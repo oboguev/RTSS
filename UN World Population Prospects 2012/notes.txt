@@ -1,0 +1,8 @@
+Site at:
+https://web.archive.org/web/20130726232200/http://esa.un.org/unpd/wpp/Excel-Data/population.htm
+
+Population by Age Groups - Both Sexes
+https://web.archive.org/web/20130726232200/http://esa.un.org/unpd/wpp/Excel-Data/EXCEL_FILES/1_Population/WPP2012_POP_F07_1_POPULATION_BY_AGE_BOTH_SEXES.XLS
+
+Population by Age Groups - Female
+https://web.archive.org/web/20130726232200/http://esa.un.org/unpd/wpp/Excel-Data/EXCEL_FILES/1_Population/WPP2012_POP_F07_3_POPULATION_BY_AGE_FEMALE.XLS
