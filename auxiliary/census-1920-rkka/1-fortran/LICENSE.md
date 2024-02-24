@@ -4,3 +4,4 @@ For write-up of the algorithm see Leo O Lai, Jed O. Kaplan, "A Fast Mean-Preserv
 DOI: 10.1175/JTECH-D-21-0154.1  
 https://journals.ametsoc.org/view/journals/atot/39/4/JTECH-D-21-0154.1.xml  
 https://journals.ametsoc.org/downloadpdf/view/journals/atot/39/4/JTECH-D-21-0154.1.pdf  
+https://www.researchgate.net/publication/358416567_A_fast_mean-preserving_spline_for_interpolating_interval_data  
