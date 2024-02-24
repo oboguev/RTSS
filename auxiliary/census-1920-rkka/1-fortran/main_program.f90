@@ -95,13 +95,25 @@ use newsplinemod,   only : newspline
 
 implicit none
 
-integer(i4)  :: nbins, nb, nyears, year, ix, yx, yx2, k, points_per_year, npoints
-integer(i4), dimension(:), allocatable :: age_x1, age_x2, bin_widths_years, bin_widths_points
-real(sp),    dimension(:), allocatable :: bin_values
-real(sp),    dimension(:), allocatable :: result_values, result_averages
-real(sp),    dimension(2)  :: bcond
+integer(i4)  :: nbins ! number of bins
+integer(i4)  :: nyears ! number of years (x-range) in all bins
+integer(i4)  :: points_per_year ! spline interpolation points to use per year
+integer(i4)  :: npoints ! number of interpolation points
+
+integer(i4), dimension(:), allocatable :: age_x1 ! bin left x (min age for the bin)
+integer(i4), dimension(:), allocatable :: age_x2 ! bin right x (max age for the bin, i.e. the start of next bin)
+integer(i4), dimension(:), allocatable :: bin_widths_in_years ! width of the bin in year
+integer(i4), dimension(:), allocatable :: bin_widths_in_points ! width of the bin in number of interpolatin points
+real(sp),    dimension(:), allocatable :: bin_values ! population per-year average in this bin
+real(sp),    dimension(:), allocatable :: result_values !  results of spline interpolation (per hi-res point)
+real(sp),    dimension(:), allocatable :: result_averages ! bin average value for each interpolation point
+real(sp),    dimension(:), allocatable :: year_values ! number of people of this year of age  (used during re-aggregation)
+real(sp),    dimension(:), allocatable :: result_bin_values ! number of people in this bin (used during re-aggregation)
+integer(i4), dimension(:), allocatable :: yx2bx ! year index to bin index
+real(sp),    dimension(2)  :: bcond ! boundary conditions
+
+integer(i4)  :: nb, year, ix, yx, yx2, k 
 real(4)      :: age, pct
-real(sp),    dimension(:), allocatable :: year_values, result_bin_values
 real(sp)     :: llim
 character(1) :: tab
 character(2) :: tab2
@@ -117,8 +129,8 @@ points_per_year = 100
 allocate(age_x1(nbins))
 allocate(age_x2(nbins))
 allocate(bin_values(nbins))
-allocate(bin_widths_years(nbins))
-allocate(bin_widths_points(nbins))
+allocate(bin_widths_in_years(nbins))
+allocate(bin_widths_in_points(nbins))
 
 !------
 ! Read data file
@@ -127,21 +139,32 @@ open(10, file = "census_1920_source.txt", status = 'old')
 do nb = 1, nbins
 
   read(10,*) age_x1(nb), age_x2(nb), bin_values(nb)
-  bin_widths_years(nb) = age_x2(nb) - age_x1(nb)
+  bin_widths_in_years(nb) = age_x2(nb) - age_x1(nb)
 
 end do
 
-nyears = sum(bin_widths_years)
+nyears = sum(bin_widths_in_years)
 npoints = nyears * points_per_year
 allocate(result_values(npoints))
 allocate(result_averages(npoints))
+allocate(yx2bx(nyears))
 
-bin_widths_points = bin_widths_years * points_per_year 
+bin_widths_in_points = bin_widths_in_years * points_per_year 
 
+! bin "average" value corresponding to each interpolation point
 ix = 1
 do nb = 1, nbins
-    do k = 1, bin_widths_years(nb) * points_per_year 
+    do k = 1, bin_widths_in_years(nb) * points_per_year 
         result_averages(ix) = bin_values(nb)
+        ix = ix + 1
+    end do
+end do
+
+! create mapping: year index -> bin index
+ix = 1
+do nb = 1, nbins
+    do k = 1, bin_widths_in_years(nb)
+        yx2bx(ix) = nb
         ix = ix + 1
     end do
 end do
@@ -151,7 +174,7 @@ bcond(1) = 0
 bcond(2) = 0
 llim = 0
 
-call newspline(monthdata=bin_values, nk=bin_widths_points, bcond=bcond, daydata=result_values, llim=llim)
+call newspline(monthdata=bin_values, nk=bin_widths_in_points, bcond=bcond, daydata=result_values, llim=llim)
 
 ! print the results of interpolation
 ! for each point: age, interpoladed value, average value of the corresponding bin
@@ -159,14 +182,14 @@ write(*,*) "Interpolated population data, by years of age, continuous curve:"
 write(*,*) ""
 do ix = 1, npoints
     age = age_x1(1) + (ix - 1) * real(age_x2(nbins) - age_x1(1), 4) / npoints
-    !!!write(*,*) age, result_values(ix), result_averages(ix)
+    write(*,*) age, result_values(ix), result_averages(ix)
 end do
 
 !-----------------------------------------------------------
 ! verify whether per-bin average is preserved by the spline
 !-----------------------------------------------------------
 
-! reaggregate by year
+! --------------- reaggregate by year ---------------
 allocate(year_values(nyears))
 year_values(nyears) = 0.0
 
@@ -182,17 +205,18 @@ write(*,*) "****************************************************************"
 write(*,*) "Interpolated population data, by years of age, for a whole year:"
 write(*,*) ""
 do yx = 1, nyears
-    write(*,*) age_x1(1) + (yx - 1), year_values(yx)
+    nb = yx2bx(yx)
+    write(*,*) age_x1(1) + (yx - 1), year_values(yx), bin_values(nb)
 end do
 
-! reaggregate by bin
+! --------------- reaggregate by bin ---------------
 allocate(result_bin_values(nbins))
 result_bin_values = 0
 
 yx = 1
 do nb = 1, nbins
-    yx2 = yx + bin_widths_years(nb)
-    result_bin_values(nb) = sum(year_values(yx:yx2-1)) / bin_widths_years(nb)
+    yx2 = yx + bin_widths_in_years(nb)
+    result_bin_values(nb) = sum(year_values(yx:yx2-1)) / bin_widths_in_years(nb)
     yx = yx2
 end do
 
@@ -207,7 +231,7 @@ tab3 = tab2 // tab
 
 write(*,*) "    year    year       original    reaggregated        diff %"
 do nb = 1, nbins
-    pct = 100 * (result_bin_values(nb) - bin_values(nb)) / bin_values(nb) 
+    pct = real(100 * (result_bin_values(nb) - bin_values(nb)) / bin_values(nb)) 
     write(*,"(I8,I8,F16.4,F16.4,F16.8)") age_x1(nb), age_x2(nb), bin_values(nb), result_bin_values(nb), pct
 end do
 

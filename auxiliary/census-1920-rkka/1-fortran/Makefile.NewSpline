@@ -25,7 +25,7 @@ PRJ_CFLAGS=
 
 PRJ_LFLAGS=
 
-FFLAGS=$(SPECIALFLAGS) $(OPTFLAGS) $(IDIR) $(PRJ_FFLAGS) -JC:/Fortran-projects/NewSpline/modules 
+FFLAGS=$(SPECIALFLAGS) $(OPTFLAGS) $(IDIR) $(PRJ_FFLAGS) -JF:/WINAPPS/SLOVO/UKR/github/RTSS/auxiliary/census-1920-rkka/1-fortran/modules 
 
 CFLAGS=$(SPECIALFLAGS) $(OPTFLAGS) $(IDIR) $(PRJ_CFLAGS)
 
