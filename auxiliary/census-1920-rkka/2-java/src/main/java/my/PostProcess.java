@@ -210,6 +210,14 @@ public class PostProcess
     {
         double[] yearly = points2yearly(points);
         
+        for (Bin bin : bins)
+        {
+            if (bin.widths_in_years == 1)
+            {
+                yearly[yx(bin.age_x1)] = bin.avg; 
+            }
+        }
+        
         yearly = fix_16(yearly);
         checkMean(yearly);
         
