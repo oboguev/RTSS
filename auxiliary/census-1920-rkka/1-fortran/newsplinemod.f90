@@ -22,7 +22,7 @@ contains
 !------------------------------------------------------------------------------------------------------------------
 !------------------------------------------------------------------------------------------------------------------
 
-subroutine newspline(monthdata,nk,bcond,daydata,alim,llim,ulim,plim)
+subroutine newspline(monthdata,nk,bcond,daydata,alim,llim,ulim,plim,llim_force)
 
 implicit none
 
@@ -35,6 +35,7 @@ real(sp),    optional    , intent(in)  :: alim               ! OPTIONAL :: Absol
 real(sp),    optional    , intent(in)  :: llim               ! OPTIONAL :: Minimum limit for bounded interpolation
 real(sp),    optional    , intent(in)  :: ulim               ! OPTIONAL :: Maximum limit for bounded interpolation
 real(sp),    optional    , intent(in)  :: plim               ! OPTIONAL :: Percetnage limit for bounded interpolation
+logical,     optional    , dimension(:), intent(in)  :: llim_force         ! OPTIONAL :: force llim adjustment for the interval 
 
 ! Local variables for wall control points
 real(sp), dimension(:), allocatable :: wcp
@@ -300,7 +301,14 @@ end do ! End of outer loop
 !-------------------------------------------------------------------------------
 ! Call bounded interpolation adjustment scheme if optional arguments are present
 
-if (present(llim)) call llim_adjust(llim,monthdata,nk,bcond,all_cont,daydata)
+if (present(llim)) then
+    if (present(llim_force)) then
+        call llim_adjust(llim,monthdata,nk,bcond,all_cont,daydata, llim_force)
+    else
+        call llim_adjust(llim,monthdata,nk,bcond,all_cont,daydata)
+    endif
+end if
+
 if (present(ulim)) call ulim_adjust(ulim,monthdata,nk,bcond,all_cont,daydata)
 if (present(alim)) call alim_adjust(alim,monthdata,nk,bcond,all_cont,daydata)
 if (present(plim)) call plim_adjust(plim,monthdata,nk,bcond,all_cont,daydata)
@@ -1034,7 +1042,7 @@ end subroutine ulim_adjust
 
 !------------------------------------------------------------------------------------------------------------------
 
-subroutine llim_adjust(llim,monthdata,nk,bcond,all_cont,daydata)
+subroutine llim_adjust(llim,monthdata,nk,bcond,all_cont,daydata, llim_force)
 
 real(sp),                  intent(in)    :: llim        ! Minimum limit (e.g. no interpolated value can exceed 1.0 in the ENTIRE interpolated series)
 real(sp),    dimension(:), intent(in)    :: monthdata   ! Array of monthly (interval) input data
@@ -1042,7 +1050,7 @@ integer(i4), dimension(:), intent(in)    :: nk          ! Array of number of sma
 real(sp),    dimension(:), intent(in)    :: bcond       ! Boundary condition array
 real(sp),    dimension(:), intent(in)    :: all_cont    ! Array of all control points (wall-CPs and mid-CPs)
 real(sp),    dimension(:), intent(inout) :: daydata     ! Array of daily intepolated values
-
+logical,     optional,     dimension(:), intent(in) :: llim_force  ! OPTIONAL :: force llim adjustment for the interval 
 
 real(sp), allocatable, dimension(:) :: d_orig           ! Slope direction of the current interval (1 = positive, -1 = negative, 0 = local maxima/minima)
 logical,  allocatable, dimension(:) :: osc_check        ! TRUE if interval require adjustment (dim = input data length)
@@ -1131,6 +1139,12 @@ do i = 1, len
 
     osc_check(i) = .TRUE.
 
+  end if
+
+  if (present(llim_force)) then
+      if (llim_force(i) .eqv. .TRUE.) then
+          osc_check(i) = .TRUE.
+      end if
   end if
 
 end do

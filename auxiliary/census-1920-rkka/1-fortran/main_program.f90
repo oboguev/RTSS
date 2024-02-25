@@ -109,7 +109,7 @@ real(sp),    dimension(:), allocatable :: result_values !  results of spline int
 real(sp),    dimension(:), allocatable :: result_averages ! bin average value for each interpolation point
 real(sp),    dimension(:), allocatable :: year_values ! number of people of this year of age  (used during re-aggregation)
 real(sp),    dimension(:), allocatable :: result_bin_values ! number of people in this bin (used during re-aggregation)
-integer(i4), dimension(:), allocatable :: yx2bx ! year index to bin index
+integer(i4), dimension(:), allocatable :: yx2bx ! mapping year index to bin index
 real(sp),    dimension(2)  :: bcond ! boundary conditions
 
 integer(i4)  :: nb, year, ix, yx, yx2, k 
@@ -118,6 +118,7 @@ real(sp)     :: llim
 character(1) :: tab
 character(2) :: tab2
 character(3) :: tab3
+logical, dimension(:), allocatable  :: llim_force
 
 ! number of bins in source data
 nbins = 10
@@ -175,6 +176,17 @@ bcond(2) = 0
 llim = 0
 
 call newspline(monthdata=bin_values, nk=bin_widths_in_points, bcond=bcond, daydata=result_values, llim=llim)
+
+allocate(llim_force(nbins))
+llim_force = .FALSE.
+do ix = 1, npoints
+    if (result_values(ix) < llim) then
+        yx = 1 + (ix - 1) / points_per_year
+        llim_force(yx2bx(yx)) = .TRUE.
+    end if
+end do
+
+!call newspline(monthdata=bin_values, nk=bin_widths_in_points, bcond=bcond, daydata=result_values, llim=llim, llim_force=llim_force)
 
 ! print the results of interpolation
 ! for each point: age, interpoladed value, average value of the corresponding bin
