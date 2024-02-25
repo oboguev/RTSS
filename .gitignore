@@ -2,3 +2,8 @@ auxiliary/census-1920-rkka/1-fortran/build/
 auxiliary/census-1920-rkka/1-fortran/modules/
 auxiliary/census-1920-rkka/1-fortran/target.exe
 auxiliary/census-1920-rkka/1-fortran/target
+#
+auxiliary/census-1920-rkka/2-java/.settings/
+auxiliary/census-1920-rkka/2-java/.classpath
+auxiliary/census-1920-rkka/2-java/.project
+auxiliary/census-1920-rkka/2-java/target
