@@ -134,6 +134,48 @@ public class Util
         byte[] bytes = Files.readAllBytes(Paths.get(Util.class.getClassLoader().getResource(path).toURI()));
         return new String(bytes, StandardCharsets.UTF_8);
     }
+    
+    public static String f2s(double f) throws Exception
+    {
+        String s = String.format("%f", f);
+        if (!s.contains("."))
+            return s;
+        while (s.endsWith("0") && !s.endsWith(".0"))
+             s = Util.stripTail(s, "0");
+        if (s.endsWith(".0"))
+            s = Util.stripTail(s, ".0");
+        return s;
+    }    
+
+    private double min(double[] y)
+    {
+        double min = y[0];
+        for (int k = 1; k < y.length; k++)
+        {
+            if (y[k] < min)
+                min = y[k];
+        }
+        return min;
+    }
+
+    private double max(double[] y)
+    {
+        double max = y[0];
+        for (int k = 1; k < y.length; k++)
+        {
+            if (y[k] > max)
+                max = y[k];
+        }
+        return max;
+    }
+
+    private double sum(double[] y)
+    {
+        double sum = 0;
+        for (int k = 0; k < y.length; k++)
+            sum += y[k];
+        return sum;
+    }
 
     public static void noop()
     {
