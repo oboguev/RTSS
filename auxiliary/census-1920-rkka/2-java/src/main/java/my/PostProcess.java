@@ -81,19 +81,47 @@ public class PostProcess
         }
 
         double[] yearly = points2yearly(points);
+        checkMean(yearly);
+
+        // printYearly();
+    }
+    
+    private boolean validateMean(double[] yearly)
+    {
         double[] avg = yearly2bin_avg(yearly);
         
         for (Bin bin : bins)
         {
             double pct = 100 * (avg[bin.index] - bin.avg) / bin.avg;
             if (Math.abs(pct) > 0.01)
-                throw new Exception("Mean is broken");
+                return false;
         }
-
-        printYearly();
+        
+        return true;
     }
     
-    private double[] points2yearly(Points points)
+    private void checkMean(double[] yearly) throws Exception
+    {
+        if (!validateMean(yearly))
+            throw new Exception("Mean is broken");
+    }
+    
+    private int yx(int year)
+    {
+        return year - firstBin.age_x1;
+    }
+
+    private Bin yx2bin(int yx)
+    {
+        return yx2bin.get(yx);
+    }
+    
+    private Bin year2bin(int year)
+    {
+        return yx2bin(yx(year));
+    }
+    
+    public double[] points2yearly(Points points)
     {
         double[] yy = new double[points.npoints / PointsPerYear];
         Arrays.fill(yy, 0);
@@ -119,8 +147,7 @@ public class PostProcess
         {
             for (int year = bin.age_x1; year < bin.age_x2; year++)
             {
-                int yx = year - firstBin.age_x1;
-                avg[bin.index] += yearly[yx];
+                avg[bin.index] += yearly[yx(year)];
             }
             avg[bin.index] /= bin.widths_in_years;
         }
@@ -164,5 +191,130 @@ public class PostProcess
             String s = String.format("%10d %16s %16s%s", firstBin.age_x1 + yx, Util.f2s(yearly[yx]), Util.f2s(a[yx]), neg);
             Util.out(s);
         }
+        
+        if (validateMean(yearly))
+        {
+            Util.out("");
+            Util.out("Mean is valid");
+        }
+        else
+        {
+            Util.out("");
+            Util.out("!!! MEAN IS BROKEN !!!");
+        }
+    }
+    
+    /*******************************************************************/
+    
+    public void postProcess() throws Exception
+    {
+        double[] yearly = points2yearly(points);
+        
+        yearly = fix_16(yearly);
+        checkMean(yearly);
+        
+        yearly = fix_60_69(yearly);
+        checkMean(yearly);
+
+        yearly = fix_50_59(yearly);
+        checkMean(yearly);
+
+        yearly = fix_40_49(yearly);
+        checkMean(yearly);
+
+        yearly = fix_30_39(yearly);
+        checkMean(yearly);
+
+        printYearly(yearly);
+    }
+    
+    private double[] fix_16(double[] yearly)
+    {
+        yearly = yearly.clone();
+        int yx15 = yx(15);
+        int yx16 = yx(16);
+        int yx17 = yx(17);
+        int yx18 = yx(18);
+        double avg = yx2bin(yx16).avg;
+        
+        yearly[yx16] = (2.0 / 3.0) * (avg - yearly[yx15]);
+        yearly[yx17] = 2 * avg - yearly[yx16]; 
+                
+        return yearly;
+    }
+    
+    private double[] fix_60_69(double[] yearly)
+    {
+        yearly = yearly.clone();
+        Bin bin = year2bin(60);
+        resample_next(yearly, yx(60), yx(69), bin.avg, bin.avg * 0.1);
+        return yearly;
+    }
+
+    private double[] fix_50_59(double[] yearly)
+    {
+        return fix_range(yearly, 50);
+    }
+
+    private double[] fix_40_49(double[] yearly)
+    {
+        return fix_range(yearly, 40);
+    }
+
+    private double[] fix_30_39(double[] yearly)
+    {
+        return fix_range(yearly, 30);
+    }
+    
+    private double[] fix_range(double[] yearly, int year)
+    {
+        Bin bin = year2bin(year);
+        return fix_range(yearly, year, bin.age_x2 - 1);
+    }
+
+    private double[] fix_range(double[] yearly, int year1, int year2)
+    {
+        yearly = yearly.clone();
+        Bin bin = year2bin(year1);
+        resample_next(yearly, yx(year1), yx(year2), bin.avg, yearly[yx(year2 + 1)]);
+        return yearly;
+    }
+
+    /*
+     * Modify yearly[yx1...yx2] such that average(yearly[yx1...yx2]) = avg and yearly[yx2] = v2 
+     */
+    private void resample(double[] yearly, int yx1, int yx2, double avg, double v2)
+    {
+        int sn = 0;
+        int cn = 0;
+        
+        for (int yx = yx1; yx <= yx2; yx++)
+        {
+            sn += yx;
+            cn++;
+        }
+        
+        LinearUtil.AB ab = LinearUtil.solve(yx2, 1, v2, sn, cn, cn * avg);
+        for (int yx = yx1; yx <= yx2; yx++)
+            yearly[yx] = ab.a * yx + ab.b;
+    }
+
+    /*
+     * Modify yearly[yx1...yx2] such that average(yearly[yx1...yx2]) = avg and projected yearly[yx2 + 1] = v2 
+     */
+    private void resample_next(double[] yearly, int yx1, int yx2, double avg, double v2)
+    {
+        int sn = 0;
+        int cn = 0;
+        
+        for (int yx = yx1; yx <= yx2; yx++)
+        {
+            sn += yx;
+            cn++;
+        }
+        
+        LinearUtil.AB ab = LinearUtil.solve(yx2 + 1, 1, v2, sn, cn, cn * avg);
+        for (int yx = yx1; yx <= yx2; yx++)
+            yearly[yx] = ab.a * yx + ab.b;
     }
 }

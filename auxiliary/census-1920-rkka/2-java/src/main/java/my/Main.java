@@ -29,6 +29,7 @@ public class Main
         PostProcess pp = new PostProcess ();
         pp.initCensusSource(loadCensusSource());
         pp.initInterpolationData(loadInterpolationData());
+        pp.postProcess();
     }
     
     private List<String[]> loadCensusSource() throws Exception
