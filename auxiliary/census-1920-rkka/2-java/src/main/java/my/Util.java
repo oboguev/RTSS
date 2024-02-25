@@ -147,7 +147,7 @@ public class Util
         return s;
     }    
 
-    private double min(double[] y)
+    public static double min(double[] y)
     {
         double min = y[0];
         for (int k = 1; k < y.length; k++)
@@ -158,7 +158,7 @@ public class Util
         return min;
     }
 
-    private double max(double[] y)
+    public static double max(double[] y)
     {
         double max = y[0];
         for (int k = 1; k < y.length; k++)
@@ -169,12 +169,22 @@ public class Util
         return max;
     }
 
-    private double sum(double[] y)
+    public static double sum(double[] y)
     {
         double sum = 0;
         for (int k = 0; k < y.length; k++)
             sum += y[k];
         return sum;
+    }
+    
+    public static double[] splice(double[] y, int yx1, int yx2)
+    {
+        double[] yy = new double[yx2 - yx1 + 1];
+        for (int yx = yx1; yx <= yx2; yx++)
+        {
+            yy[yx - yx1] = y[yx];
+        }
+        return yy;
     }
     
     public static void noop()

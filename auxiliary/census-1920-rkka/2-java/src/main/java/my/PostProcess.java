@@ -225,6 +225,12 @@ public class PostProcess
         yearly = fix_30_39(yearly);
         checkMean(yearly);
 
+        yearly = fix_25_29(yearly);
+        checkMean(yearly);
+
+        yearly = fix_20_25(yearly);
+        checkMean(yearly);
+
         printYearly(yearly);
     }
     
@@ -247,36 +253,46 @@ public class PostProcess
     {
         yearly = yearly.clone();
         Bin bin = year2bin(60);
-        resample_next(yearly, yx(60), yx(69), bin.avg, bin.avg * 0.1);
+        resample_next(yearly, yx(60), yx(69), bin.avg, bin.avg * 0.1, false);
         return yearly;
     }
 
     private double[] fix_50_59(double[] yearly)
     {
-        return fix_range(yearly, 50);
+        return fix_range(yearly, 50, false);
     }
 
     private double[] fix_40_49(double[] yearly)
     {
-        return fix_range(yearly, 40);
+        return fix_range(yearly, 40, false);
     }
 
     private double[] fix_30_39(double[] yearly)
     {
-        return fix_range(yearly, 30);
+        return fix_range(yearly, 30, true);
     }
     
-    private double[] fix_range(double[] yearly, int year)
+    private double[] fix_25_29(double[] yearly)
+    {
+        return fix_range(yearly, 25, true);
+    }
+    
+    private double[] fix_20_25(double[] yearly)
+    {
+        return fix_range(yearly, 20, true);
+    }
+    
+    private double[] fix_range(double[] yearly, int year, boolean contstrainByPrevious)
     {
         Bin bin = year2bin(year);
-        return fix_range(yearly, year, bin.age_x2 - 1);
+        return fix_range(yearly, year, bin.age_x2 - 1, contstrainByPrevious);
     }
 
-    private double[] fix_range(double[] yearly, int year1, int year2)
+    private double[] fix_range(double[] yearly, int year1, int year2, boolean contstrainByPrevious)
     {
         yearly = yearly.clone();
         Bin bin = year2bin(year1);
-        resample_next(yearly, yx(year1), yx(year2), bin.avg, yearly[yx(year2 + 1)]);
+        resample_next(yearly, yx(year1), yx(year2), bin.avg, yearly[yx(year2 + 1)], contstrainByPrevious);
         return yearly;
     }
 
@@ -298,11 +314,34 @@ public class PostProcess
         for (int yx = yx1; yx <= yx2; yx++)
             yearly[yx] = ab.a * yx + ab.b;
     }
-
+    
     /*
      * Modify yearly[yx1...yx2] such that average(yearly[yx1...yx2]) = avg and projected yearly[yx2 + 1] = v2 
      */
-    private void resample_next(double[] yearly, int yx1, int yx2, double avg, double v2)
+    private void resample_next(double[] yearly, int yx1, int yx2, double avg, double v2, boolean contstrainByPrevious)
+    {
+        ExponentialInterpolation.resample_next(yearly, yx1, yx2, avg, v2);
+        
+        if (!contstrainByPrevious || yearly[yx1] < yearly[yx1 - 1])
+            return;
+        
+        double[] exp = yearly.clone();
+        
+        resample_next_linear(yearly, yx1, yx2, avg, v2);
+        double[] lin = yearly.clone();
+        
+        Bin bin = yx2bin(yx1 - 1);
+        double r = yearly[yx(bin.age_x1)] / yearly[yx(bin.age_x2 - 1)];
+        r = Math.pow(r,  1.0 / bin.widths_in_years);
+        
+        double a = (yearly[yx1 - 1] / r - lin[yx1]) / (exp[yx1] - lin[yx1]);
+        for (int yx = yx1; yx <= yx2; yx++)
+        {
+            yearly[yx] = a * exp[yx] + (1 - a) * lin[yx];
+        }
+    }
+
+    private void resample_next_linear(double[] yearly, int yx1, int yx2, double avg, double v2)
     {
         int sn = 0;
         int cn = 0;
