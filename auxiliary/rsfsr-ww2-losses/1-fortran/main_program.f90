@@ -170,9 +170,8 @@ do nb = 1, nbins
     end do
 end do
 
-!bcond(1) = bin_values(1)
-bcond(1) = 0
-bcond(2) = 0
+bcond(1) = bin_values(1)
+bcond(2) = bin_values(nbins)
 llim = 0
 
 call newspline(monthdata=bin_values, nk=bin_widths_in_points, bcond=bcond, daydata=result_values, llim=llim)
