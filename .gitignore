@@ -7,3 +7,13 @@ auxiliary/census-1920-rkka/2-java/.settings/
 auxiliary/census-1920-rkka/2-java/.classpath
 auxiliary/census-1920-rkka/2-java/.project
 auxiliary/census-1920-rkka/2-java/target
+#
+auxiliary/rsfsr-ww2-losses/1-fortran/build/
+auxiliary/rsfsr-ww2-losses/1-fortran/modules/
+auxiliary/rsfsr-ww2-losses/1-fortran/target.exe
+auxiliary/rsfsr-ww2-losses/1-fortran/target
+#
+auxiliary/rsfsr-ww2-losses/2-java/.settings/
+auxiliary/rsfsr-ww2-losses/2-java/.classpath
+auxiliary/rsfsr-ww2-losses/2-java/.project
+auxiliary/rsfsr-ww2-losses/2-java/target
