@@ -40,6 +40,14 @@ public class Main
         Util.out("");
         EvaluatePopulationLossBase epl = new EvaluatePopulationLossVariantA();
         epl.evaluate();
+        Util.out("");
+        Util.out("====================================================================");
+        Util.out("");
+
+        Util.out("Compute at constant excess deaths number ...");
+        Util.out("");
+        epl = new EvaluatePopulationLossVariantB();
+        epl.evaluate();
     }
     
     private List<String[]> loadCensusSource() throws Exception

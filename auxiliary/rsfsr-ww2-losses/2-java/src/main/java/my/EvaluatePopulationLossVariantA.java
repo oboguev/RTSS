@@ -17,7 +17,7 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
             double cdr = cbr - actualGrowthPromille;
 
             calcActual(cbr, cdr);
-            // print();
+            // print(false);
             double excessDeaths = excessDeaths();
             double birthsDeficit = birthsDeficit();
             
@@ -25,7 +25,7 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
             
             if (Math.abs(excessDeaths - ACTUAL_EXCESS_DEATHS) < 0.2)
             {
-                print();
+                print(false);
                 Util.out(String.format("Birth rate: %.2f", cbr));
                 Util.out(String.format("Death rate: %.2f", cdr));
                 return;

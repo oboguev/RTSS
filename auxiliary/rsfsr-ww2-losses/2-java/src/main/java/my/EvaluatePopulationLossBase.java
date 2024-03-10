@@ -180,7 +180,7 @@ public abstract class EvaluatePopulationLossBase
         return -excessBirths();
     }
     
-    protected void print()
+    protected void print(boolean printRates)
     {
         String sep = " | ";
         String hdr;
@@ -190,18 +190,30 @@ public abstract class EvaluatePopulationLossBase
         hdr += sep + "                     EXPECTED                         ";
         hdr += sep + "                      ACTUAL                          ";
         hdr += sep + "  births     excess  ";
+        if (printRates)
+        {
+            hdr += sep + "birth death";
+        }
         Util.out(hdr);
 
         hdr = "Y";
         hdr += sep + "  start       mid        end       births     deaths  ";
         hdr += sep + "  start       mid        end       births     deaths  ";
         hdr += sep + "  deficit    deaths  ";
+        if (printRates)
+        {
+            hdr += sep + "rate  rate";
+        }
         Util.out(hdr);
 
         hdr = "=";
         hdr += sep + "========== ========== ========== ========== ==========";
         hdr += sep + "========== ========== ========== ========== ==========";
         hdr += sep + "========== ==========";
+        if (printRates)
+        {
+            hdr += sep + "===== =====";
+        }
         Util.out(hdr);
         
         double totalBirthsDeficit = 0;
@@ -214,9 +226,18 @@ public abstract class EvaluatePopulationLossBase
             msg += sep + format(y.actual);
             msg += sep + String.format("%10.3f %10.3f", 
                                        y.expected.births - y.actual.births, y.actual.deaths - y.expected.deaths);
+            if (printRates)
+            {
+                double cbr = 1000 * y.actual.births / y.actual.start;
+                double cdr = 1000 * y.actual.deaths / y.actual.start;
+                msg += sep + String.format("%5.2f %5.2f", cbr, cdr); 
+            }
+
             Util.out(msg);
+            
             totalBirthsDeficit += y.expected.births - y.actual.births;
             totalExcessDeaths += y.actual.deaths - y.expected.deaths;
+            
         }
         
         Util.out("");
