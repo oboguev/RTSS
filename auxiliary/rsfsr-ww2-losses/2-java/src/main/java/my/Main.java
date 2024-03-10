@@ -30,6 +30,9 @@ public class Main
         pp.initCensusSource(loadCensusSource());
         pp.initInterpolationData(loadInterpolationData());
         pp.postProcess();
+        
+        EvaluatePopulationLossBase epl = new EvaluatePopulationLossVariantA();
+        epl.evaluate();
     }
     
     private List<String[]> loadCensusSource() throws Exception
