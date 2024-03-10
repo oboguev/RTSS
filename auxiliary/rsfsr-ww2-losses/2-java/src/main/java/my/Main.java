@@ -32,6 +32,7 @@ public class Main
         pp.initCensusSource(loadCensusSource());
         pp.initInterpolationData(loadInterpolationData());
         pp.postProcess();
+        
         Util.out("");
         Util.out("====================================================================");
         Util.out("");
@@ -40,6 +41,7 @@ public class Main
         Util.out("");
         EvaluatePopulationLossBase epl = new EvaluatePopulationLossVariantA();
         epl.evaluate();
+
         Util.out("");
         Util.out("====================================================================");
         Util.out("");
@@ -48,6 +50,15 @@ public class Main
         Util.out("");
         epl = new EvaluatePopulationLossVariantB();
         epl.evaluate();
+
+        Util.out("");
+        Util.out("====================================================================");
+        Util.out("");
+
+        Util.out("Recombining half-year rates ...");
+        Util.out("");
+        RecombineRates rr = new RecombineRates();
+        rr.evaluate();
     }
     
     private List<String[]> loadCensusSource() throws Exception
