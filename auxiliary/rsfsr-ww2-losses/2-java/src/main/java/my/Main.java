@@ -26,11 +26,18 @@ public class Main
     
     private void do_main() throws Exception
     {
+        Util.out("Compute minimum births window ...");
+        Util.out("");
         PostProcess pp = new PostProcess ();
         pp.initCensusSource(loadCensusSource());
         pp.initInterpolationData(loadInterpolationData());
         pp.postProcess();
+        Util.out("");
+        Util.out("====================================================================");
+        Util.out("");
         
+        Util.out("Compute constant CDR and CBR ...");
+        Util.out("");
         EvaluatePopulationLossBase epl = new EvaluatePopulationLossVariantA();
         epl.evaluate();
     }
