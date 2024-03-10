@@ -9,15 +9,40 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
         double cbr1 = 0;
         double cbr2 = CBR_1940;
         
+        final double target_b2d =  ACTUAL_BIRTH_DEFICIT /  ACTUAL_EXCESS_DEATHS;
+
         for (;;)
         {
             double cbr = (cbr1 + cbr2) / 2;
             double cdr = cbr - actualGrowthPromille;
 
             calcActual(cbr, cdr);
-            print();
+            // print();
             double excessDeaths = excessDeaths();
             double birthsDeficit = birthsDeficit();
+            
+            double b2d = birthsDeficit / excessDeaths;
+            
+            if (Math.abs(excessDeaths - ACTUAL_EXCESS_DEATHS) < 0.2)
+            {
+                print();
+                Util.out(String.format("Birth rate: %.2f", cbr));
+                Util.out(String.format("Death rate: %.2f", cdr));
+                return;
+            }
+            
+            if (b2d > target_b2d)
+            {
+                /*
+                 * Birth deficit is too high, cbr was too low
+                 */
+                cbr1 = cbr;
+            }
+            else
+            {
+                cbr2 = cbr;
+            }
+            
             Util.noop();
         }
     }

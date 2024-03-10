@@ -189,25 +189,39 @@ public abstract class EvaluatePopulationLossBase
         hdr = " ";
         hdr += sep + "                     EXPECTED                         ";
         hdr += sep + "                      ACTUAL                          ";
+        hdr += sep + "  births     excess  ";
         Util.out(hdr);
 
         hdr = "Y";
         hdr += sep + "  start       mid        end       births     deaths  ";
         hdr += sep + "  start       mid        end       births     deaths  ";
+        hdr += sep + "  deficit    deaths  ";
         Util.out(hdr);
 
         hdr = "=";
         hdr += sep + "========== ========== ========== ========== ==========";
         hdr += sep + "========== ========== ========== ========== ==========";
+        hdr += sep + "========== ==========";
         Util.out(hdr);
+        
+        double totalBirthsDeficit = 0;
+        double totalExcessDeaths = 0;
         
         for (Year y : years)
         {
             String msg = String.format("%1d", y.nyear);
             msg += sep + format(y.expected);
             msg += sep + format(y.actual);
+            msg += sep + String.format("%10.3f %10.3f", 
+                                       y.expected.births - y.actual.births, y.actual.deaths - y.expected.deaths);
             Util.out(msg);
+            totalBirthsDeficit += y.expected.births - y.actual.births;
+            totalExcessDeaths += y.actual.deaths - y.expected.deaths;
         }
+        
+        Util.out("");
+        Util.out(String.format("Total births deficit: %10.3f", totalBirthsDeficit));
+        Util.out(String.format("Total excess deaths: %10.3f", totalExcessDeaths));
     }
     
     private String format(Population p)
