@@ -1,13 +1,7 @@
 package my;
 
-public class RecombineRates
+public class RecombineRates extends EvaluatePopulationLossBase
 {
-    public static enum BirthDeath
-    {
-        BIRTH,
-        DEATH
-    }
-    
     public void evaluate() throws Exception
     {
         eval("Variant 1 birth rate", 34.60, 14.15, 14.15, 14.15, 14.15, 14.15, 14.15, 14.15, 14.15, 26.00);
@@ -49,30 +43,6 @@ public class RecombineRates
             double p = factor2promille(f, which);
             
             Util.out(String.format("%4d: %.2f", 1940 + k, p));
-        }
-    }
-
-    protected double factor2promille(double factor, BirthDeath which)
-    {
-        switch (which)
-        {
-        case BIRTH:
-            return 1000 * (factor - 1.0); 
-        case DEATH:
-        default:
-            return 1000 * (1.0 - factor); 
-        }
-    }
-    
-    protected double promille2factor(double promille, BirthDeath which)
-    {
-        switch (which)
-        {
-        case BIRTH:
-            return 1 + promille / 1000.0;
-        case DEATH:
-        default:
-            return 1 - promille / 1000.0;
         }
     }
 }

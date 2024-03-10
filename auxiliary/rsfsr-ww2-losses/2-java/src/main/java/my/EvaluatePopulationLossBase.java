@@ -113,6 +113,31 @@ public abstract class EvaluatePopulationLossBase
         return 1 + promille / 1000.0;
     }
     
+
+    protected double factor2promille(double factor, BirthDeath which)
+    {
+        switch (which)
+        {
+        case BIRTH:
+            return 1000 * (factor - 1.0); 
+        case DEATH:
+        default:
+            return 1000 * (1.0 - factor); 
+        }
+    }
+    
+    protected double promille2factor(double promille, BirthDeath which)
+    {
+        switch (which)
+        {
+        case BIRTH:
+            return 1 + promille / 1000.0;
+        case DEATH:
+        default:
+            return 1 - promille / 1000.0;
+        }
+    }
+
     protected void verify_eq(double a, double b) throws Exception
     {
         double adiff = Math.abs(a - b);

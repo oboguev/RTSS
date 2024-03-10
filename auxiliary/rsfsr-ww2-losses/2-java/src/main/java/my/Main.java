@@ -57,8 +57,16 @@ public class Main
 
         Util.out("Recombining half-year rates ...");
         Util.out("");
-        RecombineRates rr = new RecombineRates();
-        rr.evaluate();
+        epl = new RecombineRates();
+        epl.evaluate();
+
+        Util.out("");
+        Util.out("====================================================================");
+        Util.out("");
+        Util.out("Defactor 1940 birth rates from 1940-1944 birth rates ...");
+        Util.out("");
+        epl = new Defactor();
+        epl.evaluate();
     }
     
     private List<String[]> loadCensusSource() throws Exception
