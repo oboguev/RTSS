@@ -25,6 +25,11 @@ public class Main
     
     private void do_main() throws Exception
     {
+        new Transfer_1926_1936().transfer();
+    }
+    
+    private void load_all_data() throws Exception
+    {
         new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
         new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
         

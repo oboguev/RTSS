@@ -10,6 +10,14 @@ public class SingleMortalityTable
     private Map<Integer, MortalityInfo> m = new HashMap<>();
     public static final int MAX_AGE = 100;
     
+    public MortalityInfo get(int age) throws Exception
+    {
+        MortalityInfo mi = m.get(age);
+        if (mi == null)
+            throw new Exception("Missing mortality table data");
+        return mi;
+    }
+    
     public SingleMortalityTable(String path) throws Exception
     {
         load(path);

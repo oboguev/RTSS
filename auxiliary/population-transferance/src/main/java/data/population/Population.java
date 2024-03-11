@@ -18,6 +18,26 @@ public class Population
         male = female = both = null;
         locality = null;
     }
+    
+    static public Population newSinglePopulation()
+    {
+        Population p = new Population();
+        p.reinit();
+        p.male = new HashMap<>();
+        p.female = new HashMap<>();
+        p.both = new HashMap<>();
+        return p;
+    }
+
+    static public Population newCombinedPopulation()
+    {
+        Population p = new Population();
+        p.reinit();
+        p.rural = newSinglePopulation();
+        p.urban = newSinglePopulation();
+        p.total = newSinglePopulation();
+        return p;
+    }
 
     /****************************************************************************************************/
     
@@ -26,6 +46,11 @@ public class Population
         return forLocality(locality).get(gender, age);
     }
     
+    public double sum(Locality locality, Gender gender, int age1, int age2) throws Exception
+    {
+        return forLocality(locality).sum(gender, age1, age2);
+    }
+
     public void set(Locality locality, Gender gender, int age, double value) throws Exception
     {
         forLocality(locality).set(gender, age, value);
@@ -37,6 +62,22 @@ public class Population
         if (!m.containsKey(age))
             throw new Exception("Missing data for age " + age);
         return m.get(age);
+    }
+
+    public double sum(Gender gender, int age1, int age2) throws Exception
+    {
+        Map<Integer, Double> m = forGender(gender);
+        
+        double sum = 0;
+        
+        for (int age = age1; age <= age2; age++)
+        {
+            if (!m.containsKey(age))
+                throw new Exception("Missing data for age " + age);
+            sum += m.get(age);
+        }
+        
+        return sum;
     }
 
     public void set(Gender gender, int age, double value) throws Exception

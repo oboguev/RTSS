@@ -10,6 +10,12 @@ public class CombinedMortalityTable
 {
     private Map<String, SingleMortalityTable> m = new HashMap<>();
     
+    public MortalityInfo get(Locality locality, Gender gender, int age) throws Exception
+    {
+        String key = key(locality, gender);
+        return m.get(key).get(age);
+    }
+
     public CombinedMortalityTable(String path) throws Exception
     {
         load(path);
