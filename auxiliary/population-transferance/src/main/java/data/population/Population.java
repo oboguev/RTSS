@@ -8,6 +8,12 @@ import my.Util;
 public class Population
 {
     public static final int MAX_AGE = 100;
+    
+    private void reinit()
+    {
+        rural = total = urban = null;
+        male = female = both = null;
+    }
 
     /****************************************************************************************************/
 
@@ -17,9 +23,19 @@ public class Population
     
     public void loadCombined(String path) throws Exception
     {
+        reinit();
+        
         rural = loadCombined(path, "rural");
         urban = loadCombined(path, "urban");
-        total = loadCombined(path, "total");
+        if (haveFile(path, "total"))
+        {
+            total = loadCombined(path, "total");
+        }
+        else
+        {
+            total = new Population();
+            total.makeSingleTotal(rural, urban);
+        }
         
         for (int age = 0; age <= MAX_AGE; age++)
         {
@@ -37,8 +53,18 @@ public class Population
     public Population loadCombined(String path, String locale) throws Exception
     {
         Population p = new Population();
-        p.loadSingle(String.format("%s/%s.txt", path, locale));
+        p.loadSingle(combinedFilePath(path, locale));
         return p;
+    }
+    
+    private String combinedFilePath(String path, String locale)
+    {
+        return String.format("%s/%s.txt", path, locale);
+    }
+    
+    private boolean haveFile(String path, String locale)
+    {
+        return null != Util.class.getClassLoader().getResource(combinedFilePath(path, locale));
     }
 
     /****************************************************************************************************/
@@ -82,6 +108,8 @@ public class Population
     
     public void loadSingle(String path) throws Exception
     {
+        reinit();
+
         male = new HashMap<>();
         female = new HashMap<>();
         both = new HashMap<>();
@@ -101,16 +129,23 @@ public class Population
                 continue;
             
             String[] el = line.split(" ");
-            if (el.length != 4)
+            if (el.length != 3 && el.length != 4)
                 throw new Exception("Invalid format of population table");
+            
+            String age = el[0];
+            if (age.contains("Итого") || age.contains("-"))
+                continue;
+            if (age.equals("" + MAX_AGE + "+"))
+                age = "" + MAX_AGE;
             
             int m = asInt(el[1]);
             int f = asInt(el[2]);
-            int b = asInt(el[3]);
+            int b;
             
-            String age = el[0];
-            if (age.equals("" + MAX_AGE + "+"))
-                age = "" + MAX_AGE;
+            if (el.length == 4)
+                b = asInt(el[3]);
+            else
+                b = m + f;
             
             if (age.equals("unknown"))
             {
@@ -142,6 +177,32 @@ public class Population
         validateSingle();
     }
     
+    private void makeSingleTotal(Population rural, Population urban) throws Exception
+    {
+        reinit();
+
+        male = new HashMap<>();
+        female = new HashMap<>();
+        both = new HashMap<>();
+
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            male.put(age, rural.male.get(age) + urban.male.get(age));
+            female.put(age, rural.female.get(age) + urban.female.get(age));
+            both.put(age, rural.both.get(age) + urban.both.get(age));
+        }
+        
+        male_total = rural.male_total + urban.male_total;
+        female_total = rural.female_total + urban.female_total;
+        both_total = rural.both_total + urban.both_total;
+        
+        male_unknown = rural.male_unknown + urban.male_unknown;
+        female_unknown = rural.female_unknown + urban.female_unknown;
+        both_unknown = rural.both_unknown + urban.both_unknown;
+        
+        validateSingle();
+    }
+    
     private void validateSingle() throws Exception
     {
         double sum_m = 0;
@@ -165,6 +226,15 @@ public class Population
             sum_b += b;
         }
         
+        if (male_total == 0)
+            male_total = sum_m + male_unknown;
+        
+        if (female_total == 0)
+            female_total = sum_f + female_unknown;
+
+        if (both_total == 0)
+            both_total = sum_b + both_unknown;
+
         if (male_total + female_total != both_total)
             mismatch();
 

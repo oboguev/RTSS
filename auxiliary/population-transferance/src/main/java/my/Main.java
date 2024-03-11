@@ -31,5 +31,6 @@ public class Main
         Population p = new Population();
         p.loadCombined("population_data/USSR/1926");
         p.loadCombined("population_data/RSFSR/1926");
+        p.loadCombined("population_data/USSR/1937");
     }
 }
