@@ -1,10 +1,7 @@
 package my;
 
-import java.io.StringReader;
-import java.util.List;
-import com.opencsv.CSVReader;
-
 import data.mortality.CombinedMortalityTable;
+import data.population.Population;
 
 public class Main
 {
@@ -30,5 +27,9 @@ public class Main
     {
         new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
         new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
+        
+        Population p = new Population();
+        p.loadCombined("population_data/USSR/1926");
+        p.loadCombined("population_data/RSFSR/1926");
     }
 }
