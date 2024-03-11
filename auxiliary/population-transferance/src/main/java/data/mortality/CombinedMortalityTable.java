@@ -3,6 +3,9 @@ package data.mortality;
 import java.util.HashMap;
 import java.util.Map;
 
+import data.selectors.Gender;
+import data.selectors.Locality;
+
 public class CombinedMortalityTable
 {
     private Map<String, SingleMortalityTable> m = new HashMap<>();
@@ -14,32 +17,32 @@ public class CombinedMortalityTable
     
     private void load(String path) throws Exception
     {
-        loadTables(path, "both");
-        loadTables(path, "male");
-        loadTables(path, "female");
+        loadTables(path, Gender.BOTH);
+        loadTables(path, Gender.MALE);
+        loadTables(path, Gender.FEMALE);
     }
     
-    private void loadTables(String path, String gender) throws Exception
+    private void loadTables(String path, Gender gender) throws Exception
     {
-        loadTables(path, gender, "total");
-        loadTables(path, gender, "rural");
-        loadTables(path, gender, "urban");
+        loadTables(path, gender, Locality.TOTAL);
+        loadTables(path, gender, Locality.RURAL);
+        loadTables(path, gender, Locality.URBAN);
     }
     
-    private String key(String locale, String gender)
+    private String key(Locality locality, Gender gender)
     {
-        return locale + "-" + gender;
+        return locality + "-" + gender;
     }
 
-    private void loadTables(String path, String gender, String locale) throws Exception
+    private void loadTables(String path, Gender gender, Locality locality) throws Exception
     {
-        String fng = gender;
+        String fng = gender.toString();
         if (fng.equals("both"))
             fng = "both_genders";
         
-        String fn = String.format("%s/%s_%s.txt", path, fng, locale);
+        String fn = String.format("%s/%s_%s.txt", path, fng, locality.toString());
         
         SingleMortalityTable mt = new SingleMortalityTable(fn);
-        m.put(key(locale, gender), mt);
+        m.put(key(locality, gender), mt);
     }
 }

@@ -5,6 +5,9 @@ import java.util.Map;
 
 import my.Util;
 
+import data.selectors.Gender;
+import data.selectors.Locality;
+
 public class Population
 {
     public static final int MAX_AGE = 100;
@@ -13,6 +16,55 @@ public class Population
     {
         rural = total = urban = null;
         male = female = both = null;
+        locality = null;
+    }
+
+    /****************************************************************************************************/
+    
+    public double get(Locality locality, Gender gender, int age) throws Exception
+    {
+        return forLocality(locality).get(gender, age);
+    }
+    
+    public void set(Locality locality, Gender gender, int age, double value) throws Exception
+    {
+        forLocality(locality).set(gender, age, value);
+    }
+
+    public double get(Gender gender, int age) throws Exception
+    {
+        Map<Integer, Double> m = forGender(gender);
+        if (!m.containsKey(age))
+            throw new Exception("Missing data for age " + age);
+        return m.get(age);
+    }
+
+    public void set(Gender gender, int age, double value) throws Exception
+    {
+        Map<Integer, Double> m = forGender(gender);
+        m.put(age, value);
+    }
+
+    public Population forLocality(Locality locality)
+    {
+        switch (locality)
+        {
+        case RURAL: return rural;
+        case URBAN: return urban;
+        case TOTAL: return total;
+        default:    return null;
+        }
+    }
+    
+    private Map<Integer, Double> forGender(Gender gender)
+    {
+        switch (gender)
+        {
+        case MALE:   return male;
+        case FEMALE: return female;
+        case BOTH:   return both;
+        default:     return null;
+        }
     }
 
     /****************************************************************************************************/
@@ -25,11 +77,11 @@ public class Population
     {
         reinit();
         
-        rural = loadCombined(path, "rural");
-        urban = loadCombined(path, "urban");
-        if (haveFile(path, "total"))
+        rural = loadCombined(path, Locality.RURAL);
+        urban = loadCombined(path, Locality.URBAN);
+        if (haveFile(path, Locality.TOTAL))
         {
-            total = loadCombined(path, "total");
+            total = loadCombined(path, Locality.TOTAL);
         }
         else
         {
@@ -50,21 +102,22 @@ public class Population
         }
     }
     
-    public Population loadCombined(String path, String locale) throws Exception
+    public Population loadCombined(String path, Locality locality) throws Exception
     {
         Population p = new Population();
-        p.loadSingle(combinedFilePath(path, locale));
+        p.locality = locality;
+        p.loadSingle(combinedFilePath(path, locality));
         return p;
     }
     
-    private String combinedFilePath(String path, String locale)
+    private String combinedFilePath(String path, Locality locality)
     {
-        return String.format("%s/%s.txt", path, locale);
+        return String.format("%s/%s.txt", path, locality.toString());
     }
     
-    private boolean haveFile(String path, String locale)
+    private boolean haveFile(String path, Locality locality)
     {
-        return null != Util.class.getClassLoader().getResource(combinedFilePath(path, locale));
+        return null != Util.class.getClassLoader().getResource(combinedFilePath(path, locality));
     }
 
     /****************************************************************************************************/
@@ -98,6 +151,7 @@ public class Population
     private Map<Integer, Double> male;
     private Map<Integer, Double> female;
     private Map<Integer, Double> both;
+    private Locality locality;
     
     private double male_unknown = 0;
     private double male_total = 0;
