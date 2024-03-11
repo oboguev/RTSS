@@ -48,7 +48,7 @@ public class SingleMortalityTable
             mi.lх = asInt(el[1]);
             mi.dх = asInt(el[2]);
             mi.qх = asDouble(el[3]);
-            mi.pх = asDouble(el[4]);
+            mi.px = asDouble(el[4]);
             mi.Lх = asInt(el[5]);
             mi.Tх = asInt(el[6]);
             mi.eх = asDouble(el[7]);

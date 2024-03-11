@@ -28,6 +28,7 @@ public class Main
         new Transfer_1926_1936().transfer();
     }
     
+    @SuppressWarnings("unused")
     private void load_all_data() throws Exception
     {
         new CombinedMortalityTable("mortality_tables/USSR/1926-1927");

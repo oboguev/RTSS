@@ -107,6 +107,12 @@ public class Population
         default:     return null;
         }
     }
+    
+    public void recalcTotal() throws Exception
+    {
+        total = new Population();
+        total.makeSingleTotal(rural, urban);
+    }
 
     /****************************************************************************************************/
 
@@ -126,8 +132,7 @@ public class Population
         }
         else
         {
-            total = new Population();
-            total.makeSingleTotal(rural, urban);
+            recalcTotal();
         }
         
         for (int age = 0; age <= MAX_AGE; age++)
@@ -344,6 +349,25 @@ public class Population
     
         if (sum_b + both_unknown != both_total)
             mismatch();
+    }
+    
+    public void makeBoth(Locality locality) throws Exception
+    {
+        forLocality(locality).makeBoth();
+    }
+
+    public void makeBoth() throws Exception
+    {
+        both = new HashMap<>();
+        
+        for (int age = 0; age <= MAX_AGE; age++) 
+        {
+            double m = get(Gender.MALE, age);
+            double f = get(Gender.FEMALE, age);
+            set(Gender.BOTH, age, m + f);
+            both_unknown = male_unknown + female_unknown;
+            both_total = male_total + female_total;
+        }
     }
     
     /****************************************************************************************************/

@@ -11,6 +11,8 @@ import data.selectors.Locality;
 
 public class Transfer_1926_1936
 {
+    private static final int MAX_AGE = Population.MAX_AGE;
+    
     private CombinedMortalityTable mt1926;
     private Population p1926 = new Population();
     private Population p1937 = new Population();
@@ -49,13 +51,13 @@ public class Transfer_1926_1936
                 break;
         }
         
-        // ### print total
+        Util.out(String.format("Total population at the end of 1936 survivng from end of 1926: ", p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE)));
     }
     
     private double urban_fraction(Population p, Gender gender) throws Exception
     {
-        double total = p.sum(Locality.TOTAL, gender, 0, Population.MAX_AGE);
-        double urban = p.sum(Locality.URBAN, gender, 0, Population.MAX_AGE);
+        double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
+        double urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
         return urban/total;
     }
     
@@ -86,36 +88,36 @@ public class Transfer_1926_1936
     
     public Population transfer(Population p, CombinedMortalityTable mt) throws Exception
     {
-        Locality[] localities = { Locality.RURAL, Locality.URBAN };
-        Gender[] genders = { Gender.MALE, Gender.FEMALE };
-        
-        for (Locality locality : localities)
+        Population pto = Population.newCombinedPopulation();
+        transfer(pto, p, Locality.RURAL, mt);
+        transfer(pto, p, Locality.URBAN, mt);
+        pto.recalcTotal();
+        return pto;
+    }
+
+    public void transfer(Population pto, Population p, Locality locality, CombinedMortalityTable mt) throws Exception
+    {
+        transfer(pto, p, locality, Gender.MALE, mt);
+        transfer(pto, p, locality, Gender.FEMALE, mt);
+        pto.makeBoth(locality);
+    }
+
+    public void transfer(Population pto, Population p, Locality locality, Gender gender, CombinedMortalityTable mt) throws Exception
+    {
+        pto.set(locality, gender, 0, 0);
+
+        for (int age = 0; age <= MAX_AGE; age++)
         {
-            for (Gender gender : genders)
+            MortalityInfo mi = mt.get(locality, gender, age);
+            double v = p.get(locality, gender, age) * mi.px;
+            if (age == MAX_AGE)
             {
-                for (int age = 0; age <= Population.MAX_AGE; age ++)
-                {
-                    MortalityInfo mi = mt.get(locality, gender, age);
-                    double v = p.get(locality, gender, age);
-                    // ###
-                }
+                pto.set(locality, gender, MAX_AGE, v + pto.get(locality, gender, MAX_AGE));
             }
-            
-            // ### calc Gender.BOTH
+            else
+            {
+                pto.set(locality, gender, age + 1, v);
+            }
         }
-        
-        // ### calc Locality.TOTAL
-        
-        return null;
-    }
-
-    public void transfer(Population p, Locality locality, CombinedMortalityTable mt) throws Exception
-    {
-        // ###
-    }
-
-    public void transfer(Population p, Locality locality, Gender gender, CombinedMortalityTable mt) throws Exception
-    {
-        // ###
     }
 }

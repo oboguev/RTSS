@@ -15,7 +15,7 @@ public class MortalityInfo
     public double qх;
 
     // Вероятность дожить до возраста х+1 лет
-    public double pх;
+    public double px;
 
     // Числа живущих в возрасте х лет
     public int Lх;
