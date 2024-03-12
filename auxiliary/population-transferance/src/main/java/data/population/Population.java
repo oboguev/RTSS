@@ -106,6 +106,36 @@ public class Population
         m.put(age, value);
     }
 
+    public void add(Gender gender, int age, double value) throws Exception
+    {
+        Map<Integer, Double> m = forGender(gender);
+
+        if (m.containsKey(age))
+        {
+            m.put(age, m.get(age) + value);
+        }
+        else
+        {
+            m.put(age, value);
+        }
+    }
+
+    public void sub(Gender gender, int age, double value) throws Exception
+    {
+        Map<Integer, Double> m = forGender(gender);
+
+        if (m.containsKey(age))
+        {
+            m.put(age, m.get(age) - value);
+        }
+        else
+        {
+            if (value > 0)
+                throw new Exception("Negative population");
+            m.put(age, -value);
+        }
+    }
+
     private Map<Integer, Double> forGender(Gender gender)
     {
         switch (gender)

@@ -55,6 +55,16 @@ public class PopulationByLocality
         forLocality(locality).set(gender, age, value);
     }
 
+    public void add(Locality locality, Gender gender, int age, double value) throws Exception
+    {
+        forLocality(locality).add(gender, age, value);
+    }
+
+    public void sub(Locality locality, Gender gender, int age, double value) throws Exception
+    {
+        forLocality(locality).sub(gender, age, value);
+    }
+
     public Population forLocality(Locality locality)
     {
         switch (locality)

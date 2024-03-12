@@ -30,7 +30,7 @@ public class Forward_1926_1937
     public Forward_1926_1937() throws Exception
     {
     }
-    
+
     public void transfer() throws Exception
     {
         /*
@@ -71,7 +71,7 @@ public class Forward_1926_1937
             if (year == 1936)
                 break;
         }
-        
+
         /*
          * Продвижка населения для части года (с 17 декабря 1926 по 6 января 1937)
          */
@@ -85,31 +85,31 @@ public class Forward_1926_1937
 
         show_results(p);
     }
-    
+
     private void show_results(PopulationByLocality p) throws Exception
     {
         /*
          * Распечатать суммарные итоги
          */
         Util.out(String
-                 .format("Population expected to survive from the end of 1926 till early 1937 and be of age 10+ in early 1937: %,d ",
-                         Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
+                .format("Population expected to survive from the end of 1926 till early 1937 and be of age 10+ in early 1937: %,d ",
+                        Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
 
-         Util.out(String.format("Actual early 1937 population ages 10 years and older: %,d",
-                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
-         Util.out("");
-         Util.out(String.format("Actual early 1937 population all ages: %,d",
-                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
+        Util.out(String.format("Actual early 1937 population ages 10 years and older: %,d",
+                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
+        Util.out("");
+        Util.out(String.format("Actual early 1937 population all ages: %,d",
+                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
 
-         Util.out("");
-         Util.out(String.format("Expected population ages 0-9 in early 1937: %,d",
-                                Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
+        Util.out("");
+        Util.out(String.format("Expected population ages 0-9 in early 1937: %,d",
+                               Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
 
-         Util.out(String.format("Actual population ages 0-9 in early 1937: %,d",
-                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
-         
-         // ### print shortfall by year distribution
-        
+        Util.out(String.format("Actual population ages 0-9 in early 1937: %,d",
+                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
+
+        // ### print shortfall by year distribution
+
     }
 
     /*
@@ -158,31 +158,31 @@ public class Forward_1926_1937
      * При продвижке на целый год, @yfraction = 1.0.
      * При продвижке на часть года, @yfraction < 1.0.
      */
-    public PopulationByLocality forward(final PopulationByLocality p, 
-                                        final CombinedMortalityTable mt, 
+    public PopulationByLocality forward(final PopulationByLocality p,
+                                        final CombinedMortalityTable mt,
                                         final double yfraction)
             throws Exception
     {
         /* пустая структура для получения результатов */
         PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
-        
+
         /* продвижка седльского и городского населений, сохранить результат в @pto */
         forward(pto, p, Locality.RURAL, mt, yfraction);
         forward(pto, p, Locality.URBAN, mt, yfraction);
-        
+
         /* вычислить совокупное население обеих зон суммированием городского и сельского */
         pto.recalcTotal();
-        
+
         /* проверить внутреннюю согласованность результата */
         pto.validate();
-        
+
         return pto;
     }
 
     public void forward(PopulationByLocality pto,
                         final PopulationByLocality p,
                         final Locality locality,
-                        final CombinedMortalityTable mt, 
+                        final CombinedMortalityTable mt,
                         final double yfraction)
             throws Exception
     {
@@ -196,10 +196,10 @@ public class Forward_1926_1937
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
-        pto.set(locality, Gender.MALE, 0, m_births);
-        pto.set(locality, Gender.FEMALE, 0, f_births);
+        pto.add(locality, Gender.MALE, 0, m_births);
+        pto.add(locality, Gender.FEMALE, 0, f_births);
 
-        /* вычислить графу "оба пола" из граф для мужчин и женщин */
+        /* вычислить графу "оба пола" из отдельных граф для мужчин и женщин */
         pto.makeBoth(locality);
     }
 
@@ -259,9 +259,10 @@ public class Forward_1926_1937
             throw new Exception("Negative rural -> urban movement amount");
 
         /*
-         * Мы переносим (из сельского в городское) население в возрастных группах 0-49.
+         * Мы переносим население из сельского в городское в возрастных группах 0-49.
          * Группы 50+ остаются неизменными.
-         * Распределить переносимое население равномерно между возрастами 0-49 пропорционально их численности в сельском населении.
+         * Переносимое население распределяется равномерно между возрастами 0-49 
+         * пропорционально их численности в сельском населении.
          */
         double rural049 = p.sum(Locality.RURAL, gender, 0, 49);
         double factor = move / rural049;
@@ -280,9 +281,23 @@ public class Forward_1926_1937
         pto.resetTotal();
 
         pto.validate();
-        
-        // ### add: check
+
+        /*
+         * Verify that new level (of transformed population) is correct
+         */
+        if (differ(target_urban_level, urban_fraction(pto, gender)))
+            throw new Exception("Miscalculated urbanization");
 
         return pto;
+    }
+
+    private boolean differ(double a, double b)
+    {
+        return differ(a, b, 0.00001);
+    }
+
+    private boolean differ(double a, double b, double diff)
+    {
+        return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
 }
