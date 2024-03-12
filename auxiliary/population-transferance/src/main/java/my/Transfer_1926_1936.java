@@ -6,6 +6,7 @@ import java.util.Map;
 import data.mortality.CombinedMortalityTable;
 import data.mortality.MortalityInfo;
 import data.population.Population;
+import data.population.PopulationByLocality;
 import data.selectors.Gender;
 import data.selectors.Locality;
 
@@ -14,8 +15,8 @@ public class Transfer_1926_1936
     private static final int MAX_AGE = Population.MAX_AGE;
 
     private CombinedMortalityTable mt1926;
-    private Population p1926 = new Population();
-    private Population p1937 = new Population();
+    private PopulationByLocality p1926;
+    private PopulationByLocality p1937;
 
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
@@ -23,8 +24,8 @@ public class Transfer_1926_1936
     public void transfer() throws Exception
     {
         mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
-        p1926.loadCombined("population_data/USSR/1926");
-        p1937.loadCombined("population_data/USSR/1937");
+        p1926 = PopulationByLocality.load("population_data/USSR/1926");
+        p1937 = PopulationByLocality.load("population_data/USSR/1937");
 
         /*
          * 1926 census was on 1926-12-17
@@ -42,7 +43,7 @@ public class Transfer_1926_1936
         urban_female_fraction_yyyy = interpolate_linear(1926, urban_female_fraction_1926, 1936,
                                                         urban_female_fraction_1936);
 
-        Population p = p1926;
+        PopulationByLocality p = p1926;
         int year = 1926;
         for (;;)
         {
@@ -69,7 +70,7 @@ public class Transfer_1926_1936
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
     }
 
-    private double urban_fraction(Population p, Gender gender) throws Exception
+    private double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
     {
         double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
         double urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
@@ -102,16 +103,20 @@ public class Transfer_1926_1936
         return m;
     }
 
-    public Population transfer(Population p, CombinedMortalityTable mt) throws Exception
+    public PopulationByLocality transfer(PopulationByLocality p, CombinedMortalityTable mt)
+            throws Exception
     {
-        Population pto = Population.newCombinedPopulation();
+        PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
         transfer(pto, p, Locality.RURAL, mt);
         transfer(pto, p, Locality.URBAN, mt);
         pto.recalcTotal();
         return pto;
     }
 
-    public void transfer(Population pto, Population p, Locality locality, CombinedMortalityTable mt)
+    public void transfer(PopulationByLocality pto,
+                         PopulationByLocality p,
+                         Locality locality,
+                         CombinedMortalityTable mt)
             throws Exception
     {
         transfer(pto, p, locality, Gender.MALE, mt);
@@ -119,7 +124,10 @@ public class Transfer_1926_1936
         pto.makeBoth(locality);
     }
 
-    public void transfer(Population pto, Population p, Locality locality, Gender gender,
+    public void transfer(PopulationByLocality pto,
+                         PopulationByLocality p,
+                         Locality locality,
+                         Gender gender,
                          CombinedMortalityTable mt)
             throws Exception
     {
@@ -140,10 +148,12 @@ public class Transfer_1926_1936
         }
     }
 
-    public Population urbanize(Population p, Gender gender, double target_urban_level)
+    public PopulationByLocality urbanize(PopulationByLocality p,
+                                         Gender gender,
+                                         double target_urban_level)
             throws Exception
     {
-        Population pto = p.clone();
+        PopulationByLocality pto = p.clone();
 
         /*
          * Target and current amounts of urban population
@@ -177,7 +187,7 @@ public class Transfer_1926_1936
         pto.resetUnknown();
         pto.resetTotal();
 
-        pto.validateCombined();
+        pto.validate();
 
         return pto;
     }

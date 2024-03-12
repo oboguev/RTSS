@@ -11,30 +11,21 @@ public class Population
 {
     public static final int MAX_AGE = 100;
 
-    private void reinit()
-    {
-        rural = total = urban = null;
-        male = female = both = null;
-        locality = null;
-    }
+    Map<Integer, Double> male = new HashMap<>();;
+    Map<Integer, Double> female = new HashMap<>();;
+    Map<Integer, Double> both = new HashMap<>();;
+    Locality locality;
 
-    static public Population newSinglePopulation()
+    double male_unknown = 0;
+    double male_total = 0;
+    double female_unknown = 0;
+    double female_total = 0;
+    double both_unknown = 0;
+    double both_total = 0;
+
+    static public Population newPopulation()
     {
         Population p = new Population();
-        p.reinit();
-        p.male = new HashMap<>();
-        p.female = new HashMap<>();
-        p.both = new HashMap<>();
-        return p;
-    }
-
-    static public Population newCombinedPopulation()
-    {
-        Population p = new Population();
-        p.reinit();
-        p.rural = newSinglePopulation();
-        p.urban = newSinglePopulation();
-        p.total = newSinglePopulation();
         return p;
     }
 
@@ -57,31 +48,29 @@ public class Population
         if (both != null)
             p.both = new HashMap<>(both);
 
-        if (rural != null)
-            p.rural = rural.clone();
-        if (urban != null)
-            p.urban = urban.clone();
-        if (total != null)
-            p.total = total.clone();
-
         return p;
     }
 
     /****************************************************************************************************/
 
-    public double get(Locality locality, Gender gender, int age) throws Exception
+    public double male(int age) throws Exception
     {
-        return forLocality(locality).get(gender, age);
+        return get(Gender.MALE, age);
     }
 
-    public double sum(Locality locality, Gender gender, int age1, int age2) throws Exception
+    public double female(int age) throws Exception
     {
-        return forLocality(locality).sum(gender, age1, age2);
+        return get(Gender.FEMALE, age);
     }
 
-    public void set(Locality locality, Gender gender, int age, double value) throws Exception
+    public double both(int age) throws Exception
     {
-        forLocality(locality).set(gender, age, value);
+        return get(Gender.BOTH, age);
+    }
+
+    public double fm(int age) throws Exception
+    {
+        return both(age);
     }
 
     public double get(Gender gender, int age) throws Exception
@@ -114,21 +103,6 @@ public class Population
         m.put(age, value);
     }
 
-    public Population forLocality(Locality locality)
-    {
-        switch (locality)
-        {
-        case RURAL:
-            return rural;
-        case URBAN:
-            return urban;
-        case TOTAL:
-            return total;
-        default:
-            return null;
-        }
-    }
-
     private Map<Integer, Double> forGender(Gender gender)
     {
         switch (gender)
@@ -144,21 +118,8 @@ public class Population
         }
     }
 
-    public void recalcTotal() throws Exception
-    {
-        total = new Population();
-        total.makeSingleTotal(rural, urban);
-    }
-
     public void resetUnknown() throws Exception
     {
-        if (rural != null)
-            rural.resetUnknown();
-        if (urban != null)
-            urban.resetUnknown();
-        if (total != null)
-            total.resetUnknown();
-
         male_unknown = 0;
         female_unknown = 0;
         both_unknown = 0;
@@ -166,13 +127,6 @@ public class Population
 
     public void resetTotal() throws Exception
     {
-        if (rural != null)
-            rural.resetTotal();
-        if (urban != null)
-            urban.resetTotal();
-        if (total != null)
-            total.resetTotal();
-
         male_total = 0;
         female_total = 0;
         both_total = 0;
@@ -187,113 +141,21 @@ public class Population
 
     /****************************************************************************************************/
 
-    private Population rural;
-    private Population total;
-    private Population urban;
-
-    public void loadCombined(String path) throws Exception
+    public static Population load(String path) throws Exception
     {
-        reinit();
-
-        rural = loadCombined(path, Locality.RURAL);
-        urban = loadCombined(path, Locality.URBAN);
-        if (haveFile(path, Locality.TOTAL))
-        {
-            total = loadCombined(path, Locality.TOTAL);
-        }
-        else
-        {
-            recalcTotal();
-        }
-
-        validateCombined();
+        return load(path, null);
     }
 
-    public Population loadCombined(String path, Locality locality) throws Exception
+    public static Population load(String path, Locality locality) throws Exception
     {
         Population p = new Population();
         p.locality = locality;
-        p.loadSingle(combinedFilePath(path, locality));
+        p.do_load(path);
         return p;
     }
 
-    private String combinedFilePath(String path, Locality locality)
+    private void do_load(String path) throws Exception
     {
-        return String.format("%s/%s.txt", path, locality.toString());
-    }
-
-    private boolean haveFile(String path, Locality locality)
-    {
-        return null != Util.class.getClassLoader().getResource(combinedFilePath(path, locality));
-    }
-
-    public void validateCombined() throws Exception
-    {
-        rural.validateSingle();
-        urban.validateSingle();
-        total.validateSingle();
-
-        for (int age = 0; age <= MAX_AGE; age++)
-        {
-            if (differ(rural.male(age) + urban.male(age), total.male(age)))
-                mismatch();
-
-            if (differ(rural.female(age) + urban.female(age), total.female(age)))
-                mismatch();
-
-            if (differ(rural.fm(age) + urban.fm(age), total.fm(age)))
-                mismatch();
-        }
-    }
-
-    /****************************************************************************************************/
-
-    public double male(int age) throws Exception
-    {
-        if (!male.containsKey(age))
-            throw new Exception("Missing data");
-        return male.get(age);
-    }
-
-    public double female(int age) throws Exception
-    {
-        if (!female.containsKey(age))
-            throw new Exception("Missing data");
-        return female.get(age);
-    }
-
-    public double fm(int age) throws Exception
-    {
-        return both(age);
-    }
-
-    public double both(int age) throws Exception
-    {
-        if (!both.containsKey(age))
-            throw new Exception("Missing data");
-        return both.get(age);
-    }
-
-    private Map<Integer, Double> male;
-    private Map<Integer, Double> female;
-    private Map<Integer, Double> both;
-    private Locality locality;
-
-    private double male_unknown = 0;
-    private double male_total = 0;
-    private double female_unknown = 0;
-    private double female_total = 0;
-    private double both_unknown = 0;
-    private double both_total = 0;
-
-    public void loadSingle(String path) throws Exception
-    {
-        reinit();
-
-        male = new HashMap<>();
-        female = new HashMap<>();
-        both = new HashMap<>();
-
         String rdata = Util.loadResource(path);
         rdata = rdata.replace("\r\n", "\n");
         for (String line : rdata.split("\n"))
@@ -354,36 +216,10 @@ public class Population
             }
         }
 
-        validateSingle();
+        validate();
     }
 
-    private void makeSingleTotal(Population rural, Population urban) throws Exception
-    {
-        reinit();
-
-        male = new HashMap<>();
-        female = new HashMap<>();
-        both = new HashMap<>();
-
-        for (int age = 0; age <= MAX_AGE; age++)
-        {
-            male.put(age, rural.male.get(age) + urban.male.get(age));
-            female.put(age, rural.female.get(age) + urban.female.get(age));
-            both.put(age, rural.both.get(age) + urban.both.get(age));
-        }
-
-        male_total = rural.male_total + urban.male_total;
-        female_total = rural.female_total + urban.female_total;
-        both_total = rural.both_total + urban.both_total;
-
-        male_unknown = rural.male_unknown + urban.male_unknown;
-        female_unknown = rural.female_unknown + urban.female_unknown;
-        both_unknown = rural.both_unknown + urban.both_unknown;
-
-        validateSingle();
-    }
-
-    private void validateSingle() throws Exception
+    void validate() throws Exception
     {
         double sum_m = 0;
         double sum_f = 0;
@@ -429,11 +265,6 @@ public class Population
 
         if (differ(sum_b + both_unknown, both_total))
             mismatch();
-    }
-
-    public void makeBoth(Locality locality) throws Exception
-    {
-        forLocality(locality).makeBoth();
     }
 
     public void makeBoth() throws Exception
