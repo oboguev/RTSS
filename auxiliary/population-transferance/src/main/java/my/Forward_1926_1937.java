@@ -24,7 +24,7 @@ public class Forward_1926_1937
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
 
-    private final double BirthRate = 44.0; // for the whole USSR in 1926
+    private final double BirthRate = 44.0; // for the whole USSR in 1926 ### use separate rural/urban
     private final double MaleFemaleBirthRatio = 1.05;
 
     public Forward_1926_1937() throws Exception
@@ -81,7 +81,6 @@ public class Forward_1926_1937
         long ndays = Duration.between(d1936.toInstant(), d1937.toInstant()).toDays();
         yfraction = ndays / 365.0;
         p = forward(p, mt1926, yfraction);
-        // ### for a fractional move -- use different algorithm!!! 
 
         show_results(p);
     }
@@ -214,21 +213,24 @@ public class Forward_1926_1937
         /* рождений пока нет */
         pto.set(locality, gender, 0, 0);
 
-        /* продвижка по таблице смертности */
+        /* Продвижка по таблице смертности.
+         * 
+         * Для каждого года возраста мы берём часть населения этого возраста
+         * указываемую @yfraction и переносим её в следующий год с приложением смертности.
+         * Остальная часть (1.0 - yfraction) остаётся в текущем возрасте и не
+         * подвергается смертности.
+         */
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = mt.get(locality, gender, age);
-            double initial = p.get(locality, gender, age);
-            double deaths = initial * (1.0 - mi.px) * yfraction;
-            double v = initial - deaths;
-            if (age == MAX_AGE)
-            {
-                pto.set(locality, gender, MAX_AGE, v + pto.get(locality, gender, MAX_AGE));
-            }
-            else
-            {
-                pto.set(locality, gender, age + 1, v);
-            }
+            double current = p.get(locality, gender, age);
+
+            double moving = current * yfraction;
+            double staying = current - moving;
+            double deaths = moving * (1.0 - mi.px);
+
+            pto.add(locality, gender, age, staying);
+            pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
     }
 
