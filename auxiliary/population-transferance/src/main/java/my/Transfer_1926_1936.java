@@ -21,6 +21,9 @@ public class Transfer_1926_1936
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
 
+    private final double BirthRate = 48.1; // ### 1926
+    private final double MaleFemaleBirthRatio = 1.05;
+
     public void transfer() throws Exception
     {
         mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
@@ -61,13 +64,21 @@ public class Transfer_1926_1936
         }
 
         Util.out(String
-                .format("Total population expected to sruvive from the end of 1926 till the end of 1936: %,d ",
-                        Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
+                .format("Population expected to survive from the end of 1926 till the end of 1936 and be 10+: %,d ",
+                        Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
 
-        Util.out(String.format("Actual 1937 population 10 years and older: %,d",
+        Util.out(String.format("Actual early 1937 population 10 years and older: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
-        Util.out(String.format("Actual 1937 population all ages: %,d",
+        Util.out("");
+        Util.out(String.format("Actual early 1937 population all ages: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
+
+        Util.out("");
+        Util.out(String.format("Expected population 0-9 at the end of 1936: %,d",
+                               Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
+
+        Util.out(String.format("Actual population 0-9 in early 1937: %,d",
+                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
     }
 
     private double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
@@ -110,6 +121,7 @@ public class Transfer_1926_1936
         transfer(pto, p, Locality.RURAL, mt);
         transfer(pto, p, Locality.URBAN, mt);
         pto.recalcTotal();
+        pto.validate();
         return pto;
     }
 
@@ -119,8 +131,17 @@ public class Transfer_1926_1936
                          CombinedMortalityTable mt)
             throws Exception
     {
+        double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
+        double births = sum * BirthRate / 1000;
+        double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
+        double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
+
         transfer(pto, p, locality, Gender.MALE, mt);
         transfer(pto, p, locality, Gender.FEMALE, mt);
+
+        pto.set(locality, Gender.MALE, 0, m_births);
+        pto.set(locality, Gender.FEMALE, 0, f_births);
+
         pto.makeBoth(locality);
     }
 
