@@ -1,5 +1,8 @@
 package my;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +24,7 @@ public class Transfer_1926_1936
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
 
-    private final double BirthRate = 48.1; // ### 1926
+    private final double BirthRate = 44.0; // for the whole USSR in 1926
     private final double MaleFemaleBirthRatio = 1.05;
 
     public void transfer() throws Exception
@@ -46,12 +49,16 @@ public class Transfer_1926_1936
         urban_female_fraction_yyyy = interpolate_linear(1926, urban_female_fraction_1926, 1936,
                                                         urban_female_fraction_1936);
 
+        /*
+         * Forward the population for whole years 
+         */
         PopulationByLocality p = p1926;
         int year = 1926;
+        double yfraction = 1.0;
         for (;;)
         {
             year++;
-            p = transfer(p, mt1926);
+            p = forward(p, mt1926, yfraction);
 
             /*
              * Redistribute population between rural and urban 
@@ -62,22 +69,32 @@ public class Transfer_1926_1936
             if (year == 1936)
                 break;
         }
+        
+        /*
+         * Forward the population for a fractional part of a year 
+         */
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date d1936 = df.parse("1936-12-17");
+        Date d1937 = df.parse("1937-01-06");
+        long ndays = Duration.between(d1936.toInstant(), d1937.toInstant()).toDays();
+        yfraction = ndays / 365.0;
+        p = forward(p, mt1926, yfraction);
 
         Util.out(String
                 .format("Population expected to survive from the end of 1926 till the end of 1936 and be 10+: %,d ",
                         Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
 
-        Util.out(String.format("Actual early 1937 population 10 years and older: %,d",
+        Util.out(String.format("Actual early 1937 population ages 10 years and older: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
         Util.out("");
         Util.out(String.format("Actual early 1937 population all ages: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
 
         Util.out("");
-        Util.out(String.format("Expected population 0-9 at the end of 1936: %,d",
+        Util.out(String.format("Expected population ages 0-9 in early 1937: %,d",
                                Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
 
-        Util.out(String.format("Actual population 0-9 in early 1937: %,d",
+        Util.out(String.format("Actual population ages 0-9 in early 1937: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
     }
 
@@ -114,30 +131,31 @@ public class Transfer_1926_1936
         return m;
     }
 
-    public PopulationByLocality transfer(PopulationByLocality p, CombinedMortalityTable mt)
+    public PopulationByLocality forward(PopulationByLocality p, CombinedMortalityTable mt, double yfraction)
             throws Exception
     {
         PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
-        transfer(pto, p, Locality.RURAL, mt);
-        transfer(pto, p, Locality.URBAN, mt);
+        forward(pto, p, Locality.RURAL, mt, yfraction);
+        forward(pto, p, Locality.URBAN, mt, yfraction);
         pto.recalcTotal();
         pto.validate();
         return pto;
     }
 
-    public void transfer(PopulationByLocality pto,
-                         PopulationByLocality p,
-                         Locality locality,
-                         CombinedMortalityTable mt)
+    public void forward(PopulationByLocality pto,
+                        PopulationByLocality p,
+                        Locality locality,
+                        CombinedMortalityTable mt, 
+                        double yfraction)
             throws Exception
     {
         double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
-        double births = sum * BirthRate / 1000;
+        double births = sum * yfraction * BirthRate / 1000;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
-        transfer(pto, p, locality, Gender.MALE, mt);
-        transfer(pto, p, locality, Gender.FEMALE, mt);
+        forward(pto, p, locality, Gender.MALE, mt, yfraction);
+        forward(pto, p, locality, Gender.FEMALE, mt, yfraction);
 
         pto.set(locality, Gender.MALE, 0, m_births);
         pto.set(locality, Gender.FEMALE, 0, f_births);
@@ -145,11 +163,12 @@ public class Transfer_1926_1936
         pto.makeBoth(locality);
     }
 
-    public void transfer(PopulationByLocality pto,
-                         PopulationByLocality p,
-                         Locality locality,
-                         Gender gender,
-                         CombinedMortalityTable mt)
+    public void forward(PopulationByLocality pto,
+                        PopulationByLocality p,
+                        Locality locality,
+                        Gender gender,
+                        CombinedMortalityTable mt,
+                        double yfraction)
             throws Exception
     {
         pto.set(locality, gender, 0, 0);
@@ -157,7 +176,9 @@ public class Transfer_1926_1936
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = mt.get(locality, gender, age);
-            double v = p.get(locality, gender, age) * mi.px;
+            double initial = p.get(locality, gender, age);
+            double deaths = initial * (1.0 - mi.px) * yfraction;
+            double v = initial - deaths;
             if (age == MAX_AGE)
             {
                 pto.set(locality, gender, MAX_AGE, v + pto.get(locality, gender, MAX_AGE));
