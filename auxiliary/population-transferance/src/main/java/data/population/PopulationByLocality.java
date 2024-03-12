@@ -4,23 +4,20 @@ import data.selectors.Gender;
 import data.selectors.Locality;
 import my.Util;
 
+/**
+ * Holds populations by type of locality: rural, urban, total (rural + urban)
+ */
 public class PopulationByLocality
 {
     public static final int MAX_AGE = Population.MAX_AGE;
 
     private Population rural;
-    private Population total;
     private Population urban;
-
-    private void reinit()
-    {
-        rural = total = urban = null;
-    }
+    private Population total;
 
     static public PopulationByLocality newPopulationByLocality()
     {
         PopulationByLocality p = new PopulationByLocality();
-        p.reinit();
         p.rural = Population.newPopulation();
         p.urban = Population.newPopulation();
         p.total = Population.newPopulation();
@@ -109,8 +106,6 @@ public class PopulationByLocality
 
     private void do_load(String path) throws Exception
     {
-        reinit();
-
         rural = load(path, Locality.RURAL);
         urban = load(path, Locality.URBAN);
         if (haveFile(path, Locality.TOTAL))

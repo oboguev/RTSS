@@ -7,6 +7,9 @@ import data.selectors.Gender;
 import data.selectors.Locality;
 import my.Util;
 
+/**
+ * Holds male, female and both-genders populations by age
+ */
 public class Population
 {
     public static final int MAX_AGE = 100;
