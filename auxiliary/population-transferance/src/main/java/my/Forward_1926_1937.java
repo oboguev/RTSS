@@ -86,30 +86,7 @@ public class Forward_1926_1937
         show_results(p);
     }
 
-    private void show_results(PopulationByLocality p) throws Exception
-    {
-        /*
-         * Распечатать суммарные итоги
-         */
-        Util.out(String
-                .format("Population expected to survive from the end of 1926 till early 1937 and be of age 10+ in early 1937: %,d ",
-                        Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
-
-        Util.out(String.format("Actual early 1937 population ages 10 years and older: %,d",
-                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
-        Util.out("");
-        Util.out(String.format("Actual early 1937 population all ages: %,d",
-                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
-
-        Util.out("");
-        Util.out(String.format("Expected population ages 0-9 in early 1937: %,d",
-                               Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
-
-        Util.out(String.format("Actual population ages 0-9 in early 1937: %,d",
-                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
-
-        // ### print shortfall by year distribution
-    }
+    /*****************************************************************************************/
 
     /*
      * Оценить долю городского населения во всём населении  
@@ -293,6 +270,8 @@ public class Forward_1926_1937
         return pto;
     }
 
+    /*****************************************************************************************/
+
     private boolean differ(double a, double b)
     {
         return differ(a, b, 0.00001);
@@ -301,5 +280,121 @@ public class Forward_1926_1937
     private boolean differ(double a, double b, double diff)
     {
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
+    }
+
+    /*****************************************************************************************/
+
+    private void show_results(PopulationByLocality p) throws Exception
+    {
+        /*
+         * Распечатать суммарные итоги
+         */
+        Util.out(String
+                .format("Population expected to survive from the end of 1926 till early 1937 and be of age 10+ in early 1937: %,d ",
+                        Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
+
+        Util.out(String.format("Actual early 1937 population ages 10 years and older: %,d",
+                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
+        Util.out("");
+        Util.out(String.format("Actual early 1937 population all ages: %,d",
+                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
+
+        Util.out("");
+        Util.out(String.format("Expected population ages 0-9 in early 1937: %,d",
+                               Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
+
+        Util.out(String.format("Actual population ages 0-9 in early 1937: %,d",
+                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
+
+        /*
+         * Display overall shortall
+         */
+        String divider = "*************************************************************************************";
+        Util.out("");
+        Util.out(divider);
+        Util.out("");
+        Util.out("Overall population shortfall:");
+        Util.out("");
+        show_shortfall_header();
+        show_shortfall(p, 0, MAX_AGE);
+        show_shortfall(p, 0, 9);
+        show_shortfall(p, 10, MAX_AGE);
+
+        /*
+         * Display shortall by age groups
+         */
+        Util.out("");
+        Util.out(divider);
+        Util.out("");
+        Util.out("Population shortfall by age groups:");
+        Util.out("");
+        show_shortfall_header();
+        for (int age = 0; age + 5 <= MAX_AGE; age += 5)
+        {
+            show_shortfall(p, age, age + 4);
+        }
+        show_shortfall(p, MAX_AGE, MAX_AGE);
+    }
+
+    private void show_shortfall_header()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("     ");
+        sb.append("          TOTAL       ");
+        sb.append("         TOTAL        ");
+        sb.append("          RURAL       ");
+        sb.append("         RURAL        ");
+        sb.append("          URBAN       ");
+        sb.append("         URBAN        ");
+        Util.out(sb.toString());
+
+        sb.setLength(0);
+        sb.append("  Age ");
+        for (int k = 0; k < 3; k++)
+        {
+            sb.append("          MALE        ");
+            sb.append("         FEMALE       ");
+        }
+        Util.out(sb.toString());
+
+        sb.setLength(0);
+        sb.append("=======");
+        for (int k = 0; k < 6; k++)
+            sb.append("  ====================");
+        Util.out(sb.toString());
+    }
+
+    private void show_shortfall(PopulationByLocality p, int age1, int age2) throws Exception
+    {
+        String s = String.format("%d-%d", age1, age2);
+        if (age1 == age2 & age1 == MAX_AGE)
+            s = String.format("%d+", age1);
+        s = String.format("%6s", s);
+        StringBuilder sb = new StringBuilder(s);
+
+        show_shortfall(sb, p, Locality.TOTAL, Gender.MALE, age1, age2);
+        show_shortfall(sb, p, Locality.TOTAL, Gender.FEMALE, age1, age2);
+        show_shortfall(sb, p, Locality.RURAL, Gender.MALE, age1, age2);
+        show_shortfall(sb, p, Locality.RURAL, Gender.FEMALE, age1, age2);
+        show_shortfall(sb, p, Locality.URBAN, Gender.MALE, age1, age2);
+        show_shortfall(sb, p, Locality.URBAN, Gender.FEMALE, age1, age2);
+
+        Util.out(sb.toString());
+    }
+
+    private void show_shortfall(StringBuilder sb,
+                                PopulationByLocality p,
+                                Locality locality,
+                                Gender gender,
+                                int age1, int age2)
+            throws Exception
+    {
+        double expected = p.sum(locality, gender, age1, age2);
+        double actual = p1937.sum(locality, gender, age1, age2);
+        double deficit = expected - actual;
+        double deficit_pct = 100 * deficit / expected;
+        String s = String.format("%,10d (%7.2f%%)", Math.round(deficit), deficit_pct);
+        sb.append(" ");
+        sb.append(s);
     }
 }
