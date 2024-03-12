@@ -17,9 +17,10 @@ public class Forward_1926_1937
 {
     private static final int MAX_AGE = Population.MAX_AGE;
 
-    private CombinedMortalityTable mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");;
-    private PopulationByLocality p1926 = PopulationByLocality.load("population_data/USSR/1926");;
-    private PopulationByLocality p1937 = PopulationByLocality.load("population_data/USSR/1937");;
+    private CombinedMortalityTable mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
+    private PopulationByLocality p1926 = PopulationByLocality.load("population_data/USSR/1926");
+    private PopulationByLocality p1937_original = PopulationByLocality.load("population_data/USSR/1937");
+    private PopulationByLocality p1937 = new Adjust_1937().adjust(p1937_original);
 
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
@@ -108,7 +109,6 @@ public class Forward_1926_1937
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
 
         // ### print shortfall by year distribution
-
     }
 
     /*

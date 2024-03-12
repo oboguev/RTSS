@@ -1,5 +1,9 @@
 package my;
 
+import data.population.PopulationByLocality;
+import data.selectors.Gender;
+import data.selectors.Locality;
+
 /* ***************************************************************
 
 Сохранившиеся в архиве и опубликованные материалы переписи 
@@ -59,12 +63,54 @@ package my;
 Таким образом, некоторая неизвестная часть этих контингентов очевидно попала в возрастную таблицу, а другая часть не попала.
 В этих условиях, единственный и лучший подход, который мы можем принять: это добавить к итогам "старшей" части возрастной
 таблицы 1939 года поправочную невязку в 1,944,896 чел. (1.2% всего населения или 1.6% для групп 10+).
-Её возрастное распределение, однако, остаётся неизвестным, и лучшее, что мы можем сделать -- это распределить невязку
-равномерно среди населения 10+ пропорционально даным имеющимся в возрастной таблице. 
+Её половозрастное распределение, однако, остаётся неизвестным, и лучшее, что мы можем сделать -- это предположить,
+что невязка вызвана неучётом части РККА или "контингентов" и распределить невязку равномерно среди населения 18-49 
+пропорционально численности в возрастной таблице, и относя 90% её на мужчин, а 10% на женщин. 
 
 *********************************************************************/
 
 public class Adjust_1937
 {
+    private final double total_adjustment = 1_944_896;
+    private final double male_adjustment = total_adjustment * 0.9;
+    private final double female_adjustment = total_adjustment * 0.1;
 
+    private final int age1 = 18;
+    private final int age2 = 49;
+
+    private double male_sum;
+    private double female_sum;
+
+    public PopulationByLocality adjust(final PopulationByLocality p) throws Exception
+    {
+        male_sum = p.sum(Locality.TOTAL, Gender.MALE, age1, age2);
+        female_sum = p.sum(Locality.TOTAL, Gender.FEMALE, age1, age2);
+
+        PopulationByLocality pto = p.clone();
+        pto.resetUnknown();
+        adjust(pto, Locality.RURAL);
+        adjust(pto, Locality.URBAN);
+        pto.resetTotal();
+        pto.recalcTotal();
+        pto.validate();
+        return pto;
+    }
+
+    private void adjust(PopulationByLocality pto, Locality locality)
+            throws Exception
+    {
+        adjust(pto, locality, Gender.MALE, male_adjustment / male_sum);
+        adjust(pto, locality, Gender.FEMALE, female_adjustment / female_sum);
+        pto.makeBoth(locality);
+    }
+
+    private void adjust(PopulationByLocality pto, Locality locality, Gender gender, double factor)
+            throws Exception
+    {
+        for (int age = age1; age <= age2; age++)
+        {
+            double v = pto.get(locality, gender, age);
+            pto.add(locality, gender, age, v * factor);
+        }
+    }
 }

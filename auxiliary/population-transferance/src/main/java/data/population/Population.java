@@ -165,11 +165,11 @@ public class Population
         both_total = 0;
 
         if (male != null)
-            male_total = this.sum(Gender.MALE, 0, MAX_AGE);
+            male_total = this.sum(Gender.MALE, 0, MAX_AGE) + male_unknown;
         if (female != null)
-            female_total = this.sum(Gender.FEMALE, 0, MAX_AGE);
+            female_total = this.sum(Gender.FEMALE, 0, MAX_AGE) + female_unknown;
         if (both != null)
-            both_total = this.sum(Gender.BOTH, 0, MAX_AGE);
+            both_total = this.sum(Gender.BOTH, 0, MAX_AGE) + both_unknown;
     }
 
     /****************************************************************************************************/
