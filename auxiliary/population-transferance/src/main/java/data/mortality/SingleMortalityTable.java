@@ -10,6 +10,10 @@ public class SingleMortalityTable
     private Map<Integer, MortalityInfo> m = new HashMap<>();
     public static final int MAX_AGE = 100;
     
+    private SingleMortalityTable()
+    {
+    }
+    
     public MortalityInfo get(int age) throws Exception
     {
         MortalityInfo mi = m.get(age);
@@ -45,13 +49,13 @@ public class SingleMortalityTable
             
             MortalityInfo mi = new MortalityInfo();
             mi.x = asInt(el[0]);
-            mi.lх = asInt(el[1]);
-            mi.dх = asInt(el[2]);
-            mi.qх = asDouble(el[3]);
+            mi.lx = asInt(el[1]);
+            mi.dx = asInt(el[2]);
+            mi.qx = asDouble(el[3]);
             mi.px = asDouble(el[4]);
-            mi.Lх = asInt(el[5]);
-            mi.Tх = asInt(el[6]);
-            mi.eх = asDouble(el[7]);
+            mi.Lx = asInt(el[5]);
+            mi.Tx = asInt(el[6]);
+            mi.ex = asDouble(el[7]);
             
             if (mi.x < 0 || mi.x > MAX_AGE)
                 throw new Exception("Invalid data in mortality table");
@@ -73,21 +77,25 @@ public class SingleMortalityTable
     
     public void validate() throws Exception
     {
+        /*
+         * Tables do have minor inconsistencies, so we'll allow some tolerance margin
+         */
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
-            check_eq(mi.px + mi.qх, 1.0, 0.011);
-            if (Math.abs(Math.round(mi.lх * mi.qх) - mi.dх) > 2)
+            check_eq(mi.px + mi.qx, 1.0, 0.011);
+            if (Math.abs(Math.round(mi.lx * mi.qx) - mi.dx) > 2)
                 throw new Exception("Inconsistent mortality table");
             if (age != MAX_AGE)
             {
                 MortalityInfo mi2 = get(age + 1);
-                if (Math.abs(mi.lх - mi.dх - mi2.lх) > 2)
+                if (Math.abs(mi.lx - mi.dx - mi2.lx) > 2)
                     throw new Exception("Inconsistent mortality table");
             }
         }
     }
     
+    @SuppressWarnings("unused")
     private void check_eq(double a, double b) throws Exception
     {
         check_eq(a, b, 0.00001);
@@ -101,6 +109,7 @@ public class SingleMortalityTable
         }
     }
 
+    @SuppressWarnings("unused")
     private boolean differ(double a, double b)
     {
         return differ(a, b, 0.00001);
@@ -119,5 +128,25 @@ public class SingleMortalityTable
     private double asDouble(String s)
     {
         return Double.parseDouble(s.replace(",", ""));
+    }
+    
+    static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
+    {
+        SingleMortalityTable smt = new SingleMortalityTable();
+        smt.do_interpolate(mt1, mt2, weight);
+        return smt;
+    }
+
+    private void do_interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
+    {
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            MortalityInfo mi1 = mt1.get(age);
+            MortalityInfo mi2 = mt2.get(age);
+            MortalityInfo mi = new MortalityInfo();
+            mi.px = (1 - weight) * mi1.px + weight * mi2.px;
+            mi.qx = 1.0 - mi.px;
+            m.put(age,  mi);
+        }
     }
 }
