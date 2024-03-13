@@ -14,9 +14,9 @@ public class Population
 {
     public static final int MAX_AGE = 100;
 
-    Map<Integer, Double> male = new HashMap<>();;
-    Map<Integer, Double> female = new HashMap<>();;
-    Map<Integer, Double> both = new HashMap<>();;
+    Map<Integer, Double> male = new HashMap<>();
+    Map<Integer, Double> female = new HashMap<>();
+    Map<Integer, Double> both = new HashMap<>();
     Locality locality;
 
     double male_unknown = 0;
@@ -334,5 +334,82 @@ public class Population
     private boolean differ(double a, double b, double diff)
     {
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
+    }
+
+    /****************************************************************************************************/
+    
+    public void smooth() throws Exception
+    {
+        double[] d;
+        
+        d = toArray(Gender.MALE);
+        fromArray(Gender.MALE, smooth(d));
+        
+        d = toArray(Gender.FEMALE);
+        fromArray(Gender.FEMALE, smooth(d));
+
+        makeBoth();
+        validate();
+    }
+    
+    public double[] toArray(Gender gender) throws Exception
+    {
+        int maxage = -1;
+        Map<Integer, Double> m = forGender(gender);
+        for (int age : m.keySet())
+        {
+            maxage = Math.max(age, maxage);
+        }
+        
+        double d[] = new double[maxage + 1];
+        
+        for (int age = 0; age <= maxage; age++)
+        {
+            Double v = m.get(age);
+            if (v == null)
+                throw new Exception("Missing data");
+            d[age] = v;
+        }
+        
+        return d;
+    }
+
+    public void fromArray(Gender gender, double[] d) throws Exception
+    {
+        Map<Integer, Double> m = new HashMap<>();
+        
+        for (int age = 0; age <= d.length - 1; age++)
+            m.put(age, d[age]);
+        
+        // TODO: collapse anything beyond MAX_AGE into MAX_AGE
+
+        switch (gender)
+        {
+        case MALE:
+            male = m;
+            male_total = Util.sum(d) + male_unknown;
+            break;
+
+        case FEMALE:
+            female = m;
+            female_total = Util.sum(d) + female_unknown;
+            break;
+        
+        case BOTH:
+            both = m;
+            both_total = Util.sum(d) + both_unknown;
+            break;
+        
+        default:
+            throw new Exception("Incorrect gender");
+        }
+    }
+    
+    private double[] smooth(double[] d) throws Exception
+    {
+        double[] d2 = SmoothPopulation.smooth(d);
+        if (differ(Util.sum(d), Util.sum(d2)))
+            throw new Exception("Smoothing error");
+        return d2;
     }
 }

@@ -16,6 +16,8 @@ import data.selectors.Locality;
 public class Forward_1926_1937
 {
     private static final int MAX_AGE = Population.MAX_AGE;
+    
+    public final boolean DoSmoothPopulation = true;
 
     private CombinedMortalityTable mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
     private CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");

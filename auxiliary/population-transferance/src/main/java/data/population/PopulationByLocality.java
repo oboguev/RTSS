@@ -209,4 +209,26 @@ public class PopulationByLocality
     {
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
+
+    /****************************************************************************************************/
+    
+    public PopulationByLocality smooth(boolean doSmooth) throws Exception
+    {
+        PopulationByLocality p = clone();
+
+        if (doSmooth)
+        {
+            p.rural.smooth();
+            p.urban.smooth();
+            p.recalcTotal();
+            validate();
+        }
+
+        return p;
+    }
+
+    public double[] toArray(Locality locality, Gender gender) throws Exception
+    {
+        return forLocality(locality).toArray(gender);
+    }
 }
