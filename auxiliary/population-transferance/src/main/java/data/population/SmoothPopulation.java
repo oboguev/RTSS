@@ -23,7 +23,7 @@ public class SmoothPopulation
                 boolean is10 = false;
                 double excess5;
                 
-                if (k + 2 < d.length)
+                if (k + 2 >= d.length)
                     break;
 
                 if (k >= 30 && (k % 10) == 0 && k + 3 < d.length)
@@ -37,22 +37,28 @@ public class SmoothPopulation
                 if (is10 && excess10 > excess5)
                 {
                     double excess = excess10;
-                    d[k] -= excess * (6.0/7.0);
-                    d[k-3] += excess / 7;
-                    d[k-2] += excess / 7;
-                    d[k-1] += excess / 7;
-                    d[k+1] += excess / 7;
-                    d[k+2] += excess / 7;
-                    d[k+3] += excess / 7;
+                    if (excess > 0)
+                    {
+                        d[k] -= excess * (6.0/7.0);
+                        d[k-3] += excess / 7;
+                        d[k-2] += excess / 7;
+                        d[k-1] += excess / 7;
+                        d[k+1] += excess / 7;
+                        d[k+2] += excess / 7;
+                        d[k+3] += excess / 7;
+                    }
                 } 
                 else
                 {
                     double excess = excess5;
-                    d[k] -= excess * (4.0/5.0);
-                    d[k-2] += excess / 5;
-                    d[k-1] += excess / 5;
-                    d[k+1] += excess / 5;
-                    d[k+2] += excess / 5;
+                    if (excess > 0)
+                    {
+                        d[k] -= excess * (4.0/5.0);
+                        d[k-2] += excess / 5;
+                        d[k-1] += excess / 5;
+                        d[k+1] += excess / 5;
+                        d[k+2] += excess / 5;
+                    }
                 }
             }
         }

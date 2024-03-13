@@ -2,6 +2,9 @@ package my;
 
 import data.mortality.CombinedMortalityTable;
 import data.population.PopulationByLocality;
+import data.population.SmoothPopulation;
+import data.selectors.Gender;
+import data.selectors.Locality;
 
 public class Main
 {
@@ -10,6 +13,7 @@ public class Main
         try
         {
             Main m = new Main();
+            // m.testPopulationSmoother();
             m.do_main();
         }
         catch (Exception ex)
@@ -45,5 +49,21 @@ public class Main
         PopulationByLocality.load("population_data/USSR/1926");
         PopulationByLocality.load("population_data/RSFSR/1926");
         PopulationByLocality.load("population_data/USSR/1937");
+    }
+    
+    @SuppressWarnings("unused")
+    private void testPopulationSmoother() throws Exception
+    {
+        PopulationByLocality p = PopulationByLocality.load("population_data/USSR/1926");
+        double[] d0 = p.toArray(Locality.RURAL, Gender.MALE);
+        double[] d1 = SmoothPopulation.smooth(d0, "A");
+        double[] d2 = SmoothPopulation.smooth(d0, "AB");
+        double[] d3 = SmoothPopulation.smooth(d0, "ABC");
+        for (int k = 0; k < d0.length; k++)
+        {
+            Util.out(String.format("%d,%f,%f,%f,%f", k, d0[k], d1[k], d2[k], d3[k]));
+        }
+        
+        Util.out("****************************");
     }
 }
