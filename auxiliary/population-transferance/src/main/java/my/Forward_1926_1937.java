@@ -101,12 +101,12 @@ public class Forward_1926_1937
     /*****************************************************************************************/
 
     /*
-     * Оценить долю городского населения во всём населении  
+     * Оценить долю городского населения во всём населении (для указанного пола) 
      */
     private double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
     {
-        double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
         double urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
+        double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
         return urban / total;
     }
 
@@ -143,8 +143,8 @@ public class Forward_1926_1937
      * Продвижка населения во времени на целый год или на часть года.
      * Начальное население (@p) и таблица смертности (@mt) неизменны. 
      * Результат возвращается как новая структура.
-     * При продвижке на целый год, @yfraction = 1.0.
-     * При продвижке на часть года, @yfraction < 1.0.
+     * При продвижке на целый год @yfraction = 1.0.
+     * При продвижке на часть года @yfraction < 1.0.
      */
     public PopulationByLocality forward(final PopulationByLocality p,
                                         final CombinedMortalityTable mt,
