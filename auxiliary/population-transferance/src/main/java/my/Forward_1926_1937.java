@@ -25,15 +25,21 @@ public class Forward_1926_1937
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
 
-    private final double BirthRate = 44.0; // for the whole USSR in 1926 ### use separate rural/urban
-    private final double MaleFemaleBirthRatio = 1.05;
+    private double BirthRateRural;
+    private double BirthRateUrban;
+    private final double MaleFemaleBirthRatio = 1.06;
 
     public Forward_1926_1937() throws Exception
     {
     }
 
-    public void transfer() throws Exception
+    public void forward() throws Exception
     {
+        /*
+         * Вычислить рождаемость городского и сельского населения в 1926 году 
+         */
+        calcBirthRates();
+        
         /*
          * Вычислить оценку доли городского населения для каждого года между 1926 и 1936
          * посредством интерполяции между переписями декабря 1926 и января 1937 гг. 
@@ -167,8 +173,16 @@ public class Forward_1926_1937
         forward(pto, p, locality, Gender.FEMALE, mt, yfraction);
 
         /* добавить рождения */
+        double birthRate;
+        switch (locality)
+        {
+        case RURAL:     birthRate = BirthRateRural; break;
+        case URBAN:     birthRate = BirthRateUrban; break;
+        default:        throw new Exception("Invalid locality");
+        }
+        
         double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
-        double births = sum * yfraction * BirthRate / 1000;
+        double births = sum * yfraction * birthRate / 1000;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
@@ -396,5 +410,29 @@ public class Forward_1926_1937
         String s = String.format("%,10d (%7.2f%%)", Math.round(deficit), deficit_pct);
         sb.append(" ");
         sb.append(s);
+    }
+
+    /*****************************************************************************************/
+    
+    private void calcBirthRates() throws Exception
+    {
+        /*
+         * ЦСУ СССР, "Естественное движение населения Союза ССР в 1926 г.", т. 1, вып. 2, М. 1929 (стр. 39):
+         * рождаемость во всём СССР = 44.0
+         * в сельских местностях СССР = 46.1
+         */
+        final double BirthRateTotal = 44.0;
+        BirthRateRural = 46.1;
+        final double ruralPopulation = p1926.sum(Locality.RURAL, Gender.BOTH, 0, MAX_AGE);
+        final double urbanPopulation = p1926.sum(Locality.URBAN, Gender.BOTH, 0, MAX_AGE);
+        BirthRateUrban = (BirthRateTotal * (ruralPopulation + urbanPopulation) - BirthRateRural * ruralPopulation) / urbanPopulation;
+        
+        /*
+         * Результат вычисления: 
+         *    городское = 34.4   сельское = 46.1
+         *    
+         * ЦСУ СССР, "Статистический справочник СССР за 1928", М. 1929 (стр. 76-77) приводит для Европейской части СССР на 1927 год   
+         *    городское = 32.1   сельское = 45.5
+         */
     }
 }

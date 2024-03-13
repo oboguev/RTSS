@@ -25,7 +25,7 @@ public class Main
 
     private void do_main() throws Exception
     {
-        new Forward_1926_1937().transfer();
+        new Forward_1926_1937().forward();
     }
 
     @SuppressWarnings("unused")
