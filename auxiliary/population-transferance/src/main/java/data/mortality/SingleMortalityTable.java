@@ -67,8 +67,46 @@ public class SingleMortalityTable
             if (!m.containsKey(age))
                 throw new Exception("Mising entry in mortality table");
         }
+        
+        validate();
     }
     
+    public void validate() throws Exception
+    {
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            MortalityInfo mi = get(age);
+            check_eq(mi.px + mi.qх, 1.0);
+            if (Math.abs(Math.round(mi.lх * mi.qх) - mi.dх) > 2)
+                throw new Exception("Inconsistent mortality table");
+            if (age != MAX_AGE)
+            {
+                MortalityInfo mi2 = get(age + 1);
+                if (Math.abs(mi.lх - mi.dх - mi2.lх) > 2)
+                    throw new Exception("Inconsistent mortality table");
+            }
+        }
+    }
+    
+    private void check_eq(double a, double b) throws Exception
+    {
+        if (differ(a,b))
+        {
+            Util.err("Inconsistent mortality table");
+            // ###throw new Exception("Inconsistent mortality table");
+        }
+    }
+
+    private boolean differ(double a, double b)
+    {
+        return differ(a, b, 0.00001);
+    }
+
+    private boolean differ(double a, double b, double diff)
+    {
+        return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
+    }
+
     private int asInt(String s)
     {
         return Integer.parseInt(s.replace(",", ""));
