@@ -76,7 +76,7 @@ public class SingleMortalityTable
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
-            check_eq(mi.px + mi.qх, 1.0);
+            check_eq(mi.px + mi.qх, 1.0, 0.011);
             if (Math.abs(Math.round(mi.lх * mi.qх) - mi.dх) > 2)
                 throw new Exception("Inconsistent mortality table");
             if (age != MAX_AGE)
@@ -90,10 +90,14 @@ public class SingleMortalityTable
     
     private void check_eq(double a, double b) throws Exception
     {
-        if (differ(a,b))
+        check_eq(a, b, 0.00001);
+    }
+
+    private void check_eq(double a, double b, double diff) throws Exception
+    {
+        if (differ(a,b, diff))
         {
-            Util.err("Inconsistent mortality table");
-            // ###throw new Exception("Inconsistent mortality table");
+            throw new Exception("Inconsistent mortality table");
         }
     }
 

@@ -18,6 +18,7 @@ public class Forward_1926_1937
     private static final int MAX_AGE = Population.MAX_AGE;
 
     private CombinedMortalityTable mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
+    private CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
     private PopulationByLocality p1926 = PopulationByLocality.load("population_data/USSR/1926");
     private PopulationByLocality p1937_original = PopulationByLocality.load("population_data/USSR/1937");
     private PopulationByLocality p1937 = new Adjust_1937().adjust(p1937_original);
