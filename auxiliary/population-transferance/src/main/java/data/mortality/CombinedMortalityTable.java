@@ -65,7 +65,7 @@ public class CombinedMortalityTable
      *       1 selects @mt2
      *  ]0..1[ selects the value interpolated as (mt1 * (1 - weight) * mt1 + mt2 * weight)   
      */
-    public static CombinedMortalityTable intrpolate(CombinedMortalityTable mt1, CombinedMortalityTable mt2, double weight)  throws Exception
+    public static CombinedMortalityTable interpolate(CombinedMortalityTable mt1, CombinedMortalityTable mt2, double weight)  throws Exception
     {
         CombinedMortalityTable cmt = new CombinedMortalityTable();
         cmt.interpolate(Gender.BOTH, mt1, mt2, weight);

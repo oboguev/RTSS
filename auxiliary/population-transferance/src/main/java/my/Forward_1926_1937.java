@@ -34,7 +34,7 @@ public class Forward_1926_1937
     {
     }
 
-    public void forward() throws Exception
+    public void forward(boolean interpolateMortalityTable) throws Exception
     {
         /*
          * Вычислить рождаемость городского и сельского населения в 1926 году 
@@ -62,13 +62,18 @@ public class Forward_1926_1937
         /*
          * Продвижка населения для целых лет с декабря 1926 по декабрь 1936 
          */
+        CombinedMortalityTable mt = mt1926; 
         PopulationByLocality p = p1926;
         int year = 1926;
         double yfraction = 1.0;
         for (;;)
         {
             year++;
-            p = forward(p, mt1926, yfraction);
+            
+            if (interpolateMortalityTable)
+                mt = interpolateMortalityTable(year);
+            
+            p = forward(p, mt, yfraction);
 
             /*
              * Перераспределить население между городским и сельским, отражая урбанизацию 
@@ -88,7 +93,7 @@ public class Forward_1926_1937
         Date d1937 = df.parse("1937-01-06");
         long ndays = Duration.between(d1936.toInstant(), d1937.toInstant()).toDays();
         yfraction = ndays / 365.0;
-        p = forward(p, mt1926, yfraction);
+        p = forward(p, mt, yfraction);
 
         show_results(p);
     }
@@ -328,7 +333,7 @@ public class Forward_1926_1937
         Util.out("");
         Util.out(divider);
         Util.out("");
-        Util.out("Overall population shortfall:");
+        Util.out("Overall population shortfall:  (%%-age is relative to expected population)");
         Util.out("");
         show_shortfall_header();
         show_shortfall(p, 0, MAX_AGE);
@@ -435,5 +440,11 @@ public class Forward_1926_1937
          * ЦСУ СССР, "Статистический справочник СССР за 1928", М. 1929 (стр. 76-77) приводит для Европейской части СССР на 1927 год   
          *    городское = 32.1   сельское = 45.5
          */
+    }
+    
+    private CombinedMortalityTable interpolateMortalityTable(int year) throws Exception
+    {
+        double weight = ((double)year - 1926) / (1938 - 1926);
+        return CombinedMortalityTable.interpolate(mt1926, mt1938, weight);
     }
 }

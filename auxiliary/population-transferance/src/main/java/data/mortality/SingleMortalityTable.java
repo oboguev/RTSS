@@ -139,6 +139,9 @@ public class SingleMortalityTable
 
     private void do_interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
     {
+        if (weight < 0 || weight > 1)
+            throw new Exception("Incorrect interpolation weight");
+        
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi1 = mt1.get(age);
