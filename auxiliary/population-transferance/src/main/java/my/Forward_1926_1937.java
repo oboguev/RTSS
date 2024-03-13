@@ -305,20 +305,20 @@ public class Forward_1926_1937
          * Распечатать суммарные итоги
          */
         Util.out(String
-                .format("Population expected to survive from the end of 1926 till early 1937 and be of age 10+ in early 1937: %,d ",
+                .format("Population expected to survive from the end of 1926 till January 1937 and be of age 10+ in January 1937: %,d ",
                         Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
 
-        Util.out(String.format("Actual early 1937 population ages 10 years and older: %,d",
+        Util.out(String.format("Actual January 1937 population ages 10 years and older: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
         Util.out("");
-        Util.out(String.format("Actual early 1937 population all ages: %,d",
+        Util.out(String.format("Actual January 1937 population all ages: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
 
         Util.out("");
-        Util.out(String.format("Expected population ages 0-9 in early 1937: %,d",
+        Util.out(String.format("Expected population ages 0-9 in January 1937: %,d",
                                Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
 
-        Util.out(String.format("Actual population ages 0-9 in early 1937: %,d",
+        Util.out(String.format("Actual population ages 0-9 in January 1937: %,d",
                                Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
 
         /*
@@ -354,7 +354,7 @@ public class Forward_1926_1937
     private void show_shortfall_header()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("     ");
+        sb.append("      ");
         sb.append("          TOTAL       ");
         sb.append("         TOTAL        ");
         sb.append("          RURAL       ");
