@@ -263,7 +263,7 @@ public class ForwardPopulation
         Util.out(sb.toString());
     }
     
-    private static final String COLUMN_DIVIDER = "   ‖ ";
+    private static final String COLUMN_DIVIDER = "  ‖ ";
 
     protected void show_shortfall(PopulationByLocality pExpected, PopulationByLocality pActual, int age1, int age2) throws Exception
     {
