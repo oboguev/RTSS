@@ -5,10 +5,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>RTSS</groupId>
-	<artifactId>PopulationTransferance</artifactId>
+	<artifactId>PopulationTimeProgression</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>PopulationTransferance</name>
-	<description>PopulationTransferance</description>
+	<name>PopulationTimeProgression</name>
+	<description>PopulationTimeProgression</description>
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
