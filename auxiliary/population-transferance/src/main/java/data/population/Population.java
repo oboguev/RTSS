@@ -247,7 +247,7 @@ public class Population
                 throw new Exception("Invalid format of population table");
 
             String age = el[cols.age];
-            if (age.contains("Итого") || age.contains("-"))
+            if (age.toLowerCase().contains("итого") || age.contains("-"))
                 continue;
             if (age.equals("" + MAX_AGE + "+"))
                 age = "" + MAX_AGE;
@@ -267,7 +267,7 @@ public class Population
                 female_unknown = f;
                 both_unknown = b;
             }
-            else if (age.equals("total"))
+            else if (age.equals("total") || age.equals("всего") )
             {
                 male_total = m;
                 female_total = f;

@@ -1,4 +1,4 @@
-﻿# age, both, male, female
+﻿# age, both genders, male, female
 
 0                               1,743,055       884,410         858,645
 1                               1,581,726       800,173         781,553
