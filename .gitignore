@@ -18,7 +18,7 @@ auxiliary/rsfsr-ww2-losses/2-java/.classpath
 auxiliary/rsfsr-ww2-losses/2-java/.project
 auxiliary/rsfsr-ww2-losses/2-java/target
 #
-auxiliary/population-transferance/.settings/
-auxiliary/population-transferance/.classpath
-auxiliary/population-transferance/.project
-auxiliary/population-transferance/target
+auxiliary/population-time-progression/.settings/
+auxiliary/population-time-progression/.classpath
+auxiliary/population-time-progression/.project
+auxiliary/population-time-progression/target
