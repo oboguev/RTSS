@@ -186,8 +186,31 @@ public class Population
         p.do_load(path);
         return p;
     }
+    
+    public static class Columns
+    {
+        public int age = -1;
+        public int male = -1;
+        public int female = -1;
+        public int both = -1;
+        
+        public int ncolumns()
+        {
+            int nc = 0;
+            if (age != -1) nc++;
+            if (male != -1) nc++;
+            if (female != -1) nc++;
+            if (both != -1) nc++;
+            return nc;
+        }
+    }
 
     private void do_load(String path) throws Exception
+    {
+        do_load(path, null);
+    }
+    
+    private void do_load(String path, Columns cols) throws Exception
     {
         String rdata = Util.loadResource(path);
         rdata = rdata.replace("\r\n", "\n");
@@ -198,27 +221,43 @@ public class Population
 
             int k = line.indexOf('#');
             if (k != -1)
+            {
+                if (cols == null)
+                    cols = detectColumns(line.substring(k + 1));
                 line = line.substring(0, k);
+            }
             line = line.replace("\t", " ").replaceAll(" +", " ").trim();
             if (line.length() == 0)
                 continue;
+            
+            k = line.indexOf(":");
+            if (k != -1)
+            {
+                String s1 = line.substring(0, k);
+                String s2 = line.substring(k + 1);
+                line = s1.replace(" ", "_") + " " + s2;
+            }
+            
+            if (cols == null)
+                throw new Exception("Unidentified format of population table file");
 
             String[] el = line.split(" ");
-            if (el.length != 3 && el.length != 4)
+            el = removeEmpty(el);
+            if (el.length != cols.ncolumns())
                 throw new Exception("Invalid format of population table");
 
-            String age = el[0];
+            String age = el[cols.age];
             if (age.contains("Итого") || age.contains("-"))
                 continue;
             if (age.equals("" + MAX_AGE + "+"))
                 age = "" + MAX_AGE;
 
-            int m = asInt(el[1]);
-            int f = asInt(el[2]);
+            int m = asInt(el[cols.male]);
+            int f = asInt(el[cols.female]);
             int b;
 
-            if (el.length == 4)
-                b = asInt(el[3]);
+            if (cols.both != -1)
+                b = asInt(el[cols.both]);
             else
                 b = m + f;
 
@@ -251,6 +290,67 @@ public class Population
 
         validate();
     }
+    
+    private Columns detectColumns(String line)
+    {
+        Columns cols = new Columns();
+        line = line.toLowerCase()
+                .trim()
+                .replace("both genders", "both")
+                .replace("both sexes", "both")
+                .replace(", ", ",")
+                .replace(",", " ");
+        String sa[] = line.split(" ");
+        Map<String, Integer> name2ix = new HashMap<>();
+        int k = 0;
+        for (String s : sa)
+        {
+            if (name2ix.containsKey(s))
+                return null;
+            name2ix.put(s,  k++);
+        }
+        
+        cols.age = columnIndex(name2ix, "age");
+        cols.male = columnIndex(name2ix, "male");
+        cols.female = columnIndex(name2ix, "female");
+        cols.both = columnIndex(name2ix, "both");
+        
+        if (cols.age >= 0 && cols.male >= 0 && cols.female >= 0)
+            return cols;
+        
+        return null;
+    }
+    
+    private int columnIndex(Map<String, Integer> name2ix, String name)
+    {
+        Integer ix = name2ix.get(name);
+        if (ix == null)
+            return -1;
+        else 
+            return ix;
+    }
+    
+    private String[] removeEmpty(String[] sa)
+    {
+        int n = 0;
+        for (String s : sa)
+        {
+            if (s.trim().length() != 0)
+                n++;
+        }
+        
+        String[] res = new String[n];
+        n = 0;
+        for (String s : sa)
+        {
+            if (s.trim().length() != 0)
+                res[n++] = s.trim();
+        }
+        
+        return res;
+    }
+    
+    /****************************************************************************************************/
 
     void validate() throws Exception
     {
