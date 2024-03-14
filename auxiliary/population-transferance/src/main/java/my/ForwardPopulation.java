@@ -1,8 +1,5 @@
 package my;
 
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,99 +10,18 @@ import data.population.PopulationByLocality;
 import data.selectors.Gender;
 import data.selectors.Locality;
 
-public class Forward_1926_1937
+public class ForwardPopulation
 {
-    private static final int MAX_AGE = Population.MAX_AGE;
-    
-    public final boolean DoSmoothPopulation = true;
+    protected static final int MAX_AGE = Population.MAX_AGE;
 
-    private CombinedMortalityTable mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
-    private CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
-    private PopulationByLocality p1926 = PopulationByLocality.load("population_data/USSR/1926").smooth(DoSmoothPopulation);
-    private PopulationByLocality p1937_original = PopulationByLocality.load("population_data/USSR/1937").smooth(DoSmoothPopulation);;
-    private PopulationByLocality p1937 = new Adjust_1937().adjust(p1937_original);
-
-    private Map<Integer, Double> urban_male_fraction_yyyy;
-    private Map<Integer, Double> urban_female_fraction_yyyy;
-
-    private double BirthRateRural;
-    private double BirthRateUrban;
-    private final double MaleFemaleBirthRatio = 1.06;
-
-    public Forward_1926_1937() throws Exception
-    {
-    }
-
-    public void forward(boolean interpolateMortalityTable) throws Exception
-    {
-        /*
-         * Вычислить рождаемость городского и сельского населения в 1926 году 
-         */
-        calcBirthRates();
-        
-        /*
-         * Вычислить оценку доли городского населения для каждого года между 1926 и 1936
-         * посредством интерполяции между переписями декабря 1926 и января 1937 гг. 
-         * 
-         * перепись 1926 года была 1926-12-17
-         * перепись 1937 года была 1937-01-06, почти в конце 1936 
-         */
-        double urban_female_fraction_1926 = urban_fraction(p1926, Gender.FEMALE);
-        double urban_female_fraction_1936 = urban_fraction(p1937, Gender.FEMALE);
-
-        double urban_male_fraction_1926 = urban_fraction(p1926, Gender.MALE);
-        double urban_male_fraction_1936 = urban_fraction(p1937, Gender.MALE);
-
-        urban_male_fraction_yyyy = interpolate_linear(1926, urban_male_fraction_1926, 1936,
-                                                      urban_male_fraction_1936);
-        urban_female_fraction_yyyy = interpolate_linear(1926, urban_female_fraction_1926, 1936,
-                                                        urban_female_fraction_1936);
-
-        /*
-         * Продвижка населения для целых лет с декабря 1926 по декабрь 1936 
-         */
-        CombinedMortalityTable mt = mt1926; 
-        PopulationByLocality p = p1926;
-        int year = 1926;
-        double yfraction = 1.0;
-        for (;;)
-        {
-            year++;
-            
-            if (interpolateMortalityTable)
-                mt = interpolateMortalityTable(year);
-            
-            p = forward(p, mt, yfraction);
-
-            /*
-             * Перераспределить население между городским и сельским, отражая урбанизацию 
-             */
-            p = urbanize(p, Gender.MALE, urban_male_fraction_yyyy.get(year));
-            p = urbanize(p, Gender.FEMALE, urban_female_fraction_yyyy.get(year));
-
-            if (year == 1936)
-                break;
-        }
-
-        /*
-         * Продвижка населения для части года (с 17 декабря 1926 по 6 января 1937)
-         */
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        Date d1936 = df.parse("1936-12-17");
-        Date d1937 = df.parse("1937-01-06");
-        long ndays = Duration.between(d1936.toInstant(), d1937.toInstant()).toDays();
-        yfraction = ndays / 365.0;
-        p = forward(p, mt, yfraction);
-
-        show_results(p);
-    }
-
-    /*****************************************************************************************/
+    protected double BirthRateRural;
+    protected double BirthRateUrban;
+    protected final double MaleFemaleBirthRatio = 1.06;
 
     /*
      * Оценить долю городского населения во всём населении (для указанного пола) 
      */
-    private double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
+    protected double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
     {
         double urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
         double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
@@ -115,7 +31,7 @@ public class Forward_1926_1937
     /*
      * Линейная интерполяция между двумя точками
      */
-    private Map<Integer, Double> interpolate_linear(int y1, double v1, int y2, double v2)
+    protected Map<Integer, Double> interpolate_linear(int y1, double v1, int y2, double v2)
             throws Exception
     {
         Map<Integer, Double> m = new HashMap<>();
@@ -294,78 +210,19 @@ public class Forward_1926_1937
 
     /*****************************************************************************************/
 
-    private boolean differ(double a, double b)
+    protected boolean differ(double a, double b)
     {
         return differ(a, b, 0.00001);
     }
 
-    private boolean differ(double a, double b, double diff)
+    protected boolean differ(double a, double b, double diff)
     {
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
 
     /*****************************************************************************************/
 
-    private void show_results(PopulationByLocality p) throws Exception
-    {
-        /*
-         * Распечатать суммарные итоги
-         */
-        Util.out(String
-                .format("Ожидаемое население доживающеее от декабря 1926 до января 1937, в возрасте 10+ на январь 1937: %,d ",
-                        Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
-
-        Util.out(String.format("Фактическое население в январе 1937 в возрасте 10 и старше: %,d",
-                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 10, MAX_AGE))));
-        Util.out("");
-        Util.out(String.format("Фактическое население в январе 1937 всех возрастов: %,d",
-                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE))));
-
-        Util.out("");
-        Util.out(String.format("Ожидаемое население в январе 1937 в возрасте 0-9: %,d",
-                               Math.round(p.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
-
-        Util.out(String.format("Фактическое население в январе 1937 в возрасте 0-9: %,d",
-                               Math.round(p1937.sum(Locality.TOTAL, Gender.BOTH, 0, 9))));
-
-        /*
-         * Display overall shortall
-         */
-        String divider = "............................................................................................................";
-        divider += divider;
-        Util.out("");
-        Util.out(divider);
-        Util.out("");
-        Util.out("Общий дефицит населения (%-ты указаны относительно ожидаемого населения):");
-        Util.out("");
-        show_shortfall_header();
-        show_shortfall(p, 0, MAX_AGE);
-        show_shortfall(p, 0, 9);
-        show_shortfall(p, 10, MAX_AGE);
-
-        /*
-         * Display shortall by age groups
-         */
-        Util.out("");
-        Util.out(divider);
-        Util.out("");
-        Util.out("Дефицит населения по возрастным группам:");
-        Util.out("");
-        show_shortfall_header();
-        int lc = 0;
-        for (int age = 0; age + 5 <= MAX_AGE; age += 5)
-        {
-            if (lc++ == 4)
-            {
-                Util.out("");
-                lc = 1;
-            }
-            show_shortfall(p, age, age + 4);
-        }
-        show_shortfall(p, MAX_AGE, MAX_AGE);
-    }
-
-    private void show_shortfall_header()
+    protected void show_shortfall_header()
     {
         StringBuilder sb = new StringBuilder();
         sb.append("       ");
@@ -408,7 +265,7 @@ public class Forward_1926_1937
     
     private static final String COLUMN_DIVIDER = "   ‖ ";
 
-    private void show_shortfall(PopulationByLocality p, int age1, int age2) throws Exception
+    protected void show_shortfall(PopulationByLocality pExpected, PopulationByLocality pActual, int age1, int age2) throws Exception
     {
         String s = String.format("%d-%d", age1, age2);
         if (age1 == age2 & age1 == MAX_AGE)
@@ -417,67 +274,38 @@ public class Forward_1926_1937
         StringBuilder sb = new StringBuilder(s);
 
         sb.append(COLUMN_DIVIDER);
-        show_shortfall(sb, p, Locality.TOTAL, Gender.MALE, age1, age2, "");
-        show_shortfall(sb, p, Locality.TOTAL, Gender.FEMALE, age1, age2, " ");
-        show_shortfall(sb, p, Locality.TOTAL, Gender.BOTH, age1, age2, " ");
+        show_shortfall(sb, pExpected, pActual, Locality.TOTAL, Gender.MALE, age1, age2, "");
+        show_shortfall(sb, pExpected, pActual, Locality.TOTAL, Gender.FEMALE, age1, age2, " ");
+        show_shortfall(sb, pExpected, pActual, Locality.TOTAL, Gender.BOTH, age1, age2, " ");
 
         sb.append(COLUMN_DIVIDER);
-        show_shortfall(sb, p, Locality.RURAL, Gender.MALE, age1, age2, "");
-        show_shortfall(sb, p, Locality.RURAL, Gender.FEMALE, age1, age2, " ");
-        show_shortfall(sb, p, Locality.RURAL, Gender.BOTH, age1, age2, " ");
+        show_shortfall(sb, pExpected, pActual, Locality.RURAL, Gender.MALE, age1, age2, "");
+        show_shortfall(sb, pExpected, pActual, Locality.RURAL, Gender.FEMALE, age1, age2, " ");
+        show_shortfall(sb, pExpected, pActual, Locality.RURAL, Gender.BOTH, age1, age2, " ");
         
         sb.append(COLUMN_DIVIDER);
-        show_shortfall(sb, p, Locality.URBAN, Gender.MALE, age1, age2, "");
-        show_shortfall(sb, p, Locality.URBAN, Gender.FEMALE, age1, age2, " ");
-        show_shortfall(sb, p, Locality.URBAN, Gender.BOTH, age1, age2, " ");
+        show_shortfall(sb, pExpected, pActual, Locality.URBAN, Gender.MALE, age1, age2, "");
+        show_shortfall(sb, pExpected, pActual, Locality.URBAN, Gender.FEMALE, age1, age2, " ");
+        show_shortfall(sb, pExpected, pActual, Locality.URBAN, Gender.BOTH, age1, age2, " ");
 
         Util.out(sb.toString());
     }
 
-    private void show_shortfall(StringBuilder sb,
-                                PopulationByLocality p,
+    protected void show_shortfall(StringBuilder sb,
+                                PopulationByLocality pExpected,
+                                PopulationByLocality pActual,
                                 Locality locality,
                                 Gender gender,
                                 int age1, int age2,
                                 String prefix)
             throws Exception
     {
-        double expected = p.sum(locality, gender, age1, age2);
-        double actual = p1937.sum(locality, gender, age1, age2);
+        double expected = pExpected.sum(locality, gender, age1, age2);
+        double actual = pActual.sum(locality, gender, age1, age2);
         double deficit = expected - actual;
         double deficit_pct = 100 * deficit / expected;
         String s = String.format("%,10d (%7.2f%%)", Math.round(deficit), deficit_pct);
         sb.append(prefix);
         sb.append(s);
-    }
-
-    /*****************************************************************************************/
-    
-    private void calcBirthRates() throws Exception
-    {
-        /*
-         * ЦСУ СССР, "Естественное движение населения Союза ССР в 1926 г.", т. 1, вып. 2, М. 1929 (стр. 39):
-         * рождаемость во всём СССР = 44.0
-         * в сельских местностях СССР = 46.1
-         */
-        final double BirthRateTotal = 44.0;
-        BirthRateRural = 46.1;
-        final double ruralPopulation = p1926.sum(Locality.RURAL, Gender.BOTH, 0, MAX_AGE);
-        final double urbanPopulation = p1926.sum(Locality.URBAN, Gender.BOTH, 0, MAX_AGE);
-        BirthRateUrban = (BirthRateTotal * (ruralPopulation + urbanPopulation) - BirthRateRural * ruralPopulation) / urbanPopulation;
-        
-        /*
-         * Результат вычисления: 
-         *    городское = 34.4   сельское = 46.1
-         *    
-         * ЦСУ СССР, "Статистический справочник СССР за 1928", М. 1929 (стр. 76-77) приводит для Европейской части СССР на 1927 год   
-         *    городское = 32.1   сельское = 45.5
-         */
-    }
-    
-    private CombinedMortalityTable interpolateMortalityTable(int year) throws Exception
-    {
-        double weight = ((double)year - 1926) / (1938 - 1926);
-        return CombinedMortalityTable.interpolate(mt1926, mt1938, weight);
     }
 }

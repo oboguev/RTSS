@@ -31,13 +31,13 @@ public class Main
     {
         Util.out("Вариант 1: с таблицей смертности 1926-27 гг.");
         Util.out("");
-        new Forward_1926_1937().forward(false);
+        new ForwardPopulation_1926_1937().forward(false);
         Util.out("");
         Util.out("========================================================================================================");
         Util.out("");
         Util.out("Вариант 2: погодовая интерполяция таблицы смертности между таблицами 1926-27 и 1938-39 гг.");
         Util.out("");
-        new Forward_1926_1937().forward(true);
+        new ForwardPopulation_1926_1937().forward(true);
     }
 
     @SuppressWarnings("unused")
