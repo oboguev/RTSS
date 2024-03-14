@@ -186,21 +186,25 @@ public class Population
         p.do_load(path);
         return p;
     }
-    
+
     public static class Columns
     {
         public int age = -1;
         public int male = -1;
         public int female = -1;
         public int both = -1;
-        
+
         public int ncolumns()
         {
             int nc = 0;
-            if (age != -1) nc++;
-            if (male != -1) nc++;
-            if (female != -1) nc++;
-            if (both != -1) nc++;
+            if (age != -1)
+                nc++;
+            if (male != -1)
+                nc++;
+            if (female != -1)
+                nc++;
+            if (both != -1)
+                nc++;
             return nc;
         }
     }
@@ -209,7 +213,7 @@ public class Population
     {
         do_load(path, null);
     }
-    
+
     private void do_load(String path, Columns cols) throws Exception
     {
         String rdata = Util.loadResource(path);
@@ -229,7 +233,7 @@ public class Population
             line = line.replace("\t", " ").replaceAll(" +", " ").trim();
             if (line.length() == 0)
                 continue;
-            
+
             k = line.indexOf(":");
             if (k != -1)
             {
@@ -237,7 +241,7 @@ public class Population
                 String s2 = line.substring(k + 1);
                 line = s1.replace(" ", "_") + " " + s2;
             }
-            
+
             if (cols == null)
                 throw new Exception("Unidentified format of population table file");
 
@@ -267,7 +271,7 @@ public class Population
                 female_unknown = f;
                 both_unknown = b;
             }
-            else if (age.equals("total") || age.equals("всего") )
+            else if (age.equals("total") || age.equals("всего"))
             {
                 male_total = m;
                 female_total = f;
@@ -290,7 +294,7 @@ public class Population
 
         validate();
     }
-    
+
     private Columns detectColumns(String line)
     {
         Columns cols = new Columns();
@@ -307,29 +311,29 @@ public class Population
         {
             if (name2ix.containsKey(s))
                 return null;
-            name2ix.put(s,  k++);
+            name2ix.put(s, k++);
         }
-        
+
         cols.age = columnIndex(name2ix, "age");
         cols.male = columnIndex(name2ix, "male");
         cols.female = columnIndex(name2ix, "female");
         cols.both = columnIndex(name2ix, "both");
-        
+
         if (cols.age >= 0 && cols.male >= 0 && cols.female >= 0)
             return cols;
-        
+
         return null;
     }
-    
+
     private int columnIndex(Map<String, Integer> name2ix, String name)
     {
         Integer ix = name2ix.get(name);
         if (ix == null)
             return -1;
-        else 
+        else
             return ix;
     }
-    
+
     private String[] removeEmpty(String[] sa)
     {
         int n = 0;
@@ -338,7 +342,7 @@ public class Population
             if (s.trim().length() != 0)
                 n++;
         }
-        
+
         String[] res = new String[n];
         n = 0;
         for (String s : sa)
@@ -346,10 +350,10 @@ public class Population
             if (s.trim().length() != 0)
                 res[n++] = s.trim();
         }
-        
+
         return res;
     }
-    
+
     /****************************************************************************************************/
 
     void validate() throws Exception
@@ -367,6 +371,9 @@ public class Population
             double f = female.get(age);
             double b = both.get(age);
 
+            if (m < 0 || f < 0 || b < 0)
+                negative();
+
             if (differ(m + f, b))
                 mismatch();
 
@@ -374,6 +381,9 @@ public class Population
             sum_f += f;
             sum_b += b;
         }
+
+        if (male_unknown < 0 || female_unknown < 0 || both_unknown < 0)
+            negative();
 
         if (male_total == 0)
             male_total = sum_m + male_unknown;
@@ -383,6 +393,9 @@ public class Population
 
         if (both_total == 0)
             both_total = sum_b + both_unknown;
+
+        if (male_total < 0 || female_total < 0 || both_total < 0)
+            negative();
 
         if (differ(male_total + female_total, both_total))
             mismatch();
@@ -421,6 +434,11 @@ public class Population
         throw new Exception("Mismatching data in population table");
     }
 
+    private void negative() throws Exception
+    {
+        throw new Exception("Negative counts in population table");
+    }
+
     private int asInt(String s)
     {
         return Integer.parseInt(s.replace(",", ""));
@@ -437,21 +455,21 @@ public class Population
     }
 
     /****************************************************************************************************/
-    
+
     public void smooth() throws Exception
     {
         double[] d;
-        
+
         d = toArray(Gender.MALE);
         fromArray(Gender.MALE, smooth(d));
-        
+
         d = toArray(Gender.FEMALE);
         fromArray(Gender.FEMALE, smooth(d));
 
         makeBoth();
         validate();
     }
-    
+
     public double[] toArray(Gender gender) throws Exception
     {
         int maxage = -1;
@@ -460,9 +478,9 @@ public class Population
         {
             maxage = Math.max(age, maxage);
         }
-        
+
         double d[] = new double[maxage + 1];
-        
+
         for (int age = 0; age <= maxage; age++)
         {
             Double v = m.get(age);
@@ -470,17 +488,17 @@ public class Population
                 throw new Exception("Missing data");
             d[age] = v;
         }
-        
+
         return d;
     }
 
     public void fromArray(Gender gender, double[] d) throws Exception
     {
         Map<Integer, Double> m = new HashMap<>();
-        
+
         for (int age = 0; age <= d.length - 1; age++)
             m.put(age, d[age]);
-        
+
         // TODO: collapse anything beyond MAX_AGE into MAX_AGE
 
         switch (gender)
@@ -494,17 +512,17 @@ public class Population
             female = m;
             female_total = Util.sum(d) + female_unknown;
             break;
-        
+
         case BOTH:
             both = m;
             both_total = Util.sum(d) + both_unknown;
             break;
-        
+
         default:
             throw new Exception("Incorrect gender");
         }
     }
-    
+
     private double[] smooth(double[] d) throws Exception
     {
         double[] d2 = SmoothPopulation.smooth(d);
