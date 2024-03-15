@@ -1,10 +1,11 @@
-package my;
+package rtss.forward_1926_193x;
 
-import data.mortality.CombinedMortalityTable;
-import data.population.PopulationByLocality;
-import data.population.SmoothPopulation;
-import data.selectors.Gender;
-import data.selectors.Locality;
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.population.PopulationByLocality;
+import rtss.data.population.SmoothPopulation;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 public class Main
 {

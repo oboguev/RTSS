@@ -1,9 +1,9 @@
-package data.mortality;
+package rtss.data.mortality;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import my.Util;
+import rtss.util.Util;
 
 public class SingleMortalityTable
 {

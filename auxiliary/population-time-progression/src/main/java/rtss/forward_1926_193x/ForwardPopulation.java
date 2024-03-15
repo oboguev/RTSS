@@ -1,14 +1,15 @@
-package my;
+package rtss.forward_1926_193x;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import data.mortality.CombinedMortalityTable;
-import data.mortality.MortalityInfo;
-import data.population.Population;
-import data.population.PopulationByLocality;
-import data.selectors.Gender;
-import data.selectors.Locality;
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.MortalityInfo;
+import rtss.data.population.Population;
+import rtss.data.population.PopulationByLocality;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 public class ForwardPopulation
 {

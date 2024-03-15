@@ -1,4 +1,4 @@
-package data.selectors;
+package rtss.data.selectors;
 
 public enum Locality
 {

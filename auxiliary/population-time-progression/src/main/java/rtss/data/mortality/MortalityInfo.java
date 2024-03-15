@@ -1,4 +1,4 @@
-package data.mortality;
+package rtss.data.mortality;
 
 public class MortalityInfo
 {

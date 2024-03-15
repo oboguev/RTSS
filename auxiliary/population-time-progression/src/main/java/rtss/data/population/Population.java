@@ -1,11 +1,11 @@
-package data.population;
+package rtss.data.population;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import data.selectors.Gender;
-import data.selectors.Locality;
-import my.Util;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /**
  * Holds male, female and both-genders populations by age

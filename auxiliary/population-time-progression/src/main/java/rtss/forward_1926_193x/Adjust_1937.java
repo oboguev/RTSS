@@ -1,8 +1,8 @@
-package my;
+package rtss.forward_1926_193x;
 
-import data.population.PopulationByLocality;
-import data.selectors.Gender;
-import data.selectors.Locality;
+import rtss.data.population.PopulationByLocality;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 
 /* ***************************************************************
 

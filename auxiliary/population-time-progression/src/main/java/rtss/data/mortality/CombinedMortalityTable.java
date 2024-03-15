@@ -1,10 +1,10 @@
-package data.mortality;
+package rtss.data.mortality;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import data.selectors.Gender;
-import data.selectors.Locality;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 
 public class CombinedMortalityTable
 {

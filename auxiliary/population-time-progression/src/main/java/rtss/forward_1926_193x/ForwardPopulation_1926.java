@@ -1,9 +1,9 @@
-package my;
+package rtss.forward_1926_193x;
 
-import data.mortality.CombinedMortalityTable;
-import data.population.PopulationByLocality;
-import data.selectors.Gender;
-import data.selectors.Locality;
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.population.PopulationByLocality;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 
 public class ForwardPopulation_1926 extends ForwardPopulation
 {

@@ -1,4 +1,4 @@
-package data.population;
+package rtss.data.population;
 
 public class SmoothPopulation
 {

@@ -1,4 +1,4 @@
-package my;
+package rtss.util;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;

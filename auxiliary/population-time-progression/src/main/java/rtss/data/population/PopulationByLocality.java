@@ -1,8 +1,8 @@
-package data.population;
+package rtss.data.population;
 
-import data.selectors.Gender;
-import data.selectors.Locality;
-import my.Util;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /**
  * Holds populations by type of locality: rural, urban, total (rural + urban)

@@ -1,14 +1,15 @@
-package my;
+package rtss.forward_1926_193x;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 
-import data.mortality.CombinedMortalityTable;
-import data.population.PopulationByLocality;
-import data.selectors.Gender;
-import data.selectors.Locality;
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.population.PopulationByLocality;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
 {
