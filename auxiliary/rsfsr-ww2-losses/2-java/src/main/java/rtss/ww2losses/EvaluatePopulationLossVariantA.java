@@ -1,4 +1,4 @@
-package my;
+package rtss.ww2losses;
 
 public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
 {
@@ -23,7 +23,7 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
             
             double b2d = birthsDeficit / excessDeaths;
             
-            if (Math.abs(excessDeaths - ACTUAL_EXCESS_DEATHS) < 0.2)
+            if (Math.abs(excessDeaths - ACTUAL_EXCESS_DEATHS) < 0.05)
             {
                 print(false);
                 Util.out(String.format("Birth rate: %.2f", cbr));

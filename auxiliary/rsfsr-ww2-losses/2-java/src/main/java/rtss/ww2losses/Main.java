@@ -1,4 +1,4 @@
-package my;
+package rtss.ww2losses;
 
 import java.io.StringReader;
 import java.util.List;

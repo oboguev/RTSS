@@ -1,13 +1,14 @@
-package my;
+package rtss.ww2losses;
 
 public class RecombineRates extends EvaluatePopulationLossBase
 {
     public void evaluate() throws Exception
     {
-        eval("Variant 1 birth rate", 34.60, 14.15, 14.15, 14.15, 14.15, 14.15, 14.15, 14.15, 14.15, 26.00);
-        eval("Variant 1 death rate", 23.20, 48.26, 48.26, 48.26, 48.26, 48.26, 48.26, 48.26, 48.26, 12.30);
-        eval("Variant 2 birth rate", 34.60, 14.12, 14.12, 14.12, 14.12, 14.12, 14.12, 14.12, 14.12, 26.00);
-        eval("Variant 2 death rate", 23.20, 45.45, 45.45, 47.19, 47.19, 49.09, 49.09, 51.17, 51.17, 12.30);
+        eval("Variant 1 birth rate", 34.60, 13.39, 13.39, 13.39, 13.39, 13.39, 13.39, 13.39, 13.39, 26.00);
+        eval("Variant 1 death rate", 23.20, 47.50, 47.50, 47.50, 47.50, 47.50, 47.50, 47.50, 47.50, 12.30);
+        
+        eval("Variant 2 birth rate", 34.60, 13.35, 13.35, 13.35, 13.35, 13.35, 13.35, 13.35, 13.35, 26.00);
+        eval("Variant 2 death rate", 23.20, 44.72, 44.72, 46.44, 46.44, 48.32, 48.32, 50.37, 50.37, 12.30);
     }
     
     private void eval(String title, double... fa) throws Exception

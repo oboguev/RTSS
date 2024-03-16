@@ -1,4 +1,4 @@
-package my;
+package rtss.ww2losses;
 
 public class EvaluatePopulationLossVariantB extends EvaluatePopulationLossBase
 {
@@ -20,7 +20,7 @@ public class EvaluatePopulationLossVariantB extends EvaluatePopulationLossBase
             calcActual(cbr);
             double bd = birthsDeficit();
 
-            if (Math.abs(bd - ACTUAL_BIRTH_DEFICIT) < 0.2)
+            if (Math.abs(bd - ACTUAL_BIRTH_DEFICIT) < 0.05)
             {
                 print(true);
                 return;

@@ -1,4 +1,4 @@
-package my;
+package rtss.ww2losses;
 
 public abstract class EvaluatePopulationLossBase
 {
@@ -43,10 +43,10 @@ public abstract class EvaluatePopulationLossBase
     protected static final double ACTUAL_POPULATION_1945_MID = 96_601;
     
     /* target excess deaths and birth shortage */
-    protected static final double ACTUAL_EXCESS_DEATHS = 9_877;
-    protected static final double ACTUAL_BIRTH_DEFICIT = 9_658;
+    protected static final double ACTUAL_EXCESS_DEATHS = 9_555;
+    protected static final double ACTUAL_BIRTH_DEFICIT = 9_980;
     
-    /* birth and death rates in 1940*/
+    /* birth and death rates in 1940 */
     protected static final double CBR_1940 = 34.6;
     protected static final double CDR_1940 = 23.2;
    
