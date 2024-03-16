@@ -202,6 +202,18 @@ public class Util
         return yy;
     }
     
+    public static void print(String title, double[] y, int start_year)
+    {
+        Util.out(title);
+        Util.out("");
+        for (int x = 0; x < y.length; x++)
+        {
+            Util.out(String.format("%4d  %f", x + start_year, y[x]));
+        }
+        Util.out("-------- end of " + title + " -------- ");
+        Util.out("");
+    }
+    
     public static void noop()
     {
         // for debugging

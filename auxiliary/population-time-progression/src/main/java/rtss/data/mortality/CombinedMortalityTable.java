@@ -49,6 +49,11 @@ public class CombinedMortalityTable
         m.put(key(locality, gender), smt);
     }
 
+    public SingleMortalityTable getSingleTable(Locality locality, Gender gender) throws Exception
+    {
+        return m.get(key(locality, gender));
+    }
+
     private void loadTables(String path, Gender gender, Locality locality) throws Exception
     {
         String fng = gender.toString();

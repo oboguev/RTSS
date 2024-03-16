@@ -174,7 +174,29 @@ public class SingleMortalityTable
     
     /***********************************************************/
     
-    static SingleMortalityTable from_qx(String path, double[] qx) throws Exception
+    public double[] qx() throws Exception
+    {
+        double[] v = new double[MAX_AGE + 1];
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            v[age] = get(age).qx; 
+        }
+        return v;
+    }
+    
+    public double[] px() throws Exception
+    {
+        double[] v = new double[MAX_AGE + 1];
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            v[age] = get(age).px; 
+        }
+        return v;
+    }
+    
+    /***********************************************************/
+
+    public static SingleMortalityTable from_qx(String path, double[] qx) throws Exception
     {
         SingleMortalityTable smt = new SingleMortalityTable();
         smt.path = path;
@@ -206,6 +228,7 @@ public class SingleMortalityTable
             }
             
             mi.dx = (int) Math.round(mi.lx * mi.qx);
+            m.put(mi.x, mi);
             prev_mi = mi;
         }
         

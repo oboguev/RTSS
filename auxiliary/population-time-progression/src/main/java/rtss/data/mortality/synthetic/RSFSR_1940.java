@@ -6,6 +6,7 @@ import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.ChartXY;
 
 /*
  * Таблица смертности для РСФСР 1940 г.
@@ -116,6 +117,12 @@ public class RSFSR_1940 extends CombinedMortalityTable
         // ### make both: NB bins 0-4 are different from 0 and 1-4
         mt = null;
         m.put(key(Locality.TOTAL, Gender.BOTH), mt);
+        
+        // ###
+        Util.print("RSFSR 1940 qx", getSingleTable(Locality.TOTAL, Gender.MALE).qx(), 0);
+        new ChartXY("My Plot").display();
+        Util.noop();
+        // ###
     }
     
     private Bin makeBin(int age, double avg)
@@ -132,7 +139,6 @@ public class RSFSR_1940 extends CombinedMortalityTable
     {
         double[] curve = MakeCurve.curve(bins);
         curve = Util.divide(curve, 1000);
-        // ###
-        return null;
+        return SingleMortalityTable.from_qx("computed", curve);
     }
 }
