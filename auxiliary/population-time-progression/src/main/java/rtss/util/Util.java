@@ -184,6 +184,14 @@ public class Util
         return sum(y) / y.length;
     }
 
+    public static double[] divide(double[] y, double f)
+    {
+        double[] yy = new double[y.length];
+        for (int x = 0; x < y.length; x++)
+            yy[x] = y[x] / f;
+        return yy;
+    }
+
     public static double[] splice(double[] y, int yx1, int yx2)
     {
         double[] yy = new double[yx2 - yx1 + 1];

@@ -23,6 +23,8 @@ public class SingleMortalityTable
         return mi;
     }
     
+    /***********************************************************/
+
     public SingleMortalityTable(String path) throws Exception
     {
         load(path);
@@ -144,6 +146,8 @@ public class SingleMortalityTable
         return Double.parseDouble(s.replace(",", ""));
     }
     
+    /***********************************************************/
+
     static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
     {
         SingleMortalityTable smt = new SingleMortalityTable();
@@ -166,5 +170,45 @@ public class SingleMortalityTable
             mi.qx = 1.0 - mi.px;
             m.put(age,  mi);
         }
+    }
+    
+    /***********************************************************/
+    
+    static SingleMortalityTable from_qx(String path, double[] qx) throws Exception
+    {
+        SingleMortalityTable smt = new SingleMortalityTable();
+        smt.path = path;
+        smt.from_qx(qx);
+        return smt;
+    }
+    
+    private void from_qx(double[] qx) throws Exception
+    {
+        if (qx.length != MAX_AGE + 1)
+            throw new IllegalArgumentException("Incorrect qx length");
+        
+        MortalityInfo prev_mi = null;
+        
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            MortalityInfo mi = new MortalityInfo();
+            mi.x = age;
+            mi.qx = qx[age];
+            mi.px = 1 - mi.qx;
+            
+            if (age == 0)
+            {
+                mi.lx = 100_000;
+            }
+            else
+            {
+                mi.lx = prev_mi.lx - prev_mi.dx;
+            }
+            
+            mi.dx = (int) Math.round(mi.lx * mi.qx);
+            prev_mi = mi;
+        }
+        
+        validate();
     }
 }

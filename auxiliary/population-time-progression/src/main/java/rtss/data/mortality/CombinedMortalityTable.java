@@ -43,6 +43,11 @@ public class CombinedMortalityTable
     {
         return locality + "-" + gender;
     }
+    
+    protected void setTable(Locality locality, Gender gender, SingleMortalityTable smt)
+    {
+        m.put(key(locality, gender), smt);
+    }
 
     private void loadTables(String path, Gender gender, Locality locality) throws Exception
     {

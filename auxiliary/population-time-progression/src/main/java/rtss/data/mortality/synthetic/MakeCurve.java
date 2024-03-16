@@ -4,7 +4,7 @@ import rtss.data.bin.Bin;
 
 public class MakeCurve
 {
-    public double[] averages(Bin... bins)
+    public static double[] averages(Bin... bins)
     {
         double[] d = new double[Bin.widths_in_years(bins)];
         
@@ -19,7 +19,7 @@ public class MakeCurve
         return d;
     }
 
-    public double[] curve(Bin... bins)
+    public static double[] curve(Bin... bins)
     {
         // ###
         return averages(bins);
