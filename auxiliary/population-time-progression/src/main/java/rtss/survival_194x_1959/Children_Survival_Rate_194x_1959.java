@@ -2,6 +2,7 @@ package rtss.survival_194x_1959;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.mortality.synthetic.RSFSR_1940;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -101,6 +102,7 @@ public class Children_Survival_Rate_194x_1959
     
     final private CombinedMortalityTable mt1938_ussr = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
     final private CombinedMortalityTable mt1958_ussr = new CombinedMortalityTable("mortality_tables/USSR/1958-1959");
+    final private CombinedMortalityTable mt1940_rsfsr = new RSFSR_1940(); 
     final private CombinedMortalityTable mt1958_rsfsr = new CombinedMortalityTable("mortality_tables/RSFSR/1958-1959");
     
     private CombinedMortalityTable mt1942;

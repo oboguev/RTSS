@@ -132,6 +132,7 @@ public class PostProcess
         return yx2bin.get(yx);
     }
     
+    @SuppressWarnings("unused")
     private Bin year2bin(int year)
     {
         return yx2bin(yx(year));
