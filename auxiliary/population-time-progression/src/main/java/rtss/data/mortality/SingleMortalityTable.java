@@ -34,7 +34,9 @@ public class SingleMortalityTable
         
         String rdata = Util.loadResource(path);
         rdata = rdata.replace("\r\n", "\n");
-        for (String line : rdata.split("\n"))
+        String[] lines = rdata.split("\n");
+
+        for (String line : lines)
         {
             char unicode_feff = '\uFEFF';
             line = line.replace("" + unicode_feff, "");
@@ -64,7 +66,7 @@ public class SingleMortalityTable
                 throw new Exception("Invalid data in mortality table");
             
             if (m.containsKey(mi.x))
-                throw new Exception("Duplicate entries in mortality table");
+                throw new Exception("Duplicate entries in mortality table " + path + ", age = " + mi.x);
             
             m.put(mi.x, mi);
         }
@@ -86,15 +88,16 @@ public class SingleMortalityTable
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
-            check_eq("px+qx for age " + age, mi.px + mi.qx, 1.0, 0.011);
-            if (Util.False && Math.abs(Math.round(mi.lx * mi.qx) - mi.dx) > 2) // ###
-                throw new Exception("Inconsistent mortality table");
+            check_eq(String.format("px+qx for age %d px = %f, qx = %f", age, mi.px, mi.qx), 
+                     mi.px + mi.qx, 1.0, 0.011);
+            if (Math.abs(Math.round(mi.lx * mi.qx) - mi.dx) > 2)
+                inconsistent("lx * qx - dx for age " + age);
         
             if (age != MAX_AGE)
             {
                 MortalityInfo mi2 = get(age + 1);
-                if (Util.False && Math.abs(mi.lx - mi.dx - mi2.lx) > 2) // ###
-                    throw new Exception("Inconsistent mortality table");
+                if (Util.False && Math.abs(mi.lx - mi.dx - mi2.lx) > 2)
+                    inconsistent("lx - dx - lx_net for age " + age);
             }
         }
     }
@@ -115,9 +118,9 @@ public class SingleMortalityTable
     
     private void inconsistent(String what) throws Exception
     {
-        String msg = "Inconsistent mortality table: " + what + " in " + path;
-        // ### throw new Exception("Inconsistent mortality table");
-        Util.err(msg);
+        String msg = "Inconsistent mortality table in " + path + ": " + what;
+        // Util.err(msg);
+        throw new Exception(msg);
     }
 
     @SuppressWarnings("unused")
