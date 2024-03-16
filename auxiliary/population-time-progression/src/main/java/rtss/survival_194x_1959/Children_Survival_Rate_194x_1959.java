@@ -88,11 +88,17 @@ public class Children_Survival_Rate_194x_1959
         Util.out(String.format("%9s           %.2f", "среднее", Util.average(p)));
     }
     
-    final private CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
-    final private CombinedMortalityTable mt1958 = new CombinedMortalityTable("mortality_tables/USSR/1958-1959");
+    final private CombinedMortalityTable mt1938_ussr = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
+    final private CombinedMortalityTable mt1958_ussr = new CombinedMortalityTable("mortality_tables/USSR/1958-1959");
+    final private CombinedMortalityTable mt1958_rsfsr = new CombinedMortalityTable("mortality_tables/RSFSR/1958-1959");
+    private CombinedMortalityTable mt1938;
+    private CombinedMortalityTable mt1958;
   
     private double eval_survival_rate(int birth_year) throws Exception
     {
+        mt1938 = mt1938_ussr;
+        mt1958 = mt1958_ussr;
+
         double px = 1.0;
         
         for (int year = birth_year; year <= 1958; year++)

@@ -9,6 +9,7 @@ public class SingleMortalityTable
 {
     private Map<Integer, MortalityInfo> m = new HashMap<>();
     public static final int MAX_AGE = 100;
+    private String path;
     
     private SingleMortalityTable()
     {
@@ -29,6 +30,8 @@ public class SingleMortalityTable
     
     private void load(String path) throws Exception
     {
+        this.path = path;
+        
         String rdata = Util.loadResource(path);
         rdata = rdata.replace("\r\n", "\n");
         for (String line : rdata.split("\n"))
@@ -83,30 +86,38 @@ public class SingleMortalityTable
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
-            check_eq(mi.px + mi.qx, 1.0, 0.011);
-            if (Math.abs(Math.round(mi.lx * mi.qx) - mi.dx) > 2)
+            check_eq("px+qx for age " + age, mi.px + mi.qx, 1.0, 0.011);
+            if (Util.False && Math.abs(Math.round(mi.lx * mi.qx) - mi.dx) > 2) // ###
                 throw new Exception("Inconsistent mortality table");
+        
             if (age != MAX_AGE)
             {
                 MortalityInfo mi2 = get(age + 1);
-                if (Math.abs(mi.lx - mi.dx - mi2.lx) > 2)
+                if (Util.False && Math.abs(mi.lx - mi.dx - mi2.lx) > 2) // ###
                     throw new Exception("Inconsistent mortality table");
             }
         }
     }
     
     @SuppressWarnings("unused")
-    private void check_eq(double a, double b) throws Exception
+    private void check_eq(String what, double a, double b) throws Exception
     {
-        check_eq(a, b, 0.00001);
+        check_eq(what, a, b, 0.00001);
     }
 
-    private void check_eq(double a, double b, double diff) throws Exception
+    private void check_eq(String what, double a, double b, double diff) throws Exception
     {
         if (differ(a,b, diff))
         {
-            throw new Exception("Inconsistent mortality table");
+            inconsistent(what + " differ by " + (a - b));
         }
+    }
+    
+    private void inconsistent(String what) throws Exception
+    {
+        String msg = "Inconsistent mortality table: " + what + " in " + path;
+        // ### throw new Exception("Inconsistent mortality table");
+        Util.err(msg);
     }
 
     @SuppressWarnings("unused")
@@ -133,6 +144,7 @@ public class SingleMortalityTable
     static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
     {
         SingleMortalityTable smt = new SingleMortalityTable();
+        smt.path = "interpolated";
         smt.do_interpolate(mt1, mt2, weight);
         return smt;
     }

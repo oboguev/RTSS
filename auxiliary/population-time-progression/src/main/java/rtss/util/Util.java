@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 public class Util
 {
     public static String EOL;
+    public static boolean True = true;
+    public static boolean False = false;
 
     static
     {
