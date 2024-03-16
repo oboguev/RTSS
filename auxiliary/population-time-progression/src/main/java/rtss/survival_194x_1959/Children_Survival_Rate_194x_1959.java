@@ -103,19 +103,19 @@ public class Children_Survival_Rate_194x_1959
     final private CombinedMortalityTable mt1958_ussr = new CombinedMortalityTable("mortality_tables/USSR/1958-1959");
     final private CombinedMortalityTable mt1958_rsfsr = new CombinedMortalityTable("mortality_tables/RSFSR/1958-1959");
     
-    private CombinedMortalityTable mt1938;
+    private CombinedMortalityTable mt1942;
     private CombinedMortalityTable mt1958;
   
     private double eval_survival_rate(int birth_year, Area area) throws Exception
     {
         if (area == Area.USSR)
         {
-            mt1938 = mt1938_ussr;
+            mt1942 = mt1938_ussr;
             mt1958 = mt1958_ussr;
         }
         else if (area == Area.RSFSR)
         {
-            mt1938 = mt1938_ussr; // ###
+            mt1942 = mt1938_ussr; // ###
             mt1958 = mt1958_rsfsr;
         }
 
@@ -136,7 +136,7 @@ public class Children_Survival_Rate_194x_1959
     {
         if (year <= 1942)
         {
-            return mt1938;
+            return mt1942;
         }
         else if (year >= 1958)
         {
@@ -146,7 +146,7 @@ public class Children_Survival_Rate_194x_1959
         {
             // interpolate between mt1938 in 1942 and mt1958 in 1958
             double weight = ((double)year - 1942) / (1958 - 1942);
-            return CombinedMortalityTable.interpolate(mt1938, mt1958, weight);
+            return CombinedMortalityTable.interpolate(mt1942, mt1958, weight);
         }
     }
 }

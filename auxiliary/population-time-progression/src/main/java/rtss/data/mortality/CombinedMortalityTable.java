@@ -8,9 +8,9 @@ import rtss.data.selectors.Locality;
 
 public class CombinedMortalityTable
 {
-    private Map<String, SingleMortalityTable> m = new HashMap<>();
+    protected Map<String, SingleMortalityTable> m = new HashMap<>();
     
-    private CombinedMortalityTable()
+    protected CombinedMortalityTable()
     {
     }
     
@@ -39,7 +39,7 @@ public class CombinedMortalityTable
         loadTables(path, gender, Locality.URBAN);
     }
     
-    private String key(Locality locality, Gender gender)
+    protected String key(Locality locality, Gender gender)
     {
         return locality + "-" + gender;
     }
