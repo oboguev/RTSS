@@ -177,6 +177,11 @@ public class Util
         return sum;
     }
     
+    public static double average(double[] y)
+    {
+        return sum(y) / y.length;
+    }
+
     public static double[] splice(double[] y, int yx1, int yx2)
     {
         double[] yy = new double[yx2 - yx1 + 1];
