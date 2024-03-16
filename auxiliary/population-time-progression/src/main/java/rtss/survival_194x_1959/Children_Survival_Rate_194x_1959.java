@@ -2,6 +2,7 @@ package rtss.survival_194x_1959;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -71,9 +72,19 @@ public class Children_Survival_Rate_194x_1959
 
     private void do_main() throws Exception
     {
+        eval_survival(Area.USSR);
+        Util.out("");
+        Util.out("===============================================================");
+        Util.out("");
+        eval_survival(Area.RSFSR);
+    }
+    
+    private void eval_survival(Area area) throws Exception
+    {
         double[] p = new double[4];
         
         Util.out("Вероятность детей родившихся в июне 1941 - мае 1945 гг. дожить до переписи 15 января 1959 года, если бы не было войны:");
+        Util.out("для " + area);
         Util.out("");
 
         Util.out("год войны  вероятность доживания до 1959");
@@ -81,7 +92,7 @@ public class Children_Survival_Rate_194x_1959
         for (int war_year = 1; war_year <= 4;  war_year ++)
         {
             int birth_year = 1941 + war_year;
-            double px = eval_survival_rate(birth_year);
+            double px = eval_survival_rate(birth_year, area);
             Util.out(String.format("%9d           %.2f", war_year, px));
             p[war_year - 1] = px;
         }
@@ -94,10 +105,18 @@ public class Children_Survival_Rate_194x_1959
     private CombinedMortalityTable mt1938;
     private CombinedMortalityTable mt1958;
   
-    private double eval_survival_rate(int birth_year) throws Exception
+    private double eval_survival_rate(int birth_year, Area area) throws Exception
     {
-        mt1938 = mt1938_ussr;
-        mt1958 = mt1958_ussr;
+        if (area == Area.USSR)
+        {
+            mt1938 = mt1938_ussr;
+            mt1958 = mt1958_ussr;
+        }
+        else if (area == Area.RSFSR)
+        {
+            mt1938 = mt1938_ussr; // ###
+            mt1958 = mt1958_rsfsr;
+        }
 
         double px = 1.0;
         
