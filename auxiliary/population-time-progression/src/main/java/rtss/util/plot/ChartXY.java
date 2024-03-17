@@ -18,28 +18,65 @@ import org.jfree.data.xy.XYSeriesCollection;
 // F:\github\jfree-sponsor\jfreechart-demos-1.5.2\target
 // java -jar jfreechart-demo-1.5.2-jar-with-dependencies.jar
 // java -cp jfreechart-demo-1.5.2-jar-with-dependencies.jar org.jfree.chart.demo.LineChartDemo2
+// F:\github\jfree-sponsor\jfreechart-demos-1.5.2\src\main\java\org\jfree\chart\demo
 
 public class ChartXY extends ApplicationFrame
 {
+    public static final long serialVersionUID = 1;
+    
+    private XYSeriesCollection dataset = new XYSeriesCollection();
+    private String xLabel;
+    private String yLabel;
+
+    public ChartXY()
+    {
+        this("");
+    }
+
     public ChartXY(String title)
     {
+        this(title, "", "");
+    }
+    
+    public ChartXY(String title, String xLabel, String yLabel)
+    {
         super(title);
+        this.xLabel = xLabel;
+        this.yLabel = yLabel;
+    }
+    
+    public ChartXY addSeries(String name, double[] y)
+    {
+        double[] x = new double[y.length];
+        for (int k = 0; k < y.length; k++)
+            x[k] = k;
+        return addSeries(name, x, y);
+    }
+
+    public ChartXY addSeries(String name, double[] x, double[] y)
+    {
+        XYSeries series = new XYSeries(name);
+        
+        for (int k = 0; k < x.length; k++)
+            series.add(x[k], y[k]);
+        
+        dataset.addSeries(series);
+        return this;
     }
     
     public void display() 
     {
-        JPanel chartPanel = createDemoPanel();
-        chartPanel.setPreferredSize(new java.awt.Dimension(700, 400));
+        JPanel chartPanel = createPanel();
+        chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
         setContentPane(chartPanel);
-
         pack();
         UIUtils.centerFrameOnScreen(this);
         setVisible(true);
     }    
 
-    private JPanel createDemoPanel() 
+    private JPanel createPanel() 
     {
-        JFreeChart chart = createChart(createDataset());
+        JFreeChart chart = createChart(dataset);
         ChartPanel panel = new ChartPanel(chart);
         panel.setMouseWheelEnabled(true);
         return panel;
@@ -47,19 +84,19 @@ public class ChartXY extends ApplicationFrame
 
     private JFreeChart createChart(XYDataset dataset) 
     {
-        // create the chart...
+        // create the chart
         JFreeChart chart = ChartFactory.createXYLineChart(
-            getTitle(),      // chart title
-            "X",                      // x axis label
-            "Y",                      // y axis label
-            dataset,                  // data
+            getTitle(),                 // chart title
+            xLabel,                     // x axis label
+            yLabel,                     // y axis label
+            dataset,                    // data
             PlotOrientation.VERTICAL,
-            true,                     // include legend
-            true,                     // tooltips
-            false                     // urls
+            true,                       // include legend
+            true,                       // tooltips
+            false                       // urls
         );
 
-        // get a reference to the plot for further customisation...
+        // get a reference to the plot for further customization
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
@@ -68,69 +105,10 @@ public class ChartXY extends ApplicationFrame
         renderer.setDefaultShapesVisible(true);
         renderer.setDefaultShapesFilled(true);
 
-        // change the auto tick unit selection to integer units only...
+        // change the auto tick unit selection to integer units only
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         return chart;
-    }
-    
-    private XYDataset createDataset() 
-    {
-        XYSeries series1 = new XYSeries("First");
-        series1.add(1.0, 1.0);
-        series1.add(2.0, 4.0);
-        series1.add(3.0, 3.0);
-        series1.add(4.0, 5.0);
-        series1.add(5.0, 5.0);
-        series1.add(6.0, 7.0);
-        series1.add(7.0, 7.0);
-        series1.add(8.0, 8.0);
-
-        XYSeries series2 = new XYSeries("Second");
-        series2.add(1.0, 5.0);
-        series2.add(2.0, 7.0);
-        series2.add(3.0, 6.0);
-        series2.add(4.0, 8.0);
-        series2.add(5.0, 4.0);
-        series2.add(6.0, 4.0);
-        series2.add(7.0, 2.0);
-        series2.add(8.0, 1.0);
-
-        XYSeries series3 = new XYSeries("Third");
-        series3.add(3.0, 4.0);
-        series3.add(4.0, 3.0);
-        series3.add(5.0, 2.0);
-        series3.add(6.0, 3.0);
-        series3.add(7.0, 6.0);
-        series3.add(8.0, 3.0);
-        series3.add(9.0, 4.0);
-        series3.add(10.0, 3.0);
-
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(series1);
-        dataset.addSeries(series2);
-        dataset.addSeries(series3);
-
-        return dataset;
-    }    
-    
-    public static void plot(String title, double[] x, double[] y) throws Exception
-    {
-        ChartXY chart = new ChartXY(title);
-        chart.pack();
-        UIUtils.centerFrameOnScreen(chart);
-        chart.setVisible(true);        
-    }
-
-    public void zzzz(String title, double[] x, double[] y) throws Exception
-    {
-        XYSeries series = new XYSeries(title);
-        
-        for (int k = 0; k < x.length; k++)
-            series.add(x[k], y[k]);
-        
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(series);
     }
 }
