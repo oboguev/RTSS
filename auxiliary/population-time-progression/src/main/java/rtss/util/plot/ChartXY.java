@@ -22,6 +22,20 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class ChartXY extends ApplicationFrame
 {
+    public static void quick_view(String title, double[] y)
+    {
+        new ChartXY(title, "x", "y")
+            .addSeries(title, y)
+            .display();        
+    }
+    
+    public static void quick_view(String title, double[] x, double[] y)
+    {
+        new ChartXY(title, "x", "y")
+            .addSeries(title, x, y)
+            .display();        
+    }
+    
     public static final long serialVersionUID = 1;
     
     private XYSeriesCollection dataset = new XYSeriesCollection();

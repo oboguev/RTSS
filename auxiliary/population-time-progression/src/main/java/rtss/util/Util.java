@@ -149,7 +149,8 @@ public class Util
         return s;
     }    
 
-    public static double min(double[] y)
+    // min of array values
+    public static double min(final double[] y)
     {
         double min = y[0];
         for (int k = 1; k < y.length; k++)
@@ -160,7 +161,8 @@ public class Util
         return min;
     }
 
-    public static double max(double[] y)
+    // max of array values
+    public static double max(final double[] y)
     {
         double max = y[0];
         for (int k = 1; k < y.length; k++)
@@ -171,7 +173,8 @@ public class Util
         return max;
     }
 
-    public static double sum(double[] y)
+    // sum of array values
+    public static double sum(final double[] y)
     {
         double sum = 0;
         for (int k = 0; k < y.length; k++)
@@ -179,12 +182,14 @@ public class Util
         return sum;
     }
     
-    public static double average(double[] y)
+    // average value over array
+    public static double average(final double[] y)
     {
         return sum(y) / y.length;
     }
 
-    public static double[] divide(double[] y, double f)
+    // return a new array with values representing y[] / f
+    public static double[] divide(final double[] y, double f)
     {
         double[] yy = new double[y.length];
         for (int x = 0; x < y.length; x++)
@@ -192,17 +197,52 @@ public class Util
         return yy;
     }
 
-    public static double[] splice(double[] y, int yx1, int yx2)
+    // extract a subsection [x1...x2] from am array of doubles
+    public static double[] splice(final double[] y, int x1, int x2)
     {
-        double[] yy = new double[yx2 - yx1 + 1];
-        for (int yx = yx1; yx <= yx2; yx++)
+        double[] yy = new double[x2 - x1 + 1];
+        for (int x = x1; x <= x2; x++)
         {
-            yy[yx - yx1] = y[yx];
+            yy[x - x1] = y[x];
         }
         return yy;
     }
     
-    public static void print(String title, double[] y, int start_year)
+    // insert y[] into yy[x ... x + yy.length - 1]
+    public static void insert(double[] yy, final double[] y, int x)
+    {
+        for (int k = 0; k < y.length; k++)
+            yy[x + k] = y[k];
+    }
+    
+    // clone array of doubles
+    public static double[] dup(final double[] y)
+    {
+        if (y.length == 0)
+            return new double[0];
+        else
+            return splice(y, 0, y.length - 1);
+    }
+    
+    // generate sequence of integers k1 ... k2 
+    public static int[] seq_int(int k1, int k2)
+    {
+        int[] seq = new int[k2 - k1 + 1];
+        for (int k = 0; k < seq.length; k++)
+            seq[k] = k + k1;
+        return seq;
+    }
+
+    // generate sequence of doubles  
+    public static double[] seq_double(final int[] si)
+    {
+        double[] seq = new double[si.length];
+        for (int k = 0; k < si.length; k++)
+            seq[k] = si[k];
+        return seq;
+    }
+
+    public static void print(String title, final double[] y, int start_year)
     {
         Util.out(title);
         Util.out("");
