@@ -86,8 +86,7 @@ public class Main
     
     private List<String[]> loadCensusSource(Area area) throws Exception
     {
-        String prefix = area.name() + "_";
-        String s = Util.loadResource(prefix + "census_1959_data.txt");
+        String s = Util.loadResource(String.format("ww2losses/%s_census_1959_data.txt", area.name()));
         s = removeComments(s);
         s = s.replace("\t", " ").replaceAll(" +", " ").replace(" ", ",");
         try (CSVReader reader = new CSVReader(new StringReader(s)))
@@ -98,8 +97,7 @@ public class Main
     
     private List<String[]> loadInterpolationData(Area area) throws Exception
     {
-        String prefix = area.name() + "_";
-        String s = Util.loadResource(prefix + "census_1959_interpolation.txt");
+        String s = Util.loadResource(String.format("ww2losses/%s_census_1959_interpolation.txt", area.name()));
         s = removeComments(s);
         s = s.replace("\t", " ").replaceAll(" +", " ").replace(" ", ",");
         try (CSVReader reader = new CSVReader(new StringReader(s)))
