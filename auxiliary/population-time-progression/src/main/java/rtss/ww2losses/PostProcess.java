@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import rtss.ww2losses.data.Bin;
-import rtss.ww2losses.data.Points;
-import rtss.ww2losses.util.Util;
+import rtss.data.Points;
+import rtss.util.Util;
 
 public class PostProcess
 {

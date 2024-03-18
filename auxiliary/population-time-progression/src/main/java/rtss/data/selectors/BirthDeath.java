@@ -1,4 +1,4 @@
-package rtss.ww2losses.selectors;
+package rtss.data.selectors;
 
 public enum BirthDeath
 {

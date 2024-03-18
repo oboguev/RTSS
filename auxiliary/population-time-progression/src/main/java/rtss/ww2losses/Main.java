@@ -5,8 +5,8 @@ import java.util.List;
 import com.opencsv.CSVReader;
 
 import rtss.ww2losses.params.AreaParameters;
-import rtss.ww2losses.selectors.Area;
-import rtss.ww2losses.util.Util;
+import rtss.data.selectors.Area;
+import rtss.util.Util;
 
 public class Main
 {

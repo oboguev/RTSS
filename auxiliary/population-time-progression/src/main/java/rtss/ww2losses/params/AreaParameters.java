@@ -1,6 +1,6 @@
 package rtss.ww2losses.params;
 
-import rtss.ww2losses.selectors.Area;
+import rtss.data.selectors.Area;
 
 public class AreaParameters
 {

@@ -1,4 +1,4 @@
-package rtss.ww2losses.data;
+package rtss.data;
 
 public class Points
 {
