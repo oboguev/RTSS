@@ -374,7 +374,7 @@ public class Population
             if (m < 0 || f < 0 || b < 0)
                 negative();
 
-            if (differ(m + f, b))
+            if (Util.differ(m + f, b))
                 mismatch();
 
             sum_m += m;
@@ -397,19 +397,19 @@ public class Population
         if (male_total < 0 || female_total < 0 || both_total < 0)
             negative();
 
-        if (differ(male_total + female_total, both_total))
+        if (Util.differ(male_total + female_total, both_total))
             mismatch();
 
-        if (differ(male_unknown + female_unknown, both_unknown))
+        if (Util.differ(male_unknown + female_unknown, both_unknown))
             mismatch();
 
-        if (differ(sum_m + male_unknown, male_total))
+        if (Util.differ(sum_m + male_unknown, male_total))
             mismatch();
 
-        if (differ(sum_f + female_unknown, female_total))
+        if (Util.differ(sum_f + female_unknown, female_total))
             mismatch();
 
-        if (differ(sum_b + both_unknown, both_total))
+        if (Util.differ(sum_b + both_unknown, both_total))
             mismatch();
     }
 
@@ -442,16 +442,6 @@ public class Population
     private int asInt(String s)
     {
         return Integer.parseInt(s.replace(",", ""));
-    }
-
-    private boolean differ(double a, double b)
-    {
-        return differ(a, b, 0.00001);
-    }
-
-    private boolean differ(double a, double b, double diff)
-    {
-        return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
 
     /****************************************************************************************************/
@@ -526,7 +516,7 @@ public class Population
     private double[] smooth(double[] d) throws Exception
     {
         double[] d2 = SmoothPopulation.smooth(d);
-        if (differ(Util.sum(d), Util.sum(d2)))
+        if (Util.differ(Util.sum(d), Util.sum(d2)))
             throw new Exception("Smoothing error");
         return d2;
     }

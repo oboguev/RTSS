@@ -112,7 +112,7 @@ public class SingleMortalityTable
 
     private void check_eq(String what, double a, double b, double diff) throws Exception
     {
-        if (differ(a,b, diff))
+        if (Util.differ(a,b, diff))
         {
             inconsistent(what + " differ by " + (a - b));
         }
@@ -123,17 +123,6 @@ public class SingleMortalityTable
         String msg = "Inconsistent mortality table in " + path + ": " + what;
         // Util.err(msg);
         throw new Exception(msg);
-    }
-
-    @SuppressWarnings("unused")
-    private boolean differ(double a, double b)
-    {
-        return differ(a, b, 0.00001);
-    }
-
-    private boolean differ(double a, double b, double diff)
-    {
-        return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
 
     private int asInt(String s)
@@ -196,6 +185,17 @@ public class SingleMortalityTable
     
     /***********************************************************/
 
+    /*
+     * Сначала мы вычисляем (x, qx, px, lx, dx).
+     * 
+     * Lx для возрастов 5-100 расчитан по формуле из
+     *     ЦСУ СССР, "Таблицы смертности и средней продолжительности жизни населения СССР 1958-1959 гг." (М. 1962, стр. 5)
+     * отличающейся от западной 
+     *     https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf
+     *     https://www.ssa.gov/oact/NOTES/pdf_studies/study120.pdf (page 4)
+     * Для возрастов 0-5 ЦСУ использует формулу для Lx опирающуюся на детальную статистику смертей, а не на их погодовую 
+     * суммарную вероятность (стр. 5-6). Для возрастов 0-5 мы поэтому используем стандартную западную формулу. 
+     */
     public static SingleMortalityTable from_qx(String path, double[] qx) throws Exception
     {
         SingleMortalityTable smt = new SingleMortalityTable();
@@ -211,11 +211,12 @@ public class SingleMortalityTable
         
         MortalityInfo prev_mi = null;
         
-        for (int age = 0; age <= MAX_AGE; age++)
+        /* we'll need the row for MAX_AGE+1 for Lx calculations */
+        for (int age = 0; age <= MAX_AGE + 1; age++)
         {
             MortalityInfo mi = new MortalityInfo();
             mi.x = age;
-            mi.qx = qx[age];
+            mi.qx = qx[Math.min(age, MAX_AGE)];
             mi.px = 1 - mi.qx;
             
             if (age == 0)
@@ -231,6 +232,33 @@ public class SingleMortalityTable
             m.put(mi.x, mi);
             prev_mi = mi;
         }
+        
+        // calculate Lx
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            MortalityInfo mi = m.get(age);
+            mi.Lx = mi.lx - mi.dx / 2;
+            
+            if (age >= 5)
+            {
+                // формула ЦСУ
+                MortalityInfo prev = m.get(age - 1);
+                MortalityInfo next = m.get(age + 1);
+                mi.Lx += (next.dx - prev.dx) / 24;
+            }
+        }
+
+        // calculate Tx
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            MortalityInfo mi = m.get(age);
+            for (int x = age; x <= MAX_AGE; x++)
+                mi.Tx += m.get(x).Lx;
+            mi.ex = mi.Tx / mi.lx;
+        }
+
+        /* delete auxiliary row */
+        m.remove(MAX_AGE + 1);
         
         validate();
     }

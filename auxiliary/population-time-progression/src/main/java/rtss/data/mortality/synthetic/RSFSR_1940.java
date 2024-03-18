@@ -74,7 +74,7 @@ public class RSFSR_1940 extends CombinedMortalityTable
                                                 makeBin(75, 79, 99.2),
                                                 makeBin(80, 84, 150.8),
                                                 makeBin(85, 100, 226.8));
-        setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(female_mortality_bins));
+        // ### setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(female_mortality_bins));
         
         // male population 1940, АДХ-РСФСР page 157
         Bin[] male_population_bins = Bins.bins(makeBin(0, 4, 7429),

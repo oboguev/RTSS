@@ -147,7 +147,19 @@ public class Util
         if (s.endsWith(".0"))
             s = Util.stripTail(s, ".0");
         return s;
-    }    
+    }
+    
+    // check if values differ
+    public static boolean differ(double a, double b)
+    {
+        return differ(a, b, 0.00001);
+    }
+
+    // check if values differ
+    public static boolean differ(double a, double b, double diff)
+    {
+        return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
+    }
 
     // min of array values
     public static double min(final double[] y)

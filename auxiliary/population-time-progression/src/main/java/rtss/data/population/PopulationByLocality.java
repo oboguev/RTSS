@@ -158,13 +158,13 @@ public class PopulationByLocality
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            if (differ(rural.male(age) + urban.male(age), total.male(age)))
+            if (Util.differ(rural.male(age) + urban.male(age), total.male(age)))
                 mismatch();
 
-            if (differ(rural.female(age) + urban.female(age), total.female(age)))
+            if (Util.differ(rural.female(age) + urban.female(age), total.female(age)))
                 mismatch();
 
-            if (differ(rural.fm(age) + urban.fm(age), total.fm(age)))
+            if (Util.differ(rural.fm(age) + urban.fm(age), total.fm(age)))
                 mismatch();
         }
     }
@@ -198,16 +198,6 @@ public class PopulationByLocality
     private void mismatch() throws Exception
     {
         throw new Exception("Mismatching data in population table");
-    }
-
-    private boolean differ(double a, double b)
-    {
-        return differ(a, b, 0.00001);
-    }
-
-    private boolean differ(double a, double b, double diff)
-    {
-        return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
 
     /****************************************************************************************************/

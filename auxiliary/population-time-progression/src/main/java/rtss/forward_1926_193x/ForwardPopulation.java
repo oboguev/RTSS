@@ -203,22 +203,10 @@ public class ForwardPopulation
         /*
          * Verify that new level (of transformed population) is correct
          */
-        if (differ(target_urban_level, urban_fraction(pto, gender)))
+        if (Util.differ(target_urban_level, urban_fraction(pto, gender)))
             throw new Exception("Miscalculated urbanization");
 
         return pto;
-    }
-
-    /*****************************************************************************************/
-
-    protected boolean differ(double a, double b)
-    {
-        return differ(a, b, 0.00001);
-    }
-
-    protected boolean differ(double a, double b, double diff)
-    {
-        return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
 
     /*****************************************************************************************/
