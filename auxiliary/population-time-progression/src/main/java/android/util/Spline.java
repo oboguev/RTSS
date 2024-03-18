@@ -43,6 +43,7 @@ public abstract class Spline
             throw new IllegalArgumentException("The control points must all have strictly "
                                                + "increasing X values.");
         }
+        
         if (isMonotonic(y))
         {
             return createMonotoneCubicSpline(x, y);
@@ -105,7 +106,9 @@ public abstract class Spline
         {
             throw new IllegalArgumentException("There must be at least two control points.");
         }
+        
         double prev = x[0];
+        
         for (int i = 1; i < x.length; i++)
         {
             double curr = x[i];
@@ -115,6 +118,7 @@ public abstract class Spline
             }
             prev = curr;
         }
+        
         return true;
     }
 
@@ -124,7 +128,9 @@ public abstract class Spline
         {
             throw new IllegalArgumentException("There must be at least two control points.");
         }
+        
         double prev = x[0];
+        
         for (int i = 1; i < x.length; i++)
         {
             double curr = x[i];
@@ -134,6 +140,7 @@ public abstract class Spline
             }
             prev = curr;
         }
+        
         return true;
     }
 
@@ -272,12 +279,16 @@ public abstract class Spline
                 throw new IllegalArgumentException("There must be at least two control "
                                                    + "points and the arrays must be of equal length.");
             }
+            
             final int N = x.length;
+            
             mM = new double[N - 1];
+            
             for (int i = 0; i < N - 1; i++)
             {
                 mM[i] = (y[i + 1] - y[i]) / (x[i + 1] - x[i]);
             }
+            
             mX = x;
             mY = y;
         }
@@ -287,18 +298,22 @@ public abstract class Spline
         {
             // Handle the boundary cases.
             final int n = mX.length;
+        
             if (Double.isNaN(x))
             {
                 return x;
             }
+            
             if (x <= mX[0])
             {
                 return mY[0];
             }
+            
             if (x >= mX[n - 1])
             {
                 return mY[n - 1];
             }
+            
             // Find the index 'i' of the last point with smaller X.
             // We know this will be within the spline due to the boundary tests.
             int i = 0;
@@ -310,6 +325,7 @@ public abstract class Spline
                     return mY[i];
                 }
             }
+            
             return mY[i] + mM[i] * (x - mX[i]);
         }
 

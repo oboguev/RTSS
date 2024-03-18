@@ -1,4 +1,4 @@
-package rtss.ww2losses;
+package rtss.ww2losses.util;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;

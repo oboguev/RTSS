@@ -1,5 +1,8 @@
 package rtss.ww2losses;
 
+import rtss.ww2losses.selectors.BirthDeath;
+import rtss.ww2losses.util.Util;
+
 public abstract class EvaluatePopulationLossBase
 {
     public static class Population
@@ -38,21 +41,16 @@ public abstract class EvaluatePopulationLossBase
     protected Year firstYear;
     protected Year lastYear;
     
-    /* population at the beginning and end of the war */
-    protected static final double ACTUAL_POPULATION_1941_MID = 110_988;
-    protected static final double ACTUAL_POPULATION_1945_MID = 96_601;
-    
-    /* target excess deaths and birth shortage */
-    protected static final double ACTUAL_EXCESS_DEATHS = 9_555;
-    protected static final double ACTUAL_BIRTH_DEFICIT = 9_980;
-    
-    /* birth and death rates in 1940 */
-    protected static final double CBR_1940 = 34.6;
-    protected static final double CDR_1940 = 23.2;
-   
     /* average yearly growth as multiplier and in promille */
     protected double actualGrowthFactor;
     protected double actualGrowthPromille;
+    
+    protected AreaParameters params;
+    
+    public EvaluatePopulationLossBase(AreaParameters params)
+    {
+        this.params = params;
+    }
 
     protected void init() throws Exception
     {
@@ -70,11 +68,11 @@ public abstract class EvaluatePopulationLossBase
                 years[ny].next = years[ny + 1];
         }
 
-        firstYear.actual.start = ACTUAL_POPULATION_1941_MID;
-        lastYear.actual.end = ACTUAL_POPULATION_1945_MID;
-        firstYear.expected.start = ACTUAL_POPULATION_1941_MID;
+        firstYear.actual.start = params.ACTUAL_POPULATION_1941_MID;
+        lastYear.actual.end = params.ACTUAL_POPULATION_1945_MID;
+        firstYear.expected.start = params.ACTUAL_POPULATION_1941_MID;
 
-        double factor = promille2factor(CBR_1940 - CDR_1940);
+        double factor = promille2factor(params.CBR_1940 - params.CDR_1940);
         for (Year y : years)
         {
             Population p = y.expected;
@@ -86,8 +84,8 @@ public abstract class EvaluatePopulationLossBase
             p.mid = root(p.start * p.end, 2);
             
             /* define rates as attached to the start of the period */
-            p.births = p.start * CBR_1940 / 1000.0;
-            p.deaths = p.start * CDR_1940 / 1000.0;
+            p.births = p.start * params.CBR_1940 / 1000.0;
+            p.deaths = p.start * params.CDR_1940 / 1000.0;
             
             verify_eq(p.end - p.start, p.births - p.deaths);
         }
@@ -262,7 +260,6 @@ public abstract class EvaluatePopulationLossBase
             
             totalBirthsDeficit += y.expected.births - y.actual.births;
             totalExcessDeaths += y.actual.deaths - y.expected.deaths;
-            
         }
         
         Util.out("");

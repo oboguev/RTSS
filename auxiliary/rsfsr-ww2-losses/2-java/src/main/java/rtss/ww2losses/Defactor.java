@@ -1,7 +1,15 @@
 package rtss.ww2losses;
 
+import rtss.ww2losses.selectors.BirthDeath;
+import rtss.ww2losses.util.Util;
+
 public class Defactor extends EvaluatePopulationLossBase
 {
+    public Defactor(AreaParameters params)
+    {
+        super(params);
+    }
+
     public void evaluate()
     {
         defactorBirthRate(34.6, 20.7);

@@ -1,15 +1,22 @@
 package rtss.ww2losses;
 
+import rtss.ww2losses.util.Util;
+
 public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
 {
+    public EvaluatePopulationLossVariantA(AreaParameters params)
+    {
+        super(params);
+    }
+    
     public void evaluate() throws Exception
     {
         init();
         
         double cbr1 = 0;
-        double cbr2 = CBR_1940;
+        double cbr2 = params.CBR_1940;
         
-        final double target_b2d =  ACTUAL_BIRTH_DEFICIT /  ACTUAL_EXCESS_DEATHS;
+        final double target_b2d =  params.ACTUAL_BIRTH_DEFICIT /  params.ACTUAL_EXCESS_DEATHS;
 
         for (;;)
         {
@@ -23,11 +30,15 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
             
             double b2d = birthsDeficit / excessDeaths;
             
-            if (Math.abs(excessDeaths - ACTUAL_EXCESS_DEATHS) < 0.05)
+            if (Math.abs(excessDeaths - params.ACTUAL_EXCESS_DEATHS) < 0.04)
             {
                 print(false);
                 Util.out(String.format("Birth rate: %.2f", cbr));
                 Util.out(String.format("Death rate: %.2f", cdr));
+                
+                params.constant_cbr = cbr;
+                params.constant_cdr = cdr;
+                
                 return;
             }
             

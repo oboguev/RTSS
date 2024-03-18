@@ -1,18 +1,26 @@
 package rtss.ww2losses;
 
+import rtss.ww2losses.EvaluatePopulationLossBase.Year;
+import rtss.ww2losses.util.Util;
+
 public class EvaluatePopulationLossVariantB extends EvaluatePopulationLossBase
 {
+    public EvaluatePopulationLossVariantB(AreaParameters params)
+    {
+        super(params);
+    }
+
     public void evaluate() throws Exception
     {
         init();
         
         for (Year y : years)
         {
-            y.actual.deaths = y.expected.deaths + ACTUAL_EXCESS_DEATHS / NYears;
+            y.actual.deaths = y.expected.deaths + params.ACTUAL_EXCESS_DEATHS / NYears;
         }
         
         double cbr1 = 0;
-        double cbr2 = CBR_1940;
+        double cbr2 = params.CBR_1940;
 
         for (;;)
         {
@@ -20,13 +28,12 @@ public class EvaluatePopulationLossVariantB extends EvaluatePopulationLossBase
             calcActual(cbr);
             double bd = birthsDeficit();
 
-            if (Math.abs(bd - ACTUAL_BIRTH_DEFICIT) < 0.05)
+            if (Math.abs(bd - params.ACTUAL_BIRTH_DEFICIT) < 0.01)
             {
-                print(true);
-                return;
+                break;
             }
             
-            if (bd < ACTUAL_BIRTH_DEFICIT)
+            if (bd < params.ACTUAL_BIRTH_DEFICIT)
             {
                 /* cbr was too high */
                 cbr2 = cbr;
@@ -36,6 +43,14 @@ public class EvaluatePopulationLossVariantB extends EvaluatePopulationLossBase
                 cbr1 = cbr;
             }
         }
+
+        for (Year y : years)
+        {
+            params.var_cbr[y.nyear] = 1000 * y.actual.births / y.actual.start;
+            params.var_cdr[y.nyear] = 1000 * y.actual.deaths / y.actual.start;
+        }
+
+        print(true);
     }
     
     private void calcActual(double cbr)

@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rtss.ww2losses.data.Bin;
+import rtss.ww2losses.data.Points;
+import rtss.ww2losses.util.Util;
+
 public class PostProcess
 {
     public static final int PointsPerYear = 100;

@@ -1,16 +1,72 @@
 package rtss.ww2losses;
 
+import rtss.ww2losses.selectors.BirthDeath;
+import rtss.ww2losses.util.Util;
+
 public class RecombineRates extends EvaluatePopulationLossBase
 {
+    public RecombineRates (AreaParameters params)
+    {
+        super(params);
+    }
+
     public void evaluate() throws Exception
     {
-        eval("Variant 1 birth rate", 34.60, 13.39, 13.39, 13.39, 13.39, 13.39, 13.39, 13.39, 13.39, 26.00);
-        eval("Variant 1 death rate", 23.20, 47.50, 47.50, 47.50, 47.50, 47.50, 47.50, 47.50, 47.50, 12.30);
+        evalx("Variant 1 birth rate", BirthDeath.BIRTH, params.constant_cbr);
+        evalx("Variant 1 death rate", BirthDeath.DEATH, params.constant_cdr);
         
-        eval("Variant 2 birth rate", 34.60, 13.35, 13.35, 13.35, 13.35, 13.35, 13.35, 13.35, 13.35, 26.00);
-        eval("Variant 2 death rate", 23.20, 44.72, 44.72, 46.44, 46.44, 48.32, 48.32, 50.37, 50.37, 12.30);
+        evalx("Variant 2 birth rate", BirthDeath.BIRTH, params.var_cbr);
+        evalx("Variant 2 death rate", BirthDeath.DEATH, params.var_cdr);
     }
     
+    private void evalx(String title, BirthDeath bd, double rate)  throws Exception
+    {
+        double[] rates = {rate, rate, rate, rate};
+        evalx(title, bd, rates);
+    }
+    
+    private void evalx(String title, BirthDeath bd, double[] rate)  throws Exception
+    {
+        double[] rates = new double[10];
+        
+        int ix = 0;
+        
+        switch (bd)
+        {
+        case BIRTH:
+            rates[ix++] = params.CBR_1940;
+            break;
+        case DEATH:
+            rates[ix++] = params.CDR_1940;
+            break;
+        }
+
+        rates[ix++] = rate[0];
+        rates[ix++] = rate[0];
+        
+        rates[ix++] = rate[1];
+        rates[ix++] = rate[1];
+
+        rates[ix++] = rate[2];
+        rates[ix++] = rate[2];
+        
+        rates[ix++] = rate[3];
+        rates[ix++] = rate[3];
+        
+        switch (bd)
+        {
+        case BIRTH:
+            rates[ix++] = params.CBR_1946;
+            break;
+        case DEATH:
+            rates[ix++] = params.CDR_1946;
+            break;
+        }
+        
+        eval(title, rates);
+        
+    }
+
     private void eval(String title, double... fa) throws Exception
     {
         BirthDeath which = BirthDeath.BIRTH;

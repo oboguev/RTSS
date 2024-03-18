@@ -1,4 +1,6 @@
-package rtss.ww2losses;
+package rtss.ww2losses.data;
+
+import rtss.ww2losses.PostProcess;
 
 public class Bin
 {
