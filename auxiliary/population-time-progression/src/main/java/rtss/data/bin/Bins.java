@@ -155,4 +155,18 @@ public class Bins
         
         return maxBin;
     }
+    
+    /*
+     * Find bin for year of age 
+     */
+    public static Bin binForAge(int age, Bin... bins)
+    {
+        for (Bin bin : bins)
+        {
+            if (age >= bin.age_x1 && age <= bin.age_x2)
+                return bin;
+        }
+        
+        return null;
+    }
 }

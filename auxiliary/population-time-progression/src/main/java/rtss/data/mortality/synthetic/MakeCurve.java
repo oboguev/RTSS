@@ -89,6 +89,7 @@ public class MakeCurve
             }
         }
 
+        @SuppressWarnings("unused")
         double[] before_res_y = Util.dup(res_y);
         preserve_means(res_y, bins);
         validate_means(res_y, bins);

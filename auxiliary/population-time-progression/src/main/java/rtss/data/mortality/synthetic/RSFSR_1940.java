@@ -3,6 +3,7 @@ package rtss.data.mortality.synthetic;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -12,26 +13,22 @@ import rtss.util.plot.ChartXYSPlineBasic;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
 /*
- * Таблица смертности для РСФСР 1940 г.
+ * Вычисление таблицы смертности для РСФСР 1940 г.
+ * Для мужчин и женщин (сельских и городских совокупно).
+ * Строимые таблицы: MALE TOTAL, FEMALE TOTAL, BOTH TOTAL.
  * 
- * Для мужчин и женщин (сельских и городских совокупно):
+ * Источники:
  *  
- * Е.М. Андреев, Л.Е. Дарский, Т.Л. Харькова, "Демографическая история России : 1927-1959", 
- * НИИ статистики Госкомстата России, Отделение демографии, М. 1998, стр. 167-169
+ *     Е.М. Андреев, Л.Е. Дарский, Т.Л. Харькова, "Демографическая история России : 1927-1959", 
+ *     НИИ статистики Госкомстата России, Отделение демографии, М. 1998, стр. 167, 169, 157, 159
  * 
- * Доп. см. Е.М.Андреев, "Снижение младенческой смертности в России в 1940-1958 гг." // "Развитие населения и демографическая политика. Памяти А.Я. Кваши. Сборник статей" (ред. М.Б. Денисенко, В.В. Елизарова), 
- * М.: МАКС Пресс, 2014, стр. 108-128
- *
- * Мы генерируем только x, lx, dx, qx и px.
- * 
- * Строимые таблицы: MALE TOTAL, FEMALE TOTAL, BOTH TOTAL
+ *     Доп. см. Е.М.Андреев, "Снижение младенческой смертности в России в 1940-1958 гг." // "Развитие населения и демографическая политика. 
+ *     Памяти А.Я. Кваши. Сборник статей" (ред. М.Б. Денисенко, В.В. Елизарова), М.: МАКС Пресс, 2014, стр. 108-128
  */
 public class RSFSR_1940 extends CombinedMortalityTable
 {
     public RSFSR_1940() throws Exception
     {
-        SingleMortalityTable mt;
-        
         // males total 1940 mortality, АДХ-РСФСР page 167
         Bin[] male_mortality_bins = Bins.bins(makeBin(0, 259.8),
                                               makeBin(1, 4, 58.5),
@@ -115,12 +112,30 @@ public class RSFSR_1940 extends CombinedMortalityTable
                                                  makeBin(75, 79, 466),
                                                  makeBin(80, 84, 222),
                                                  makeBin(85, 100, 145));
-
-        // ### make both: NB bins 0-4 are different from 0 and 1-4
-        mt = null;
-        m.put(key(Locality.TOTAL, Gender.BOTH), mt);
         
+        double[] qx = new double[MAX_AGE + 1];
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            Bin males = Bins.binForAge(age, male_population_bins);
+            Bin females = Bins.binForAge(age, female_population_bins);
+
+            double m_fraction = males.avg / (males.avg + females.avg);
+            double f_fraction = females.avg / (males.avg + females.avg);
+            
+            MortalityInfo mi_m = get(Locality.TOTAL, Gender.MALE, age);
+            MortalityInfo mi_f = get(Locality.TOTAL, Gender.FEMALE, age);
+            
+            qx[age] = m_fraction * mi_m.qx + f_fraction * mi_f.qx;
+        }
+        setTable(Locality.TOTAL, Gender.BOTH, SingleMortalityTable.from_qx("computed", qx));
+
         // display(Locality.TOTAL, Gender.MALE);
+        
+        if (Util.False)
+        {
+            String comment = "# Таблица построена модулем " + RSFSR_1940.class.getCanonicalName() + " по данным в АДХ-Россия"; 
+            saveTable("P:\\@\\zzzz", comment);
+        }
     }
     
     private Bin makeBin(int age, double avg)
@@ -140,6 +155,7 @@ public class RSFSR_1940 extends CombinedMortalityTable
         return SingleMortalityTable.from_qx("computed", curve);
     }
     
+    @SuppressWarnings("unused")
     private void display(Locality locality, Gender gender) throws Exception
     {
         double[] qx = getSingleTable(locality, gender).qx();

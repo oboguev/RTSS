@@ -23,7 +23,7 @@ public class SingleMortalityTable
         return mi;
     }
     
-    /***********************************************************/
+    /*****************************************************************************************************/
 
     public SingleMortalityTable(String path) throws Exception
     {
@@ -135,7 +135,7 @@ public class SingleMortalityTable
         return Double.parseDouble(s.replace(",", ""));
     }
     
-    /***********************************************************/
+    /*****************************************************************************************************/
 
     static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
     {
@@ -161,7 +161,7 @@ public class SingleMortalityTable
         }
     }
     
-    /***********************************************************/
+    /*****************************************************************************************************/
     
     public double[] qx() throws Exception
     {
@@ -183,10 +183,12 @@ public class SingleMortalityTable
         return v;
     }
     
-    /***********************************************************/
+    /*****************************************************************************************************/
 
     /*
-     * Сначала мы вычисляем (x, qx, px, lx, dx).
+     * Вычислить таблицу из массива qx.
+     * 
+     * Сначала мы вычисляем (x, qx, px, lx, dx), затем (Lx, Tx и ex).
      * 
      * Lx для возрастов 5-100 расчитан по формуле из
      *     ЦСУ СССР, "Таблицы смертности и средней продолжительности жизни населения СССР 1958-1959 гг." (М. 1962, стр. 5)
@@ -248,7 +250,7 @@ public class SingleMortalityTable
             }
         }
 
-        // calculate Tx
+        // calculate Tx and ex
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = m.get(age);
@@ -261,5 +263,36 @@ public class SingleMortalityTable
         m.remove(MAX_AGE + 1);
         
         validate();
+    }
+
+    /*****************************************************************************************************/
+    
+    public void saveTable(String filepath, String comment) throws Exception
+    {
+        String nl = "\n";
+        StringBuilder sb = new StringBuilder();
+        if (comment != null && comment.length() != 0)
+            sb.append(comment + nl);
+        
+        sb.append("# Возраст в годах, Числа доживающих до возраста х лет, Числа умирающих при переходе от возраста x к возрасту х+1 лет, ");
+        sb.append("Вероятность умереть в течение предстоящего года жизни, Вероятность дожить до возраста х+1 лет, Числа живущих в возрасте х лет, ");
+        sb.append("Числа прожитых человеколет, Средняя продолжительность предстоящей жизни" + nl);
+        sb.append("# x, lx, dx, qx, px, Lx, Tx, ex" + nl + nl);
+        
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            MortalityInfo mi = m.get(age);
+            sb.append(String.format("%-8d", mi.x));
+            sb.append(String.format("%-8d", Math.round(mi.lx)));
+            sb.append(String.format("%-8d", Math.round(mi.dx)));
+            sb.append(String.format("%-8.5f", mi.qx));
+            sb.append(String.format("%-8.5f", mi.px));
+            sb.append(String.format("%-8d", Math.round(mi.Lx)));
+            sb.append(String.format("%-8d", Math.round(mi.Tx)));
+            sb.append(String.format("%.2f", mi.ex));
+            sb.append(nl);
+        }
+
+        Util.writeAsFile(filepath, sb.toString());
     }
 }
