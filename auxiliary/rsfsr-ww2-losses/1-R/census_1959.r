@@ -12,66 +12,35 @@ library(DemoTools)
 
 ########################################
 
-# example data set
-#pop5_mat <- structure(
-#    c(54170, 44775, 42142, 38464, 34406, 30386, 26933,
-#      23481, 20602, 16489, 14248, 9928, 8490, 4801, 3599, 2048, 941,
-#      326, 80, 17, 0, 57424, 44475, 41752, 39628, 34757, 30605, 27183,
-#      23792, 20724, 17056, 14059, 10585, 8103, 5306, 3367, 2040, 963,
-#      315, 80, 16, 1, 60272, 44780, 41804, 40229, 35155, 30978, 27456,
-#      24097, 20873, 17546, 13990, 11146, 7841, 5738, 3184, 2062, 961,
-#      311, 80, 15, 1, 62727, 45681, 42101, 40474, 35599, 31439, 27758,
-#      24396, 21055, 17958, 14046, 11589, 7731, 6060, 3086, 2083, 949,
-#      312, 79, 14, 1, 64816, 47137, 42508, 40532, 36083, 31940, 28092,
-#      24693, 21274, 18299, 14223, 11906, 7785, 6255, 3090, 2084, 938,
-#      316, 80, 14, 2),
-#    .Dim = c(21L, 5L),
-#    .Dimnames = list(seq(0, 100, by = 5), 1950:1954)
-#)
-#
-#Value <- pop5_mat[,4]
-#Age   <- as.integer(rownames(pop5_mat))
-
-########################################
-
 # interpolation points per year
 ppy <- 100L
 
-# census data with x-step = 1 point per year of age
-#census_mat_basic <- structure(
-#    c(2273515, 2057696, 2050408, 1202123, 917983, 824692, 1232709, 2092825, 2305946, 2518715, 2762422),
-#   .Dim = c(11L,1L),
-#   .Dimnames = list(10:20, 1959:1959)
-#)  
-
-# census data with x-step = ppy points per year of age
-#census_mat_ppy <- structure(
-#    c(2273515, 2057696, 2050408, 1202123, 917983, 824692, 1232709, 2092825, 2305946, 2518715, 2762422),
-#   .Dim = c(11L,1L),
-#   .Dimnames = list(seq(10 * ppy, 20 * ppy, by = ppy), 1959:1959)
-#)  
-
-# padded with extra data, to calm edge effects
-#census_mat_ppy_padded <- structure(
-#    c(2273515, 2057696, 2050408, 1202123, 917983, 824692, 1232709, 2092825, 2305946, 2518715, 2762422, round(2762422 * 1.1), round(2762422 * 1.2), round(2762422 * 1.3), 0),
-#   .Dim = c(15L,1L),
-#   .Dimnames = list(seq(10 * ppy, 24 * ppy, by = ppy), 1959:1959)
-#)  
-
-census_fuller_mat_ppy_padded <- structure(
-    # actual 1959 data for ages 0-35
+rsfsr_1959_census_mat_ppy_padded <- structure(
+    # actual 1959 census RSFSR data for ages 0-35
     c(2673692, 2650692, 2618103, 2676036, 2734270, 2504297, 2556631, 2475495, 2423412, 2455379, 
       2273515, 2057696, 2050408, 1202123,  917983,  824692, 1232709, 2092825, 2305946, 2518715, 
       2762422, 2624964, 2359786, 2063493, 1741259, 1750482, 2071898, 2020253, 2467978, 2280469, 
       2726990, 2250019, 2344838, 1957459, 1823606, 1651938,
-      # artititial cutoff receding padding ages 36-47, total 48 elements
+      # artititial cutoff with receding padding, ages 36-47, total 48 elements
       1651938, 991163, 594698, 356819, 214091, 128455, 77073, 46244, 27746, 16648, 9989, 0),
    .Dim = c(48L,1L),
    .Dimnames = list(seq(0 * ppy, 47 * ppy, by = ppy), 1959:1959)
 )  
 
-#census_data <- census_mat_ppy_padded
-census_data <- census_fuller_mat_ppy_padded
+ussr_1959_census_mat_ppy_padded <- structure(
+    # actual 1959 census USSR data for ages 0-35
+    c(4941943, 4814717, 4824744, 4860641, 4891170, 4494379, 4578178, 4373766, 4365670, 4217154,
+      4049353, 3536842, 3576594, 2216973, 1957440, 1796204, 2503106, 3660502, 4194923, 4316538,
+      4839038, 4548304, 4193488, 3653926, 3108272, 3101726, 3572820, 3417968, 4279726, 3817889,
+      4744064, 3769136, 3962259, 3353473, 3169967, 2962885, 
+      # artititial cutoff with receding padding, ages 36-47, total 48 elements
+      2962885, 1777731, 1066639, 639983, 383990, 230394, 138236, 82942, 49765, 29859, 17915, 0),
+   .Dim = c(48L,1L),
+   .Dimnames = list(seq(0 * ppy, 47 * ppy, by = ppy), 1959:1959)
+)  
+
+census_data <- rsfsr_1959_census_mat_ppy_padded
+#census_data <- ussr_1959_census_mat_ppy_padded
 
 Value <- census_data[,1]
 Age   <- as.integer(rownames(census_data))

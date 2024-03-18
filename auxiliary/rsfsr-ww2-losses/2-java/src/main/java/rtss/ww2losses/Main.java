@@ -50,7 +50,7 @@ public class Main
         Util.out("Compute minimum births window ...");
         Util.out("");
         PostProcess pp = new PostProcess();
-        pp.initCensusSource(loadCensusSource(area));
+        pp.initCensusSource(loadCensusSource(area), 9, 20);
         pp.initInterpolationData(loadInterpolationData(area));
         pp.postProcess();
         

@@ -23,32 +23,34 @@ public class PostProcess
     
     private Points points;
     
-    public void initCensusSource(List<String[]> list) throws Exception
+    public void initCensusSource(List<String[]> list, int age_from, int age_to) throws Exception
     {
-        nbins = list.size();
-        
         Bin prev = null;
+        int ix = 0;
         
-        for (int k = 0; k < nbins; k++)
+        for (String[] sa : list)
         {
-            String[] sa = list.get(k);
-            int age_x1 = Integer.parseInt(sa[0]);
-            int age_x2 = Integer.parseInt(sa[1]);
-            double avg = Double.parseDouble(sa[2]);
+            int age = Integer.parseInt(sa[0]);
+            double avg = Double.parseDouble(sa[1]);
             
-            Bin bin = new Bin(age_x1, age_x2, avg);
+            if (age < age_from || age > age_to)
+                continue;
+                
+            Bin bin = new Bin(age, age + 1, avg);
             bins.add(bin);
-            bin.index = k;
+            bin.index = ix++;
 
             bin.prev = prev;
             if (prev != null)
                 prev.next = bin;
             prev = bin;
 
-            if (k == 0)
+            if (firstBin == null)
                 firstBin = bin;
             lastBin = bin;
         }
+        
+        nbins = bins.size();
         
         nyears = 0;
         int yx = 0;
