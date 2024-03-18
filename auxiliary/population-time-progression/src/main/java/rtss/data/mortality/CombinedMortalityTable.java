@@ -103,7 +103,8 @@ public class CombinedMortalityTable
         String key = key(locality, gender);
         SingleMortalityTable smt1 = mt1.m.get(key);
         SingleMortalityTable smt2 = mt2.m.get(key);
-        m.put(key, SingleMortalityTable.interpolate(smt1, smt2, weight));
+        if (smt1 != null && smt2 != null)
+            m.put(key, SingleMortalityTable.interpolate(smt1, smt2, weight));
     }
 
     /*****************************************************************************************************/
