@@ -91,10 +91,9 @@ public class MakeCurve
 
         double[] before_res_y = Util.dup(res_y);
         preserve_means(res_y, bins);
-        preserve_means(res_y, bins);
         validate_means(res_y, bins);
 
-        if (Util.True)
+        if (Util.False)
         {
             new ChartXYSplineAdvanced("Generating curve: mean-preserving modification", "age", "y")
                     .addSeries("averages", res_x, averages(bins))
@@ -194,10 +193,7 @@ public class MakeCurve
             /*
              * endpoints are not constrained, scale the whole range
              */
-            double sum = Util.sum(Util.splice(y, ixLeft, ixRight));
-            scale = (bin.avg * bin.widths_in_years) / sum;
-            for (int k = ixLeft; k <= ixRight; k++)
-                y[k] *= scale;
+            scalePoints(y, bin, false, false);
         }
         else if (leftConstraint.any(scale * y[ixLeft]) && rightConstraint.any(scale * y[ixRight]))
         {
@@ -208,11 +204,7 @@ public class MakeCurve
             y[ixRight] = rightConstraint.apply(y[ixRight] * scale);
 
             // scale all inner points except the leftmost and rightmost ones
-            double sum = Util.sum(Util.splice(y, ixLeft + 1, ixRight - 1));
-            scale = (bin.avg * bin.widths_in_years - y[ixLeft] - y[ixRight]) / sum;
-            for (int k = ixLeft + 1; k <= ixRight - 1; k++)
-                y[k] *= scale;
-            return;
+            scalePoints(y, bin, true, true);
         }
         else
         {
@@ -229,10 +221,7 @@ public class MakeCurve
             y[ixRight] = rightConstraint.apply(y[ixRight] * scale);
 
             // move inner points except the leftmost and rightmost ones
-            sum = Util.sum(Util.splice(y, ixLeft + 1, ixRight - 1));
-            scale = (bin.avg * bin.widths_in_years - y[ixLeft] - y[ixRight]) / sum;
-            for (int k = ixLeft + 1; k <= ixRight - 1; k++)
-                y[k] *= scale;
+            scalePoints(y, bin, true, true);
         }
         
         /*
@@ -247,14 +236,38 @@ public class MakeCurve
         {
             y[0] += (y[1] - y[0]) / 2;
 
-            // move inner points except the leftmost and rightmost ones
-            double sum = Util.sum(Util.splice(y, ixLeft + 1, ixRight - 1));
-            scale = (bin.avg * bin.widths_in_years - y[ixLeft] - y[ixRight]) / sum;
-            for (int k = ixLeft + 1; k <= ixRight - 1; k++)
-                y[k] *= scale;
+            // move inner points except the leftmost and rightmost ones 
+            // (except if the last bin, then can also move the rightmost point)
+            scalePoints(y, bin, true, bin.next != null);
             
             // TODO: if y[0] is now >= y[1], reduce the increase 
         }
+    }
+    
+    private static void scalePoints(double[] y, Bin bin, boolean fixLeft, boolean fixRight)
+    {
+        final int ixLeft = 0;
+        final int ixRight = y.length - 1;
+        
+        int range_x1 = ixLeft;
+        if (fixLeft) 
+            range_x1++;
+
+        int range_x2 = ixRight;
+        if (fixRight) 
+            range_x2--;
+
+        double range_sum = Util.sum(Util.splice(y, range_x1, range_x2));
+        
+        double target_sum = bin.avg * bin.widths_in_years;
+        if (fixLeft)
+            target_sum -= y[ixLeft];
+        if (fixRight)
+            target_sum -= y[ixRight];
+        
+        double scale = target_sum / range_sum;
+        for (int x = range_x1; x <= range_x2; x++)
+            y[x] *= scale;
     }
 
     public static class ValueConstraint
