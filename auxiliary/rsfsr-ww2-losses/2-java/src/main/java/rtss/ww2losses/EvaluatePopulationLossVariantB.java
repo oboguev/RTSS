@@ -1,7 +1,6 @@
 package rtss.ww2losses;
 
-import rtss.ww2losses.EvaluatePopulationLossBase.Year;
-import rtss.ww2losses.util.Util;
+import rtss.ww2losses.params.AreaParameters;
 
 public class EvaluatePopulationLossVariantB extends EvaluatePopulationLossBase
 {

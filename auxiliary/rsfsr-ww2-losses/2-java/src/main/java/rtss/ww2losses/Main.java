@@ -4,6 +4,7 @@ import java.io.StringReader;
 import java.util.List;
 import com.opencsv.CSVReader;
 
+import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.selectors.Area;
 import rtss.ww2losses.util.Util;
 
@@ -87,7 +88,8 @@ public class Main
     {
         String prefix = area.name() + "_";
         String s = Util.loadResource(prefix + "census_1959_data.txt");
-        s = s.replace("\t", ",");
+        s = removeComments(s);
+        s = s.replace("\t", " ").replaceAll(" +", " ").replace(" ", ",");
         try (CSVReader reader = new CSVReader(new StringReader(s)))
         {
             return reader.readAll();
@@ -98,10 +100,28 @@ public class Main
     {
         String prefix = area.name() + "_";
         String s = Util.loadResource(prefix + "census_1959_interpolation.txt");
+        s = removeComments(s);
         s = s.replace("\t", " ").replaceAll(" +", " ").replace(" ", ",");
         try (CSVReader reader = new CSVReader(new StringReader(s)))
         {
             return reader.readAll();
         }
+    }
+    
+    private String removeComments(String rdata)
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        rdata = rdata.replace("\r\n", "\n");
+        for (String line : rdata.split("\n")) 
+        {
+            String lt = line.trim();
+            if (lt.startsWith("#") || lt.length() == 0)
+                continue;
+            sb.append(line);
+            sb.append("\n");
+        }
+        
+        return sb.toString();
     }
 }
