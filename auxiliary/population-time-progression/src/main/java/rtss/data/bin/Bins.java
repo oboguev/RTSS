@@ -1,6 +1,8 @@
 package rtss.data.bin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Bins
 {
@@ -8,26 +10,31 @@ public class Bins
     {
         Bin prev = null;
         int index = 0;
-        
+
         for (Bin bin : bins)
         {
             bin.index = index++;
-            
+
             bin.prev = prev;
             if (prev != null)
                 prev.next = bin;
-            prev = bin;            
+            prev = bin;
 
             if (bin.widths_in_years < 1)
-                throw new Exception("Invalid bin width");        
+                throw new Exception("Invalid bin width");
 
             if (bin.next != null && bin.age_x2 + 1 != bin.next.age_x1)
                 throw new Exception("Bins not continuous");
         }
-        
+
         return bins;
     }
-    
+
+    public static Bin[] bins(List<Bin> bins) throws Exception
+    {
+        return bins(bins.toArray(new Bin[0]));
+    }
+
     public static Bin firstBin(Bin... bins)
     {
         return bins[0];
@@ -37,7 +44,7 @@ public class Bins
     {
         return bins[bins.length - 1];
     }
-    
+
     public static int widths_in_years(Bin... bins)
     {
         int w = 0;
@@ -45,7 +52,7 @@ public class Bins
             w += bin.widths_in_years;
         return w;
     }
-    
+
     public static double[] midpoint_x(Bin... bins)
     {
         double[] x = new double[bins.length];
@@ -63,11 +70,11 @@ public class Bins
             x[k++] = bin.avg;
         return x;
     }
-    
+
     public static Bin[] combine_equals(Bin... bins) throws Exception
     {
         ArrayList<Bin> ar = new ArrayList<>();
-        
+
         Bin prev = null;
         for (Bin bin : bins)
         {
@@ -85,19 +92,23 @@ public class Bins
                 prev.widths_in_years = prev.age_x2 - prev.age_x1 + 1;
             }
         }
-        
+
         bins = ar.toArray(new Bin[0]);
-        
+
         /*
          * recalculate links and indexes
          */
         return bins(bins);
     }
-    
-    public static int flips(Bin...bins) throws Exception
+
+    /*
+     * Get the number of inner minimum and inner maximum points for the curve,
+     * not including endpoints  
+     */
+    public static int flips(Bin... bins) throws Exception
     {
         int flips = 0;
-        
+
         for (Bin bin : combine_equals(bins))
         {
             if (bin.prev != null && bin.next != null)
@@ -108,7 +119,7 @@ public class Bins
                     flips++;
             }
         }
-        
+
         return flips;
     }
 
@@ -118,19 +129,19 @@ public class Bins
     public static Bin findMinBin(Bin... bins) throws Exception
     {
         Bin minBin = null;
-        
+
         for (Bin bin : bins)
         {
             if (minBin == null)
             {
                 minBin = bin;
-            } 
+            }
             else if (bin.avg <= minBin.avg)
             {
                 minBin = bin;
             }
         }
-        
+
         return minBin;
     }
 
@@ -140,22 +151,22 @@ public class Bins
     public static Bin findMaxBin(Bin... bins) throws Exception
     {
         Bin maxBin = null;
-        
+
         for (Bin bin : bins)
         {
             if (maxBin == null)
             {
                 maxBin = bin;
-            } 
+            }
             else if (bin.avg >= maxBin.avg)
             {
                 maxBin = bin;
             }
         }
-        
+
         return maxBin;
     }
-    
+
     /*
      * Find bin for year of age 
      */
@@ -166,7 +177,63 @@ public class Bins
             if (age >= bin.age_x1 && age <= bin.age_x2)
                 return bin;
         }
-        
+
         return null;
+    }
+
+    /*
+     * Get yearly averages for the sequence of bins
+     */
+    public static double[] bins2yearly(Bin... bins)
+    {
+        double[] yy = new double[Bins.widths_in_years(bins)];
+        int ix = 0;
+
+        for (Bin bin : bins)
+        {
+            for (int k = bin.age_x1; k <= bin.age_x2; k++)
+            {
+                yy[ix++] = bin.avg;
+            }
+        }
+
+        return yy;
+    }
+
+    /*
+     * Convert an array of value points with PPY points for each year to yearly averages
+     */
+    public static double[] ppy2yearly(double[] y, int ppy)
+    {
+        double[] yy = new double[y.length / ppy];
+        Arrays.fill(yy, 0);
+
+        for (int ix = 0; ix < y.length; ix++)
+            yy[ix / ppy] += y[ix];
+
+        for (int yx = 0; yx < yy.length; yx++)
+            yy[yx] /= ppy;
+
+        return yy;
+    }
+
+    /*
+     * Convert an array of yearly value points to an array of averages according to bin sizes
+     */
+    public static double[] yearly2bin_avg(Bin[] bins, double[] yearly)
+    {
+        double[] avg = new double[bins.length];
+        int yx = 0;
+        for (Bin bin : bins)
+        {
+            for (int year = bin.age_x1; year <= bin.age_x2; year++)
+            {
+                avg[bin.index] += yearly[yx++];
+            }
+
+            avg[bin.index] /= bin.widths_in_years;
+        }
+
+        return avg;
     }
 }
