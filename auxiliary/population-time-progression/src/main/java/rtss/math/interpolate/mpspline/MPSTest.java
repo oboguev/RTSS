@@ -1,4 +1,4 @@
-package rtss.math.mpspline;
+package rtss.math.interpolate.mpspline;
 
 import java.io.StringReader;
 import java.util.ArrayList;

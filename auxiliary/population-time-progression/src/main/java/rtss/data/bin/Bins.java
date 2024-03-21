@@ -201,6 +201,41 @@ public class Bins
     }
 
     /*
+     * Generate X-points at PPY per year, evenly distributed across the bins interval
+     */
+    public static double[] ppy_x(Bin[] bins, int ppy)
+    {
+        double x1 = Bins.firstBin(bins).age_x1;
+        double x2 = Bins.lastBin(bins).age_x2 + 1;
+
+        // will compute interpolation for these points
+        int xcount = Bins.widths_in_years(bins) * ppy;
+        double[] xx = new double[xcount];
+        for (int k = 0; k < xcount; k++)
+            xx[k] = x1 + k * (x2 - x1) / xcount;
+
+        return xx;
+    }
+
+    /*
+     * Generate Y-points at PPY per year
+     */
+    public static double[] ppy_y(Bin[] bins, int ppy)
+    {
+        int xcount = Bins.widths_in_years(bins) * ppy;
+        double[] yy = new double[xcount];
+        int ix = 0;
+
+        for (Bin bin : bins)
+        {
+            for (int k = 0; k < bin.widths_in_years * ppy; k++)
+                yy[ix++] = bin.avg;
+        }
+
+        return yy;
+    }
+
+    /*
      * Convert an array of value points with PPY points for each year to yearly averages
      */
     public static double[] ppy2yearly(double[] y, int ppy)
