@@ -109,7 +109,7 @@ public class MakeCurve
     static public class SplineCurve
     {
         // private PolynomialSplineFunction spline;
-        private android.util.Spline aspline;
+        private rtss.math.interpolate.FritschCarlsonMonotonicSpline aspline;
         private double cp_x_last;
 
         public SplineCurve(double[] cp_x, double[] cp_y) throws Exception
@@ -122,7 +122,7 @@ public class MakeCurve
             // https://jetcracker.wordpress.com/2014/12/26/constrained-cubic-spline-java
 
             // but use android.util.Spline for now
-            aspline = android.util.Spline.createMonotoneCubicSpline(cp_x, cp_y);
+            aspline = rtss.math.interpolate.FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
             cp_x_last = cp_x[cp_x.length - 1];
         }
 
