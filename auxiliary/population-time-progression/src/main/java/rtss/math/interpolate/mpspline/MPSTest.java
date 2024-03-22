@@ -13,6 +13,7 @@ public class MPSTest
         {
             Bin[] bins = Bins.loadBinsYearly(String.format("ww2losses/%s_census_1959_data.txt", Area.USSR.name()));
             final int ppy = 10;
+            @SuppressWarnings("unused")
             double[] yy = MeanPreservingIterativeSpline.eval(bins, ppy);
             Util.noop();
         }

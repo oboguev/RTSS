@@ -4,12 +4,13 @@ import static java.lang.Math.abs;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.math.interpolate.FunctionRangeExtenderDirect;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
@@ -65,10 +66,10 @@ public class MeanPreservingIterativeSpline
              * https://www.researchgate.net/post/What_is_the_significance_of_Akima_spline_over_cubic_splines_or_other_curve_fitting_techniques
              * https://blogs.mathworks.com/cleve/2019/04/29/makima-piecewise-cubic-interpolation
              */
-            PolynomialSplineFunction sp = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
+            UnivariateFunction sp = makeSpline(cp_x, cp_y);
 
             for (int k = 0; k < xx.length; k++)
-                yy[k] = splineValue(sp, xx[k]);
+                yy[k] = sp.value(xx[k]);
 
             for (int k = 0; k < xx.length; k++)
                 result[k] += yy[k];
@@ -109,29 +110,11 @@ public class MeanPreservingIterativeSpline
         return result;
     }
 
-    private double splineValue(PolynomialSplineFunction sp, double x) throws Exception
+    private UnivariateFunction makeSpline(final double[] cp_x, final double[] cp_y) throws Exception
     {
-        if (sp.isValidPoint(x))
-            return sp.value(x);
-
-        double[] knots = sp.getKnots();
-        PolynomialFunction[] pf = sp.getPolynomials();
-
-        if (pf.length != knots.length - 1)
-            throw new Exception("Unexpected PolynomialSplineFunction ");
-
-        if (x < knots[0])
-        {
-            return pf[0].value(x - knots[0]);
-        }
-        else if (x > knots[knots.length - 1])
-        {
-            return pf[pf.length - 1].value(x - knots[knots.length - 1]);
-        }
-        else
-        {
-            return sp.value(x);
-        }
+        PolynomialSplineFunction sp = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
+        // return new FunctionRangeExtenderMirror(sp);
+        return new FunctionRangeExtenderDirect(sp);
     }
 
     private double[] weigted_control_points_x(Bin[] bins, int ppy)
