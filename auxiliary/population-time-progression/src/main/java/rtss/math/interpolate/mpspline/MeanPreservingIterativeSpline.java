@@ -11,6 +11,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.math.interpolate.FunctionRangeExtenderDirect;
+import rtss.math.interpolate.SteffenSplineInterpolator;
 // import rtss.math.interpolate.FunctionRangeExtenderMirror;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.util.Util;
@@ -32,10 +33,13 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  * Current implementation is meant for use with demographic data and expects positive values in bin averages 
  * (not negative and non-zero). It would be trivial though to generalize the implementation (methods "same"
  * and "eval_cp_x") to handle any data, by taking into account max and min value of the whole range of
- * bin averages (i.e. data channel height).  
+ * bin averages (i.e. data channel height).
+ * 
+ * Result is not guaranteed to be non-negative but usually is. 
  */
 public class MeanPreservingIterativeSpline
 {
+    // ### non-negative
     public static double[] eval(Bin[] bins, int ppy) throws Exception
     {
         return eval(bins, ppy, new TargetPrecision().eachBinAbsoluteDifference(0.1));
@@ -113,7 +117,8 @@ public class MeanPreservingIterativeSpline
 
     private UnivariateFunction makeSpline(final double[] cp_x, final double[] cp_y) throws Exception
     {
-        PolynomialSplineFunction sp = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
+        // PolynomialSplineFunction sp = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
+        PolynomialSplineFunction sp = new SteffenSplineInterpolator().interpolate(cp_x, cp_y);
         // return new FunctionRangeExtenderMirror(sp);
         return new FunctionRangeExtenderDirect(sp);
     }
