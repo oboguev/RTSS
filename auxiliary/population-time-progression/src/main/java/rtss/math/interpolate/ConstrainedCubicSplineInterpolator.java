@@ -18,7 +18,7 @@ import org.apache.commons.math3.util.MathArrays;
  * https://pages.uoregon.edu/dgavin/software/spline.pdf
  * https://web.archive.org/web/20070307145036/http://www.korf.co.uk/spline.pdf
  */
-public class ConstrainedCubicSpline implements UnivariateInterpolator
+public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolator
 {
     @Override
     public PolynomialSplineFunction interpolate(double x[], double y[])

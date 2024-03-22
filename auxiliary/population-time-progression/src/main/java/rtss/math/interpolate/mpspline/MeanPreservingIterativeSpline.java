@@ -10,9 +10,10 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.FunctionRangeExtenderDirect;
 import rtss.math.interpolate.SteffenSplineInterpolator;
-// import rtss.math.interpolate.FunctionRangeExtenderMirror;
+import rtss.math.interpolate.FunctionRangeExtenderMirror;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
@@ -39,19 +40,23 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  */
 public class MeanPreservingIterativeSpline
 {
-    // ### non-negative
     public static double[] eval(Bin[] bins, int ppy) throws Exception
     {
-        return eval(bins, ppy, new TargetPrecision().eachBinAbsoluteDifference(0.1));
+        return eval(bins, ppy, null, new TargetPrecision().eachBinAbsoluteDifference(0.1));
     }
 
-    public static double[] eval(Bin[] bins, int ppy, TargetPrecision precision) throws Exception
+    public static double[] eval(Bin[] bins, int ppy, Options options, TargetPrecision precision) throws Exception
     {
-        return new MeanPreservingIterativeSpline().do_eval(bins, ppy, precision);
+        return new MeanPreservingIterativeSpline().do_eval(bins, ppy, options, precision);
     }
 
-    private double[] do_eval(Bin[] bins, int ppy, TargetPrecision precision) throws Exception
+    private double[] do_eval(Bin[] bins, int ppy, Options options, TargetPrecision precision) throws Exception
     {
+        if (options == null)
+            options = new Options();
+        else
+            options = new Options(options);
+        options.applyDefaults();
 
         double[] xx = Bins.ppy_x(bins, ppy);
         double[] result = new double[xx.length];
@@ -61,7 +66,7 @@ public class MeanPreservingIterativeSpline
         final double[] cp_x = weigted_control_points_x(bins, ppy);
         double[] cp_y = Bins.midpoint_y(bins);
 
-        for (;;)
+        for (int pass = 0;; pass++)
         {
             double[] yy = new double[xx.length];
 
@@ -71,7 +76,7 @@ public class MeanPreservingIterativeSpline
              * https://www.researchgate.net/post/What_is_the_significance_of_Akima_spline_over_cubic_splines_or_other_curve_fitting_techniques
              * https://blogs.mathworks.com/cleve/2019/04/29/makima-piecewise-cubic-interpolation
              */
-            UnivariateFunction sp = makeSpline(cp_x, cp_y);
+            UnivariateFunction sp = makeSpline(cp_x, cp_y, options);
 
             for (int k = 0; k < xx.length; k++)
                 yy[k] = sp.value(xx[k]);
@@ -90,14 +95,16 @@ public class MeanPreservingIterativeSpline
 
             if (Util.False)
             {
-                new ChartXYSplineAdvanced("Mean-Preserving Iterative Spline [interim]", "x", "y")
+                String title = String.format("Mean-Preserving Iterative Spline [interim pass %d %s]", 
+                                             pass, options.basicSplineType.getSimpleName());
+                new ChartXYSplineAdvanced(title, "x", "y")
                         .addSeries("MPS", xx, result)
                         .addSeries("bins", xx, Bins.ppy_y(bins, ppy))
                         .display();
             }
 
             /*
-             * calculate residue
+             * calculate per-bin residue and store in updated control points for next iteration
              */
             cp_y = Bins.midpoint_y(bins);
             for (int ix = 0; ix < avg.length; ix++)
@@ -106,21 +113,56 @@ public class MeanPreservingIterativeSpline
 
         if (Util.True)
         {
-            new ChartXYSplineAdvanced("Mean-Preserving Iterative Spline [result]", "x", "y")
+            String title = String.format("Mean-Preserving Iterative Spline [result %s]", 
+                                         options.basicSplineType.getSimpleName());
+            new ChartXYSplineAdvanced(title, "x", "y")
                     .addSeries("MPS", xx, result)
                     .addSeries("bins", xx, Bins.ppy_y(bins, ppy))
                     .display();
         }
+        
+        if (options.checkNonNegative != null && options.checkNonNegative && !Util.isNonNegative(result))
+            throw new Exception("Result of interpolation is negative");
+
+        if (options.checkPositive != null && options.checkPositive && !Util.isPositive(result))
+            throw new Exception("Result of interpolation is negative or zero");
 
         return result;
     }
 
-    private UnivariateFunction makeSpline(final double[] cp_x, final double[] cp_y) throws Exception
+    private UnivariateFunction makeSpline(final double[] cp_x, final double[] cp_y, Options options) throws Exception
     {
-        // PolynomialSplineFunction sp = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
-        PolynomialSplineFunction sp = new SteffenSplineInterpolator().interpolate(cp_x, cp_y);
-        // return new FunctionRangeExtenderMirror(sp);
-        return new FunctionRangeExtenderDirect(sp);
+        PolynomialSplineFunction sp = null;
+        
+        if (options.basicSplineType == AkimaSplineInterpolator.class)
+        {
+            sp = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
+        }
+        else if (options.basicSplineType == SteffenSplineInterpolator.class)
+        {
+            sp = new SteffenSplineInterpolator().interpolate(cp_x, cp_y);
+        }
+        else if (options.basicSplineType == ConstrainedCubicSplineInterpolator.class)
+        {
+            sp = new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y);
+        }
+        else
+        {
+            throw new Exception("Not a valid spline type");
+        }
+        
+        if (options.functionExtenderType == FunctionRangeExtenderDirect.class)
+        {
+            return new FunctionRangeExtenderDirect(sp);
+        }
+        else if (options.functionExtenderType == FunctionRangeExtenderMirror.class)
+        {
+            return new FunctionRangeExtenderMirror(sp);
+        }
+        else
+        {
+            throw new Exception("Not a valid function range extender type");
+        }
     }
 
     private double[] weigted_control_points_x(Bin[] bins, int ppy)
@@ -198,5 +240,77 @@ public class MeanPreservingIterativeSpline
         double adiff = abs(a - b);
         double mass = max(abs(a), abs(b));
         return adiff / mass < 0.0001;
+    }
+    
+    /*=======================================================================================================*/
+    
+    public static class Options
+    {
+        Boolean checkNonNegative;
+        Boolean checkPositive;
+        Class<?> basicSplineType;
+        Class<?> functionExtenderType;
+        
+        public Options()
+        {
+            checkNonNegative = null;
+            checkPositive = null;
+            basicSplineType = null;
+            functionExtenderType = null;
+        }
+        
+        public Options(Options x)
+        {
+            checkNonNegative = x.checkNonNegative;
+            checkPositive = x.checkPositive;
+            basicSplineType = x.basicSplineType;
+            functionExtenderType = x.functionExtenderType;
+        }
+        
+        public Options checkNonNegative()
+        {
+            return checkNonNegative(true);
+        }
+
+        public Options checkNonNegative(Boolean b)
+        {
+            checkNonNegative = b;
+            return this; 
+        }
+
+        public Options checkPositive()
+        {
+            return checkPositive(true);
+        }
+
+        public Options checkPositive(Boolean b)
+        {
+            checkPositive = b;
+            return this; 
+        }
+
+        public Options basicSplineType(Class<?> clz)
+        {
+            basicSplineType = clz;
+            return this; 
+        }
+    
+        public Options functionExtenderType(Class<?> clz)
+        {
+            functionExtenderType = clz;
+            return this; 
+        }
+        
+        public void applyDefaults()
+        {
+            if (checkNonNegative == null && checkPositive == null)
+                checkNonNegative = true;
+            
+            if (basicSplineType == null)
+                basicSplineType = SteffenSplineInterpolator.class;
+            
+            if (functionExtenderType == null)
+                functionExtenderType = FunctionRangeExtenderDirect.class; 
+        }
     }
 }

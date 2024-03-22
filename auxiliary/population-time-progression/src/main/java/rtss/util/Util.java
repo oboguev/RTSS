@@ -255,6 +255,28 @@ public class Util
             seq[k] = si[k];
         return seq;
     }
+    
+    public static boolean isPositive(final double[] yy)
+    {
+        for (double y : yy)
+        {
+            if (y <= 0)
+                return false;
+        }
+        
+        return true;
+    }
+
+    public static boolean isNonNegative(final double[] yy)
+    {
+        for (double y : yy)
+        {
+            if (y < 0)
+                return false;
+        }
+        
+        return true;
+    }
 
     public static void print(String title, final double[] y, int start_year)
     {
@@ -324,6 +346,10 @@ public class Util
         }
 
         return sb.toString();
+    }
+    
+    public static void unused(Object... o)
+    {
     }
 
     public static void noop()
