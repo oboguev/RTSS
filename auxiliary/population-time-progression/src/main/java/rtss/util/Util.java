@@ -7,9 +7,11 @@ import java.nio.file.Paths;
 
 public class Util
 {
-    public static String EOL;
     public static boolean True = true;
     public static boolean False = false;
+
+    public static final String EOL;
+    public static final String nl = "\n";
 
     static
     {
@@ -130,25 +132,25 @@ public class Util
             text = "";
         return text;
     }
-    
+
     public static String loadResource(String path) throws Exception
     {
         byte[] bytes = Files.readAllBytes(Paths.get(Util.class.getClassLoader().getResource(path).toURI()));
         return new String(bytes, StandardCharsets.UTF_8);
     }
-    
+
     public static String f2s(double f) throws Exception
     {
         String s = String.format("%f", f);
         if (!s.contains("."))
             return s;
         while (s.endsWith("0") && !s.endsWith(".0"))
-             s = Util.stripTail(s, "0");
+            s = Util.stripTail(s, "0");
         if (s.endsWith(".0"))
             s = Util.stripTail(s, ".0");
         return s;
     }
-    
+
     // check if values differ
     public static boolean differ(double a, double b)
     {
@@ -193,7 +195,7 @@ public class Util
             sum += y[k];
         return sum;
     }
-    
+
     // average value over array
     public static double average(final double[] y)
     {
@@ -219,14 +221,14 @@ public class Util
         }
         return yy;
     }
-    
+
     // insert y[] into yy[x ... x + yy.length - 1]
     public static void insert(double[] yy, final double[] y, int x)
     {
         for (int k = 0; k < y.length; k++)
             yy[x + k] = y[k];
     }
-    
+
     // clone array of doubles
     public static double[] dup(final double[] y)
     {
@@ -235,7 +237,7 @@ public class Util
         else
             return splice(y, 0, y.length - 1);
     }
-    
+
     // generate sequence of integers k1 ... k2 
     public static int[] seq_int(int k1, int k2)
     {
@@ -265,7 +267,65 @@ public class Util
         Util.out("-------- end of " + title + " -------- ");
         Util.out("");
     }
-    
+
+    public static String removeComments(String lines)
+    {
+        lines = removeComments(lines, "#");
+        lines = removeComments(lines, "//");
+        return lines;
+    }
+
+    public static String removeComments(String lines, String tag)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        for (String line : lines.replace("\r\n", "\n").split("\n"))
+        {
+            if (line != null)
+            {
+                int k = line.indexOf(tag);
+                if (k != -1)
+                    line = line.substring(0, k);
+                sb.append(line);
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public static String trimLines(String lines)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        for (String line : lines.replace("\r\n", "\n").split("\n"))
+        {
+            if (line != null)
+            {
+                sb.append(line.trim());
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public static String removeEmptyLines(String lines)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        for (String line : lines.replace("\r\n", "\n").split("\n"))
+        {
+            if (line != null && line.length() != 0)
+            {
+                sb.append(line);
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
     public static void noop()
     {
         // for debugging

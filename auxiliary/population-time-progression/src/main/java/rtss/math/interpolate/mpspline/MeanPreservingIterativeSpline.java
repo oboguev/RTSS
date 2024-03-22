@@ -25,7 +25,12 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  * We first compute a spline that is not mean-preserving.     
  * Then we calculate the residue (per-bin difference between bin values and generated spline),
  * calculate the spline for the residue and add it to the initial result.
- * We then iteratively repeat the process until a desired precision is achieved.       
+ * We then iteratively repeat the process until a desired precision is achieved.
+ * 
+ * Current implementation is meant for use with demographic data and expects positive values in bin averages 
+ * (not negative and non-zero). It would be trivial though to generalize the implementation (methods "same"
+ * and "eval_cp_x") to handle any data, by taking into account max and min value of the whole range of
+ * bin averages (i.e. data channel height).  
  */
 public class MeanPreservingIterativeSpline
 {
@@ -41,6 +46,7 @@ public class MeanPreservingIterativeSpline
 
     private double[] do_eval(Bin[] bins, int ppy, TargetPrecision precision) throws Exception
     {
+
         double[] xx = Bins.ppy_x(bins, ppy);
         double[] result = new double[xx.length];
 

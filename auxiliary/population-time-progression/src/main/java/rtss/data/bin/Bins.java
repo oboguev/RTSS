@@ -1,8 +1,13 @@
 package rtss.data.bin;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.opencsv.CSVReader;
+
+import rtss.util.Util;
 
 public class Bins
 {
@@ -270,5 +275,119 @@ public class Bins
         }
 
         return avg;
+    }
+
+    /*
+     * Parse text file with bin data.
+     * Each line has format "year value".
+     */
+    public static Bin[] loadBinsYearly(String path) throws Exception
+    {
+        return parseBinsYearly(Util.loadResource(path));
+    }
+
+    public static Bin[] parseBinsYearly(String text) throws Exception
+    {
+        text = cleanDataContent(text).replace(" ", ",");
+        List<String[]> list;
+        try (CSVReader reader = new CSVReader(new StringReader(text)))
+        {
+            list = reader.readAll();
+        }
+
+        List<Bin> binlist = new ArrayList<>();
+
+        for (String[] sa : list)
+        {
+            int age = Integer.parseInt(sa[0]);
+            double avg = Double.parseDouble(sa[1]);
+
+            Bin bin = new Bin(age, age, avg);
+            binlist.add(bin);
+        }
+
+        return bins(binlist);
+    }
+
+    /*
+     * Parse text file with bin data.
+     * Each line has format "year-first year-last value".
+     * E.g. 
+     *   10 14 ...
+     *   15 19 ...
+     *   20 24 ...
+     */
+    public static Bin[] loadBinsMultiYear(String path) throws Exception
+    {
+        return parseBinsYearly(Util.loadResource(path));
+    }
+
+    public static Bin[] parseBinsMultiYear(String text) throws Exception
+    {
+        List<String[]> list;
+        try (CSVReader reader = new CSVReader(new StringReader(text)))
+        {
+            list = reader.readAll();
+        }
+
+        List<Bin> binlist = new ArrayList<>();
+
+        for (String[] sa : list)
+        {
+            int age1 = Integer.parseInt(sa[0]);
+            int age2 = Integer.parseInt(sa[1]);
+            double avg = Double.parseDouble(sa[2]);
+
+            Bin bin = new Bin(age1, age2, avg);
+            binlist.add(bin);
+        }
+
+        return bins(binlist);
+    }
+
+    /*
+     * Parse text file with bin data.
+     * Each line has format "year-first year-past-last value".
+     * E.g. 
+     *   10 15 ...
+     *   15 20 ...
+     *   20 25 ...
+     */
+    public static Bin[] loadBinsMultiYearPast(String path) throws Exception
+    {
+        return parseBinsMultiYearPast(Util.loadResource(path));
+    }
+
+    public static Bin[] parseBinsMultiYearPast(String text) throws Exception
+    {
+        List<String[]> list;
+        try (CSVReader reader = new CSVReader(new StringReader(text)))
+        {
+            list = reader.readAll();
+        }
+
+        List<Bin> binlist = new ArrayList<>();
+
+        for (String[] sa : list)
+        {
+            int age1 = Integer.parseInt(sa[0]);
+            int age2 = Integer.parseInt(sa[1]);
+            double avg = Double.parseDouble(sa[2]);
+
+            Bin bin = new Bin(age1, age2 - 1, avg);
+            binlist.add(bin);
+        }
+
+        return bins(binlist);
+    }
+
+    private static String cleanDataContent(String text)
+    {
+        text = text.replace("\r\n", "\n");
+        text = text.replace("\t", " ").replaceAll(" +", " ");
+        text = Util.removeComments(text);
+        text = Util.trimLines(text);
+        text = Util.removeEmptyLines(text);
+        return text;
     }
 }
