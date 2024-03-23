@@ -9,7 +9,6 @@ import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
-import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline.Options;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
