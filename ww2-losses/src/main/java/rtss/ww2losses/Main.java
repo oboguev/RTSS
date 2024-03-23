@@ -1,9 +1,5 @@
 package rtss.ww2losses;
 
-import java.io.StringReader;
-import java.util.List;
-import com.opencsv.CSVReader;
-
 import rtss.ww2losses.params.AreaParameters;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
