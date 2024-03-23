@@ -241,6 +241,9 @@ public class Population
                 String s2 = line.substring(k + 1);
                 line = s1.replace(" ", "_") + " " + s2;
             }
+            
+            line = line.toLowerCase();
+            line = line.replace("возраст не указан", "unknown");
 
             if (cols == null)
                 throw new Exception("Unidentified format of population table file");
@@ -251,7 +254,7 @@ public class Population
                 throw new Exception("Invalid format of population table");
 
             String age = el[cols.age];
-            if (age.toLowerCase().contains("итого") || age.contains("-"))
+            if (age.toLowerCase().contains("итого") || age.contains("-") || age.contains("–"))
                 continue;
             if (age.equals("" + MAX_AGE + "+"))
                 age = "" + MAX_AGE;
