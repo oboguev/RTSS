@@ -8,8 +8,6 @@ import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
-import rtss.util.plot.ChartXY;
-import rtss.util.plot.ChartXYSPlineBasic;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
 /*
@@ -161,14 +159,6 @@ public class RSFSR_1940 extends CombinedMortalityTable
         double[] qx = getSingleTable(locality, gender).qx();
         
         Util.print("RSFSR 1940 qx", qx, 0);
-
-        new ChartXY("RSFSR 1940 qx", "age", "mortality")
-            .addSeries("qx", qx)
-            .display();
-        
-        new ChartXYSPlineBasic("RSFSR 1940 qx", "age", "mortality")
-            .addSeries("qx", qx)
-            .display();
 
         new ChartXYSplineAdvanced("RSFSR 1940 qx", "age", "mortality")
             .addSeries("qx", qx)

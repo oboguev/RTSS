@@ -111,7 +111,7 @@ public class MeanPreservingIterativeSpline
                 cp_y[ix] -= avg[ix];
         }
 
-        if (Util.True)
+        if (Util.False)
         {
             String title = String.format("Mean-Preserving Iterative Spline [result %s]", 
                                          options.basicSplineType.getSimpleName());
