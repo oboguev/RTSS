@@ -51,7 +51,6 @@ public class MakeCurve
         
         if (Util.False)
         {
-
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)
                 chart.addSeries("1", xxx, yyy1);

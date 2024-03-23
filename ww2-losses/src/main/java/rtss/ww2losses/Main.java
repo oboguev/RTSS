@@ -30,6 +30,8 @@ public class Main
     
     private void do_main() throws Exception
     {
+        new BirthTrough().calcTrough(Area.RSFSR);
+        new BirthTrough().calcTrough(Area.USSR);
         do_main(Area.RSFSR);
 
         Util.out("");
