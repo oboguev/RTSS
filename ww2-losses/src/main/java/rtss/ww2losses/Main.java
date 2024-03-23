@@ -30,8 +30,6 @@ public class Main
     
     private void do_main() throws Exception
     {
-        new BirthTrough().calcTrough(Area.RSFSR);
-        new BirthTrough().calcTrough(Area.USSR);
         do_main(Area.RSFSR);
 
         Util.out("");
@@ -51,10 +49,7 @@ public class Main
         Util.out("");
         Util.out("Compute minimum births window ...");
         Util.out("");
-        PostProcess pp = new PostProcess();
-        pp.initCensusSource(loadCensusSource(area), 9, 20);
-        pp.initInterpolationData(loadInterpolationData(area));
-        pp.postProcess();
+        new BirthTrough().calcTrough(area);
         
         AreaParameters params = AreaParameters.forArea(area);
         

@@ -39,7 +39,7 @@ public class BirthTrough
                 .basicSplineType(AkimaSplineInterpolator.class);
         double[] yy = MeanPreservingIterativeSpline.eval(bins, PointsPerYear, options, precision);
         
-        if (Util.True)
+        if (Util.False)
         {
             double[] xx = Bins.ppy_x(bins, PointsPerYear);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("BirthTrough " + area.toString(), "x", "y");
