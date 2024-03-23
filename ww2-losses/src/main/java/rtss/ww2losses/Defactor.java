@@ -31,7 +31,7 @@ public class Defactor extends EvaluatePopulationLossBase
         
         double p_arith = (5 * cbr_1940_1944 - cbr_1940) / 4;
         
-        Util.out(String.format("Defactor 1940 %.1f from 1940-1940-1944 %.1f => average for 1941-1944 is %.2f, airth average is %.2f", 
+        Util.out(String.format("Defactor 1940 %.1f from 1940-1940-1944 %.1f => average for 1941-1944 is %.2f, arithmetic average is %.2f", 
                                cbr_1940, cbr_1940_1944, p, p_arith));
     }
 }
