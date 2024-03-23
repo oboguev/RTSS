@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
 <project xmlns="https://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rtss</groupId>
-	<artifactId>PopulationTimeProgression</artifactId>
+	<artifactId>rtss-math-tools</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>PopulationTimeProgression</name>
-	<description>PopulationTimeProgression</description>
+	<name>rtss-math-tools</name>
+	<description>Mathematical library for RTSS</description>
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
@@ -22,19 +23,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.jfree</groupId>
-			<artifactId>jfreechart</artifactId>
-			<version>1.5.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.orsonpdf</groupId>
-			<artifactId>orsonpdf</artifactId>
-			<version>1.9</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jfree</groupId>
-			<artifactId>jfreesvg</artifactId>
-			<version>3.4</version>
+			<groupId>rtss</groupId>
+			<artifactId>rtss-runtime</artifactId>
+			<version>${version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.manyangled</groupId>
