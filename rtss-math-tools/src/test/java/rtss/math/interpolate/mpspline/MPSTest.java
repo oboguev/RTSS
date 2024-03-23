@@ -16,7 +16,7 @@ public class MPSTest
     {
         try
         {
-            Bin[] bins = Bins.loadBinsYearly(String.format("ww2losses/%s_census_1959_data.txt", Area.RSFSR.name()));
+            Bin[] bins = Bins.loadBinsYearly(String.format("test-math-tools/%s_census_1959_data.txt", Area.RSFSR.name()));
             final int ppy = 10;
             double[] yy;
 
