@@ -80,43 +80,4 @@ public class Main
         epl = new RecombineRates(params);
         epl.evaluate();
     }
-    
-    private List<String[]> loadCensusSource(Area area) throws Exception
-    {
-        String s = Util.loadResource(String.format("ww2losses/%s_census_1959_data.txt", area.name()));
-        s = removeComments(s);
-        s = s.replace("\t", " ").replaceAll(" +", " ").replace(" ", ",");
-        try (CSVReader reader = new CSVReader(new StringReader(s)))
-        {
-            return reader.readAll();
-        }
-    }
-    
-    private List<String[]> loadInterpolationData(Area area) throws Exception
-    {
-        String s = Util.loadResource(String.format("ww2losses/%s_census_1959_interpolation.txt", area.name()));
-        s = removeComments(s);
-        s = s.replace("\t", " ").replaceAll(" +", " ").replace(" ", ",");
-        try (CSVReader reader = new CSVReader(new StringReader(s)))
-        {
-            return reader.readAll();
-        }
-    }
-    
-    private String removeComments(String rdata)
-    {
-        StringBuilder sb = new StringBuilder();
-        
-        rdata = rdata.replace("\r\n", "\n");
-        for (String line : rdata.split("\n")) 
-        {
-            String lt = line.trim();
-            if (lt.startsWith("#") || lt.length() == 0)
-                continue;
-            sb.append(line);
-            sb.append("\n");
-        }
-        
-        return sb.toString();
-    }
 }
