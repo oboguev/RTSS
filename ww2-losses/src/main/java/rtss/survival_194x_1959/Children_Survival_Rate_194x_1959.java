@@ -114,6 +114,7 @@ public class Children_Survival_Rate_194x_1959
         {
             mt1942 = mt1938_ussr;
             mt1958 = mt1958_ussr;
+            // mt1958 = mt1958_rsfsr; 
         }
         else if (area == Area.RSFSR)
         {
