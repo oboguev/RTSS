@@ -9,6 +9,7 @@ import java.util.Map;
 import rtss.ww2losses.data.Bin;
 import rtss.data.Points;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.selectors.Area;
 import rtss.util.Util;
 
 public class PostProcess
@@ -26,8 +27,8 @@ public class PostProcess
     
     public void initCensusSource(List<String[]> list, int age_from, int age_to) throws Exception
     {
-        PopulationByLocality rsfsr_1959 = PopulationByLocality.load("population_data/RSFSR/1959");
-        PopulationByLocality ussr_1959 = PopulationByLocality.load("population_data/USSR/1959");
+        PopulationByLocality rsfsr_1959 = PopulationByLocality.census(Area.RSFSR, 1959);
+        PopulationByLocality ussr_1959 = PopulationByLocality.census(Area.USSR, 1959);
         
         
         Bin prev = null;

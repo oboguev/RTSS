@@ -1,5 +1,6 @@
 package rtss.data.population;
 
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -107,6 +108,11 @@ public class PopulationByLocality
 
     /****************************************************************************************************/
 
+    public static PopulationByLocality census(Area area, int year) throws Exception
+    {
+        return load(String.format("population_data/%s/%d", area.name(), year));
+    }
+    
     public static PopulationByLocality load(String path) throws Exception
     {
         PopulationByLocality p = new PopulationByLocality();
