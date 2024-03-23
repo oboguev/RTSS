@@ -2,6 +2,7 @@ package rtss.forward_1926_193x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 
@@ -21,7 +22,7 @@ public class ForwardPopulation_1926 extends ForwardPopulation
          * рождаемость во всём СССР = 44.0
          * в сельских местностях СССР = 46.1
          */
-        PopulationByLocality p1926 = PopulationByLocality.load("population_data/USSR/1926");
+        PopulationByLocality p1926 = PopulationByLocality.census(Area.USSR, 1926);
         final double BirthRateTotal = 44.0;
         BirthRateRural = 46.1;
         final double ruralPopulation = p1926.sum(Locality.RURAL, Gender.BOTH, 0, MAX_AGE);

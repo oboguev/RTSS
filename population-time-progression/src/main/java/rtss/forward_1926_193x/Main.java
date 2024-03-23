@@ -3,6 +3,7 @@ package rtss.forward_1926_193x;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.SmoothPopulation;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -57,15 +58,15 @@ public class Main
         new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
         new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
 
-        PopulationByLocality.load("population_data/USSR/1926");
-        PopulationByLocality.load("population_data/RSFSR/1926");
-        PopulationByLocality.load("population_data/USSR/1937");
+        PopulationByLocality.census(Area.USSR, 1926);
+        PopulationByLocality.census(Area.RSFSR, 1926);
+        PopulationByLocality.census(Area.USSR, 1937);
     }
     
     @SuppressWarnings("unused")
     private void testPopulationSmoother() throws Exception
     {
-        PopulationByLocality p = PopulationByLocality.load("population_data/USSR/1926");
+        PopulationByLocality p = PopulationByLocality.census(Area.USSR, 1926);
         double[] d0 = p.toArray(Locality.RURAL, Gender.MALE);
         double[] d1 = SmoothPopulation.smooth(d0, "A");
         double[] d2 = SmoothPopulation.smooth(d0, "AB");

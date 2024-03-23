@@ -7,6 +7,7 @@ import java.util.Map;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -15,8 +16,8 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
 {
     public final boolean DoSmoothPopulation = true;
 
-    private PopulationByLocality p1926 = PopulationByLocality.load("population_data/USSR/1926").smooth(DoSmoothPopulation);
-    private PopulationByLocality p1939 = PopulationByLocality.load("population_data/USSR/1939").smooth(DoSmoothPopulation);;
+    private PopulationByLocality p1926 = PopulationByLocality.census(Area.USSR, 1926).smooth(DoSmoothPopulation);
+    private PopulationByLocality p1939 = PopulationByLocality.census(Area.USSR, 1939).smooth(DoSmoothPopulation);;
 
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
