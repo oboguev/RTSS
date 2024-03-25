@@ -19,7 +19,7 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
         
         final double target_b2d =  params.ACTUAL_BIRTH_DEFICIT /  params.ACTUAL_EXCESS_DEATHS;
 
-        for (;;)
+        for (int pass = 0;; pass++)
         {
             double cbr = (cbr1 + cbr2) / 2;
             double cdr = cbr - actualGrowthPromille;
@@ -31,7 +31,7 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
             
             double b2d = birthsDeficit / excessDeaths;
             
-            if (Math.abs(excessDeaths - params.ACTUAL_EXCESS_DEATHS) < 0.05)
+            if (Math.abs(excessDeaths - params.ACTUAL_EXCESS_DEATHS) < 0.05 || Math.abs(cbr1 - cbr2) < 0.0001)
             {
                 print(false);
                 Util.out(String.format("Birth rate: %.2f", cbr));
