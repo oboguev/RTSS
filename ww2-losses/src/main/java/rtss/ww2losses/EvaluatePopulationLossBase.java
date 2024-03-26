@@ -245,7 +245,7 @@ public abstract class EvaluatePopulationLossBase
         
         for (Year y : years)
         {
-            String msg = String.format("%1d", y.nyear);
+            String msg = String.format("%1d", y.nyear + 1);
             msg += sep + format(y.expected);
             msg += sep + format(y.actual);
             msg += sep + String.format("%10.3f %10.3f", 
