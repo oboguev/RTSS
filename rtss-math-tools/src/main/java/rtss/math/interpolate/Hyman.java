@@ -10,9 +10,10 @@ import rtss.util.Util;
 
 import static java.lang.Math.IEEEremainder;
 
-/*
+/**
  * Derived from R system source code,
  * with the original files under GPL 2 (or later GPL versions)
+ * (files: spline.R splinefun.R splines.c)
  */
 public class Hyman
 {
@@ -471,13 +472,10 @@ public class Hyman
             dd[k] = (2 * y[k] / h[k] + b0[k] + b1[k]) / pow2(h[k]);
         }
 
-        int n = z.x.length;
-        // ### index ???
+        int n = cc.length;
         double c1 = (3 * y[n - 1] + (b0[n - 1] + 2 * b1[n - 1]) * h[n - 1]) / pow2(h[n - 1]);
-
         z.c = concat(cc, c1);
-        // ### index ???
-        z.d = concat(dd, dd[n -1]);
+        z.d = concat(dd, dd[n - 1]);
     }
 
     /*
@@ -587,6 +585,7 @@ public class Hyman
         return m;
     }
 
+    @SuppressWarnings("unused")
     private double[] pmax(double[] a, double[] b)
     {
         if (a.length != b.length)
