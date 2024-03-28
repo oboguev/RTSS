@@ -30,7 +30,7 @@ public class Hyman
         double[] b;
         double[] c;
         double[] d;
-        
+
         public Coefficients(double[] x, double[] y)
         {
             this.x = x;
@@ -430,9 +430,55 @@ public class Hyman
     /*====================================================
     
     
+    spl_coef_conv <- function(z)
     
+    n <- length(z.x)
+    h <- diff(z.x); 
+    y <- -diff(z.y)
+    b0 <- z.b[-n];   // means dropping element at index n
+    b1 <- z.b[-1L]   // means dropping element at index 1
+    
+    cc <- -(3*y + (2*b0 + b1)*h) / h^2
+    c1 <- (3*y[n-1L] + (b0[n-1L] + 2*b1[n-1L])*h[n-1L]) / h[n-1L]^2
+    
+    z.c <- c(cc, c1)
+    dd <- (2*y/h + b0 + b1) / h^2
+    z.d <- c(dd, dd[n-1L])
+    z
     
     ============================================================= */
+
+    /*
+     * Takes an object z containing equal-length vectors z.x, z.y, z.b, z.c, z.d 
+     * defining a cubic spline interpolating z.x, z.y 
+     * and forces z.c and z.d to be consistent with z.y and z.b (gradient of spline). 
+     * 
+     * This is intended for use in conjunction with Hyman's monotonicity filter.
+     * Note that R's spline routine has s''(x)/2 as c and s'''(x)/6 as d.
+     */
+    private void spl_coef_conv(Coefficients z)
+    {
+        double[] h = diff(z.x);
+        double[] y = multiply(diff(z.y), -1);
+        double[] b0 = Util.splice(z.b, 0, z.b.length - 2);
+        double[] b1 = Util.splice(z.b, 1, z.b.length - 1);
+
+        double[] cc = new double[b0.length];
+        double[] dd = new double[b0.length];
+        for (int k = 0; k < cc.length; k++)
+        {
+            cc[k] = -(3 * y[k] + (2 * b0[k] + b1[k]) * h[k]) / pow2(h[k]);
+            dd[k] = (2 * y[k] / h[k] + b0[k] + b1[k]) / pow2(h[k]);
+        }
+
+        int n = z.x.length;
+        // ### index ???
+        double c1 = (3 * y[n - 1] + (b0[n - 1] + 2 * b1[n - 1]) * h[n - 1]) / pow2(h[n - 1]);
+
+        z.c = concat(cc, c1);
+        // ### index ???
+        z.d = concat(dd, dd[n -1]);
+    }
 
     /*
      * Filters cubic spline function to yield co-monotonicity in accordance
@@ -448,7 +494,7 @@ public class Hyman
     {
         double[] ss = div(diff(z.y), diff(z.x));
         double[] s0 = concat(ss[0], ss);
-        double[] s1 = concat(ss, ss[ss.length -1]);
+        double[] s1 = concat(ss, ss[ss.length - 1]);
         double[] t1 = pmin(abs(s0), abs(s1));
         double[] sig = Util.dup(z.b);
         for (int k = 0; k < s0.length; k++)
@@ -456,7 +502,7 @@ public class Hyman
             if (s0[k] * s1[k] > 0)
                 sig[k] = s1[k];
         }
-        
+
         double[] b = z.b;
 
         for (int k = 0; k < s0.length; k++)
@@ -468,11 +514,11 @@ public class Hyman
             else
             {
                 b[k] = max(min(0, b[k]), -3 * t1[k]);
-                
+
             }
         }
     }
-    
+
     private double[] diff(double[] x)
     {
         double[] d = new double[x.length - 1];
@@ -480,7 +526,7 @@ public class Hyman
             d[k] = x[k + 1] - x[k];
         return d;
     }
-    
+
     private double[] div(double[] a, double[] b)
     {
         if (a.length != b.length)
@@ -489,18 +535,18 @@ public class Hyman
         double[] d = new double[a.length];
         for (int k = 0; k < d.length; k++)
             d[k] = a[k] / b[k];
-        
+
         return d;
     }
-    
+
     private double[] concat(double a, double[] b)
     {
-        return concat(new double[] {a}, b);
+        return concat(new double[] { a }, b);
     }
-    
+
     private double[] concat(double[] a, double b)
     {
-        return concat(a, new double[] {b});
+        return concat(a, new double[] { b });
     }
 
     private double[] concat(double[] a, double[] b)
@@ -513,7 +559,7 @@ public class Hyman
             d[ix++] = b[k];
         return d;
     }
-    
+
     private double[] abs(double[] x)
     {
         double[] a = new double[x.length];
@@ -521,12 +567,20 @@ public class Hyman
             a[k] = Math.abs(x[k]);
         return a;
     }
-    
+
+    private double[] multiply(double[] x, double v)
+    {
+        double[] a = new double[x.length];
+        for (int k = 0; k < x.length; k++)
+            a[k] = x[k] * v;
+        return a;
+    }
+
     private double[] pmin(double[] a, double[] b)
     {
         if (a.length != b.length)
             throw new IllegalArgumentException();
-        
+
         double[] m = new double[a.length];
         for (int k = 0; k < m.length; k++)
             m[k] = min(a[k], b[k]);
@@ -537,10 +591,15 @@ public class Hyman
     {
         if (a.length != b.length)
             throw new IllegalArgumentException();
-        
+
         double[] m = new double[a.length];
         for (int k = 0; k < m.length; k++)
             m[k] = max(a[k], b[k]);
         return m;
+    }
+
+    private double pow2(double x)
+    {
+        return x * x;
     }
 }
