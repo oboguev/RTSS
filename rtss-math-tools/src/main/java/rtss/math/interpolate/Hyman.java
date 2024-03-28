@@ -324,7 +324,7 @@ public class Hyman
         int n = x.length;
         double[] e = new double[n];
 
-        if (n < 2 || y[1] != y[n])
+        if (n < 2 || y[0] != y[n - 1])
             throw new IllegalArgumentException();
 
         if (n == 2)
