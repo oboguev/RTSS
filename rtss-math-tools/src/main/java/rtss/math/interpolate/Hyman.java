@@ -431,21 +431,6 @@ public class Hyman
     /*====================================================
     
     
-    spl_coef_conv <- function(z)
-    
-    n <- length(z.x)
-    h <- diff(z.x); 
-    y <- -diff(z.y)
-    b0 <- z.b[-n];   // means dropping element at index n
-    b1 <- z.b[-1L]   // means dropping element at index 1
-    
-    cc <- -(3*y + (2*b0 + b1)*h) / h^2
-    c1 <- (3*y[n-1L] + (b0[n-1L] + 2*b1[n-1L])*h[n-1L]) / h[n-1L]^2
-    
-    z.c <- c(cc, c1)
-    dd <- (2*y/h + b0 + b1) / h^2
-    z.d <- c(dd, dd[n-1L])
-    z
     
     ============================================================= */
 
@@ -460,7 +445,7 @@ public class Hyman
     private void spl_coef_conv(Coefficients z)
     {
         double[] h = diff(z.x);
-        double[] y = multiply(diff(z.y), -1);
+        double[] yy = multiply(diff(z.y), -1);
         double[] b0 = Util.splice(z.b, 0, z.b.length - 2);
         double[] b1 = Util.splice(z.b, 1, z.b.length - 1);
 
@@ -468,12 +453,12 @@ public class Hyman
         double[] dd = new double[b0.length];
         for (int k = 0; k < cc.length; k++)
         {
-            cc[k] = -(3 * y[k] + (2 * b0[k] + b1[k]) * h[k]) / pow2(h[k]);
-            dd[k] = (2 * y[k] / h[k] + b0[k] + b1[k]) / pow2(h[k]);
+            cc[k] = -(3 * yy[k] + (2 * b0[k] + b1[k]) * h[k]) / pow2(h[k]);
+            dd[k] = (2 * yy[k] / h[k] + b0[k] + b1[k]) / pow2(h[k]);
         }
 
         int n = cc.length;
-        double c1 = (3 * y[n - 1] + (b0[n - 1] + 2 * b1[n - 1]) * h[n - 1]) / pow2(h[n - 1]);
+        double c1 = (3 * yy[n - 1] + (b0[n - 1] + 2 * b1[n - 1]) * h[n - 1]) / pow2(h[n - 1]);
         z.c = concat(cc, c1);
         z.d = concat(dd, dd[n - 1]);
     }
