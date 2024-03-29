@@ -4,8 +4,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
 
-import java.util.Arrays;
-
 import rtss.util.Util;
 
 import static java.lang.Math.IEEEremainder;
@@ -15,9 +13,9 @@ import static java.lang.Math.IEEEremainder;
  * with the original files under GPL 2 (or later GPL versions)
  * (package: stats, files: spline.R splinefun.R splines.c)
  */
-public class Hyman
+class Common
 {
-    public static enum SplineMethod
+    static enum SplineMethod
     {
         PERIODIC, // 1
         NATURAL, // 2
@@ -25,7 +23,7 @@ public class Hyman
         HYMAN // 5
     }
 
-    private static class Coefficients
+    static class Coefficients
     {
         double[] x;
         double[] y;
@@ -40,18 +38,21 @@ public class Hyman
             this.b = new double[x.length];
             this.d = new double[x.length];
             this.d = new double[x.length];
+            // Arrays.fill(b, 0);
+            // Arrays.fill(c, 0);
+            // Arrays.fill(d, 0);
         }
     }
 
-    private Coefficients makeCoefficients(SplineMethod method, double[] x, double[] y)
+    protected Coefficients makeCoefficients(SplineMethod method, double[] x, double[] y)
     {
         if (x.length < 2 || y.length != x.length)
             throw new IllegalArgumentException();
-        
+
         verifyIncreasing(x);
 
         Coefficients cf = new Coefficients(x, y);
-        
+
         if (method == SplineMethod.HYMAN)
         {
             verifyMonotone(y);
@@ -63,14 +64,14 @@ public class Hyman
         {
             spline_coef(method, cf.x, cf.y, cf.b, cf.c, cf.d);
         }
-        
+
         return cf;
     }
 
     /*
      * (x, y, b, c, d) should have the same length
      */
-    private void spline_coef(
+    protected void spline_coef(
             SplineMethod method,
             double[] x, double[] y,
             double[] b, double[] c, double[] d) throws IllegalArgumentException
@@ -82,10 +83,6 @@ public class Hyman
             d.length != x.length)
             throw new IllegalArgumentException();
 
-        Arrays.fill(b, 0);
-        Arrays.fill(c, 0);
-        Arrays.fill(d, 0);
-        
         switch (method)
         {
         case PERIODIC:
@@ -99,7 +96,7 @@ public class Hyman
         case FMM:
             fmm_spline(x, y, b, c, d);
             break;
-            
+
         default:
             throw new IllegalArgumentException();
         }
@@ -335,7 +332,7 @@ public class Hyman
      *  Note: There is an explicit check that the user has supplied
      *  data with y[1] equal to y[n].
      */
-    private void periodic_spline(double[] x, double[] y, double[] b, double[] c, double[] d)
+    protected void periodic_spline(double[] x, double[] y, double[] b, double[] c, double[] d)
             throws IllegalArgumentException
     {
         int n = x.length;
@@ -453,7 +450,7 @@ public class Hyman
      * This is intended for use in conjunction with Hyman's monotonicity filter.
      * Note that R's spline routine has s''(x)/2 as c and s'''(x)/6 as d.
      */
-    private void spl_coef_conv(Coefficients z)
+    protected void spl_coef_conv(Coefficients z)
     {
         double[] h = diff(z.x);
         double[] yy = multiply(diff(z.y), -1);
@@ -484,7 +481,7 @@ public class Hyman
      * 
      * See also Dougherty, Edelman and Hyman 1989 Mathematics of Computation 52:471-494.
      */
-    private void hyman_filter(Coefficients z)
+    protected void hyman_filter(Coefficients z)
     {
         double[] ss = div(diff(z.y), diff(z.x));
         double[] s0 = concat(ss[0], ss);
@@ -518,7 +515,7 @@ public class Hyman
      *     diff[k] = x[k + 1] - x[k]
      * Returned array is one element shorter than the argument array.    
      */
-    private double[] diff(double[] x)
+    protected double[] diff(double[] x)
     {
         double[] d = new double[x.length - 1];
         for (int k = 0; k < d.length; k++)
@@ -529,7 +526,7 @@ public class Hyman
     /*
      * Return result[k] = a(k) / b(k)
      */
-    private double[] div(double[] a, double[] b)
+    protected double[] div(double[] a, double[] b)
     {
         if (a.length != b.length)
             throw new IllegalArgumentException();
@@ -544,7 +541,7 @@ public class Hyman
     /*
      * Return a concatenation of a scalar and appended array
      */
-    private double[] concat(double a, double[] b)
+    protected double[] concat(double a, double[] b)
     {
         return concat(new double[] { a }, b);
     }
@@ -552,7 +549,7 @@ public class Hyman
     /*
      * Return a concatenation of array and appended scalar
      */
-    private double[] concat(double[] a, double b)
+    protected double[] concat(double[] a, double b)
     {
         return concat(a, new double[] { b });
     }
@@ -560,7 +557,7 @@ public class Hyman
     /*
      * Return a concatenation of two arrays
      */
-    private double[] concat(double[] a, double[] b)
+    protected double[] concat(double[] a, double[] b)
     {
         double[] d = new double[a.length + b.length];
         int ix = 0;
@@ -574,7 +571,7 @@ public class Hyman
     /*
      * Return result[k] = abs(x[k])
      */
-    private double[] abs(double[] x)
+    protected double[] abs(double[] x)
     {
         double[] a = new double[x.length];
         for (int k = 0; k < x.length; k++)
@@ -585,7 +582,7 @@ public class Hyman
     /*
      * Return result[k] = v * x[k]
      */
-    private double[] multiply(double[] x, double v)
+    protected double[] multiply(double[] x, double v)
     {
         double[] a = new double[x.length];
         for (int k = 0; k < x.length; k++)
@@ -596,7 +593,7 @@ public class Hyman
     /*
      * Return "parallel minimum": result[k] = min(a[k], b[k])
      */
-    private double[] pmin(double[] a, double[] b) 
+    protected double[] pmin(double[] a, double[] b)
             throws IllegalArgumentException
     {
         if (a.length != b.length)
@@ -612,7 +609,7 @@ public class Hyman
      * Return "parallel maximum": result[k] = max(a[k], b[k])
      */
     @SuppressWarnings("unused")
-    private double[] pmax(double[] a, double[] b) 
+    protected double[] pmax(double[] a, double[] b)
             throws IllegalArgumentException
     {
         if (a.length != b.length)
@@ -627,15 +624,15 @@ public class Hyman
     /*
      * return x^2
      */
-    private double pow2(double x)
+    protected double pow2(double x)
     {
         return x * x;
     }
-    
+
     /*
      * Verify the sequence is strictly increasing
      */
-    private void verifyIncreasing(double[] x) 
+    protected void verifyIncreasing(double[] x)
             throws IllegalArgumentException
     {
         for (double d : diff(x))
@@ -649,7 +646,7 @@ public class Hyman
      * Verify the sequence is monotone: increasing or decreasing,
      * zero-change segments are also ok
      */
-    private void verifyMonotone(double[] y) 
+    protected void verifyMonotone(double[] y)
             throws IllegalArgumentException
     {
         int sign = 0;
