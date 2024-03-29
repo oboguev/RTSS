@@ -13,7 +13,7 @@ import static java.lang.Math.IEEEremainder;
 /**
  * Derived from R system source code,
  * with the original files under GPL 2 (or later GPL versions)
- * (files: spline.R splinefun.R splines.c)
+ * (package: stats, files: spline.R splinefun.R splines.c)
  */
 public class Hyman
 {
@@ -21,7 +21,8 @@ public class Hyman
     {
         PERIODIC, // 1
         NATURAL, // 2
-        FMM // 3
+        FMM, // 3
+        HYMAN // 5
     }
 
     private static class Coefficients
@@ -46,8 +47,23 @@ public class Hyman
     {
         if (x.length < 2 || y.length != x.length)
             throw new IllegalArgumentException();
+        
+        verifyIncreasing(x);
+
         Coefficients cf = new Coefficients(x, y);
-        spline_coef(method, cf.x, cf.y, cf.b, cf.c, cf.d);
+        
+        if (method == SplineMethod.HYMAN)
+        {
+            verifyMonotone(y);
+            spline_coef(SplineMethod.FMM, cf.x, cf.y, cf.b, cf.c, cf.d);
+            hyman_filter(cf);
+            spl_coef_conv(cf);
+        }
+        else
+        {
+            spline_coef(method, cf.x, cf.y, cf.b, cf.c, cf.d);
+        }
+        
         return cf;
     }
 
@@ -69,9 +85,7 @@ public class Hyman
         Arrays.fill(b, 0);
         Arrays.fill(c, 0);
         Arrays.fill(d, 0);
-
-        // ### x should be increasing and unique
-
+        
         switch (method)
         {
         case PERIODIC:
@@ -85,6 +99,9 @@ public class Hyman
         case FMM:
             fmm_spline(x, y, b, c, d);
             break;
+            
+        default:
+            throw new IllegalArgumentException();
         }
     }
 
@@ -147,7 +164,7 @@ public class Hyman
         }
     }
 
-    /*                                          /*
+    /*
      *  Natural Splines
      *  ---------------
      *  Here the end-conditions are determined by setting the second
@@ -428,12 +445,6 @@ public class Hyman
         d[n - 1] = d[0];
     }
 
-    /*====================================================
-    
-    
-    
-    ============================================================= */
-
     /*
      * Takes an object z containing equal-length vectors z.x, z.y, z.b, z.c, z.d 
      * defining a cubic spline interpolating z.x, z.y 
@@ -502,6 +513,11 @@ public class Hyman
         }
     }
 
+    /*
+     * Return an array of stepwise differences between the elements of x:
+     *     diff[k] = x[k + 1] - x[k]
+     * Returned array is one element shorter than the argument array.    
+     */
     private double[] diff(double[] x)
     {
         double[] d = new double[x.length - 1];
@@ -510,6 +526,9 @@ public class Hyman
         return d;
     }
 
+    /*
+     * Return result[k] = a(k) / b(k)
+     */
     private double[] div(double[] a, double[] b)
     {
         if (a.length != b.length)
@@ -522,16 +541,25 @@ public class Hyman
         return d;
     }
 
+    /*
+     * Return a concatenation of a scalar and appended array
+     */
     private double[] concat(double a, double[] b)
     {
         return concat(new double[] { a }, b);
     }
 
+    /*
+     * Return a concatenation of array and appended scalar
+     */
     private double[] concat(double[] a, double b)
     {
         return concat(a, new double[] { b });
     }
 
+    /*
+     * Return a concatenation of two arrays
+     */
     private double[] concat(double[] a, double[] b)
     {
         double[] d = new double[a.length + b.length];
@@ -543,6 +571,9 @@ public class Hyman
         return d;
     }
 
+    /*
+     * Return result[k] = abs(x[k])
+     */
     private double[] abs(double[] x)
     {
         double[] a = new double[x.length];
@@ -551,6 +582,9 @@ public class Hyman
         return a;
     }
 
+    /*
+     * Return result[k] = v * x[k]
+     */
     private double[] multiply(double[] x, double v)
     {
         double[] a = new double[x.length];
@@ -559,7 +593,11 @@ public class Hyman
         return a;
     }
 
-    private double[] pmin(double[] a, double[] b)
+    /*
+     * Return "parallel minimum": result[k] = min(a[k], b[k])
+     */
+    private double[] pmin(double[] a, double[] b) 
+            throws IllegalArgumentException
     {
         if (a.length != b.length)
             throw new IllegalArgumentException();
@@ -570,8 +608,12 @@ public class Hyman
         return m;
     }
 
+    /*
+     * Return "parallel maximum": result[k] = max(a[k], b[k])
+     */
     @SuppressWarnings("unused")
-    private double[] pmax(double[] a, double[] b)
+    private double[] pmax(double[] a, double[] b) 
+            throws IllegalArgumentException
     {
         if (a.length != b.length)
             throw new IllegalArgumentException();
@@ -582,8 +624,50 @@ public class Hyman
         return m;
     }
 
+    /*
+     * return x^2
+     */
     private double pow2(double x)
     {
         return x * x;
+    }
+    
+    /*
+     * Verify the sequence is strictly increasing
+     */
+    private void verifyIncreasing(double[] x) 
+            throws IllegalArgumentException
+    {
+        for (double d : diff(x))
+        {
+            if (d <= 0)
+                throw new IllegalArgumentException();
+        }
+    }
+
+    /*
+     * Verify the sequence is monotone: increasing or decreasing,
+     * zero-change segments are also ok
+     */
+    private void verifyMonotone(double[] y) 
+            throws IllegalArgumentException
+    {
+        int sign = 0;
+
+        for (double d : diff(y))
+        {
+            if (d > 0)
+            {
+                if (sign == -1)
+                    throw new IllegalArgumentException();
+                sign = 1;
+            }
+            else if (d < 0)
+            {
+                if (sign == 1)
+                    throw new IllegalArgumentException();
+                sign = -1;
+            }
+        }
     }
 }
