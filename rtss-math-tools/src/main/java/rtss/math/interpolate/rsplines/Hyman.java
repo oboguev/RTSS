@@ -1,4 +1,4 @@
-package rtss.math.interpolate;
+package rtss.math.interpolate.rsplines;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
