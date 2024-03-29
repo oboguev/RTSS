@@ -5,12 +5,12 @@ public class AreaParameters_RSFSR extends AreaParameters
     public AreaParameters_RSFSR()
     {
         /* population at the beginning and end of the war */
-        ACTUAL_POPULATION_1941_MID = 110_988;
-        ACTUAL_POPULATION_1945_MID = 96_601;
+        ACTUAL_POPULATION_1941_MID = 111_656;
+        ACTUAL_POPULATION_1945_MID = 97_073;
         
         /* target excess deaths and birth shortage */
-        ACTUAL_EXCESS_DEATHS = 9_354;
-        ACTUAL_BIRTH_DEFICIT = 10_181;
+        ACTUAL_EXCESS_DEATHS = 9_487;
+        ACTUAL_BIRTH_DEFICIT = 10_275;
         
         /* birth and death rates in 1940 */
         /* Андреев, Дарский, Харькова, "Демографическая история России 1927-1959", стр. 164 */

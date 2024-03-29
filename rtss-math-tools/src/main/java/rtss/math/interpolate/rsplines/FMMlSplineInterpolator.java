@@ -22,7 +22,7 @@ import org.apache.commons.math3.util.MathArrays.OrderDirection;
 public class FMMlSplineInterpolator extends Common implements UnivariateInterpolator
 {
     @Override
-    public UnivariateFunction interpolate(double[] x, double[] y) 
+    public UnivariateFunction interpolate(double[] x, double[] y)
             throws MathIllegalArgumentException, DimensionMismatchException
     {
         if (x.length != y.length)
@@ -30,23 +30,24 @@ public class FMMlSplineInterpolator extends Common implements UnivariateInterpol
 
         if (x.length < 2)
             throw new NumberIsTooSmallException(LocalizedFormats.NUMBER_OF_POINTS, x.length, 3, true);
-        
+
         MathArrays.checkOrder(x, OrderDirection.INCREASING, true, true);
-        
+
         Coefficients cf = new Coefficients(x, y);
         fmm_spline(x, y, cf.b, cf.c, cf.d);
-        
+
         // ###
-        
+
+        int n = 10; // ### 
         final PolynomialFunction polynomials[] = new PolynomialFunction[n];
         final double coefficients[] = new double[4];
         for (int i = 1; i <= n; i++)
         {
-            coefficients[0] = a[i];
-            coefficients[1] = b[i];
-            coefficients[2] = c[i];
-            coefficients[3] = d[i];
-            final double x0 = x[i - 1];
+            // ### coefficients[0] = a[i];
+            // ### coefficients[1] = b[i];
+            // ### coefficients[2] = c[i];
+            // ### coefficients[3] = d[i];
+            // ### final double x0 = x[i - 1];
             polynomials[i - 1] = new PolynomialFunction(coefficients);
         }
 

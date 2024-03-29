@@ -19,7 +19,7 @@ public class EvaluatePopulationLossVariantA extends EvaluatePopulationLossBase
         
         final double target_b2d =  params.ACTUAL_BIRTH_DEFICIT /  params.ACTUAL_EXCESS_DEATHS;
 
-        for (int pass = 0;; pass++)
+        for (;;)
         {
             double cbr = (cbr1 + cbr2) / 2;
             double cdr = cbr - actualGrowthPromille;
