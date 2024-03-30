@@ -58,6 +58,15 @@ public class Bins
         return w;
     }
 
+    public static int[] start_x(Bin... bins)
+    {
+        int[] x = new int[bins.length];
+        int k = 0;
+        for (Bin bin : bins)
+            x[k++] = bin.age_x1;
+        return x;
+    }
+
     public static double[] midpoint_x(Bin... bins)
     {
         double[] x = new double[bins.length];
@@ -281,14 +290,14 @@ public class Bins
      * Parse text file with bin data.
      * Each line has format "year value".
      */
-    public static Bin[] loadBinsYearly(String path) throws Exception
+    public static Bin[] loadBinsYearly(String path, String sep) throws Exception
     {
-        return parseBinsYearly(Util.loadResource(path));
+        return parseBinsYearly(Util.loadResource(path), sep);
     }
 
-    public static Bin[] parseBinsYearly(String text) throws Exception
+    public static Bin[] parseBinsYearly(String text, String sep) throws Exception
     {
-        text = cleanDataContent(text).replace(" ", ",");
+        text = cleanDataContent(text, sep).replace(" ", ",");
         List<String[]> list;
         try (CSVReader reader = new CSVReader(new StringReader(text)))
         {
@@ -317,12 +326,12 @@ public class Bins
      *   15 19 ...
      *   20 24 ...
      */
-    public static Bin[] loadBinsMultiYear(String path) throws Exception
+    public static Bin[] loadBinsMultiYear(String path, String sep) throws Exception
     {
-        return parseBinsYearly(Util.loadResource(path));
+        return parseBinsYearly(Util.loadResource(path), sep);
     }
 
-    public static Bin[] parseBinsMultiYear(String text) throws Exception
+    public static Bin[] parseBinsMultiYear(String text, String sep) throws Exception
     {
         List<String[]> list;
         try (CSVReader reader = new CSVReader(new StringReader(text)))
@@ -353,12 +362,12 @@ public class Bins
      *   15 20 ...
      *   20 25 ...
      */
-    public static Bin[] loadBinsMultiYearPast(String path) throws Exception
+    public static Bin[] loadBinsMultiYearPast(String path, String sep) throws Exception
     {
-        return parseBinsMultiYearPast(Util.loadResource(path));
+        return parseBinsMultiYearPast(Util.loadResource(path), sep);
     }
 
-    public static Bin[] parseBinsMultiYearPast(String text) throws Exception
+    public static Bin[] parseBinsMultiYearPast(String text, String sep) throws Exception
     {
         List<String[]> list;
         try (CSVReader reader = new CSVReader(new StringReader(text)))
@@ -381,13 +390,15 @@ public class Bins
         return bins(binlist);
     }
 
-    private static String cleanDataContent(String text)
+    private static String cleanDataContent(String text, String sep)
     {
         text = text.replace("\r\n", "\n");
         text = text.replace("\t", " ").replaceAll(" +", " ");
         text = Util.removeComments(text);
         text = Util.trimLines(text);
         text = Util.removeEmptyLines(text);
+        if (!sep.contains(","))
+            text = text.replace(",", "");
         return text;
     }
 }

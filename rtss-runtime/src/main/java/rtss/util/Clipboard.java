@@ -1,6 +1,7 @@
 package rtss.util;
 
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 // import java.awt.datatransfer.Clipboard;
 
@@ -65,5 +66,15 @@ public class Clipboard
         }
 
         put(sb.toString());
+    }
+    
+    public static String getText() throws Exception
+    {
+        java.awt.datatransfer.Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Object data = clipboard.getData(DataFlavor.stringFlavor);
+        if (data != null && data instanceof String)
+            return (String) data;
+        else
+            return null;
     }
 }
