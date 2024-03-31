@@ -9,8 +9,8 @@ public class AreaParameters_RSFSR extends AreaParameters
         ACTUAL_POPULATION_1945_MID = 97_073;
         
         /* target excess deaths and birth shortage */
-        ACTUAL_EXCESS_DEATHS = 9_487;
-        ACTUAL_BIRTH_DEFICIT = 10_275;
+        ACTUAL_EXCESS_DEATHS = 9_789;
+        ACTUAL_BIRTH_DEFICIT = 9_973;
         
         /* birth and death rates in 1940 */
         /* Андреев, Дарский, Харькова, "Демографическая история России 1927-1959", стр. 164 */
