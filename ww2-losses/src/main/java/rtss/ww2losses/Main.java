@@ -26,7 +26,7 @@ public class Main
     
     private void do_main() throws Exception
     {
-        do_main(Area.RSFSR);
+        do_main(Area.RSFSR, 4);
 
         Util.out("");
         Util.out("====================================================================");
@@ -36,21 +36,36 @@ public class Main
         EvaluatePopulationLossBase epl = new Defactor(AreaParameters.forArea(Area.RSFSR, 4));
         epl.evaluate();
 
-        Util.out("");
-        do_main(Area.USSR);
+        do_main(Area.USSR, 4);
+        do_main(Area.USSR, 5);
     }
     
-    private void do_main(Area area) throws Exception
+    private void do_main(Area area, int nyears) throws Exception
     {
+        String syears = null;
+        if (nyears == 4)
+        {
+            syears = "за 4 года (середина 1941 - середина 1945)";
+        }
+        else if (nyears == 5)
+        {
+            syears = "за 5 лет (начало 1941 - начало 1946)";
+        }
+        else
+        {
+            throw new IllegalArgumentException();
+        }
+        
+        Util.out("");
         Util.out("*********************************************************************************************");
-        Util.out("*****   Расчёт для " + area.toString() + ":");
+        Util.out("*****   Расчёт для " + area.toString() + " " + syears + ":");
         Util.out("*********************************************************************************************");
         Util.out("");
         Util.out("Compute minimum births window ...");
         Util.out("");
         new BirthTrough().calcTrough(area);
         
-        AreaParameters params = AreaParameters.forArea(area, 4);
+        AreaParameters params = AreaParameters.forArea(area, nyears);
         
         Util.out("");
         Util.out("====================================================================");

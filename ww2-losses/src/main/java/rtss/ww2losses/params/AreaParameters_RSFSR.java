@@ -4,7 +4,8 @@ public class AreaParameters_RSFSR extends AreaParameters
 {
     public AreaParameters_RSFSR()
     {
-        NYears = 4;
+        /* 4 years */
+        super(4);
         
         /* population at the beginning and end of the war (mid-1941 and mid-1945) */
         ACTUAL_POPULATION_START = 111_656;

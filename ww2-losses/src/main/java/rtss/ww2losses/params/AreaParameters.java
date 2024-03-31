@@ -25,8 +25,15 @@ public class AreaParameters
     public double constant_cbr;
     public double constant_cdr;
 
-    public double[] var_cbr = new double[4];
-    public double[] var_cdr = new double[4];
+    public double[] var_cbr;
+    public double[] var_cdr;
+    
+    protected AreaParameters(int NYears)
+    {
+        this.NYears = NYears;
+        this.var_cbr = new double[NYears];
+        this.var_cdr = new double[NYears];
+    }
 
     static public AreaParameters forArea(Area area, int nyears)
     {
@@ -39,7 +46,7 @@ public class AreaParameters
             case USSR:
                 return new AreaParameters_USSR_4();
             default:
-                return null;
+                throw new IllegalArgumentException();
             }
         }
         else if (nyears == 5)
@@ -47,10 +54,9 @@ public class AreaParameters
             switch (area)
             {
             case USSR:
-                // ###
-                return new AreaParameters_USSR_4();
+                return new AreaParameters_USSR_5();
             default:
-                return null;
+                throw new IllegalArgumentException();
             }
         }
         else

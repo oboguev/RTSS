@@ -4,7 +4,8 @@ public class AreaParameters_USSR_4 extends AreaParameters
 {
     public AreaParameters_USSR_4()
     {
-        NYears = 4;
+        /* 4 years */
+        super(4);
 
         /* birth and death rates in 1940 */
         /* Андреев, Дарский, Харькова, "Население Советского Союза 1922-1991", стр. 120 */
