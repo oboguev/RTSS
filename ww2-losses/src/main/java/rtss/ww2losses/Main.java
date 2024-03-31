@@ -35,6 +35,9 @@ public class Main
         Util.out("");
         EvaluatePopulationLossBase epl = new Defactor(AreaParameters.forArea(Area.RSFSR));
         epl.evaluate();
+
+        Util.out("");
+        do_main(Area.USSR);
     }
     
     private void do_main(Area area) throws Exception

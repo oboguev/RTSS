@@ -28,6 +28,14 @@ public class AreaParameters
 
     static public AreaParameters forArea(Area area)
     {
-        return new AreaParameters_RSFSR(); 
+        switch (area)
+        {
+        case RSFSR:
+            return new AreaParameters_RSFSR();
+        case USSR:
+            return new AreaParameters_USSR();
+        default:
+            return null;
+        }
     }
 }
