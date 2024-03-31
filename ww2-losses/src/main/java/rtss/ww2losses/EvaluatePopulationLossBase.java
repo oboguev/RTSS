@@ -27,7 +27,7 @@ public abstract class EvaluatePopulationLossBase
             this.nyear = nyear;
         }
         
-        public int nyear; // 0 to 3
+        public int nyear; // 0 to 3 or 4
         
         /* actual population at start, end and middle of the period */
         Population actual = new Population(); 
@@ -36,9 +36,9 @@ public abstract class EvaluatePopulationLossBase
         Population expected = new Population(); 
     }
     
-    public static final int NYears =4;
+    public static int NYears;
     
-    protected Year[] years = new Year[NYears];
+    protected Year[] years;
     protected Year firstYear;
     protected Year lastYear;
     
@@ -51,6 +51,8 @@ public abstract class EvaluatePopulationLossBase
     public EvaluatePopulationLossBase(AreaParameters params)
     {
         this.params = params;
+        NYears = params.NYears;
+        years = new Year[NYears];
     }
 
     protected void init() throws Exception
@@ -69,9 +71,9 @@ public abstract class EvaluatePopulationLossBase
                 years[ny].next = years[ny + 1];
         }
 
-        firstYear.actual.start = params.ACTUAL_POPULATION_1941_MID;
-        lastYear.actual.end = params.ACTUAL_POPULATION_1945_MID;
-        firstYear.expected.start = params.ACTUAL_POPULATION_1941_MID;
+        firstYear.actual.start = params.ACTUAL_POPULATION_START;
+        lastYear.actual.end = params.ACTUAL_POPULATION_END;
+        firstYear.expected.start = params.ACTUAL_POPULATION_START;
 
         double factor = promille2factor(params.CBR_1940 - params.CDR_1940);
         for (Year y : years)

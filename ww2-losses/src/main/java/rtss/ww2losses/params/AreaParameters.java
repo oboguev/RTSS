@@ -4,9 +4,11 @@ import rtss.data.selectors.Area;
 
 public class AreaParameters
 {
+    public /*final*/ int NYears;
+    
     /* population at the beginning and end of the war */
-    public /*final*/ double ACTUAL_POPULATION_1941_MID;
-    public /*final*/ double ACTUAL_POPULATION_1945_MID;
+    public /*final*/ double ACTUAL_POPULATION_START;
+    public /*final*/ double ACTUAL_POPULATION_END;
     
     /* target excess deaths and birth shortage */
     public /*final*/ double ACTUAL_EXCESS_DEATHS;
@@ -26,15 +28,33 @@ public class AreaParameters
     public double[] var_cbr = new double[4];
     public double[] var_cdr = new double[4];
 
-    static public AreaParameters forArea(Area area)
+    static public AreaParameters forArea(Area area, int nyears)
     {
-        switch (area)
+        if (nyears == 4)
         {
-        case RSFSR:
-            return new AreaParameters_RSFSR();
-        case USSR:
-            return new AreaParameters_USSR();
-        default:
+            switch (area)
+            {
+            case RSFSR:
+                return new AreaParameters_RSFSR();
+            case USSR:
+                return new AreaParameters_USSR_4();
+            default:
+                return null;
+            }
+        }
+        else if (nyears == 5)
+        {
+            switch (area)
+            {
+            case USSR:
+                // ###
+                return new AreaParameters_USSR_4();
+            default:
+                return null;
+            }
+        }
+        else
+        {
             return null;
         }
     }

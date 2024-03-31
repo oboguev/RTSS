@@ -4,9 +4,11 @@ public class AreaParameters_RSFSR extends AreaParameters
 {
     public AreaParameters_RSFSR()
     {
-        /* population at the beginning and end of the war */
-        ACTUAL_POPULATION_1941_MID = 111_656;
-        ACTUAL_POPULATION_1945_MID = 97_073;
+        NYears = 4;
+        
+        /* population at the beginning and end of the war (mid-1941 and mid-1945) */
+        ACTUAL_POPULATION_START = 111_656;
+        ACTUAL_POPULATION_END = 97_073;
         
         /* target excess deaths and birth shortage */
         ACTUAL_EXCESS_DEATHS = 9_789;

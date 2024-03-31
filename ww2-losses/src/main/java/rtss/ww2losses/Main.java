@@ -33,7 +33,7 @@ public class Main
         Util.out("");
         Util.out("РСФСР: defactor 1940 birth rates from 1940-1944 birth rates ...");
         Util.out("");
-        EvaluatePopulationLossBase epl = new Defactor(AreaParameters.forArea(Area.RSFSR));
+        EvaluatePopulationLossBase epl = new Defactor(AreaParameters.forArea(Area.RSFSR, 4));
         epl.evaluate();
 
         Util.out("");
@@ -50,7 +50,7 @@ public class Main
         Util.out("");
         new BirthTrough().calcTrough(area);
         
-        AreaParameters params = AreaParameters.forArea(area);
+        AreaParameters params = AreaParameters.forArea(area, 4);
         
         Util.out("");
         Util.out("====================================================================");
