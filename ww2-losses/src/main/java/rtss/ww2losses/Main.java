@@ -44,7 +44,8 @@ public class Main
         
         AreaParameters ap;
         ap = AreaParameters.forArea(Area.USSR, 4);
-        do_show(Area.USSR, ap, 4.0, 196_716.0, backward_6mo(170_548, ap), 0.68);
+        Double immigration = null;
+        do_show(Area.USSR, ap, 4.0, 196_716.0, backward_6mo(170_548, ap), immigration, 0.68);
     }
     
     private void do_main(Area area, int nyears, double survival_rate) throws Exception
@@ -104,7 +105,14 @@ public class Main
         epl.evaluate();
     }
     
-    private void do_show(Area area, AreaParameters ap, double nyears, Double actual_start, Double actual_end, double survival_rate) throws Exception
+    private void do_show(
+            Area area, 
+            AreaParameters ap, 
+            double nyears, 
+            Double actual_start, 
+            Double actual_end,
+            Double immigration,
+            double survival_rate) throws Exception
     {
         String pre = "*****   ";
         StringBuffer syears = new StringBuffer(String.format("за %s года (%s - %s)\n%sпри средней доживаемости рождённых в 1941-1945 гг. до переписи 15 января 1959 = %.2f", 
@@ -131,9 +139,19 @@ public class Main
         Util.out(String.format("Ожидаемое население в конце периода: %s", f2k(expected_end)));
         Util.out(String.format("Наличное население в конце периода: %s", f2k(actual_end)));
         Util.out(String.format("Общий демографический дефицит в конце периода: %s", f2k(expected_end - actual_end)));
-        Util.out(String.format("Ожидаемое число рождений за %s года войны при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s", d2s(nyears), f2k(expected_births)));
+        Util.out(String.format("Ожидаемое число рождений за %s года войны при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s", 
+                               d2s(nyears), f2k(expected_births)));
         Util.out(String.format("Доживаемость в мирных условиях между 1941-1945 в среднем и 15.1.1959, принимаемая как: %.2f", survival_rate));
         Util.out(String.format("Число родившихся в период за %s года и доживших до переписи 1959 года: %s", d2s(nyears), f2k(actual_in1959)));
+        if (immigration != null && immigration > 0) 
+        {
+            Util.out(String.format("Число родившихся в период за %s года и доживших до переписи 1959 года с вычетом миграции 1946-1958 гг. (%s): %s", 
+                                   f2k(immigration), d2s(nyears), f2k(actual_in1959 - immigration)));
+        }
+        else
+        {
+            Util.out(String.format("Миграции нет"));
+        }
 
         
         
