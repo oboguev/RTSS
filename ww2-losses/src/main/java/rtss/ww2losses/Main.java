@@ -233,4 +233,33 @@ public class Main
         // ###
         return 0;
     }
+    
+    /*
+     * Determine what fraction of [x1 ... x2] overlaps [a1 ... a2].
+     * Return value ranges from 0.0 (no overlap at all) to 1.0 (if x1...x2 is fully inside a1...a2),
+     * to a value in between in case of a partial overlap. 
+     */
+    private double overlap(double x1, double x2, double a1, double a2)
+    {
+        if (x1 >= x2 || a1 >= a2)
+            throw new IllegalArgumentException();
+        
+        /* whole @x is outside of @a range */
+        if (x2 <= a1 || x1 >= a2)
+            return 0;
+        
+        /* whole @x is fully within @a range */
+        if (x1 >= a1 && x2 <= a2)
+            return 1;
+        
+        /* partial overlap */
+        if (x1 < a1)
+        {
+            return (x2 - a1) / (x2 - x1);
+        }
+        else
+        {
+            return (a2 - x1) / (x2 - x1);
+        }
+    }
 }
