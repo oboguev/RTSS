@@ -3,6 +3,8 @@ package rtss.ww2losses;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 public class Main
@@ -123,6 +125,7 @@ public class Main
         
         double expected_end = prorate(actual_start, ap.CBR_1940 - ap.CDR_1940, nyears);
         double expected_births = num_births(actual_start, nyears, ap);
+        double actual_in1959 = actual_in1959(area, 1941.5, 9, nyears);
         
         Util.out(String.format("Наличное население в начале периода: %s", f2k(actual_start)));
         Util.out(String.format("Ожидаемое население в конце периода: %s", f2k(expected_end)));
@@ -130,6 +133,7 @@ public class Main
         Util.out(String.format("Общий демографический дефицит в конце периода: %s", f2k(expected_end - actual_end)));
         Util.out(String.format("Ожидаемое число рождений за %s года войны при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s", d2s(nyears), f2k(expected_births)));
         Util.out(String.format("Доживаемость в мирных условиях между 1941-1945 в среднем и 15.1.1959, принимаемая как: %.2f", survival_rate));
+        Util.out(String.format("Число родившихся в период за %s года и доживших до переписи 1959 года: %s", d2s(nyears), f2k(actual_in1959)));
 
         
         
@@ -140,7 +144,10 @@ public class Main
     
     private String f2k(double v)
     {
-        return String.format("%,7.0f", v);
+        String s = String.format("%,10.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
     
     private String d2s(double f) throws Exception
@@ -220,18 +227,36 @@ public class Main
         return v / f;
     }
     
+    /*
+     * Calculate population registered by the 1959 census, with birth dates in a window @nyears wide 
+     * starting from (@start_year + @months_delay/12)
+     */
     private double actual_in1959(Area area, double start_year, double months_delay, double nyears) throws Exception
     {
         return actual_in1959(area, start_year + months_delay / 12, nyears);
     }
 
+    /*
+     * Calculate population registered by the 1959 census, with birth dates in a window @nyears wide 
+     * starting from @start_year
+     */
     private double actual_in1959(Area area, double start_year, double nyears) throws Exception
     {
+        double sum = 0;
         double end_year = start_year + nyears;
         PopulationByLocality p = PopulationByLocality.census(area, 1959);
+        
+        for (int age = 0; age <= PopulationByLocality.MAX_AGE; age++)
+        {
+            double birth_year = 1958 - age;
+            double overlap = overlap(birth_year, birth_year + 1, start_year, end_year);
+            if (overlap > 0)
+            {
+                sum += overlap * p.get(Locality.TOTAL, Gender.BOTH, age);
+            }
+        }
 
-        // ###
-        return 0;
+        return sum / 1000;
     }
     
     /*
