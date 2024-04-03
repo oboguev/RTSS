@@ -1,6 +1,9 @@
 package rtss.ww2losses;
 
 import rtss.ww2losses.params.AreaParameters;
+
+import java.math.BigDecimal;
+
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
@@ -11,7 +14,7 @@ public class Main
 {
     public static void main(String[] args)
     {
-        try 
+        try
         {
             Main m = new Main();
             m.do_main();
@@ -22,11 +25,11 @@ public class Main
             ex.printStackTrace();
             System.exit(1);
         }
-        
+
         Util.out("");
         Util.out("*** Completed.");
     }
-    
+
     private void do_main() throws Exception
     {
         do_main(Area.RSFSR, 4, 0.68);
@@ -40,14 +43,29 @@ public class Main
         epl.evaluate();
 
         do_main(Area.USSR, 4, 0.68);
-        do_main(Area.USSR, 5, 0.68);
-        
+
         AreaParameters ap;
+        double birth_delay_months;
+
         ap = AreaParameters.forArea(Area.USSR, 4);
-        Double immigration = null;
-        do_show(Area.USSR, ap, 4.0, 196_716.0, backward_6mo(170_548, ap), immigration, 0.68);
+        ap.immigration = 0;
+        ap.survival_rate_194x_1959 = 0.68;
+        birth_delay_months = 9;
+        do_show(Area.USSR, ap, 4.0, forward_6mo(195_392, ap, 1940), backward_6mo(170_548, ap, 1946), birth_delay_months);
+
+        ap = AreaParameters.forArea(Area.USSR, 4);
+        ap.immigration = 0;
+        ap.survival_rate_194x_1959 = 0.62;
+        birth_delay_months = 0;
+        do_show(Area.USSR, ap, 4.5, forward_6mo(195_392, ap, 1940), backward_6mo(170_548, ap, 1946), birth_delay_months);
+
+        ap = AreaParameters.forArea(Area.USSR, 4);
+        ap.immigration = 0;
+        ap.survival_rate_194x_1959 = 0.62;
+        birth_delay_months = 0;
+        do_show(Area.USSR, ap, 4.0, forward_6mo(195_392, ap, 1940), backward_6mo(170_548, ap, 1946), birth_delay_months);
     }
-    
+
     private void do_main(Area area, int nyears, double survival_rate) throws Exception
     {
         String syears = null;
@@ -63,9 +81,9 @@ public class Main
         {
             throw new IllegalArgumentException();
         }
-        
+
         syears += " и средней доживаемости с военного времени до января 1959 года равной " + survival_rate;
-        
+
         Util.out("");
         Util.out("**********************************************************************************************************************************************");
         Util.out("*****   Расчёт для " + area.toString() + " " + syears + ":");
@@ -74,13 +92,13 @@ public class Main
         Util.out("Compute minimum births window ...");
         Util.out("");
         new BirthTrough().calcTrough(area);
-        
+
         AreaParameters params = AreaParameters.forArea(area, nyears);
-        
+
         Util.out("");
         Util.out("====================================================================");
         Util.out("");
-        
+
         Util.out("Compute at constant CDR and CBR ...");
         Util.out("");
         EvaluatePopulationLossBase epl = new EvaluatePopulationLossVariantA(params);
@@ -104,25 +122,28 @@ public class Main
         epl = new RecombineRates(params);
         epl.evaluate();
     }
-    
+
     private void do_show(
-            Area area, 
-            AreaParameters ap, 
-            double nyears, 
-            Double actual_start, 
+            Area area,
+            AreaParameters ap,
+            double nyears,
+            Double actual_start,
             Double actual_end,
-            Double immigration,
-            double survival_rate) throws Exception
+            double birth_months_delay)
+            throws Exception
     {
+        double start_year = 1941.5;
+
         String pre = "*****   ";
-        StringBuffer syears = new StringBuffer(String.format("за %s года (%s - %s)\n%sпри средней доживаемости рождённых в 1941-1945 гг. до переписи 15 января 1959 = %.2f", 
-                                                             d2s(nyears), ny2s(1941.5), ny2s(1941.5 + nyears), pre, survival_rate));
+        StringBuffer syears = new StringBuffer(String
+                .format("за %s года (%s - %s)\n%sпри средней доживаемости рождённых в 1941-1945 гг. до переписи 15 января 1959 = %.2f",
+                        d2s(nyears), ny2s(start_year, "а"), ny2s(start_year + nyears, "а"), pre, ap.survival_rate_194x_1959));
         Util.out("");
         Util.out("**********************************************************************************************************************************************");
         Util.out(pre + "Расчёт для " + area.toString() + " " + syears + ":");
         Util.out("**********************************************************************************************************************************************");
         Util.out("");
-        
+
         if (actual_start != null)
             ap.ACTUAL_POPULATION_START = actual_start;
         actual_start = ap.ACTUAL_POPULATION_START;
@@ -130,36 +151,56 @@ public class Main
         if (actual_end != null)
             ap.ACTUAL_POPULATION_END = actual_end;
         actual_end = ap.ACTUAL_POPULATION_END;
-        
+
         double expected_end = prorate(actual_start, ap.CBR_1940 - ap.CDR_1940, nyears);
         double expected_births = num_births(actual_start, nyears, ap);
-        double actual_in1959 = actual_in1959(area, 1941.5, 9, nyears);
-        
-        Util.out(String.format("Наличное население в начале периода: %s", f2k(actual_start)));
-        Util.out(String.format("Ожидаемое население в конце периода: %s", f2k(expected_end)));
-        Util.out(String.format("Наличное население в конце периода: %s", f2k(actual_end)));
-        Util.out(String.format("Общий демографический дефицит в конце периода: %s", f2k(expected_end - actual_end)));
-        Util.out(String.format("Ожидаемое число рождений за %s года войны при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s", 
-                               d2s(nyears), f2k(expected_births)));
-        Util.out(String.format("Доживаемость в мирных условиях между 1941-1945 в среднем и 15.1.1959, принимаемая как: %.2f", survival_rate));
-        Util.out(String.format("Число родившихся в период за %s года и доживших до переписи 1959 года: %s", d2s(nyears), f2k(actual_in1959)));
-        if (immigration != null && immigration > 0) 
+        StringBuilder birthsFormula = new StringBuilder();
+        double actual_in1959 = actual_in1959(area, 1941.5, birth_months_delay, nyears, birthsFormula);
+        double overall_deficit = expected_end - actual_end;
+
+        Util.out(String.format("Наличное население в начале периода: %s тыс. чел.", f2k(actual_start)));
+        Util.out(String.format("Ожидаемое население в конце периода: %s тыс. чел.", f2k(expected_end)));
+        Util.out(String.format("Наличное население в конце периода: %s тыс. чел.", f2k(actual_end)));
+        Util.out(String.format("Общий демографический дефицит в конце периода: %s тыс. чел.", f2k(overall_deficit)));
+        Util.out(String
+                .format("Ожидаемое число рождений за %s года войны при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s тыс. чел.",
+                        d2s(nyears), f2k(expected_births)));
+        Util.out(String.format("Доживаемость в мирных условиях между 1941-1945 в среднем и 15.1.1959, принимаемая как: %.2f",
+                               ap.survival_rate_194x_1959));
+        Util.out(String
+                .format("Фактическое число родившихся в период за %s года (с задержкой %s месяцев) и доживших до переписи 1959 года: %s тыс. чел.",
+                        d2s(nyears), d2s(birth_months_delay), f2k(actual_in1959)));
+        Util.out(String.format("Формула для числа рождений, по данным переписи 1959 года: %s", birthsFormula, toString()));
+        if (ap.immigration > 0)
         {
-            Util.out(String.format("Число родившихся в период за %s года и доживших до переписи 1959 года с вычетом миграции 1946-1958 гг. (%s): %s", 
-                                   f2k(immigration), d2s(nyears), f2k(actual_in1959 - immigration)));
+            Util.out(String
+                    .format("Фактическое число родившихся в период за %s года (с задержкой %s месяцев) и доживших до переписи 1959 года с вычетом миграции 1946-1958 гг. (%s): %s тыс. чел.",
+                            f2k(ap.immigration), d2s(nyears), d2s(birth_months_delay), f2k(actual_in1959 - ap.immigration)));
         }
         else
         {
             Util.out(String.format("Миграции нет"));
         }
 
-        
-        
+        double peacetime_births = (actual_in1959 - ap.immigration) / ap.survival_rate_194x_1959;
+        Util.out(String.format("В мирных условиях это означало бы рождение за %s-летний период: %s тыс. чел.", d2s(nyears), f2k(peacetime_births)));
+
+        double births_deficit = expected_births - peacetime_births;
+        Util.out(String.format("Дефицит рождений + ранняя детская сверхсмертность военных лет: %s тыс. чел.", f2k(births_deficit)));
+
+        double excess_deaths = overall_deficit - births_deficit;
+        Util.out(String.format("Сверхсмертность наличного на %s года населения за %s года: %s", ny2s(start_year, "у"), d2s(nyears),
+                               f2k(excess_deaths)));
+
+        Util.out(String.format("Доля сверхсмертности наличного на начало войны населения в общем дефиците: %.1f%%",
+                               100 * excess_deaths / overall_deficit));
+        Util.out(String.format("Доля недорода и ранней детской сверхсмертности в общем дефиците: %.1f%%", 100 * births_deficit / overall_deficit));
+
         // ###
     }
-    
+
     /* =================================================================================== */
-    
+
     private String f2k(double v)
     {
         String s = String.format("%,10.0f", v);
@@ -167,16 +208,23 @@ public class Main
             s = s.substring(1);
         return s;
     }
-    
+
     private String d2s(double f) throws Exception
     {
-        String s = String.format("%.1f", f);
-        if (s.endsWith(".0"))
-            s = Util.stripTail(s, ".0");
+        String s = new BigDecimal(f).toPlainString();
+
+        if (s.contains("."))
+        {
+            while (s.endsWith("0") && !s.endsWith(".0"))
+                s = Util.stripTail(s, "0");
+            if (s.endsWith(".0"))
+                s = Util.stripTail(s, ".0");
+        }
+
         return s;
     }
-    
-    private String ny2s(double f) throws Exception
+
+    private String ny2s(double f, String suffix) throws Exception
     {
         int ny = (int) (f + 0.001);
         f -= ny;
@@ -185,7 +233,7 @@ public class Main
         else if (f > 0.8)
             return String.format("конец %d", ny);
         else
-            return String.format("середина %d", ny);
+            return String.format("середин%s %d", suffix, ny);
     }
 
     private double prorate(double v, double rate, double years)
@@ -193,77 +241,90 @@ public class Main
         double xrate = (1 + rate / 1000);
         return v * Math.pow(xrate, years);
     }
-    
+
     private double num_births(double start, double nyears, AreaParameters ap)
     {
         return num_births(start, nyears, ap.CBR_1940, ap.CDR_1940);
     }
-    
+
     private double num_births(double start, double nyears, double cbr, double cdr)
     {
         double p = start;
         double total_births = 0;
-        
+
         while (nyears >= 1)
         {
-            double births = p * cbr / 1000; 
+            double births = p * cbr / 1000;
             double deaths = p * cdr / 1000;
             total_births += births;
             p += births - deaths;
             nyears -= 1;
         }
-        
+
         if (nyears > 0)
         {
-            double f = Math.pow(1 + cbr/1000, nyears) - 1;
+            double f = Math.pow(1 + cbr / 1000, nyears) - 1;
             double births = p * f;
             total_births += births;
         }
-        
+
         return total_births;
     }
-    
-    public static double forward_6mo(double v, AreaParameters ap)
+
+    public static double forward_6mo(double v, AreaParameters ap, int year)
     {
-        return forward_6mo(v, ap.CBR_1940 - ap.CDR_1940);
+        if (year == 1940)
+            return forward_6mo(v, ap.growth_1940());
+        else if (year == 1946)
+            return forward_6mo(v, ap.growth_1946());
+        else
+            throw new IllegalArgumentException();
     }
-    
+
     public static double forward_6mo(double v, double rate)
     {
-        double f = Math.sqrt(1 + rate/1000);
+        double f = Math.sqrt(1 + rate / 1000);
         return v * f;
     }
 
-    public static double backward_6mo(double v, AreaParameters ap)
+    public static double backward_6mo(double v, AreaParameters ap, int year)
     {
-        return backward_6mo(v, ap.CBR_1946 - ap.CDR_1946);
+        if (year == 1940)
+            return backward_6mo(v, ap.growth_1940());
+        else if (year == 1946)
+            return backward_6mo(v, ap.growth_1946());
+        else
+            throw new IllegalArgumentException();
     }
 
     public static double backward_6mo(double v, double rate)
     {
-        double f = Math.sqrt(1 + rate/1000);
+        double f = Math.sqrt(1 + rate / 1000);
         return v / f;
     }
-    
+
     /*
      * Calculate population registered by the 1959 census, with birth dates in a window @nyears wide 
      * starting from (@start_year + @months_delay/12)
      */
-    private double actual_in1959(Area area, double start_year, double months_delay, double nyears) throws Exception
+    private double actual_in1959(Area area, double start_year, double months_delay, double nyears, StringBuilder sbFormula) throws Exception
     {
-        return actual_in1959(area, start_year + months_delay / 12, nyears);
+        return actual_in1959(area, start_year + months_delay / 12, nyears, sbFormula);
     }
 
     /*
      * Calculate population registered by the 1959 census, with birth dates in a window @nyears wide 
      * starting from @start_year
      */
-    private double actual_in1959(Area area, double start_year, double nyears) throws Exception
+    private double actual_in1959(Area area, double start_year, double nyears, StringBuilder sbFormula) throws Exception
     {
+        if (sbFormula != null)
+            sbFormula.setLength(0);
+
         double sum = 0;
         double end_year = start_year + nyears;
         PopulationByLocality p = PopulationByLocality.census(area, 1959);
-        
+
         for (int age = 0; age <= PopulationByLocality.MAX_AGE; age++)
         {
             double birth_year = 1958 - age;
@@ -271,12 +332,26 @@ public class Main
             if (overlap > 0)
             {
                 sum += overlap * p.get(Locality.TOTAL, Gender.BOTH, age);
+                if (sbFormula != null)
+                {
+                    if (sbFormula.length() != 0)
+                        sbFormula.append(" + ");
+                    if (overlap >= 0.99 && overlap <= 1.01)
+                    {
+                        sbFormula.append(String.format("ч%d", age));
+                    }
+                    else
+                    {
+                        overlap = 0.01 * Math.round(overlap * 100);
+                        sbFormula.append(String.format("%s × ч%d", d2s(overlap), age));
+                    }
+                }
             }
         }
 
         return sum / 1000;
     }
-    
+
     /*
      * Determine what fraction of [x1 ... x2] overlaps [a1 ... a2].
      * Return value ranges from 0.0 (no overlap at all) to 1.0 (if x1...x2 is fully inside a1...a2),
@@ -286,15 +361,15 @@ public class Main
     {
         if (x1 >= x2 || a1 >= a2)
             throw new IllegalArgumentException();
-        
+
         /* whole @x is outside of @a range */
         if (x2 <= a1 || x1 >= a2)
             return 0;
-        
+
         /* whole @x is fully within @a range */
         if (x1 >= a1 && x2 <= a2)
             return 1;
-        
+
         /* partial overlap */
         if (x1 < a1)
         {

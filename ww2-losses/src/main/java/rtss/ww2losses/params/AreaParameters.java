@@ -17,16 +17,23 @@ public class AreaParameters
     /* birth and death rates in 1940 */
     public /*final*/ double CBR_1940;
     public /*final*/ double CDR_1940;
+    public final /*final*/ Double growth_1940 = null;  
     
     /* birth and death rates in 1946 */
     public /*final*/ double CBR_1946;
     public /*final*/ double CDR_1946;
+    public final /*final*/ Double growth_1946 = null;  
 
     public double constant_cbr;
     public double constant_cdr;
 
     public double[] var_cbr;
     public double[] var_cdr;
+    
+    public double immigration = 0;
+    
+    /* среднее дожитие родившихся в 1941-1945 гг. до переписи 15 января 1959 года */
+    public double survival_rate_194x_1959 = 0.68;
     
     protected AreaParameters(int NYears)
     {
@@ -44,17 +51,7 @@ public class AreaParameters
             case RSFSR:
                 return new AreaParameters_RSFSR();
             case USSR:
-                return new AreaParameters_USSR_4();
-            default:
-                throw new IllegalArgumentException();
-            }
-        }
-        else if (nyears == 5)
-        {
-            switch (area)
-            {
-            case USSR:
-                return new AreaParameters_USSR_5();
+                return new AreaParameters_USSR();
             default:
                 throw new IllegalArgumentException();
             }
@@ -63,5 +60,21 @@ public class AreaParameters
         {
             return null;
         }
+    }
+    
+    public double growth_1940()
+    {
+        if (growth_1940 != null)
+            return growth_1940;
+        else
+            return CBR_1940 - CDR_1940;
+    }
+
+    public double growth_1946()
+    {
+        if (growth_1946 != null)
+            return growth_1946;
+        else
+            return CBR_1946 - CDR_1946;
     }
 }
