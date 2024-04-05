@@ -21,6 +21,12 @@ public class ForwardPopulationT
 
     protected final double MaleFemaleBirthRatio = 1.06;
     protected double BirthRateTotal;
+    
+    public ForwardPopulationT setBirthRateTotal(double BirthRateTotal)
+    {
+        this.BirthRateTotal = BirthRateTotal;
+        return this;
+    }
 
     /*
      * Линейная интерполяция между двумя точками

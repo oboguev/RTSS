@@ -39,6 +39,16 @@ public class PopulationByLocality
         return p;
     }
 
+    public PopulationByLocality cloneTotal()
+    {
+        PopulationByLocality p = new PopulationByLocality();
+        
+        if (total != null)
+            p.total = total.clone();
+
+        return p;
+    }
+    
     /****************************************************************************************************/
 
     public double get(Locality locality, Gender gender, int age) throws Exception
