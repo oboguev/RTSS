@@ -85,9 +85,7 @@ public class USSR_Expected_Population_In_Early_1946
 
     private PopulationByLocality forward(PopulationByLocality p, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
     {
-        ForwardPopulationT fw = new ForwardPopulationT();
-        fw.setBirthRateTotal(cbr);
-        p = fw.forward(p, mt, yfraction);
-        return p;
+        ForwardPopulationT fw = new ForwardPopulationT().setBirthRateTotal(cbr);
+        return fw.forward(p, mt, yfraction);
     }
 }
