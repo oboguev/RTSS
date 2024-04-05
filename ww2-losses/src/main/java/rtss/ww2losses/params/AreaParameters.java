@@ -17,23 +17,36 @@ public class AreaParameters
     /* birth and death rates in 1940 */
     public /*final*/ double CBR_1940;
     public /*final*/ double CDR_1940;
+
+    /* 
+     * прирост населения в 1940 году, с учётом миграции, 
+     * если не задан, то полагается равным естественному приросту (CBR_1940 - CDR_1940) 
+     * */
     public final /*final*/ Double growth_1940 = null;  
     
     /* birth and death rates in 1946 */
     public /*final*/ double CBR_1946;
     public /*final*/ double CDR_1946;
+
+    /* 
+     * прирост населения в 1946 году, с учётом миграции, 
+     * если не задан, то полагается равным естественному приросту (CBR_1946 - CDR_1946) 
+     */
     public final /*final*/ Double growth_1946 = null;  
 
+    /* среднее дожитие родившихся в 1941-1945 гг. до переписи 15 января 1959 года */
+    public double survival_rate_194x_1959 = 0.68;
+    
+    /* баланс миграции возрастной группы военных лет рожденния в период с войны по 15 января 1959 года */
+    public double immigration = 0;
+    
+    /* результаты вычислений: вариант с постоянной (по годам войны) рождаемостью и смертностью */
     public double constant_cbr;
     public double constant_cdr;
 
+    /* результаты вычислений: вариант с переменной (по годам войны) рождаемостью и смертностью */
     public double[] var_cbr;
     public double[] var_cdr;
-    
-    public double immigration = 0;
-    
-    /* среднее дожитие родившихся в 1941-1945 гг. до переписи 15 января 1959 года */
-    public double survival_rate_194x_1959 = 0.68;
     
     protected AreaParameters(int NYears)
     {

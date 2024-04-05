@@ -44,26 +44,47 @@ public class Main
 
         do_main(Area.USSR, 4, 0.68);
 
-        AreaParameters ap;
+        AreaParameters ap = AreaParameters.forArea(Area.USSR, 4);
         double birth_delay_months;
+        
+        double USSR_1941_START = 195_392;
+        double USSR_1941_MID = forward_6mo(USSR_1941_START, ap, 1940);
 
+        double USSR_1946_START = 170_548;
+        double USSR_1945_MID = backward_6mo(USSR_1946_START, ap, 1946); 
+
+        /* 
+         * СССР с середины 1941 по середину 1945
+         * дожитие 0.68
+         * окно рождений сдвинуто на 9 месяцев 
+         */
         ap = AreaParameters.forArea(Area.USSR, 4);
         ap.immigration = 0;
         ap.survival_rate_194x_1959 = 0.68;
         birth_delay_months = 9;
-        do_show(Area.USSR, ap, 4.0, forward_6mo(195_392, ap, 1940), backward_6mo(170_548, ap, 1946), birth_delay_months);
+        do_show(Area.USSR, ap, 4.0, USSR_1941_MID, USSR_1945_MID, birth_delay_months);
 
+        /* 
+         * СССР с середины 1941 по начало 1946
+         * дожитие 0.62
+         * окно рождений сдвинуто на 0 месяцев 
+         */
         ap = AreaParameters.forArea(Area.USSR, 4);
         ap.immigration = 0;
         ap.survival_rate_194x_1959 = 0.62;
         birth_delay_months = 0;
-        do_show(Area.USSR, ap, 4.5, forward_6mo(195_392, ap, 1940), backward_6mo(170_548, ap, 1946), birth_delay_months);
+        do_show(Area.USSR, ap, 4.5, USSR_1941_MID, USSR_1946_START, birth_delay_months);
 
+        /* 
+         * СССР с середины 1941 по середину 1945
+         * дожитие 0.62
+         * окно рождений сдвинуто на 0 месяцев 
+         */
         ap = AreaParameters.forArea(Area.USSR, 4);
         ap.immigration = 0;
         ap.survival_rate_194x_1959 = 0.62;
         birth_delay_months = 0;
-        do_show(Area.USSR, ap, 4.0, forward_6mo(195_392, ap, 1940), backward_6mo(170_548, ap, 1946), birth_delay_months);
+        do_show(Area.USSR, ap, 4.0, USSR_1941_MID, USSR_1945_MID, birth_delay_months);
     }
 
     private void do_main(Area area, int nyears, double survival_rate) throws Exception
