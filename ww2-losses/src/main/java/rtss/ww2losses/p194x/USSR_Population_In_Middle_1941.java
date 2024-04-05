@@ -1,4 +1,4 @@
-package rtss.ww2losses.p1941;
+package rtss.ww2losses.p194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
@@ -11,7 +11,7 @@ import rtss.ww2losses.params.AreaParameters;
 /**
  * Вычислить возрастуню структуру населения СССР на середину 1941 года
  */
-public class USSR_Population_Middle_Of_1941
+public class USSR_Population_In_Middle_1941
 {
     /*
      * AДХ, "Население Советского Союза", стр. 120
