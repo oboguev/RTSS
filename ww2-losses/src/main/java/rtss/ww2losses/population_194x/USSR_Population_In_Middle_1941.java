@@ -21,7 +21,7 @@ public class USSR_Population_In_Middle_1941
     
     private static final int MAX_AGE = PopulationByLocality.MAX_AGE;
     
-    public PopulationByLocality make() throws Exception
+    public PopulationByLocality evaluate() throws Exception
     {
         CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
 

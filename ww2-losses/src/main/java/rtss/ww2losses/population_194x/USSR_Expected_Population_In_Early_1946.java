@@ -2,6 +2,7 @@ package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.forward.ForwardPopulationT;
 
 /**
  * Вычислить возрастную структуру и численность гипотетического населения СССР на начало 1946 года
@@ -14,7 +15,6 @@ public class USSR_Expected_Population_In_Early_1946
      */
     public static final double CBR_1940 = 36.1;
     
-    private static final int MAX_AGE = PopulationByLocality.MAX_AGE;
     private CombinedMortalityTable mt_ussr_1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
     private CombinedMortalityTable mt_rsfsr_1940 = new CombinedMortalityTable("mortality_tables/RSFSR/1940");
     
@@ -63,7 +63,31 @@ public class USSR_Expected_Population_In_Early_1946
     
     private PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr) throws Exception
     {
-        // ###
-        return null;
+        PopulationByLocality p = new USSR_Population_In_Middle_1941().evaluate();
+        
+        /* продвижка до начала 1942 года */
+        p = forward(p, mt, cbr, 0.5);
+        
+        /* продвижка до начала 1943 года */
+        p = forward(p, mt, cbr, 1.0);
+        
+        /* продвижка до начала 1944 года */
+        p = forward(p, mt, cbr, 1.0);
+        
+        /* продвижка до начала 1945 года */
+        p = forward(p, mt, cbr, 1.0);
+        
+        /* продвижка до начала 1946 года */
+        p = forward(p, mt, cbr, 1.0);
+        
+        return p;
+    }
+
+    private PopulationByLocality forward(PopulationByLocality p, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
+    {
+        ForwardPopulationT fw = new ForwardPopulationT();
+        fw.setBirthRateTotal(cbr);
+        p = fw.forward(p, mt, yfraction);
+        return p;
     }
 }
