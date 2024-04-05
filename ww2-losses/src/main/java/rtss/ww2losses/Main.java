@@ -257,12 +257,20 @@ public class Main
             return String.format("середин%s %d", suffix, ny);
     }
 
+    /* =================================================================================== */
+
+    /*
+     * Численность населения @years спустя при годовом темпе роста @rate
+     */
     private double prorate(double v, double rate, double years)
     {
         double xrate = (1 + rate / 1000);
         return v * Math.pow(xrate, years);
     }
 
+    /*
+     * Количество рождений за @nyears
+     */
     private double num_births(double start, double nyears, AreaParameters ap)
     {
         return num_births(start, nyears, ap.CBR_1940, ap.CDR_1940);
@@ -292,6 +300,9 @@ public class Main
         return total_births;
     }
 
+    /*
+     * Численность населения 6 месяцев спустя
+     */
     public static double forward_6mo(double v, AreaParameters ap, int year)
     {
         if (year == 1940)
@@ -308,6 +319,9 @@ public class Main
         return v * f;
     }
 
+    /*
+     * Численность населения 6 месяцами ранее
+     */
     public static double backward_6mo(double v, AreaParameters ap, int year)
     {
         if (year == 1940)
@@ -325,8 +339,8 @@ public class Main
     }
 
     /*
-     * Calculate population registered by the 1959 census, with birth dates in a window @nyears wide 
-     * starting from (@start_year + @months_delay/12)
+     * Опеределить численность населения по переписи 1959 года с датами рождения во временном окне шириной @nyears 
+     * начинающемся со (@start_year + @months_delay/12)
      */
     private double actual_in1959(Area area, double start_year, double months_delay, double nyears, StringBuilder sbFormula) throws Exception
     {
@@ -334,8 +348,8 @@ public class Main
     }
 
     /*
-     * Calculate population registered by the 1959 census, with birth dates in a window @nyears wide 
-     * starting from @start_year
+     * Опеределить численность населения по переписи 1959 года с датами рождения во временном окне шириной @nyears 
+     * начинающемся со @start_year
      */
     private double actual_in1959(Area area, double start_year, double nyears, StringBuilder sbFormula) throws Exception
     {
@@ -374,9 +388,9 @@ public class Main
     }
 
     /*
-     * Determine what fraction of [x1 ... x2] overlaps [a1 ... a2].
-     * Return value ranges from 0.0 (no overlap at all) to 1.0 (if x1...x2 is fully inside a1...a2),
-     * to a value in between in case of a partial overlap. 
+     * Определить, какая часть диапазона [x1 ... x2] перекрывает диапазон [a1 ... a2].
+     * Возвращает значение от 0.0 (если нет перекрытия) до 1.0 (если x1...x2 целиком внутри a1...a2),
+     * или промежуточное значение в случае частичного перекрытия. 
      */
     private double overlap(double x1, double x2, double a1, double a2)
     {
