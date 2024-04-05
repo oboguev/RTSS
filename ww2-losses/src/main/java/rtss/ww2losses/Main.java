@@ -176,6 +176,7 @@ public class Main
         double expected_end = prorate(actual_start, ap.CBR_1940 - ap.CDR_1940, nyears);
         double expected_births = expected_births(actual_start, nyears, ap);
         double expected_deaths = expected_deaths(actual_start, nyears, ap);
+        double original_population_expected_deaths = original_population_expected_deaths(actual_start, nyears, ap);
         StringBuilder birthsFormula = new StringBuilder();
         double actual_in1959 = actual_in1959(area, 1941.5, birth_months_delay, nyears, birthsFormula);
         double overall_deficit = expected_end - actual_end;
@@ -188,6 +189,9 @@ public class Main
         Util.out(String
                  .format("Ожидаемое число смертей за период в %s года при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s тыс. чел.",
                          d2s(nyears), f2k(expected_deaths)));
+        Util.out(String
+                 .format("Ожидаемое число смертей в первоначальном населении (не включая рождённых) за период в %s года при сохранении в 1941-1945 гг. уровня смертности 1940 года: %s тыс. чел.",
+                         d2s(nyears), f2k(original_population_expected_deaths)));
         Util.out(String
                 .format("Ожидаемое число рождений за период в %s года при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s тыс. чел.",
                         d2s(nyears), f2k(expected_births)));
@@ -363,6 +367,47 @@ public class Main
         return total_deaths;
     }
 
+    
+    /*
+     * Ожидаемое количество смертей за @nyears в первоначальном населении
+     */
+    private double original_population_expected_deaths(double start, double nyears, AreaParameters ap)
+    {
+        return original_population_expected_deaths(start, nyears, ap.CDR_1940);
+    }
+
+    private double original_population_expected_deaths(double start, double nyears, double cdr)
+    {
+        double p = start;
+        double total_deaths = 0;
+
+        while (nyears >= 1)
+        {
+            double deaths = p * cdr / 1000;
+            total_deaths += deaths;
+            p -= deaths;
+            nyears -= 1;
+        }
+
+        if (nyears > 0)
+        {
+            /*
+             * Частичный годовой интервал разбивается на шаги, 
+             * результат интегрируется по ним
+             */
+            final int STEPS = 1000;
+            final double stepsize = nyears / STEPS; 
+            for (int step = 0; step <= STEPS; step++)
+            {
+                double deaths = p * cdr * stepsize  / 1000;
+                total_deaths += deaths;
+                p -= deaths;
+            }
+        }
+
+        return total_deaths;
+    }
+    
     /*
      * Ожидаемая численность населения 6 месяцев спустя
      * при начальном количестве @v
