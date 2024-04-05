@@ -9,7 +9,7 @@ import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
- * Вычислить возрастуню структуру населения СССР на середину 1941 года
+ * Вычислить возрастную структуру населения СССР на середину 1941 года
  */
 public class USSR_Population_In_Middle_1941
 {
@@ -66,7 +66,7 @@ public class USSR_Population_In_Middle_1941
         final double males_mid1941 = males_jun21 * USSR_1941_MID / total_jun21; 
         
         p = scale(p, Gender.FEMALE, females_mid1941);
-        p = scale(p, Gender.MALE, females_mid1941);
+        p = scale(p, Gender.MALE, males_mid1941);
 
         return p;
     }
