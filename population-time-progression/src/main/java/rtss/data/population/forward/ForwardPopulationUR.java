@@ -1,4 +1,4 @@
-package rtss.forward_1926_193x;
+package rtss.data.population.forward;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,11 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
-public class ForwardPopulation
+/**
+ * Продвижка населения по таблице смертности имеющей отдельные части
+ * для городского и сельского населения  
+ */
+public class ForwardPopulationUR
 {
     protected static final int MAX_AGE = Population.MAX_AGE;
 
@@ -22,7 +26,7 @@ public class ForwardPopulation
     /*
      * Оценить долю городского населения во всём населении (для указанного пола) 
      */
-    protected double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
+    public double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
     {
         double urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
         double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
@@ -32,7 +36,7 @@ public class ForwardPopulation
     /*
      * Линейная интерполяция между двумя точками
      */
-    protected Map<Integer, Double> interpolate_linear(int y1, double v1, int y2, double v2)
+    public Map<Integer, Double> interpolate_linear(int y1, double v1, int y2, double v2)
             throws Exception
     {
         Map<Integer, Double> m = new HashMap<>();

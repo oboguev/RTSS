@@ -2,11 +2,12 @@ package rtss.forward_1926_193x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.forward.ForwardPopulationUR;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 
-public class ForwardPopulation_1926 extends ForwardPopulation
+public class ForwardPopulation_1926 extends ForwardPopulationUR
 {
     protected CombinedMortalityTable mt1926 = new CombinedMortalityTable("mortality_tables/USSR/1926-1927");
     protected CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
