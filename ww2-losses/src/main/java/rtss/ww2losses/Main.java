@@ -174,7 +174,8 @@ public class Main
         actual_end = ap.ACTUAL_POPULATION_END;
 
         double expected_end = prorate(actual_start, ap.CBR_1940 - ap.CDR_1940, nyears);
-        double expected_births = num_births(actual_start, nyears, ap);
+        double expected_births = expected_births(actual_start, nyears, ap);
+        double expected_deaths = expected_deaths(actual_start, nyears, ap);
         StringBuilder birthsFormula = new StringBuilder();
         double actual_in1959 = actual_in1959(area, 1941.5, birth_months_delay, nyears, birthsFormula);
         double overall_deficit = expected_end - actual_end;
@@ -183,15 +184,21 @@ public class Main
         Util.out(String.format("Ожидаемое население в конце периода: %s тыс. чел.", f2k(expected_end)));
         Util.out(String.format("Наличное население в конце периода: %s тыс. чел.", f2k(actual_end)));
         Util.out(String.format("Общий демографический дефицит в конце периода: %s тыс. чел.", f2k(overall_deficit)));
+
         Util.out(String
-                .format("Ожидаемое число рождений за %s года войны при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s тыс. чел.",
+                 .format("Ожидаемое число смертей за период в %s года при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s тыс. чел.",
+                         d2s(nyears), f2k(expected_deaths)));
+        Util.out(String
+                .format("Ожидаемое число рождений за период в %s года при сохранении в 1941-1945 гг. уровней рождаемости и смертности 1940 года: %s тыс. чел.",
                         d2s(nyears), f2k(expected_births)));
+        
         Util.out(String.format("Доживаемость в мирных условиях между 1941-1945 в среднем и 15.1.1959, принимаемая как: %.2f",
                                ap.survival_rate_194x_1959));
         Util.out(String
                 .format("Фактическое число родившихся в период за %s года (с задержкой %s месяцев) и доживших до переписи 1959 года: %s тыс. чел.",
                         d2s(nyears), d2s(birth_months_delay), f2k(actual_in1959)));
         Util.out(String.format("Формула для числа рождений, по данным переписи 1959 года: %s", birthsFormula, toString()));
+        
         if (ap.immigration > 0)
         {
             Util.out(String
@@ -221,7 +228,10 @@ public class Main
     }
 
     /* =================================================================================== */
-
+    
+    /*
+     * Форматирование вывода
+     */
     private String f2k(double v)
     {
         String s = String.format("%,10.0f", v);
@@ -260,7 +270,8 @@ public class Main
     /* =================================================================================== */
 
     /*
-     * Численность населения @years спустя при годовом темпе роста @rate
+     * Ожидаемая численность населения @years спустя при годовом темпе роста @rate
+     * и начальном количестве @v
      */
     private double prorate(double v, double rate, double years)
     {
@@ -269,14 +280,14 @@ public class Main
     }
 
     /*
-     * Количество рождений за @nyears
+     * Ожидаемое количество рождений за @nyears
      */
-    private double num_births(double start, double nyears, AreaParameters ap)
+    private double expected_births(double start, double nyears, AreaParameters ap)
     {
-        return num_births(start, nyears, ap.CBR_1940, ap.CDR_1940);
+        return expected_births(start, nyears, ap.CBR_1940, ap.CDR_1940);
     }
 
-    private double num_births(double start, double nyears, double cbr, double cdr)
+    private double expected_births(double start, double nyears, double cbr, double cdr)
     {
         double p = start;
         double total_births = 0;
@@ -292,16 +303,69 @@ public class Main
 
         if (nyears > 0)
         {
-            double f = Math.pow(1 + cbr / 1000, nyears) - 1;
-            double births = p * f;
-            total_births += births;
+            /*
+             * Частичный годовой интервал разбивается на шаги, 
+             * результат интегрируется по ним
+             */
+            final int STEPS = 1000;
+            final double stepsize = nyears / STEPS; 
+            for (int step = 0; step <= STEPS; step++)
+            {
+                double births = p * cbr * stepsize / 1000;
+                double deaths = p * cdr * stepsize  / 1000;
+                total_births += births;
+                p += births - deaths;
+            }
         }
 
         return total_births;
     }
 
     /*
-     * Численность населения 6 месяцев спустя
+     * Ожидаемое количество смертей за @nyears
+     */
+    private double expected_deaths(double start, double nyears, AreaParameters ap)
+    {
+        return expected_deaths(start, nyears, ap.CBR_1940, ap.CDR_1940);
+    }
+
+    private double expected_deaths(double start, double nyears, double cbr, double cdr)
+    {
+        double p = start;
+        double total_deaths = 0;
+
+        while (nyears >= 1)
+        {
+            double births = p * cbr / 1000;
+            double deaths = p * cdr / 1000;
+            total_deaths += deaths;
+            p += births - deaths;
+            nyears -= 1;
+        }
+
+        if (nyears > 0)
+        {
+            /*
+             * Частичный годовой интервал разбивается на шаги, 
+             * результат интегрируется по ним
+             */
+            final int STEPS = 1000;
+            final double stepsize = nyears / STEPS; 
+            for (int step = 0; step <= STEPS; step++)
+            {
+                double births = p * cbr * stepsize / 1000;
+                double deaths = p * cdr * stepsize  / 1000;
+                total_deaths += deaths;
+                p += births - deaths;
+            }
+        }
+
+        return total_deaths;
+    }
+
+    /*
+     * Ожидаемая численность населения 6 месяцев спустя
+     * при начальном количестве @v
      */
     public static double forward_6mo(double v, AreaParameters ap, int year)
     {
@@ -321,6 +385,7 @@ public class Main
 
     /*
      * Численность населения 6 месяцами ранее
+     * при начальном количестве @v
      */
     public static double backward_6mo(double v, AreaParameters ap, int year)
     {
