@@ -25,6 +25,13 @@ public class PopulationByLocality
         return p;
     }
 
+    static public PopulationByLocality newPopulationTotalOnly()
+    {
+        PopulationByLocality p = new PopulationByLocality();
+        p.total = Population.newPopulation();
+        return p;
+    }
+
     public PopulationByLocality clone()
     {
         PopulationByLocality p = new PopulationByLocality();
@@ -168,20 +175,29 @@ public class PopulationByLocality
 
     public void validate() throws Exception
     {
-        rural.validate();
-        urban.validate();
-        total.validate();
+        if (rural != null)
+            rural.validate();
 
-        for (int age = 0; age <= MAX_AGE; age++)
+        if (urban != null)
+            urban.validate();
+        
+        if (total != null)
+            total.validate();
+        
+        if (rural != null && urban != null)
         {
-            if (Util.differ(rural.male(age) + urban.male(age), total.male(age)))
-                mismatch();
 
-            if (Util.differ(rural.female(age) + urban.female(age), total.female(age)))
-                mismatch();
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                if (Util.differ(rural.male(age) + urban.male(age), total.male(age)))
+                    mismatch();
 
-            if (Util.differ(rural.fm(age) + urban.fm(age), total.fm(age)))
-                mismatch();
+                if (Util.differ(rural.female(age) + urban.female(age), total.female(age)))
+                    mismatch();
+
+                if (Util.differ(rural.fm(age) + urban.fm(age), total.fm(age)))
+                    mismatch();
+            }
         }
     }
 
@@ -224,9 +240,17 @@ public class PopulationByLocality
 
         if (doSmooth)
         {
-            p.rural.smooth();
-            p.urban.smooth();
-            p.recalcTotal();
+            if (p.rural != null && p.urban != null)
+            {
+                p.rural.smooth();
+                p.urban.smooth();
+                p.recalcTotal();
+            }
+            else
+            {
+                p.total.smooth();
+            }
+            
             validate();
         }
 

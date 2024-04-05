@@ -16,6 +16,15 @@ public class CombinedMortalityTable
     protected CombinedMortalityTable()
     {
     }
+    
+    static public CombinedMortalityTable loadTotal(String path) throws Exception
+    {
+        CombinedMortalityTable cmt = new CombinedMortalityTable();
+        cmt.loadTables(path, Gender.BOTH, Locality.TOTAL);
+        cmt.loadTables(path, Gender.MALE, Locality.TOTAL);
+        cmt.loadTables(path, Gender.FEMALE, Locality.TOTAL);
+        return cmt;
+    }
 
     public MortalityInfo get(Locality locality, Gender gender, int age) throws Exception
     {

@@ -70,9 +70,9 @@ public class ForwardPopulationT
             throws Exception
     {
         /* пустая структура для получения результатов */
-        PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
+        PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
 
-        /* продвижка седльского и городского населений, сохранить результат в @pto */
+        /* продвижка всего населения (городского и сельского совокупно), сохранить результат в @pto */
         forward(pto, p, Locality.TOTAL, mt, yfraction);
 
         /* проверить внутреннюю согласованность результата */

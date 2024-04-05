@@ -65,10 +65,13 @@ public class USSR_Population_In_Middle_1941
         final double females_mid1941 = females_jun21 * USSR_1941_MID / total_jun21; 
         final double males_mid1941 = males_jun21 * USSR_1941_MID / total_jun21; 
         
-        p = scale(p, Gender.FEMALE, females_mid1941);
-        p = scale(p, Gender.MALE, males_mid1941);
+        PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
+        scale(pto, p, Gender.FEMALE, females_mid1941);
+        scale(pto, p, Gender.MALE, males_mid1941);
+        pto.makeBoth(Locality.TOTAL);
+        pto.validate();
 
-        return p;
+        return pto;
     }
 
     private double forward_6mo(double v, double rate)
@@ -77,9 +80,8 @@ public class USSR_Population_In_Middle_1941
         return v * f;
     }
     
-    private PopulationByLocality scale(PopulationByLocality p, Gender gender, double target) throws Exception
+    private void scale(PopulationByLocality pto, PopulationByLocality p, Gender gender, double target) throws Exception
     {
-        PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
         double v = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
         double scale = target / v;
         
@@ -89,9 +91,5 @@ public class USSR_Population_In_Middle_1941
             v *= scale;
             pto.set(Locality.TOTAL, gender, age, v);
         }
-
-        pto.recalcTotal();
-        pto.validate();
-        return pto;
     }
 }

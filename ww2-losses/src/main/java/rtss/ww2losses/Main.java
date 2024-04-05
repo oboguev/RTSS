@@ -1,6 +1,7 @@
 package rtss.ww2losses;
 
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.population_194x.USSR_Expected_Population_In_Early_1946;
 
 import java.math.BigDecimal;
 
@@ -65,17 +66,6 @@ public class Main
         do_show(Area.USSR, ap, 4.0, USSR_1941_MID, USSR_1945_MID, birth_delay_months);
 
         /* 
-         * СССР с середины 1941 по начало 1946
-         * дожитие 0.62
-         * окно рождений сдвинуто на 0 месяцев 
-         */
-        ap = AreaParameters.forArea(Area.USSR, 4);
-        ap.immigration = 0;
-        ap.survival_rate_194x_1959 = 0.62;
-        birth_delay_months = 0;
-        do_show(Area.USSR, ap, 4.5, USSR_1941_MID, USSR_1946_START, birth_delay_months);
-
-        /* 
          * СССР с середины 1941 по середину 1945
          * дожитие 0.62
          * окно рождений сдвинуто на 0 месяцев 
@@ -85,6 +75,18 @@ public class Main
         ap.survival_rate_194x_1959 = 0.62;
         birth_delay_months = 0;
         do_show(Area.USSR, ap, 4.0, USSR_1941_MID, USSR_1945_MID, birth_delay_months);
+
+        /* 
+         * СССР с середины 1941 по начало 1946
+         * дожитие 0.62
+         * окно рождений сдвинуто на 0 месяцев 
+         */
+        ap = AreaParameters.forArea(Area.USSR, 4);
+        ap.immigration = 0;
+        ap.survival_rate_194x_1959 = 0.62;
+        birth_delay_months = 0;
+        do_show(Area.USSR, ap, 4.5, USSR_1941_MID, USSR_1946_START, birth_delay_months);
+        do_show_forwarding();
     }
 
     private void do_main(Area area, int nyears, double survival_rate) throws Exception
@@ -534,5 +536,40 @@ public class Main
         {
             return (a2 - x1) / (x2 - x1);
         }
+    }
+
+    private void do_show_forwarding() throws Exception
+    {
+        final USSR_Expected_Population_In_Early_1946 x46 = new USSR_Expected_Population_In_Early_1946();
+        final double CBR_1940 = USSR_Expected_Population_In_Early_1946.CBR_1940;
+        final int MAX_AGE = PopulationByLocality.MAX_AGE;
+        PopulationByLocality p;
+        double sum;
+        
+        Util.out("");
+        
+        p = x46.with_mt_USSR_1938(0);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
+                               "таблица ГКС-СССР-1938, без рождений",
+                               f2k(sum)));
+        
+        p = x46.with_mt_USSR_1938(CBR_1940);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
+                               "таблица ГКС-СССР-1938, с рождениями",
+                               f2k(sum)));
+
+        p = x46.with_mt_RSFSR_1940(0);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
+                               "таблица АДХ-РСФСР-1940, без рождений",
+                               f2k(sum)));
+
+        p = x46.with_mt_RSFSR_1940(CBR_1940);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
+                               "таблица АДХ-РСФСР-1940, с рождениями",
+                               f2k(sum)));
     }
 }
