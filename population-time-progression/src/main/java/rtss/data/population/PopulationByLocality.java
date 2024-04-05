@@ -56,6 +56,11 @@ public class PopulationByLocality
         return p;
     }
     
+    public boolean hasRuralUrban()
+    {
+        return rural != null && urban != null;
+    }
+    
     /****************************************************************************************************/
 
     public double get(Locality locality, Gender gender, int age) throws Exception

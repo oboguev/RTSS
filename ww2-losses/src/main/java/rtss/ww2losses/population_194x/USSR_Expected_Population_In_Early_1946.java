@@ -61,7 +61,7 @@ public class USSR_Expected_Population_In_Early_1946
         return with_mt(null, cbr);
     }
     
-    private PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr) throws Exception
+    public PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr) throws Exception
     {
         PopulationByLocality p = new USSR_Population_In_Middle_1941().evaluate();
         

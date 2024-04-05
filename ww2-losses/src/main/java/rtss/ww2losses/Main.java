@@ -2,9 +2,12 @@ package rtss.ww2losses;
 
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.USSR_Expected_Population_In_Early_1946;
+import rtss.ww2losses.population_194x.USSR_Population_In_Middle_1941;
 
 import java.math.BigDecimal;
 
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
@@ -546,30 +549,55 @@ public class Main
         PopulationByLocality p;
         double sum;
         
+        CombinedMortalityTable mt_ussr_1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
+        CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
+        PopulationByLocality p1941 = new USSR_Population_In_Middle_1941().evaluate();
+        
         Util.out("");
         
+        double cdr1 = EvalMortalityRate.eval(mt_ussr_1938, p1941);
+        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице ГКС-СССР-1938: %.1f промилле", cdr1));
+        
+        double cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1941);
+        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице АДХ-РСФСР-1938: %.1f промилле", cdr2));
+        
+        CombinedMortalityTable mt = combine(mt_ussr_1938, cdr1, mt_rsfsr_1940, cdr2);
+        double cdr3 = EvalMortalityRate.eval(mt, p1941);
+        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и комбинированной таблице: %.1f промилле", cdr3));
+        
+        Util.out("");
+
+        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира:"));
         p = x46.with_mt_USSR_1938(0);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
-                               "таблица ГКС-СССР-1938, без рождений",
-                               f2k(sum)));
+        Util.out(String.format("таблица ГКС-СССР-1938, без рождений: %s тыс. чел.", f2k(sum)));
         
         p = x46.with_mt_USSR_1938(CBR_1940);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
-                               "таблица ГКС-СССР-1938, с рождениями",
-                               f2k(sum)));
+        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями: %s тыс. чел.", f2k(sum)));
 
         p = x46.with_mt_RSFSR_1940(0);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
-                               "таблица АДХ-РСФСР-1940, без рождений",
-                               f2k(sum)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений: %s тыс. чел.", f2k(sum)));
 
         p = x46.with_mt_RSFSR_1940(CBR_1940);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира\n%s: %s тыс. чел.",
-                               "таблица АДХ-РСФСР-1940, с рождениями",
-                               f2k(sum)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями: %s тыс. чел.", f2k(sum)));
+
+        p = x46.with_mt(mt, 0);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("комбинированная таблица, без рождений: %s тыс. чел.", f2k(sum)));
+
+        p = x46.with_mt(mt, CBR_1940);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("комбинированная таблица, с рождениями: %s тыс. чел.", f2k(sum)));
+    }
+    
+    private CombinedMortalityTable combine(CombinedMortalityTable mt1, double cdr1, CombinedMortalityTable mt2, double cdr2) throws Exception
+    {
+        AreaParameters ap = AreaParameters.forArea(Area.USSR, 4);
+        double a = (ap.CDR_1940 - cdr2) / (cdr1 - cdr2);
+        Util.out(String.format("комбинированная таблица: %.3f от ГКС-СССР-1939, %.3f от АДХ-РСФСР-1940", 1 - a, a));
+        return CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
     }
 }
