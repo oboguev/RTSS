@@ -109,9 +109,7 @@ public class PopulationForwardingContext
 
     public double sumAge(Locality locality, Gender gender, int age) throws Exception
     {
-        int nd1 = age * DAYS_PER_YEAR;
-        int nd2 = nd1 + DAYS_PER_YEAR - 1;
-        return sum(locality, gender, nd1, nd2);
+        return sum(locality, gender, firstDayForAge(age), lastDayForAge(age));
     }
 
     public double sumAges(Locality locality, Gender gender, int age1, int age2) throws Exception
@@ -133,6 +131,16 @@ public class PopulationForwardingContext
     {
         if (v < 0)
             throw new Exception("Negative population");
+    }
+    
+    public int firstDayForAge(int age)
+    {
+        return age * DAYS_PER_YEAR;
+    }
+
+    public int lastDayForAge(int age)
+    {
+        return (age + 1) * DAYS_PER_YEAR - 1;
     }
 
     /* =============================================================================================== */
@@ -178,9 +186,7 @@ public class PopulationForwardingContext
             double v = p.get(locality, gender, age);
             p.set(locality, gender, age, 0);
 
-            int nd1 = age * DAYS_PER_YEAR;
-            int nd2 = nd1 + DAYS_PER_YEAR - 1;
-            for (int nd = nd1; nd <= nd2; nd++)
+            for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
                 set(locality, gender, nd, v / DAYS_PER_YEAR);
         }
     }
@@ -219,9 +225,7 @@ public class PopulationForwardingContext
     {
         for (int age = 0; age < NYEARS; age++)
         {
-            int nd1 = age * DAYS_PER_YEAR;
-            int nd2 = nd1 + DAYS_PER_YEAR - 1;
-            double v = sum(locality, gender, nd1, nd2);
+            double v = sum(locality, gender, firstDayForAge(age), lastDayForAge(age));
             p.add(locality, gender, age, v);
             p.add(locality, Gender.BOTH, age, v);
         }
