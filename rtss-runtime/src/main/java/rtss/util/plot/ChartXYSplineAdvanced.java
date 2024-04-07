@@ -2,6 +2,8 @@ package rtss.util.plot;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -16,6 +18,7 @@ import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.ui.ApplicationFrame;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.chart.ui.UIUtils;
+import org.jfree.chart.util.ShapeUtils;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -41,6 +44,7 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
     private XYSeriesCollection dataset = new XYSeriesCollection();
     private String xLabel;
     private String yLabel;
+    private List<Boolean> asDots = new ArrayList<Boolean>();
 
     public ChartXYSplineAdvanced()
     {
@@ -75,9 +79,24 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
             series.add(x[k], y[k]);
         
         dataset.addSeries(series);
+        asDots.add(false);
+        
         return this;
     }
     
+    public ChartXYSplineAdvanced addSeriesAsDots(String name, double[] x, double[] y)
+    {
+        XYSeries series = new XYSeries(name);
+        
+        for (int k = 0; k < x.length; k++)
+            series.add(x[k], y[k]);
+        
+        dataset.addSeries(series);
+        asDots.add(true);
+        
+        return this;
+    }
+
     public void display() 
     {
         JPanel content = new MyDisplayPanel(this);
@@ -137,6 +156,16 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
             plot.setDomainGridlinePaint(Color.WHITE);
             plot.setRangeGridlinePaint(Color.WHITE);
             plot.setAxisOffset(new RectangleInsets(4, 4, 4, 4));
+            
+            for (int k = 0; k < chart.asDots.size(); k++)
+            {
+                if (chart.asDots.get(k))
+                {
+                    renderer1.setSeriesShapesVisible(k, true);
+                    renderer1.setSeriesLinesVisible(k, false);
+                    renderer1.setSeriesShape(k, ShapeUtils.createDiamond(10.0f));
+                }
+            }
 
             // create and return the chart panel
             String title = chart.getTitle();
@@ -164,6 +193,16 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
             plot.setDomainGridlinePaint(Color.WHITE);
             plot.setRangeGridlinePaint(Color.WHITE);
             plot.setAxisOffset(new RectangleInsets(4, 4, 4, 4));
+
+            for (int k = 0; k < chart.asDots.size(); k++)
+            {
+                if (chart.asDots.get(k))
+                {
+                    renderer1.setSeriesShapesVisible(k, true);
+                    renderer1.setSeriesLinesVisible(k, false);
+                    renderer1.setSeriesShape(k, ShapeUtils.createDiamond(10.0f));
+                }
+            }
 
             // create and return the chart panel
             String title = chart.getTitle();

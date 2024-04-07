@@ -1,16 +1,10 @@
 package rtss.data.mortality.synthetic;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
-import rtss.data.bin.Bin;
-import rtss.data.bin.Bins;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
-import rtss.math.interpolate.TargetPrecision;
-import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -23,50 +17,38 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  */
 public class InterpolateYearlyToDailyAsValuePreservingMonotoneCurve
 {
+    final static int DAYS_PER_YEAR = 365; 
+    
     public static double[] yearly2daily(final double[] y) throws Exception
     {
-        final int DAYS_PER_YEAR = 365; 
-        
         final double[] x = new double[y.length];
         for (int k = 0; k < y.length; k++)
             x[k] = k;
         
-        
-
-        List<Bin> list = new ArrayList<>();
-        for (int year = 0; year  < y.length; year++)
-            list.add(new Bin(year, year, y[year]));
-
-        Bin[] bins = Bins.bins(list);
-
-        TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
-        MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
-                .checkPositive(false);
-
-        double[] xxx = Bins.ppy_x(bins, DAYS_PER_YEAR);
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
+        double[] xxx = xxx(x);
 
         if (Util.False)
         {
-            options.basicSplineType(SteffenSplineInterpolator.class);
-            yyy1 = MeanPreservingIterativeSpline.eval(bins, DAYS_PER_YEAR, options, precision);
+            UnivariateFunction sp = makeSpline(x, y, SteffenSplineInterpolator.class);
+            yyy1 = interpol(sp, x);
         }
 
         if (Util.False)
         {
-            options.basicSplineType(AkimaSplineInterpolator.class);
-            yyy2 = MeanPreservingIterativeSpline.eval(bins, DAYS_PER_YEAR, options, precision);
+            UnivariateFunction sp = makeSpline(x, y, AkimaSplineInterpolator.class);
+            yyy2 = interpol(sp, x);
         }
 
         if (Util.True)
         {
-            options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
-            yyy3 = MeanPreservingIterativeSpline.eval(bins, DAYS_PER_YEAR, options, precision);
+            UnivariateFunction sp = makeSpline(x, y, ConstrainedCubicSplineInterpolator.class);
+            yyy3 = interpol(sp, x);
         }
         
-        if (Util.True)
+        if (Util.False)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)
@@ -75,7 +57,7 @@ public class InterpolateYearlyToDailyAsValuePreservingMonotoneCurve
                 chart.addSeries("2", xxx, yyy2);
             if (yyy3 != null)
                 chart.addSeries("3", xxx, yyy3);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, DAYS_PER_YEAR));
+            chart.addSeriesAsDots("original", x, y);
             chart.display();
         }
         
@@ -87,10 +69,44 @@ public class InterpolateYearlyToDailyAsValuePreservingMonotoneCurve
         if (!Util.isPositive(yyy))
             throw new Exception("Error calculating curve (negative or zero value)");
         
-        double[] yy = Bins.ppy2yearly(yyy, DAYS_PER_YEAR);
-
-        InterpolateAsMeanPreservingCurve.validate_means(yy, bins);
-
+        return yyy;
+    }
+    
+    private static double[] interpol(UnivariateFunction sp, double[] x)
+    {
+        int ndays = (x.length - 1) * DAYS_PER_YEAR;
+        double[] yy = new double[ndays];
+        for (int day = 0; day < ndays; day++)
+            yy[day] = sp.value(day * 1.0 / DAYS_PER_YEAR);
         return yy;
+    }
+
+    private static UnivariateFunction makeSpline(final double[] cp_x, final double[] cp_y, Class<?> basicSplineType) throws Exception
+    {
+        if (basicSplineType == AkimaSplineInterpolator.class)
+        {
+            return new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
+        }
+        else if (basicSplineType == SteffenSplineInterpolator.class)
+        {
+            return new SteffenSplineInterpolator().interpolate(cp_x, cp_y);
+        }
+        else if (basicSplineType == ConstrainedCubicSplineInterpolator.class)
+        {
+            return new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y);
+        }
+        else
+        {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private static double[] xxx(double[] x)
+    {
+        int ndays = (x.length - 1) * DAYS_PER_YEAR;
+        double[] xxx = new double[ndays];
+        for (int day = 0; day < ndays; day++)
+            xxx[day] = day * 1.0 / DAYS_PER_YEAR;
+        return xxx;
     }
 }
