@@ -222,12 +222,33 @@ public class ForwardPopulationUR
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
 
+        /*
+         * Продвижка контекста ранней детской смертности
+         */
         if (fctx != null)
         {
-            // ### продвижка контекста
+            forward_context(pto, fctx, locality, gender, mt, yfraction);
         }
     }
 
+    private void forward_context(
+            PopulationByLocality pto,
+            PopulationForwardingContext fctx,
+            final Locality locality,
+            final Gender gender,
+            final CombinedMortalityTable mt,
+            final double yfraction)
+            throws Exception
+    {
+        int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
+        if (ndays == 0)
+            return;
+        
+        double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
+
+        // ###  
+    }
+    
     /*
      * Перенести часть населения из сельского в городское для достижения указанного уровня урбанизации.
      * Мы вычисляем требуемое количество передвижения и переносим это население.
