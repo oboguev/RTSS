@@ -47,6 +47,8 @@ public class PopulationForwardingContext
     public static final int NDAYS = NYEARS * DAYS_PER_YEAR;
     public static final int MAX_DAY = NDAYS - 1;
     
+    private boolean hasRuralUrban;
+    
     /* =============================================================================================== */
     
     private Map<String, Double> m = new HashMap<>(); 
@@ -88,6 +90,12 @@ public class PopulationForwardingContext
 
     public double sum(Locality locality, Gender gender, int nd1, int nd2) throws Exception
     {
+        if (locality == Locality.TOTAL && hasRuralUrban)
+            return sum(Locality.URBAN, gender, nd1, nd2) + sum(Locality.RURAL, gender, nd1, nd2);
+        
+        if (gender == Gender.BOTH)
+            return sum(locality, Gender.MALE, nd1, nd2) + sum(locality, Gender.FEMALE, nd1, nd2);
+
         double sum = 0;
         for (int nd = nd1; nd <= nd2; nd++)
             sum += get(locality, gender, nd);
@@ -112,8 +120,9 @@ public class PopulationForwardingContext
         m.clear();
         
         PopulationByLocality pto = p.clone();
-
-        if (pto.hasRuralUrban())
+        
+        hasRuralUrban = pto.hasRuralUrban(); 
+        if (hasRuralUrban)
         {
             begin(pto, Locality.RURAL);
             begin(pto, Locality.URBAN);
