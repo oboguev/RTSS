@@ -7,6 +7,7 @@ import java.util.Map;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -59,6 +60,15 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
         PopulationByLocality p = p1926;
         int year = 1926;
         double yfraction = 1.0;
+        
+        PopulationForwardingContext fctx = null;
+        if (Util.False)
+        {
+            // ###
+            fctx = new PopulationForwardingContext();
+            p = fctx.begin(p);
+        }
+        
         for (;;)
         {
             year++;
@@ -66,13 +76,13 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
             if (interpolateMortalityTable)
                 mt = interpolateMortalityTable(year);
             
-            p = forward(p, mt, yfraction);
+            p = forward(p, fctx, mt, yfraction);
 
             /*
              * Перераспределить население между городским и сельским, отражая урбанизацию 
              */
-            p = urbanize(p, Gender.MALE, urban_male_fraction_yyyy.get(year));
-            p = urbanize(p, Gender.FEMALE, urban_female_fraction_yyyy.get(year));
+            p = urbanize(p, fctx, Gender.MALE, urban_male_fraction_yyyy.get(year));
+            p = urbanize(p, fctx, Gender.FEMALE, urban_female_fraction_yyyy.get(year));
 
             if (year == 1936)
                 break;
@@ -86,7 +96,10 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
         Date d1937 = df.parse("1937-01-06");
         long ndays = Duration.between(d1936.toInstant(), d1937.toInstant()).toDays();
         yfraction = ndays / 365.0;
-        p = forward(p, mt, yfraction);
+        p = forward(p, fctx, mt, yfraction);
+        
+        if (fctx != null)
+            p = fctx.end(p);
 
         show_results(p);
     }

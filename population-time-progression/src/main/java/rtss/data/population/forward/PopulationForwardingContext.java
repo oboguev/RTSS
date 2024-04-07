@@ -28,13 +28,15 @@ import rtss.data.selectors.Locality;
  * Численность населения хранится в PopulationForwardingContext только для младших NYEARS лет, т.е. возрастов [0 ... NYEARS-1] лет
  * или [0 ... MAX_DAY] дней со дня рождения.
  * 
+ * Хранятся данные только для Gender.MALE и Gender.FEMALE, но не для Gender.BOTH.   
+ * 
  * Использование:
  * 
  *     PopulationByLocality p = ...
  *     PopulationForwardingContext fctx = new PopulationForwardingContext();
- *     PopulationByLocality pto = fcxt.begin(p);
+ *     PopulationByLocality pto = fctx.begin(p);
  *     ....
- *     pto = fcxt.end(pto);
+ *     pto = fctx.end(pto);
  * 
  */
 public class PopulationForwardingContext
@@ -94,7 +96,7 @@ public class PopulationForwardingContext
 
     private String key(Locality locality, Gender gender, int day) throws Exception
     {
-        if (day < 0 || day > MAX_DAY)
+        if (day < 0 || day > MAX_DAY || gender == Gender.BOTH)
             throw new IllegalArgumentException();
         return locality.name() + "-" + gender.name() + "-" + day;
     }
@@ -132,7 +134,6 @@ public class PopulationForwardingContext
     {
         begin(p, locality, Gender.MALE);
         begin(p, locality, Gender.FEMALE);
-        begin(p, locality, Gender.BOTH);
     }
 
     private void begin(PopulationByLocality p, Locality locality, Gender gender) throws Exception
@@ -177,7 +178,6 @@ public class PopulationForwardingContext
     {
         end(p, locality, Gender.MALE);
         end(p, locality, Gender.FEMALE);
-        end(p, locality, Gender.BOTH);
     }
 
     private void end(PopulationByLocality p, Locality locality, Gender gender) throws Exception
@@ -188,6 +188,7 @@ public class PopulationForwardingContext
             int nd2 = nd1 + DAYS_PER_YEAR - 1;
             double v = sum(locality, gender, nd1, nd2);
             p.add(locality, gender, age, v);
+            p.add(locality, Gender.BOTH, age, v);
         }
     }
 }
