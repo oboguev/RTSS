@@ -9,6 +9,13 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 // import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 // import com.manyangled.snowball.analysis.interpolation.MonotonicSplineInterpolator;
 
+/**
+ * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
+ * Typically used to interpolate the "qx" curve from an aggregated multi-year data to a yearly resolution.
+ * 
+ * Use a newer implementation instead: MakeCurve.
+ */
+@Deprecated 
 public class MakeCurve_Old
 {
     public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;

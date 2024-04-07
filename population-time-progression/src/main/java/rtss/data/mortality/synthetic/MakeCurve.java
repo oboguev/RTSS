@@ -13,8 +13,8 @@ import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
 /**
- * Interpolate bins to a smooth yearly curve.
- * Typically used to interpolate the "qx" curve.
+ * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
+ * Typically used to interpolate the "qx" curve from an aggregated multi-year data to a yearly resolution.
  */
 public class MakeCurve
 {
