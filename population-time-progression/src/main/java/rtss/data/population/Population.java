@@ -103,6 +103,7 @@ public class Population
     public void set(Gender gender, int age, double value) throws Exception
     {
         Map<Integer, Double> m = forGender(gender);
+        checkNonNegative(value);
         m.put(age, value);
     }
 
@@ -112,10 +113,12 @@ public class Population
 
         if (m.containsKey(age))
         {
+            checkNonNegative(m.get(age) + value);
             m.put(age, m.get(age) + value);
         }
         else
         {
+            checkNonNegative(value);
             m.put(age, value);
         }
     }
@@ -126,6 +129,7 @@ public class Population
 
         if (m.containsKey(age))
         {
+            checkNonNegative(m.get(age) - value);
             m.put(age, m.get(age) - value);
         }
         else
@@ -134,6 +138,12 @@ public class Population
                 throw new Exception("Negative population");
             m.put(age, -value);
         }
+    }
+    
+    private void checkNonNegative(double v) throws Exception
+    {
+        if (v < 0)
+            throw new Exception("Negative population");
     }
 
     private Map<Integer, Double> forGender(Gender gender)

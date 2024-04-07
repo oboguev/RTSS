@@ -229,7 +229,7 @@ public class ForwardPopulationUR
 
             double r2 = 0;
             double u2 = 0;
-            if (fctx != null)
+            if (fctx != null && age <= fctx.MAX_YEAR)
             {
                 r2 = fctx.sumAge(Locality.RURAL, gender, age);
                 u2 = fctx.sumAge(Locality.URBAN, gender, age);

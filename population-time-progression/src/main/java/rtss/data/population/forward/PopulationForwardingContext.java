@@ -65,6 +65,7 @@ public class PopulationForwardingContext
     public void set(Locality locality, Gender gender, int day, double v) throws Exception
     {
         String key = key(locality, gender, day);
+        checkNonNegative(v);
         m.put(key, v);
     }
 
@@ -75,6 +76,7 @@ public class PopulationForwardingContext
         if (d == null)
             d = 0.0;
         v += d;
+        checkNonNegative(v);
         m.put(key, v);
         return v;
     }
@@ -86,6 +88,7 @@ public class PopulationForwardingContext
         if (d == null)
             d = 0.0;
         v = d - v;
+        checkNonNegative(v);
         m.put(key, v);
         return v;
     }
@@ -124,6 +127,12 @@ public class PopulationForwardingContext
         if (day < 0 || day > MAX_DAY || gender == Gender.BOTH)
             throw new IllegalArgumentException();
         return locality.name() + "-" + gender.name() + "-" + day;
+    }
+    
+    private void checkNonNegative(double v) throws Exception
+    {
+        if (v < 0)
+            throw new Exception("Negative population");
     }
 
     /* =============================================================================================== */
