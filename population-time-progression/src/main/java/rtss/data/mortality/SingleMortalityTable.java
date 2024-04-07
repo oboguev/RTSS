@@ -2,6 +2,7 @@ package rtss.data.mortality;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import rtss.util.Util;
 
@@ -183,6 +184,16 @@ public class SingleMortalityTable
         return v;
     }
     
+    public double[] lx() throws Exception
+    {
+        double[] v = new double[MAX_AGE + 1];
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            v[age] = get(age).lx; 
+        }
+        return v;
+    }
+
     /*****************************************************************************************************/
 
     /*
@@ -294,5 +305,21 @@ public class SingleMortalityTable
         }
 
         Util.writeAsFile(filepath, sb.toString());
+    }
+
+    /*****************************************************************************************************/
+
+    private String tid = UUID.randomUUID().toString(); 
+    
+    public int hashCode()
+    {
+        return tid.hashCode();
+    }
+    
+    public boolean equals(Object x)
+    {
+        if (x == null || !(x instanceof SingleMortalityTable))
+            return false;
+        return ((SingleMortalityTable)x).tid.equals(tid);
     }
 }

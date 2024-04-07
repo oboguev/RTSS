@@ -3,6 +3,7 @@ package rtss.data.mortality;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -149,4 +150,21 @@ public class CombinedMortalityTable
             smt.saveTable(f.getAbsoluteFile().getCanonicalPath(), comment);
         }
     }
+
+    /*****************************************************************************************************/
+
+    private String tid = UUID.randomUUID().toString(); 
+    
+    public int hashCode()
+    {
+        return tid.hashCode();
+    }
+    
+    public boolean equals(Object x)
+    {
+        if (x == null || !(x instanceof CombinedMortalityTable))
+            return false;
+        return ((CombinedMortalityTable)x).tid.equals(tid);
+    }
+    
 }
