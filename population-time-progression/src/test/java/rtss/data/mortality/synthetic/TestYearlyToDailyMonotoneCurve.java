@@ -14,7 +14,7 @@ public class TestYearlyToDailyMonotoneCurve
             CombinedMortalityTable mt = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
             double[] yearly = mt.getSingleTable(Locality.TOTAL, Gender.BOTH).lx();
             yearly = Util.splice(yearly, 0, 10);
-            double[] daily = YearlyToDailyMonotoneCurve.yearly2daily(yearly);
+            double[] daily = InterpolateYearlyToDailyAsMeanPreservingMonotoneCurve.yearly2daily(yearly);
             Util.unused(daily);
         }
         catch (Exception ex)

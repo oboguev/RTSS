@@ -16,9 +16,9 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 
 /**
  * Interpolate monotone curve from yearly x-values to daily x-values in a mean-preserving way.
- * Typically used to interpolate the "lx" curve.  
+ * Values in @y refer to the average of the interval. 
  */
-public class YearlyToDailyMonotoneCurve
+public class InterpolateYearlyToDailyAsMeanPreservingMonotoneCurve
 {
     public static double[] yearly2daily(final double[] y) throws Exception
     {
