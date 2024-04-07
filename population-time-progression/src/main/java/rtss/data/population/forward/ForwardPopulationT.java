@@ -104,7 +104,7 @@ public class ForwardPopulationT
         double births = sum * yfraction * birthRate / 1000;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
-
+        
         pto.add(locality, Gender.MALE, 0, m_births);
         pto.add(locality, Gender.FEMALE, 0, f_births);
 
