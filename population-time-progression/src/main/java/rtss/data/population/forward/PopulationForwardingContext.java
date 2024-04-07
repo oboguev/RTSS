@@ -165,6 +165,11 @@ public class PopulationForwardingContext
         for (int nd = 0; nd < NDAYS; nd++)
             set(locality, gender, nd, 0); 
     }
+    
+    public int day2age(int nd)
+    {
+        return nd / DAYS_PER_YEAR;
+    }
 
     /* =============================================================================================== */
     

@@ -245,8 +245,30 @@ public class ForwardPopulationUR
             return;
         
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
+        double[] p = fctx.asArray(locality, gender);
+        double[] p2 = new double[p.length];
+        
+        for (int nd = 0; nd < p.length; nd++)
+        {
+            int nd2 = nd + ndays;
+            
+            double v = p[nd];
 
-        // ###  
+            if (nd2 < p2.length)
+            {
+                v *= day_lx[nd2] / day_lx[nd];
+                p2[nd2] = v;
+            }
+            else
+            {
+                int age = fctx.day2age(nd2);
+                nd2 = age * fctx.DAYS_PER_YEAR;
+                v *= day_lx[nd2] / day_lx[nd];
+                pto.add(locality, gender, age, v);
+            }
+        }
+        
+        fctx.fromArray(locality, gender, p2);
     }
     
     /*
