@@ -1,10 +1,12 @@
 package rtss.data.mortality.synthetic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.mortality.SingleMortalityTable;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
@@ -13,21 +15,26 @@ import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
 /**
- * Interpolate bins to a smooth yearly curve.
- * Typically used to interpolate the "qx" curve.
+ * Interpolate monotone curve from yearly x-values to daily x-values in a mean-preserving way.
+ * Typically used to interpolate the "lx" curve.  
  */
-public class MakeCurve
+public class YearlyToDailyMonotoneCurve
 {
-    public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
-
-    public static double[] curve(Bin... bins) throws Exception
+    public static double[] yearly2daily(final double[] y) throws Exception
     {
+        final int DAYS_PER_YEAR = 365; 
+
+        List<Bin> list = new ArrayList<>();
+        for (int year = 0; year  < y.length; year++)
+            list.add(new Bin(year, year, y[year]));
+
+        Bin[] bins = Bins.bins(list);
+
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);
 
-        int ppy = 1000;
-        double[] xxx = Bins.ppy_x(bins, ppy);
+        double[] xxx = Bins.ppy_x(bins, DAYS_PER_YEAR);
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
@@ -35,22 +42,22 @@ public class MakeCurve
         if (Util.False)
         {
             options.basicSplineType(SteffenSplineInterpolator.class);
-            yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            yyy1 = MeanPreservingIterativeSpline.eval(bins, DAYS_PER_YEAR, options, precision);
         }
 
         if (Util.False)
         {
             options.basicSplineType(AkimaSplineInterpolator.class);
-            yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            yyy2 = MeanPreservingIterativeSpline.eval(bins, DAYS_PER_YEAR, options, precision);
         }
 
         if (Util.True)
         {
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
-            yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            yyy3 = MeanPreservingIterativeSpline.eval(bins, DAYS_PER_YEAR, options, precision);
         }
         
-        if (Util.False)
+        if (Util.True)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)
@@ -59,7 +66,7 @@ public class MakeCurve
                 chart.addSeries("2", xxx, yyy2);
             if (yyy3 != null)
                 chart.addSeries("3", xxx, yyy3);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, DAYS_PER_YEAR));
             chart.display();
         }
         
@@ -71,24 +78,10 @@ public class MakeCurve
         if (!Util.isPositive(yyy))
             throw new Exception("Error calculating curve (negative or zero value)");
         
-        double[] yy = Bins.ppy2yearly(yyy, ppy);
+        double[] yy = Bins.ppy2yearly(yyy, DAYS_PER_YEAR);
 
-        validate_means(yy, bins);
+        MakeCurve.validate_means(yy, bins);
 
         return yy;
     }
-    
-    /*
-     * Verify that the curve preserves mean values as indicated by the bins
-     */
-    static void validate_means(double[] yy, Bin... bins) throws Exception
-    {
-        for (Bin bin : bins)
-        {
-            double[] y = Util.splice(yy, bin.age_x1, bin.age_x2);
-            if (Util.differ(Util.average(y), bin.avg, 0.001))
-                throw new Exception("Curve does not preserve mean values of the bins");
-        }
-    }
-
 }
