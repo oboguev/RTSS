@@ -153,7 +153,12 @@ public class CombinedMortalityTable
 
     /*****************************************************************************************************/
 
-    private String tid = UUID.randomUUID().toString(); 
+    private final String tid = UUID.randomUUID().toString();
+    
+    public String tableId()
+    {
+        return tid;
+    }
     
     public int hashCode()
     {

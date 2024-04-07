@@ -309,7 +309,7 @@ public class SingleMortalityTable
 
     /*****************************************************************************************************/
 
-    private String tid = UUID.randomUUID().toString(); 
+    private final String tid = UUID.randomUUID().toString(); 
     
     public int hashCode()
     {

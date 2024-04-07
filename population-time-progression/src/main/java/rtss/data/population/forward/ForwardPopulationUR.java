@@ -13,7 +13,7 @@ import rtss.util.Util;
 
 /**
  * Продвижка населения по таблице смертности имеющей отдельные части
- * для городского и сельского населения  
+ * для городского и сельского населения
  */
 public class ForwardPopulationUR
 {
@@ -30,13 +30,13 @@ public class ForwardPopulationUR
     {
         double urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
         double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
-        
+
         if (fctx != null)
         {
             urban += fctx.sum(Locality.URBAN, gender, 0, fctx.MAX_DAY);
             total += fctx.sum(Locality.TOTAL, gender, 0, fctx.MAX_DAY);
         }
-        
+
         return urban / total;
     }
 
@@ -77,9 +77,9 @@ public class ForwardPopulationUR
      * При продвижке на часть года @yfraction < 1.0.
      */
     public PopulationByLocality forward(final PopulationByLocality p,
-                                        PopulationForwardingContext fctx,
-                                        final CombinedMortalityTable mt,
-                                        final double yfraction)
+            PopulationForwardingContext fctx,
+            final CombinedMortalityTable mt,
+            final double yfraction)
             throws Exception
     {
         /* пустая структура для получения результатов */
@@ -99,29 +99,34 @@ public class ForwardPopulationUR
     }
 
     public void forward(PopulationByLocality pto,
-                        final PopulationByLocality p,
-                        PopulationForwardingContext fctx,
-                        final Locality locality,
-                        final CombinedMortalityTable mt,
-                        final double yfraction)
+            final PopulationByLocality p,
+            PopulationForwardingContext fctx,
+            final Locality locality,
+            final CombinedMortalityTable mt,
+            final double yfraction)
             throws Exception
     {
         /* продвижка мужского и женского населений по смертности из @p в @pto */
         forward(pto, p, fctx, locality, Gender.MALE, mt, yfraction);
         forward(pto, p, fctx, locality, Gender.FEMALE, mt, yfraction);
-        
+
         /* добавить рождения */
         double birthRate;
         switch (locality)
         {
-        case RURAL:     birthRate = BirthRateRural; break;
-        case URBAN:     birthRate = BirthRateUrban; break;
-        default:        throw new Exception("Invalid locality");
+        case RURAL:
+            birthRate = BirthRateRural;
+            break;
+        case URBAN:
+            birthRate = BirthRateUrban;
+            break;
+        default:
+            throw new Exception("Invalid locality");
         }
 
         if (fctx != null)
         {
-            // ###
+            add_births(fctx, p, locality, mt, birthRate, yfraction);
         }
         else
         {
@@ -133,18 +138,65 @@ public class ForwardPopulationUR
             pto.add(locality, Gender.MALE, 0, m_births);
             pto.add(locality, Gender.FEMALE, 0, f_births);
         }
-        
+
         /* вычислить графу "оба пола" из отдельных граф для мужчин и женщин */
         pto.makeBoth(locality);
     }
 
+    private void add_births(PopulationForwardingContext fctx,
+            final PopulationByLocality p,
+            final Locality locality,
+            final CombinedMortalityTable mt,
+            final double birthRate,
+            final double yfraction) throws Exception
+    {
+        double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAges(locality, Gender.BOTH, 0, fctx.MAX_YEAR);
+        double births = sum  * yfraction * birthRate / 1000;
+        double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
+        double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
+
+        int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
+        ndays = Math.max(1,  ndays);
+
+        add_births(fctx, locality, Gender.MALE, m_births, mt, ndays);
+        add_births(fctx, locality, Gender.FEMALE, f_births, mt, ndays);
+    }
+
+    private void add_births(PopulationForwardingContext fctx,
+            final Locality locality,
+            final Gender gender,
+            double total_births,
+            final CombinedMortalityTable mt,
+            final int ndays) throws Exception
+    {
+        /*
+         * распределить рождения по числу дней
+         */
+        double[] day_births = new double[ndays];
+        for (int nd = 0; nd < ndays; nd++)
+            day_births[nd] = total_births / ndays;
+        
+        /*
+         * подвергнуть рождения смертности
+         */
+        double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
+        for (int nd = 0; nd < ndays; nd++)
+            day_births[nd] *= day_lx[nd] / day_lx[0];
+        
+        /*
+         * добавить результат в контекст
+         */
+        for (int nd = 0; nd < ndays; nd++)
+            fctx.add(locality, gender, nd, day_births[nd]);
+    }
+    
     public void forward(PopulationByLocality pto,
-                        final PopulationByLocality p,
-                        PopulationForwardingContext fctx,
-                        final Locality locality,
-                        final Gender gender,
-                        final CombinedMortalityTable mt,
-                        final double yfraction)
+            final PopulationByLocality p,
+            PopulationForwardingContext fctx,
+            final Locality locality,
+            final Gender gender,
+            final CombinedMortalityTable mt,
+            final double yfraction)
             throws Exception
     {
         /* рождений пока нет */
@@ -183,26 +235,26 @@ public class ForwardPopulationUR
      * В группах 0-49 перенос распределяется равномерно, пропорционально численности этих групп.  
      */
     public PopulationByLocality urbanize(final PopulationByLocality p,
-                                         PopulationForwardingContext fctx,
-                                         final Gender gender,
-                                         final double target_urban_level)
+            PopulationForwardingContext fctx,
+            final Gender gender,
+            final double target_urban_level)
             throws Exception
     {
         PopulationByLocality pto = p.clone();
-        
+
         if (fctx == null)
             fctx = new PopulationForwardingContext();
 
         /*
          * Целевая и текущая численность городского населения во всех возрастах
          */
-        double total_population = p.sum(Locality.TOTAL, gender, 0, MAX_AGE) + 
-                fctx.sumAges(Locality.TOTAL, gender, 0, fctx.MAX_YEAR);
-        
+        double total_population = p.sum(Locality.TOTAL, gender, 0, MAX_AGE) +
+                                  fctx.sumAges(Locality.TOTAL, gender, 0, fctx.MAX_YEAR);
+
         double target_urban = target_urban_level * total_population;
-        
-        double current_urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE) + 
-                fctx.sumAges(Locality.URBAN, gender, 0, fctx.MAX_YEAR);
+
+        double current_urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE) +
+                               fctx.sumAges(Locality.URBAN, gender, 0, fctx.MAX_YEAR);
 
         /*
          * Численность населения, которое нужно перенести 
@@ -217,11 +269,11 @@ public class ForwardPopulationUR
          * Переносимое население распределяется равномерно между возрастами 0-49 
          * пропорционально их численности в сельском населении.
          */
-        double rural049 = p.sum(Locality.RURAL, gender, 0, 49) + 
-                fctx.sumAges(Locality.RURAL, gender, 0, fctx.MAX_YEAR);
-        
+        double rural049 = p.sum(Locality.RURAL, gender, 0, 49) +
+                          fctx.sumAges(Locality.RURAL, gender, 0, fctx.MAX_YEAR);
+
         double factor = move / rural049;
-        
+
         for (int age = 0; age <= 49; age++)
         {
             double r1 = p.get(Locality.RURAL, gender, age);
@@ -249,7 +301,7 @@ public class ForwardPopulationUR
         pto.resetTotal();
 
         pto.validate();
-        
+
         /*
          * Verify that new level (of transformed population) is correct
          */
@@ -301,7 +353,7 @@ public class ForwardPopulationUR
         }
         Util.out(sb.toString());
     }
-    
+
     private static final String COLUMN_DIVIDER = "  ‖ ";
 
     protected void show_shortfall(PopulationByLocality pExpected, PopulationByLocality pActual, int age1, int age2) throws Exception
@@ -321,7 +373,7 @@ public class ForwardPopulationUR
         show_shortfall(sb, pExpected, pActual, Locality.RURAL, Gender.MALE, age1, age2, "");
         show_shortfall(sb, pExpected, pActual, Locality.RURAL, Gender.FEMALE, age1, age2, " ");
         show_shortfall(sb, pExpected, pActual, Locality.RURAL, Gender.BOTH, age1, age2, " ");
-        
+
         sb.append(COLUMN_DIVIDER);
         show_shortfall(sb, pExpected, pActual, Locality.URBAN, Gender.MALE, age1, age2, "");
         show_shortfall(sb, pExpected, pActual, Locality.URBAN, Gender.FEMALE, age1, age2, " ");
@@ -331,12 +383,12 @@ public class ForwardPopulationUR
     }
 
     protected void show_shortfall(StringBuilder sb,
-                                PopulationByLocality pExpected,
-                                PopulationByLocality pActual,
-                                Locality locality,
-                                Gender gender,
-                                int age1, int age2,
-                                String prefix)
+            PopulationByLocality pExpected,
+            PopulationByLocality pActual,
+            Locality locality,
+            Gender gender,
+            int age1, int age2,
+            String prefix)
             throws Exception
     {
         double expected = pExpected.sum(locality, gender, age1, age2);

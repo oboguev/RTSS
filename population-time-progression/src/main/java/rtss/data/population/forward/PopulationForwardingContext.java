@@ -3,9 +3,12 @@ package rtss.data.population.forward;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.synthetic.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /**
  * Применяется для учёта населения самых младших возрастов при продвижке.
@@ -143,6 +146,30 @@ public class PopulationForwardingContext
         return (age + 1) * DAYS_PER_YEAR - 1;
     }
 
+    /* =============================================================================================== */
+    
+    private Map<String, double[]> m_lx = new HashMap<>(); 
+    
+    /*
+     * Вычислить подневное значение "lx" по годовым значениям в таблице смертности
+     */
+    public double[] get_daily_lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
+    {
+        String key = String.format("%s-%-%s", mt.tableId(), locality.name(), gender.name());
+        double[] daily_lx = m_lx.get(key);
+    
+        if (daily_lx == null)
+        {
+            double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
+            /* значения после MAX_YEAR + 1 не слишком важны */
+            yearly_lx = Util.splice(yearly_lx, 0, MAX_YEAR + 5);
+            daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
+            m_lx.put(key, daily_lx);
+        }
+        
+        return daily_lx;
+    }
+    
     /* =============================================================================================== */
     
     /*
