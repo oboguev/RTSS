@@ -81,10 +81,10 @@ public class Adjust_1937
         PopulationByLocality pto = p.clone();
         pto.resetUnknown();
         
-        adjust_1(pto, total_adjustment * 0.85);
-        adjust_2(pto, total_adjustment * 0.15);
+        adjust_younger(pto, total_adjustment * 0.85);
+        adjust_older(pto, total_adjustment * 0.15);
 
-        pto.resetTotal(); // ### или в обратном порядке?
+        pto.resetTotal();
         pto.recalcTotal();
         pto.validate();
         
@@ -96,7 +96,7 @@ public class Adjust_1937
     /*
      * Для призывных возрастов (18.5-21.5)
      */
-    private void adjust_1(PopulationByLocality p, double amount) throws Exception
+    private void adjust_younger(PopulationByLocality p, double amount) throws Exception
     {
         double w18 = 0.5;
         double w19 = 1.0;
@@ -146,7 +146,7 @@ public class Adjust_1937
     /*
      * Для старших возрастов (21.5 - 49)
      */
-    private void adjust_2(PopulationByLocality p, double amount) throws Exception
+    private void adjust_older(PopulationByLocality p, double amount) throws Exception
     {
         double s_all = 0;
         for (int age = 21; age <= 49; age++)
