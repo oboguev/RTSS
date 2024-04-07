@@ -148,7 +148,7 @@ public class RSFSR_1940 extends CombinedMortalityTable
     
     private SingleMortalityTable makeSingleTable(Bin... bins) throws Exception
     {
-        double[] curve = MakeCurve.curve(bins);
+        double[] curve = InterpolateAsMeanPreservingCurve.curve(bins);
         curve = Util.divide(curve, 1000);
         return SingleMortalityTable.from_qx("computed", curve);
     }

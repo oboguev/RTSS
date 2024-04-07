@@ -80,7 +80,7 @@ public class YearlyToDailyMonotoneCurve
         
         double[] yy = Bins.ppy2yearly(yyy, DAYS_PER_YEAR);
 
-        MakeCurve.validate_means(yy, bins);
+        InterpolateAsMeanPreservingCurve.validate_means(yy, bins);
 
         return yy;
     }

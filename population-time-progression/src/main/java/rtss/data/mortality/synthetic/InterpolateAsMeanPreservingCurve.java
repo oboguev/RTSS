@@ -16,7 +16,7 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
  * Typically used to interpolate the "qx" curve from an aggregated multi-year data to a yearly resolution.
  */
-public class MakeCurve
+public class InterpolateAsMeanPreservingCurve
 {
     public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
 
