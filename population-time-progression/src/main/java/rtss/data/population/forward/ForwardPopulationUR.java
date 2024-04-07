@@ -26,10 +26,17 @@ public class ForwardPopulationUR
     /*
      * Оценить долю городского населения во всём населении (для указанного пола) 
      */
-    public double urban_fraction(PopulationByLocality p, Gender gender) throws Exception
+    public double urban_fraction(PopulationByLocality p, PopulationForwardingContext fctx, Gender gender) throws Exception
     {
         double urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
         double total = p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
+        
+        if (fctx != null)
+        {
+            urban += fctx.sum(Locality.URBAN, gender, 0, fctx.MAX_DAY);
+            total += fctx.sum(Locality.TOTAL, gender, 0, fctx.MAX_DAY);
+        }
+        
         return urban / total;
     }
 
@@ -182,12 +189,20 @@ public class ForwardPopulationUR
             throws Exception
     {
         PopulationByLocality pto = p.clone();
+        
+        if (fctx == null)
+            fctx = new PopulationForwardingContext();
 
         /*
          * Целевая и текущая численность городского населения во всех возрастах
          */
-        double target_urban = target_urban_level * p.sum(Locality.TOTAL, gender, 0, MAX_AGE);
-        double current_urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE);
+        double total_population = p.sum(Locality.TOTAL, gender, 0, MAX_AGE) + 
+                fctx.sumAges(Locality.TOTAL, gender, 0, fctx.MAX_YEAR);
+        
+        double target_urban = target_urban_level * total_population;
+        
+        double current_urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE) + 
+                fctx.sumAges(Locality.URBAN, gender, 0, fctx.MAX_YEAR);
 
         /*
          * Численность населения, которое нужно перенести 
@@ -202,15 +217,35 @@ public class ForwardPopulationUR
          * Переносимое население распределяется равномерно между возрастами 0-49 
          * пропорционально их численности в сельском населении.
          */
-        double rural049 = p.sum(Locality.RURAL, gender, 0, 49);
+        double rural049 = p.sum(Locality.RURAL, gender, 0, 49) + 
+                fctx.sumAges(Locality.RURAL, gender, 0, fctx.MAX_YEAR);
+        
         double factor = move / rural049;
+        
         for (int age = 0; age <= 49; age++)
         {
-            double r = p.get(Locality.RURAL, gender, age);
-            double u = p.get(Locality.URBAN, gender, age);
+            double r1 = p.get(Locality.RURAL, gender, age);
+            double u1 = p.get(Locality.URBAN, gender, age);
+
+            double r2 = 0;
+            double u2 = 0;
+            if (fctx != null)
+            {
+                r2 = fctx.sumAge(Locality.RURAL, gender, age);
+                u2 = fctx.sumAge(Locality.URBAN, gender, age);
+            }
+            
+            double r = r1 + r2;
+            double u = u1 + u2;
+
             move = r * factor;
             pto.set(Locality.RURAL, gender, age, r - move);
             pto.set(Locality.URBAN, gender, age, u + move);
+
+            if (fctx != null)
+            {
+                // ###
+            }
         }
 
         pto.makeBoth(Locality.RURAL);
@@ -220,15 +255,10 @@ public class ForwardPopulationUR
 
         pto.validate();
         
-        if (fctx != null)
-        {
-            // ###
-        }
-
         /*
          * Verify that new level (of transformed population) is correct
          */
-        if (Util.differ(target_urban_level, urban_fraction(pto, gender)))
+        if (Util.differ(target_urban_level, urban_fraction(pto, fctx, gender)))
             throw new Exception("Miscalculated urbanization");
 
         return pto;

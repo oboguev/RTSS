@@ -41,11 +41,11 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
          * перепись 1926 года была 1926-12-17
          * перепись 1939 года была 1939-01-17, почти в конце 1938 
          */
-        double urban_female_fraction_1926 = urban_fraction(p1926, Gender.FEMALE);
-        double urban_female_fraction_1939 = urban_fraction(p1939, Gender.FEMALE);
+        double urban_female_fraction_1926 = urban_fraction(p1926, null, Gender.FEMALE);
+        double urban_female_fraction_1939 = urban_fraction(p1939, null, Gender.FEMALE);
 
-        double urban_male_fraction_1926 = urban_fraction(p1926, Gender.MALE);
-        double urban_male_fraction_1939 = urban_fraction(p1939, Gender.MALE);
+        double urban_male_fraction_1926 = urban_fraction(p1926, null, Gender.MALE);
+        double urban_male_fraction_1939 = urban_fraction(p1939, null, Gender.MALE);
 
         urban_male_fraction_yyyy = interpolate_linear(1926, urban_male_fraction_1926, 1938,
                                                       urban_male_fraction_1939);

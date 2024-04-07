@@ -41,11 +41,13 @@ import rtss.data.selectors.Locality;
  */
 public class PopulationForwardingContext
 {
-    public static final int DAYS_PER_YEAR = 365;
+    public final int DAYS_PER_YEAR = 365;
 
-    public static final int NYEARS = 4;
-    public static final int NDAYS = NYEARS * DAYS_PER_YEAR;
-    public static final int MAX_DAY = NDAYS - 1;
+    public final int NYEARS = 4;
+    public final int MAX_YEAR = NYEARS - 1;
+
+    public final int NDAYS = NYEARS * DAYS_PER_YEAR;
+    public final int MAX_DAY = NDAYS - 1;
     
     private boolean hasRuralUrban;
     
@@ -99,6 +101,21 @@ public class PopulationForwardingContext
         double sum = 0;
         for (int nd = nd1; nd <= nd2; nd++)
             sum += get(locality, gender, nd);
+        return sum;
+    }
+
+    public double sumAge(Locality locality, Gender gender, int age) throws Exception
+    {
+        int nd1 = age * DAYS_PER_YEAR;
+        int nd2 = nd1 + DAYS_PER_YEAR - 1;
+        return sum(locality, gender, nd1, nd2);
+    }
+
+    public double sumAges(Locality locality, Gender gender, int age1, int age2) throws Exception
+    {
+        double sum = 0;
+        for (int age = age1; age <= age2; age++)
+            sum += sumAge(locality, gender, age);
         return sum;
     }
 
