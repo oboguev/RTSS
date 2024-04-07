@@ -12,6 +12,8 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  * Interpolate monotone curve from yearly x-values to daily x-values 
  * such that the curve smoothly passes through the knots.
  * Values in @y refer to the start of the interval.
+ * 
+ * Interpolation happens to the start of the last year, but not beyond it. 
  *  
  * Typically used to interpolate the "lx" curve.  
  */
