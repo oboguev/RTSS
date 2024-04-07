@@ -145,6 +145,26 @@ public class PopulationForwardingContext
     {
         return (age + 1) * DAYS_PER_YEAR - 1;
     }
+    
+    public double[] asArray(Locality locality, Gender gender) throws Exception
+    {
+        double[] v = new double[NDAYS];
+        for (int nd = 0; nd < NDAYS; nd++)
+            v[nd] = get(locality, gender, nd); 
+        return v;
+    }
+
+    public void fromArray(Locality locality, Gender gender, double[] v) throws Exception
+    {
+        for (int nd = 0; nd < v.length; nd++)
+            set(locality, gender, nd, v[nd]); 
+    }
+
+    public void zero(Locality locality, Gender gender) throws Exception
+    {
+        for (int nd = 0; nd < NDAYS; nd++)
+            set(locality, gender, nd, 0); 
+    }
 
     /* =============================================================================================== */
     
