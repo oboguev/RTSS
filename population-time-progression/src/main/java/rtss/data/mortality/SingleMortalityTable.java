@@ -10,7 +10,6 @@ public class SingleMortalityTable
 {
     private Map<Integer, MortalityInfo> m = new HashMap<>();
     public static final int MAX_AGE = 100;
-    // ### private String path;
     
     private SingleMortalityTable()
     {

@@ -63,7 +63,6 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
         PopulationForwardingContext fctx = null;
         if (Util.True)
         {
-            // ###
             fctx = new PopulationForwardingContext();
             p = fctx.begin(p);
         }

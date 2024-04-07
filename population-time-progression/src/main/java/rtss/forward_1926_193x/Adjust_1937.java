@@ -4,7 +4,7 @@ import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 
-/* ***************************************************************
+/** **************************************************************
 
 Сохранившиеся в архиве и опубликованные материалы переписи 
 
@@ -61,62 +61,106 @@ import rtss.data.selectors.Locality;
 Всего таблицей возрастной структуры переписи охвачены 160,058,329 чел., 
 однако перепись сообщила об общей численности населения СССР 162,003,225 человек, включая контингенты РККА и НКВД (стр. 37).
 
-Таким образом, некоторая неизвестная часть этих контингентов очевидно попала в возрастную таблицу, а другая часть не попала.
-В этих условиях, единственный и лучший подход, который мы можем принять: это добавить к итогам "старшей" части возрастной
-таблицы 1937 года поправочную невязку в 1,944,896 чел. (1.2% всего населения или 1.6% для групп 10+).
+Невязка в 1,944,896 чел. (1.2% всего населения или 1.6% для групп 10+) относима на РККА и часть погранохраны 
+(Андреев,Дарский,Харькова, "Население Советского Союза 1922-1991", М. Наука, 1993, стр. 27).
 
-Её половозрастное распределение, однако, остаётся неизвестным, и лучшее, что мы можем сделать -- это предположить,
-что невязка вызвана неучётом части РККА или "контингентов" и распределить невязку равномерно среди населения 18-49 
-пропорционально его численности в возрастной таблице, и относя 90% её на мужчин, а 10% на женщин.
+Срок действительной службы установленный законом СССР об обязательной военной службе 13.8.1930 г. составлял 2 года в частях РККА
+и 3 или 4 года (в зависимости от подготовки) в частях РККФ и пограничной охраны.
 
-Справедливость этого предположения подтверждается указанием в
-Андреев,Дарский,Харькова, "Население Советского Союза 1922-1991", М. Наука, 1993, стр. 27
-с отсылкой к материалам переписи в РГАЭ, что невязка относима на РККА и часть погранохраны.  
+Чтобы учесть невязку, мы распределили 85% её величины на призывные возраста 18.5-21.5, а 15% на возраста 21.5-49 пропорционально 
+их численности в возрастной таблице, относя 90% невязки на мужчин, а на 10% на женщин.
 
 *********************************************************************/
 
 public class Adjust_1937
 {
     private final double total_adjustment = 1_944_896;
-    private final double male_adjustment = total_adjustment * 0.9;
-    private final double female_adjustment = total_adjustment * 0.1;
-
-    private final int age1 = 18;
-    private final int age2 = 49;
-
-    private double male_sum;
-    private double female_sum;
 
     public PopulationByLocality adjust(final PopulationByLocality p) throws Exception
     {
-        male_sum = p.sum(Locality.TOTAL, Gender.MALE, age1, age2);
-        female_sum = p.sum(Locality.TOTAL, Gender.FEMALE, age1, age2);
-
         PopulationByLocality pto = p.clone();
         pto.resetUnknown();
-        adjust(pto, Locality.RURAL);
-        adjust(pto, Locality.URBAN);
-        pto.resetTotal();
+        
+        adjust_1(pto, total_adjustment * 0.85);
+        adjust_2(pto, total_adjustment * 0.15);
+
+        pto.resetTotal(); // ### или в обратном порядке?
         pto.recalcTotal();
         pto.validate();
+        
         return pto;
     }
+    
+    /* ================================================================================================= */
 
-    private void adjust(PopulationByLocality pto, Locality locality)
-            throws Exception
+    /*
+     * Для призывных возрастов (18.5-21.5)
+     */
+    private void adjust_1(PopulationByLocality p, double amount) throws Exception
     {
-        adjust(pto, locality, Gender.MALE, male_adjustment / male_sum);
-        adjust(pto, locality, Gender.FEMALE, female_adjustment / female_sum);
-        pto.makeBoth(locality);
+        double w18 = 0.5;
+        double w19 = 1.0;
+        double w20 = 1.0;
+        double w21 = 0.5;
+
+        double s18 = w18 * p.get(Locality.TOTAL, Gender.BOTH, 18);
+        double s19 = w19 * p.get(Locality.TOTAL, Gender.BOTH, 19);
+        double s20 = w20 * p.get(Locality.TOTAL, Gender.BOTH, 20);
+        double s21 = w21 * p.get(Locality.TOTAL, Gender.BOTH, 21);
+        double s_all = s18 + s19 + s20 + s21;
+        
+        adjust_for_age(p, 18, amount * s18 / s_all);
+        adjust_for_age(p, 19, amount * s19 / s_all);
+        adjust_for_age(p, 20, amount * s20 / s_all);
+        adjust_for_age(p, 21, amount * s21 / s_all);
     }
 
-    private void adjust(PopulationByLocality pto, Locality locality, Gender gender, double factor)
-            throws Exception
+    /*
+     * Увеличить численность населения в указанном возрасте на @amount,
+     * распределив 90% прибавки на мужчин, 10% на женщин
+     */
+    private void adjust_for_age(PopulationByLocality p, int age, double amount) throws Exception
     {
-        for (int age = age1; age <= age2; age++)
+        adjust_for_age(p, age, Gender.MALE, 0.9 * amount);
+        adjust_for_age(p, age, Gender.FEMALE, 0.1 * amount);
+    }
+
+    /*
+     * Увеличить численность населения указанного возраста и пола на @amount,
+     * распределив его между городским и сельским населением пропорционально их уже имеющейся численности
+     */
+    private void adjust_for_age(PopulationByLocality p, int age, Gender gender, double amount) throws Exception
+    {
+        double rural = p.get(Locality.RURAL, gender, age); 
+        double urban = p.get(Locality.URBAN, gender, age);
+        
+        p.add(Locality.RURAL, gender, age, amount * rural / (rural + urban));
+        p.add(Locality.URBAN, gender, age, amount * urban / (rural + urban));
+                
+        p.makeBoth(Locality.RURAL);
+        p.makeBoth(Locality.URBAN);
+    }
+    
+    /* ================================================================================================= */
+
+    /*
+     * Для старших возрастов (21.5 - 49)
+     */
+    private void adjust_2(PopulationByLocality p, double amount) throws Exception
+    {
+        double s_all = 0;
+        for (int age = 21; age <= 49; age++)
         {
-            double v = pto.get(locality, gender, age);
-            pto.add(locality, gender, age, v * factor);
+            double w = (age == 21) ? 0.5 : 1.0;
+            double s = w * p.get(Locality.TOTAL, Gender.BOTH, age);
+            s_all += s;
+        }
+
+        for (int age = 21; age <= 49; age++)
+        {
+            double w = (age == 21) ? 0.5 : 1.0;
+            double s = w * p.get(Locality.TOTAL, Gender.BOTH, age);
+            adjust_for_age(p, age, amount * s / s_all);
         }
     }
 }
