@@ -3,6 +3,7 @@ package rtss.data.population.forward;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 
@@ -26,6 +27,15 @@ import rtss.data.selectors.Locality;
  * 
  * Численность населения хранится в PopulationForwardingContext только для младших NYEARS лет, т.е. возрастов [0 ... NYEARS-1] лет
  * или [0 ... MAX_DAY] дней со дня рождения.
+ * 
+ * Использование:
+ * 
+ *     PopulationByLocality p = ...
+ *     PopulationForwardingContext fctx = new PopulationForwardingContext();
+ *     PopulationByLocality pto = fcxt.begin(p);
+ *     ....
+ *     pto = fcxt.end(pto);
+ * 
  */
 public class PopulationForwardingContext
 {
@@ -90,4 +100,94 @@ public class PopulationForwardingContext
     }
 
     /* =============================================================================================== */
+    
+    /*
+     * Переместить детские ряды из @p в контекст.
+     * Вернуть население с обнулёнными детскими рядами.
+     */
+    public PopulationByLocality begin(final PopulationByLocality p) throws Exception
+    {
+        m.clear();
+        
+        PopulationByLocality pto = p.clone();
+
+        if (pto.hasRuralUrban())
+        {
+            begin(pto, Locality.RURAL);
+            begin(pto, Locality.URBAN);
+        }
+        
+        if (pto.hasTotal())
+        {
+            begin(pto, Locality.TOTAL);
+        }
+        
+        pto.resetTotal();
+        pto.validate();
+        
+        return pto;
+    }
+
+    private void begin(PopulationByLocality p, Locality locality) throws Exception
+    {
+        begin(p, locality, Gender.MALE);
+        begin(p, locality, Gender.FEMALE);
+        begin(p, locality, Gender.BOTH);
+    }
+
+    private void begin(PopulationByLocality p, Locality locality, Gender gender) throws Exception
+    {
+        for (int age = 0; age < NYEARS; age++)
+        {
+            double v = p.get(locality, gender, age);
+            p.set(locality, gender, age, 0);
+
+            int nd1 = age * DAYS_PER_YEAR;
+            int nd2 = nd1 + DAYS_PER_YEAR - 1;
+            for (int nd = nd1; nd <= nd2; nd++)
+                set(locality, gender, nd, v / DAYS_PER_YEAR);
+        }
+    }
+    
+    /*
+     * Переместить детские ряды из контекста в структуру населения  
+     */
+    public PopulationByLocality end(final PopulationByLocality p) throws Exception
+    {
+        PopulationByLocality pto = p.clone();
+
+        if (pto.hasRuralUrban())
+        {
+            end(pto, Locality.RURAL);
+            end(pto, Locality.URBAN);
+        }
+        
+        if (pto.hasTotal())
+        {
+            end(pto, Locality.TOTAL);
+        }
+        
+        pto.resetTotal();
+        pto.validate();
+        
+        return pto;
+    }
+
+    private void end(PopulationByLocality p, Locality locality) throws Exception
+    {
+        end(p, locality, Gender.MALE);
+        end(p, locality, Gender.FEMALE);
+        end(p, locality, Gender.BOTH);
+    }
+
+    private void end(PopulationByLocality p, Locality locality, Gender gender) throws Exception
+    {
+        for (int age = 0; age < NYEARS; age++)
+        {
+            int nd1 = age * DAYS_PER_YEAR;
+            int nd2 = nd1 + DAYS_PER_YEAR - 1;
+            double v = sum(locality, gender, nd1, nd2);
+            p.add(locality, gender, age, v);
+        }
+    }
 }

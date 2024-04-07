@@ -60,6 +60,11 @@ public class PopulationByLocality
     {
         return rural != null && urban != null;
     }
+
+    public boolean hasTotal()
+    {
+        return total != null;
+    }
     
     /****************************************************************************************************/
 
