@@ -16,11 +16,13 @@ public class CombinedMortalityTable
 
     protected CombinedMortalityTable()
     {
+        source = "unknown";
     }
     
     static public CombinedMortalityTable loadTotal(String path) throws Exception
     {
         CombinedMortalityTable cmt = new CombinedMortalityTable();
+        cmt.source = path;
         cmt.loadTables(path, Gender.BOTH, Locality.TOTAL);
         cmt.loadTables(path, Gender.MALE, Locality.TOTAL);
         cmt.loadTables(path, Gender.FEMALE, Locality.TOTAL);
@@ -40,6 +42,7 @@ public class CombinedMortalityTable
 
     private void load(String path) throws Exception
     {
+        source = path;
         loadTables(path, Gender.BOTH);
         loadTables(path, Gender.MALE);
         loadTables(path, Gender.FEMALE);
@@ -94,6 +97,7 @@ public class CombinedMortalityTable
             throws Exception
     {
         CombinedMortalityTable cmt = new CombinedMortalityTable();
+        cmt.source = String.format("interpolated between %s and %s", mt1.source, mt2.source);
         cmt.interpolate(Gender.BOTH, mt1, mt2, weight);
         cmt.interpolate(Gender.MALE, mt1, mt2, weight);
         cmt.interpolate(Gender.FEMALE, mt1, mt2, weight);
@@ -153,6 +157,7 @@ public class CombinedMortalityTable
 
     /*****************************************************************************************************/
 
+    private String source;
     private final String tid = UUID.randomUUID().toString();
     
     public String tableId()
@@ -171,5 +176,4 @@ public class CombinedMortalityTable
             return false;
         return ((CombinedMortalityTable)x).tid.equals(tid);
     }
-    
 }

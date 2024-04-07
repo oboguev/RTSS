@@ -11,7 +11,8 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 /**
- * Применяется для учёта населения самых младших возрастов при продвижке.
+ * Применяется для детального учёта населения самых младших возрастов при продвижке, чтобы точнее учесть рождения и 
+ * ранюю детскую смертность. 
  * 
  * Смертность в этих возрастах изменяется резко, поэтому для учёта населения при последовательных шагах продвижки,
  * особенно если некоторые шаги имеют продолжительность менее года, требуется более детальная разбивка численности
@@ -23,9 +24,9 @@ import rtss.util.Util;
  * Структура PopulationForwardingContext, в противоположность, хранит численность населения с возрастом индексированным 
  * в днях (а не годах) с даты рождения до текущего момента.
  * 
- * Индексация по: (Locality, Gender, ndays), где ndays – число дней прошедших со дня рождения до текущего момента.
+ * Индексация производится по (Locality, Gender, ndays), где ndays – число дней прошедших со дня рождения до текущего момента.
  *   
- * Хранимые числа населения уже были подвергнуты влиянию смертности (и соответствующей числовой децимации) и представляют 
+ * Хранимые числа населения уже подвергнуты влиянию смертности (и соответствующей числовой децимации) и представляют 
  * числа доживших до данного момента.
  * 
  * Численность населения хранится в PopulationForwardingContext только для младших NYEARS лет, т.е. возрастов [0 ... NYEARS-1] лет
@@ -38,6 +39,8 @@ import rtss.util.Util;
  *     PopulationByLocality p = ...
  *     PopulationForwardingContext fctx = new PopulationForwardingContext();
  *     PopulationByLocality pto = fctx.begin(p);
+ *     ....
+ *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько нужно
  *     ....
  *     pto = fctx.end(pto);
  * 
@@ -180,7 +183,7 @@ public class PopulationForwardingContext
      */
     public double[] get_daily_lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
     {
-        String key = String.format("%s-%-%s", mt.tableId(), locality.name(), gender.name());
+        String key = String.format("%s-%s-%s", mt.tableId(), locality.name(), gender.name());
         double[] daily_lx = m_lx.get(key);
     
         if (daily_lx == null)
@@ -229,6 +232,7 @@ public class PopulationForwardingContext
     {
         begin(p, locality, Gender.MALE);
         begin(p, locality, Gender.FEMALE);
+        p.makeBoth(locality);
     }
 
     private void begin(PopulationByLocality p, Locality locality, Gender gender) throws Exception

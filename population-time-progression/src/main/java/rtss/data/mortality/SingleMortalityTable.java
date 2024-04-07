@@ -10,10 +10,11 @@ public class SingleMortalityTable
 {
     private Map<Integer, MortalityInfo> m = new HashMap<>();
     public static final int MAX_AGE = 100;
-    private String path;
+    // ### private String path;
     
     private SingleMortalityTable()
     {
+        source = "unknown";
     }
     
     public MortalityInfo get(int age) throws Exception
@@ -33,7 +34,7 @@ public class SingleMortalityTable
     
     private void load(String path) throws Exception
     {
-        this.path = path;
+        this.source = path;
         
         String rdata = Util.loadResource(path);
         rdata = rdata.replace("\r\n", "\n");
@@ -121,7 +122,7 @@ public class SingleMortalityTable
     
     private void inconsistent(String what) throws Exception
     {
-        String msg = "Inconsistent mortality table in " + path + ": " + what;
+        String msg = "Inconsistent mortality table in " + source + ": " + what;
         // Util.err(msg);
         throw new Exception(msg);
     }
@@ -141,7 +142,7 @@ public class SingleMortalityTable
     static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
     {
         SingleMortalityTable smt = new SingleMortalityTable();
-        smt.path = "interpolated";
+        smt.source = String.format("interpolated between %s [%f] and %s [%f]", mt1.source, 1 - weight, mt2.source, weight);
         smt.do_interpolate(mt1, mt2, weight);
         return smt;
     }
@@ -151,13 +152,23 @@ public class SingleMortalityTable
         if (weight < 0 || weight > 1)
             throw new Exception("Incorrect interpolation weight");
         
+        double w1 = 1 - weight;
+        double w2 = weight;
+        
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi1 = mt1.get(age);
             MortalityInfo mi2 = mt2.get(age);
             MortalityInfo mi = new MortalityInfo();
-            mi.px = (1 - weight) * mi1.px + weight * mi2.px;
+
+            mi.px = w1 * mi1.px + w2 * mi2.px;
             mi.qx = 1.0 - mi.px;
+            mi.lx = w1 * mi1.lx + w2 * mi2.lx;
+            mi.dx = w1 * mi1.dx + w2 * mi2.dx;
+            mi.Lx = w1 * mi1.Lx + w2 * mi2.Lx;
+            mi.Tx = w1 * mi1.Tx + w2 * mi2.Tx;
+            mi.ex = w1 * mi1.ex + w2 * mi2.ex;
+            
             m.put(age,  mi);
         }
     }
@@ -212,7 +223,7 @@ public class SingleMortalityTable
     public static SingleMortalityTable from_qx(String path, double[] qx) throws Exception
     {
         SingleMortalityTable smt = new SingleMortalityTable();
-        smt.path = path;
+        smt.source = path;
         smt.from_qx(qx);
         return smt;
     }
@@ -309,6 +320,7 @@ public class SingleMortalityTable
 
     /*****************************************************************************************************/
 
+    private String source;
     private final String tid = UUID.randomUUID().toString(); 
     
     public int hashCode()

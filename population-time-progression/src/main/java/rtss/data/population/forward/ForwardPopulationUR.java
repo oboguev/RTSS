@@ -320,7 +320,6 @@ public class ForwardPopulationUR
         for (int age = 0; age <= 49; age++)
         {
             double r1 = p.get(Locality.RURAL, gender, age);
-            double u1 = p.get(Locality.URBAN, gender, age);
             move = r1 * factor;
             pto.sub(Locality.RURAL, gender, age, move);
             pto.add(Locality.URBAN, gender, age, move);
@@ -330,7 +329,6 @@ public class ForwardPopulationUR
                 for (int nd = fctx.firstDayForAge(age); nd <= fctx.lastDayForAge(age); nd++)
                 {
                     double r2 = fctx.get(Locality.RURAL, gender, nd);
-                    double u2 = fctx.get(Locality.URBAN, gender, nd);
                     move = r2 * factor;
                     fctx.sub(Locality.RURAL, gender, nd, move);
                     fctx.add(Locality.URBAN, gender, nd, move);
