@@ -2,7 +2,7 @@ package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.ForwardPopulationT;
+import rtss.data.population.forward.ForwardPopulationT_Old;
 
 /**
  * Вычислить возрастную структуру и численность гипотетического населения СССР на начало 1946 года
@@ -85,7 +85,7 @@ public class USSR_Expected_Population_In_Early_1946
 
     private PopulationByLocality forward(PopulationByLocality p, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
     {
-        ForwardPopulationT fw = new ForwardPopulationT().setBirthRateTotal(cbr);
+        ForwardPopulationT_Old fw = new ForwardPopulationT_Old().setBirthRateTotal(cbr);
         return fw.forward(p, mt, yfraction);
     }
 }

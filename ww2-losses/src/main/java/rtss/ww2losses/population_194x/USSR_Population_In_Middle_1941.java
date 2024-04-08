@@ -2,7 +2,7 @@ package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.ForwardPopulationT;
+import rtss.data.population.forward.ForwardPopulationT_Old;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -34,7 +34,7 @@ public class USSR_Population_In_Middle_1941
         /*
          * Продвижка с 17 января 1939 до начала 1940 года
          */
-        ForwardPopulationT fw = new ForwardPopulationT();
+        ForwardPopulationT_Old fw = new ForwardPopulationT_Old();
         fw.setBirthRateTotal(CBR_1939);
         double yfraction = (365 - 17) / 365.0;
         p = fw.forward(p, mt1938, yfraction);
