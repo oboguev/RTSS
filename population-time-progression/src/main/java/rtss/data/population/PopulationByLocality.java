@@ -46,7 +46,7 @@ public class PopulationByLocality
         return p;
     }
 
-    public PopulationByLocality cloneTotal()
+    public PopulationByLocality cloneTotalOnly()
     {
         PopulationByLocality p = new PopulationByLocality();
         

@@ -1,8 +1,5 @@
 package rtss.data.population.forward;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.population.Population;
@@ -21,34 +18,11 @@ public class ForwardPopulationT
     protected final double MaleFemaleBirthRatio = 1.06;
 
     protected double BirthRateTotal;
-
-    /*
-     * Линейная интерполяция между двумя точками
-     */
-    public Map<Integer, Double> interpolate_linear(int y1, double v1, int y2, double v2)
-            throws Exception
+    
+    public ForwardPopulationT setBirthRateTotal(double BirthRateTotal)
     {
-        Map<Integer, Double> m = new HashMap<>();
-
-        if (y1 > y2)
-            throw new Exception("Invalid arguments");
-
-        if (y1 == y2)
-        {
-            if (v1 != v2)
-                throw new Exception("Invalid arguments");
-            m.put(y1, v1);
-        }
-        else
-        {
-            for (int y = y1; y <= y2; y++)
-            {
-                double v = v1 + (v2 - v1) * (y - y1) / (y2 - y1);
-                m.put(y, v);
-            }
-        }
-
-        return m;
+        this.BirthRateTotal = BirthRateTotal;
+        return this;
     }
 
     /*
@@ -65,7 +39,7 @@ public class ForwardPopulationT
             throws Exception
     {
         /* пустая структура для получения результатов */
-        PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
+        PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
 
         /* продвижка сельского и городского населений, сохранить результат в @pto */
         if (p.hasRuralUrban())

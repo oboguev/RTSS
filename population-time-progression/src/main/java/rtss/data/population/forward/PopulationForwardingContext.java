@@ -214,7 +214,7 @@ public class PopulationForwardingContext
         
         PopulationByLocality pto = p.clone();
         
-        hasRuralUrban = pto.hasRuralUrban(); 
+        hasRuralUrban = p.hasRuralUrban(); 
         if (hasRuralUrban)
         {
             begin(pto, Locality.RURAL);

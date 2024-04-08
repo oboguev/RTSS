@@ -566,31 +566,33 @@ public class Main
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и комбинированной таблице: %.1f промилле", cdr3));
         
         Util.out("");
+        
+        double sum0;
 
         Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира:"));
         p = x46.with_mt_USSR_1938(0);
-        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out(String.format("таблица ГКС-СССР-1938, без рождений: %s тыс. чел.", f2k(sum)));
         
         p = x46.with_mt_USSR_1938(CBR_1940);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
 
         p = x46.with_mt_RSFSR_1940(0);
-        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений: %s тыс. чел.", f2k(sum)));
 
         p = x46.with_mt_RSFSR_1940(CBR_1940);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
 
         p = x46.with_mt(mt, 0);
-        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out(String.format("комбинированная таблица, без рождений: %s тыс. чел.", f2k(sum)));
 
         p = x46.with_mt(mt, CBR_1940);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("комбинированная таблица, с рождениями: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("комбинированная таблица, с рождениями: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
     }
     
     private CombinedMortalityTable combine(CombinedMortalityTable mt1, double cdr1, CombinedMortalityTable mt2, double cdr2) throws Exception

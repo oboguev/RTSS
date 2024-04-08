@@ -2,7 +2,8 @@ package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.ForwardPopulationT_Old;
+import rtss.data.population.forward.ForwardPopulationT;
+import rtss.data.population.forward.PopulationForwardingContext;
 
 /**
  * Вычислить возрастную структуру и численность гипотетического населения СССР на начало 1946 года
@@ -23,7 +24,7 @@ public class USSR_Expected_Population_In_Early_1946
     }
     
     /*
-     * Вычислить население СССР в начале 1946 г. 
+     * Вычислить гипотетическое ожидаемое население СССР в начале 1946 г. 
      * используя госкомстатовкую таблицу смертности для СССР 1938-1939 гг.
      * 
      * @cbr указывает рождаемость
@@ -36,7 +37,7 @@ public class USSR_Expected_Population_In_Early_1946
     }
 
     /*
-     * Вычислить население СССР в начале 1946 г. 
+     * Вычислить гипотетическое ожидаемое население СССР в начале 1946 г. 
      * используя таблицу смертности соответствующую возрастным уровням расчитанным АДХ для РСФСР 1940 г. 
      * 
      * @cbr указывает рождаемость
@@ -49,7 +50,7 @@ public class USSR_Expected_Population_In_Early_1946
     }
 
     /*
-     * Вычислить население СССР в начале 1946 г. 
+     * Вычислить гипотетическое ожидаемое население СССР в начале 1946 г. 
      * используя интерполируемую таблицу смертности. 
      * 
      * @cbr указывает рождаемость
@@ -63,29 +64,30 @@ public class USSR_Expected_Population_In_Early_1946
     
     public PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr) throws Exception
     {
-        PopulationByLocality p = new USSR_Population_In_Middle_1941().evaluate();
+        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationByLocality p = new USSR_Population_In_Middle_1941().evaluate(fctx);
         
         /* продвижка до начала 1942 года */
-        p = forward(p, mt, cbr, 0.5);
+        p = forward(p, fctx, mt, cbr, 0.5);
         
         /* продвижка до начала 1943 года */
-        p = forward(p, mt, cbr, 1.0);
+        p = forward(p, fctx, mt, cbr, 1.0);
         
         /* продвижка до начала 1944 года */
-        p = forward(p, mt, cbr, 1.0);
+        p = forward(p, fctx, mt, cbr, 1.0);
         
         /* продвижка до начала 1945 года */
-        p = forward(p, mt, cbr, 1.0);
+        p = forward(p, fctx, mt, cbr, 1.0);
         
         /* продвижка до начала 1946 года */
-        p = forward(p, mt, cbr, 1.0);
+        p = forward(p, fctx, mt, cbr, 1.0);
         
-        return p;
+        return fctx.end(p);
     }
 
-    private PopulationByLocality forward(PopulationByLocality p, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
+    private PopulationByLocality forward(PopulationByLocality p, PopulationForwardingContext fctx, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
     {
-        ForwardPopulationT_Old fw = new ForwardPopulationT_Old().setBirthRateTotal(cbr);
-        return fw.forward(p, mt, yfraction);
+        ForwardPopulationT fw = new ForwardPopulationT().setBirthRateTotal(cbr);
+        return fw.forward(p, fctx, mt, yfraction);
     }
 }
