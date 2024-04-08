@@ -86,6 +86,8 @@ public class ForwardPopulationUR
         PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
 
         /* продвижка сельского и городского населений, сохранить результат в @pto */
+        if (!p.hasRuralUrban())
+            throw new IllegalArgumentException();
         forward(pto, p, fctx, Locality.RURAL, mt, yfraction);
         forward(pto, p, fctx, Locality.URBAN, mt, yfraction);
 
