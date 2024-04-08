@@ -168,7 +168,7 @@ public class Population
         both_unknown = 0;
     }
 
-    public void resetTotal() throws Exception
+    public void recalcTotal() throws Exception
     {
         male_total = 0;
         female_total = 0;

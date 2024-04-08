@@ -108,7 +108,7 @@ public class PopulationByLocality
         }
     }
 
-    public void resetUnknown() throws Exception
+    public void resetUnknownForEveryLocality() throws Exception
     {
         if (rural != null)
             rural.resetUnknown();
@@ -118,14 +118,14 @@ public class PopulationByLocality
             total.resetUnknown();
     }
 
-    public void resetTotal() throws Exception
+    public void recalcTotalForEveryLocality() throws Exception
     {
         if (rural != null)
-            rural.resetTotal();
+            rural.recalcTotal();
         if (urban != null)
-            urban.resetTotal();
+            urban.recalcTotal();
         if (total != null)
-            total.resetTotal();
+            total.recalcTotal();
     }
 
     public void makeBoth(Locality locality) throws Exception
@@ -163,7 +163,7 @@ public class PopulationByLocality
         validate();
     }
 
-    public void recalcTotal() throws Exception
+    public void recalcTotalLocalityFromUrbanRural() throws Exception
     {
         total = calcTotal(rural, urban);
     }
@@ -254,7 +254,7 @@ public class PopulationByLocality
             {
                 p.rural.smooth();
                 p.urban.smooth();
-                p.recalcTotal();
+                p.recalcTotalLocalityFromUrbanRural();
             }
             else
             {

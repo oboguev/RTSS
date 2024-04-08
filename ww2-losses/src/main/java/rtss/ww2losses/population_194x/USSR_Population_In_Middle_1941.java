@@ -26,8 +26,8 @@ public class USSR_Population_In_Middle_1941
         CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
 
         PopulationByLocality p = PopulationByLocality.census(Area.USSR, 1939);
-        p.resetUnknown();
-        p.resetTotal();
+        p.resetUnknownForEveryLocality();
+        p.recalcTotalForEveryLocality();
         p.validate();
         p = p.cloneTotal();
         

@@ -79,13 +79,13 @@ public class Adjust_1937
     public PopulationByLocality adjust(final PopulationByLocality p) throws Exception
     {
         PopulationByLocality pto = p.clone();
-        pto.resetUnknown();
+        pto.resetUnknownForEveryLocality();
         
         adjust_younger(pto, total_adjustment * 0.85);
         adjust_older(pto, total_adjustment * 0.15);
 
-        pto.resetTotal();
-        pto.recalcTotal();
+        pto.recalcTotalForEveryLocality();
+        pto.recalcTotalLocalityFromUrbanRural();
         pto.validate();
         
         return pto;

@@ -90,7 +90,7 @@ public class ForwardPopulationUR
         forward(pto, p, fctx, Locality.URBAN, mt, yfraction);
 
         /* вычислить совокупное население обеих зон суммированием городского и сельского */
-        pto.recalcTotal();
+        pto.recalcTotalLocalityFromUrbanRural();
 
         /* проверить внутреннюю согласованность результата */
         pto.validate();
@@ -178,6 +178,7 @@ public class ForwardPopulationUR
         
         /*
          * подвергнуть рождения смертности
+         * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности 
          */
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
@@ -245,6 +246,8 @@ public class ForwardPopulationUR
             return;
         
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
+        /* lx[nd] содержит число выживших на день жизни nd согласно таблице смертности */ 
+
         double[] p = fctx.asArray(locality, gender);
         double[] p2 = new double[p.length];
         
@@ -338,8 +341,8 @@ public class ForwardPopulationUR
 
         pto.makeBoth(Locality.RURAL);
         pto.makeBoth(Locality.URBAN);
-        pto.resetUnknown();
-        pto.resetTotal();
+        pto.resetUnknownForEveryLocality();
+        pto.recalcTotalForEveryLocality();
 
         pto.validate();
 

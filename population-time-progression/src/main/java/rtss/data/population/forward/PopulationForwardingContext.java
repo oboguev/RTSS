@@ -128,6 +128,10 @@ public class PopulationForwardingContext
 
     private String key(Locality locality, Gender gender, int day) throws Exception
     {
+        if (hasRuralUrban && locality == Locality.TOTAL)
+            throw new IllegalArgumentException();
+        if (!hasRuralUrban && locality != Locality.TOTAL)
+            throw new IllegalArgumentException();
         if (day < 0 || day > MAX_DAY || gender == Gender.BOTH)
             throw new IllegalArgumentException();
         return locality.name() + "-" + gender.name() + "-" + day;
@@ -179,7 +183,7 @@ public class PopulationForwardingContext
     private Map<String, double[]> m_lx = new HashMap<>(); 
     
     /*
-     * Вычислить подневное значение "lx" по годовым значениям в таблице смертности
+     * Вычислить подневное значение "lx" их годовых значений в таблице смертности
      */
     public double[] get_daily_lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
     {
@@ -215,14 +219,15 @@ public class PopulationForwardingContext
         {
             begin(pto, Locality.RURAL);
             begin(pto, Locality.URBAN);
+            pto.recalcTotalForEveryLocality();
+            pto.recalcTotalLocalityFromUrbanRural();
         }
-        
-        if (pto.hasTotal())
+        else
         {
             begin(pto, Locality.TOTAL);
+            pto.recalcTotalForEveryLocality();
         }
         
-        pto.resetTotal();
         pto.validate();
         
         return pto;
@@ -248,7 +253,10 @@ public class PopulationForwardingContext
     }
     
     /*
-     * Переместить детские ряды из контекста в структуру населения  
+     * Переместить детские ряды из контекста в структуру населения.
+     * 
+     * Контекст не изменяется и может быть использован для повторных операций. Это позволяет сделать
+     * snapshot населения в текущий момент и затем продолжить продвижку.  
      */
     public PopulationByLocality end(final PopulationByLocality p) throws Exception
     {
@@ -265,7 +273,7 @@ public class PopulationForwardingContext
             end(pto, Locality.TOTAL);
         }
         
-        pto.resetTotal();
+        pto.recalcTotalForEveryLocality();
         pto.validate();
         
         return pto;

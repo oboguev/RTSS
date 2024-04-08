@@ -93,11 +93,11 @@ public class Adjust_1937_Old
         female_sum = p.sum(Locality.TOTAL, Gender.FEMALE, age1, age2);
 
         PopulationByLocality pto = p.clone();
-        pto.resetUnknown();
+        pto.resetUnknownForEveryLocality();
         adjust(pto, Locality.RURAL);
         adjust(pto, Locality.URBAN);
-        pto.resetTotal();
-        pto.recalcTotal();
+        pto.recalcTotalForEveryLocality();
+        pto.recalcTotalLocalityFromUrbanRural();
         pto.validate();
         return pto;
     }
