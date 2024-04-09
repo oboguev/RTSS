@@ -32,4 +32,9 @@ public class Bin
         // this.next = bin.next;
         // this.index = bin.index;
     }
+    
+    public String toString()
+    {
+        return String.format("%d-%d -> %f", age_x1, age_x2, avg);
+    }
 }

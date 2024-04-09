@@ -133,10 +133,14 @@ public class Util
         return text;
     }
 
+    public static byte[] loadResourceAsBytes(String path) throws Exception
+    {
+        return Files.readAllBytes(Paths.get(Util.class.getClassLoader().getResource(path).toURI()));
+    }
+
     public static String loadResource(String path) throws Exception
     {
-        byte[] bytes = Files.readAllBytes(Paths.get(Util.class.getClassLoader().getResource(path).toURI()));
-        return new String(bytes, StandardCharsets.UTF_8);
+        return new String(loadResourceAsBytes(path), StandardCharsets.UTF_8);
     }
 
     public static String f2s(double f) throws Exception
