@@ -7,6 +7,9 @@ import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 
+/**
+ * Возрастные коэффициенты женской плодовитости
+ */
 public class AgeSpecificFertilityRates
 {
     private Bin[] bins;

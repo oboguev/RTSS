@@ -56,10 +56,18 @@ public class PopulationForwardingContext
     public final int MAX_DAY = NDAYS - 1;
     
     private boolean hasRuralUrban;
+    private Map<String, Double> m = new HashMap<>();
     
     /* =============================================================================================== */
     
-    private Map<String, Double> m = new HashMap<>(); 
+    public PopulationForwardingContext clone()
+    {
+        PopulationForwardingContext cx = new PopulationForwardingContext();
+        cx.hasRuralUrban = hasRuralUrban;
+        cx.m = new HashMap<String, Double>(m);
+        cx.m_lx = new HashMap<String, double[]>(m_lx); 
+        return cx;
+    }
     
     public double get(Locality locality, Gender gender, int day) throws Exception
     {

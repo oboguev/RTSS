@@ -49,19 +49,6 @@ public class USSR_Expected_Population_In_Early_1946
         return with_mt(mt_rsfsr_1940, cbr);
     }
 
-    /*
-     * Вычислить гипотетическое ожидаемое население СССР в начале 1946 г. 
-     * используя интерполируемую таблицу смертности. 
-     * 
-     * @cbr указывает рождаемость
-     * При значении CBR_1940 (36.1) число рождающихся добавляется в соответствии с уровнем рождаемости 1940 г.
-     * При значении 0 рождения не добавляются. 
-     */
-    public PopulationByLocality with_mt_interpolated(double cbr) throws Exception
-    {
-        return with_mt(null, cbr);
-    }
-    
     public PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr) throws Exception
     {
         PopulationForwardingContext fctx = new PopulationForwardingContext();

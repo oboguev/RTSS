@@ -135,7 +135,14 @@ public class Util
 
     public static byte[] loadResourceAsBytes(String path) throws Exception
     {
-        return Files.readAllBytes(Paths.get(Util.class.getClassLoader().getResource(path).toURI()));
+        try
+        {
+            return Files.readAllBytes(Paths.get(Util.class.getClassLoader().getResource(path).toURI()));
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Unable to load resource " + path, ex);
+        }
     }
 
     public static String loadResource(String path) throws Exception
@@ -259,7 +266,7 @@ public class Util
             seq[k] = si[k];
         return seq;
     }
-    
+
     public static boolean isPositive(final double[] yy)
     {
         for (double y : yy)
@@ -267,7 +274,7 @@ public class Util
             if (y <= 0)
                 return false;
         }
-        
+
         return true;
     }
 
@@ -278,7 +285,7 @@ public class Util
             if (y < 0)
                 return false;
         }
-        
+
         return true;
     }
 
@@ -351,7 +358,7 @@ public class Util
 
         return sb.toString();
     }
-    
+
     public static void unused(Object... o)
     {
     }

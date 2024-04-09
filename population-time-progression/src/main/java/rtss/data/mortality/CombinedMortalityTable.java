@@ -29,6 +29,11 @@ public class CombinedMortalityTable
         return cmt;
     }
 
+    static public CombinedMortalityTable load(String path) throws Exception
+    {
+        return new CombinedMortalityTable(path);
+    }
+
     public MortalityInfo get(Locality locality, Gender gender, int age) throws Exception
     {
         String key = key(locality, gender);
@@ -37,10 +42,10 @@ public class CombinedMortalityTable
 
     public CombinedMortalityTable(String path) throws Exception
     {
-        load(path);
+        do_load(path);
     }
 
-    private void load(String path) throws Exception
+    private void do_load(String path) throws Exception
     {
         source = path;
         loadTables(path, Gender.BOTH);
