@@ -559,7 +559,7 @@ public class Main
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице ГКС-СССР-1938: %.1f промилле", cdr1));
         
         double cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1941);
-        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице АДХ-РСФСР-1938: %.1f промилле", cdr2));
+        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице АДХ-РСФСР-1940: %.1f промилле", cdr2));
         
         CombinedMortalityTable mt = combine(mt_ussr_1938, cdr1, mt_rsfsr_1940, cdr2);
         double cdr3 = EvalMortalityRate.eval(mt, p1941);
@@ -599,7 +599,7 @@ public class Main
     {
         AreaParameters ap = AreaParameters.forArea(Area.USSR, 4);
         double a = (ap.CDR_1940 - cdr2) / (cdr1 - cdr2);
-        Util.out(String.format("комбинированная таблица: %.3f от ГКС-СССР-1939, %.3f от АДХ-РСФСР-1940", 1 - a, a));
+        Util.out(String.format("комбинированная таблица: %.3f от ГКС-СССР-1938, %.3f от АДХ-РСФСР-1940", 1 - a, a));
         return CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
     }
 }

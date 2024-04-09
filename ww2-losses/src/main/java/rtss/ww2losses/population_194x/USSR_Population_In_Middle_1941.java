@@ -7,8 +7,6 @@ import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Area;
-import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
@@ -39,34 +37,20 @@ public class USSR_Population_In_Middle_1941
      */
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
-        CombinedMortalityTable mt1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
-
-        PopulationByLocality p = PopulationByLocality.census(Area.USSR, 1939);
-        p.resetUnknownForEveryLocality();
-        p.recalcTotalForEveryLocality();
-        p.validate();
-        p = p.cloneTotalOnly();
-        
-        /*
-         * Продвижка с 17 января 1939 до начала 1940 года
-         */
-        ForwardPopulationT fw = new ForwardPopulationT();
-        fctx.begin(p);
-        fw.setBirthRateTotal(CBR_1939);
-        double yfraction = (365 - 16) / 365.0;
-        p = fw.forward(p, fctx, mt1938, yfraction);
+        PopulationByLocality p = new USSR_Population_In_Early_1940().evaluate(fctx);
         
         /*
          * Продвижка с начала 1940 до начала 1941 года
          */
+        ForwardPopulationT fw = new ForwardPopulationT();
         fw.setBirthRateTotal(CBR_1940);
-        p = fw.forward(p, fctx, mt1938, 1.0);
+        p = forward(fw, p, fctx, 1.0, CDR_1940);
         
         /*
          * Продвижка с начала 1941 до середины 1941 года
          */
         fw.setBirthRateTotal(CBR_1940);
-        p = fw.forward(p, fctx, mt1938, 0.5);
+        p = fw.forward(p, fctx, cmt, 0.5);
         
         /*
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
@@ -82,13 +66,10 @@ public class USSR_Population_In_Middle_1941
         final double females_mid1941 = females_jun21 * USSR_1941_MID / total_jun21; 
         final double males_mid1941 = males_jun21 * USSR_1941_MID / total_jun21; 
         
-        PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
-        RescalePopulation.scaleTotal(pto, p, fctx, Gender.MALE, males_mid1941);
-        RescalePopulation.scaleTotal(pto, p, fctx, Gender.FEMALE, females_mid1941);
-        pto.makeBoth(Locality.TOTAL);
-        pto.validate();
+        p = RescalePopulation.scaleTotal(p, fctx, males_mid1941, females_mid1941);
+        p.validate();
 
-        return pto;
+        return p;
     }
     
     private PopulationByLocality forward(
