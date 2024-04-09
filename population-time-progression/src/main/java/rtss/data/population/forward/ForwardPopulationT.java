@@ -1,5 +1,6 @@
 package rtss.data.population.forward;
 
+import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.population.Population;
@@ -17,8 +18,15 @@ public class ForwardPopulationT
     protected static final int MAX_AGE = Population.MAX_AGE;
     protected final double MaleFemaleBirthRatio = 1.06;
 
+    protected AgeSpecificFertilityRates ageSpecificFertilityRates;
     protected double BirthRateTotal;
     
+    public ForwardPopulationT setBirthRateTotal(AgeSpecificFertilityRates ageSpecificFertilityRates)
+    {
+        this.ageSpecificFertilityRates = ageSpecificFertilityRates;
+        return this;
+    }
+
     public ForwardPopulationT setBirthRateTotal(double BirthRateTotal)
     {
         this.BirthRateTotal = BirthRateTotal;
@@ -69,12 +77,22 @@ public class ForwardPopulationT
 
         if (fctx != null)
         {
-            add_births(fctx, p, locality, mt, birthRate, yfraction);
+            add_births(fctx, p, locality, mt, ageSpecificFertilityRates, birthRate, yfraction);
         }
         else
         {
-            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
-            double births = sum * yfraction * birthRate / 1000;
+            double births;
+            
+            if (ageSpecificFertilityRates != null)
+            {
+                births = yfraction * ageSpecificFertilityRates.births(p);
+            }
+            else
+            {
+                double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
+                births = yfraction * sum * birthRate / 1000;
+            }
+            
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
@@ -90,11 +108,22 @@ public class ForwardPopulationT
             final PopulationByLocality p,
             final Locality locality,
             final CombinedMortalityTable mt,
+            final AgeSpecificFertilityRates ageSpecificFertilityRates,
             final double birthRate,
             final double yfraction) throws Exception
     {
-        double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAges(locality, Gender.BOTH, 0, fctx.MAX_YEAR);
-        double births = sum  * yfraction * birthRate / 1000;
+        double births;
+
+        if (ageSpecificFertilityRates != null)
+        {
+            births = yfraction * ageSpecificFertilityRates.births(p);
+        }
+        else
+        {
+            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAges(locality, Gender.BOTH, 0, fctx.MAX_YEAR);
+            births = yfraction * sum  * birthRate / 1000;
+        }
+        
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
