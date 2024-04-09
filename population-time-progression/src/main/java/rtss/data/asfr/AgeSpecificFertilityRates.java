@@ -44,6 +44,11 @@ public class AgeSpecificFertilityRates
         return sum;
     }
     
+    public double birthRate(PopulationByLocality p) throws Exception
+    {
+        return birthRate(p.forLocality(Locality.TOTAL));
+    }
+
     public double birthRate(Population p) throws Exception
     {
         return 1000 * births(p) / p.sum(Gender.BOTH, 0, Population.MAX_AGE);
