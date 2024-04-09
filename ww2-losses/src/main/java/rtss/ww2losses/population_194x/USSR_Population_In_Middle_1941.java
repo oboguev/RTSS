@@ -3,6 +3,7 @@ package rtss.ww2losses.population_194x;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Area;
@@ -23,8 +24,6 @@ public class USSR_Population_In_Middle_1941
     
     public double CBR_1940 = 36.1;
     public double CDR_1940 = 21.7;
-    
-    private static final int MAX_AGE = PopulationByLocality.MAX_AGE;
     
     private CombinedMortalityTable cmt;
     
@@ -84,8 +83,8 @@ public class USSR_Population_In_Middle_1941
         final double males_mid1941 = males_jun21 * USSR_1941_MID / total_jun21; 
         
         PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
-        scale(pto, p, fctx, Gender.FEMALE, females_mid1941);
-        scale(pto, p, fctx, Gender.MALE, males_mid1941);
+        RescalePopulation.scaleTotal(pto, p, fctx, Gender.MALE, males_mid1941);
+        RescalePopulation.scaleTotal(pto, p, fctx, Gender.FEMALE, females_mid1941);
         pto.makeBoth(Locality.TOTAL);
         pto.validate();
 
@@ -119,24 +118,5 @@ public class USSR_Population_In_Middle_1941
     {
         double f = Math.sqrt(1 + rate / 1000);
         return v * f;
-    }
-    
-    private void scale(PopulationByLocality pto, PopulationByLocality p, PopulationForwardingContext fctx, Gender gender, double target) throws Exception
-    {
-        final Locality locality = Locality.TOTAL;
-        double v = p.sum(locality, gender, 0, MAX_AGE) + fctx.sumAges(Locality.TOTAL, gender, 0, fctx.MAX_YEAR);
-        final double scale = target / v;
-        
-        for (int age = 0; age <= MAX_AGE; age++)
-        {
-            v = p.get(locality, gender, age);
-            pto.set(locality, gender, age, v * scale);
-        }
-        
-        for (int nd = 0; nd <= fctx.MAX_DAY; nd++)
-        {
-            v = fctx.get(locality, gender, nd);
-            fctx.set(locality, gender, nd, v * scale);
-        }
     }
 }

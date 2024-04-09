@@ -3,12 +3,12 @@ package rtss.ww2losses.population_194x;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
-import rtss.util.Util;
 
 /**
  * Вычислить возрастную структуру населения СССР на начало 1940 года
@@ -20,8 +20,6 @@ public class USSR_Population_In_Early_1940
      */
     public double CBR_1939 = 40.0;
     public double CDR_1939 = 20.1;
-
-    private static final int MAX_AGE = PopulationByLocality.MAX_AGE;
 
     private CombinedMortalityTable cmt;
 
@@ -64,8 +62,8 @@ public class USSR_Population_In_Early_1940
         final double females_1940 = 100_283;
 
         PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
-        scale(pto, p, fctx, Gender.MALE, males_1940);
-        scale(pto, p, fctx, Gender.FEMALE, females_1940);
+        RescalePopulation.scaleTotal(pto, p, fctx, Gender.MALE, males_1940);
+        RescalePopulation.scaleTotal(pto, p, fctx, Gender.FEMALE, females_1940);
         pto.makeBoth(Locality.TOTAL);
         pto.validate();
 
@@ -93,25 +91,5 @@ public class USSR_Population_In_Early_1940
         cmt = CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
 
         return fw.forward(p, fctx, cmt, yfraction);
-    }
-
-    private void scale(PopulationByLocality pto, PopulationByLocality p, PopulationForwardingContext fctx, Gender gender, double target)
-            throws Exception
-    {
-        final Locality locality = Locality.TOTAL;
-        double v = p.sum(locality, gender, 0, MAX_AGE) + fctx.sumAges(Locality.TOTAL, gender, 0, fctx.MAX_YEAR);
-        final double scale = target / v;
-
-        for (int age = 0; age <= MAX_AGE; age++)
-        {
-            v = p.get(locality, gender, age);
-            pto.set(locality, gender, age, v * scale);
-        }
-
-        for (int nd = 0; nd <= fctx.MAX_DAY; nd++)
-        {
-            v = fctx.get(locality, gender, nd);
-            fctx.set(locality, gender, nd, v * scale);
-        }
     }
 }
