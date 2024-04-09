@@ -7,8 +7,6 @@ import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Area;
-import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 
 /**
  * Вычислить возрастную структуру населения СССР на начало 1940 года
@@ -46,12 +44,20 @@ public class USSR_Population_In_Early_1940
         p = p.cloneTotalOnly();
 
         /*
-         * Продвижка с 17 января 1939 до начала 1940 года
+         * Перемасштабировать на начало 1939 года и границы 1946 года
+         */
+        /* АДХ, "Население Советского Союза", стр. 131 */
+        final double males_1939 = 90_013;
+        final double females_1939 = 98_194;
+        p = RescalePopulation.scaleTotal(p, fctx, males_1939, females_1939);
+
+        /*
+         * Продвижка с начала 1939 до начала 1940 года
          */
         ForwardPopulationT fw = new ForwardPopulationT();
         fctx.begin(p);
         fw.setBirthRateTotal(CBR_1939);
-        double yfraction = (365 - 16) / 365.0;
+        double yfraction = 1.0;
         p = forward(fw, p, fctx, yfraction, CDR_1939);
 
         /*
@@ -60,11 +66,7 @@ public class USSR_Population_In_Early_1940
         /* АДХ, "Население Советского Союза", стр. 125-126 */
         final double males_1940 = 92_316;
         final double females_1940 = 100_283;
-
-        PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
-        RescalePopulation.scaleTotal(pto, p, fctx, Gender.MALE, males_1940);
-        RescalePopulation.scaleTotal(pto, p, fctx, Gender.FEMALE, females_1940);
-        pto.makeBoth(Locality.TOTAL);
+        PopulationByLocality pto = RescalePopulation.scaleTotal(p, fctx, males_1940, females_1940);
         pto.validate();
 
         return pto;
