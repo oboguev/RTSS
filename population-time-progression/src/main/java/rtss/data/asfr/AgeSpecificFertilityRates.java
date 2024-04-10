@@ -73,12 +73,12 @@ public class AgeSpecificFertilityRates
      * 
      * Первоначальная структура не изменяется, возвращается новая структура.
      */
-    public AgeSpecificFertilityRates rescale(PopulationByLocality p, double cbr) throws Exception
+    public AgeSpecificFertilityRates rescaleToBirthRate(PopulationByLocality p, double cbr) throws Exception
     {
-        return rescale(p.forLocality(Locality.TOTAL), cbr);
+        return rescaleToBirthRate(p.forLocality(Locality.TOTAL), cbr);
     }
 
-    public AgeSpecificFertilityRates rescale(Population p, double cbr) throws Exception
+    public AgeSpecificFertilityRates rescaleToBirthRate(Population p, double cbr) throws Exception
     {
         double scale = cbr / birthRate(p);
         
