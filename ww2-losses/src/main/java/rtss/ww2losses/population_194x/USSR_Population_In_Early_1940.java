@@ -47,8 +47,8 @@ public class USSR_Population_In_Early_1940
          * Перемасштабировать на начало 1939 года и границы 1946 года
          */
         /* АДХ, "Население Советского Союза", стр. 131 */
-        final double males_1939 = 90_013;
-        final double females_1939 = 98_194;
+        final double males_1939 = 90_013_000;
+        final double females_1939 = 98_194_000;
         p = RescalePopulation.scaleTotal(p, fctx, males_1939, females_1939);
 
         /*
@@ -64,8 +64,8 @@ public class USSR_Population_In_Early_1940
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
          */
         /* АДХ, "Население Советского Союза", стр. 125-126 */
-        final double males_1940 = 92_316;
-        final double females_1940 = 100_283;
+        final double males_1940 = 92_316_000;
+        final double females_1940 = 100_283_000;
         PopulationByLocality pto = RescalePopulation.scaleTotal(p, fctx, males_1940, females_1940);
         pto.validate();
 

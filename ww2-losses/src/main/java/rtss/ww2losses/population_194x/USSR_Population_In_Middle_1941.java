@@ -55,12 +55,12 @@ public class USSR_Population_In_Middle_1941
         /*
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
          */
-        final double USSR_1941_START = 195_392; // АДХ, "Население Советского Союза", стр. 77, 118, 126
+        final double USSR_1941_START = 195_392_000; // АДХ, "Население Советского Союза", стр. 77, 118, 126
         final double USSR_1941_MID = forward_6mo(USSR_1941_START, AreaParameters.forArea(Area.USSR, 4).growth_1940());
 
         /* АДХ, "Население Советского Союза", стр. 56, 74 */
-        final double males_jun21 = 94_338; 
-        final double females_jun21 = 102_378;
+        final double males_jun21 = 94_338_000; 
+        final double females_jun21 = 102_378_000;
         final double total_jun21 = males_jun21 + females_jun21;
         
         final double females_mid1941 = females_jun21 * USSR_1941_MID / total_jun21; 
