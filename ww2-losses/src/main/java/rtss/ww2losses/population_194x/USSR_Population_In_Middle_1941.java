@@ -7,6 +7,9 @@ import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
@@ -45,6 +48,7 @@ public class USSR_Population_In_Middle_1941
         ForwardPopulationT fw = new ForwardPopulationT();
         fw.setBirthRateTotal(CBR_1940);
         p = forward(fw, p, fctx, 1.0, CDR_1940);
+        show_struct("начало 1941", p, fctx);
         
         /*
          * Продвижка с начала 1941 до середины 1941 года
@@ -99,5 +103,23 @@ public class USSR_Population_In_Middle_1941
     {
         double f = Math.sqrt(1 + rate / 1000);
         return v * f;
+    }
+
+    private void show_struct(String what, PopulationByLocality p, PopulationForwardingContext fctx) throws Exception
+    {
+        if (Util.False)
+        {
+            p = fctx.end(p);
+
+            String struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.MALE);
+            Util.out("");
+            Util.out(">>> " + what + " male");
+            Util.out(struct);
+
+            struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.FEMALE);
+            Util.out("");
+            Util.out(">>> " + what + " female");
+            Util.out(struct);
+        }
     }
 }

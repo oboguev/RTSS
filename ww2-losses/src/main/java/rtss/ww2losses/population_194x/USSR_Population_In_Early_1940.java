@@ -7,6 +7,9 @@ import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /**
  * Вычислить возрастную структуру населения СССР на начало 1940 года
@@ -50,6 +53,7 @@ public class USSR_Population_In_Early_1940
         final double males_1939 = 90_013_000;
         final double females_1939 = 98_194_000;
         p = RescalePopulation.scaleTotal(p, fctx, males_1939, females_1939);
+        show_struct("начало 1939 в границах 1946", p, fctx);
 
         /*
          * Продвижка с начала 1939 до начала 1940 года
@@ -68,6 +72,7 @@ public class USSR_Population_In_Early_1940
         final double females_1940 = 100_283_000;
         PopulationByLocality pto = RescalePopulation.scaleTotal(p, fctx, males_1940, females_1940);
         pto.validate();
+        show_struct("начало 1940", pto, fctx);
 
         return pto;
     }
@@ -93,5 +98,23 @@ public class USSR_Population_In_Early_1940
         cmt = CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
 
         return fw.forward(p, fctx, cmt, yfraction);
+    }
+    
+    private void show_struct(String what, PopulationByLocality p, PopulationForwardingContext fctx) throws Exception
+    {
+        if (Util.False)
+        {
+            p = fctx.end(p);
+
+            String struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.MALE);
+            Util.out("");
+            Util.out(">>> " + what + " male");
+            Util.out(struct);
+
+            struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.FEMALE);
+            Util.out("");
+            Util.out(">>> " + what + " female");
+            Util.out(struct);
+        }
     }
 }

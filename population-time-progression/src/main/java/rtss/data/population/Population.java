@@ -564,8 +564,8 @@ public class Population
         return s;
     }
     
-    public static final String STRUCT_014 = "0 1-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85-89 85+"; 
-    public static final String STRUCT_0459 = "0-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85-89 85+"; 
+    public static final String STRUCT_014 = "0 1-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85+"; 
+    public static final String STRUCT_0459 = "0-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85+"; 
     
     public String ageStructure014() throws Exception
     {
