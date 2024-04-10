@@ -307,4 +307,51 @@ public class PopulationForwardingContext
             p.add(locality, Gender.BOTH, age, v);
         }
     }
+
+    /* =============================================================================================== */
+
+    @Override
+    public String toString()
+    {
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            
+            double m = sumAllAges(Locality.TOTAL, Gender.MALE);
+            double f = sumAllAges(Locality.TOTAL, Gender.FEMALE);
+            sb_out(sb, "total.", m, f);
+            
+            if (hasRuralUrban)
+            {
+                m = sumAllAges(Locality.URBAN, Gender.MALE);
+                f = sumAllAges(Locality.URBAN, Gender.FEMALE);
+                sb_out(sb, "urban.", m, f);
+                
+                m = sumAllAges(Locality.RURAL, Gender.MALE);
+                f = sumAllAges(Locality.RURAL, Gender.FEMALE);
+                sb_out(sb, "rural.", m, f);
+            }
+
+            return sb.toString();
+        }
+        catch (Exception ex)
+        {
+            return "<exception while formating>";
+        }
+    }
+    
+    private void sb_out(StringBuilder sb, String prefix, double m, double f)
+    {
+        if (sb.length() != 0)
+            sb.append(" ");
+        sb.append(String.format("%smf:%s %sm:%s %sf:%s", prefix, f2k(m + f), prefix, f2k(m), prefix, f2k(f)));
+    }
+
+    private String f2k(double v)
+    {
+        String s = String.format("%,10.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
+    }
 }

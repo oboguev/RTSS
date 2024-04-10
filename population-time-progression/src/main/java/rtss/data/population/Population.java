@@ -139,7 +139,7 @@ public class Population
             m.put(age, -value);
         }
     }
-    
+
     private void checkNonNegative(double v) throws Exception
     {
         if (v < 0)
@@ -251,7 +251,7 @@ public class Population
                 String s2 = line.substring(k + 1);
                 line = s1.replace(" ", "_") + " " + s2;
             }
-            
+
             line = line.toLowerCase();
             line = line.replace("возраст не указан", "unknown");
 
@@ -532,5 +532,35 @@ public class Population
         if (Util.differ(Util.sum(d), Util.sum(d2)))
             throw new Exception("Smoothing error");
         return d2;
+    }
+
+    /****************************************************************************************************/
+
+    @Override
+    public String toString()
+    {
+        try
+        {
+            return toString("");
+        }
+        catch (Exception ex)
+        {
+            return "<exception while formating>";
+        }
+    }
+
+    public String toString(String prefix) throws Exception
+    {
+        double m = sum(Gender.MALE, 0, MAX_AGE);
+        double f = sum(Gender.MALE, 0, MAX_AGE);
+        return String.format("%smf:%s %sm:%s %sf:%s", prefix, f2k(m + f), prefix, f2k(m), prefix, f2k(f));
+    }
+
+    private String f2k(double v)
+    {
+        String s = String.format("%,10.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
 }

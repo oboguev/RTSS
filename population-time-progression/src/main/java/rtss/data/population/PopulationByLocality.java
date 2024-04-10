@@ -271,4 +271,38 @@ public class PopulationByLocality
     {
         return forLocality(locality).toArray(gender);
     }
+
+    /****************************************************************************************************/
+
+    @Override
+    public String toString()
+    {
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            
+            if (total != null)
+                sb.append(total.toString("total."));
+            
+            if (urban != null)
+            {
+                if (sb.length() != 0)
+                    sb.append(" ");
+                sb.append(urban.toString("urban."));
+            }
+            
+            if (rural != null)
+            {
+                if (sb.length() != 0)
+                    sb.append(" ");
+                sb.append(rural.toString("rural."));
+            }
+
+            return sb.toString();
+        }
+        catch (Exception ex)
+        {
+            return "<exception while formating>";
+        }
+    }
 }
