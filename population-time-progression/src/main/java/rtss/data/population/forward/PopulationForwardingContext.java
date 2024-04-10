@@ -134,6 +134,11 @@ public class PopulationForwardingContext
         return sum;
     }
 
+    public double sumAllAges(Locality locality, Gender gender) throws Exception
+    {
+        return sumAges(locality, gender, 0, MAX_YEAR);
+    }
+
     private String key(Locality locality, Gender gender, int day) throws Exception
     {
         if (hasRuralUrban && locality == Locality.TOTAL)

@@ -22,7 +22,7 @@ public class EvalMortalityRate
     {
         double total_pop = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         if (fctx != null)
-            total_pop += fctx.sumAges(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_YEAR);
+            total_pop += fctx.sumAllAges(Locality.TOTAL, Gender.BOTH);
 
         double total_deaths = 0;
 

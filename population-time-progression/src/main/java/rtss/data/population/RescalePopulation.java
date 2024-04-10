@@ -35,7 +35,7 @@ public class RescalePopulation
         
         double v = p.sum(locality, gender, 0, MAX_AGE);
         if (fctx != null)
-            v += fctx.sumAges(locality, gender, 0, fctx.MAX_YEAR);
+            v += fctx.sumAllAges(locality, gender);
 
         final double scale = target / v;
         

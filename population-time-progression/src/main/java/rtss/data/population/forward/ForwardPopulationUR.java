@@ -152,7 +152,7 @@ public class ForwardPopulationUR
             final double birthRate,
             final double yfraction) throws Exception
     {
-        double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAges(locality, Gender.BOTH, 0, fctx.MAX_YEAR);
+        double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
         double births = sum  * yfraction * birthRate / 1000;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
@@ -297,12 +297,12 @@ public class ForwardPopulationUR
          * Целевая и текущая численность городского населения во всех возрастах
          */
         double total_population = p.sum(Locality.TOTAL, gender, 0, MAX_AGE) +
-                                  fctx.sumAges(Locality.TOTAL, gender, 0, fctx.MAX_YEAR);
+                                  fctx.sumAllAges(Locality.TOTAL, gender);
 
         double target_urban = target_urban_level * total_population;
 
         double current_urban = p.sum(Locality.URBAN, gender, 0, MAX_AGE) +
-                               fctx.sumAges(Locality.URBAN, gender, 0, fctx.MAX_YEAR);
+                               fctx.sumAllAges(Locality.URBAN, gender);
 
         /*
          * Численность населения, которое нужно перенести 
@@ -317,8 +317,7 @@ public class ForwardPopulationUR
          * Переносимое население распределяется равномерно между возрастами 0-49 
          * пропорционально их численности в сельском населении.
          */
-        double rural049 = p.sum(Locality.RURAL, gender, 0, 49) +
-                          fctx.sumAges(Locality.RURAL, gender, 0, fctx.MAX_YEAR);
+        double rural049 = p.sum(Locality.RURAL, gender, 0, 49) + fctx.sumAllAges(Locality.RURAL, gender);
 
         double factor = move / rural049;
 

@@ -120,7 +120,7 @@ public class ForwardPopulationT
         }
         else
         {
-            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAges(locality, Gender.BOTH, 0, fctx.MAX_YEAR);
+            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
             births = yfraction * sum  * birthRate / 1000;
         }
         
