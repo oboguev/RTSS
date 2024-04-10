@@ -55,7 +55,7 @@ public class USSR_Population_In_Early_1940
          * Продвижка с начала 1939 до начала 1940 года
          */
         ForwardPopulationT fw = new ForwardPopulationT();
-        fctx.begin(p);
+        p = fctx.begin(p);
         fw.setBirthRateTotal(CBR_1939);
         double yfraction = 1.0;
         p = forward(fw, p, fctx, yfraction, CDR_1939);

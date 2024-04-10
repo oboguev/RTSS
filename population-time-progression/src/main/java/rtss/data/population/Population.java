@@ -552,7 +552,7 @@ public class Population
     public String toString(String prefix) throws Exception
     {
         double m = sum(Gender.MALE, 0, MAX_AGE);
-        double f = sum(Gender.MALE, 0, MAX_AGE);
+        double f = sum(Gender.FEMALE, 0, MAX_AGE);
         return String.format("%smf:%s %sm:%s %sf:%s", prefix, f2k(m + f), prefix, f2k(m), prefix, f2k(f));
     }
 
