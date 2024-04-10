@@ -563,4 +563,101 @@ public class Population
             s = s.substring(1);
         return s;
     }
+    
+    public static final String STRUCT_014 = "0 1-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85-89 85+"; 
+    public static final String STRUCT_0459 = "0-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85-89 85+"; 
+    
+    public String ageStructure014() throws Exception
+    {
+        return ageStructure(STRUCT_014);
+    }
+
+    public String ageStructure0459() throws Exception
+    {
+        return ageStructure(STRUCT_0459);
+    }
+
+    public String ageStructure(String struct) throws Exception
+    {
+        return ageStructure(struct, Gender.BOTH);
+    }
+
+    public String ageStructure(String struct, String which) throws Exception
+    {
+        switch (which.trim().toLowerCase())
+        {
+        case "mf":
+        case "fm":
+        case "both":
+            return ageStructure(struct, Gender.BOTH);
+
+        case "m":
+        case "male":
+            return ageStructure(struct, Gender.MALE);
+
+        case "f":
+        case "female":
+            return ageStructure(struct, Gender.FEMALE);
+            
+        default:
+            throw new Exception("Invalid gender selector: " + which);
+        }
+    }
+    
+    public String ageStructure(String struct, Gender gender) throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        double tot = sum(gender, 0, MAX_AGE);
+
+        for (String s : struct.split(" "))
+        {
+            if (s == null)
+                continue;
+            s = s.trim();
+            if (s.length() == 0)
+                continue;
+            
+            s = s.replace("+", "-" + MAX_AGE);
+            
+            int age1;
+            int age2;
+            
+            if (s.contains("-"))
+            {
+                String[] sa = s.split("-");
+                if (sa.length != 2)
+                    throw new IllegalArgumentException();
+                age1 = Integer.parseUnsignedInt(sa[0]);
+                age2 = Integer.parseUnsignedInt(sa[1]);
+            }
+            else
+            {
+                age1 = age2 = Integer.parseUnsignedInt(s);
+            }
+            
+            double v = sum(gender, age1, age2);
+            
+            String s_age = "";
+            if (age1 == age2)
+            {
+                s_age += age1; 
+            }
+            else if (age2 == MAX_AGE)
+            {
+                s_age += age1 + "+";
+            }
+            else
+            {
+                s_age += age1 + "-" + age2;
+            }
+            
+            if (sb.length() != 0)
+                sb.append("\n");
+            
+            sb.append(String.format("%-5s %s (%.2f%%)", s_age, f2k(v), 100 * v / tot));
+        }
+        
+        return sb.toString();
+    }
 }

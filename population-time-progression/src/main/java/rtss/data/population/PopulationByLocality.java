@@ -305,4 +305,88 @@ public class PopulationByLocality
             return "<exception while formating>";
         }
     }
+
+    public static final String STRUCT_014 = Population.STRUCT_014; 
+    public static final String STRUCT_0459 = Population.STRUCT_0459; 
+
+    public String ageStructure014() throws Exception
+    {
+        return ageStructure(STRUCT_014, Locality.TOTAL, Gender.BOTH);
+    }
+
+    public String ageStructure0459() throws Exception
+    {
+        return ageStructure(STRUCT_0459, Locality.TOTAL, Gender.BOTH);
+    }
+
+    public String ageStructure(String struct) throws Exception
+    {
+        return ageStructure(struct, Locality.TOTAL, Gender.BOTH);
+    }
+
+    public String ageStructure(String struct, String whichLocality, String whichGender) throws Exception
+    {
+        Locality locality;
+        Gender gender;
+        
+        switch (whichLocality.trim().toLowerCase())
+        {
+        case "total":
+            locality = Locality.TOTAL;
+            break;
+            
+        case "rural":
+            locality = Locality.RURAL;
+            break;
+            
+        case "urban":
+            locality = Locality.URBAN;
+            break;
+            
+        default:
+            throw new Exception("Invalid locality selector: " + whichLocality);
+        }
+        
+        switch (whichGender.trim().toLowerCase())
+        {
+        case "mf":
+        case "fm":
+        case "both":
+            gender = Gender.BOTH;
+            break;
+
+        case "m":
+        case "male":
+            gender = Gender.MALE;
+            break;
+
+        case "f":
+        case "female":
+            gender = Gender.FEMALE;
+            break;
+            
+        default:
+            throw new Exception("Invalid gender selector: " + whichGender);
+        }
+
+        return ageStructure(struct, locality, gender);
+    }
+    
+    public String ageStructure(String struct, Locality locality, Gender gender) throws Exception
+    {
+        switch (locality)
+        {
+        case TOTAL:
+            return total.ageStructure(struct, gender);
+            
+        case URBAN:
+            return urban.ageStructure(struct, gender);
+            
+        case RURAL:
+            return rural.ageStructure(struct, gender);
+            
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
 }
