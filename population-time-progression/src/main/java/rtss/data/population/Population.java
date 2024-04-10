@@ -558,7 +558,7 @@ public class Population
 
     private String f2k(double v)
     {
-        String s = String.format("%,10.0f", v);
+        String s = String.format("%,15.0f", v);
         while (s.startsWith(" "))
             s = s.substring(1);
         return s;

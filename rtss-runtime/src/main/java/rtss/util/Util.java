@@ -207,10 +207,43 @@ public class Util
         return sum;
     }
 
+    // per-element array addition
+    public static double[] add(final double[] a, final double[] b) throws Exception
+    {
+        if (a.length != b.length)
+            throw new IllegalArgumentException();
+        double[] v = new double[a.length];
+        for (int k = 0; k < a.length; k++)
+            v[k] = a[k] + b[k];
+        return v;
+    }
+    
+    // per-element array substraction
+    public static double[] sub(final double[] a, final double[] b) throws Exception
+    {
+        if (a.length != b.length)
+            throw new IllegalArgumentException();
+        double[] v = new double[a.length];
+        for (int k = 0; k < a.length; k++)
+            v[k] = a[k] - b[k];
+        return v;
+    }
+    
     // average value over array
     public static double average(final double[] y)
     {
         return sum(y) / y.length;
+    }
+    
+    // sign of the value
+    public static int sign(double d)
+    {
+        if (d > 0)
+            return 1;
+        else if (d < 0)
+            return -1;
+        else
+            return 0;
     }
 
     // return a new array with values representing y[] / f
