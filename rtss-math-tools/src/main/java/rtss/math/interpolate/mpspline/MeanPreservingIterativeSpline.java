@@ -63,7 +63,7 @@ public class MeanPreservingIterativeSpline
 
         // use weighted control points for the spline
         // final double[] cp_x = Bins.midpoint_x(bins);
-        final double[] cp_x = weigted_control_points_x(bins, ppy);
+        final double[] cp_x = weigted_control_points_x(bins, ppy, options);
         double[] cp_y = Bins.midpoint_y(bins);
 
         for (int pass = 0;; pass++)
@@ -71,7 +71,7 @@ public class MeanPreservingIterativeSpline
             double[] yy = new double[xx.length];
 
             /*
-             * use Akima spline as it has less oscillations and overshooting 
+             * generally use Akima spline as it has less oscillations and overshooting 
              * http://www.alglib.net/interpolation/spline3.php#header5
              * https://www.researchgate.net/post/What_is_the_significance_of_Akima_spline_over_cubic_splines_or_other_curve_fitting_techniques
              * https://blogs.mathworks.com/cleve/2019/04/29/makima-piecewise-cubic-interpolation
@@ -165,14 +165,14 @@ public class MeanPreservingIterativeSpline
         }
     }
 
-    private double[] weigted_control_points_x(Bin[] bins, int ppy)
+    private double[] weigted_control_points_x(Bin[] bins, int ppy, Options options)
     {
         double minOffset = 1.0 / ppy;
         double[] cp_x = new double[bins.length];
 
         for (Bin bin : bins)
         {
-            double x = eval_cp_x(bin);
+            double x = eval_cp_x(bin, options);
             x = max(x, bin.age_x1 + minOffset);
             x = min(x, bin.age_x2 + 1 - minOffset);
             cp_x[bin.index] = x;
@@ -180,10 +180,13 @@ public class MeanPreservingIterativeSpline
         return cp_x;
     }
 
-    private double eval_cp_x(Bin bin)
+    private double eval_cp_x(Bin bin, Options options)
     {
         Bin prev = bin.prev;
         Bin next = bin.next;
+        
+        if (next == null && options.placeLastBinKnotAtRightmostPoint)
+            return bin.age_x2 + 1;
 
         // endpoint
         if (prev == null || next == null)
@@ -248,6 +251,7 @@ public class MeanPreservingIterativeSpline
     {
         Boolean checkNonNegative;
         Boolean checkPositive;
+        Boolean placeLastBinKnotAtRightmostPoint;
         Class<?> basicSplineType;
         Class<?> functionExtenderType;
         
@@ -255,6 +259,7 @@ public class MeanPreservingIterativeSpline
         {
             checkNonNegative = null;
             checkPositive = null;
+            placeLastBinKnotAtRightmostPoint = false;
             basicSplineType = null;
             functionExtenderType = null;
         }
@@ -263,6 +268,7 @@ public class MeanPreservingIterativeSpline
         {
             checkNonNegative = x.checkNonNegative;
             checkPositive = x.checkPositive;
+            placeLastBinKnotAtRightmostPoint = x.placeLastBinKnotAtRightmostPoint;
             basicSplineType = x.basicSplineType;
             functionExtenderType = x.functionExtenderType;
         }
@@ -288,7 +294,18 @@ public class MeanPreservingIterativeSpline
             checkPositive = b;
             return this; 
         }
-
+        
+        public Options placeLastBinKnotAtRightmostPoint()
+        {
+            return placeLastBinKnotAtRightmostPoint(true);
+        }
+        
+        public Options placeLastBinKnotAtRightmostPoint(boolean b)
+        {
+            placeLastBinKnotAtRightmostPoint = b;
+            return this;
+        }
+        
         public Options basicSplineType(Class<?> clz)
         {
             basicSplineType = clz;
@@ -305,6 +322,9 @@ public class MeanPreservingIterativeSpline
         {
             if (checkNonNegative == null && checkPositive == null)
                 checkNonNegative = true;
+            
+            if (placeLastBinKnotAtRightmostPoint == null)
+                placeLastBinKnotAtRightmostPoint = false;
             
             if (basicSplineType == null)
                 basicSplineType = SteffenSplineInterpolator.class;

@@ -26,19 +26,27 @@ public class InterpolatePopulationAsMeanPreservingCurve
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);
 
+        if (Util.True)
+        {
+            /*
+             * Helps to avoid the last segment of the curve dive down to much
+             */
+            options = options.placeLastBinKnotAtRightmostPoint();
+        }
+
         int ppy = 12;
         double[] xxx = Bins.ppy_x(bins, ppy);
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
 
-        if (Util.True)
+        if (Util.False)
         {
             options.basicSplineType(SteffenSplineInterpolator.class);
             yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
 
-        if (Util.True)
+        if (Util.False)
         {
             options.basicSplineType(AkimaSplineInterpolator.class);
             yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
@@ -49,8 +57,16 @@ public class InterpolatePopulationAsMeanPreservingCurve
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
+
+        double[] yyy = yyy1;
+        if (yyy == null)
+            yyy = yyy2;
+        if (yyy == null)
+            yyy = yyy3;
         
-        if (Util.True)
+        yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins);
+        
+        if (Util.False)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)
@@ -59,25 +75,25 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 chart.addSeries("2", xxx, yyy2);
             if (yyy3 != null)
                 chart.addSeries("3", xxx, yyy3);
+            if (yyy3 != null)
+                chart.addSeries("yyy", xxx, yyy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }
-        
-        double[] yyy = yyy1;
-        if (yyy == null)
-            yyy = yyy2;
-        if (yyy == null)
-            yyy = yyy3;
-        if (!Util.isPositive(yyy))
-            throw new Exception("Error calculating curve (negative or zero value)");
-        
+
+        if (!Util.isNonNegative(yyy))
+            throw new Exception("Error calculating curve (negative value)");
+
         double[] yy = Bins.ppy2yearly(yyy, ppy);
+
+        if (!Util.isNonNegative(yy))
+            throw new Exception("Error calculating curve (negative value)");
 
         validate_means(yy, bins);
 
         return yy;
     }
-    
+
     /*
      * Verify that the curve preserves mean values as indicated by the bins
      */

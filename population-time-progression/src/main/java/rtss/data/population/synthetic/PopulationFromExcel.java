@@ -151,7 +151,8 @@ public class PopulationFromExcel
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);
         
-        // ###
+        if (Util.differ(sum1, sum2))
+            throw new Exception("Curve count mismatches bin count");
         
         return counts;
     }
