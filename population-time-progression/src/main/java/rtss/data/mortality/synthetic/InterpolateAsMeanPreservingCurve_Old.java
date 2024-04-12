@@ -83,7 +83,7 @@ public class InterpolateAsMeanPreservingCurve_Old
         preserve_means(res_y, bins);
         validate_means(res_y, bins);
 
-        if (Util.True)
+        if (Util.False)
         {
             new ChartXYSplineAdvanced("Generating mean-preserving curve", "age", "y")
                     .addSeries("averages", res_x, Bins.bins2yearly(bins))

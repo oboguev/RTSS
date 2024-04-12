@@ -124,10 +124,31 @@ public class PopulationFromExcel
         }
         
         Bin[] bins = Bins.bins(list);
+        if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
+            throw new Exception("Invalid population age range");
         
-        // ### interpolate
+        return bins2yearly(bins);
+    }
+    
+    private static double[] bins2yearly(Bin[] bins) throws Exception
+    {
+        boolean interpolate = false;
         
-        return null;
+        for (Bin bin : bins)
+        {
+            if (bin.widths_in_years != 1)
+                interpolate = true;
+        }
+        
+        if (!interpolate)
+        {
+            double[] v = new double[Population.MAX_AGE + 1];
+            for (int k = 0; k < v.length; k++)
+                v[k] = bins[k].avg;
+            return v;
+        }
+
+        return InterpolatePopulationAsMeanPreservingCurve.curve(bins);        
     }
 
     private static List<Object> loadAges(String path, Gender gender) throws Exception

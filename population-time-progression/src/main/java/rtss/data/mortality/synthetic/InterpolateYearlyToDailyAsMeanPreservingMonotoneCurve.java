@@ -57,7 +57,7 @@ public class InterpolateYearlyToDailyAsMeanPreservingMonotoneCurve
             yyy3 = MeanPreservingIterativeSpline.eval(bins, DAYS_PER_YEAR, options, precision);
         }
         
-        if (Util.True)
+        if (Util.False)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)

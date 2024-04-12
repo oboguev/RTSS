@@ -1,10 +1,10 @@
-package rtss.data.mortality.synthetic;
+package rtss.data.population.synthetic;
 
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.mortality.SingleMortalityTable;
+import rtss.data.population.Population;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
@@ -14,11 +14,11 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 
 /**
  * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
- * Typically used to interpolate the "qx" curve from an aggregated multi-year data to a yearly resolution.
+ * Typically used to interpolate population from an aggregated multi-year data to a yearly resolution.
  */
-public class InterpolateAsMeanPreservingCurve
+public class InterpolatePopulationAsMeanPreservingCurve
 {
-    public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
+    public static final int MAX_AGE = Population.MAX_AGE;
 
     public static double[] curve(Bin... bins) throws Exception
     {
@@ -26,7 +26,7 @@ public class InterpolateAsMeanPreservingCurve
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);
 
-        int ppy = 1000;
+        int ppy = 12;
         double[] xxx = Bins.ppy_x(bins, ppy);
         double[] yyy1 = null;
         double[] yyy2 = null;
@@ -50,7 +50,7 @@ public class InterpolateAsMeanPreservingCurve
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
         
-        if (Util.False)
+        if (Util.True)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)

@@ -34,7 +34,7 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
          * Вычислить рождаемость городского и сельского населения в 1926 году 
          */
         calcBirthRates();
-        
+
         /*
          * Вычислить оценку доли городского населения для каждого года между 1926 и 1936
          * посредством интерполяции между переписями декабря 1926 и января 1937 гг. 
@@ -56,25 +56,21 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
         /*
          * Продвижка населения для целых лет с декабря 1926 по декабрь 1936 
          */
-        CombinedMortalityTable mt = mt1926; 
+        CombinedMortalityTable mt = mt1926;
         PopulationByLocality p = p1926;
         int year = 1926;
         double yfraction = 1.0;
-        
-        PopulationForwardingContext fctx = null;
-        if (Util.True)
-        {
-            fctx = new PopulationForwardingContext();
-            p = fctx.begin(p);
-        }
-        
+
+        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        p = fctx.begin(p);
+
         for (;;)
         {
             year++;
-            
+
             if (interpolateMortalityTable)
                 mt = interpolateMortalityTable(year);
-            
+
             p = forward(p, fctx, mt, yfraction);
 
             /*
@@ -96,9 +92,8 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
         long ndays = Duration.between(d1936.toInstant(), d1937.toInstant()).toDays();
         yfraction = ndays / 365.0;
         p = forward(p, fctx, mt, yfraction);
-        
-        if (fctx != null)
-            p = fctx.end(p);
+
+        p = fctx.end(p);
 
         show_results(p);
     }
