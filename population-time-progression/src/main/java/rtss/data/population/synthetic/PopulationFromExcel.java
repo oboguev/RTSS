@@ -17,7 +17,7 @@ public class PopulationFromExcel
     private static final String[] keyFemales = { "female", "females", "женщины", "жен", "жен.", "ж" };
     private static final String[] keyAge = { "age", "ages", "возраст", "возрасты", "возрастная группа", "возрастные группы" };
 
-    private static final double MAX_DIFF = 2;
+    private static final double MAX_DIFF = 3;
 
     public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown) throws Exception
     {
