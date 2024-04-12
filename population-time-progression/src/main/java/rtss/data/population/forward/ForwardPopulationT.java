@@ -33,6 +33,11 @@ public class ForwardPopulationT
         return this;
     }
 
+    public double getBirthRateTotal()
+    {
+        return BirthRateTotal;
+    }
+
     /*
      * Продвижка населения во времени на целый год или на часть года.
      * Начальное население (@p) и таблица смертности (@mt) неизменны. 
@@ -150,7 +155,8 @@ public class ForwardPopulationT
         
         /*
          * подвергнуть рождения смертности
-         * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности 
+         * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности,
+         * таким образом day_lx[nd] / day_lx[0] представляет долю выживших к этому дню со дня рождения 
          */
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)

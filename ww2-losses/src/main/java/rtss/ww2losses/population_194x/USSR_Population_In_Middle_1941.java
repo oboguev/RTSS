@@ -98,10 +98,10 @@ public class USSR_Population_In_Middle_1941
             throws Exception
     {
         CombinedMortalityTable mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
-        double cdr1 = EvalMortalityRate.eval(mt1, p, fctx);
+        double cdr1 = EvalMortalityRate.eval(mt1, p, fctx, fw.getBirthRateTotal());
 
         CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
-        double cdr2 = EvalMortalityRate.eval(mt2, p, fctx);
+        double cdr2 = EvalMortalityRate.eval(mt2, p, fctx, fw.getBirthRateTotal());
 
         double a = (cdr - cdr2) / (cdr1 - cdr2);
         if (a < 0) a = 0;

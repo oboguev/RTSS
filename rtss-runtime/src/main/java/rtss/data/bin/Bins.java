@@ -194,6 +194,49 @@ public class Bins
 
         return null;
     }
+    
+    /*
+     * sum of values in all bins
+     */
+    public static double sum(Bin... bins)
+    {
+        double sum = 0;
+        for (Bin bin : bins)
+            sum += bin.avg * bin.widths_in_years;
+        return sum;
+    }
+    
+    /*
+     * convert bin set with values (@avg) actually meaning a sum for the bin,
+     * into the bin set with values (@avg) meaning a mean for the bin 
+     */
+    public static Bin[] sum2avg(Bin... bins) throws Exception
+    {
+        Bin[] r = new Bin[bins.length];
+        for (int k = 0; k < bins.length; k++)
+        {
+            r[k] = new Bin(bins[k]);
+            r[k].avg /= r[k].widths_in_years;
+        }
+        
+        return bins(r);
+    }
+
+    /*
+     * convert bin set with values (@avg) actually meaning a mean for the bin,
+     * into the bin set with values (@avg) meaning a sum for the bin 
+     */
+    public static Bin[] avg2sum(Bin... bins) throws Exception
+    {
+        Bin[] r = new Bin[bins.length];
+        for (int k = 0; k < bins.length; k++)
+        {
+            r[k] = new Bin(bins[k]);
+            r[k].avg *= r[k].widths_in_years;
+        }
+        
+        return bins(r);
+    }
 
     /*
      * Get yearly averages for the sequence of bins

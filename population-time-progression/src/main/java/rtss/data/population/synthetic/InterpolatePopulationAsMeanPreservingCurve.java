@@ -32,13 +32,13 @@ public class InterpolatePopulationAsMeanPreservingCurve
         double[] yyy2 = null;
         double[] yyy3 = null;
 
-        if (Util.False)
+        if (Util.True)
         {
             options.basicSplineType(SteffenSplineInterpolator.class);
             yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
 
-        if (Util.False)
+        if (Util.True)
         {
             options.basicSplineType(AkimaSplineInterpolator.class);
             yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
@@ -50,7 +50,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
         
-        if (Util.False)
+        if (Util.True)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)
