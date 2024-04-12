@@ -3,6 +3,8 @@ package rtss.data.population.synthetic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.population.Population;
@@ -14,22 +16,22 @@ public class PopulationFromExcel
     private static final String[] keyMales = { "male", "males", "мужчины", "муж", "муж.", "м" };
     private static final String[] keyFemales = { "female", "females", "женщины", "жен", "жен.", "ж" };
     private static final String[] keyAge = { "age", "ages", "возраст", "возрасты", "возрастная группа", "возрастные группы" };
-    
+
     private static final double MAX_DIFF = 2;
 
-    public static double[] loadCounts(String path, Gender gender, int year) throws Exception
+    public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown) throws Exception
     {
         /*
          * parse excel rows and fill them into the bins
          */
         List<Object> ages = loadAges(path, gender);
         List<Object> values = loadValues(path, gender, "" + year);
-        
+
         Double total = null;
         Double unknown = null;
         List<Bin> list = new ArrayList<>();
         double sum = 0;
-        
+
         for (int nrow = 1; nrow <= ages.size(); nrow++)
         {
             Object oa = ages.get(nrow - 1);
@@ -54,13 +56,13 @@ public class PopulationFromExcel
             {
                 throw new Exception("Unexpected value type in the age column");
             }
-            
+
             sa = sa.trim().toLowerCase();
             if (sa.equals(""))
                 continue;
             if (sa.startsWith("провер") || sa.startsWith("check") || sa.startsWith("verif"))
                 continue;
-            
+
             if (sa.equals("всего"))
                 sa = "total";
             if (sa.startsWith("неизвестно") || sa.startsWith("не изв"))
@@ -68,7 +70,7 @@ public class PopulationFromExcel
 
             sa = sa.replace(" и старше", "-" + Population.MAX_AGE);
             sa = sa.replace("+", "-" + Population.MAX_AGE);
-            
+
             Object ov = values.get(nrow - 1);
             double v;
             if (ov instanceof String)
@@ -83,7 +85,7 @@ public class PopulationFromExcel
             {
                 throw new Exception("Unexpected value type in population numbers column");
             }
-            
+
             if (sa.equals("total"))
             {
                 if (total != null)
@@ -115,31 +117,40 @@ public class PopulationFromExcel
         }
 
         if (unknown != null)
+        {
             sum += unknown;
-        
+            if (v_unknown != null)
+                v_unknown.setValue(unknown);
+        }
+        else
+        {
+            if (v_unknown != null)
+                v_unknown.setValue(0);
+        }
+
         if (total != null)
         {
             if (Math.abs(total - sum) > MAX_DIFF)
                 throw new Exception("Population bins mismatch designated total");
         }
-        
+
         Bin[] bins = Bins.bins(list);
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
-        
+
         return bins2yearly(bins);
     }
-    
+
     private static double[] bins2yearly(Bin[] bins) throws Exception
     {
         boolean interpolate = false;
-        
+
         for (Bin bin : bins)
         {
             if (bin.widths_in_years != 1)
                 interpolate = true;
         }
-        
+
         if (!interpolate)
         {
             double[] v = new double[Population.MAX_AGE + 1];
@@ -148,19 +159,19 @@ public class PopulationFromExcel
             return v;
         }
 
-        return InterpolatePopulationAsMeanPreservingCurve.curve(bins);        
+        return InterpolatePopulationAsMeanPreservingCurve.curve(bins);
     }
 
     private static List<Object> loadAges(String path, Gender gender) throws Exception
     {
         return loadValues(path, gender, keyAge);
     }
-    
+
     private static List<Object> loadValues(String path, Gender gender, String... matchingColumnNames) throws Exception
     {
         return Excel.loadColumn(path, key(gender), matchingColumnNames);
     }
-    
+
     private static String[] key(Gender gender) throws Exception
     {
         switch (gender)

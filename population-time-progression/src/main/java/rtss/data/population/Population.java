@@ -31,6 +31,31 @@ public class Population
         Population p = new Population();
         return p;
     }
+    
+    private Population()
+    {
+    }
+
+    public Population(Locality locality, double[] m, double m_unknown, double[] f, double f_unknown) throws Exception
+    {
+        this.locality = locality;
+        
+        if (m.length != MAX_AGE + 1 || f.length != m.length)
+            throw new IllegalArgumentException();
+        
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            set(Gender.MALE, age, m[age]);
+            set(Gender.FEMALE, age, f[age]);
+        }
+        
+        male_unknown = m_unknown;
+        female_unknown = f_unknown;
+        
+        recalcTotal();
+        makeBoth();
+        validate();
+    }
 
     public Population clone()
     {

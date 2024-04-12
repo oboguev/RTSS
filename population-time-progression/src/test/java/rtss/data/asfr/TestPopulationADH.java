@@ -10,7 +10,7 @@ public class TestPopulationADH
         try
         {
             // ###
-            PopulationADH.zzz(Area.RSFSR, 1940);
+            PopulationADH.getPopulationByLocality(Area.RSFSR, 1940);
         }
         catch (Exception ex)
         {

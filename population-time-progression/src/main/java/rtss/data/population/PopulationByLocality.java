@@ -15,6 +15,24 @@ public class PopulationByLocality
     private Population rural;
     private Population urban;
     private Population total;
+    
+    private PopulationByLocality()
+    {
+    }
+
+    public PopulationByLocality(Population total) throws Exception
+    {
+        this.total = total; 
+        validate();
+    }
+
+    public PopulationByLocality(Population total, Population urban, Population rural) throws Exception
+    {
+        this.total = total; 
+        this.urban = urban; 
+        this.rural = rural;
+        validate();
+    }
 
     static public PopulationByLocality newPopulationByLocality()
     {
