@@ -52,7 +52,7 @@ public class AgeSpecificFertilityRatesByYear
     {
         this.path = path;
 
-        List<List<Object>> rows = Excel.readSheet(path, "Data");
+        List<List<Object>> rows = Excel.readSheet(path, false, "Data");
 
         nrow = 0;
         int years_row = -1;
