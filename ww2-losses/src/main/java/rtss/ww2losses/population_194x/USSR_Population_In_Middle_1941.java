@@ -6,6 +6,7 @@ import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -40,15 +41,27 @@ public class USSR_Population_In_Middle_1941
      */
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
-        PopulationByLocality p = new USSR_Population_In_Early_1940().evaluate(fctx);
-        
-        /*
-         * Продвижка с начала 1940 до начала 1941 года
-         */
         ForwardPopulationT fw = new ForwardPopulationT();
-        fw.setBirthRateTotal(CBR_1940);
-        p = forward(fw, p, fctx, 1.0, CDR_1940);
-        show_struct("начало 1941", p, fctx);
+        PopulationByLocality p;
+        
+        if (UseADH.useADH)
+        {
+            // ### вычислить cmt для 1940
+            
+            p = PopulationADH.getPopulationByLocality(Area.USSR, 1941);
+            p = fctx.begin(p);
+        }
+        else
+        {
+            p = new USSR_Population_In_Early_1940().evaluate(fctx);
+            
+            /*
+             * Продвижка с начала 1940 до начала 1941 года
+             */
+            fw.setBirthRateTotal(CBR_1940);
+            p = forward(fw, p, fctx, 1.0, CDR_1940);
+            show_struct("начало 1941", p, fctx);
+        }
         
         /*
          * Продвижка с начала 1941 до середины 1941 года

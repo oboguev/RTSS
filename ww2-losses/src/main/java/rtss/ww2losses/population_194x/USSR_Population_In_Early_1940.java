@@ -6,6 +6,7 @@ import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -40,41 +41,50 @@ public class USSR_Population_In_Early_1940
      */
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
-        PopulationByLocality p = PopulationByLocality.census(Area.USSR, 1939);
-        p.resetUnknownForEveryLocality();
-        p.recalcTotalForEveryLocality();
-        p.validate();
-        p = p.cloneTotalOnly();
+        if (UseADH.useADH)
+        {
+            PopulationByLocality p = PopulationADH.getPopulationByLocality(Area.USSR, 1940);
+            return fctx.begin(p);
+        }
+        else
+        {
+            
+            PopulationByLocality p = PopulationByLocality.census(Area.USSR, 1939);
+            p.resetUnknownForEveryLocality();
+            p.recalcTotalForEveryLocality();
+            p.validate();
+            p = p.cloneTotalOnly();
 
-        /*
-         * Перемасштабировать на начало 1939 года и границы 1946 года
-         */
-        /* АДХ, "Население Советского Союза", стр. 131 */
-        final double males_1939 = 90_013_000;
-        final double females_1939 = 98_194_000;
-        p = RescalePopulation.scaleTotal(p, fctx, males_1939, females_1939);
-        show_struct("начало 1939 в границах 1946", p, fctx);
+            /*
+             * Перемасштабировать на начало 1939 года и границы 1946 года
+             */
+            /* АДХ, "Население Советского Союза", стр. 131 */
+            final double males_1939 = 90_013_000;
+            final double females_1939 = 98_194_000;
+            p = RescalePopulation.scaleTotal(p, fctx, males_1939, females_1939);
+            show_struct("начало 1939 в границах 1946", p, fctx);
 
-        /*
-         * Продвижка с начала 1939 до начала 1940 года
-         */
-        ForwardPopulationT fw = new ForwardPopulationT();
-        p = fctx.begin(p);
-        fw.setBirthRateTotal(CBR_1939);
-        double yfraction = 1.0;
-        p = forward(fw, p, fctx, yfraction, CDR_1939);
+            /*
+             * Продвижка с начала 1939 до начала 1940 года
+             */
+            ForwardPopulationT fw = new ForwardPopulationT();
+            p = fctx.begin(p);
+            fw.setBirthRateTotal(CBR_1939);
+            double yfraction = 1.0;
+            p = forward(fw, p, fctx, yfraction, CDR_1939);
 
-        /*
-         * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
-         */
-        /* АДХ, "Население Советского Союза", стр. 125-126 */
-        final double males_1940 = 92_316_000;
-        final double females_1940 = 100_283_000;
-        PopulationByLocality pto = RescalePopulation.scaleTotal(p, fctx, males_1940, females_1940);
-        pto.validate();
-        show_struct("начало 1940", pto, fctx);
+            /*
+             * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
+             */
+            /* АДХ, "Население Советского Союза", стр. 125-126 */
+            final double males_1940 = 92_316_000;
+            final double females_1940 = 100_283_000;
+            PopulationByLocality pto = RescalePopulation.scaleTotal(p, fctx, males_1940, females_1940);
+            pto.validate();
+            show_struct("начало 1940", pto, fctx);
 
-        return pto;
+            return pto;
+        }
     }
 
     private PopulationByLocality forward(
