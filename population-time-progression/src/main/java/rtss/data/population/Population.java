@@ -51,9 +51,12 @@ public class Population
         
         male_unknown = m_unknown;
         female_unknown = f_unknown;
-        
+
+        both = null;
         recalcTotal();
+        
         makeBoth();
+        
         validate();
     }
 

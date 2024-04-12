@@ -245,7 +245,7 @@ public class Excel
             {
                 try
                 {
-                    Double d = Double.parseDouble(text);
+                    Double d = Double.parseDouble(text.replace(",", ""));
                     if (d.equals(o))
                         return true;
                 }

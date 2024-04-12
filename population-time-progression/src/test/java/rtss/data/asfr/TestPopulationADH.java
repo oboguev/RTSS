@@ -2,6 +2,7 @@ package rtss.data.asfr;
 
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
+import rtss.util.Util;
 
 public class TestPopulationADH
 {
@@ -9,8 +10,13 @@ public class TestPopulationADH
     {
         try
         {
-            // ###
+            PopulationADH.getPopulationByLocality(Area.RSFSR, 1939);
             PopulationADH.getPopulationByLocality(Area.RSFSR, 1940);
+            PopulationADH.getPopulationByLocality(Area.RSFSR, 1941);
+            PopulationADH.getPopulationByLocality(Area.RSFSR, 1946);
+            PopulationADH.getPopulationByLocality(Area.RSFSR, 1947);
+            
+            Util.out("*** Completed");
         }
         catch (Exception ex)
         {

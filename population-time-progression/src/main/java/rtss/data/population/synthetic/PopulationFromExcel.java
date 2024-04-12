@@ -21,6 +21,11 @@ public class PopulationFromExcel
 
     public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown) throws Exception
     {
+        return loadCounts(path, gender, "" + year, v_unknown);
+    }
+    
+    public static double[] loadCounts(String path, Gender gender, String year, MutableDouble v_unknown) throws Exception
+    {
         /*
          * parse excel rows and fill them into the bins
          */
@@ -75,7 +80,8 @@ public class PopulationFromExcel
             double v;
             if (ov instanceof String)
             {
-                v = Double.parseDouble((String) ov);
+                String sv = (String) ov;
+                v = Double.parseDouble(sv.replace(",", ""));
             }
             else if (ov instanceof Double)
             {
