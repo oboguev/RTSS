@@ -11,11 +11,6 @@ import rtss.data.population.forward.PopulationForwardingContext;
  */
 public class USSR_Expected_Population_In_Early_1946 extends UtilBase_194x
 {
-    /*
-     * AДХ, "Население Советского Союза", стр. 120
-     */
-    public static final double CBR_1940 = 36.1;
-    
     private CombinedMortalityTable mt_ussr_1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
     private CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
     

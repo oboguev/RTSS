@@ -1,7 +1,6 @@
 package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
