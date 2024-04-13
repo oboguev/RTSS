@@ -9,7 +9,7 @@ import rtss.data.population.forward.PopulationForwardingContext;
  * Вычислить возрастную структуру и численность гипотетического населения СССР на начало 1946 года
  * в том случае, если бы рождаемость и смертность в 1941-1945 гг. оставались такими же, как в 1940 году 
  */
-public class USSR_Expected_Population_In_Early_1946
+public class USSR_Expected_Population_In_Early_1946 extends UtilBase_194x
 {
     /*
      * AДХ, "Население Советского Союза", стр. 120

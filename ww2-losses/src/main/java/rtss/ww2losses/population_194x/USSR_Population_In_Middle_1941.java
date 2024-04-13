@@ -8,27 +8,13 @@ import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
-import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
-import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
  * Вычислить возрастную структуру населения СССР на середину 1941 года
  */
-public class USSR_Population_In_Middle_1941
+public class USSR_Population_In_Middle_1941 extends UtilBase_194x
 {
-    /*
-     * AДХ, "Население Советского Союза", стр. 120
-     */
-    public double CBR_1939 = 40.0;
-    public double CDR_1939 = 20.1;
-    
-    public double CBR_1940 = 36.1;
-    public double CDR_1940 = 21.7;
-    
-    private CombinedMortalityTable cmt;
-    
     public PopulationByLocality evaluate() throws Exception
     {
         PopulationForwardingContext fctx = new PopulationForwardingContext();
@@ -42,12 +28,11 @@ public class USSR_Population_In_Middle_1941
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
         ForwardPopulationT fw = new ForwardPopulationT();
+        CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940().evaluate();
         PopulationByLocality p;
         
-        if (UseADH.useADH)
+        if (useADH)
         {
-            // ### вычислить cmt для 1940
-            
             p = PopulationADH.getPopulationByLocality(Area.USSR, 1941);
             p = fctx.begin(p);
         }
@@ -58,16 +43,16 @@ public class USSR_Population_In_Middle_1941
             /*
              * Продвижка с начала 1940 до начала 1941 года
              */
-            fw.setBirthRateTotal(CBR_1940);
-            p = forward(fw, p, fctx, 1.0, CDR_1940);
+            fw.setBirthRateTotal(USSR_CBR_1940);
+            p = fw.forward(p, fctx, mt1940, 1.0);
             show_struct("начало 1941", p, fctx);
         }
         
         /*
          * Продвижка с начала 1941 до середины 1941 года
          */
-        fw.setBirthRateTotal(CBR_1940);
-        p = fw.forward(p, fctx, cmt, 0.5);
+        fw.setBirthRateTotal(USSR_CBR_1940);
+        p = fw.forward(p, fctx, mt1940, 0.5);
         
         /*
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
@@ -87,52 +72,5 @@ public class USSR_Population_In_Middle_1941
         p.validate();
 
         return p;
-    }
-    
-    private PopulationByLocality forward(
-            ForwardPopulationT fw, 
-            PopulationByLocality p, 
-            PopulationForwardingContext fctx, 
-            double yfraction, 
-            double cdr)
-            throws Exception
-    {
-        CombinedMortalityTable mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
-        double cdr1 = EvalMortalityRate.eval(mt1, p, fctx, fw.getBirthRateTotal());
-
-        CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
-        double cdr2 = EvalMortalityRate.eval(mt2, p, fctx, fw.getBirthRateTotal());
-
-        double a = (cdr - cdr2) / (cdr1 - cdr2);
-        if (a < 0) a = 0;
-        if (a > 1) a = 1;
-        // Util.out(String.format("комбинированная таблица: %.3f от ГКС-СССР-1938, %.3f от АДХ-РСФСР-1940", 1 - a, a));
-        cmt = CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
-
-        return fw.forward(p, fctx, cmt, yfraction);
-    }
-
-    private double forward_6mo(double v, double rate)
-    {
-        double f = Math.sqrt(1 + rate / 1000);
-        return v * f;
-    }
-
-    private void show_struct(String what, PopulationByLocality p, PopulationForwardingContext fctx) throws Exception
-    {
-        if (Util.False)
-        {
-            p = fctx.end(p);
-
-            String struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.MALE);
-            Util.out("");
-            Util.out(">>> " + what + " male");
-            Util.out(struct);
-
-            struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.FEMALE);
-            Util.out("");
-            Util.out(">>> " + what + " female");
-            Util.out(struct);
-        }
     }
 }

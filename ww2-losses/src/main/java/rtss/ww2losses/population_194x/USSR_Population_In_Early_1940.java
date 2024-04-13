@@ -1,28 +1,19 @@
 package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.mortality.EvalMortalityRate;
+import rtss.data.mortality.synthetic.InterpolateMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
-import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
-import rtss.util.Util;
 
 /**
  * Вычислить возрастную структуру населения СССР на начало 1940 года
  */
-public class USSR_Population_In_Early_1940
+public class USSR_Population_In_Early_1940 extends UtilBase_194x
 {
-    /*
-     * AДХ, "Население Советского Союза", стр. 120
-     */
-    public double CBR_1939 = 40.0;
-    public double CDR_1939 = 20.1;
-
     private CombinedMortalityTable cmt;
 
     public USSR_Population_In_Early_1940() throws Exception
@@ -41,14 +32,16 @@ public class USSR_Population_In_Early_1940
      */
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
-        if (UseADH.useADH)
+        if (useADH)
         {
             PopulationByLocality p = PopulationADH.getPopulationByLocality(Area.USSR, 1940);
             return fctx.begin(p);
         }
         else
         {
-            
+            /*
+             * Загрузить структуру населения по переписи 1939 года
+             */
             PopulationByLocality p = PopulationByLocality.census(Area.USSR, 1939);
             p.resetUnknownForEveryLocality();
             p.recalcTotalForEveryLocality();
@@ -69,9 +62,9 @@ public class USSR_Population_In_Early_1940
              */
             ForwardPopulationT fw = new ForwardPopulationT();
             p = fctx.begin(p);
-            fw.setBirthRateTotal(CBR_1939);
+            fw.setBirthRateTotal(USSR_CBR_1939);
             double yfraction = 1.0;
-            p = forward(fw, p, fctx, yfraction, CDR_1939);
+            p = forward(fw, p, fctx, yfraction, USSR_CDR_1939);
 
             /*
              * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
@@ -88,43 +81,21 @@ public class USSR_Population_In_Early_1940
     }
 
     private PopulationByLocality forward(
-            ForwardPopulationT fw, 
-            PopulationByLocality p, 
-            PopulationForwardingContext fctx, 
-            double yfraction, 
+            ForwardPopulationT fw,
+            PopulationByLocality p,
+            PopulationForwardingContext fctx,
+            double yfraction,
             double cdr)
             throws Exception
     {
         CombinedMortalityTable mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
-        double cdr1 = EvalMortalityRate.eval(mt1, p, fctx, fw.getBirthRateTotal());
+        mt1.comment("ГКС-СССР-1938");
 
         CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
-        double cdr2 = EvalMortalityRate.eval(mt2, p, fctx, fw.getBirthRateTotal());
+        mt2.comment("АДХ-РСФСР-1940");
 
-        double a = (cdr - cdr2) / (cdr1 - cdr2);
-        if (a < 0) a = 0;
-        if (a > 1) a = 1;
-        // Util.out(String.format("комбинированная таблица: %.3f от ГКС-СССР-1938, %.3f от АДХ-РСФСР-1940", 1 - a, a));
-        cmt = CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
+        cmt = InterpolateMortalityTable.forTargetRates(mt1, mt2, p, fctx, fw.getBirthRateTotal(), cdr);
 
         return fw.forward(p, fctx, cmt, yfraction);
-    }
-    
-    private void show_struct(String what, PopulationByLocality p, PopulationForwardingContext fctx) throws Exception
-    {
-        if (Util.False)
-        {
-            p = fctx.end(p);
-
-            String struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.MALE);
-            Util.out("");
-            Util.out(">>> " + what + " male");
-            Util.out(struct);
-
-            struct = p.ageStructure(PopulationByLocality.STRUCT_0459, Locality.TOTAL, Gender.FEMALE);
-            Util.out("");
-            Util.out(">>> " + what + " female");
-            Util.out(struct);
-        }
     }
 }

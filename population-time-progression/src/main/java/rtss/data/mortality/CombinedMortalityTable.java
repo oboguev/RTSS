@@ -18,7 +18,7 @@ public class CombinedMortalityTable
     {
         source = "unknown";
     }
-    
+
     static public CombinedMortalityTable loadTotal(String path) throws Exception
     {
         CombinedMortalityTable cmt = new CombinedMortalityTable();
@@ -86,7 +86,7 @@ public class CombinedMortalityTable
         SingleMortalityTable mt = new SingleMortalityTable(fn);
         m.put(key(locality, gender), mt);
     }
-    
+
     /*****************************************************************************************************/
 
     /*
@@ -102,10 +102,29 @@ public class CombinedMortalityTable
             throws Exception
     {
         CombinedMortalityTable cmt = new CombinedMortalityTable();
-        cmt.source = String.format("interpolated between %s and %s", mt1.source, mt2.source);
+
+        double pct1 = 100 * (1 - weight);
+        double pct2 = 100 * weight;
+
+        cmt.source = String.format("interpolated between %.1f%% [%s] and %.1f%% [%s]",
+                                   pct1, mt1.source,
+                                   pct2, mt2.source);
+
+        if (mt1.comment() != null && mt2.comment() != null)
+        {
+            cmt.comment = String.format("interpolated between %.1f%% [%s] and %.1f%% [%s]",
+                                        pct1, mt1.comment(),
+                                        pct2, mt2.comment());
+        }
+        else
+        {
+            cmt.comment = "interpolated";
+        }
+
         cmt.interpolate(Gender.BOTH, mt1, mt2, weight);
         cmt.interpolate(Gender.MALE, mt1, mt2, weight);
         cmt.interpolate(Gender.FEMALE, mt1, mt2, weight);
+
         return cmt;
     }
 
@@ -162,23 +181,37 @@ public class CombinedMortalityTable
 
     /*****************************************************************************************************/
 
+    private String comment;
+
+    public String comment()
+    {
+        return comment;
+    }
+
+    public void comment(String comment)
+    {
+        this.comment = comment;
+    }
+
+    /*****************************************************************************************************/
+
     private String source;
     private final String tid = UUID.randomUUID().toString();
-    
+
     public String tableId()
     {
         return tid;
     }
-    
+
     public int hashCode()
     {
         return tid.hashCode();
     }
-    
+
     public boolean equals(Object x)
     {
         if (x == null || !(x instanceof CombinedMortalityTable))
             return false;
-        return ((CombinedMortalityTable)x).tid.equals(tid);
+        return ((CombinedMortalityTable) x).tid.equals(tid);
     }
 }

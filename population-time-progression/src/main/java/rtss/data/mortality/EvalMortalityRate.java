@@ -18,7 +18,11 @@ public class EvalMortalityRate
         return eval(mt, p, null, cbr);
     }
 
-    public static double eval(final CombinedMortalityTable mt, final PopulationByLocality p, final PopulationForwardingContext fctx, double cbr) throws Exception
+    public static double eval(
+            final CombinedMortalityTable mt, 
+            final PopulationByLocality p, 
+            final PopulationForwardingContext fctx, 
+            double cbr) throws Exception
     {
         double total_pop = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         if (fctx != null)
