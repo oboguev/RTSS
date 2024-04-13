@@ -12,7 +12,7 @@ public class UtilBase_194x
      * true => использовать данные для населения 1940 и 1941 гг. расчитанные АДХ
      * false => вычислять их продвижкой от переписи 1939 года 
      */
-    public static final boolean useADH = false;    
+    public static final boolean useADH = true;    
     
     /*
      * AДХ, "Население Советского Союза", стр. 120

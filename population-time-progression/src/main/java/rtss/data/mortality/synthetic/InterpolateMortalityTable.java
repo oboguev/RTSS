@@ -41,6 +41,13 @@ public class InterpolateMortalityTable
         if (a < 0) a = 0;
         if (a > 1) a = 1;
 
-        return CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
+        CombinedMortalityTable mt = CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
+        
+        double cdr_mt = EvalMortalityRate.eval(mt, p, fctx, cbr);
+        
+        if (Util.differ(cdr, cdr_mt, 0.005))
+            throw new Exception("Error evaluating combined mortality table: verification mismatch");
+
+        return mt;
     }
 }

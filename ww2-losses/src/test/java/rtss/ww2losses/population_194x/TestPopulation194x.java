@@ -18,6 +18,8 @@ public class TestPopulation194x
             
             p = new USSR_Population_In_Middle_1941().evaluate();
             
+            new USSR_MortalityTable_1940().show_survival_rates_1941_1946(); 
+            
             Util.unused(p);
             Util.unused(mt1940);
         }
