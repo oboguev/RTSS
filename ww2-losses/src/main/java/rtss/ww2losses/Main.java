@@ -44,12 +44,12 @@ public class Main
         Util.out("");
         Util.out("РСФСР: defactor 1940 birth rates from 1940-1944 birth rates ...");
         Util.out("");
-        EvaluatePopulationLossBase epl = new Defactor(AreaParameters.forArea(Area.RSFSR, 4));
+        EvaluatePopulationLossBase epl = new Defactor(AreaParameters.forArea(Area.RSFSR));
         epl.evaluate();
 
         do_main(Area.USSR, 4, 0.68);
 
-        AreaParameters ap = AreaParameters.forArea(Area.USSR, 4);
+        AreaParameters ap = AreaParameters.forArea(Area.USSR);
         double birth_delay_months;
         
         double USSR_1941_START = 195_392;
@@ -63,7 +63,7 @@ public class Main
          * дожитие 0.68
          * окно рождений сдвинуто на 9 месяцев 
          */
-        ap = AreaParameters.forArea(Area.USSR, 4);
+        ap = AreaParameters.forArea(Area.USSR);
         ap.immigration = 0;
         ap.survival_rate_194x_1959 = 0.68;
         birth_delay_months = 9;
@@ -74,7 +74,7 @@ public class Main
          * дожитие 0.62
          * окно рождений сдвинуто на 0 месяцев 
          */
-        ap = AreaParameters.forArea(Area.USSR, 4);
+        ap = AreaParameters.forArea(Area.USSR);
         ap.immigration = 0;
         ap.survival_rate_194x_1959 = 0.62;
         birth_delay_months = 0;
@@ -85,7 +85,7 @@ public class Main
          * дожитие 0.62
          * окно рождений сдвинуто на 0 месяцев 
          */
-        ap = AreaParameters.forArea(Area.USSR, 4);
+        ap = AreaParameters.forArea(Area.USSR);
         ap.immigration = 0;
         ap.survival_rate_194x_1959 = 0.62;
         birth_delay_months = 0;
@@ -120,7 +120,7 @@ public class Main
         Util.out("");
         new BirthTrough().calcTrough(area);
 
-        AreaParameters params = AreaParameters.forArea(area, nyears);
+        AreaParameters params = AreaParameters.forArea(area);
 
         Util.out("");
         Util.out("====================================================================");
@@ -544,26 +544,27 @@ public class Main
 
     private void do_show_forwarding() throws Exception
     {
-        final USSR_Expected_Population_In_Early_1946 x46 = new USSR_Expected_Population_In_Early_1946();
-        final double CBR_1940 = USSR_Expected_Population_In_Early_1946.USSR_CBR_1940;
+        AreaParameters ap = AreaParameters.forArea(Area.USSR);
+        
+        final USSR_Expected_Population_In_Early_1946 x46 = new USSR_Expected_Population_In_Early_1946(ap);
         final int MAX_AGE = PopulationByLocality.MAX_AGE;
         PopulationByLocality p;
         double sum;
         
         CombinedMortalityTable mt_ussr_1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
         CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
-        PopulationByLocality p1941 = new USSR_Population_In_Middle_1941().evaluate();
+        PopulationByLocality p1941 = new USSR_Population_In_Middle_1941(ap).evaluate();
         
         Util.out("");
         
-        double cdr1 = EvalMortalityRate.eval(mt_ussr_1938, p1941, CBR_1940);
+        double cdr1 = EvalMortalityRate.eval(mt_ussr_1938, p1941, ap.CBR_1940);
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице ГКС-СССР-1938: %.1f промилле", cdr1));
         
-        double cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1941, CBR_1940);
+        double cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1941, ap.CBR_1940);
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице АДХ-РСФСР-1940: %.1f промилле", cdr2));
         
-        CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940().evaluate();
-        double cdr3 = EvalMortalityRate.eval(mt1940, p1941, CBR_1940);
+        CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940(ap).evaluate();
+        double cdr3 = EvalMortalityRate.eval(mt1940, p1941, ap.CBR_1940);
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и комбинированной таблице: %.1f промилле", cdr3));
         
         Util.out("");
@@ -571,28 +572,61 @@ public class Main
         double sum0;
 
         Util.out(String.format("Ожидаемая численность наличного на середину 1941 г. населения в начале 1946 по продвижке, в условиях мира:"));
-        p = x46.with_mt_USSR_1938(0);
+
+        /* ------------------------------------------------- */
+
+        Util.out("");
+
+        p = x46.with_mt_USSR_1938(0, false);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица ГКС-СССР-1938, без рождений: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица ГКС-СССР-1938, без рождений, без антибиотиков: %s тыс. чел.", f2k(sum)));
         
-        p = x46.with_mt_USSR_1938(CBR_1940);
+        p = x46.with_mt_USSR_1938(ap.CBR_1940, false);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
+        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями, без антибиотиков: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
 
-        p = x46.with_mt_RSFSR_1940(0);
+        p = x46.with_mt_RSFSR_1940(0, false);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений, без антибиотиков: %s тыс. чел.", f2k(sum)));
 
-        p = x46.with_mt_RSFSR_1940(CBR_1940);
+        p = x46.with_mt_RSFSR_1940(ap.CBR_1940, false);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями, без антибиотиков: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
 
-        p = x46.with_mt(mt1940, 0);
+        p = x46.with_mt(mt1940, 0, false);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("комбинированная таблица, без рождений: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("комбинированная таблица, без рождений, без антибиотиков: %s тыс. чел.", f2k(sum)));
 
-        p = x46.with_mt(mt1940, CBR_1940);
+        p = x46.with_mt(mt1940, ap.CBR_1940, false);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("комбинированная таблица, с рождениями: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
+        Util.out(String.format("комбинированная таблица, с рождениями, без антибиотиков: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
+        
+        /* ------------------------------------------------- */
+
+        Util.out("");
+
+        p = x46.with_mt_USSR_1938(0, true);
+        sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("таблица ГКС-СССР-1938, без рождений, с антибиотиками: %s тыс. чел.", f2k(sum)));
+        
+        p = x46.with_mt_USSR_1938(ap.CBR_1940, true);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями, с антибиотиками: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
+
+        p = x46.with_mt_RSFSR_1940(0, true);
+        sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений, с антибиотиками: %s тыс. чел.", f2k(sum)));
+
+        p = x46.with_mt_RSFSR_1940(ap.CBR_1940, true);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями, с антибиотиками: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
+
+        p = x46.with_mt(mt1940, 0, true);
+        sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("комбинированная таблица, без рождений, с антибиотиками: %s тыс. чел.", f2k(sum)));
+
+        p = x46.with_mt(mt1940, ap.CBR_1940, true);
+        sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out(String.format("комбинированная таблица, с рождениями, с антибиотиками: %s тыс. чел. (старое население: %s, новое население: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0)));
     }
 }

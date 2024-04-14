@@ -9,6 +9,7 @@ import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.ww2losses.params.AreaParameters;
 
 /**
  * Вычислить таблицу смертности населения СССР для 1940 года.
@@ -33,18 +34,37 @@ import rtss.util.Util;
  */
 public class USSR_MortalityTable_1940 extends UtilBase_194x
 {
-    private CombinedMortalityTable mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
-    private CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
+    private AreaParameters ap;
+    private CombinedMortalityTable mt1;
+    private CombinedMortalityTable mt2;
     
-    public USSR_MortalityTable_1940() throws Exception
+    public USSR_MortalityTable_1940(AreaParameters ap) throws Exception
     {
-        mt1.comment("ГКС-СССР-1938");
+        this.ap = ap;
+        
+        switch (ap.area)
+        {
+        case USSR:
+            mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
+            mt1.comment("ГКС-СССР-1938");
+            break;
+            
+        case RSFSR:
+            mt1 = CombinedMortalityTable.load("mortality_tables/RSFSR/1938-1939");
+            mt1.comment("ГКС-РСФСР-1938");
+            break;
+            
+        default:
+            throw new IllegalArgumentException();
+        }
+
+        mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
         mt2.comment("АДХ-РСФСР-1940");
     }
 
     public CombinedMortalityTable evaluate() throws Exception
     {
-        return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940().evaluate(), USSR_CBR_1940, USSR_CDR_1940);
+        return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);
     }
 
     public void show_survival_rates_1941_1946() throws Exception
@@ -150,7 +170,7 @@ public class USSR_MortalityTable_1940 extends UtilBase_194x
         double sum0 = 1.0;
         fctx.set(Locality.TOTAL, gender, 0, sum0);
 
-        // to early 1942
+        // forward to early 1942
         ForwardPopulationT fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         p = fw.forward(p, fctx, mt, 1);

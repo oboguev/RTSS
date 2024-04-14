@@ -4,16 +4,13 @@ import rtss.data.selectors.Area;
 
 public class AreaParameters
 {
+    public /*final*/ Area area;
     public /*final*/ int NYears;
     
-    /* population at the beginning and end of the war */
-    public /*final*/ double ACTUAL_POPULATION_START;
-    public /*final*/ double ACTUAL_POPULATION_END;
-    
-    /* target excess deaths and birth shortage */
-    public /*final*/ double ACTUAL_EXCESS_DEATHS;
-    public /*final*/ double ACTUAL_BIRTH_DEFICIT;
-    
+    /* birth and death rates in 1939 */
+    public /*final*/ double CBR_1939;
+    public /*final*/ double CDR_1939;
+
     /* birth and death rates in 1940 */
     public /*final*/ double CBR_1940;
     public /*final*/ double CDR_1940;
@@ -41,6 +38,17 @@ public class AreaParameters
     public double immigration = 0;
     
     /* результаты вычислений: вариант с постоянной (по годам войны) рождаемостью и смертностью */
+
+    /* population at the beginning and end of the war */
+    public /*final*/ double ACTUAL_POPULATION_START;
+    public /*final*/ double ACTUAL_POPULATION_END;
+    
+    /* target excess deaths and birth shortage */
+    public /*final*/ double ACTUAL_EXCESS_DEATHS;
+    public /*final*/ double ACTUAL_BIRTH_DEFICIT;
+    
+    /* ======================================================================= */
+    
     public double constant_cbr;
     public double constant_cdr;
 
@@ -48,30 +56,24 @@ public class AreaParameters
     public double[] var_cbr;
     public double[] var_cdr;
     
-    protected AreaParameters(int NYears)
+    protected AreaParameters(Area area, int NYears)
     {
+        this.area = area;
         this.NYears = NYears;
         this.var_cbr = new double[NYears];
         this.var_cdr = new double[NYears];
     }
 
-    static public AreaParameters forArea(Area area, int nyears)
+    static public AreaParameters forArea(Area area)
     {
-        if (nyears == 4)
+        switch (area)
         {
-            switch (area)
-            {
-            case RSFSR:
-                return new AreaParameters_RSFSR();
-            case USSR:
-                return new AreaParameters_USSR();
-            default:
-                throw new IllegalArgumentException();
-            }
-        }
-        else
-        {
-            return null;
+        case RSFSR:
+            return new AreaParameters_RSFSR();
+        case USSR:
+            return new AreaParameters_USSR();
+        default:
+            throw new IllegalArgumentException();
         }
     }
     

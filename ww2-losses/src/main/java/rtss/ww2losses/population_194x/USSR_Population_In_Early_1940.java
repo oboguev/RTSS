@@ -8,6 +8,7 @@ import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
+import rtss.ww2losses.params.AreaParameters;
 
 /**
  * Вычислить возрастную структуру населения СССР на начало 1940 года
@@ -15,9 +16,11 @@ import rtss.data.selectors.Area;
 public class USSR_Population_In_Early_1940 extends UtilBase_194x
 {
     private CombinedMortalityTable cmt;
+    private AreaParameters ap;
 
-    public USSR_Population_In_Early_1940() throws Exception
+    public USSR_Population_In_Early_1940(AreaParameters ap) throws Exception
     {
+        this.ap = ap;
     }
 
     public PopulationByLocality evaluate() throws Exception
@@ -34,7 +37,7 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
     {
         if (useADH)
         {
-            PopulationByLocality p = PopulationADH.getPopulationByLocality(Area.USSR, 1940);
+            PopulationByLocality p = PopulationADH.getPopulationByLocality(ap.area, 1940);
             return fctx.begin(p);
         }
         else
@@ -42,7 +45,7 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
             /*
              * Загрузить структуру населения по переписи 1939 года
              */
-            PopulationByLocality p = PopulationByLocality.census(Area.USSR, 1939);
+            PopulationByLocality p = PopulationByLocality.census(ap.area, 1939);
             p.resetUnknownForEveryLocality();
             p.recalcTotalForEveryLocality();
             p.validate();
@@ -62,9 +65,9 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
              */
             ForwardPopulationT fw = new ForwardPopulationT();
             p = fctx.begin(p);
-            fw.setBirthRateTotal(USSR_CBR_1939);
+            fw.setBirthRateTotal(ap.CBR_1939);
             double yfraction = 1.0;
-            p = forward(fw, p, fctx, yfraction, USSR_CDR_1939);
+            p = forward(fw, p, fctx, yfraction, ap.CDR_1939);
 
             /*
              * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
@@ -88,9 +91,24 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
             double cdr)
             throws Exception
     {
-        CombinedMortalityTable mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
-        mt1.comment("ГКС-СССР-1938");
-
+        CombinedMortalityTable mt1;
+        
+        switch (ap.area)
+        {
+        case USSR:
+            mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
+            mt1.comment("ГКС-СССР-1938");
+            break;
+            
+        case RSFSR:
+            mt1 = CombinedMortalityTable.load("mortality_tables/RSFSR/1938-1939");
+            mt1.comment("ГКС-РСФСР-1938");
+            break;
+            
+        default:
+            throw new IllegalArgumentException();
+        }
+        
         CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
         mt2.comment("АДХ-РСФСР-1940");
 

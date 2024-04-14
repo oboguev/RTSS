@@ -14,15 +14,6 @@ public class UtilBase_194x
      */
     public static final boolean useADH = true;    
     
-    /*
-     * AДХ, "Население Советского Союза", стр. 120
-     */
-    public static final double USSR_CBR_1939 = 40.0;
-    public static final double USSR_CDR_1939 = 20.1;
-
-    public static final double USSR_CBR_1940 = 36.1;
-    public static final double USSR_CDR_1940 = 21.7;
-    
     protected void show_struct(String what, PopulationByLocality p, PopulationForwardingContext fctx) throws Exception
     {
         if (Util.False)

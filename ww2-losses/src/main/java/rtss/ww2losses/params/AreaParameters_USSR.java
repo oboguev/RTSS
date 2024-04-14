@@ -1,5 +1,6 @@
 package rtss.ww2losses.params;
 
+import rtss.data.selectors.Area;
 import rtss.ww2losses.Main;
 
 public class AreaParameters_USSR extends AreaParameters
@@ -7,7 +8,12 @@ public class AreaParameters_USSR extends AreaParameters
     public AreaParameters_USSR()
     {
         /* 4 years */
-        super(4);
+        super(Area.USSR, 4);
+
+        /* birth and death rates in 1939 */
+        /* Андреев, Дарский, Харькова, "Население Советского Союза 1922-1991", стр. 120 */
+        CBR_1939 = 40.0;
+        CDR_1939 = 20.1;
 
         /* birth and death rates in 1940 */
         /* Андреев, Дарский, Харькова, "Население Советского Союза 1922-1991", стр. 120 */
@@ -18,6 +24,8 @@ public class AreaParameters_USSR extends AreaParameters
         /* Андреев, Дарский, Харькова, "Население Советского Союза 1922-1991", стр. 120 */
         CBR_1946 = 28.5;
         CDR_1946 = 15.8;
+        
+        /* ================================================================================== */
 
         /* population at the beginning and end of the war (mid-1941 and mid-1945) */
         ACTUAL_POPULATION_START = Main.forward_6mo(195_392, this, 1940);

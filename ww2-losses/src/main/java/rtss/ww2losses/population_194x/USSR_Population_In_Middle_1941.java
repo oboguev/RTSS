@@ -14,6 +14,13 @@ import rtss.ww2losses.params.AreaParameters;
  */
 public class USSR_Population_In_Middle_1941 extends UtilBase_194x
 {
+    private AreaParameters ap;
+    
+    public USSR_Population_In_Middle_1941(AreaParameters ap)
+    {
+        this.ap = ap;
+    }
+
     public PopulationByLocality evaluate() throws Exception
     {
         PopulationForwardingContext fctx = new PopulationForwardingContext();
@@ -27,7 +34,7 @@ public class USSR_Population_In_Middle_1941 extends UtilBase_194x
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
         ForwardPopulationT fw = new ForwardPopulationT();
-        CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940().evaluate();
+        CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940(ap).evaluate();
         PopulationByLocality p;
         
         if (useADH)
@@ -37,12 +44,12 @@ public class USSR_Population_In_Middle_1941 extends UtilBase_194x
         }
         else
         {
-            p = new USSR_Population_In_Early_1940().evaluate(fctx);
+            p = new USSR_Population_In_Early_1940(ap).evaluate(fctx);
             
             /*
              * Продвижка с начала 1940 до начала 1941 года
              */
-            fw.setBirthRateTotal(USSR_CBR_1940);
+            fw.setBirthRateTotal(ap.CBR_1940);
             p = fw.forward(p, fctx, mt1940, 1.0);
             show_struct("начало 1941", p, fctx);
         }
@@ -50,14 +57,14 @@ public class USSR_Population_In_Middle_1941 extends UtilBase_194x
         /*
          * Продвижка с начала 1941 до середины 1941 года
          */
-        fw.setBirthRateTotal(USSR_CBR_1940);
+        fw.setBirthRateTotal(ap.CBR_1940);
         p = fw.forward(p, fctx, mt1940, 0.5);
         
         /*
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
          */
         final double USSR_1941_START = 195_392_000; // АДХ, "Население Советского Союза", стр. 77, 118, 126
-        final double USSR_1941_MID = forward_6mo(USSR_1941_START, AreaParameters.forArea(Area.USSR, 4).growth_1940());
+        final double USSR_1941_MID = forward_6mo(USSR_1941_START, AreaParameters.forArea(Area.USSR).growth_1940());
 
         /* АДХ, "Население Советского Союза", стр. 56, 74 */
         final double males_jun21 = 94_338_000; 
