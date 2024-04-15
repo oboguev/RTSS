@@ -146,8 +146,10 @@ public class ForwardPopulationT
             final CombinedMortalityTable mt,
             final int ndays) throws Exception
     {
+        fctx.addTotalBirths(locality, gender, total_births);
+        
         /*
-         * распределить рождения по числу дней
+         * распределить рождения равномерно по числу дней
          */
         double[] day_births = new double[ndays];
         for (int nd = 0; nd < ndays; nd++)

@@ -12,30 +12,30 @@ import rtss.util.Util;
 
 /**
  * 
- * Структура PopulationForwardingContext применяется для детального учёта населения самых младших возрастов при продвижке, 
- * чтобы точнее учесть рождения и ранюю детскую смертность. 
+ * Структура PopulationForwardingContext применяется для детального учёта населения самых младших возрастов при продвижке,
+ * чтобы точнее учесть рождения и ранюю детскую смертность.
  * 
  * Смертность в ранних возрастах изменяется резко с возрастом, различаясь в начале и в конце года.
- * Поэтому для учёта смертности детского населения при последовательных шагах продвижки, особенно если некоторые шаги 
- * имеют длительность менее года, требуется более детальная разбивка численности населения этих возрастных групп, 
+ * Поэтому для учёта смертности детского населения при последовательных шагах продвижки, особенно если некоторые шаги
+ * имеют длительность менее года, требуется более детальная разбивка численности населения этих возрастных групп,
  * нежели по году возраста. Необходмо знать не только возраст в годах, но и в какой именно части года их возраста
  * родились отслеживаемые.
  * 
  * Структуры Population и PopulationByLocality индексируют население только по годам возраста и не дают возможности
- * учёта с более детальным временны́м разрешением.  
+ * учёта с более детальным временны́м разрешением.
  * 
- * Структура PopulationForwardingContext, в противоположность, хранит численность населения с возрастом индексированным 
+ * Структура PopulationForwardingContext, в противоположность, хранит численность населения с возрастом индексированным
  * в днях (а не годах) с даты рождения до текущего момента.
  * 
  * Индексация производится по (Locality, Gender, ndays), где ndays – число дней прошедших со дня рождения до текущего момента.
- *   
- * Хранимые числа населения уже подвергнуты влиянию смертности (и соответствующей числовой децимации) и представляют 
+ * 
+ * Хранимые числа населения уже подвергнуты влиянию смертности (и соответствующей числовой децимации) и представляют
  * числа доживших до настоящего момента.
  * 
  * Численность населения хранится в PopulationForwardingContext только для младших NYEARS лет, т.е. возрастов [0 ... NYEARS-1] лет
  * или [0 ... MAX_DAY] дней со дня рождения.
  * 
- * Хранятся данные только для Gender.MALE и Gender.FEMALE, но не для Gender.BOTH.   
+ * Хранятся данные только для Gender.MALE и Gender.FEMALE, но не для Gender.BOTH.
  * 
  * Использование:
  * 
@@ -62,28 +62,36 @@ public class PopulationForwardingContext
 
     public final int NDAYS = NYEARS * DAYS_PER_YEAR;
     public final int MAX_DAY = NDAYS - 1;
-    
+
+    private boolean began = false;
     private boolean hasRuralUrban;
     private Map<String, Double> m = new HashMap<>();
-    
+
+    /*
+     * Total number of births during forwarding
+     */
+    private Map<String, Double> totalBirths;
+
     /* =============================================================================================== */
-    
+
     public PopulationForwardingContext clone()
     {
         PopulationForwardingContext cx = new PopulationForwardingContext();
+        cx.began = began;
         cx.hasRuralUrban = hasRuralUrban;
         cx.m = new HashMap<String, Double>(m);
-        cx.m_lx = new HashMap<String, double[]>(m_lx); 
+        cx.m_lx = new HashMap<String, double[]>(m_lx);
+        cx.totalBirths = new HashMap<>(totalBirths);
         return cx;
     }
-    
+
     public double get(Locality locality, Gender gender, int day) throws Exception
     {
         String key = key(locality, gender, day);
         Double d = m.get(key);
         return d != null ? d : 0;
     }
-    
+
     public void set(Locality locality, Gender gender, int day, double v) throws Exception
     {
         String key = key(locality, gender, day);
@@ -117,9 +125,12 @@ public class PopulationForwardingContext
 
     public double sum(Locality locality, Gender gender, int nd1, int nd2) throws Exception
     {
+        if (!began)
+            return 0;
+        
         if (locality == Locality.TOTAL && hasRuralUrban)
             return sum(Locality.URBAN, gender, nd1, nd2) + sum(Locality.RURAL, gender, nd1, nd2);
-        
+
         if (gender == Gender.BOTH)
             return sum(locality, Gender.MALE, nd1, nd2) + sum(locality, Gender.FEMALE, nd1, nd2);
 
@@ -149,6 +160,9 @@ public class PopulationForwardingContext
 
     private String key(Locality locality, Gender gender, int day) throws Exception
     {
+        if (!began)
+            throw new IllegalArgumentException();
+        
         if (hasRuralUrban && locality == Locality.TOTAL)
             throw new IllegalArgumentException();
         if (!hasRuralUrban && locality != Locality.TOTAL)
@@ -157,13 +171,13 @@ public class PopulationForwardingContext
             throw new IllegalArgumentException();
         return locality.name() + "-" + gender.name() + "-" + day;
     }
-    
+
     private void checkNonNegative(double v) throws Exception
     {
         if (v < 0)
             throw new Exception("Negative population");
     }
-    
+
     public int firstDayForAge(int age)
     {
         return age * DAYS_PER_YEAR;
@@ -173,36 +187,36 @@ public class PopulationForwardingContext
     {
         return (age + 1) * DAYS_PER_YEAR - 1;
     }
-    
+
     public double[] asArray(Locality locality, Gender gender) throws Exception
     {
         double[] v = new double[NDAYS];
         for (int nd = 0; nd < NDAYS; nd++)
-            v[nd] = get(locality, gender, nd); 
+            v[nd] = get(locality, gender, nd);
         return v;
     }
 
     public void fromArray(Locality locality, Gender gender, double[] v) throws Exception
     {
         for (int nd = 0; nd < v.length; nd++)
-            set(locality, gender, nd, v[nd]); 
+            set(locality, gender, nd, v[nd]);
     }
 
     public void zero(Locality locality, Gender gender) throws Exception
     {
         for (int nd = 0; nd < NDAYS; nd++)
-            set(locality, gender, nd, 0); 
+            set(locality, gender, nd, 0);
     }
-    
+
     public int day2age(int nd)
     {
         return nd / DAYS_PER_YEAR;
     }
 
     /* =============================================================================================== */
-    
-    private Map<String, double[]> m_lx = new HashMap<>(); 
-    
+
+    private Map<String, double[]> m_lx = new HashMap<>();
+
     /*
      * Вычислить подневное значение "lx" их годовых значений в таблице смертности
      */
@@ -210,7 +224,7 @@ public class PopulationForwardingContext
     {
         String key = String.format("%s-%s-%s", mt.tableId(), locality.name(), gender.name());
         double[] daily_lx = m_lx.get(key);
-    
+
         if (daily_lx == null)
         {
             double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
@@ -219,23 +233,28 @@ public class PopulationForwardingContext
             daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
             m_lx.put(key, daily_lx);
         }
-        
+
         return daily_lx;
     }
-    
+
     /* =============================================================================================== */
-    
+
     /*
      * Переместить детские ряды из @p в контекст.
      * Вернуть население с обнулёнными детскими рядами.
      */
     public PopulationByLocality begin(final PopulationByLocality p) throws Exception
     {
+        if (began)
+            throw new IllegalArgumentException();
+        
         m.clear();
-        
+
         PopulationByLocality pto = p.clone();
-        
-        hasRuralUrban = p.hasRuralUrban(); 
+
+        hasRuralUrban = p.hasRuralUrban();
+        began = true;
+
         if (hasRuralUrban)
         {
             begin(pto, Locality.RURAL);
@@ -248,9 +267,9 @@ public class PopulationForwardingContext
             begin(pto, Locality.TOTAL);
             pto.recalcTotalForEveryLocality();
         }
-        
+
         pto.validate();
-        
+
         return pto;
     }
 
@@ -272,7 +291,7 @@ public class PopulationForwardingContext
                 set(locality, gender, nd, v / DAYS_PER_YEAR);
         }
     }
-    
+
     /*
      * Переместить детские ряды из контекста в структуру населения.
      * 
@@ -283,6 +302,9 @@ public class PopulationForwardingContext
      */
     public PopulationByLocality end(final PopulationByLocality p) throws Exception
     {
+        if (!began)
+            throw new IllegalArgumentException();
+        
         PopulationByLocality pto = p.clone();
 
         if (pto.hasRuralUrban())
@@ -290,15 +312,15 @@ public class PopulationForwardingContext
             end(pto, Locality.RURAL);
             end(pto, Locality.URBAN);
         }
-        
+
         if (pto.hasTotal())
         {
             end(pto, Locality.TOTAL);
         }
-        
+
         pto.recalcTotalForEveryLocality();
         pto.validate();
-        
+
         return pto;
     }
 
@@ -320,23 +342,95 @@ public class PopulationForwardingContext
 
     /* =============================================================================================== */
 
+    public double getTotalBirths(Locality locality, Gender gender) throws Exception
+    {
+        if (!began)
+            return 0;
+
+        if (hasRuralUrban && locality == Locality.TOTAL)
+        {
+            return getTotalBirths(Locality.RURAL, gender) + getTotalBirths(Locality.URBAN, gender); 
+        }
+
+        switch (gender)
+        {
+        case MALE:
+        case FEMALE:
+            Double v = totalBirths.get(key(locality, gender));
+            if (v == null)
+                v = 0.0;
+            return v;
+
+        case BOTH:
+            return getTotalBirths(locality, Gender.MALE) + getTotalBirths(locality, Gender.FEMALE);
+
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public void setTotalBirths(Locality locality, Gender gender, double births) throws Exception
+    {
+        switch (gender)
+        {
+        case MALE:
+        case FEMALE:
+            break;
+        default:
+            throw new IllegalArgumentException();
+        }
+        
+        totalBirths.put(key(locality, gender), births);
+    }
+
+    public void addTotalBirths(Locality locality, Gender gender, double births) throws Exception
+    {
+        switch (gender)
+        {
+        case MALE:
+        case FEMALE:
+            break;
+        default:
+            throw new IllegalArgumentException();
+        }
+        
+        Double v = totalBirths.get(key(locality, gender));
+        if (v == null)
+            v = 0.0;
+        totalBirths.put(key(locality, gender), v + births);
+    }
+
+    private String key(Locality locality, Gender gender) throws Exception
+    {
+        if (!began)
+            throw new IllegalArgumentException();
+        
+        if (hasRuralUrban && locality == Locality.TOTAL)
+            throw new IllegalArgumentException();
+        if (!hasRuralUrban && locality != Locality.TOTAL)
+            throw new IllegalArgumentException();
+        return locality.name() + "-" + gender.name();
+    }
+
+    /* =============================================================================================== */
+
     @Override
     public String toString()
     {
         try
         {
             StringBuilder sb = new StringBuilder();
-            
+
             double m = sumAllAges(Locality.TOTAL, Gender.MALE);
             double f = sumAllAges(Locality.TOTAL, Gender.FEMALE);
             sb_out(sb, "total.", m, f);
-            
+
             if (hasRuralUrban)
             {
                 m = sumAllAges(Locality.URBAN, Gender.MALE);
                 f = sumAllAges(Locality.URBAN, Gender.FEMALE);
                 sb_out(sb, "urban.", m, f);
-                
+
                 m = sumAllAges(Locality.RURAL, Gender.MALE);
                 f = sumAllAges(Locality.RURAL, Gender.FEMALE);
                 sb_out(sb, "rural.", m, f);
@@ -349,7 +443,7 @@ public class PopulationForwardingContext
             return "<exception while formating>";
         }
     }
-    
+
     private void sb_out(StringBuilder sb, String prefix, double m, double f)
     {
         if (sb.length() != 0)

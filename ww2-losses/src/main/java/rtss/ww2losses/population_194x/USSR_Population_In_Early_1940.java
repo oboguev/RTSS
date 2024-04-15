@@ -7,7 +7,6 @@ import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.population.synthetic.PopulationADH;
-import rtss.data.selectors.Area;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
@@ -54,6 +53,7 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
             /*
              * Перемасштабировать на начало 1939 года и границы 1946 года
              */
+            // ###
             /* АДХ, "Население Советского Союза", стр. 131 */
             final double males_1939 = 90_013_000;
             final double females_1939 = 98_194_000;
@@ -72,6 +72,7 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
             /*
              * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
              */
+            // ###
             /* АДХ, "Население Советского Союза", стр. 125-126 */
             final double males_1940 = 92_316_000;
             final double females_1940 = 100_283_000;

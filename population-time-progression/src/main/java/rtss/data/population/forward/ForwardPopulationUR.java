@@ -171,6 +171,8 @@ public class ForwardPopulationUR
             final CombinedMortalityTable mt,
             final int ndays) throws Exception
     {
+        fctx.addTotalBirths(locality, gender, total_births);
+
         /*
          * распределить рождения по числу дней
          */
