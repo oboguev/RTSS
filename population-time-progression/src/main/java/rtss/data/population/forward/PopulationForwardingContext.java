@@ -394,10 +394,11 @@ public class PopulationForwardingContext
             throw new IllegalArgumentException();
         }
         
-        Double v = totalBirths.get(key(locality, gender));
+        String key = key(locality, gender);
+        Double v = totalBirths.get(key);
         if (v == null)
             v = 0.0;
-        totalBirths.put(key(locality, gender), v + births);
+        totalBirths.put(key, v + births);
     }
 
     private String key(Locality locality, Gender gender) throws Exception
