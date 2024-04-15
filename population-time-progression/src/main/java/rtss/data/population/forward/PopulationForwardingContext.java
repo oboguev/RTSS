@@ -70,7 +70,7 @@ public class PopulationForwardingContext
     /*
      * Total number of births during forwarding
      */
-    private Map<String, Double> totalBirths;
+    private Map<String, Double> totalBirths = new HashMap<>();
 
     /* =============================================================================================== */
 
