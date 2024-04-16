@@ -95,6 +95,12 @@ public class InterpolateMortalityTable
         
         for (;;)
         {
+            if (Math.abs(cdr - cdr2) < 0.01)
+                return xmt2;
+
+            if (Math.abs(cdr - cdr1) < 0.01)
+                return xmt1;
+            
             if (!(cdr >= cdr1 && cdr <= cdr2))
                 Util.err("Таблица для данного уровня смертности не составляема");
             

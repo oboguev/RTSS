@@ -45,13 +45,9 @@ public class MortalityTable_1940 extends UtilBase_194x
         switch (ap.area)
         {
         case USSR:
+        case RSFSR:
             mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
             mt1.comment("ГКС-СССР-1938");
-            break;
-            
-        case RSFSR:
-            mt1 = CombinedMortalityTable.load("mortality_tables/RSFSR/1938-1939");
-            mt1.comment("ГКС-РСФСР-1938");
             break;
             
         default:

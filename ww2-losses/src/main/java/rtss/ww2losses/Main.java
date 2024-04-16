@@ -93,8 +93,14 @@ public class Main
         ap.survival_rate_194x_1959 = 0.62;
         birth_delay_months = 0;
         do_show(Area.USSR, ap, 4.5, USSR_1941_MID, USSR_1946_START, birth_delay_months);
-        do_show_forwarding();
-    }
+        do_show_forwarding(Area.USSR);
+        
+        Util.out("");
+        Util.out("======================= РСФСР =====================================");
+        Util.out("");
+
+        do_show_forwarding(Area.RSFSR);
+}
 
     private void do_main(Area area, int nyears, double survival_rate) throws Exception
     {
@@ -550,9 +556,9 @@ public class Main
         }
     }
 
-    private void do_show_forwarding() throws Exception
+    private void do_show_forwarding(Area area) throws Exception
     {
-        AreaParameters ap = AreaParameters.forArea(Area.USSR);
+        AreaParameters ap = AreaParameters.forArea(area);
         
         final Expected_Population_In_Early_1946 x46 = new Expected_Population_In_Early_1946(ap);
         final int MAX_AGE = PopulationByLocality.MAX_AGE;
@@ -560,7 +566,7 @@ public class Main
         double sum;
         
         CombinedMortalityTable mt_ussr_1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
-        mt_ussr_1938.comment("ГКС-" + ap.area.toString() + "-1938");
+        mt_ussr_1938.comment("ГКС-СССР-1938");
         
         CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
         mt_rsfsr_1940.comment("АДХ-РСФСР-1940");
