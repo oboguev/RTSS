@@ -53,11 +53,7 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
             /*
              * Перемасштабировать на начало 1939 года и границы 1946 года
              */
-            // ###
-            /* АДХ, "Население Советского Союза", стр. 131 */
-            final double males_1939 = 90_013_000;
-            final double females_1939 = 98_194_000;
-            p = RescalePopulation.scaleTotal(p, fctx, males_1939, females_1939);
+            p = RescalePopulation.scaleTotal(p, fctx, ap.ADH_MALES_1939, ap.ADH_FEMALES_1939);
             show_struct("начало 1939 в границах 1946", p, fctx);
 
             /*
@@ -72,11 +68,7 @@ public class USSR_Population_In_Early_1940 extends UtilBase_194x
             /*
              * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
              */
-            // ###
-            /* АДХ, "Население Советского Союза", стр. 125-126 */
-            final double males_1940 = 92_316_000;
-            final double females_1940 = 100_283_000;
-            PopulationByLocality pto = RescalePopulation.scaleTotal(p, fctx, males_1940, females_1940);
+            PopulationByLocality pto = RescalePopulation.scaleTotal(p, fctx, ap.ADH_MALES_1940, ap.ADH_FEMALES_1940);
             pto.validate();
             show_struct("начало 1940", pto, fctx);
 

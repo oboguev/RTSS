@@ -29,7 +29,13 @@ public class AreaParameters
      * прирост населения в 1946 году, с учётом миграции, 
      * если не задан, то полагается равным естественному приросту (CBR_1946 - CDR_1946) 
      */
-    public final /*final*/ Double growth_1946 = null;  
+    public final /*final*/ Double growth_1946 = null;
+    
+    /* население по АДХ на начало 1939 и начало 1940 гг. */
+    public double ADH_MALES_1939;
+    public double ADH_FEMALES_1939;
+    public double ADH_MALES_1940;
+    public double ADH_FEMALES_1940;
 
     /* среднее дожитие родившихся в 1941-1945 гг. до переписи 15 января 1959 года */
     public double survival_rate_194x_1959 = 0.68;
