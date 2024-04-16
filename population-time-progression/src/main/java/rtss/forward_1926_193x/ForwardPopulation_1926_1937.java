@@ -23,6 +23,8 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
 
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
+    
+    private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
     public ForwardPopulation_1926_1937() throws Exception
     {
@@ -86,7 +88,6 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
         /*
          * Продвижка населения для части года (с 17 декабря 1926 по 6 января 1937)
          */
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Date d1936 = df.parse("1936-12-17");
         Date d1937 = df.parse("1937-01-06");
         long ndays = Duration.between(d1936.toInstant(), d1937.toInstant()).toDays();
