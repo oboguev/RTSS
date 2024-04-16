@@ -1,6 +1,5 @@
 package rtss.data.selectors.holders;
 
-import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
 import rtss.data.selectors.Gender;
 

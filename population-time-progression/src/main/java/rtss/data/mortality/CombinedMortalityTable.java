@@ -3,12 +3,10 @@ package rtss.data.mortality;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-
-import com.fasterxml.uuid.Generators;
 
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.FastUUID;
 
 public class CombinedMortalityTable
 {
@@ -198,8 +196,7 @@ public class CombinedMortalityTable
     /*****************************************************************************************************/
 
     private String source;
-    // private final String tid = UUID.randomUUID().toString();
-    private final String tid = Generators.timeBasedGenerator().generate().toString(); 
+    private final String tid = FastUUID.getUniqueId();
 
     public String tableId()
     {

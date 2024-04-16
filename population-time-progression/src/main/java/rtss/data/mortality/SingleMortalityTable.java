@@ -2,8 +2,8 @@ package rtss.data.mortality;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
+import rtss.util.FastUUID;
 import rtss.util.Util;
 
 public class SingleMortalityTable
@@ -320,7 +320,7 @@ public class SingleMortalityTable
     /*****************************************************************************************************/
 
     private String source;
-    private final String tid = UUID.randomUUID().toString(); 
+    private final String tid = FastUUID.getUniqueId();
     
     public int hashCode()
     {
