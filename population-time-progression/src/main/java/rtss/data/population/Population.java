@@ -3,6 +3,8 @@ package rtss.data.population;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.DoubleArray;
+import rtss.data.ValueConstraint;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -14,9 +16,9 @@ public class Population
 {
     public static final int MAX_AGE = 100;
 
-    Map<Integer, Double> male = new HashMap<>();
-    Map<Integer, Double> female = new HashMap<>();
-    Map<Integer, Double> both = new HashMap<>();
+    DoubleArray male = newDoubleArray();
+    DoubleArray female = newDoubleArray();
+    DoubleArray both = newDoubleArray();
     Locality locality;
 
     double male_unknown = 0;
@@ -25,6 +27,11 @@ public class Population
     double female_total = 0;
     double both_unknown = 0;
     double both_total = 0;
+    
+    private DoubleArray newDoubleArray()
+    {
+        return new DoubleArray(MAX_AGE, ValueConstraint.NON_NEGATIVE);
+    }
 
     static public Population newPopulation()
     {
@@ -73,11 +80,11 @@ public class Population
         p.both_total = both_total;
 
         if (male != null)
-            p.male = new HashMap<>(male);
+            p.male = new DoubleArray(male);
         if (female != null)
-            p.female = new HashMap<>(female);
+            p.female = new DoubleArray(female);
         if (both != null)
-            p.both = new HashMap<>(both);
+            p.both = new DoubleArray(both);
 
         return p;
     }
@@ -106,7 +113,7 @@ public class Population
 
     public double get(Gender gender, int age) throws Exception
     {
-        Map<Integer, Double> m = forGender(gender);
+        DoubleArray m = forGender(gender);
         if (!m.containsKey(age))
             throw new Exception("Missing data for age " + age);
         return m.get(age);
@@ -114,7 +121,7 @@ public class Population
 
     public double sum(Gender gender, int age1, int age2) throws Exception
     {
-        Map<Integer, Double> m = forGender(gender);
+        DoubleArray m = forGender(gender);
 
         double sum = 0;
 
@@ -130,14 +137,14 @@ public class Population
 
     public void set(Gender gender, int age, double value) throws Exception
     {
-        Map<Integer, Double> m = forGender(gender);
+        DoubleArray m = forGender(gender);
         checkNonNegative(value);
         m.put(age, value);
     }
 
     public void add(Gender gender, int age, double value) throws Exception
     {
-        Map<Integer, Double> m = forGender(gender);
+        DoubleArray m = forGender(gender);
 
         if (m.containsKey(age))
         {
@@ -153,7 +160,7 @@ public class Population
 
     public void sub(Gender gender, int age, double value) throws Exception
     {
-        Map<Integer, Double> m = forGender(gender);
+        DoubleArray m = forGender(gender);
 
         if (m.containsKey(age))
         {
@@ -174,7 +181,7 @@ public class Population
             throw new Exception("Negative population");
     }
 
-    private Map<Integer, Double> forGender(Gender gender)
+    private DoubleArray forGender(Gender gender)
     {
         switch (gender)
         {
@@ -456,7 +463,7 @@ public class Population
 
     public void makeBoth() throws Exception
     {
-        both = new HashMap<>();
+        both = newDoubleArray();
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
@@ -500,18 +507,21 @@ public class Population
         makeBoth();
         validate();
     }
-
+    
     public double[] toArray(Gender gender) throws Exception
     {
         int maxage = -1;
-        Map<Integer, Double> m = forGender(gender);
-        for (int age : m.keySet())
+        DoubleArray m = forGender(gender);
+        Double[] x = m.get();
+        
+        for (int age = 0; age < x.length; age++)
         {
-            maxage = Math.max(age, maxage);
+            if (x[age] != null)
+                maxage = Math.max(age, maxage);
         }
-
+        
         double d[] = new double[maxage + 1];
-
+        
         for (int age = 0; age <= maxage; age++)
         {
             Double v = m.get(age);
@@ -525,7 +535,7 @@ public class Population
 
     public void fromArray(Gender gender, double[] d) throws Exception
     {
-        Map<Integer, Double> m = new HashMap<>();
+        DoubleArray m = newDoubleArray();
 
         for (int age = 0; age <= d.length - 1; age++)
             m.put(age, d[age]);
