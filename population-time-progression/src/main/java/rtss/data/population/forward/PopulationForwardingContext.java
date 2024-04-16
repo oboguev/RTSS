@@ -3,11 +3,13 @@ package rtss.data.population.forward;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.ValueConstraint;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.data.selectors.holders.LocalityGenderToDoubleArray;
 import rtss.util.Util;
 
 /**
@@ -65,7 +67,7 @@ public class PopulationForwardingContext
 
     private boolean began = false;
     private boolean hasRuralUrban;
-    private Map<String, Double> m = new HashMap<>();
+    private LocalityGenderToDoubleArray m = new LocalityGenderToDoubleArray(MAX_DAY,  ValueConstraint.NON_NEGATIVE);
 
     /*
      * Total number of births during forwarding
@@ -79,7 +81,7 @@ public class PopulationForwardingContext
         PopulationForwardingContext cx = new PopulationForwardingContext();
         cx.began = began;
         cx.hasRuralUrban = hasRuralUrban;
-        cx.m = new HashMap<String, Double>(m);
+        cx.m = new LocalityGenderToDoubleArray(m);
         cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
         return cx;
@@ -87,39 +89,39 @@ public class PopulationForwardingContext
 
     public double get(Locality locality, Gender gender, int day) throws Exception
     {
-        String key = key(locality, gender, day);
-        Double d = m.get(key);
+        checkAccess(locality, gender, day);
+        Double d = m.get(locality, gender, day);
         return d != null ? d : 0;
     }
 
     public void set(Locality locality, Gender gender, int day, double v) throws Exception
     {
-        String key = key(locality, gender, day);
+        checkAccess(locality, gender, day);
         checkNonNegative(v);
-        m.put(key, v);
+        m.put(locality, gender, day, v);
     }
 
     public double add(Locality locality, Gender gender, int day, double v) throws Exception
     {
-        String key = key(locality, gender, day);
-        Double d = m.get(key);
+        checkAccess(locality, gender, day);
+        Double d = m.get(locality, gender, day);
         if (d == null)
             d = 0.0;
         v += d;
         checkNonNegative(v);
-        m.put(key, v);
+        m.put(locality, gender, day, v);
         return v;
     }
 
     public double sub(Locality locality, Gender gender, int day, double v) throws Exception
     {
-        String key = key(locality, gender, day);
-        Double d = m.get(key);
+        checkAccess(locality, gender, day);
+        Double d = m.get(locality, gender, day);
         if (d == null)
             d = 0.0;
         v = d - v;
         checkNonNegative(v);
-        m.put(key, v);
+        m.put(locality, gender, day, v);
         return v;
     }
 
@@ -158,7 +160,7 @@ public class PopulationForwardingContext
         return sumAges(locality, gender, 0, MAX_YEAR);
     }
 
-    private String key(Locality locality, Gender gender, int day) throws Exception
+    private void checkAccess(Locality locality, Gender gender, int day) throws Exception
     {
         if (!began)
             throw new IllegalArgumentException();
@@ -169,7 +171,6 @@ public class PopulationForwardingContext
             throw new IllegalArgumentException();
         if (day < 0 || day > MAX_DAY || gender == Gender.BOTH)
             throw new IllegalArgumentException();
-        return locality.name() + "-" + gender.name() + "-" + day;
     }
 
     private void checkNonNegative(double v) throws Exception

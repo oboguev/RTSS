@@ -26,6 +26,11 @@ public class DoubleArray
         this.values = a.values.clone();
     }
     
+    public DoubleArray clone()
+    {
+        return new DoubleArray(this);
+    }
+    
     public Double[] get() throws Exception
     {
         return values;

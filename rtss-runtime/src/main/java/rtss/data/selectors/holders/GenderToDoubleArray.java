@@ -1,5 +1,6 @@
 package rtss.data.selectors.holders;
 
+import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
 import rtss.data.selectors.Gender;
 
@@ -29,6 +30,20 @@ public class GenderToDoubleArray
         this.both = new Double[maxage + 1];
     }
 
+    public GenderToDoubleArray(GenderToDoubleArray a)
+    {
+        this.maxage = a.maxage;
+        this.vc = a.vc;
+        this.male = a.male.clone();
+        this.female = a.female.clone();
+        this.both = a.both.clone();
+    }
+    
+    public GenderToDoubleArray clone()
+    {
+        return new GenderToDoubleArray(this);
+    }
+    
     public Double[] get(Gender gender) throws Exception
     {
         switch (gender)
