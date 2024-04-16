@@ -126,6 +126,7 @@ public class RSFSR_1940 extends CombinedMortalityTable
             qx[age] = m_fraction * mi_m.qx + f_fraction * mi_f.qx;
         }
         setTable(Locality.TOTAL, Gender.BOTH, SingleMortalityTable.from_qx("computed", qx));
+        comment("АДХ-РСФСР-1940");
 
         // display(Locality.TOTAL, Gender.MALE);
         
