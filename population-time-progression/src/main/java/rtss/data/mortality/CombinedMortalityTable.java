@@ -91,8 +91,6 @@ public class CombinedMortalityTable
 
     /*
      * Create mortality table interpolating between @mt1 and @mt2.
-     * We only interpolate qx and px.
-     * Other fields are left invalid.
      * @weight ranges from 0 to 1:
      *       0 selects @mt1
      *       1 selects @mt2
@@ -143,6 +141,64 @@ public class CombinedMortalityTable
         SingleMortalityTable smt2 = mt2.m.get(key);
         if (smt1 != null && smt2 != null)
             m.put(key, SingleMortalityTable.interpolate(smt1, smt2, weight));
+    }
+
+    /*
+     * Create mortality table interpolating between @mt1 and @mt2 in age range [0 ... @toAge].
+     * Above @toAge, use @mt1.
+     * 
+     * @weight ranges from 0 to 1:
+     *       0 selects @mt1
+     *       1 selects @mt2
+     *  ]0..1[ selects the value interpolated as (mt1 * (1 - weight) * mt1 + mt2 * weight)   
+     */
+    public static CombinedMortalityTable interpolate(CombinedMortalityTable mt1, CombinedMortalityTable mt2, int toAge, double weight)
+            throws Exception
+    {
+        CombinedMortalityTable cmt = new CombinedMortalityTable();
+
+        double pct1 = 100 * (1 - weight);
+        double pct2 = 100 * weight;
+
+        cmt.source = String.format("interpolated between %.1f%% [%s] and %.1f%% [%s] for ages 0-%d",
+                                   pct1, mt1.source,
+                                   pct2, mt2.source,
+                                   toAge);
+
+        if (mt1.comment() != null && mt2.comment() != null)
+        {
+            cmt.comment = String.format("interpolated between %.1f%% [%s] and %.1f%% [%s] for ages 0-%d",
+                                        pct1, mt1.comment(),
+                                        pct2, mt2.comment(),
+                                        toAge);
+        }
+        else
+        {
+            cmt.comment = "interpolated";
+        }
+
+        cmt.interpolate(Gender.BOTH, mt1, mt2, toAge, weight);
+        cmt.interpolate(Gender.MALE, mt1, mt2, toAge, weight);
+        cmt.interpolate(Gender.FEMALE, mt1, mt2, toAge, weight);
+
+        return cmt;
+    }
+
+    private void interpolate(Gender gender, CombinedMortalityTable mt1, CombinedMortalityTable mt2, int toAge, double weight) throws Exception
+    {
+        interpolate(Locality.TOTAL, gender, mt1, mt2, toAge, weight);
+        interpolate(Locality.RURAL, gender, mt1, mt2, toAge, weight);
+        interpolate(Locality.URBAN, gender, mt1, mt2, toAge, weight);
+    }
+
+    private void interpolate(Locality locality, Gender gender, CombinedMortalityTable mt1, CombinedMortalityTable mt2,
+            int toAge, double weight) throws Exception
+    {
+        String key = key(locality, gender);
+        SingleMortalityTable smt1 = mt1.m.get(key);
+        SingleMortalityTable smt2 = mt2.m.get(key);
+        if (smt1 != null && smt2 != null)
+            m.put(key, SingleMortalityTable.interpolate(smt1, smt2, toAge, weight));
     }
 
     /*****************************************************************************************************/

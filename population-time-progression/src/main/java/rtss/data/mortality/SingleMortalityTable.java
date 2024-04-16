@@ -173,6 +173,28 @@ public class SingleMortalityTable
     }
     
     /*****************************************************************************************************/
+
+    static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, int toAge, double weight) throws Exception
+    {
+        if (weight < 0 || weight > 1)
+            throw new Exception("Incorrect interpolation weight");
+        
+        double w1 = 1 - weight;
+        double w2 = weight;
+        
+        double[] qx1 = mt1.qx();
+        double[] qx2 = mt2.qx();
+        
+        double[] qx = Util.dup(qx1);
+        for (int age = 0; age <= toAge; age++)
+            qx[age] = w1 * qx1[age] + w2 * qx2[age];
+
+        String source = String.format("interpolated between %s [%f] and %s [%f] for ages 0-%d", mt1.source, w1, mt2.source, w2, toAge);
+
+        return from_qx(source, qx);
+    }
+
+    /*****************************************************************************************************/
     
     public double[] qx() throws Exception
     {
