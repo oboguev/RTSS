@@ -20,10 +20,16 @@ public class EvalMortalityRate
 
     public static double eval(
             final CombinedMortalityTable mt, 
-            final PopulationByLocality p, 
-            final PopulationForwardingContext fctx, 
+            PopulationByLocality p, 
+            PopulationForwardingContext fctx, 
             double cbr) throws Exception
     {
+        if (fctx == null)
+        {
+            fctx = new PopulationForwardingContext();
+            p = fctx.begin(p);
+        }
+        
         double total_pop = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         if (fctx != null)
             total_pop += fctx.sumAllAges(Locality.TOTAL, Gender.BOTH);
