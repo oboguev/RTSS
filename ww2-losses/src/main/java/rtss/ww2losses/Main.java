@@ -559,7 +559,11 @@ public class Main
         double sum;
         
         CombinedMortalityTable mt_ussr_1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
+        mt_ussr_1938.comment("ГКС-" + ap.area.toString() + "-1938");
+        
         CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
+        mt_rsfsr_1940.comment("АДХ-РСФСР-1940");
+        
         PopulationByLocality p1941 = new USSR_Population_In_Middle_1941(ap).evaluate();
         
         Util.out("");
@@ -571,6 +575,7 @@ public class Main
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице АДХ-РСФСР-1940: %.1f промилле", cdr2));
         
         CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940(ap).evaluate();
+        Util.out(String.format("комбинированная таблица: %s", mt1940.comment())); 
         double cdr3 = EvalMortalityRate.eval(mt1940, p1941, ap.CBR_1940);
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и комбинированной таблице: %.1f промилле", cdr3));
         

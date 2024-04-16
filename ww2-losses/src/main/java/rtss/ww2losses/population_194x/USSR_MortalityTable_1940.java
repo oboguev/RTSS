@@ -64,7 +64,8 @@ public class USSR_MortalityTable_1940 extends UtilBase_194x
 
     public CombinedMortalityTable evaluate() throws Exception
     {
-        return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);
+        // return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);
+        return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4);
     }
 
     public void show_survival_rates_1941_1946() throws Exception
