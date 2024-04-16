@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.uuid.Generators;
+
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 
@@ -196,7 +198,8 @@ public class CombinedMortalityTable
     /*****************************************************************************************************/
 
     private String source;
-    private final String tid = UUID.randomUUID().toString();
+    // private final String tid = UUID.randomUUID().toString();
+    private final String tid = Generators.timeBasedGenerator().generate().toString(); 
 
     public String tableId()
     {

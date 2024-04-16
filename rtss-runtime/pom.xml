@@ -74,6 +74,13 @@
 			<version>0.17.0</version>
 		</dependency>
 
+		<!-- UUID generator -->
+		<dependency>
+			<groupId>com.fasterxml.uuid</groupId>
+			<artifactId>java-uuid-generator</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+
 	</dependencies>
 
 </project>
