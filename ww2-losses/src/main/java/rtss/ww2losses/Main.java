@@ -3,6 +3,7 @@ package rtss.ww2losses;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.USSR_Expected_Population_In_Early_1946;
 import rtss.ww2losses.population_194x.USSR_MortalityTable_1940;
+import rtss.ww2losses.population_194x.USSR_Population_In_Early_1940;
 import rtss.ww2losses.population_194x.USSR_Population_In_Middle_1941;
 
 import java.math.BigDecimal;
@@ -564,19 +565,31 @@ public class Main
         CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
         mt_rsfsr_1940.comment("АДХ-РСФСР-1940");
         
+        PopulationByLocality p1940 = new USSR_Population_In_Early_1940(ap).evaluate();
         PopulationByLocality p1941 = new USSR_Population_In_Middle_1941(ap).evaluate();
         
         Util.out("");
         
-        double cdr1 = EvalMortalityRate.eval(mt_ussr_1938, p1941, ap.CBR_1940);
-        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице ГКС-СССР-1938: %.1f промилле", cdr1));
+        double cdr1 = EvalMortalityRate.eval(mt_ussr_1938, p1940, ap.CBR_1940);
+        Util.out(String.format("Смертность при возрастной структуре населения начала 1940 года и таблице ГКС-СССР-1938: %.1f промилле", cdr1));
         
-        double cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1941, ap.CBR_1940);
-        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице АДХ-РСФСР-1940: %.1f промилле", cdr2));
+        double cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1940, ap.CBR_1940);
+        Util.out(String.format("Смертность при возрастной структуре населения начала 1940 года и таблице АДХ-РСФСР-1940: %.1f промилле", cdr2));
         
         CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940(ap).evaluate();
         Util.out(String.format("комбинированная таблица: %s", mt1940.comment())); 
-        double cdr3 = EvalMortalityRate.eval(mt1940, p1941, ap.CBR_1940);
+        double cdr3 = EvalMortalityRate.eval(mt1940, p1940, ap.CBR_1940);
+        Util.out(String.format("Смертность при возрастной структуре населения начала 1940 года и комбинированной таблице: %.1f промилле", cdr3));
+        
+        Util.out("");
+
+        cdr1 = EvalMortalityRate.eval(mt_ussr_1938, p1941, ap.CBR_1940);
+        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице ГКС-СССР-1938: %.1f промилле", cdr1));
+        
+        cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1941, ap.CBR_1940);
+        Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и таблице АДХ-РСФСР-1940: %.1f промилле", cdr2));
+        
+        cdr3 = EvalMortalityRate.eval(mt1940, p1941, ap.CBR_1940);
         Util.out(String.format("Смертность при возрастной структуре населения середины 1941 года и комбинированной таблице: %.1f промилле", cdr3));
         
         Util.out("");
