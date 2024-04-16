@@ -10,13 +10,13 @@ import rtss.data.selectors.Area;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
- * Вычислить возрастную структуру населения СССР на середину 1941 года
+ * Вычислить возрастную структуру населения СССР или РСФСР на середину 1941 года
  */
-public class USSR_Population_In_Middle_1941 extends UtilBase_194x
+public class Population_In_Middle_1941 extends UtilBase_194x
 {
     private AreaParameters ap;
     
-    public USSR_Population_In_Middle_1941(AreaParameters ap)
+    public Population_In_Middle_1941(AreaParameters ap)
     {
         this.ap = ap;
     }
@@ -34,17 +34,17 @@ public class USSR_Population_In_Middle_1941 extends UtilBase_194x
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
         ForwardPopulationT fw = new ForwardPopulationT();
-        CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940(ap).evaluate();
+        CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
         PopulationByLocality p;
         
         if (useADH)
         {
-            p = PopulationADH.getPopulationByLocality(Area.USSR, 1941);
+            p = PopulationADH.getPopulationByLocality(ap.area, 1941);
             p = fctx.begin(p);
         }
         else
         {
-            p = new USSR_Population_In_Early_1940(ap).evaluate(fctx);
+            p = new Population_In_Early_1940(ap).evaluate(fctx);
             
             /*
              * Продвижка с начала 1940 до начала 1941 года
@@ -63,18 +63,22 @@ public class USSR_Population_In_Middle_1941 extends UtilBase_194x
         /*
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
          */
-        final double USSR_1941_START = 195_392_000; // АДХ, "Население Советского Союза", стр. 77, 118, 126
-        final double USSR_1941_MID = forward_6mo(USSR_1941_START, AreaParameters.forArea(Area.USSR).growth_1940());
+        if (ap.area == Area.USSR)
+        {
+            final double USSR_1941_START = 195_392_000; // АДХ, "Население Советского Союза", стр. 77, 118, 126
+            final double USSR_1941_MID = forward_6mo(USSR_1941_START, AreaParameters.forArea(Area.USSR).growth_1940());
 
-        /* АДХ, "Население Советского Союза", стр. 56, 74 */
-        final double males_jun21 = 94_338_000; 
-        final double females_jun21 = 102_378_000;
-        final double total_jun21 = males_jun21 + females_jun21;
-        
-        final double females_mid1941 = females_jun21 * USSR_1941_MID / total_jun21; 
-        final double males_mid1941 = males_jun21 * USSR_1941_MID / total_jun21; 
-        
-        p = RescalePopulation.scaleTotal(p, fctx, males_mid1941, females_mid1941);
+            /* АДХ, "Население Советского Союза", стр. 56, 74 */
+            final double males_jun21 = 94_338_000; 
+            final double females_jun21 = 102_378_000;
+            final double total_jun21 = males_jun21 + females_jun21;
+            
+            final double females_mid1941 = females_jun21 * USSR_1941_MID / total_jun21; 
+            final double males_mid1941 = males_jun21 * USSR_1941_MID / total_jun21; 
+            
+            p = RescalePopulation.scaleTotal(p, fctx, males_mid1941, females_mid1941);
+        }
+
         p.validate();
 
         return p;

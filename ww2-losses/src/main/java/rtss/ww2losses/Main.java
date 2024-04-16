@@ -1,10 +1,10 @@
 package rtss.ww2losses;
 
 import rtss.ww2losses.params.AreaParameters;
-import rtss.ww2losses.population_194x.USSR_Expected_Population_In_Early_1946;
-import rtss.ww2losses.population_194x.USSR_MortalityTable_1940;
-import rtss.ww2losses.population_194x.USSR_Population_In_Early_1940;
-import rtss.ww2losses.population_194x.USSR_Population_In_Middle_1941;
+import rtss.ww2losses.population_194x.Expected_Population_In_Early_1946;
+import rtss.ww2losses.population_194x.MortalityTable_1940;
+import rtss.ww2losses.population_194x.Population_In_Early_1940;
+import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 
 import java.math.BigDecimal;
 
@@ -554,7 +554,7 @@ public class Main
     {
         AreaParameters ap = AreaParameters.forArea(Area.USSR);
         
-        final USSR_Expected_Population_In_Early_1946 x46 = new USSR_Expected_Population_In_Early_1946(ap);
+        final Expected_Population_In_Early_1946 x46 = new Expected_Population_In_Early_1946(ap);
         final int MAX_AGE = PopulationByLocality.MAX_AGE;
         PopulationByLocality p;
         double sum;
@@ -565,8 +565,8 @@ public class Main
         CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
         mt_rsfsr_1940.comment("АДХ-РСФСР-1940");
         
-        PopulationByLocality p1940 = new USSR_Population_In_Early_1940(ap).evaluate();
-        PopulationByLocality p1941 = new USSR_Population_In_Middle_1941(ap).evaluate();
+        PopulationByLocality p1940 = new Population_In_Early_1940(ap).evaluate();
+        PopulationByLocality p1941 = new Population_In_Middle_1941(ap).evaluate();
         
         Util.out("");
         
@@ -576,7 +576,7 @@ public class Main
         double cdr2 = EvalMortalityRate.eval(mt_rsfsr_1940, p1940, ap.CBR_1940);
         Util.out(String.format("Смертность при возрастной структуре населения начала 1940 года и таблице АДХ-РСФСР-1940: %.1f промилле", cdr2));
         
-        CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940(ap).evaluate();
+        CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
         Util.out(String.format("комбинированная таблица: %s", mt1940.comment())); 
         double cdr3 = EvalMortalityRate.eval(mt1940, p1940, ap.CBR_1940);
         Util.out(String.format("Смертность при возрастной структуре населения начала 1940 года и комбинированной таблице: %.1f промилле", cdr3));

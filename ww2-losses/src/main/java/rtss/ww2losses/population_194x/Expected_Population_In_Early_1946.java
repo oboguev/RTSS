@@ -6,22 +6,23 @@ import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
- * Вычислить возрастную структуру и численность гипотетического населения СССР на начало 1946 года
+ * Вычислить возрастную структуру и численность гипотетического населения СССР или РСФСР на начало 1946 года
  * в том случае, если бы рождаемость и смертность в 1941-1945 гг. оставались такими же, как в 1940 году 
  */
-public class USSR_Expected_Population_In_Early_1946 extends UtilBase_194x
+public class Expected_Population_In_Early_1946 extends UtilBase_194x
 {
     private CombinedMortalityTable mt_ussr_1938 = new CombinedMortalityTable("mortality_tables/USSR/1938-1939");
     private CombinedMortalityTable mt_rsfsr_1940 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
     private CombinedMortalityTable mt_ussr_1958 = new CombinedMortalityTable("mortality_tables/USSR/1958-1959");
     private AreaParameters ap;
     
-    public USSR_Expected_Population_In_Early_1946(AreaParameters ap) throws Exception
+    public Expected_Population_In_Early_1946(AreaParameters ap) throws Exception
     {
         this.ap = ap;
     }
@@ -55,7 +56,7 @@ public class USSR_Expected_Population_In_Early_1946 extends UtilBase_194x
     public PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr, boolean interpolate_mt_to1958, MutableDouble births) throws Exception
     {
         PopulationForwardingContext fctx = new PopulationForwardingContext();
-        PopulationByLocality p = new USSR_Population_In_Middle_1941(ap).evaluate(fctx);
+        PopulationByLocality p = new Population_In_Middle_1941(ap).evaluate(fctx);
         
         /* продвижка до начала 1942 года */
         p = forward(p, fctx, mt, cbr, 0.5);

@@ -12,7 +12,7 @@ import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
- * Вычислить таблицу смертности населения СССР для 1940 года.
+ * Вычислить таблицу смертности населения СССР или РСФСР для 1940 года.
  * 
  * К сожалению, АДХ не опубликовали вычисленные и использованные ими возрастные показатели смертности, в т.ч. для 1940 года.
  * Насколько можно судить, для взрослых возрастов они полагали их близкими по величине к госкомстатовскому расчёту для 1938-1939
@@ -32,13 +32,13 @@ import rtss.ww2losses.params.AreaParameters;
  * вычисленных АДХ для 1940 года даёт итоговую таблицу линейно составленную на 88.7% из ГКС-СССР-1938 и на 11.3% из
  * АДХ-РСФСР-1940.
  */
-public class USSR_MortalityTable_1940 extends UtilBase_194x
+public class MortalityTable_1940 extends UtilBase_194x
 {
     private AreaParameters ap;
     private CombinedMortalityTable mt1;
     private CombinedMortalityTable mt2;
     
-    public USSR_MortalityTable_1940(AreaParameters ap) throws Exception
+    public MortalityTable_1940(AreaParameters ap) throws Exception
     {
         this.ap = ap;
         
@@ -65,7 +65,7 @@ public class USSR_MortalityTable_1940 extends UtilBase_194x
     public CombinedMortalityTable evaluate() throws Exception
     {
         // return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);
-        return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4);
+        return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4);
     }
 
     public void show_survival_rates_1941_1946() throws Exception

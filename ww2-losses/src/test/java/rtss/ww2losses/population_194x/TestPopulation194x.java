@@ -16,13 +16,13 @@ public class TestPopulation194x
             
             AreaParameters ap = AreaParameters.forArea(Area.USSR);
 
-            p = new USSR_Population_In_Early_1940(ap).evaluate();
+            p = new Population_In_Early_1940(ap).evaluate();
             
-            CombinedMortalityTable mt1940 = new USSR_MortalityTable_1940(ap).evaluate();
+            CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
             
-            p = new USSR_Population_In_Middle_1941(ap).evaluate();
+            p = new Population_In_Middle_1941(ap).evaluate();
             
-            new USSR_MortalityTable_1940(ap).show_survival_rates_1941_1946(); 
+            new MortalityTable_1940(ap).show_survival_rates_1941_1946(); 
             
             Util.unused(p);
             Util.unused(mt1940);

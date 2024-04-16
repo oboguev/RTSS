@@ -10,14 +10,14 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
- * Вычислить возрастную структуру населения СССР на начало 1940 года
+ * Вычислить возрастную структуру населения СССР или РСФСР на начало 1940 года
  */
-public class USSR_Population_In_Early_1940 extends UtilBase_194x
+public class Population_In_Early_1940 extends UtilBase_194x
 {
     private CombinedMortalityTable cmt;
     private AreaParameters ap;
 
-    public USSR_Population_In_Early_1940(AreaParameters ap) throws Exception
+    public Population_In_Early_1940(AreaParameters ap) throws Exception
     {
         this.ap = ap;
     }
