@@ -59,7 +59,7 @@ public class PopulationForwardingContext
 {
     public final int DAYS_PER_YEAR = 365;
 
-    public final int NYEARS = 4;
+    public final int NYEARS = 5;  /* years 0-4 */
     public final int MAX_YEAR = NYEARS - 1;
 
     public final int NDAYS = NYEARS * DAYS_PER_YEAR;
