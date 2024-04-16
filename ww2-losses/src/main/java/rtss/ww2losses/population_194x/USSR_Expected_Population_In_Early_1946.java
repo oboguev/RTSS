@@ -1,9 +1,13 @@
 package rtss.ww2losses.population_194x;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
@@ -30,9 +34,9 @@ public class USSR_Expected_Population_In_Early_1946 extends UtilBase_194x
      * При значении CBR_1940 (36.1) число рождающихся добавляется в соответствии с уровнем рождаемости 1940 г.
      * При значении 0 рождения не добавляются. 
      */
-    public PopulationByLocality with_mt_USSR_1938(double cbr, boolean interpolate_mt_to1958) throws Exception
+    public PopulationByLocality with_mt_USSR_1938(double cbr, boolean interpolate_mt_to1958, MutableDouble births) throws Exception
     {
-        return with_mt(mt_ussr_1938, cbr, interpolate_mt_to1958);
+        return with_mt(mt_ussr_1938, cbr, interpolate_mt_to1958, births);
     }
 
     /*
@@ -43,12 +47,12 @@ public class USSR_Expected_Population_In_Early_1946 extends UtilBase_194x
      * При значении CBR_1940 (36.1) число рождающихся добавляется в соответствии с уровнем рождаемости 1940 г.
      * При значении 0 рождения не добавляются. 
      */
-    public PopulationByLocality with_mt_RSFSR_1940(double cbr, boolean interpolate_mt_to1958) throws Exception
+    public PopulationByLocality with_mt_RSFSR_1940(double cbr, boolean interpolate_mt_to1958, MutableDouble births) throws Exception
     {
-        return with_mt(mt_rsfsr_1940, cbr, interpolate_mt_to1958);
+        return with_mt(mt_rsfsr_1940, cbr, interpolate_mt_to1958, births);
     }
 
-    public PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr, boolean interpolate_mt_to1958) throws Exception
+    public PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr, boolean interpolate_mt_to1958, MutableDouble births) throws Exception
     {
         PopulationForwardingContext fctx = new PopulationForwardingContext();
         PopulationByLocality p = new USSR_Population_In_Middle_1941(ap).evaluate(fctx);
@@ -71,7 +75,12 @@ public class USSR_Expected_Population_In_Early_1946 extends UtilBase_194x
         xmt = tableForYear(mt, 1945, interpolate_mt_to1958);
         p = forward(p, fctx, xmt, cbr, 1.0);
         
-        return fctx.end(p);
+        p = fctx.end(p);
+        
+        if (births != null)
+            births.setValue(fctx.getTotalBirths(Locality.TOTAL, Gender.BOTH));
+        
+        return p;
     }
 
     private PopulationByLocality forward(PopulationByLocality p, PopulationForwardingContext fctx, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
