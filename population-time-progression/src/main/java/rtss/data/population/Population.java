@@ -33,12 +33,13 @@ public class Population
         return new DoubleArray(MAX_AGE, ValueConstraint.NON_NEGATIVE);
     }
 
-    static public Population newPopulation()
+    static public Population newPopulation(Locality locality)
     {
         Population p = new Population();
+        p.locality = locality;
         return p;
     }
-    
+
     private Population()
     {
     }

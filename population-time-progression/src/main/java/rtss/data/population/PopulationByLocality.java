@@ -34,19 +34,27 @@ public class PopulationByLocality
         validate();
     }
 
+    public PopulationByLocality(Population urban, Population rural) throws Exception
+    {
+        this.urban = urban; 
+        this.rural = rural;
+        recalcTotalLocalityFromUrbanRural();
+        validate();
+    }
+
     static public PopulationByLocality newPopulationByLocality()
     {
         PopulationByLocality p = new PopulationByLocality();
-        p.rural = Population.newPopulation();
-        p.urban = Population.newPopulation();
-        p.total = Population.newPopulation();
+        p.rural = Population.newPopulation(Locality.RURAL);
+        p.urban = Population.newPopulation(Locality.URBAN);
+        p.total = Population.newPopulation(Locality.TOTAL);
         return p;
     }
 
     static public PopulationByLocality newPopulationTotalOnly()
     {
         PopulationByLocality p = new PopulationByLocality();
-        p.total = Population.newPopulation();
+        p.total = Population.newPopulation(Locality.TOTAL);
         return p;
     }
 
@@ -203,18 +211,29 @@ public class PopulationByLocality
 
     public void validate() throws Exception
     {
-        if (rural != null)
+        if (rural != null) 
+        {
+            if (rural.locality != Locality.RURAL)
+                mismatch();
             rural.validate();
+        }
 
         if (urban != null)
+        {
+            if (urban.locality != Locality.URBAN)
+                mismatch();
             urban.validate();
+        }
         
         if (total != null)
+        {
+            if (total.locality != Locality.TOTAL)
+                mismatch();
             total.validate();
+        }
         
         if (rural != null && urban != null)
         {
-
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 if (Util.differ(rural.male(age) + urban.male(age), total.male(age)))
@@ -231,7 +250,7 @@ public class PopulationByLocality
 
     static private Population calcTotal(Population rural, Population urban) throws Exception
     {
-        Population total = Population.newPopulation();
+        Population total = Population.newPopulation(Locality.TOTAL);
 
         for (int age = 0; age <= MAX_AGE; age++)
         {

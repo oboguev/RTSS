@@ -87,7 +87,7 @@ public class RescalePopulation
         return new PopulationByLocality(total, urban, rural);
     }
     
-    private static Population scaleAll(Population p, double scale) throws Exception
+    static Population scaleAll(Population p, double scale) throws Exception
     {
         if (p == null)
             return null;
@@ -102,5 +102,14 @@ public class RescalePopulation
         double f_unknown = scale * p.getUnknown(Gender.FEMALE);
 
         return new Population(p.locality, m, m_unknown, f, f_unknown);
+    }
+
+    static Population scaleTo(Population p, double new_amount) throws Exception
+    {
+        if (p == null)
+            return null;
+        
+        double old_amount = p.sum(Gender.BOTH, 0, MAX_AGE);
+        return scaleAll(p, new_amount / old_amount);
     }
 }
