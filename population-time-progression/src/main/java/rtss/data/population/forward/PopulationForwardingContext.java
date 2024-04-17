@@ -344,6 +344,11 @@ public class PopulationForwardingContext
 
     /* =============================================================================================== */
 
+    public void clearTotalBirths()
+    {
+        totalBirths.clear();
+    }
+    
     public double getTotalBirths(Locality locality, Gender gender) throws Exception
     {
         if (!began)

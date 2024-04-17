@@ -57,6 +57,8 @@ public class Expected_Population_In_Early_1946 extends UtilBase_194x
         PopulationForwardingContext fctx = new PopulationForwardingContext();
         PopulationByLocality p = new Population_In_Middle_1941(ap).evaluate(fctx);
         
+        fctx.clearTotalBirths();
+        
         /* продвижка до начала 1942 года */
         p = forward(p, fctx, mt, cbr, 0.5);
         

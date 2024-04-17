@@ -7,7 +7,6 @@ import rtss.data.population.RescalePopulation;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
-import rtss.util.Util;
 
 /*
  * При обработке переписи 1939 года были совершены приписки.

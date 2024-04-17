@@ -97,7 +97,6 @@ public class Main
         
         Util.out("");
         Util.out("======================= РСФСР =====================================");
-        Util.out("");
 
         do_show_forwarding(Area.RSFSR);
 }
@@ -611,27 +610,27 @@ public class Main
 
         p = x46.with_mt_USSR_1938(0, false, null);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица ГКС-СССР-1938, без рождений, без антибиотиков: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица ГКС-СССР-1938, без рождений, без антибиотиков: %s", f2k(sum)));
         
         p = x46.with_mt_USSR_1938(ap.CBR_1940, false, births);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями, без антибиотиков: %s тыс. чел. (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
+        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями, без антибиотиков: %s (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
 
         p = x46.with_mt_RSFSR_1940(0, false, null);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений, без антибиотиков: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений, без антибиотиков: %s", f2k(sum)));
 
         p = x46.with_mt_RSFSR_1940(ap.CBR_1940, false, births);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями, без антибиотиков: %s тыс. чел. (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями, без антибиотиков: %s (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
 
         p = x46.with_mt(mt1940, 0, false, null);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("комбинированная таблица, без рождений, без антибиотиков: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("комбинированная таблица, без рождений, без антибиотиков: %s", f2k(sum)));
 
         p = x46.with_mt(mt1940, ap.CBR_1940, false, births);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("комбинированная таблица, с рождениями, без антибиотиков: %s тыс. чел. (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
+        Util.out(String.format("комбинированная таблица, с рождениями, без антибиотиков: %s (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
         
         /* ------------------------------------------------- */
 
@@ -639,26 +638,26 @@ public class Main
 
         p = x46.with_mt_USSR_1938(0, true, null);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица ГКС-СССР-1938, без рождений, с антибиотиками: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица ГКС-СССР-1938, без рождений, с антибиотиками: %s", f2k(sum)));
         
         p = x46.with_mt_USSR_1938(ap.CBR_1940, true, births);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями, с антибиотиками: %s тыс. чел. (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
+        Util.out(String.format("таблица ГКС-СССР-1938, c рождениями, с антибиотиками: %s (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
 
         p = x46.with_mt_RSFSR_1940(0, true, null);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений, с антибиотиками: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, без рождений, с антибиотиками: %s", f2k(sum)));
 
         p = x46.with_mt_RSFSR_1940(ap.CBR_1940, true, births);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями, с антибиотиками: %s тыс. чел. (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
+        Util.out(String.format("таблица АДХ-РСФСР-1940, с рождениями, с антибиотиками: %s (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
 
         p = x46.with_mt(mt1940, 0, true, null);
         sum0 = sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("комбинированная таблица, без рождений, с антибиотиками: %s тыс. чел.", f2k(sum)));
+        Util.out(String.format("комбинированная таблица, без рождений, с антибиотиками: %s", f2k(sum)));
 
         p = x46.with_mt(mt1940, ap.CBR_1940, true, births);
         sum = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        Util.out(String.format("комбинированная таблица, с рождениями, с антибиотиками: %s тыс. чел. (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
+        Util.out(String.format("комбинированная таблица, с рождениями, с антибиотиками: %s (старое население: %s, новое население: %s, рождений: %s)", f2k(sum), f2k(sum0), f2k(sum - sum0), f2k(births)));
     }
 }
