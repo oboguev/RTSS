@@ -7,6 +7,7 @@ import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.population.synthetic.PopulationADH;
+import rtss.forward_1926_193x.Adjust_1939;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
@@ -47,13 +48,15 @@ public class Population_In_Early_1940 extends UtilBase_194x
             PopulationByLocality p = PopulationByLocality.census(ap.area, 1939);
             p.resetUnknownForEveryLocality();
             p.recalcTotalForEveryLocality();
+            p = p.smooth(true);
+            p = new Adjust_1939().adjust(ap.area, p);
             p.validate();
             p = p.cloneTotalOnly();
 
             /*
              * Перемасштабировать на начало 1939 года и границы 1946 года
              */
-            p = RescalePopulation.scaleTotal(p, fctx, ap.ADH_MALES_1939, ap.ADH_FEMALES_1939);
+            p = RescalePopulation.scaleTotal(p, null, ap.ADH_MALES_1939, ap.ADH_FEMALES_1939);
             show_struct("начало 1939 в границах 1946", p, fctx);
 
             /*
@@ -89,13 +92,9 @@ public class Population_In_Early_1940 extends UtilBase_194x
         switch (ap.area)
         {
         case USSR:
+        case RSFSR:
             mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
             mt1.comment("ГКС-СССР-1938");
-            break;
-            
-        case RSFSR:
-            mt1 = CombinedMortalityTable.load("mortality_tables/RSFSR/1938-1939");
-            mt1.comment("ГКС-РСФСР-1938");
             break;
             
         default:
@@ -105,7 +104,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
         CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
         mt2.comment("АДХ-РСФСР-1940");
 
-        cmt = InterpolateMortalityTable.forTargetRates(mt1, mt2, p, fctx, fw.getBirthRateTotal(), cdr);
+        cmt = InterpolateMortalityTable.forTargetRates(mt1, mt2, p, fctx, fw.getBirthRateTotal(), cdr, 4);
 
         return fw.forward(p, fctx, cmt, yfraction);
     }

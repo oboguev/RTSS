@@ -12,7 +12,7 @@ public class UtilBase_194x
      * true => использовать данные для населения 1940 и 1941 гг. расчитанные АДХ
      * false => вычислять их продвижкой от переписи 1939 года 
      */
-    public static final boolean useADH = true;    
+    public static final boolean useADH = true;
     
     protected void show_struct(String what, PopulationByLocality p, PopulationForwardingContext fctx) throws Exception
     {
