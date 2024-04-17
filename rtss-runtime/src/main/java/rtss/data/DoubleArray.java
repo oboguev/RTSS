@@ -1,5 +1,7 @@
 package rtss.data;
 
+import rtss.util.Util;
+
 public class DoubleArray
 {
     @SuppressWarnings("unused")
@@ -55,7 +57,7 @@ public class DoubleArray
     
     public void set(int age, double v) throws Exception
     {
-        values[age] = v;
+        values[age] = Util.validate(v);
     }
 
     public void add(int age, double v) throws Exception
@@ -93,6 +95,8 @@ public class DoubleArray
     
     private void checkValueRange(double v) throws Exception
     {
+        Util.validate(v);
+        
         switch (vc)
         {
         case POSITIVE:

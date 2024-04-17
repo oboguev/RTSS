@@ -175,6 +175,7 @@ public class PopulationForwardingContext
 
     private void checkNonNegative(double v) throws Exception
     {
+        Util.validate(v);
         if (v < 0)
             throw new Exception("Negative population");
     }

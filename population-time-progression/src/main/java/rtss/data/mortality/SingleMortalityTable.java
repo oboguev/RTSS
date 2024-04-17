@@ -91,6 +91,15 @@ public class SingleMortalityTable
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
+            
+            Util.checkValid(mi.px);
+            Util.checkValid(mi.qx);
+            Util.checkValid(mi.dx);
+            Util.checkValid(mi.ex);
+            Util.checkValid(mi.lx);
+            Util.checkValid(mi.Lx);
+            Util.checkValid(mi.Tx);
+            
             check_eq(String.format("px+qx for age %d px = %f, qx = %f", age, mi.px, mi.qx), 
                      mi.px + mi.qx, 1.0, 0.011);
             if (Math.abs(Math.round(mi.lx * mi.qx) - mi.dx) > 2)

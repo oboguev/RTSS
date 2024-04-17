@@ -132,12 +132,13 @@ public class Population
             sum += m.get(age);
         }
 
-        return sum;
+        return Util.validate(sum);
     }
 
     public void set(Gender gender, int age, double value) throws Exception
     {
         DoubleArray m = forGender(gender);
+        Util.validate(value);
         checkNonNegative(value);
         m.put(age, value);
     }
@@ -149,12 +150,12 @@ public class Population
         if (m.containsKey(age))
         {
             checkNonNegative(m.get(age) + value);
-            m.put(age, m.get(age) + value);
+            m.put(age, Util.validate(m.get(age) + value));
         }
         else
         {
             checkNonNegative(value);
-            m.put(age, value);
+            m.put(age, Util.validate(value));
         }
     }
 
@@ -165,18 +166,19 @@ public class Population
         if (m.containsKey(age))
         {
             checkNonNegative(m.get(age) - value);
-            m.put(age, m.get(age) - value);
+            m.put(age, Util.validate(m.get(age) - value));
         }
         else
         {
             if (value > 0)
                 throw new Exception("Negative population");
-            m.put(age, -value);
+            m.put(age, Util.validate(-value));
         }
     }
 
     private void checkNonNegative(double v) throws Exception
     {
+        Util.checkValid(v);
         if (v < 0)
             throw new Exception("Negative population");
     }
@@ -210,11 +212,11 @@ public class Population
         both_total = 0;
 
         if (male != null)
-            male_total = this.sum(Gender.MALE, 0, MAX_AGE) + male_unknown;
+            male_total = Util.validate(this.sum(Gender.MALE, 0, MAX_AGE) + male_unknown);
         if (female != null)
-            female_total = this.sum(Gender.FEMALE, 0, MAX_AGE) + female_unknown;
+            female_total = Util.validate(this.sum(Gender.FEMALE, 0, MAX_AGE) + female_unknown);
         if (both != null)
-            both_total = this.sum(Gender.BOTH, 0, MAX_AGE) + both_unknown;
+            both_total = Util.validate(this.sum(Gender.BOTH, 0, MAX_AGE) + both_unknown);
     }
 
     /****************************************************************************************************/
@@ -418,6 +420,10 @@ public class Population
             double m = male.get(age);
             double f = female.get(age);
             double b = both.get(age);
+            
+            Util.checkValid(m);
+            Util.checkValid(f);
+            Util.checkValid(b);
 
             if (m < 0 || f < 0 || b < 0)
                 negative();
@@ -429,7 +435,19 @@ public class Population
             sum_f += f;
             sum_b += b;
         }
+        
+        Util.checkValid(male_unknown);
+        Util.checkValid(female_unknown);
+        Util.checkValid(both_unknown);
 
+        Util.checkValid(male_total);
+        Util.checkValid(female_total);
+        Util.checkValid(both_total);
+
+        Util.checkValid(sum_m);
+        Util.checkValid(sum_f);
+        Util.checkValid(sum_b);
+        
         if (male_unknown < 0 || female_unknown < 0 || both_unknown < 0)
             negative();
 
@@ -538,7 +556,7 @@ public class Population
         DoubleArray m = newDoubleArray();
 
         for (int age = 0; age <= d.length - 1; age++)
-            m.put(age, d[age]);
+            m.put(age, Util.validate(d[age]));
 
         // TODO: collapse anything beyond MAX_AGE into MAX_AGE
 

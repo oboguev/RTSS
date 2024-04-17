@@ -171,9 +171,29 @@ public class Util
     // check if values differ
     public static boolean differ(double a, double b, double diff)
     {
+        if (!isValid(a) || !isValid(b) || !isValid(diff))
+            return true;
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
+    
+    public static boolean isValid(double v)
+    {
+        return Double.isFinite(v);
+    }
 
+    public static void checkValid(double v) throws Exception
+    {
+        if (!isValid(v))
+            throw new ArithmeticException("Not a valid number");
+    }
+    
+    public static double validate(double v) throws Exception
+    {
+        if (!isValid(v))
+            throw new ArithmeticException("Not a valid number");
+        return v;
+    }
+    
     // min of array values
     public static double min(final double[] y)
     {
