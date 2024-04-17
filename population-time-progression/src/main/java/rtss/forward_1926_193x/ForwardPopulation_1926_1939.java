@@ -18,7 +18,8 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
     public final boolean DoSmoothPopulation = true;
 
     private PopulationByLocality p1926 = PopulationByLocality.census(Area.USSR, 1926).smooth(DoSmoothPopulation);
-    private PopulationByLocality p1939 = PopulationByLocality.census(Area.USSR, 1939).smooth(DoSmoothPopulation);;
+    private PopulationByLocality p1939_original = PopulationByLocality.census(Area.USSR, 1939).smooth(DoSmoothPopulation);
+    private PopulationByLocality p1939 = new Adjust_1939().adjust(Area.USSR, p1939_original);
 
     private Map<Integer, Double> urban_male_fraction_yyyy;
     private Map<Integer, Double> urban_female_fraction_yyyy;
