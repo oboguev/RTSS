@@ -4,6 +4,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.RescalePopulation;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -25,7 +26,12 @@ public class PopulationADH
         MutableDouble f_unknown = new MutableDouble(); 
         double[] f = PopulationFromExcel.loadCounts(path, Gender.FEMALE, year, f_unknown);
         
-        return new Population(Locality.TOTAL, m, m_unknown.doubleValue(), f, f_unknown.doubleValue());
+        Population p = new Population(Locality.TOTAL, m, m_unknown.doubleValue(), f, f_unknown.doubleValue());
+        
+        /* population data in AHD book (and Excel file) is in thousands */
+        p = RescalePopulation.scaleBy(p, 1000);
+        
+        return p;
     }
     
     /* ========================================================================== */

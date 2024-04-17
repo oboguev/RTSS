@@ -53,7 +53,7 @@ public class Adjust_1939
         double t = p.sum(Locality.TOTAL, Gender.BOTH, 0, Population.MAX_AGE);
         if (t > CorrectTotalPopulation)
         {
-            p = RescalePopulation.scaleAll(p, CorrectTotalPopulation);
+            p = RescalePopulation.scaleAllTo(p, CorrectTotalPopulation);
             t = CorrectTotalPopulation;
         }
         

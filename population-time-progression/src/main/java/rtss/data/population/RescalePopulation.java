@@ -76,18 +76,22 @@ public class RescalePopulation
      * Перемасштабировать городское, сельское и суммарное население пропорционально имеющемуся таким образом,
      * чтобы общее население равнялось @target
      */
-    public static PopulationByLocality scaleAll(PopulationByLocality p, double target) throws Exception
+    public static PopulationByLocality scaleAllTo(PopulationByLocality p, double target) throws Exception
     {
         double scale = target / p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        
-        Population rural = scaleAll(p.forLocality(Locality.RURAL), scale);
-        Population urban = scaleAll(p.forLocality(Locality.URBAN), scale);
-        Population total = scaleAll(p.forLocality(Locality.TOTAL), scale);
+        return scaleAllBy(p, scale);
+    }
+    
+    public static PopulationByLocality scaleAllBy(PopulationByLocality p, double scale) throws Exception
+    {
+        Population rural = scaleBy(p.forLocality(Locality.RURAL), scale);
+        Population urban = scaleBy(p.forLocality(Locality.URBAN), scale);
+        Population total = scaleBy(p.forLocality(Locality.TOTAL), scale);
         
         return new PopulationByLocality(total, urban, rural);
     }
-    
-    static Population scaleAll(Population p, double scale) throws Exception
+
+    public static Population scaleBy(Population p, double scale) throws Exception
     {
         if (p == null)
             return null;
@@ -109,7 +113,7 @@ public class RescalePopulation
         if (p == null)
             return null;
         
-        double old_amount = p.sum(Gender.BOTH, 0, MAX_AGE);
-        return scaleAll(p, new_amount / old_amount);
+        double old_amount = p.sum(Gender.BOTH, 0, MAX_AGE) + p.getUnknown(Gender.BOTH);
+        return scaleBy(p, new_amount / old_amount);
     }
 }
