@@ -114,4 +114,17 @@ public class DoubleArray
             break;
         }
     }
+    
+    public double[] asUnboxedArray() throws Exception
+    {
+        double[] d = new double[values.length];
+        for (int age = 0; age < values.length; age++)
+        {
+            Double v = values[age];
+            if (v == null)
+                throw new Exception("Mising value for age " + age);
+            d[age] = v;
+        }
+        return d;
+    }
 }

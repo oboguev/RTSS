@@ -266,6 +266,15 @@ public class Util
             return 0;
     }
 
+    // return a new array with values representing y[] * f
+    public static double[] multiply(final double[] y, double f)
+    {
+        double[] yy = new double[y.length];
+        for (int x = 0; x < y.length; x++)
+            yy[x] = y[x] * f;
+        return yy;
+    }
+
     // return a new array with values representing y[] / f
     public static double[] divide(final double[] y, double f)
     {

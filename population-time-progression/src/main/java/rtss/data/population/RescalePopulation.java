@@ -3,6 +3,7 @@ package rtss.data.population;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 public class RescalePopulation
 {
@@ -69,5 +70,37 @@ public class RescalePopulation
         scaleTotal(pto, p, fctx, Gender.FEMALE, females);
         pto.makeBoth(Locality.TOTAL);
         return pto;
+    }
+    
+    /*
+     * Перемасштабировать городское, сельское и суммарное население пропорционально имеющемуся таким образом,
+     * чтобы общее население равнялось @target
+     */
+    public static PopulationByLocality scaleAll(PopulationByLocality p, double target) throws Exception
+    {
+        double scale = target / p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        
+        Population rural = scaleAll(p.forLocality(Locality.RURAL), scale);
+        Population urban = scaleAll(p.forLocality(Locality.URBAN), scale);
+        Population total = scaleAll(p.forLocality(Locality.TOTAL), scale);
+        
+        return new PopulationByLocality(total, urban, rural);
+    }
+    
+    private static Population scaleAll(Population p, double scale) throws Exception
+    {
+        if (p == null)
+            return null;
+
+        double[] m = p.asArray(Gender.MALE);
+        m = Util.multiply(m, scale);
+        
+        double[] f = p.asArray(Gender.FEMALE);
+        f = Util.multiply(f, scale);
+        
+        double m_unknown = scale * p.getUnknown(Gender.MALE);
+        double f_unknown = scale * p.getUnknown(Gender.FEMALE);
+
+        return new Population(p.locality, m, m_unknown, f, f_unknown);
     }
 }

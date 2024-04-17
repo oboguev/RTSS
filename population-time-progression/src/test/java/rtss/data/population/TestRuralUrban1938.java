@@ -50,8 +50,8 @@ public class TestRuralUrban1938
             double pu = p.get(Locality.URBAN, gender, age);
             double pct_p = 100 * pu / (pr + pu);
             
-            Util.noop();
-            // ###
+            Util.unused(pct_m);
+            Util.unused(pct_p);
         }
     }
     

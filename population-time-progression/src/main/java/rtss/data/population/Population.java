@@ -197,6 +197,11 @@ public class Population
             return null;
         }
     }
+    
+    public double[] asArray(Gender gender) throws Exception
+    {
+        return forGender(gender).asUnboxedArray();
+    }
 
     public void resetUnknown() throws Exception
     {
@@ -217,6 +222,21 @@ public class Population
             female_total = Util.validate(this.sum(Gender.FEMALE, 0, MAX_AGE) + female_unknown);
         if (both != null)
             both_total = Util.validate(this.sum(Gender.BOTH, 0, MAX_AGE) + both_unknown);
+    }
+    
+    public double getUnknown(Gender gender) throws Exception
+    {
+        switch (gender)
+        {
+        case MALE:
+            return male_unknown;
+        case FEMALE:
+            return female_unknown;
+        case BOTH:
+            return both_unknown;
+        default:
+            throw new IllegalArgumentException();
+        }
     }
 
     /****************************************************************************************************/

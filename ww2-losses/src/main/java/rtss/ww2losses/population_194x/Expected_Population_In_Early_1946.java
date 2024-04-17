@@ -6,7 +6,6 @@ import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
-import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
