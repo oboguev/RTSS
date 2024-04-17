@@ -1,7 +1,13 @@
 package rtss.forward_1926_193x;
 
+import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.RebalanceUrbanRural;
+import rtss.data.population.RescalePopulation;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /*
  * При обработке переписи 1939 года были совершены приписки.
@@ -13,12 +19,51 @@ import rtss.data.selectors.Area;
  * Население РСФСР составляло 106.9 млн. чел., 
  * а городское население 34.1 (31.9%), а не 36.8. 
  * 
+ * Мы не располагаем сведениями о возрастной структуре приписок, поэтому корректируем равномерно 
+ * все возрастные группы.
  */
 public class Adjust_1939
 {
     public PopulationByLocality adjust(Area area, final PopulationByLocality p) throws Exception
     {
-        // ###
+        if (area == Area.USSR)
+        {
+            final double CorrectTotalPopulation = 167_650_000;
+            final double CorrectUrbanlPopulation = 47_500_000;
+            return correct(p, CorrectTotalPopulation, CorrectUrbanlPopulation);
+        }
+        else if (area == Area.RSFSR)
+        {
+            final double CorrectTotalPopulation = 106_900_000;
+            final double CorrectUrbanlPopulation = 34_100_000;
+            return correct(p, CorrectTotalPopulation, CorrectUrbanlPopulation);
+        }
+        else
+        {
+            throw new IllegalArgumentException();
+        }
+    }
+    
+    static private PopulationByLocality correct(PopulationByLocality p, double CorrectTotalPopulation, double CorrectUrbanlPopulation) throws Exception
+    {
+        PopulationByLocality p0 = p;
+        
+        double t = p.sum(Locality.TOTAL, Gender.BOTH, 0, Population.MAX_AGE);
+        if (t > CorrectTotalPopulation)
+        {
+            p = RescalePopulation.scaleAll(p, CorrectTotalPopulation);
+            t = CorrectTotalPopulation;
+        }
+        
+        double u = p.sum(Locality.URBAN, Gender.BOTH, 0, Population.MAX_AGE);
+        if (u/t > CorrectUrbanlPopulation / CorrectTotalPopulation)
+        {
+            p = RebalanceUrbanRural.rebalanceUrbanRural(p, CorrectUrbanlPopulation / CorrectTotalPopulation);
+        }
+        
+        if (p == p0)
+            p = p.clone();
+        
         return p;
     }
 }
