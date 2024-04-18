@@ -616,7 +616,7 @@ public class Population
     /*
      * Value returned in bin "avg" field is SUM rather than AVG
      */
-    public Bin[] binByAge(Gender gender, final Bin[] ages) throws Exception
+    public Bin[] binSumByAge(Gender gender, final Bin[] ages) throws Exception
     {
         Bin[] bins = new Bin[ages.length];
         
