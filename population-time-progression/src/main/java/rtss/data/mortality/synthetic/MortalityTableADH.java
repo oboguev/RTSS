@@ -8,6 +8,7 @@ import rtss.data.bin.Bins;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
+import rtss.data.mortality.synthetic.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.population.Population;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;

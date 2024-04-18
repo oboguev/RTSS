@@ -5,6 +5,7 @@ import rtss.data.bin.Bins;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
+import rtss.data.mortality.synthetic.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;

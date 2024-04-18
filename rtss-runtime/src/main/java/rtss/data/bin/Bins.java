@@ -328,6 +328,25 @@ public class Bins
 
         return avg;
     }
+    
+    /*
+     * Extract a subrange [start ... end] 
+     */
+    public static Bin[] subset(Bin start, Bin end) throws Exception
+    {
+       List<Bin> list = new ArrayList<>();
+       
+       for (Bin bin = start;; bin = bin.next)
+       {
+           if (bin == null || end == null)
+               throw new IllegalArgumentException("end bin is not reachable from the start bin");
+           list.add(new Bin(bin));
+           if (bin == end)
+               break;
+       }
+       
+       return Bins.bins(list);
+    }
 
     /*
      * Parse text file with bin data.

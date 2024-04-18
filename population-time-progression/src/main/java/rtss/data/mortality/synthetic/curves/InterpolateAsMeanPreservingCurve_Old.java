@@ -1,4 +1,4 @@
-package rtss.data.mortality.synthetic;
+package rtss.data.mortality.synthetic.curves;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
@@ -13,7 +13,7 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
  * Typically used to interpolate the "qx" curve from an aggregated multi-year data to a yearly resolution.
  * 
- * Use a newer implementation instead: InterpolateAsMeanPreservingCurve.
+ * Use a newer implementation instead: InterpolateAsMeanPreservingCurve or InterpolateUShapeAsMeanPreservingCurve.
  */
 @Deprecated 
 public class InterpolateAsMeanPreservingCurve_Old

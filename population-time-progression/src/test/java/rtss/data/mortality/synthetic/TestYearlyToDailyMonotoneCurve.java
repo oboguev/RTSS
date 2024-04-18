@@ -1,6 +1,7 @@
 package rtss.data.mortality.synthetic;
 
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.synthetic.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
