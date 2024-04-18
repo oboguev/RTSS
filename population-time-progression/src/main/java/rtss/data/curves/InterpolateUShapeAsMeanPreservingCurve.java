@@ -31,6 +31,12 @@ public class InterpolateUShapeAsMeanPreservingCurve
      */
     public static double[] curve(Bin... bins) throws Exception, ConstraintViolationException
     {
+        String debug_title = null;
+        return curve(debug_title, bins);
+    }
+    
+    public static double[] curve(String debug_title, Bin... bins) throws Exception, ConstraintViolationException
+    {
         if (Bins.flips(bins) > 1)
             throw new Exception("Mortality curve has multiple local minumums and maximums");
         

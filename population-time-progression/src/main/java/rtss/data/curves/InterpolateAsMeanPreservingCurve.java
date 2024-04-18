@@ -31,6 +31,12 @@ public class InterpolateAsMeanPreservingCurve
 
     public static double[] curve(Bin... bins) throws Exception, ConstraintViolationException
     {
+        String debug_title = null;
+        return curve(debug_title, bins);
+    }
+
+    public static double[] curve(String debug_title, Bin... bins) throws Exception, ConstraintViolationException
+    {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);

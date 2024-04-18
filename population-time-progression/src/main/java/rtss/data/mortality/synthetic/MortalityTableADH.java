@@ -82,8 +82,11 @@ public class MortalityTableADH
         fix_80_85_100(male_mortality_bins, male_population_sum_bins); 
         fix_80_85_100(female_mortality_bins, female_population_sum_bins); 
 
-        cmt.setTable(Locality.TOTAL, Gender.MALE, makeSingleTable(male_mortality_bins));
-        cmt.setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(female_mortality_bins));
+        String debug_title_male = String.format("%s %s", year, Gender.MALE.name());
+        String debug_title_female = String.format("%s %s", year, Gender.FEMALE.name());
+        
+        cmt.setTable(Locality.TOTAL, Gender.MALE, makeSingleTable(debug_title_male, male_mortality_bins));
+        cmt.setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(debug_title_female, female_mortality_bins));
 
         double[] qx = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
@@ -114,13 +117,13 @@ public class MortalityTableADH
         return cmt;
     }
 
-    private static SingleMortalityTable makeSingleTable(Bin... bins) throws Exception
+    private static SingleMortalityTable makeSingleTable(String debug_title, Bin... bins) throws Exception
     {
         double[] curve = null;
         
         try
         {
-            curve = InterpolateAsMeanPreservingCurve.curve(bins);
+            curve = InterpolateAsMeanPreservingCurve.curve(debug_title, bins);
         }
         catch (ConstraintViolationException ex)
         {
@@ -128,7 +131,7 @@ public class MortalityTableADH
         }
         
         if (curve == null)
-            curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins);
+            curve = InterpolateUShapeAsMeanPreservingCurve.curve(debug_title, bins);
         
         curve = Util.divide(curve, 1000);
         return SingleMortalityTable.from_qx("computed", curve);
