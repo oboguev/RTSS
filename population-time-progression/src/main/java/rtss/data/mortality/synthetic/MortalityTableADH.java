@@ -133,6 +133,8 @@ public class MortalityTableADH
         if (curve == null)
             curve = InterpolateUShapeAsMeanPreservingCurve.curve(debug_title, bins);
         
+        // ### ensure monotonic for bins 1-4 and 5-9
+        
         curve = Util.divide(curve, 1000);
         return SingleMortalityTable.from_qx("computed", curve);
     }
