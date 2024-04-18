@@ -1,5 +1,9 @@
 package rtss.data.mortality.synthetic;
 
+import java.util.HashSet;
+
+import javax.validation.ConstraintViolationException;
+
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
@@ -20,7 +24,7 @@ public class InterpolateAsMeanPreservingCurve
 {
     public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
 
-    public static double[] curve(Bin... bins) throws Exception
+    public static double[] curve(Bin... bins) throws Exception, ConstraintViolationException
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
@@ -69,7 +73,7 @@ public class InterpolateAsMeanPreservingCurve
         if (yyy == null)
             yyy = yyy3;
         if (!Util.isPositive(yyy))
-            throw new Exception("Error calculating curve (negative or zero value)");
+            throw new ConstraintViolationException("Error calculating curve (negative or zero value)", new HashSet<>());
         
         double[] yy = Bins.ppy2yearly(yyy, ppy);
 
