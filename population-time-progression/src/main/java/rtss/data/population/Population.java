@@ -621,7 +621,10 @@ public class Population
         Bin[] bins = new Bin[ages.length];
         
         for (int k = 0; k < ages.length; k++)
-            bins[k].avg = this.sum(gender, ages[k].age_x1, ages[k].age_x2);
+        {
+            double sum = this.sum(gender, ages[k].age_x1, ages[k].age_x2);
+            bins[k] = new Bin(ages[k].age_x1, ages[k].age_x2, sum);
+        }
 
         return Bins.bins(bins);
     }

@@ -67,8 +67,9 @@ public class MortalityTableADH
     {
         CombinedMortalityTable cmt = CombinedMortalityTable.newEmptyTable();
         
-        Bin[] male_mortality_bins = MortalityRatesFromExcel.loadRates(year, Gender.MALE, year);
-        Bin[] female_mortality_bins = MortalityRatesFromExcel.loadRates(year, Gender.FEMALE, year);
+        String path = String.format("mortality_tables/%s/%s-MortalityRates-ADH.xlsx", area.name(), area.name());
+        Bin[] male_mortality_bins = MortalityRatesFromExcel.loadRates(path, Gender.MALE, year);
+        Bin[] female_mortality_bins = MortalityRatesFromExcel.loadRates(path, Gender.FEMALE, year);
         
         cmt.setTable(Locality.TOTAL, Gender.MALE, makeSingleTable(male_mortality_bins));
         cmt.setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(female_mortality_bins));
