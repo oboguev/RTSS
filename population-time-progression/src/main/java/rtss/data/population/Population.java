@@ -5,6 +5,8 @@ import java.util.Map;
 
 import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
+import rtss.data.bin.Bin;
+import rtss.data.bin.Bins;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -609,6 +611,19 @@ public class Population
         if (Util.differ(Util.sum(d), Util.sum(d2)))
             throw new Exception("Smoothing error");
         return d2;
+    }
+    
+    /*
+     * Value returned in bin "avg" field is SUM rather than AVG
+     */
+    public Bin[] binByAge(Gender gender, final Bin[] ages) throws Exception
+    {
+        Bin[] bins = new Bin[ages.length];
+        
+        for (int k = 0; k < ages.length; k++)
+            bins[k].avg = this.sum(gender, ages[k].age_x1, ages[k].age_x2);
+
+        return Bins.bins(bins);
     }
 
     /****************************************************************************************************/

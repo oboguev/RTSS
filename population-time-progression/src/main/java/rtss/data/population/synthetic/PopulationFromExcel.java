@@ -10,14 +10,10 @@ import rtss.data.bin.Bins;
 import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
-import rtss.util.excel.Excel;
+import rtss.util.excel.ExcelLoader;
 
-public class PopulationFromExcel
+public class PopulationFromExcel extends ExcelLoader
 {
-    private static final String[] keyMales = { "male", "males", "мужчины", "муж", "муж.", "м" };
-    private static final String[] keyFemales = { "female", "females", "женщины", "жен", "жен.", "ж" };
-    private static final String[] keyAge = { "age", "ages", "возраст", "возрасты", "возрастная группа", "возрастные группы" };
-
     private static final double MAX_DIFF = 3;
 
     public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown) throws Exception
@@ -176,28 +172,5 @@ public class PopulationFromExcel
         }
 
         return InterpolatePopulationAsMeanPreservingCurve.curve(bins);
-    }
-
-    private static List<Object> loadAges(String path, Gender gender) throws Exception
-    {
-        return loadValues(path, gender, keyAge);
-    }
-
-    private static List<Object> loadValues(String path, Gender gender, String... matchingColumnNames) throws Exception
-    {
-        return Excel.loadColumn(path, key(gender), matchingColumnNames);
-    }
-
-    private static String[] key(Gender gender) throws Exception
-    {
-        switch (gender)
-        {
-        case MALE:
-            return keyMales;
-        case FEMALE:
-            return keyFemales;
-        default:
-            throw new Exception("Invalid gender selector");
-        }
     }
 }

@@ -19,6 +19,11 @@ public class CombinedMortalityTable
         source = "unknown";
     }
 
+    public static CombinedMortalityTable newEmptyTable()
+    {
+        return new CombinedMortalityTable();
+    }
+
     static public CombinedMortalityTable loadTotal(String path) throws Exception
     {
         CombinedMortalityTable cmt = new CombinedMortalityTable();
@@ -65,7 +70,7 @@ public class CombinedMortalityTable
         return locality + "-" + gender;
     }
 
-    protected void setTable(Locality locality, Gender gender, SingleMortalityTable smt)
+    public void setTable(Locality locality, Gender gender, SingleMortalityTable smt)
     {
         m.put(key(locality, gender), smt);
     }
