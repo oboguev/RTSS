@@ -1,5 +1,8 @@
 package rtss.data.mortality.synthetic;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.mortality.CombinedMortalityTable;
@@ -20,17 +23,48 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 public class MortalityTableADH
 {
     public static final int MAX_AGE = CombinedMortalityTable.MAX_AGE;
+    private static Map<String, CombinedMortalityTable > cache = new HashMap<>();
     
     public static CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
     {
         return getMortalityTable(area, "" + year);
     }
     
-    public static CombinedMortalityTable getMortalityTable(Area area, String year) throws Exception
+    public static synchronized CombinedMortalityTable getMortalityTable(Area area, String year) throws Exception
     {
-        // ### look in cache
-        // ### try loading from resource
+        String path = String.format("mortality_tables/%s/%s", area.name(), year);
+
+        // look in cache
+        CombinedMortalityTable cmt = cache.get(path);
+        if (cmt != null)
+            return cmt;
+
+        // try loading from resource
+        try
+        {
+            if (Util.True)
+            {
+                cmt = CombinedMortalityTable.loadTotal(path);
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
         
+        if (cmt == null)
+            cmt = get(area, year);
+        
+        cmt.seal();
+        cache.put(path, cmt);
+        return cmt;
+    }
+
+    /*
+     * Read data from Excel and generate the table with 1-year resolution
+     */
+    private static CombinedMortalityTable get(Area area, String year) throws Exception
+    {
         CombinedMortalityTable cmt = CombinedMortalityTable.newEmptyTable();
         
         Bin[] male_mortality_bins = MortalityRatesFromExcel.loadRates(year, Gender.MALE, year);
@@ -71,7 +105,7 @@ public class MortalityTableADH
         }
         
         
-        return null;
+        return cmt;
     }
 
     private static SingleMortalityTable makeSingleTable(Bin... bins) throws Exception
