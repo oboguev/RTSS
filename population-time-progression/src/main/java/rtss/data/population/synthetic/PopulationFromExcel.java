@@ -7,6 +7,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;

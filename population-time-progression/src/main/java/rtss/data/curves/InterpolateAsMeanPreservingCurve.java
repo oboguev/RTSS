@@ -1,10 +1,14 @@
-package rtss.data.population.synthetic;
+package rtss.data.curves;
+
+import java.util.HashSet;
+
+import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.population.Population;
+import rtss.data.mortality.SingleMortalityTable;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
@@ -14,28 +18,24 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 
 /**
  * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
- * Typically used to interpolate population from an aggregated multi-year data to a yearly resolution.
+ * Typically used to interpolate the "qx" curve from an aggregated multi-year data to a yearly resolution.
+ * 
+ * Does not always work.
+ * When mortality at young ages drops too abruptly from very high values to very low values,
+ * generated curve can overshoot and go into the negative range, at which point ConstraintViolationException
+ * will be thrown. Then use InterpolateUShapeAsMeanPreservingCurve instead.
  */
-public class InterpolatePopulationAsMeanPreservingCurve
+public class InterpolateAsMeanPreservingCurve
 {
-    public static final int MAX_AGE = Population.MAX_AGE;
+    public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
 
-    public static double[] curve(Bin... bins) throws Exception
+    public static double[] curve(Bin... bins) throws Exception, ConstraintViolationException
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);
 
-        if (Util.True)
-        {
-            /*
-             * Helps to avoid the last segment of the curve dive down to much
-             */
-            options = options.placeLastBinKnotAtRightmostPoint();
-        }
-
-        int ppy = 12;
-        double[] xxx = Bins.ppy_x(bins, ppy);
+        int ppy = 1000;
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
@@ -52,22 +52,15 @@ public class InterpolatePopulationAsMeanPreservingCurve
             yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
 
-        if (Util.True)
+        if (Util.False)
         {
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
 
-        double[] yyy = yyy1;
-        if (yyy == null)
-            yyy = yyy2;
-        if (yyy == null)
-            yyy = yyy3;
-        
-        yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins);
-        
         if (Util.False)
         {
+            double[] xxx = Bins.ppy_x(bins, ppy);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             if (yyy1 != null)
                 chart.addSeries("1", xxx, yyy1);
@@ -75,35 +68,22 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 chart.addSeries("2", xxx, yyy2);
             if (yyy3 != null)
                 chart.addSeries("3", xxx, yyy3);
-            if (yyy3 != null)
-                chart.addSeries("yyy", xxx, yyy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }
 
-        if (!Util.isNonNegative(yyy))
-            throw new Exception("Error calculating curve (negative value)");
+        double[] yyy = yyy1;
+        if (yyy == null)
+            yyy = yyy2;
+        if (yyy == null)
+            yyy = yyy3;
+        if (!Util.isPositive(yyy))
+            throw new ConstraintViolationException("Error calculating curve (negative or zero value)", new HashSet<>());
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
 
-        if (!Util.isNonNegative(yy))
-            throw new Exception("Error calculating curve (negative value)");
-
-        validate_means(yy, bins);
+        CurveUtil.validate_means(yy, bins);
 
         return yy;
-    }
-
-    /*
-     * Verify that the curve preserves mean values as indicated by the bins
-     */
-    static void validate_means(double[] yy, Bin... bins) throws Exception
-    {
-        for (Bin bin : bins)
-        {
-            double[] y = Util.splice(yy, bin.age_x1, bin.age_x2);
-            if (Util.differ(Util.average(y), bin.avg, 0.001))
-                throw new Exception("Curve does not preserve mean values of the bins");
-        }
     }
 }

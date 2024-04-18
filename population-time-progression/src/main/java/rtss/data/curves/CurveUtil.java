@@ -1,4 +1,4 @@
-package rtss.data.mortality.synthetic.curves;
+package rtss.data.curves;
 
 import rtss.data.bin.Bin;
 import rtss.util.Util;

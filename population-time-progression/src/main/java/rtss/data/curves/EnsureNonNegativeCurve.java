@@ -1,4 +1,4 @@
-package rtss.data.population.synthetic;
+package rtss.data.curves;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;

@@ -1,4 +1,4 @@
-package rtss.data.mortality.synthetic.curves;
+package rtss.data.curves;
 
 import java.util.HashSet;
 
@@ -9,6 +9,7 @@ import rtss.data.bin.Bins;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
+import rtss.util.Clipboard;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -57,6 +58,12 @@ public class InterpolateUShapeAsMeanPreservingCurve
         if (Util.True)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
+            Clipboard.put(" ", xxx, yyy);
+        }
+
+        if (Util.True)
+        {
+            double[] xxx = Bins.ppy_x(bins, ppy);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
             chart.addSeries("curve", xxx, yyy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
@@ -78,7 +85,10 @@ public class InterpolateUShapeAsMeanPreservingCurve
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);
+        // options = options.debug();
         options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
+        // options.basicSplineType(AkimaSplineInterpolator.class);
+        // options.basicSplineType(SteffenSplineInterpolator.class);
         return MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
     }
     

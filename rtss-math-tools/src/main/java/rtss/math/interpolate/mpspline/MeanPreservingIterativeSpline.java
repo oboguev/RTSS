@@ -93,7 +93,7 @@ public class MeanPreservingIterativeSpline
             if (precision.achieved(bins, avg))
                 break;
 
-            if (Util.False)
+            if (Util.False || options.debug)
             {
                 String title = String.format("Mean-Preserving Iterative Spline [interim pass %d %s]", 
                                              pass, options.basicSplineType.getSimpleName());
@@ -101,6 +101,11 @@ public class MeanPreservingIterativeSpline
                         .addSeries("MPS", xx, result)
                         .addSeries("bins", xx, Bins.ppy_y(bins, ppy))
                         .display();
+            }
+            
+            if (options.debug)
+            {
+                Util.noop();
             }
 
             /*
@@ -111,7 +116,7 @@ public class MeanPreservingIterativeSpline
                 cp_y[ix] -= avg[ix];
         }
 
-        if (Util.False)
+        if (Util.False || options.debug)
         {
             String title = String.format("Mean-Preserving Iterative Spline [result %s]", 
                                          options.basicSplineType.getSimpleName());
@@ -252,6 +257,7 @@ public class MeanPreservingIterativeSpline
         Boolean checkNonNegative;
         Boolean checkPositive;
         Boolean placeLastBinKnotAtRightmostPoint;
+        Boolean debug;
         Class<?> basicSplineType;
         Class<?> functionExtenderType;
         
@@ -259,7 +265,8 @@ public class MeanPreservingIterativeSpline
         {
             checkNonNegative = null;
             checkPositive = null;
-            placeLastBinKnotAtRightmostPoint = false;
+            placeLastBinKnotAtRightmostPoint = null;
+            debug = null;
             basicSplineType = null;
             functionExtenderType = null;
         }
@@ -269,6 +276,7 @@ public class MeanPreservingIterativeSpline
             checkNonNegative = x.checkNonNegative;
             checkPositive = x.checkPositive;
             placeLastBinKnotAtRightmostPoint = x.placeLastBinKnotAtRightmostPoint;
+            debug = x.debug;
             basicSplineType = x.basicSplineType;
             functionExtenderType = x.functionExtenderType;
         }
@@ -306,6 +314,17 @@ public class MeanPreservingIterativeSpline
             return this;
         }
         
+        public Options debug()
+        {
+            return debug(true);
+        }
+        
+        public Options debug(boolean b)
+        {
+            debug = b;
+            return this;
+        }
+        
         public Options basicSplineType(Class<?> clz)
         {
             basicSplineType = clz;
@@ -330,7 +349,10 @@ public class MeanPreservingIterativeSpline
                 basicSplineType = SteffenSplineInterpolator.class;
             
             if (functionExtenderType == null)
-                functionExtenderType = FunctionRangeExtenderDirect.class; 
+                functionExtenderType = FunctionRangeExtenderDirect.class;
+            
+            if (debug == null)
+                debug = false;
         }
     }
 }

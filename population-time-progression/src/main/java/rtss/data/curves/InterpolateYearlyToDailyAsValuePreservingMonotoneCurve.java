@@ -1,4 +1,4 @@
-package rtss.data.mortality.synthetic.curves;
+package rtss.data.curves;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;

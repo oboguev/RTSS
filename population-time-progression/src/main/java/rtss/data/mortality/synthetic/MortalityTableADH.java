@@ -5,10 +5,10 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
-import rtss.data.mortality.synthetic.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.population.Population;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
@@ -113,7 +113,8 @@ public class MortalityTableADH
 
     private static SingleMortalityTable makeSingleTable(Bin... bins) throws Exception
     {
-        double[] curve = InterpolateAsMeanPreservingCurve.curve(bins);
+        // double[] curve = InterpolateAsMeanPreservingCurve.curve(bins);
+        double[] curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins);
         curve = Util.divide(curve, 1000);
         return SingleMortalityTable.from_qx("computed", curve);
     }

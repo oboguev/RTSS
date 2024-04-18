@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rtss.data.ValueConstraint;
+import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.mortality.synthetic.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
