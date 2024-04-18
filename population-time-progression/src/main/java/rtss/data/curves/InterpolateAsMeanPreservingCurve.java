@@ -52,7 +52,7 @@ public class InterpolateAsMeanPreservingCurve
             yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
 
-        if (Util.False)
+        if (Util.True)
         {
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
@@ -77,6 +77,9 @@ public class InterpolateAsMeanPreservingCurve
             yyy = yyy2;
         if (yyy == null)
             yyy = yyy3;
+
+        yyy = EnsurePositiveCurve.ensurePositive(yyy, bins);
+
         if (!Util.isPositive(yyy))
             throw new ConstraintViolationException("Error calculating curve (negative or zero value)", new HashSet<>());
 

@@ -144,6 +144,5 @@ public class EnsureNonNegativeCurve
             xseg[x] = max * Math.pow(seg[x] / max, a);
 
         return xseg;
-
     }
 }

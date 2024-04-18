@@ -3,8 +3,11 @@ package rtss.data.mortality.synthetic;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.ConstraintViolationException;
+
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
@@ -113,8 +116,20 @@ public class MortalityTableADH
 
     private static SingleMortalityTable makeSingleTable(Bin... bins) throws Exception
     {
-        // double[] curve = InterpolateAsMeanPreservingCurve.curve(bins);
-        double[] curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins);
+        double[] curve = null;
+        
+        try
+        {
+            curve = InterpolateAsMeanPreservingCurve.curve(bins);
+        }
+        catch (ConstraintViolationException ex)
+        {
+            // ignore
+        }
+        
+        if (curve == null)
+            curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins);
+        
         curve = Util.divide(curve, 1000);
         return SingleMortalityTable.from_qx("computed", curve);
     }
@@ -145,7 +160,7 @@ public class MortalityTableADH
      */
     private static void fix_80_85_100(Bin[] m, final Bin[] psum) throws Exception
     {
-        final double ratio = 1.1;
+        final double ratio = 1.15;
 
         if (m.length < 3)
             return;

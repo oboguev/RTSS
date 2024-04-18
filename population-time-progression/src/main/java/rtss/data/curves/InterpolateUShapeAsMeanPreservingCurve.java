@@ -48,20 +48,22 @@ public class InterpolateUShapeAsMeanPreservingCurve
         
         Bin[] leftSet = Bins.subset(firstBin, minBin);
         Bin[] rightSet = Bins.subset(minBin, lastBin);
-        int ppy = 10; // ###
+        int ppy = 1000;
         
         double[] lcurve = bins2curve(leftSet, ppy);
         double[] rcurve = bins2curve(rightSet, ppy);
         
         double[] yyy = joinCurves(lcurve, rcurve, ppy, minBin);
         
-        if (Util.True)
+        yyy = EnsurePositiveCurve.ensurePositive(yyy, bins);
+        
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             Clipboard.put(" ", xxx, yyy);
         }
 
-        if (Util.True)
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
