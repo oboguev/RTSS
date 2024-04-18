@@ -13,6 +13,7 @@ public class CombinedMortalityTable
     public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
 
     protected Map<String, SingleMortalityTable> m = new HashMap<>();
+    private boolean sealed = false;
 
     protected CombinedMortalityTable()
     {
@@ -70,8 +71,9 @@ public class CombinedMortalityTable
         return locality + "-" + gender;
     }
 
-    public void setTable(Locality locality, Gender gender, SingleMortalityTable smt)
+    public void setTable(Locality locality, Gender gender, SingleMortalityTable smt) throws Exception
     {
+        checkWritable();
         m.put(key(locality, gender), smt);
     }
 
@@ -251,6 +253,7 @@ public class CombinedMortalityTable
 
     public void comment(String comment)
     {
+        // checkWritable();
         this.comment = comment;
     }
 
@@ -274,5 +277,20 @@ public class CombinedMortalityTable
         if (x == null || !(x instanceof CombinedMortalityTable))
             return false;
         return ((CombinedMortalityTable) x).tid.equals(tid);
+    }
+
+    /*****************************************************************************************************/
+    
+    public void seal()
+    {
+        for (SingleMortalityTable smt : m.values())
+            smt.seal();
+        sealed = true;
+    }
+    
+    private void checkWritable() throws Exception
+    {
+        if (sealed)
+            throw new Exception("Table is sealed and cannot be modified");
     }
 }

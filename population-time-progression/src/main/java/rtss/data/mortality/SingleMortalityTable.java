@@ -9,6 +9,7 @@ import rtss.util.Util;
 public class SingleMortalityTable
 {
     private Map<Integer, MortalityInfo> m = new HashMap<>();
+    private boolean sealed = false;
     public static final int MAX_AGE = 100;
     
     private SingleMortalityTable()
@@ -33,6 +34,8 @@ public class SingleMortalityTable
     
     private void load(String path) throws Exception
     {
+        checkWritable(); 
+        
         this.source = path;
         
         String rdata = Util.loadResource(path);
@@ -260,6 +263,8 @@ public class SingleMortalityTable
     
     private void from_qx(double[] qx) throws Exception
     {
+        checkWritable(); 
+
         if (qx.length != MAX_AGE + 1)
             throw new IllegalArgumentException("Incorrect qx length");
         
@@ -363,5 +368,18 @@ public class SingleMortalityTable
         if (x == null || !(x instanceof SingleMortalityTable))
             return false;
         return ((SingleMortalityTable)x).tid.equals(tid);
+    }
+
+    /*****************************************************************************************************/
+    
+    public void seal()
+    {
+        sealed = true;
+    }
+    
+    private void checkWritable() throws Exception
+    {
+        if (sealed)
+            throw new Exception("Table is sealed and cannot be modified");
     }
 }
