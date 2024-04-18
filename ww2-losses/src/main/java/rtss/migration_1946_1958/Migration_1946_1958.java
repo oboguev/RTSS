@@ -70,7 +70,7 @@ public class Migration_1946_1958
             Migration_1946_1958 m = new Migration_1946_1958();
             m.do_main();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             Util.err("Exception: " + ex.getLocalizedMessage());
             ex.printStackTrace();

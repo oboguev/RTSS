@@ -24,7 +24,7 @@ public class TestPopulationADH
 
             Util.out("*** Completed");
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

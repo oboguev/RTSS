@@ -34,7 +34,7 @@ public class MPSTest
             
             Util.unused(yy);
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

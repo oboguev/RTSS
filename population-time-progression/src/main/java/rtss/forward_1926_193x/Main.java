@@ -18,7 +18,7 @@ public class Main
             // m.testPopulationSmoother();
             m.do_main();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             Util.err("Exception: " + ex.getLocalizedMessage());
             ex.printStackTrace();

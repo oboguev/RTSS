@@ -446,7 +446,7 @@ public class PopulationForwardingContext
 
             return sb.toString();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             return "<exception while formating>";
         }

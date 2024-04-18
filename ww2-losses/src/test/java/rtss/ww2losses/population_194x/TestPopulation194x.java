@@ -27,7 +27,7 @@ public class TestPopulation194x
             Util.unused(p);
             Util.unused(mt1940);
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

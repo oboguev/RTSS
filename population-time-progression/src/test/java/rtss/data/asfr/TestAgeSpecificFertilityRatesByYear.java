@@ -12,7 +12,7 @@ public class TestAgeSpecificFertilityRatesByYear
             AgeSpecificFertilityRatesByYear asfry = AgeSpecificFertilityRatesByYear.load(Area.USSR);
             Util.unused(asfry);
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

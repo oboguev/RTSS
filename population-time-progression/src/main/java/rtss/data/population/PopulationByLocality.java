@@ -337,7 +337,7 @@ public class PopulationByLocality
 
             return sb.toString();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             return "<exception while formating>";
         }

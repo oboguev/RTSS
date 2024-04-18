@@ -13,7 +13,7 @@ public class TestPopulation1939
             new TestPopulation1939().eval();
             Util.out("*** Completed");
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

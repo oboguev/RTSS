@@ -56,7 +56,7 @@ public class Children_Survival_Rate_194x_1959
             Children_Survival_Rate_194x_1959 m = new Children_Survival_Rate_194x_1959();
             m.do_main();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             Util.err("Exception: " + ex.getLocalizedMessage());
             ex.printStackTrace();

@@ -635,7 +635,7 @@ public class Population
         {
             return toString("");
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             return "<exception while formating>";
         }

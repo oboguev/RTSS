@@ -14,7 +14,7 @@ public class TestYearlyToDailyMonotoneCurve
             test_1();
             test_2();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

@@ -26,7 +26,7 @@ public class SmoothPopulation100
             SmoothPopulation100 m = new SmoothPopulation100();
             m.do_main();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             Util.err("Exception: " + ex.getLocalizedMessage());
             ex.printStackTrace();
@@ -44,7 +44,7 @@ public class SmoothPopulation100
         {
             text = Clipboard.getText();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             Util.noop();
         }

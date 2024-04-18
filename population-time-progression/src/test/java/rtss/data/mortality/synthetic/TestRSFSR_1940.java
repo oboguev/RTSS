@@ -15,7 +15,7 @@ public class TestRSFSR_1940
             
             mt.saveTable(outputDir, comment);
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

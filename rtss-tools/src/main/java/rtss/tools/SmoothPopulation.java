@@ -22,7 +22,7 @@ public class SmoothPopulation
             SmoothPopulation m = new SmoothPopulation();
             m.do_main();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             Util.err("Exception: " + ex.getLocalizedMessage());
             ex.printStackTrace();
@@ -40,7 +40,7 @@ public class SmoothPopulation
         {
             text = Clipboard.getText();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             Util.noop();
         }

@@ -36,7 +36,7 @@ public class TestInterpolateMortalityTable
             Util.unused(cmt);
 
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }

@@ -20,7 +20,7 @@ public class TestRuralUrban1938
             new TestRuralUrban1938().eval();
             Util.out("*** Completed");
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
         }
