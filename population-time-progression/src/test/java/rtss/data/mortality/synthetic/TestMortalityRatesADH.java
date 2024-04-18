@@ -1,6 +1,7 @@
 package rtss.data.mortality.synthetic;
 
 import rtss.data.selectors.Area;
+import rtss.util.Util;
 
 public class TestMortalityRatesADH
 {
@@ -9,6 +10,7 @@ public class TestMortalityRatesADH
         try
         {
             new TestMortalityRatesADH().do_main();
+            Util.out("*** Completed");
         }
         catch (Throwable ex)
         {

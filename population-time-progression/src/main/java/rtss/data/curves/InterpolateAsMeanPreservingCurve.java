@@ -50,24 +50,30 @@ public class InterpolateAsMeanPreservingCurve
         {
             options.basicSplineType(SteffenSplineInterpolator.class);
             yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            yyy1 = EnsurePositiveCurve.ensurePositive(yyy1, bins);
         }
 
         if (Util.False)
         {
             options.basicSplineType(AkimaSplineInterpolator.class);
             yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            yyy2 = EnsurePositiveCurve.ensurePositive(yyy2, bins);
         }
 
         if (Util.True)
         {
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            yyy3 = EnsurePositiveCurve.ensurePositive(yyy3, bins);
         }
 
         if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
+            String title = "Make curve";
+            if (debug_title != null)
+                title += " " + debug_title;
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y");
             if (yyy1 != null)
                 chart.addSeries("1", xxx, yyy1);
             if (yyy2 != null)
@@ -83,8 +89,6 @@ public class InterpolateAsMeanPreservingCurve
             yyy = yyy2;
         if (yyy == null)
             yyy = yyy3;
-
-        yyy = EnsurePositiveCurve.ensurePositive(yyy, bins);
 
         if (!Util.isPositive(yyy))
             throw new ConstraintViolationException("Error calculating curve (negative or zero value)", new HashSet<>());
