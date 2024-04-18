@@ -27,7 +27,6 @@ public class InterpolateAsMeanPreservingCurve
                 .checkPositive(false);
 
         int ppy = 1000;
-        ppy = 10; // ###
         double[] xxx = Bins.ppy_x(bins, ppy);
         double[] yyy1 = null;
         double[] yyy2 = null;
@@ -45,7 +44,7 @@ public class InterpolateAsMeanPreservingCurve
             yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
 
-        if (Util.True) // ###
+        if (Util.False)
         {
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);

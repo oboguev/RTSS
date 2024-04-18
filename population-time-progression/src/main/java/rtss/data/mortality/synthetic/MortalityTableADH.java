@@ -84,7 +84,6 @@ public class MortalityTableADH
         double[] qx = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            // ### divide by width???
             Bin males = Bins.binForAge(age, male_population_sum_bins);
             Bin females = Bins.binForAge(age, female_population_sum_bins);
 
