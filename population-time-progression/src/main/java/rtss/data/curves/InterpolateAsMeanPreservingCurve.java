@@ -34,44 +34,72 @@ public class InterpolateAsMeanPreservingCurve
         return curve(bins, null);
     }
 
-    public static double[] curve(Bin[] bins, String debug_title) throws Exception, ConstraintViolationException
+    public static double[] curve(Bin[] bins, Options options) throws Exception, ConstraintViolationException
     {
+        if (options == null)
+            options = new Options();
+        options = options.applyDefaults();
+
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
-        MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
+        MeanPreservingIterativeSpline.Options splineOptions = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false).placeLastBinKnotAtRightmostPoint();
 
-        int ppy = 10; // ###
+        int ppy = options.ppy;
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
 
         if (Util.False)
         {
-            options.basicSplineType(SteffenSplineInterpolator.class);
-            yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
-            yyy1 = EnsurePositiveCurve.ensurePositive(yyy1, bins);
+            splineOptions.basicSplineType(SteffenSplineInterpolator.class);
+            yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, splineOptions, precision);
+            if (options.ensurePositive)
+                yyy1 = EnsurePositiveCurve.ensurePositive(yyy1, bins);
+            
+            /*
+             * Резкое падение смертности в возрастных группах 1-4 и 5-9 часто вызывает перехлёысты сплайна в этом диапазоне.
+             * Изменить ход кривой сделав её монотонно уменьшающейся, но сохраняя средние значения.
+             */
+            if (options.ensureMonotonicallyDecreasing_1_4_5_9)
+                EnsureMonotonic.ensureMonotonicallyDecreasing_1_4_5_9(yyy1, bins, options.debug_title);
         }
 
         if (Util.False)
         {
-            options.basicSplineType(AkimaSplineInterpolator.class);
-            yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
-            yyy2 = EnsurePositiveCurve.ensurePositive(yyy2, bins);
+            splineOptions.basicSplineType(AkimaSplineInterpolator.class);
+            yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, splineOptions, precision);
+            if (options.ensurePositive)
+                yyy2 = EnsurePositiveCurve.ensurePositive(yyy2, bins);
+
+            /*
+             * Резкое падение смертности в возрастных группах 1-4 и 5-9 часто вызывает перехлёысты сплайна в этом диапазоне.
+             * Изменить ход кривой сделав её монотонно уменьшающейся, но сохраняя средние значения.
+             */
+            if (options.ensureMonotonicallyDecreasing_1_4_5_9)
+                EnsureMonotonic.ensureMonotonicallyDecreasing_1_4_5_9(yyy2, bins, options.debug_title);
         }
 
         if (Util.True)
         {
-            options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
-            yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
-            yyy3 = EnsurePositiveCurve.ensurePositive(yyy3, bins);
+            splineOptions.basicSplineType(ConstrainedCubicSplineInterpolator.class);
+            yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, splineOptions, precision);
+            if (options.ensurePositive)
+                yyy3 = EnsurePositiveCurve.ensurePositive(yyy3, bins);
+
+            /*
+             * Резкое падение смертности в возрастных группах 1-4 и 5-9 часто вызывает перехлёысты сплайна в этом диапазоне.
+             * Изменить ход кривой сделав её монотонно уменьшающейся, но сохраняя средние значения.
+             */
+            if (options.ensureMonotonicallyDecreasing_1_4_5_9)
+                EnsureMonotonic.ensureMonotonicallyDecreasing_1_4_5_9(yyy3, bins, options.debug_title);
         }
 
-        if (Util.True) // ###
+        if (Util.False || options.displayCurve)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "Make curve";
-            if (debug_title != null)
-                title += " " + debug_title;
+            if (options.debug_title != null)
+                title += " " + options.debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y");
             if (yyy1 != null)
                 chart.addSeries("1", xxx, yyy1);
@@ -97,5 +125,94 @@ public class InterpolateAsMeanPreservingCurve
         CurveUtil.validate_means(yy, bins);
 
         return yy;
+    }
+
+    public static class Options
+    {
+        public String debug_title;
+        public Integer ppy;
+        public Boolean ensurePositive;
+        public Boolean ensureMonotonicallyDecreasing_1_4_5_9;
+        public Boolean displayCurve;
+
+        public Options()
+        {
+        }
+
+        public Options(Options x)
+        {
+            this.debug_title = x.debug_title;
+            this.ppy = x.ppy;
+            this.ensurePositive = x.ensurePositive;
+            this.ensureMonotonicallyDecreasing_1_4_5_9 = x.ensureMonotonicallyDecreasing_1_4_5_9;
+            this.displayCurve = x.displayCurve;
+        }
+
+        public Options applyDefaults()
+        {
+            Options x = new Options(this);
+
+            if (x.debug_title == null)
+                x.debug_title = "";
+
+            if (x.ppy == null)
+                x.ppy = 1000;
+
+            if (x.ensurePositive == null)
+                x.ensurePositive = false;
+
+            if (x.ensureMonotonicallyDecreasing_1_4_5_9 == null)
+                x.ensureMonotonicallyDecreasing_1_4_5_9 = false;
+
+            if (x.displayCurve == null)
+                x.displayCurve = false;
+
+            return x;
+        }
+
+        public Options debug_title(String v)
+        {
+            debug_title = v;
+            return this;
+        }
+
+        public Options ppy(Integer v)
+        {
+            ppy = v;
+            return this;
+        }
+
+        public Options ensurePositive()
+        {
+            return ensurePositive(true);
+        }
+        
+        public Options ensurePositive(Boolean v)
+        {
+            ensurePositive = v;
+            return this;
+        }
+
+        public Options ensureMonotonicallyDecreasing_1_4_5_9()
+        {
+            return ensureMonotonicallyDecreasing_1_4_5_9(true);
+        }
+        
+        public Options ensureMonotonicallyDecreasing_1_4_5_9(Boolean v)
+        {
+            ensureMonotonicallyDecreasing_1_4_5_9 = v;
+            return this;
+        }
+
+        public Options displayCurve()
+        {
+            return displayCurve(true);
+        }
+        
+        public Options displayCurve(Boolean v)
+        {
+            displayCurve = v;
+            return this;
+        }
     }
 }

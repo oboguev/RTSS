@@ -8,12 +8,11 @@ public class EnsurePositiveCurve
 {
     public static double[] ensurePositive(double[] yyy, Bin[] bins) throws Exception
     {
-        
         return new EnsurePositiveCurve().do_ensurePositive(yyy, bins); 
     }
     
     private double[] yyy;
-    //private Bin[] bins;
+    private Bin[] bins;
     private int ppy;
     private Bin first;
     private Bin last;
@@ -21,7 +20,7 @@ public class EnsurePositiveCurve
     private double[] do_ensurePositive(double[] yyy, Bin[] bins) throws Exception
     {
         this.yyy = yyy = yyy.clone();
-        // this.bins = bins;
+        this.bins = bins;
 
         if (Util.isPositive(yyy))
             return yyy;
@@ -39,6 +38,8 @@ public class EnsurePositiveCurve
         ppy = yyy.length / (last.age_x2 + 1);
         if (yyy.length != ppy * (last.age_x2 + 1))
             throw new IllegalArgumentException();
+        
+        /* ===================================================================== */
         
         for (Bin bin = first; bin != null; bin = bin.next)
         {
@@ -86,10 +87,7 @@ public class EnsurePositiveCurve
      */
     private double[] seg(Bin bin) throws Exception
     {
-        int x1 = ppy * (bin.age_x1 - first.age_x1);
-        int x2 = ppy * (bin.age_x2 + 1 - first.age_x1) - 1;
-
-        return Util.splice(yyy, x1, x2);
+        return CurveUtil.seg(yyy, bin, bins, ppy);
     }
     
     /*

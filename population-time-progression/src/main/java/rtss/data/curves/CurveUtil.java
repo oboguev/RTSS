@@ -18,12 +18,12 @@ public class CurveUtil
                 throw new Exception("Curve does not preserve mean values of the bins");
         }
     }
-    
+
     public static void verifyUShape(Bin[] bins, String title, boolean doThrow) throws Exception
     {
         if (Bins.flips(bins) > 1)
             error(title, doThrow, "Mortality curve has multiple local minumums and maximums");
-        
+
         Bin firstBin = Bins.firstBin(bins);
         Bin lastBin = Bins.lastBin(bins);
 
@@ -35,9 +35,9 @@ public class CurveUtil
         Bin minBin = Bins.findMinBin(bins);
         if (minBin == firstBin || minBin == lastBin)
             error(title, doThrow, "Mortality minimum is not in the middle");
-        
+
     }
-    
+
     private static void error(String title, boolean doThrow, String msg) throws Exception
     {
         msg += ": " + title;
@@ -45,5 +45,56 @@ public class CurveUtil
             throw new Exception(msg);
         else
             Util.err(msg);
+    }
+
+    public static int ppy(double[] curve, Bin[] bins) throws Exception
+    {
+        Bin last = Bins.lastBin(bins);
+        int ppy = curve.length / (last.age_x2 + 1);
+        if (curve.length != ppy * (last.age_x2 + 1))
+            throw new IllegalArgumentException();
+        return ppy;
+    }
+
+    /*
+     * Extract the segment for the bin from @curve
+     */
+    public static double[] seg(double[] curve, Bin bin, Bin[] bins, int ppy) throws Exception
+    {
+        Bin first = Bins.firstBin(bins);
+
+        int x1 = ppy * (bin.age_x1 - first.age_x1);
+        int x2 = ppy * (bin.age_x2 + 1 - first.age_x1) - 1;
+
+        return Util.splice(curve, x1, x2);
+    }
+
+    /*
+     * Insert the segment for the bin into @curve
+     */
+    public static void insert(double[] curve, Bin bin, Bin[] bins, double[] seg) throws Exception
+    {
+        int ppy = ppy(curve, bins);
+        
+        Bin first = Bins.firstBin(bins);
+
+        int x1 = ppy * (bin.age_x1 - first.age_x1);
+        int x2 = ppy * (bin.age_x2 + 1 - first.age_x1) - 1;
+        
+        if (seg.length != x2 - x1 + 1)
+            throw new IllegalArgumentException();
+        
+        Util.insert(curve, seg, x1);
+    }
+
+    public static boolean isMonotonicallyDescending(double[] y)
+    {
+        for (int k = 1; k < y.length; k++)
+        {
+            if (y[k] > y[k - 1])
+                return false;
+        }
+
+        return true;
     }
 }

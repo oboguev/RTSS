@@ -106,8 +106,8 @@ public class MortalityTableADH
         CurveUtil.verifyUShape(male_mortality_bins, debug_title_male, false); // ###
         CurveUtil.verifyUShape(female_mortality_bins, debug_title_female, false);
 
-        cmt.setTable(Locality.TOTAL, Gender.MALE, makeSingleTable(debug_title_male, male_mortality_bins));
-        cmt.setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(debug_title_female, female_mortality_bins));
+        cmt.setTable(Locality.TOTAL, Gender.MALE, makeSingleTable(male_mortality_bins, debug_title_male));
+        cmt.setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(female_mortality_bins, debug_title_female));
 
         double[] qx = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
@@ -138,13 +138,16 @@ public class MortalityTableADH
         return cmt;
     }
 
-    private static SingleMortalityTable makeSingleTable(String debug_title, Bin... bins) throws Exception
+    private static SingleMortalityTable makeSingleTable(Bin[] bins, String debug_title) throws Exception
     {
         double[] curve = null;
 
         try
         {
-            curve = InterpolateAsMeanPreservingCurve.curve(bins, debug_title);
+            InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
+            options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9();
+            options = options.ppy(10).displayCurve(); // ###
+            curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
         }
         catch (ConstraintViolationException ex)
         {
@@ -153,9 +156,7 @@ public class MortalityTableADH
 
         if (curve == null)
             curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, debug_title);
-
-        // ### ensure monotonic for bins 1-4 and 5-9
-
+        
         curve = Util.divide(curve, 1000);
         return SingleMortalityTable.from_qx("computed", curve);
     }
