@@ -29,13 +29,12 @@ public class InterpolateUShapeAsMeanPreservingCurve
      * 3. Interpolate each part using monotonic mean-preserving spline.
      * 4. For the minimum bin, take average of two interpolations.  
      */
-    public static double[] curve(Bin... bins) throws Exception, ConstraintViolationException
+    public static double[] curve(Bin[] bins) throws Exception, ConstraintViolationException
     {
-        String debug_title = null;
-        return curve(debug_title, bins);
+        return curve(bins, null);
     }
     
-    public static double[] curve(String debug_title, Bin... bins) throws Exception, ConstraintViolationException
+    public static double[] curve(Bin[] bins, String debug_title) throws Exception, ConstraintViolationException
     {
         if (Bins.flips(bins) > 1)
             throw new Exception("Mortality curve has multiple local minumums and maximums");

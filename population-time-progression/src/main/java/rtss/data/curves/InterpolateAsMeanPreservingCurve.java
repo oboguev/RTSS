@@ -31,17 +31,16 @@ public class InterpolateAsMeanPreservingCurve
 
     public static double[] curve(Bin... bins) throws Exception, ConstraintViolationException
     {
-        String debug_title = null;
-        return curve(debug_title, bins);
+        return curve(bins, null);
     }
 
-    public static double[] curve(String debug_title, Bin... bins) throws Exception, ConstraintViolationException
+    public static double[] curve(Bin[] bins, String debug_title) throws Exception, ConstraintViolationException
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
-                .checkPositive(false);
+                .checkPositive(false).placeLastBinKnotAtRightmostPoint();
 
-        int ppy = 1000;
+        int ppy = 10; // ###
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
@@ -67,7 +66,7 @@ public class InterpolateAsMeanPreservingCurve
             yyy3 = EnsurePositiveCurve.ensurePositive(yyy3, bins);
         }
 
-        if (Util.False)
+        if (Util.True) // ###
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "Make curve";

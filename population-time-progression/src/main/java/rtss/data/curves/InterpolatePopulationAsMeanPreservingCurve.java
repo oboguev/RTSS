@@ -20,7 +20,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 {
     public static final int MAX_AGE = Population.MAX_AGE;
 
-    public static double[] curve(Bin... bins) throws Exception
+    public static double[] curve(Bin[] bins) throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()

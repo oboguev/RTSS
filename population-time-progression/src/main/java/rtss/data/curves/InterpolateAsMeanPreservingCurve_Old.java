@@ -23,7 +23,7 @@ public class InterpolateAsMeanPreservingCurve_Old
     /*
      * Interpolate bins to a smooth yearly curve
      */
-    public static double[] curve(Bin... bins) throws Exception
+    public static double[] curve(Bin[] bins) throws Exception
     {
         /*
          * Mortality curve is expected to be U-shaped.
