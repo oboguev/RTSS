@@ -265,6 +265,14 @@ public class Util
         else
             return 0;
     }
+    
+    // check if @x is with range [x1...x2], where x1 and x2 can be inversed 
+    public static boolean within(double x, double x1, double x2)
+    {
+       double xx1 = Math.min(x1, x2); 
+       double xx2 = Math.max(x1, x2);
+       return x >= xx1 && x <= xx2;
+    }
 
     // return a new array with values representing y[] * f
     public static double[] multiply(final double[] y, double f)

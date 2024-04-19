@@ -61,12 +61,14 @@ public class EnsureMonotonic
             break;
 
         case ".xx":
-            fixOne(b2);
+            if (!fixOne(b2))
+                fixTwo(b1, b2);
             break;
 
         case "x.x":
             // not present in the data we use, but handle it
-            fixOne(b1);
+            if (!fixOne(b1))
+                fixTwo(b1, b2);
             break;
 
         default:
@@ -92,7 +94,9 @@ public class EnsureMonotonic
             return null;
     }
 
-    private void fixOne(Bin b) throws Exception
+    /* ================================================================= */
+
+    private boolean fixOne(Bin b) throws Exception
     {
         int x1 = ppy * (b.age_x1 - first.age_x1);
         int x2 = ppy * (b.age_x2 + 1 - first.age_x1) - 1;
@@ -120,31 +124,128 @@ public class EnsureMonotonic
             v2 = 2 * curve[x2 + 1] - curve[x2 + 2];
         }
 
-        straight_line(seg, 0, v1, seg.length - 1, v2);
-
-        // ###
-    }
-
-    private void fixTwo(Bin b1, Bin b2)
-    {
-        // ###
-    }
-    
-    /*
-     * Fill in straigth line of values into @seg[x1...x2], interpolated frim @v1 to @v2.
-     */
-    private void straight_line(double[] seg, int x1, double v1, int x2, double v2)
-    {
-        if (x2 == x1)
+        if (!Util.within(b.avg, v1, v2))
+            return false;
+        
+        double[] line = seg.clone();
+        CurveUtil.straight_line(line, 0, v1, seg.length - 1, v2);
+        if (v1 == v2)
         {
-            if (v1 != v2)
-                throw new IllegalArgumentException();
-            seg[x1] = v1;
+            CurveUtil.insert(curve, b, bins, line);
+            return true;
+        }
+
+        double vmin = Util.min(line);
+        double vmax = Util.max(line);
+
+        double avg = Util.average(line);
+        double a1, a2, a = 1;
+
+        if (avg == b.avg)
+        {
+            CurveUtil.insert(curve, b, bins, line);
+            return true;
+        }
+        else if (avg < b.avg)
+        {
+            // should increase avg by decreasing a
+            do
+            {
+                a /= 2;
+                seg = CurveUtil.distort(line, vmin, vmax, a);
+            }
+            while (Util.average(seg) < b.avg);
+            a2 = 1;
+            a1 = a;
+        }
+        else // if (avg > b.avg)
+        {
+            // should decrease avg by increasing a
+            do
+            {
+                a *= 2;
+                seg = CurveUtil.distort(line, vmin, vmax, a);
+            }
+            while (Util.average(seg) > b.avg);
+            a1 = 1;
+            a2 = a;
+        }
+        
+        if (Util.average(seg) == b.avg)
+        {
+            CurveUtil.insert(curve, b, bins, seg);
+            return true;
+        }
+        
+        /*
+         * Perform binary search between a1 (low) and a2 (high) 
+         */
+        for (;;)
+        {
+            a = (a1 + a2) / 2;
+            seg = CurveUtil.distort(line, vmin, vmax, a);
+            avg = Util.average(seg);
+            if (avg == b.avg || !Util.differ(avg, b.avg))
+            {
+                Util.out(String.format("Fixed age range %d-%d in %s", b.age_x1, b.age_x2, debug_title));
+                CurveUtil.insert(curve, b, bins, seg);
+                return true;
+            }
+            else if (avg < b.avg)
+            {
+                // should increase avg by decreasing a
+                a2 = a;
+            }
+            else // if (avg < b.avg)
+            {
+                // should decrease avg by increasing a
+                a1 = a;
+            }
+        }
+    }
+
+    /* ================================================================= */
+
+    private void fixTwo(Bin b1, Bin b2) throws Exception
+    {
+        double[] seg1 = CurveUtil.seg(curve, b1, bins, ppy);
+        double[] seg2 = CurveUtil.seg(curve, b2, bins, ppy);
+
+        int x1 = ppy * (b1.age_x1 - first.age_x1);
+        int x2 = ppy * (b2.age_x2 + 1 - first.age_x1) - 1;
+
+        double[] seg12 = Util.splice(curve, x1, x2);
+
+        double v1;
+        double v2;
+
+        if (b1.prev == null)
+        {
+            v1 = curve[x1];
         }
         else
         {
-            for (int x = x1; x <= x2; x++)
-                seg[x] = v1 + (x - x1) * (v2 - v1) / (x2 - x1); 
+            v1 = 2 * curve[x1 - 1] - curve[x1 - 2];
+        }
+
+        if (b2.next == null)
+        {
+            v2 = curve[x2];
+        }
+        else
+        {
+            v2 = 2 * curve[x2 + 1] - curve[x2 + 2];
+        }
+
+        // ###
+        if (!Util.within(b1.avg, v1, v2))
+        {
+            Util.noop();
+        }
+
+        if (!Util.within(b2.avg, v1, v2))
+        {
+            Util.noop();
         }
     }
 }

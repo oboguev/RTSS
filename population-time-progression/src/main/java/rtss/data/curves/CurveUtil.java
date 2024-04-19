@@ -75,15 +75,15 @@ public class CurveUtil
     public static void insert(double[] curve, Bin bin, Bin[] bins, double[] seg) throws Exception
     {
         int ppy = ppy(curve, bins);
-        
+
         Bin first = Bins.firstBin(bins);
 
         int x1 = ppy * (bin.age_x1 - first.age_x1);
         int x2 = ppy * (bin.age_x2 + 1 - first.age_x1) - 1;
-        
+
         if (seg.length != x2 - x1 + 1)
             throw new IllegalArgumentException();
-        
+
         Util.insert(curve, seg, x1);
     }
 
@@ -96,5 +96,48 @@ public class CurveUtil
         }
 
         return true;
+    }
+
+    /*
+     * Fill in straigth line of values into @seg[x1...x2], interpolated frim @v1 to @v2.
+     */
+    public static void straight_line(double[] seg, int x1, double v1, int x2, double v2)
+    {
+        if (x2 == x1)
+        {
+            if (v1 != v2)
+                throw new IllegalArgumentException();
+            seg[x1] = v1;
+        }
+        else
+        {
+            for (int x = x1; x <= x2; x++)
+                seg[x] = v1 + (x - x1) * (v2 - v1) / (x2 - x1);
+        }
+    }
+
+    /*
+     * Distort array values: y -> ymin + (ymax - ymin) * ((y - ymin)/(ymax - ymin)) ^ a.
+     * Original array is unchanged, a modified copy is returned.
+     * 
+     * Values of a > 1 decrease sum and average.
+     * Values of a < 1 increase sum and average.
+     */
+    public static double[] distort(final double[] y, double ymin, double ymax, double a) throws Exception
+    {
+        if (ymin == ymax)
+        {
+            return y.clone();
+        }
+        else
+        {
+            double[] z = new double[y.length];
+            for (int x = 0; x < y.length; x++)
+            {
+                z[x] = ymin + (ymax - ymin) * Math.pow((y[x] - ymin) / (ymax - ymin), a);
+                z[x] = Util.validate(z[x]);
+            }
+            return z;
+        }
     }
 }
