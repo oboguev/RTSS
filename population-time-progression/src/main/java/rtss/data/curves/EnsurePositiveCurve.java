@@ -195,7 +195,6 @@ public class EnsurePositiveCurve
         }
 
         return xseg;
-        
     }
 
     /*
