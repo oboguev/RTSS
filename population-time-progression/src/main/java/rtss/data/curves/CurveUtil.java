@@ -2,6 +2,7 @@ package rtss.data.curves;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.util.Clipboard;
 import rtss.util.Util;
 
 public class CurveUtil
@@ -117,7 +118,7 @@ public class CurveUtil
     }
 
     /*
-     * Distort array values: y -> ymin + (ymax - ymin) * ((y - ymin)/(ymax - ymin)) ^ a.
+     * Distort array values: y -> ymin + (ymax - ymin) * F((y - ymin)/(ymax - ymin), a).
      * Original array is unchanged, a modified copy is returned.
      * 
      * Values of a > 1 decrease sum and average.
@@ -134,10 +135,34 @@ public class CurveUtil
             double[] z = new double[y.length];
             for (int x = 0; x < y.length; x++)
             {
-                z[x] = ymin + (ymax - ymin) * Math.pow((y[x] - ymin) / (ymax - ymin), a);
+                z[x] = ymin + (ymax - ymin) * map_01((y[x] - ymin) / (ymax - ymin), a);
                 z[x] = Util.validate(z[x]);
             }
             return z;
         }
+    }
+    
+    private static double map_01(double x, double a) throws Exception
+    {
+        if (!(x >= 0 && x <= 1))
+            throw new IllegalArgumentException();
+        return Math.pow(x, a);
+    }
+    
+    public static void exportCurveSegmentToClipboard(final double[] curve, int year1, int year2, int ppy) throws Exception
+    {
+        int x1 = year1 * ppy;
+        int x2 = (year2 + 1) * ppy - 1;
+        double year = year1;
+        
+        StringBuilder sb = new StringBuilder(); 
+        
+        for (int x = x1; x <= x2; x++)
+        {
+            sb.append(String.format("%.5f %.3f\n", year, curve[x]));
+            year += 1.0 / ppy;
+        }
+
+        Clipboard.put(sb.toString());
     }
 }

@@ -61,13 +61,13 @@ public class EnsureMonotonic
             break;
 
         case ".xx":
-            if (!fixOne(b2))
+            if (!fixOne(b2, false))
                 fixTwo(b1, b2);
             break;
 
         case "x.x":
             // not present in the data we use, but handle it
-            if (!fixOne(b1))
+            if (!fixOne(b1, false))
                 fixTwo(b1, b2);
             break;
 
@@ -96,7 +96,7 @@ public class EnsureMonotonic
 
     /* ================================================================= */
 
-    private boolean fixOne(Bin b) throws Exception
+    private boolean fixOne(Bin b, boolean force) throws Exception
     {
         int x1 = ppy * (b.age_x1 - first.age_x1);
         int x2 = ppy * (b.age_x2 + 1 - first.age_x1) - 1;
@@ -130,10 +130,7 @@ public class EnsureMonotonic
         double[] line = seg.clone();
         CurveUtil.straight_line(line, 0, v1, seg.length - 1, v2);
         if (v1 == v2)
-        {
-            CurveUtil.insert(curve, b, bins, line);
-            return true;
-        }
+            return doneOne(b, line);
 
         double vmin = Util.min(line);
         double vmax = Util.max(line);
@@ -143,8 +140,7 @@ public class EnsureMonotonic
 
         if (avg == b.avg)
         {
-            CurveUtil.insert(curve, b, bins, line);
-            return true;
+            return doneOne(b, line);
         }
         else if (avg < b.avg)
         {
@@ -152,6 +148,12 @@ public class EnsureMonotonic
             do
             {
                 a /= 2;
+
+                if (a < 0.1  && !force)
+                    return false;
+                if (a < 0.01)
+                    throw new Exception("Unable to fix the curve");
+                
                 seg = CurveUtil.distort(line, vmin, vmax, a);
             }
             while (Util.average(seg) < b.avg);
@@ -164,6 +166,12 @@ public class EnsureMonotonic
             do
             {
                 a *= 2;
+
+                if (a > 10  && !force)
+                    return false;
+                if (a > 100)
+                    throw new Exception("Unable to fix the curve");
+                
                 seg = CurveUtil.distort(line, vmin, vmax, a);
             }
             while (Util.average(seg) > b.avg);
@@ -172,10 +180,7 @@ public class EnsureMonotonic
         }
         
         if (Util.average(seg) == b.avg)
-        {
-            CurveUtil.insert(curve, b, bins, seg);
-            return true;
-        }
+            return doneOne(b, seg);
         
         /*
          * Perform binary search between a1 (low) and a2 (high) 
@@ -183,12 +188,17 @@ public class EnsureMonotonic
         for (;;)
         {
             a = (a1 + a2) / 2;
+
+            if (!force && (a < 0.1 || a > 10))
+                return false;
+            
             seg = CurveUtil.distort(line, vmin, vmax, a);
             avg = Util.average(seg);
             if (avg == b.avg || !Util.differ(avg, b.avg))
             {
-                Util.out(String.format("Fixed age range %d-%d in %s", b.age_x1, b.age_x2, debug_title));
                 CurveUtil.insert(curve, b, bins, seg);
+                CurveUtil.exportCurveSegmentToClipboard(curve, b.prev.age_x1, b.next.age_x2, ppy);
+                Util.out(String.format("Fixed age range %d-%d in %s, with a = %f", b.age_x1, b.age_x2, debug_title, a));
                 return true;
             }
             else if (avg < b.avg)
@@ -202,6 +212,12 @@ public class EnsureMonotonic
                 a1 = a;
             }
         }
+    }
+    
+    private boolean doneOne(Bin b, double[] seg) throws Exception
+    {
+        CurveUtil.insert(curve, b, bins, seg);
+        return true;
     }
 
     /* ================================================================= */
