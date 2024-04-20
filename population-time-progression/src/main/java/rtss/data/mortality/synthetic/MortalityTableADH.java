@@ -145,7 +145,7 @@ public class MortalityTableADH
         try
         {
             InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
-            options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9();
+            options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9(true);
             options = options.ppy(10).displayCurve(); // ###
             curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
         }
@@ -157,8 +157,8 @@ public class MortalityTableADH
         if (curve == null)
             curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, debug_title);
         
-        curve = Util.divide(curve, 1000);
-        return SingleMortalityTable.from_qx("computed", curve);
+        CurveUtil.validate_means(curve, bins);
+        return SingleMortalityTable.from_qx("computed", Util.divide(curve, 1000));
     }
 
     @SuppressWarnings("unused")

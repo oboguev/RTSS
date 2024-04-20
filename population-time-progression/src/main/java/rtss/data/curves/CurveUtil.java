@@ -135,28 +135,68 @@ public class CurveUtil
             double[] z = new double[y.length];
             for (int x = 0; x < y.length; x++)
             {
-                z[x] = ymin + (ymax - ymin) * map_01((y[x] - ymin) / (ymax - ymin), a);
+                /*
+                 * map_01_basic can cause abrupt twists at the end of the segment because x^a
+                 * may have high derivative near 0 or 1. Use map_01_beveled instead, which is more relaxed. 
+                 */
+                z[x] = ymin + (ymax - ymin) * map_01_beveled((y[x] - ymin) / (ymax - ymin), a);
                 z[x] = Util.validate(z[x]);
             }
             return z;
         }
     }
-    
-    private static double map_01(double x, double a) throws Exception
+
+    @SuppressWarnings("unused")
+    private static double map_01_basic(double x, double a) throws Exception
     {
         if (!(x >= 0 && x <= 1))
             throw new IllegalArgumentException();
         return Math.pow(x, a);
     }
-    
+
+    @SuppressWarnings("unused")
+    private static double map_01_beveled(double x, double a) throws Exception
+    {
+        if (!(x >= 0 && x <= 1))
+            throw new IllegalArgumentException();
+
+        final double margin = 0.2;
+
+        if (x < margin)
+        {
+            return linear_interpol(x, 0, 0, margin, Math.pow(margin, a));
+        }
+        else if (x > 1 - margin)
+        {
+            return linear_interpol(x, 1 - margin, Math.pow(1 - margin, a), 1, 1);
+        }
+        else
+        {
+            return Math.pow(x, a);
+        }
+    }
+
+    private static double linear_interpol(double x, double x1, double y1, double x2, double y2) throws Exception
+    {
+        if (x1 == x2)
+        {
+            if (y1 == y2 && x == x1)
+                return y1;
+            else
+                throw new IllegalArgumentException();
+        }
+
+        return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
+    }
+
     public static void exportCurveSegmentToClipboard(final double[] curve, int year1, int year2, int ppy) throws Exception
     {
         int x1 = year1 * ppy;
         int x2 = (year2 + 1) * ppy - 1;
         double year = year1;
-        
-        StringBuilder sb = new StringBuilder(); 
-        
+
+        StringBuilder sb = new StringBuilder();
+
         for (int x = x1; x <= x2; x++)
         {
             sb.append(String.format("%.5f %.3f\n", year, curve[x]));
