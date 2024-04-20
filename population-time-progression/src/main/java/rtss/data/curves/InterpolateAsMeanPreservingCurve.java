@@ -29,7 +29,7 @@ public class InterpolateAsMeanPreservingCurve
 {
     public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
 
-    public static double[] curve(Bin... bins) throws Exception, ConstraintViolationException
+    public static double[] curve(Bin[] bins) throws Exception, ConstraintViolationException
     {
         return curve(bins, null);
     }
@@ -126,6 +126,8 @@ public class InterpolateAsMeanPreservingCurve
 
         return yy;
     }
+    
+    /* =============================================================================================== */
 
     public static class Options
     {

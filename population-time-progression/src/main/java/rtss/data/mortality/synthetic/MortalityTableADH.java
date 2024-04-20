@@ -144,10 +144,13 @@ public class MortalityTableADH
 
         try
         {
-            InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
-            options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9(true);
-            options = options.ppy(10).displayCurve(); // ###
-            curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
+            if (Util.False)
+            {
+                InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
+                options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9(true);
+                options = options.ppy(10).displayCurve(); // ###
+                curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
+            }
         }
         catch (ConstraintViolationException ex)
         {
@@ -155,7 +158,12 @@ public class MortalityTableADH
         }
 
         if (curve == null)
-            curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, debug_title);
+        {
+            InterpolateUShapeAsMeanPreservingCurve.Options options = new InterpolateUShapeAsMeanPreservingCurve.Options();
+            options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9(true);
+            options = options.ppy(10).displayCurve(); // ###
+            curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, options);
+        }
         
         CurveUtil.validate_means(curve, bins);
         return SingleMortalityTable.from_qx("computed", Util.divide(curve, 1000));

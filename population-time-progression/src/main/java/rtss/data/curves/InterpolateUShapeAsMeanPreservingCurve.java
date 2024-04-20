@@ -6,6 +6,7 @@ import javax.validation.ConstraintViolationException;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.InterpolateAsMeanPreservingCurve.Options;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
@@ -33,12 +34,16 @@ public class InterpolateUShapeAsMeanPreservingCurve
     {
         return curve(bins, null);
     }
-    
-    public static double[] curve(Bin[] bins, String debug_title) throws Exception, ConstraintViolationException
+
+    public static double[] curve(Bin[] bins, Options options) throws Exception, ConstraintViolationException
     {
+        if (options == null)
+            options = new Options();
+        options = options.applyDefaults();
+
         if (Bins.flips(bins) > 1)
             throw new Exception("Mortality curve has multiple local minumums and maximums");
-        
+
         Bin firstBin = Bins.firstBin(bins);
         Bin lastBin = Bins.lastBin(bins);
 
@@ -50,28 +55,31 @@ public class InterpolateUShapeAsMeanPreservingCurve
         Bin minBin = Bins.findMinBin(bins);
         if (minBin == firstBin || minBin == lastBin)
             throw new Exception("Mortality minimum is not in the middle");
-        
+
         Bin[] leftSet = Bins.subset(firstBin, minBin);
         Bin[] rightSet = Bins.subset(minBin, lastBin);
-        int ppy = 1000;
-        
+        int ppy = options.ppy;
+
         double[] lcurve = bins2curve(leftSet, ppy);
         double[] rcurve = bins2curve(rightSet, ppy);
-        
+
         double[] yyy = joinCurves(lcurve, rcurve, ppy, minBin);
-        
+
         yyy = EnsurePositiveCurve.ensurePositive(yyy, bins);
-        
+
         if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             Clipboard.put(" ", xxx, yyy);
         }
 
-        if (Util.False)
+        if (Util.False || options.displayCurve)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
+            String title = "Make curve";
+            if (options.debug_title != null)
+                title += " " + options.debug_title;
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y");
             chart.addSeries("curve", xxx, yyy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
@@ -86,7 +94,7 @@ public class InterpolateUShapeAsMeanPreservingCurve
 
         return yy;
     }
-    
+
     private static double[] bins2curve(Bin[] bins, int ppy) throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
@@ -98,16 +106,16 @@ public class InterpolateUShapeAsMeanPreservingCurve
         // options.basicSplineType(SteffenSplineInterpolator.class);
         return MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
     }
-    
+
     private static double[] joinCurves(double[] left, double[] right, int ppy, Bin minBin)
     {
         int overlap = minBin.widths_in_years * ppy;
         double[] y = new double[left.length + right.length - overlap];
-        
+
         /* left non-overlapped part */
         for (int k = 0; k < left.length - overlap; k++)
             y[k] = left[k];
-        
+
         /* right non-overlapped part */
         for (int k = overlap; k < right.length; k++)
             y[left.length + (k - overlap)] = right[k];
@@ -119,7 +127,98 @@ public class InterpolateUShapeAsMeanPreservingCurve
             double v2 = right[k];
             y[left.length - overlap + k] = (v1 + v2) / 2;
         }
-        
+
         return y;
+    }
+
+    /* =============================================================================================== */
+
+    public static class Options
+    {
+        public String debug_title;
+        public Integer ppy;
+        public Boolean ensurePositive;
+        public Boolean ensureMonotonicallyDecreasing_1_4_5_9;
+        public Boolean displayCurve;
+
+        public Options()
+        {
+        }
+
+        public Options(Options x)
+        {
+            this.debug_title = x.debug_title;
+            this.ppy = x.ppy;
+            this.ensurePositive = x.ensurePositive;
+            this.ensureMonotonicallyDecreasing_1_4_5_9 = x.ensureMonotonicallyDecreasing_1_4_5_9;
+            this.displayCurve = x.displayCurve;
+        }
+
+        public Options applyDefaults()
+        {
+            Options x = new Options(this);
+
+            if (x.debug_title == null)
+                x.debug_title = "";
+
+            if (x.ppy == null)
+                x.ppy = 1000;
+
+            if (x.ensurePositive == null)
+                x.ensurePositive = false;
+
+            if (x.ensureMonotonicallyDecreasing_1_4_5_9 == null)
+                x.ensureMonotonicallyDecreasing_1_4_5_9 = false;
+
+            if (x.displayCurve == null)
+                x.displayCurve = false;
+
+            return x;
+        }
+
+        public Options debug_title(String v)
+        {
+            debug_title = v;
+            return this;
+        }
+
+        public Options ppy(Integer v)
+        {
+            ppy = v;
+            return this;
+        }
+
+        public Options ensurePositive()
+        {
+            return ensurePositive(true);
+        }
+
+        public Options ensurePositive(Boolean v)
+        {
+            ensurePositive = v;
+            return this;
+        }
+
+        public Options ensureMonotonicallyDecreasing_1_4_5_9()
+        {
+            return ensureMonotonicallyDecreasing_1_4_5_9(true);
+        }
+
+        public Options ensureMonotonicallyDecreasing_1_4_5_9(Boolean v)
+        {
+            ensureMonotonicallyDecreasing_1_4_5_9 = v;
+            return this;
+        }
+
+        public Options displayCurve()
+        {
+            return displayCurve(true);
+        }
+
+        public Options displayCurve(Boolean v)
+        {
+            displayCurve = v;
+            return this;
+        }
     }
 }

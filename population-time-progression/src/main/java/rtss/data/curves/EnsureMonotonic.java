@@ -26,17 +26,17 @@ public class EnsureMonotonic
      * Резкое падение смертности в возрастных группах 1-4 и 5-9 часто вызывает перехлёысты сплайна в этом диапазоне.
      * Изменить ход кривой сделав её монотонно уменьшающейся, но сохраняя средние значения.
      */
-    public static void ensureMonotonicallyDecreasing_1_4_5_9(double[] curve, Bin[] bins, String debug_title) throws Exception
+    public static boolean ensureMonotonicallyDecreasing_1_4_5_9(double[] curve, Bin[] bins, String debug_title) throws Exception
     {
-        new EnsureMonotonic(curve, bins, debug_title).ensureMonotonicallyDecreasing_1_4_5_9();
+        return new EnsureMonotonic(curve, bins, debug_title).ensureMonotonicallyDecreasing_1_4_5_9();
     }
 
-    private void ensureMonotonicallyDecreasing_1_4_5_9() throws Exception
+    private boolean ensureMonotonicallyDecreasing_1_4_5_9() throws Exception
     {
         Bin b1 = bin_1_4();
         Bin b2 = bin_5_9();
         if (b1 == null || b2 == null || b1.prev == null || b2.next == null)
-            return;
+            return false;
 
         double[] seg1 = CurveUtil.seg(curve, b1, bins, ppy);
         double[] seg2 = CurveUtil.seg(curve, b2, bins, ppy);
@@ -48,28 +48,25 @@ public class EnsureMonotonic
         sig += CurveUtil.isMonotonicallyDescending(seg1) ? "." : "x";
         sig += CurveUtil.isMonotonicallyDescending(seg2) ? "." : "x";
         sig += CurveUtil.isMonotonicallyDescending(seg12) ? "." : "x";
-        if (sig.equals("..."))
-            return;
 
         switch (sig)
         {
         case "...":
-            return;
+            return true;
 
         case "xxx":
-            fixTwo(b1, b2);
-            break;
+            return fixTwo(b1, b2);
 
         case ".xx":
-            if (!fixOne(b2, false))
-                fixTwo(b1, b2);
-            break;
+            if (fixOne(b2, false))
+                return true;
+            return fixTwo(b1, b2);
 
         case "x.x":
-            // not present in the data we use, but handle it
-            if (!fixOne(b1, false))
-                fixTwo(b1, b2);
-            break;
+            // not present in the data we use, but do handle it anyway
+            if (fixOne(b1, false))
+                return true;
+            return fixTwo(b1, b2);
 
         default:
             throw new Exception("Internal error");
@@ -197,8 +194,8 @@ public class EnsureMonotonic
             if (avg == b.avg || !Util.differ(avg, b.avg))
             {
                 CurveUtil.insert(curve, b, bins, seg);
-                CurveUtil.exportCurveSegmentToClipboard(curve, b.prev.age_x1, b.next.age_x2, ppy);
-                Util.out(String.format("Fixed age range %d-%d in %s, with a = %f", b.age_x1, b.age_x2, debug_title, a));
+                // CurveUtil.exportCurveSegmentToClipboard(curve, b.prev.age_x1, b.next.age_x2, ppy);
+                // Util.out(String.format("Fixed age range %d-%d in %s, with a = %f", b.age_x1, b.age_x2, debug_title, a));
                 return true;
             }
             else if (avg < b.avg)
@@ -222,7 +219,7 @@ public class EnsureMonotonic
 
     /* ================================================================= */
 
-    private void fixTwo(Bin b1, Bin b2) throws Exception
+    private boolean fixTwo(Bin b1, Bin b2) throws Exception
     {
         double[] seg1 = CurveUtil.seg(curve, b1, bins, ppy);
         double[] seg2 = CurveUtil.seg(curve, b2, bins, ppy);
@@ -252,16 +249,25 @@ public class EnsureMonotonic
         {
             v2 = 2 * curve[x2 + 1] - curve[x2 + 2];
         }
-
-        // ###
+        
         if (!Util.within(b1.avg, v1, v2))
-        {
-            Util.noop();
-        }
+            return fixThree(b1, b2, b2.next);
 
         if (!Util.within(b2.avg, v1, v2))
-        {
-            Util.noop();
-        }
+            return fixThree(b1, b2, b2.next);
+        
+        // ### move vm between v1 and v2
+        
+        Util.out("Fix: " + debug_title);
+
+        return false;
+    }
+
+    /* ================================================================= */
+
+    private boolean fixThree(Bin b1, Bin b2, Bin b3) throws Exception
+    {
+        // ###
+        return false;
     }
 }
