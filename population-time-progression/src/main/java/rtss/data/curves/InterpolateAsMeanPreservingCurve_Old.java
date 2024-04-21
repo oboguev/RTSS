@@ -1,8 +1,11 @@
 package rtss.data.curves;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.mortality.SingleMortalityTable;
+import rtss.math.interpolate.FritschCarlsonMonotonicSpline;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -98,7 +101,7 @@ public class InterpolateAsMeanPreservingCurve_Old
     static public class SplineCurve
     {
         // private PolynomialSplineFunction spline;
-        private rtss.math.interpolate.FritschCarlsonMonotonicSpline aspline;
+        private UnivariateFunction aspline;
         private double cp_x_last;
 
         public SplineCurve(double[] cp_x, double[] cp_y) throws Exception
@@ -111,7 +114,7 @@ public class InterpolateAsMeanPreservingCurve_Old
             // https://jetcracker.wordpress.com/2014/12/26/constrained-cubic-spline-java
 
             // but use android.util.Spline for now
-            aspline = rtss.math.interpolate.FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
+            aspline = FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
             cp_x_last = cp_x[cp_x.length - 1];
         }
 
@@ -125,7 +128,7 @@ public class InterpolateAsMeanPreservingCurve_Old
             else
             {
                 // return spline.value(x);
-                return aspline.interpolate(x);
+                return aspline.value(x);
             }
         }
     }

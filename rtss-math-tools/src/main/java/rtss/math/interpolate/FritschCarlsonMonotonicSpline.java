@@ -15,40 +15,13 @@
  */
 package rtss.math.interpolate;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+
 /**
  * Performs spline interpolation given a set of control points.
- * 
- * @hide
  */
 public abstract class FritschCarlsonMonotonicSpline
 {
-    /**
-     * Interpolates the value of Y = f(X) for given X. Clamps X to the domain of the spline.
-     *
-     * @param x
-     *            The X value.
-     * @return The interpolated Y = f(X) value.
-     */
-    public abstract double interpolate(double x);
-
-    /**
-     * Creates an appropriate spline based on the properties of the control points.
-     *
-     * If the control points are monotonic then the resulting spline will preserve that and otherwise optimize for error bounds.
-     */
-    public static FritschCarlsonMonotonicSpline createSpline(double[] x, double[] y) throws Exception
-    {
-        if (!isStrictlyIncreasing(x))
-        {
-            throw new IllegalArgumentException("The control points must all have strictly increasing X values");
-        }
-        
-        if (!isMonotonic(y))
-            throw new Exception("Control points are not monotonic");
-
-        return createMonotoneCubicSpline(x, y);
-    }
-
     /**
      * Creates a monotone cubic spline from a given set of control points.
      *
@@ -69,7 +42,7 @@ public abstract class FritschCarlsonMonotonicSpline
      * @throws IllegalArgumentException
      *             if the control points are not monotonic.
      */
-    public static FritschCarlsonMonotonicSpline createMonotoneCubicSpline(double[] x, double[] y)
+    public static UnivariateFunction createMonotoneCubicSpline(double[] x, double[] y)
     {
         return new MonotoneCubicSpline(x, y);
     }
@@ -78,9 +51,9 @@ public abstract class FritschCarlsonMonotonicSpline
     {
         if (x == null || x.length < 2)
             throw new IllegalArgumentException("There must be at least two control points.");
-        
+
         double prev = x[0];
-        
+
         for (int i = 1; i < x.length; i++)
         {
             double curr = x[i];
@@ -88,7 +61,7 @@ public abstract class FritschCarlsonMonotonicSpline
                 return false;
             prev = curr;
         }
-        
+
         return true;
     }
 
@@ -96,9 +69,9 @@ public abstract class FritschCarlsonMonotonicSpline
     {
         if (x == null || x.length < 2)
             throw new IllegalArgumentException("There must be at least two control points.");
-        
+
         double prev = x[0];
-        
+
         for (int i = 1; i < x.length; i++)
         {
             double curr = x[i];
@@ -106,47 +79,53 @@ public abstract class FritschCarlsonMonotonicSpline
                 return false;
             prev = curr;
         }
-        
+
         return true;
     }
 
-    public static class MonotoneCubicSpline extends FritschCarlsonMonotonicSpline
+    public static class MonotoneCubicSpline implements UnivariateFunction
     {
         private double[] mX;
         private double[] mY;
         private double[] mM;
 
-        public MonotoneCubicSpline(double[] x, double[] y)
+        public MonotoneCubicSpline(double[] x, double[] y) throws IllegalArgumentException
         {
             if (x == null || y == null || x.length != y.length || x.length < 2)
-            {
-                throw new IllegalArgumentException("There must be at least two control "
-                                                   + "points and the arrays must be of equal length.");
-            }
+                throw new IllegalArgumentException("There must be at least two control points and the arrays must be of equal length.");
+
+            if (!isStrictlyIncreasing(x))
+                throw new IllegalArgumentException("The control points must all have strictly increasing X values");
+
+            if (!isMonotonic(y))
+                throw new IllegalArgumentException("Control points are not monotonic");
+
             final int n = x.length;
             double[] d = new double[n - 1]; // could optimize this out
             double[] m = new double[n];
+
             // Compute slopes of secant lines between successive points.
             for (int i = 0; i < n - 1; i++)
             {
                 double h = x[i + 1] - x[i];
                 if (h <= 0f)
-                {
-                    throw new IllegalArgumentException("The control points must all "
-                                                       + "have strictly increasing X values.");
-                }
+                    throw new IllegalArgumentException("The control points must all have strictly increasing X values");
                 d[i] = (y[i + 1] - y[i]) / h;
             }
+
             // Initialize the tangents as the average of the secants.
             m[0] = d[0];
+
             for (int i = 1; i < n - 1; i++)
                 m[i] = (d[i - 1] + d[i]) * 0.5f;
+            
             m[n - 1] = d[n - 2];
+
             // Update the tangents to preserve monotonicity.
             for (int i = 0; i < n - 1; i++)
             {
                 if (d[i] == 0f)
-                { 
+                {
                     // successive Y values are equal
                     m[i] = 0f;
                     m[i + 1] = 0f;
@@ -156,11 +135,8 @@ public abstract class FritschCarlsonMonotonicSpline
                     double a = m[i] / d[i];
                     double b = m[i + 1] / d[i];
                     if (a < 0f || b < 0f)
-                    {
-                        throw new IllegalArgumentException("The control points must have "
-                                                           + "monotonic Y values.");
-                    }
-                    
+                        throw new IllegalArgumentException("The control points must have  monotonic Y values");
+
                     double h = (float) Math.hypot(a, b);
                     if (h > 3f)
                     {
@@ -176,8 +152,14 @@ public abstract class FritschCarlsonMonotonicSpline
             mM = m;
         }
 
-        @Override
-        public double interpolate(double x)
+        /**
+         * Interpolates the value of Y = f(X) for given X. Clamps X to the domain of the spline.
+         *
+         * @param x
+         *            The X value.
+         * @return The interpolated Y = f(X) value.
+         */
+        public double value(double x)
         {
             // Handle the boundary cases.
             final int n = mX.length;
@@ -186,7 +168,7 @@ public abstract class FritschCarlsonMonotonicSpline
 
             if (x <= mX[0])
                 return mY[0];
-            
+
             if (x >= mX[n - 1])
                 return mY[n - 1];
 
@@ -201,12 +183,12 @@ public abstract class FritschCarlsonMonotonicSpline
                     return mY[i];
                 }
             }
-            
+
             // Perform cubic Hermite spline interpolation.
             double h = mX[i + 1] - mX[i];
             double t = (x - mX[i]) / h;
             return (mY[i] * (1 + 2 * t) + h * mM[i] * t) * (1 - t) * (1 - t)
                    + (mY[i + 1] * (3 - 2 * t) + h * mM[i + 1] * (t - 1)) * t * t;
         }
-   }
+    }
 }

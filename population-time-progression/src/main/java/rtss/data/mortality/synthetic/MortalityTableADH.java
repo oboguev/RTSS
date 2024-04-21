@@ -18,6 +18,7 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -141,13 +142,28 @@ public class MortalityTableADH
 
         double[] curve = null;
 
+        // ###
+        int ppy = 10;
+        curve = MeanPreservingIntegralSpline.eval(bins, ppy);
+        if (Util.True)
+        {
+            double[] xxx = Bins.ppy_x(bins, ppy);
+            String title = "Make curve";
+            title += "Integr curve " + debug_title;
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("3", xxx, curve);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.display();
+        }
+        // ###
+
         try
         {
             if (Util.True)
             {
                 InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
                 options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
-                options = options.ppy(10).displayCurve(); // ###
+                options = options.ppy(10).displayCurve(false); // ###
                 curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
             }
         }
@@ -161,7 +177,7 @@ public class MortalityTableADH
         {
             InterpolateUShapeAsMeanPreservingCurve.Options options = new InterpolateUShapeAsMeanPreservingCurve.Options();
             options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
-            options = options.ppy(10).displayCurve(); // ###
+            options = options.ppy(10).displayCurve(false); // ###
             curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, options);
         }
         

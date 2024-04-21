@@ -6,7 +6,6 @@ import javax.validation.ConstraintViolationException;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.curves.InterpolateAsMeanPreservingCurve.Options;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
