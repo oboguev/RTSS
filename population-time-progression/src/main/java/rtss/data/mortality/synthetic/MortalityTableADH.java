@@ -7,7 +7,7 @@ import javax.validation.ConstraintViolationException;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.curves.CurveUtil;
+import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.mortality.CombinedMortalityTable;
@@ -85,6 +85,9 @@ public class MortalityTableADH
      */
     private static CombinedMortalityTable get(Area area, String year) throws Exception
     {
+        String debug_title_male = String.format("АДХ-%s %s %s", area.toString(), year, Gender.MALE.name());
+        String debug_title_female = String.format("АДХ-%s %s %s", area.toString(), year, Gender.FEMALE.name());
+
         CombinedMortalityTable cmt = CombinedMortalityTable.newEmptyTable();
 
         String path = String.format("mortality_tables/%s/%s-MortalityRates-ADH.xlsx", area.name(), area.name());
@@ -100,11 +103,8 @@ public class MortalityTableADH
 
         fix_40_44(female_mortality_bins, female_population_sum_bins);
 
-        String debug_title_male = String.format("%s %s", year, Gender.MALE.name());
-        String debug_title_female = String.format("%s %s", year, Gender.FEMALE.name());
-
-        CurveUtil.verifyUShape(male_mortality_bins, debug_title_male, false); // ###
-        CurveUtil.verifyUShape(female_mortality_bins, debug_title_female, false);
+        CurveVerifier.verifyUShape(male_mortality_bins, false, debug_title_male, true);
+        CurveVerifier.verifyUShape(female_mortality_bins, false, debug_title_female, true);
 
         cmt.setTable(Locality.TOTAL, Gender.MALE, makeSingleTable(male_mortality_bins, debug_title_male));
         cmt.setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(female_mortality_bins, debug_title_female));
@@ -165,7 +165,7 @@ public class MortalityTableADH
             curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, options);
         }
         
-        CurveUtil.validate_means(curve, bins);
+        CurveVerifier.validate_means(curve, bins);
         return SingleMortalityTable.from_qx("computed", Util.divide(curve, 1000));
     }
 

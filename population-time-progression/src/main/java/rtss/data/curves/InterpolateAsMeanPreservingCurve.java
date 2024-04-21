@@ -122,7 +122,7 @@ public class InterpolateAsMeanPreservingCurve
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
 
-        CurveUtil.validate_means(yy, bins);
+        CurveVerifier.validate_means(yy, bins);
 
         return yy;
     }
