@@ -37,4 +37,14 @@ public class Bin
     {
         return String.format("%d-%d -> %f", age_x1, age_x2, avg);
     }
+    
+    public int x1(int ppy)
+    {
+        return age_x1 * ppy;
+    }
+
+    public int x2(int ppy)
+    {
+        return (age_x2 + 1) * ppy - 1;
+    }
 }

@@ -11,9 +11,11 @@ public class CurveVerifier
      */
     public static void validate_means(double[] yy, Bin[] bins) throws Exception
     {
+        int ppy = CurveUtil.ppy(yy, bins);
+        
         for (Bin bin : bins)
         {
-            double[] y = Util.splice(yy, bin.age_x1, bin.age_x2);
+            double[] y = Util.splice(yy, bin.x1(ppy), bin.x2(ppy));
             if (Util.differ(Util.average(y), bin.avg, 0.001))
                 throw new Exception("Curve does not preserve mean values of the bins");
         }

@@ -4,9 +4,11 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveVerifier;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.FritschCarlsonMonotonicSpline;
 import rtss.math.interpolate.rsplines.HymanSpline;
+import rtss.util.Util;
 
 public class MeanPreservingIntegralSpline
 {
@@ -19,7 +21,7 @@ public class MeanPreservingIntegralSpline
     {
         return new MeanPreservingIntegralSpline().do_eval(bins, ppy, options);
     }
-    
+
     private double[] do_eval(Bin[] bins, int ppy, Options options) throws Exception
     {
         if (options == null)
@@ -27,12 +29,12 @@ public class MeanPreservingIntegralSpline
         else
             options = new Options(options);
         options.applyDefaults();
-        
+
         /*
          * Make control points for the curve that represents the running cumulative sum of the bins
          */
-        double[] cp_x = new double [bins.length + 1];
-        double[] cp_y = new double [bins.length + 1];
+        double[] cp_x = new double[bins.length + 1];
+        double[] cp_y = new double[bins.length + 1];
         for (int k = 0; k < bins.length; k++)
         {
             Bin bin = bins[k];
@@ -43,14 +45,18 @@ public class MeanPreservingIntegralSpline
                 cp_y[k] = 0;
             cp_y[k + 1] = cp_y[k] + bin.avg * bin.widths_in_years;
         }
-        
+
         /*
          * Create monotonic spline passing through these control points
          */
-        UnivariateFunction aspline = FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
-        // aspline = new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y);
-        aspline = new HymanSpline(cp_x, cp_y);
-        
+        UnivariateFunction aspline = null;
+        if (Util.False)
+            aspline = FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
+        if (Util.True)
+            aspline = new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y);
+        if (Util.False)
+            aspline = new HymanSpline(cp_x, cp_y);
+
         double[] scurve = new double[Bins.widths_in_years(bins) * ppy + 1];
         double xstep = 1.0 / ppy;
         int k = 0;
@@ -62,25 +68,29 @@ public class MeanPreservingIntegralSpline
         double[] curve = new double[scurve.length - 1];
         for (k = 0; k < curve.length; k++)
             curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
-        
-        // ### try Hyman and others
+
         // ### adjust segments (distort)
-        // ### check mean-preserving
-        // ### check non-negative
-        // ### check positive
         
+        if (options.checkPositive && !Util.isPositive(curve))
+            throw new Exception("Curve has negative values");
+        
+        if (options.checkNonNegative && !Util.isNonNegative(curve))
+            throw new Exception("Curve has negative or zero values");
+        
+        CurveVerifier.validate_means(curve, bins);
+
         return curve;
     }
 
     /*=======================================================================================================*/
-    
+
     public static class Options
     {
         Boolean checkNonNegative;
         Boolean checkPositive;
         Boolean debug;
         Class<?> basicSplineType;
-        
+
         public Options()
         {
             checkNonNegative = null;
@@ -88,7 +98,7 @@ public class MeanPreservingIntegralSpline
             debug = null;
             basicSplineType = null;
         }
-        
+
         public Options(Options x)
         {
             checkNonNegative = x.checkNonNegative;
@@ -96,7 +106,7 @@ public class MeanPreservingIntegralSpline
             debug = x.debug;
             basicSplineType = x.basicSplineType;
         }
-        
+
         public Options checkNonNegative()
         {
             return checkNonNegative(true);
@@ -105,7 +115,7 @@ public class MeanPreservingIntegralSpline
         public Options checkNonNegative(Boolean b)
         {
             checkNonNegative = b;
-            return this; 
+            return this;
         }
 
         public Options checkPositive()
@@ -116,34 +126,37 @@ public class MeanPreservingIntegralSpline
         public Options checkPositive(Boolean b)
         {
             checkPositive = b;
-            return this; 
+            return this;
         }
-        
+
         public Options debug()
         {
             return debug(true);
         }
-        
+
         public Options debug(boolean b)
         {
             debug = b;
             return this;
         }
-        
+
         public Options basicSplineType(Class<?> clz)
         {
             basicSplineType = clz;
-            return this; 
+            return this;
         }
-    
+
         public void applyDefaults()
         {
-            if (checkNonNegative == null && checkPositive == null)
-                checkNonNegative = true;
+            if (checkNonNegative == null)
+                checkNonNegative = false;
             
+            if (checkPositive == null)
+                checkPositive = false;
+
             // if (basicSplineType == null)
             //     basicSplineType = SteffenSplineInterpolator.class;
-            
+
             if (debug == null)
                 debug = false;
         }
