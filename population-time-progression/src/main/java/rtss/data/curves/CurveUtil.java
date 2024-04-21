@@ -7,6 +7,9 @@ import rtss.util.Util;
 
 public class CurveUtil
 {
+    /*
+     * Estimate ppy for the curve
+     */
     public static int ppy(double[] curve, Bin[] bins) throws Exception
     {
         Bin last = Bins.lastBin(bins);
@@ -14,6 +17,15 @@ public class CurveUtil
         if (curve.length != ppy * (last.age_x2 + 1))
             throw new IllegalArgumentException();
         return ppy;
+    }
+    
+    /*
+     * Get bin corresponding to x-point
+     */
+    public static Bin x2bin(int x, int ppy, Bin[] bins) throws Exception
+    {
+        int year = (x / ppy) + Bins.firstBin(bins).age_x1;
+        return Bins.binForAge(year, bins);
     }
 
     /*

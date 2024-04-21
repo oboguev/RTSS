@@ -65,7 +65,8 @@ public class InterpolateUShapeAsMeanPreservingCurve
 
         double[] yyy = joinCurves(lcurve, rcurve, ppy, minBin);
 
-        yyy = EnsurePositiveCurve.ensurePositive(yyy, bins);
+        if (options.ensurePositive)
+            yyy = EnsurePositiveCurve.ensurePositive(yyy, bins);
 
         if (Util.False)
         {
@@ -85,7 +86,7 @@ public class InterpolateUShapeAsMeanPreservingCurve
             chart.display();
         }
 
-        if (!Util.isPositive(yyy))
+        if (options.ensurePositive && !Util.isPositive(yyy))
             throw new ConstraintViolationException("Error calculating curve (negative or zero value)", new HashSet<>());
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);

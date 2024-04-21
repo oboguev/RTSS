@@ -103,9 +103,6 @@ public class MortalityTableADH
 
         fix_40_44(female_mortality_bins, female_population_sum_bins);
 
-        CurveVerifier.verifyUShape(male_mortality_bins, false, debug_title_male, true);
-        CurveVerifier.verifyUShape(female_mortality_bins, false, debug_title_female, true);
-
         cmt.setTable(Locality.TOTAL, Gender.MALE, makeSingleTable(male_mortality_bins, debug_title_male));
         cmt.setTable(Locality.TOTAL, Gender.FEMALE, makeSingleTable(female_mortality_bins, debug_title_female));
 
@@ -140,31 +137,36 @@ public class MortalityTableADH
 
     private static SingleMortalityTable makeSingleTable(Bin[] bins, String debug_title) throws Exception
     {
+        CurveVerifier.verifyUShape(bins, false, debug_title, true);
+
         double[] curve = null;
 
         try
         {
-            if (Util.False)
+            if (Util.True)
             {
                 InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
-                options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9(true);
+                options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(false); // ###
                 options = options.ppy(10).displayCurve(); // ###
                 curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
             }
         }
         catch (ConstraintViolationException ex)
         {
-            // ignore
+            // ignore ?
+            throw ex;
         }
 
         if (curve == null)
         {
             InterpolateUShapeAsMeanPreservingCurve.Options options = new InterpolateUShapeAsMeanPreservingCurve.Options();
-            options = options.debug_title(debug_title).ensurePositive().ensureMonotonicallyDecreasing_1_4_5_9(true);
+            options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(false); // ###
             options = options.ppy(10).displayCurve(); // ###
             curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, options);
         }
         
+        CurveVerifier.positive(curve, bins, debug_title, true);
+        CurveVerifier.verifyUShape(curve, bins, debug_title, false);
         CurveVerifier.validate_means(curve, bins);
         return SingleMortalityTable.from_qx("computed", Util.divide(curve, 1000));
     }

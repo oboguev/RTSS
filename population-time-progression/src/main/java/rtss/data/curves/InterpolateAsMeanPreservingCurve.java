@@ -117,7 +117,7 @@ public class InterpolateAsMeanPreservingCurve
         if (yyy == null)
             yyy = yyy3;
 
-        if (!Util.isPositive(yyy))
+        if (options.ensurePositive && !Util.isPositive(yyy))
             throw new ConstraintViolationException("Error calculating curve (negative or zero value)", new HashSet<>());
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);

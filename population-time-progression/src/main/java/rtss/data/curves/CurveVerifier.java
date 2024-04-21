@@ -19,6 +19,9 @@ public class CurveVerifier
         }
     }
 
+    /*
+     * Verify that the bins data is U-shaped
+     */
     public static boolean verifyUShape(Bin[] bins, boolean strict, String title, boolean doThrow) throws Exception
     {
         boolean was_down = false;
@@ -84,5 +87,141 @@ public class CurveVerifier
             Util.err(msg);
             return false;
         }
+    }
+    
+    /*
+     * Verify that curve values are positive
+     */
+    public static boolean positive(double[] curve, Bin[] bins, String title, boolean doThrow) throws Exception
+    {
+        final int ppy = CurveUtil.ppy(curve, bins);
+        StringBuilder sb = new StringBuilder();
+
+        Bin recent = null;
+        
+        for (int x = 0; x < curve.length; x++)
+        {
+            if (curve[x] <= 0)
+            {
+                Bin bin = CurveUtil.x2bin(x, ppy, bins);
+                if (bin != recent)
+                {
+                    recent = bin;
+                    if (sb.length() != 0)
+                        sb.append(" ");
+                    if (bin.age_x1 == bin.age_x2)
+                        sb.append(String.format("%d", bin.age_x1));
+                    else
+                        sb.append(String.format("%d-%d", bin.age_x1, bin.age_x2));
+                }
+            }
+        }
+        
+        if (recent != null)
+        {
+            String msg = String.format("Nevative or zero-value segments in %s at ages %s", title, sb.toString());
+            if (doThrow)
+                throw new Exception(msg);
+            Util.err(msg);
+            return false;
+        }
+
+        return true;
+    }
+
+    /*
+     * Verify that the curve is U-shaped
+     */
+    public static boolean verifyUShape(double[] curve, Bin[] bins, String title, boolean doThrow) throws Exception
+    {
+        final int ppy = CurveUtil.ppy(curve, bins);
+        StringBuilder sb = new StringBuilder();
+        
+        Bin minBin1 = null;
+        Bin minBin2 = null;
+        Bin lastMinBin = null;
+
+        for (Bin bin : bins)
+        {
+            if (minBin1 == null)
+            {
+                minBin1 = bin;
+            }
+            else if (bin.avg < minBin1.avg)
+            {
+                minBin1 = bin;
+                minBin2 = null;
+            }
+            else if (bin.avg == minBin1.avg)
+            {
+                if (bin != minBin1.next)
+                    return error(title, doThrow, "Long chain of mimimum bins");
+                minBin2 = bin;
+            }
+        }
+        
+        lastMinBin = minBin1;
+        if (minBin2 != null)
+            lastMinBin = minBin2;
+        
+        boolean inflected = false;
+        Bin recentErrorBin = null;
+        
+        for (int x = 1; x < curve.length; x++)
+        {
+            Bin bin = CurveUtil.x2bin(x, ppy, bins);
+            boolean error = false;
+            
+            if (bin.index < minBin1.index)
+            {
+                // must be trending down
+                if (curve[x] > curve[x - 1])
+                    error = true;
+            }
+            else if (bin.index > lastMinBin.index)
+            {
+                // must be trending up
+                if (curve[x] < curve[x - 1])
+                    error = true;
+            }
+            else if (bin == minBin1 || bin == minBin2)
+            {
+                // must be trending down before the inflection point,
+                // then trending up
+                if (!inflected)
+                {
+                    if (curve[x] > curve[x - 1])
+                        inflected = true;
+                }
+                else
+                {
+                    // must be trending up
+                    if (curve[x] < curve[x - 1])
+                        error = true;
+                }
+            }
+            
+            if (error && bin != recentErrorBin)
+            {
+                recentErrorBin = bin;
+                if (sb.length() != 0)
+                    sb.append(" ");
+                if (bin.age_x1 == bin.age_x2)
+                    sb.append(String.format("%d", bin.age_x1));
+                else
+                    sb.append(String.format("%d-%d", bin.age_x1, bin.age_x2));
+            }
+        }
+        
+        if (recentErrorBin != null)
+        {
+            String msg = String.format("Non-monotonic segments in %s at ages %s", title, sb.toString());
+            if (doThrow)
+                throw new Exception(msg);
+            Util.err(msg);
+            return false;
+        }
+        
+        return true;
     }
 }
