@@ -146,7 +146,7 @@ public class MortalityTableADH
             if (Util.True)
             {
                 InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
-                options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(false); // ###
+                options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
                 options = options.ppy(10).displayCurve(); // ###
                 curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
             }
@@ -160,7 +160,7 @@ public class MortalityTableADH
         if (curve == null)
         {
             InterpolateUShapeAsMeanPreservingCurve.Options options = new InterpolateUShapeAsMeanPreservingCurve.Options();
-            options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(false); // ###
+            options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
             options = options.ppy(10).displayCurve(); // ###
             curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, options);
         }

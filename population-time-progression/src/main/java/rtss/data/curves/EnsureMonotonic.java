@@ -263,7 +263,7 @@ public class EnsureMonotonic
         
         // ###
         
-        Util.out("Fix: " + debug_title);
+        Util.out("FixTwo: " + debug_title);
 
         return false;
     }
@@ -272,6 +272,7 @@ public class EnsureMonotonic
 
     private boolean fixThree(Bin b1, Bin b2, Bin b3) throws Exception
     {
+        Util.out("FixThree: " + debug_title);
         // ###
         return false;
     }
