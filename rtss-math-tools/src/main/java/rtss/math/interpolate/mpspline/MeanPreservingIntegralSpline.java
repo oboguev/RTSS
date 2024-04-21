@@ -4,7 +4,9 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.FritschCarlsonMonotonicSpline;
+import rtss.math.interpolate.rsplines.HymanSpline;
 
 public class MeanPreservingIntegralSpline
 {
@@ -46,6 +48,8 @@ public class MeanPreservingIntegralSpline
          * Create monotonic spline passing through these control points
          */
         UnivariateFunction aspline = FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
+        // aspline = new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y);
+        aspline = new HymanSpline(cp_x, cp_y);
         
         double[] scurve = new double[Bins.widths_in_years(bins) * ppy + 1];
         double xstep = 1.0 / ppy;

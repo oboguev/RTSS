@@ -13,7 +13,7 @@ import static java.lang.Math.IEEEremainder;
  * with the original files under GPL 2 (or later GPL versions)
  * (package: stats, files: spline.R splinefun.R splines.c)
  */
-class Common
+class SplineCommonCore
 {
     static enum SplineMethod
     {
@@ -36,7 +36,7 @@ class Common
             this.x = x;
             this.y = y;
             this.b = new double[x.length];
-            this.d = new double[x.length];
+            this.c = new double[x.length];
             this.d = new double[x.length];
             // Arrays.fill(b, 0);
             // Arrays.fill(c, 0);
@@ -101,6 +101,19 @@ class Common
             throw new IllegalArgumentException();
         }
     }
+    
+    double spline_eval(SplineMethod method, double x, Coefficients cf)
+    {
+        double[] u = new double[] {x};
+        double[] v = new double[1];
+        spline_eval(method, 1, u, v, cf);
+        return v[0];
+    }
+
+    void spline_eval(SplineMethod method, int nu, double[] u, double[] v, Coefficients cf)
+    {
+        spline_eval(method, nu, u, v, cf.x.length, cf.x, cf.y, cf.b, cf.c, cf.d);
+    }
 
     void spline_eval(SplineMethod method,
             int nu, double[] u, double[] v,
@@ -108,7 +121,7 @@ class Common
     {
         /* 
          * Evaluate  v[l] := spline(u[l], ...),     l = 1,..,nu, i.e. 0:(nu-1)
-         * Nodes x[i], coef (y[i]; b[i],c[i],d[i]); i = 1,..,n , i.e. 0:(*n-1)
+         * Nodes x[i], coef (y[i]; b[i],c[i],d[i]); i = 1,..,n , i.e. 0:(n-1)
          */
         final int n_1 = n - 1;
         int i, l;

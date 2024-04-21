@@ -19,7 +19,7 @@ import org.apache.commons.math3.util.MathArrays.OrderDirection;
  * Forsythe, Malcolm, Moler, "Computer methods for mathematical computations" (1977), p. 70-79
  * 
  */
-public class FMMlSplineInterpolator extends Common implements UnivariateInterpolator
+public class FMMlSplineInterpolator extends SplineCommonCore implements UnivariateInterpolator
 {
     @Override
     public UnivariateFunction interpolate(double[] x, double[] y)
