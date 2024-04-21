@@ -162,7 +162,7 @@ public class RSFSR_1940 extends CombinedMortalityTable
         
         Util.print("RSFSR 1940 qx", qx, 0);
 
-        new ChartXYSplineAdvanced("RSFSR 1940 qx", "age", "mortality")
+        new ChartXYSplineAdvanced("RSFSR 1940 qx", "age", "mortality").showSplinePane(false)
             .addSeries("qx", qx)
             .display();
     }

@@ -221,13 +221,15 @@ public class EnsureMonotonic
 
     private boolean fixTwo(Bin b1, Bin b2) throws Exception
     {
-        double[] seg1 = CurveUtil.seg(curve, b1, bins, ppy);
-        double[] seg2 = CurveUtil.seg(curve, b2, bins, ppy);
+        if (!(b1.avg > b2.avg))
+            return false;
+        
+        // double[] seg1 = CurveUtil.seg(curve, b1, bins, ppy);
+        // double[] seg2 = CurveUtil.seg(curve, b2, bins, ppy);
+        // double[] seg12 = Util.splice(curve, x1, x2);
 
         int x1 = ppy * (b1.age_x1 - first.age_x1);
         int x2 = ppy * (b2.age_x2 + 1 - first.age_x1) - 1;
-
-        double[] seg12 = Util.splice(curve, x1, x2);
 
         double v1;
         double v2;
@@ -255,8 +257,11 @@ public class EnsureMonotonic
 
         if (!Util.within(b2.avg, v1, v2))
             return fixThree(b1, b2, b2.next);
+        /*
+         * move vmid in range ]b2.avg ... b1.avg[
+         */
         
-        // ### move vm between v1 and v2
+        // ###
         
         Util.out("Fix: " + debug_title);
 

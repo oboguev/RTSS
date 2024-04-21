@@ -68,7 +68,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         
         if (Util.False)
         {
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y").showSplinePane(false);
             if (yyy1 != null)
                 chart.addSeries("1", xxx, yyy1);
             if (yyy2 != null)

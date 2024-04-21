@@ -45,6 +45,7 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
     private String xLabel;
     private String yLabel;
     private List<Boolean> asDots = new ArrayList<Boolean>();
+    private boolean showSplinePane = true;
 
     public ChartXYSplineAdvanced()
     {
@@ -61,6 +62,12 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
         super(title);
         this.xLabel = xLabel;
         this.yLabel = yLabel;
+    }
+    
+    public ChartXYSplineAdvanced showSplinePane(boolean b)
+    {
+        this.showSplinePane = b;
+        return this;
     }
     
     public ChartXYSplineAdvanced addSeries(String name, double[] y)
@@ -134,7 +141,8 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
         private JTabbedPane createContent()
         {
             JTabbedPane tabs = new JTabbedPane();
-            tabs.add("Splines:", createChartPanel1());
+            if (chart.showSplinePane)
+                tabs.add("Splines:", createChartPanel1());
             tabs.add("Lines:", createChartPanel2());
             return tabs;
         }

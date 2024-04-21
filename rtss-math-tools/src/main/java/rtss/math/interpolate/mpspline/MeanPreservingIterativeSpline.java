@@ -97,7 +97,7 @@ public class MeanPreservingIterativeSpline
             {
                 String title = String.format("Mean-Preserving Iterative Spline [interim pass %d %s]", 
                                              pass, options.basicSplineType.getSimpleName());
-                new ChartXYSplineAdvanced(title, "x", "y")
+                new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false)
                         .addSeries("MPS", xx, result)
                         .addSeries("bins", xx, Bins.ppy_y(bins, ppy))
                         .display();
@@ -120,7 +120,7 @@ public class MeanPreservingIterativeSpline
         {
             String title = String.format("Mean-Preserving Iterative Spline [result %s]", 
                                          options.basicSplineType.getSimpleName());
-            new ChartXYSplineAdvanced(title, "x", "y")
+            new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false)
                     .addSeries("MPS", xx, result)
                     .addSeries("bins", xx, Bins.ppy_y(bins, ppy))
                     .display();

@@ -176,7 +176,7 @@ public class MortalityTableADH
 
         Util.print(cmt.comment() + " qx", qx, 0);
 
-        new ChartXYSplineAdvanced(cmt.comment() + " qx", "age", "mortality")
+        new ChartXYSplineAdvanced(cmt.comment() + " qx", "age", "mortality").showSplinePane(false)
                 .addSeries("qx", qx)
                 .display();
     }

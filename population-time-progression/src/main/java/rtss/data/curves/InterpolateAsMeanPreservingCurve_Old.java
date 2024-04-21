@@ -85,7 +85,7 @@ public class InterpolateAsMeanPreservingCurve_Old
 
         if (Util.False)
         {
-            new ChartXYSplineAdvanced("Generating mean-preserving curve", "age", "y")
+            new ChartXYSplineAdvanced("Generating mean-preserving curve", "age", "y").showSplinePane(false)
                     .addSeries("averages", res_x, Bins.bins2yearly(bins))
                     .addSeries("after", res_x, res_y)
                     // .addSeries("before", res_x, before_res_y)

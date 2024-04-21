@@ -100,7 +100,7 @@ public class InterpolateAsMeanPreservingCurve
             String title = "Make curve";
             if (options.debug_title != null)
                 title += " " + options.debug_title;
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y");
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             if (yyy1 != null)
                 chart.addSeries("1", xxx, yyy1);
             if (yyy2 != null)
