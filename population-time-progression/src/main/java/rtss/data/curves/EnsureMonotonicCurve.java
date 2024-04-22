@@ -261,9 +261,8 @@ public class EnsureMonotonicCurve
          * move vmid in range ]b2.avg ... b1.avg[
          */
         
-        // ###
-        
-        Util.out("FixTwo: " + debug_title);
+        Util.err(String.format("Unable to fix non-monotonic curve %s, method unimplemented: %s", debug_title, Util.stackFrame(0)));
+        // Util.out("FixTwo: " + debug_title);
 
         return false;
     }
@@ -272,8 +271,8 @@ public class EnsureMonotonicCurve
 
     private boolean fixThree(Bin b1, Bin b2, Bin b3) throws Exception
     {
-        Util.out("FixThree: " + debug_title);
-        // ###
+        Util.err(String.format("Unable to fix non-monotonic curve %s, method unimplemented: %s", debug_title, Util.stackFrame(0)));
+        // Util.out("FixThree: " + debug_title);
         return false;
     }
 }

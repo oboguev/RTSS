@@ -440,6 +440,33 @@ public class Util
 
         return sb.toString();
     }
+    
+    /*
+     * Return stack frame string.
+     * depth = 0 => for the place of the call
+     * depth = 1 => for caller of the place of the call
+     */
+    public static String stackFrame(int depth)
+    {
+        boolean gotit = false;
+        int ix = 0;
+
+        for (StackTraceElement t : Thread.currentThread().getStackTrace())
+        {
+            if (t.getClassName().equals(Util.class.getCanonicalName()) && t.getMethodName().equals("stackFrame"))
+            {
+                gotit = true;
+            }
+            else if (gotit)
+            {
+                if (ix == depth)
+                    return t.getClassName() + "." + t.getMethodName() + " line " + t.getLineNumber();
+                ix++;
+            }
+        }
+
+        return "";
+    }
 
     public static void unused(Object... o)
     {
