@@ -15,6 +15,7 @@ import org.apache.commons.math3.util.MathArrays;
  * 
  * https://numxl.com/blogs/interpolation-101
  * https://jetcracker.wordpress.com/2014/12/26/constrained-cubic-spline-java
+ * https://web.archive.org/web/20210330154026/https://jetcracker.wordpress.com/2014/12/26/constrained-cubic-spline-java/
  * https://pages.uoregon.edu/dgavin/software/spline.pdf
  * https://web.archive.org/web/20070307145036/http://www.korf.co.uk/spline.pdf
  */
@@ -60,6 +61,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
                 f1[i] = 0d;
             }
         }
+        
         f1[0] = 3d * dy[0] / (2d * (dx[0])) - f1[1] / 2d;
         f1[n] = 3d * dy[n - 1] / (2d * (dx[n - 1])) - f1[n - 1] / 2d;
 
