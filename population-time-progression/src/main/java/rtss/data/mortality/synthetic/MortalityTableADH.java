@@ -3,8 +3,6 @@ package rtss.data.mortality.synthetic;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.ConstraintViolationException;
-
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.CurveVerifier;
@@ -145,18 +143,20 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        return curve_1(bins, debug_title);
+        return curve_2(bins, debug_title);
     }
 
+    @SuppressWarnings("unused")
     private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
-        int ppy = 10; // ###
+        final int ppy = 1000;
+        
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
-        options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class); 
+        options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
         double[] yyy = MeanPreservingIntegralSpline.eval(bins, options);
-        if (Util.True)
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "MP-integral sub-yearly curve " + debug_title;
@@ -165,9 +165,9 @@ public class MortalityTableADH
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }
-        
+
         double[] yy = Bins.ppy2yearly(yyy, ppy);
-        if (Util.True)
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, 1);
             String title = "MP-integral yearly curve " + debug_title;
@@ -180,40 +180,40 @@ public class MortalityTableADH
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, debug_title, false);
         CurveVerifier.validate_means(yy, bins);
-        
+
         return yy;
     }
-    
+
+    @SuppressWarnings("unused")
     private static double[] curve_2(Bin[] bins, String debug_title) throws Exception
     {
+        final int ppy = 10; // ###
+
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
-        double[] curve = null;
+        InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
+        options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
+        options = options.ppy(ppy).displayCurve(false); // ###
+        double[] curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
 
-        try
-        {
-            if (Util.True)
-            {
-                InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
-                options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
-                options = options.ppy(10).displayCurve(false); // ###
-                curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
-            }
-        }
-        catch (ConstraintViolationException ex)
-        {
-            // ignore ?
-            throw ex;
-        }
+        CurveVerifier.positive(curve, bins, debug_title, true);
+        CurveVerifier.verifyUShape(curve, bins, debug_title, false);
+        CurveVerifier.validate_means(curve, bins);
+        return curve;
+    }
 
-        if (curve == null)
-        {
-            InterpolateUShapeAsMeanPreservingCurve.Options options = new InterpolateUShapeAsMeanPreservingCurve.Options();
-            options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
-            options = options.ppy(10).displayCurve(false); // ###
-            curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, options);
-        }
-        
+    @SuppressWarnings("unused")
+    private static double[] curve_3(Bin[] bins, String debug_title) throws Exception
+    {
+        final int ppy = 1000;
+
+        CurveVerifier.verifyUShape(bins, false, debug_title, true);
+
+        InterpolateUShapeAsMeanPreservingCurve.Options options = new InterpolateUShapeAsMeanPreservingCurve.Options();
+        options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
+        options = options.ppy(ppy).displayCurve(false);
+        double[] curve = InterpolateUShapeAsMeanPreservingCurve.curve(bins, options);
+
         CurveVerifier.positive(curve, bins, debug_title, true);
         CurveVerifier.verifyUShape(curve, bins, debug_title, false);
         CurveVerifier.validate_means(curve, bins);
@@ -362,12 +362,12 @@ public class MortalityTableADH
 
             double v2 = deaths_012 / c2 - m0.avg + c3 * m2.avg;
             v2 /= c3 + c1 / c2;
-            
+
             double v0 = deaths_012 - (p2.avg + p1.avg / 2) * v2;
             v0 /= p0.avg + p1.avg / 2;
-            
+
             double v1 = (v0 + v2) / 2;
-            
+
             if (v2 >= v1 && v1 >= v0)
             {
                 // proceed
@@ -376,7 +376,7 @@ public class MortalityTableADH
             {
                 throw new Exception("Internal error");
             }
-            
+
             m0.avg = v0;
             m1.avg = v1;
             m2.avg = v2;
