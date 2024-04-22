@@ -7,6 +7,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.util.Util;
 
 public class EnsureMonotonicYearlyPoints
 {
@@ -96,7 +97,23 @@ public class EnsureMonotonicYearlyPoints
      */
     private void fixOneLast(int x)
     {
-        // ###
+        Bin bin = Bins.binForAge(x, bins);
+        
+        if (x == inflection)
+        {
+            // ###
+            Util.noop();
+        }
+        else if (x < inflection)
+        {
+            // ###
+            Util.noop();
+        }
+        else
+        {
+            // ###
+            Util.noop();
+        }
     }
 
     /*
@@ -104,7 +121,17 @@ public class EnsureMonotonicYearlyPoints
      */
     private void fixOneFirst(int x)
     {
-        // ###
+        Bin bin = Bins.binForAge(x, bins);
+
+        if (x > inflection)
+        {
+            // ###
+            Util.noop();
+        }
+        else
+        {
+            notImplemented();
+        }
     }
 
     /*
@@ -112,6 +139,22 @@ public class EnsureMonotonicYearlyPoints
      */
     private void fixOneMiddle(int x)
     {
-        // ###
+        Bin bin = Bins.binForAge(x, bins);
+
+        if (x > inflection)
+        {
+            // ###
+            Util.noop();
+        }
+        else
+        {
+            notImplemented();
+        }
+    }
+    
+    private void notImplemented()
+    {
+        Util.err(String.format("Unable to make curve %s well-monotonic, method unimplemented at %s", 
+                               title, Util.stackFrame(1)));
     }
 }

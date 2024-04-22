@@ -76,20 +76,20 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         for (int i = 1; i < n; i++)
         {
             double slope = dy[i - 1] * dy[i];
-            if (slope > 0d)
+            if (slope > 0)
             {
                 // doesn't change sign
-                f1[i] = 2d / (dx[i] / dy[i] + dx[i - 1] / dy[i - 1]);
+                f1[i] = 2 / (dx[i] / dy[i] + dx[i - 1] / dy[i - 1]);
             }
-            else if (slope <= 0d)
+            else if (slope <= 0)
             {
                 // changes sign
-                f1[i] = 0d;
+                f1[i] = 0;
             }
         }
         
-        f1[0] = 3d * dy[0] / (2d * (dx[0])) - f1[1] / 2d;
-        f1[n] = 3d * dy[n - 1] / (2d * (dx[n - 1])) - f1[n - 1] / 2d;
+        f1[0] = 3 * dy[0] / (2 * (dx[0])) - f1[1] / 2;
+        f1[n] = 3 * dy[n - 1] / (2 * (dx[n - 1])) - f1[n - 1] / 2;
         
         if (params.containsKey("f1.0"))
             f1[0] = (Double) params.get("f1.0");
@@ -104,10 +104,10 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
         for (int i = 1; i <= n; i++)
         {
-            final double f2a = -2d * (f1[i] + 2 * f1[i - 1]) / dx[i - 1] + 6d * dy[i - 1] / (dx[i - 1] * dx[i - 1]);
-            final double f2b = 2d * (2d * f1[i] + f1[i - 1]) / dx[i - 1] - 6d * dy[i - 1] / (dx[i - 1] * dx[i - 1]);
-            d[i] = (f2b - f2a) / (6d * dx[i - 1]);
-            c[i] = (x[i] * f2a - x[i - 1] * f2b) / (2d * dx[i - 1]);
+            final double f2a = -2 * (f1[i] + 2 * f1[i - 1]) / dx[i - 1] + 6 * dy[i - 1] / (dx[i - 1] * dx[i - 1]);
+            final double f2b = 2 * (2 * f1[i] + f1[i - 1]) / dx[i - 1] - 6 * dy[i - 1] / (dx[i - 1] * dx[i - 1]);
+            d[i] = (f2b - f2a) / (6 * dx[i - 1]);
+            c[i] = (x[i] * f2a - x[i - 1] * f2b) / (2 * dx[i - 1]);
             b[i] = (dy[i - 1] -
                     c[i] * (x[i] * x[i] - x[i - 1] * x[i - 1]) -
                     d[i] * (x[i] * x[i] * x[i] - x[i - 1] * x[i - 1] * x[i - 1]))

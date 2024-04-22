@@ -6,6 +6,7 @@ import java.util.Map;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.CurveVerifier;
+import rtss.data.curves.EnsureMonotonicYearlyPoints;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.curves.TuneCCS;
@@ -184,6 +185,7 @@ public class MortalityTableADH
         }
 
         CurveVerifier.positive(yy, bins, debug_title, true);
+        new EnsureMonotonicYearlyPoints(bins, yy, debug_title).fix();
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
         CurveVerifier.validate_means(yy, bins);
 

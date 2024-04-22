@@ -242,6 +242,9 @@ public class CurveVerifier
         return true;
     }
 
+    /*
+     * @inflection returned as the minimum point before raise and can be the last point *before* the minimum bin
+     */
     public static List<Integer> locateNonMonotonicPoints(double[] curve, Bin[] bins, String title, double tolerance, MutableInt inflection) throws Exception
     {
         final int ppy = CurveUtil.ppy(curve, bins);
