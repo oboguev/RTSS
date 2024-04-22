@@ -138,23 +138,54 @@ public class MortalityTableADH
 
     private static SingleMortalityTable makeSingleTable(Bin[] bins, String debug_title) throws Exception
     {
+        double[] qx = curve(bins, debug_title);
+        return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
+    }
+
+    private static double[] curve(Bin[] bins, String debug_title) throws Exception
+    {
+        return curve_1(bins, debug_title);
+    }
+
+    private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
+    {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
-        double[] curve = null;
-
-        // ###
         int ppy = 10;
-        curve = MeanPreservingIntegralSpline.eval(bins, ppy);
+        double[] yyy = MeanPreservingIntegralSpline.eval(bins, ppy);
         if (Util.True)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
-            String title = "MP-integral curve " + debug_title;
+            String title = "MP-integral sub-yearly curve " + debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("3", xxx, curve);
+            chart.addSeries("qx", xxx, yyy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }
-        // ###
+        
+        double[] yy = Bins.ppy2yearly(yyy, ppy);
+        if (Util.True)
+        {
+            double[] xxx = Bins.ppy_x(bins, 1);
+            String title = "MP-integral yearly curve " + debug_title;
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("qx", xxx, yy);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, 1));
+            chart.display();
+        }
+
+        CurveVerifier.positive(yy, bins, debug_title, true);
+        CurveVerifier.verifyUShape(yy, bins, debug_title, false);
+        CurveVerifier.validate_means(yy, bins);
+        
+        return yy;
+    }
+    
+    private static double[] curve_2(Bin[] bins, String debug_title) throws Exception
+    {
+        CurveVerifier.verifyUShape(bins, false, debug_title, true);
+
+        double[] curve = null;
 
         try
         {
@@ -183,7 +214,7 @@ public class MortalityTableADH
         CurveVerifier.positive(curve, bins, debug_title, true);
         CurveVerifier.verifyUShape(curve, bins, debug_title, false);
         CurveVerifier.validate_means(curve, bins);
-        return SingleMortalityTable.from_qx("computed", Util.divide(curve, 1000));
+        return curve;
     }
 
     @SuppressWarnings("unused")
