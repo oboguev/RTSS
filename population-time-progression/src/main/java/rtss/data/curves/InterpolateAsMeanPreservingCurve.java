@@ -61,7 +61,7 @@ public class InterpolateAsMeanPreservingCurve
              * Изменить ход кривой сделав её монотонно уменьшающейся, но сохраняя средние значения.
              */
             if (options.ensureMonotonicallyDecreasing_1_4_5_9)
-                EnsureMonotonic.ensureMonotonicallyDecreasing_1_4_5_9(yyy1, bins, options.debug_title);
+                EnsureMonotonicCurve.ensureMonotonicallyDecreasing_1_4_5_9(yyy1, bins, options.debug_title);
         }
 
         if (Util.False)
@@ -76,7 +76,7 @@ public class InterpolateAsMeanPreservingCurve
              * Изменить ход кривой сделав её монотонно уменьшающейся, но сохраняя средние значения.
              */
             if (options.ensureMonotonicallyDecreasing_1_4_5_9)
-                EnsureMonotonic.ensureMonotonicallyDecreasing_1_4_5_9(yyy2, bins, options.debug_title);
+                EnsureMonotonicCurve.ensureMonotonicallyDecreasing_1_4_5_9(yyy2, bins, options.debug_title);
         }
 
         if (Util.True)
@@ -91,7 +91,7 @@ public class InterpolateAsMeanPreservingCurve
              * Изменить ход кривой сделав её монотонно уменьшающейся, но сохраняя средние значения.
              */
             if (options.ensureMonotonicallyDecreasing_1_4_5_9)
-                EnsureMonotonic.ensureMonotonicallyDecreasing_1_4_5_9(yyy3, bins, options.debug_title);
+                EnsureMonotonicCurve.ensureMonotonicallyDecreasing_1_4_5_9(yyy3, bins, options.debug_title);
         }
 
         if (Util.False || options.displayCurve)

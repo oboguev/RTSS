@@ -1,5 +1,10 @@
 package rtss.data.curves;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.util.Util;
@@ -136,6 +141,11 @@ public class CurveVerifier
      */
     public static boolean verifyUShape(double[] curve, Bin[] bins, String title, boolean doThrow) throws Exception
     {
+        return verifyUShape(curve, bins, true, title, doThrow);
+    }
+    
+    public static boolean verifyUShape(double[] curve, Bin[] bins, boolean strict, String title, boolean doThrow) throws Exception
+    {
         final int ppy = CurveUtil.ppy(curve, bins);
         StringBuilder sb = new StringBuilder();
         
@@ -168,6 +178,9 @@ public class CurveVerifier
         
         boolean inflected = false;
         Bin recentErrorBin = null;
+        double tolerance = 1.0;
+        if (!strict)
+            tolerance = 1.0;
         
         for (int x = 1; x < curve.length; x++)
         {
@@ -177,13 +190,13 @@ public class CurveVerifier
             if (bin.index < minBin1.index)
             {
                 // must be trending down
-                if (curve[x] > curve[x - 1])
+                if (curve[x] > tolerance * curve[x - 1])
                     error = true;
             }
             else if (bin.index > lastMinBin.index)
             {
                 // must be trending up
-                if (curve[x] < curve[x - 1])
+                if (tolerance * curve[x] < curve[x - 1])
                     error = true;
             }
             else if (bin == minBin1 || bin == minBin2)
@@ -192,13 +205,13 @@ public class CurveVerifier
                 // then trending up
                 if (!inflected)
                 {
-                    if (curve[x] > curve[x - 1])
+                    if (curve[x] > tolerance * curve[x - 1])
                         inflected = true;
                 }
                 else
                 {
                     // must be trending up
-                    if (curve[x] < curve[x - 1])
+                    if (tolerance * curve[x] < curve[x - 1])
                         error = true;
                 }
             }
@@ -217,7 +230,9 @@ public class CurveVerifier
         
         if (recentErrorBin != null)
         {
-            String msg = String.format("Non-monotonic segments in %s at ages %s", title, sb.toString());
+            List<List<Integer>> xlist = locateContinuousNonMonotonicPoints(curve, bins, title, tolerance, null);
+            String desc = describeContinuousNonMonotonicPoints(xlist);
+            String msg = String.format("Non-monotonic segments in %s at ranges %s and ages %s", title, sb.toString(), desc);
             if (doThrow)
                 throw new Exception(msg);
             Util.err(msg);
@@ -225,5 +240,129 @@ public class CurveVerifier
         }
         
         return true;
+    }
+
+    public static List<Integer> locateNonMonotonicPoints(double[] curve, Bin[] bins, String title, double tolerance, MutableInt inflection) throws Exception
+    {
+        final int ppy = CurveUtil.ppy(curve, bins);
+        List<Integer> list = new ArrayList<>();
+        
+        Bin minBin1 = null;
+        Bin minBin2 = null;
+        Bin lastMinBin = null;
+
+        for (Bin bin : bins)
+        {
+            if (minBin1 == null)
+            {
+                minBin1 = bin;
+            }
+            else if (bin.avg < minBin1.avg)
+            {
+                minBin1 = bin;
+                minBin2 = null;
+            }
+            else if (bin.avg == minBin1.avg)
+            {
+                if (bin != minBin1.next)
+                    error(title, true, "Long chain of mimimum bins");
+                minBin2 = bin;
+            }
+        }
+        
+        lastMinBin = minBin1;
+        if (minBin2 != null)
+            lastMinBin = minBin2;
+        
+        boolean inflected = false;
+        double lastv = curve[0];
+        
+        for (int x = 1; x < curve.length; x++)
+        {
+            Bin bin = CurveUtil.x2bin(x, ppy, bins);
+            
+            if (bin.index < minBin1.index)
+            {
+                // must be trending down
+                if (curve[x] > tolerance * lastv)
+                    list.add(x);
+                else 
+                    lastv = curve[x];
+            }
+            else if (bin.index > lastMinBin.index)
+            {
+                // must be trending up
+                if (tolerance * curve[x] < lastv)
+                    list.add(x);
+                else 
+                    lastv = curve[x];
+            }
+            else if (bin == minBin1 || bin == minBin2)
+            {
+                // must be trending down before the inflection point,
+                // then trending up
+                if (!inflected)
+                {
+                    if (curve[x] > tolerance * curve[x - 1])
+                    {
+                        inflected = true;
+                        if (inflection != null)
+                            inflection.setValue(x - 1);
+                    }
+                    lastv = curve[x];
+                }
+                else
+                {
+                    // must be trending up
+                    if (tolerance * curve[x] < lastv)
+                        list.add(x);
+                    else
+                        lastv = curve[x];
+                }
+            }
+        }
+        
+        return list;
+    }
+    
+    public static List<List<Integer>> locateContinuousNonMonotonicPoints(double[] curve, Bin[] bins, String title, double tolerance, MutableInt inflection) throws Exception
+    {
+        List<List<Integer>> xlist = new ArrayList<>();
+        
+        Integer last_x = null;
+        List<Integer> list = null;
+        
+        for (int x : locateNonMonotonicPoints(curve, bins, title, tolerance, inflection)) 
+        {
+            if (last_x != null && x == last_x + 1)
+            {
+                list.add(x);
+            }
+            else
+            {
+                list = new ArrayList<Integer>();
+                list.add(x);
+                xlist.add(list);
+            }
+            last_x = x;
+        }
+        
+        return xlist;
+    }
+
+    public static String describeContinuousNonMonotonicPoints(List<List<Integer>> xlist)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (List<Integer> list : xlist)
+        {
+            String s = "" + list.get(0);
+            if (list.size() != 1)
+                s += "-" + list.get(list.size() - 1);
+            
+            if (sb.length() != 0)
+                sb.append(" ");
+            sb.append(s);
+        }
+        return sb.toString();
     }
 }

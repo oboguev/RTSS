@@ -4,7 +4,7 @@ import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.util.Util;
 
-public class EnsureMonotonic
+public class EnsureMonotonicCurve
 {
     private double[] curve;
     private Bin[] bins;
@@ -13,7 +13,7 @@ public class EnsureMonotonic
     private int ppy;
     private Bin first;
 
-    private EnsureMonotonic(double[] curve, Bin[] bins, String debug_title) throws Exception
+    private EnsureMonotonicCurve(double[] curve, Bin[] bins, String debug_title) throws Exception
     {
         this.curve = curve;
         this.bins = bins;
@@ -28,7 +28,7 @@ public class EnsureMonotonic
      */
     public static boolean ensureMonotonicallyDecreasing_1_4_5_9(double[] curve, Bin[] bins, String debug_title) throws Exception
     {
-        return new EnsureMonotonic(curve, bins, debug_title).ensureMonotonicallyDecreasing_1_4_5_9();
+        return new EnsureMonotonicCurve(curve, bins, debug_title).ensureMonotonicallyDecreasing_1_4_5_9();
     }
 
     private boolean ensureMonotonicallyDecreasing_1_4_5_9() throws Exception

@@ -152,7 +152,7 @@ public class MortalityTableADH
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
-        final int ppy = 10; // ###
+        final int ppy = 1000; // ###
         
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
@@ -162,7 +162,7 @@ public class MortalityTableADH
         options = options.splineParams("f1.0", yyy[0] * 1.5);
         yyy = MeanPreservingIntegralSpline.eval(bins, options);
         
-        if (Util.True)
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "MP-integral sub-yearly curve " + debug_title;
@@ -184,7 +184,7 @@ public class MortalityTableADH
         }
 
         CurveVerifier.positive(yy, bins, debug_title, true);
-        CurveVerifier.verifyUShape(yy, bins, debug_title, false);
+        CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
         CurveVerifier.validate_means(yy, bins);
 
         return yy;
