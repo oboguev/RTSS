@@ -5,6 +5,7 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveUtil;
 import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.EnsureMonotonicYearlyPoints;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
@@ -152,6 +153,9 @@ public class MortalityTableADH
     private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
+        int signs[] = CurveUtil.getUShapeSigns(bins);
+        if (signs == null)
+            throw new Exception("Bins are not U-shaped");
 
         final int ppy = 1000; // ###
         

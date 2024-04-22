@@ -176,4 +176,44 @@ public class CurveUtil
 
         Clipboard.put(sb.toString());
     }
+    
+    /*
+     * If bins are not U-shaped, return null.
+     * If bins are U-shaped, return signs for all segments: -1 descending, 0 minimum (sideways), +1 ascending.
+     * There may be multiple consecutive minimum segments. 
+     */
+    public static int[] getUShapeSigns(Bin[] bins) throws Exception
+    {
+        int[] signs = new int[bins.length];
+
+        Double vmin = null;
+        for (Bin bin : bins)
+        {
+            if (vmin == null || bin.avg < vmin)
+                vmin = bin.avg;
+        }
+        
+        if (!(Bins.firstBin(bins).avg > vmin && Bins.lastBin(bins).avg > vmin))
+            return null;
+        
+        boolean inflected = false;
+        for (Bin bin : bins)
+        {
+            if (bin.avg == vmin)
+            {
+                signs[bin.index] = 0;
+                inflected = true;
+            }
+            else if (inflected && bin.avg < bin.prev.avg)
+            {
+                return null;
+            }
+            else
+            {
+                signs[bin.index] = inflected ? 1 : -1;
+            }
+        }
+        
+        return signs;
+    }
 }
