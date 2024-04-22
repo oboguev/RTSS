@@ -8,6 +8,7 @@ import rtss.data.bin.Bins;
 import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
+import rtss.data.curves.TuneCCS;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
@@ -156,6 +157,10 @@ public class MortalityTableADH
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
         double[] yyy = MeanPreservingIntegralSpline.eval(bins, options);
+        double f1n = new TuneCCS(bins, options, yyy).tuneLastSegment();
+        options = options.splineParams("f1.n", f1n);
+        yyy = MeanPreservingIntegralSpline.eval(bins, options);
+        
         if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);

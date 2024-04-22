@@ -125,6 +125,11 @@ public class MeanPreservingIntegralSpline
             this.basicSplineType = x.basicSplineType;
             this.splineParams = new HashMap<>(x.splineParams);
         }
+        
+        public Options clone()
+        {
+            return new Options(this);
+        }
 
         public Options debug_title(String v)
         {
@@ -174,6 +179,12 @@ public class MeanPreservingIntegralSpline
         public Options basicSplineType(Class<?> clz)
         {
             basicSplineType = clz;
+            return this;
+        }
+        
+        public Options splineParams(String key, Object value)
+        {
+            splineParams.put(key, value);
             return this;
         }
 
