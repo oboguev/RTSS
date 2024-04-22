@@ -95,13 +95,13 @@ public class SingleMortalityTable
         {
             MortalityInfo mi = get(age);
             
-            Util.checkValid(mi.px);
-            Util.checkValid(mi.qx);
-            Util.checkValid(mi.dx);
-            Util.checkValid(mi.ex);
-            Util.checkValid(mi.lx);
-            Util.checkValid(mi.Lx);
-            Util.checkValid(mi.Tx);
+            Util.checkValidNonNegative(mi.px);
+            Util.checkValidNonNegative(mi.qx);
+            Util.checkValidNonNegative(mi.dx);
+            Util.checkValidNonNegative(mi.ex);
+            Util.checkValidNonNegative(mi.lx);
+            Util.checkValidNonNegative(mi.Lx);
+            Util.checkValidNonNegative(mi.Tx);
             
             check_eq(String.format("px+qx for age %d px = %f, qx = %f", age, mi.px, mi.qx), 
                      mi.px + mi.qx, 1.0, 0.011);
@@ -285,6 +285,8 @@ public class SingleMortalityTable
             else
             {
                 mi.lx = prev_mi.lx - prev_mi.dx;
+                if (mi.lx < 0)
+                    mi.lx = 0;
             }
             
             mi.dx = (int) Math.round(mi.lx * mi.qx);
@@ -305,6 +307,9 @@ public class SingleMortalityTable
                 MortalityInfo next = m.get(age + 1);
                 mi.Lx += (next.dx - prev.dx) / 24;
             }
+
+            if (mi.Lx < 0)
+                mi.Lx = 0;
         }
 
         // calculate Tx and ex
@@ -313,7 +318,18 @@ public class SingleMortalityTable
             MortalityInfo mi = m.get(age);
             for (int x = age; x <= MAX_AGE; x++)
                 mi.Tx += m.get(x).Lx;
-            mi.ex = mi.Tx / mi.lx;
+            if (mi.lx != 0)
+            {
+                mi.ex = mi.Tx / mi.lx;
+            }
+            else if (mi.Tx != 0)
+            {
+                throw new Exception("Internal error while building life table");
+            }
+            else
+            {
+                mi.ex = 0;
+            }
         }
 
         /* delete auxiliary row */

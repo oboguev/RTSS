@@ -25,4 +25,12 @@ public class MortalityInfo
 
     // Средняя продолжительность предстоящей жизни
     public double ex;
+    
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("x=%d lx=%f dx=%f qx=%f px=%f ", x, lx, dx, qx, px));
+        sb.append(String.format("Lx=%f Tx=%f ex=%f", Lx, Tx, ex));
+        return sb.toString();
+    }
 }

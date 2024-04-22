@@ -187,6 +187,18 @@ public class Util
             throw new ArithmeticException("Not a valid number");
     }
     
+    public static void checkNonNegative(double v) throws Exception
+    {
+        if (v < 0)
+            throw new ArithmeticException("Unexpected negative number");
+    }
+
+    public static void checkValidNonNegative(double v) throws Exception
+    {
+        checkValid(v);
+        checkNonNegative(v);
+    }
+
     public static double validate(double v) throws Exception
     {
         if (!isValid(v))

@@ -159,6 +159,7 @@ public class MortalityTableADH
         double[] yyy = MeanPreservingIntegralSpline.eval(bins, options);
         double f1n = new TuneCCS(bins, options, yyy).tuneLastSegment();
         options = options.splineParams("f1.n", f1n);
+        options = options.splineParams("f1.n", yyy[0] * 1.5);
         yyy = MeanPreservingIntegralSpline.eval(bins, options);
         
         if (Util.False)
@@ -172,7 +173,7 @@ public class MortalityTableADH
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
-        if (Util.True)
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, 1);
             String title = "MP-integral yearly curve " + debug_title;
