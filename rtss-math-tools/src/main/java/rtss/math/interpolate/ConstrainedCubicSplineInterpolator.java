@@ -25,15 +25,10 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException
     {
         if (x.length != y.length)
-        {
             throw new DimensionMismatchException(x.length, y.length);
-        }
 
         if (x.length < 3)
-        {
-            throw new NumberIsTooSmallException(LocalizedFormats.NUMBER_OF_POINTS,
-                                                x.length, 3, true);
-        }
+            throw new NumberIsTooSmallException(LocalizedFormats.NUMBER_OF_POINTS, x.length, 3, true);
 
         // Number of intervals.  The number of data points is n + 1.
         final int n = x.length - 1;

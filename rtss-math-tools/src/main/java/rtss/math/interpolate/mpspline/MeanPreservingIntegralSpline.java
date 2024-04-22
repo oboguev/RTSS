@@ -80,14 +80,13 @@ public class MeanPreservingIntegralSpline
         for (k = 0; k < curve.length; k++)
             curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
 
-        // ### adjust segments (distort)
-        
         if (options.checkPositive && !Util.isPositive(curve))
             throw new Exception("Curve has negative values");
         
         if (options.checkNonNegative && !Util.isNonNegative(curve))
             throw new Exception("Curve has negative or zero values");
         
+        // for low values of ppy may want to adjust (distort) segments so they match mean  
         CurveVerifier.validate_means(curve, bins);
 
         return curve;
