@@ -1,12 +1,15 @@
 package rtss.math.interpolate.mpspline;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.CurveVerifier;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.FritschCarlsonMonotonicSpline;
+import rtss.math.interpolate.SteffenSplineInterpolator;
+import rtss.math.interpolate.rsplines.FMMSpline;
 import rtss.math.interpolate.rsplines.HymanSpline;
 import rtss.util.Util;
 
@@ -50,12 +53,20 @@ public class MeanPreservingIntegralSpline
          * Create monotonic spline passing through these control points
          */
         UnivariateFunction aspline = null;
-        if (Util.False)
+        if (options.basicSplineType == FritschCarlsonMonotonicSpline.class)
             aspline = FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
-        if (Util.True)
+        else if (options.basicSplineType == ConstrainedCubicSplineInterpolator.class)
             aspline = new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y);
-        if (Util.False)
+        else if (options.basicSplineType == HymanSpline.class)
             aspline = new HymanSpline(cp_x, cp_y);
+        else if (options.basicSplineType == FMMSpline.class)
+            aspline = new FMMSpline(cp_x, cp_y);
+        else if (options.basicSplineType == SteffenSplineInterpolator.class)
+            aspline = new SteffenSplineInterpolator().interpolate(cp_x, cp_y);
+        else if (options.basicSplineType == AkimaSplineInterpolator.class)
+            aspline = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
+        else
+            throw new IllegalArgumentException("Incorrect spline type");
 
         double[] scurve = new double[Bins.widths_in_years(bins) * ppy + 1];
         double xstep = 1.0 / ppy;
@@ -154,8 +165,8 @@ public class MeanPreservingIntegralSpline
             if (checkPositive == null)
                 checkPositive = false;
 
-            // if (basicSplineType == null)
-            //     basicSplineType = SteffenSplineInterpolator.class;
+            if (basicSplineType == null)
+                basicSplineType = ConstrainedCubicSplineInterpolator.class;
 
             if (debug == null)
                 debug = false;

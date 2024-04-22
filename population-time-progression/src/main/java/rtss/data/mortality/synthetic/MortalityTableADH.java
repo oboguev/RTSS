@@ -148,8 +148,7 @@ public class MortalityTableADH
         if (Util.True)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
-            String title = "Make curve";
-            title += "Integr curve " + debug_title;
+            String title = "MP-integral curve " + debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             chart.addSeries("3", xxx, curve);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
