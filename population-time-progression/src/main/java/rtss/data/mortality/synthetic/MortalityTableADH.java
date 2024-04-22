@@ -18,6 +18,7 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
@@ -151,8 +152,10 @@ public class MortalityTableADH
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
-        int ppy = 10;
-        double[] yyy = MeanPreservingIntegralSpline.eval(bins, ppy);
+        int ppy = 10; // ###
+        MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
+        options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class); 
+        double[] yyy = MeanPreservingIntegralSpline.eval(bins, options);
         if (Util.True)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);

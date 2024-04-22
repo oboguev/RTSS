@@ -15,23 +15,16 @@ import rtss.util.Util;
 
 public class MeanPreservingIntegralSpline
 {
-    public static double[] eval(Bin[] bins, int ppy) throws Exception
+    public static double[] eval(Bin[] bins, Options options) throws Exception
     {
-        return eval(bins, ppy, null);
+        return new MeanPreservingIntegralSpline().do_eval(bins, options);
     }
 
-    public static double[] eval(Bin[] bins, int ppy, Options options) throws Exception
-    {
-        return new MeanPreservingIntegralSpline().do_eval(bins, ppy, options);
-    }
-
-    private double[] do_eval(Bin[] bins, int ppy, Options options) throws Exception
+    private double[] do_eval(Bin[] bins, Options options) throws Exception
     {
         if (options == null)
             options = new Options();
-        else
-            options = new Options(options);
-        options.applyDefaults();
+        options = options.applyDefaults();
 
         /*
          * Make control points for the curve that represents the running cumulative sum of the bins
@@ -68,8 +61,8 @@ public class MeanPreservingIntegralSpline
         else
             throw new IllegalArgumentException("Incorrect spline type");
 
-        double[] scurve = new double[Bins.widths_in_years(bins) * ppy + 1];
-        double xstep = 1.0 / ppy;
+        double[] scurve = new double[Bins.widths_in_years(bins) * options.ppy + 1];
+        double xstep = 1.0 / options.ppy;
         int k = 0;
         for (double x = cp_x[0]; x <= cp_x[cp_x.length - 1]; x += xstep)
             scurve[k++] = aspline.value(x);
@@ -96,6 +89,8 @@ public class MeanPreservingIntegralSpline
 
     public static class Options
     {
+        String debug_title;
+        Integer ppy;
         Boolean checkNonNegative;
         Boolean checkPositive;
         Boolean debug;
@@ -111,12 +106,26 @@ public class MeanPreservingIntegralSpline
 
         public Options(Options x)
         {
-            checkNonNegative = x.checkNonNegative;
-            checkPositive = x.checkPositive;
-            debug = x.debug;
-            basicSplineType = x.basicSplineType;
+            this.debug_title = x.debug_title;
+            this.ppy = x.ppy;
+            this.checkNonNegative = x.checkNonNegative;
+            this.checkPositive = x.checkPositive;
+            this.debug = x.debug;
+            this.basicSplineType = x.basicSplineType;
         }
 
+        public Options debug_title(String v)
+        {
+            debug_title = v;
+            return this;
+        }
+
+        public Options ppy(Integer v)
+        {
+            ppy = v;
+            return this;
+        }
+        
         public Options checkNonNegative()
         {
             return checkNonNegative(true);
@@ -156,19 +165,29 @@ public class MeanPreservingIntegralSpline
             return this;
         }
 
-        public void applyDefaults()
+        public Options applyDefaults()
         {
-            if (checkNonNegative == null)
-                checkNonNegative = false;
+            Options x = new Options(this);
+
+            if (x.debug_title == null)
+                x.debug_title = "";
+
+            if (x.ppy == null)
+                x.ppy = 1000;
+
+            if (x.checkNonNegative == null)
+                x.checkNonNegative = false;
             
-            if (checkPositive == null)
-                checkPositive = false;
+            if (x.checkPositive == null)
+                x.checkPositive = false;
 
-            if (basicSplineType == null)
-                basicSplineType = ConstrainedCubicSplineInterpolator.class;
+            if (x.basicSplineType == null)
+                x.basicSplineType = ConstrainedCubicSplineInterpolator.class;
 
-            if (debug == null)
-                debug = false;
+            if (x.debug == null)
+                x.debug = false;
+            
+            return x;
         }
     }
 }
