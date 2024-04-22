@@ -1,5 +1,8 @@
 package rtss.math.interpolate.mpspline;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
@@ -49,7 +52,7 @@ public class MeanPreservingIntegralSpline
         if (options.basicSplineType == FritschCarlsonMonotonicSpline.class)
             aspline = FritschCarlsonMonotonicSpline.createMonotoneCubicSpline(cp_x, cp_y);
         else if (options.basicSplineType == ConstrainedCubicSplineInterpolator.class)
-            aspline = new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y);
+            aspline = new ConstrainedCubicSplineInterpolator().interpolate(cp_x, cp_y, options.splineParams);
         else if (options.basicSplineType == HymanSpline.class)
             aspline = new HymanSpline(cp_x, cp_y);
         else if (options.basicSplineType == FMMSpline.class)
@@ -100,9 +103,12 @@ public class MeanPreservingIntegralSpline
         Boolean checkPositive;
         Boolean debug;
         Class<?> basicSplineType;
+        Map<String, Object> splineParams = new HashMap<>();
 
         public Options()
         {
+            debug_title = null;
+            ppy = null;
             checkNonNegative = null;
             checkPositive = null;
             debug = null;
@@ -117,6 +123,7 @@ public class MeanPreservingIntegralSpline
             this.checkPositive = x.checkPositive;
             this.debug = x.debug;
             this.basicSplineType = x.basicSplineType;
+            this.splineParams = new HashMap<>(x.splineParams);
         }
 
         public Options debug_title(String v)

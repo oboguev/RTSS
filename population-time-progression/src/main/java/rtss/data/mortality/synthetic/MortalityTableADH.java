@@ -151,7 +151,7 @@ public class MortalityTableADH
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
-        final int ppy = 100; // ### 64 is ok, 65 is not
+        final int ppy = 100; // ###
         
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
