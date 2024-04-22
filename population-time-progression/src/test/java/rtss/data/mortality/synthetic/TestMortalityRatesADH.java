@@ -17,16 +17,19 @@ public class TestMortalityRatesADH
             ex.printStackTrace();
         }
     }
-    
+
     private void do_main() throws Exception
     {
         MortalityTableADH.getMortalityTable(Area.RSFSR, 1946); // ###
+        
+        if (Util.True) // ###
+            return;
 
         for (int year = 1927; year <= 1958; year++)
         {
             if (year >= 1941 && year <= 1945)
                 continue;
-            
+
             MortalityTableADH.getMortalityTable(Area.RSFSR, year);
         }
     }

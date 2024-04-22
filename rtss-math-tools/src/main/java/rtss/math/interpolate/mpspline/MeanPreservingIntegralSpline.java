@@ -62,15 +62,20 @@ public class MeanPreservingIntegralSpline
             throw new IllegalArgumentException("Incorrect spline type");
 
         double[] scurve = new double[Bins.widths_in_years(bins) * options.ppy + 1];
-        double xstep = 1.0 / options.ppy;
-        int k = 0;
-        for (double x = cp_x[0]; x <= cp_x[cp_x.length - 1]; x += xstep)
-            scurve[k++] = aspline.value(x);
+        for (int k = 0; k < scurve.length; k++)
+        {
+            double x = cp_x[0] + k * (cp_x[cp_x.length - 1] - cp_x[0]) / (scurve.length - 1);
+            x = Math.max(x, cp_x[0]);
+            x = Math.min(x, cp_x[cp_x.length - 1]);
+            scurve[k] = aspline.value(x);
+        }
+
         /*
          * Calculate its derivative
          */
         double[] curve = new double[scurve.length - 1];
-        for (k = 0; k < curve.length; k++)
+        double xstep = 1.0 / options.ppy;
+        for (int k = 0; k < curve.length; k++)
             curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
 
         if (options.checkPositive && !Util.isPositive(curve))

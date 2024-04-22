@@ -1,13 +1,19 @@
 package rtss.math.interpolate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.util.MathArrays;
+
+import rtss.util.Util;
 
 /**
  * Constrained Spline Interpolation algorithm (CJC Kruger).
@@ -25,6 +31,26 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
     public PolynomialSplineFunction interpolate(double x[], double y[])
             throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException
     {
+        try
+        {
+            Map<String, Object> params = null;
+            return interpolate(x, y, params);
+        }
+        catch (MathIllegalArgumentException ex)
+        {
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(ex.getLocalizedMessage(), ex); 
+        }
+    }
+
+    public PolynomialSplineFunction interpolate(double x[], double y[], Map<String, Object> params) throws Exception
+    {
+        if (params == null)
+            params = new HashMap<>();
+
         if (x.length != y.length)
             throw new DimensionMismatchException(x.length, y.length);
 
@@ -64,6 +90,11 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         
         f1[0] = 3d * dy[0] / (2d * (dx[0])) - f1[1] / 2d;
         f1[n] = 3d * dy[n - 1] / (2d * (dx[n - 1])) - f1[n - 1] / 2d;
+        
+        if (params.containsKey("f1.0"))
+            f1[0] = (Double) params.get("f1.0");
+        if (params.containsKey("f1.n"))
+            f1[n] = (Double) params.get("f1.n");
 
         // cubic spline coefficients -- a contains constants, b is linear, c quadratic, d is cubic
         final double a[] = new double[n + 1];
@@ -106,6 +137,16 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             };
         }
 
-        return new PolynomialSplineFunction(x, polynomials);
+        PolynomialSplineFunction sp = new PolynomialSplineFunction(x, polynomials);
+        
+        // self-test
+        for (int k = 0; k < x.length; k++)
+        {
+            double v = sp.value(x[k]);
+            if (Util.differ(v,  y[k]))
+                throw new Exception("Spline self-test failed"); 
+        }
+        
+        return sp;
     }
 }

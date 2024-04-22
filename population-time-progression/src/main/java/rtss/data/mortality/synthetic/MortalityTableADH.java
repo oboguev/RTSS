@@ -143,7 +143,7 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        return curve_2(bins, debug_title);
+        return curve_1(bins, debug_title);
     }
 
     @SuppressWarnings("unused")
@@ -151,7 +151,7 @@ public class MortalityTableADH
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
-        final int ppy = 1000;
+        final int ppy = 100; // ### 64 is ok, 65 is not
         
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
@@ -167,7 +167,7 @@ public class MortalityTableADH
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
-        if (Util.False)
+        if (Util.True)
         {
             double[] xxx = Bins.ppy_x(bins, 1);
             String title = "MP-integral yearly curve " + debug_title;
