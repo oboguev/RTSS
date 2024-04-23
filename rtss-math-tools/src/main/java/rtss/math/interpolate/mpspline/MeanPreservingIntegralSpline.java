@@ -15,6 +15,7 @@ import rtss.math.interpolate.FritschCarlsonMonotonicSpline;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.rsplines.FMMSpline;
 import rtss.math.interpolate.rsplines.HymanSpline;
+import rtss.util.Clipboard;
 import rtss.util.Util;
 
 public class MeanPreservingIntegralSpline
@@ -68,9 +69,32 @@ public class MeanPreservingIntegralSpline
         double[] curve = new double[Bins.widths_in_years(bins) * options.ppy];
         double xstep = 1.0 / options.ppy;
 
-        if (Util.False && aspline instanceof PolynomialSplineFunction)
+        if (Util.False && options.basicSplineType == ConstrainedCubicSplineInterpolator.class)
         {
+            /*
+             * This does not work at low @ppy, as derivative is evaluated at discrete points,
+             * rather than covering the range of actual "dx" increments, so the sum over a bin range
+             * somewhat differs from bin.avg. 
+             */
+            aspline = ConstrainedCubicSplineInterpolator.derivative(aspline);
+
+            for (int k = 0; k < curve.length; k++)
+            {
+                double x = cp_x[0] + k * (cp_x[cp_x.length - 1] - cp_x[0] - xstep) / (curve.length - 1);
+                x = Math.max(x, cp_x[0]);
+                x = Math.min(x, cp_x[cp_x.length - 1]);
+                curve[k] = aspline.value(x);
+            }
+        }
+        else if (Util.False && aspline instanceof PolynomialSplineFunction)
+        {
+            /*
+             * This does not work at low @ppy, as derivative is evaluated at discrete points,
+             * rather than covering the range of actual "dx" increments, so the sum over a bin range
+             * somewhat differs from bin.avg. 
+             */
             aspline = ((PolynomialSplineFunction) aspline).derivative();
+            
             for (int k = 0; k < curve.length; k++)
             {
                 double x = cp_x[0] + k * (cp_x[cp_x.length - 1] - cp_x[0] - xstep) / (curve.length - 1);
@@ -98,6 +122,12 @@ public class MeanPreservingIntegralSpline
              */
             for (int k = 0; k < curve.length; k++)
                 curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
+        }
+        
+        if (Util.True)
+        {
+            double [] xxx = Bins.ppy_x(bins, options.ppy);
+            Clipboard.put(" ", xxx, curve);
         }
 
         if (options.checkPositive && !Util.isPositive(curve))

@@ -157,7 +157,7 @@ public class MortalityTableADH
         if (signs == null)
             throw new Exception("Bins are not U-shaped");
 
-        final int ppy = 10; // ###
+        final int ppy = 1000; // ###
         
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
@@ -179,7 +179,7 @@ public class MortalityTableADH
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
-        if (Util.True)
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, 1);
             String title = "MP-integral yearly curve " + debug_title;

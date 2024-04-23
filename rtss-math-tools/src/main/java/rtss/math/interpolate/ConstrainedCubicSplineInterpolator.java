@@ -3,6 +3,7 @@ package rtss.math.interpolate;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -137,7 +138,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             coefficients[2] = c[i];
             coefficients[3] = d[i];
             final double x0 = x[i - 1];
-            polynomials[i - 1] = new ConstrainedCubicSplinePolynomialFunction (coefficients, x0);
+            polynomials[i - 1] = new ConstrainedCubicSplinePolynomialFunction(coefficients, x0);
         }
 
         PolynomialSplineFunction sp = new PolynomialSplineFunction(x, polynomials);
@@ -158,6 +159,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         private static final long serialVersionUID = 1L;
 
         private final double x0;
+
         public ConstrainedCubicSplinePolynomialFunction(double[] coefficients, double x0) throws NullArgumentException, NoDataException
         {
             super(coefficients);
@@ -170,6 +172,36 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             // bypass the standard Apache Commons behavior
             return super.value(x + x0);
         }
+
+        @Override
+        public PolynomialFunction polynomialDerivative()
+        {
+            return new ConstrainedCubicSplinePolynomialFunction(differentiate(getCoefficients()), x0);
+        }
+    }
+
+    public static PolynomialSplineFunction derivative(UnivariateFunction f)
+    {
+        if (f instanceof PolynomialSplineFunction)
+            return derivative((PolynomialSplineFunction) f);
+        else
+            throw new IllegalArgumentException();
+    }
+    
+    public static PolynomialSplineFunction derivative(PolynomialSplineFunction f)
+    {
+        PolynomialFunction polynomials[] = new PolynomialFunction[f.getPolynomials().length];
+        int k = 0;
+        
+        for (PolynomialFunction pf : f.getPolynomials())
+        {
+            if (pf instanceof ConstrainedCubicSplinePolynomialFunction)
+                polynomials[k++] = ((ConstrainedCubicSplinePolynomialFunction) pf).polynomialDerivative();
+            else
+                throw new IllegalArgumentException();
+        }
+
+        return new PolynomialSplineFunction(f.getKnots(), polynomials);
     }
 
     /* ====================================================================================================== */
