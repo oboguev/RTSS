@@ -136,7 +136,8 @@ public class MeanPreservingIntegralSpline
         if (options.checkNonNegative && !Util.isNonNegative(curve))
             throw new Exception("Curve has negative or zero values");
         
-        // for low values of ppy may want to adjust (distort) segments so they match mean  
+        // if using discrete derivatives directly, then for low values of ppy may want to adjust (distort) segments 
+        // so they match the mean value  
         CurveVerifier.validate_means(curve, bins);
 
         return curve;
