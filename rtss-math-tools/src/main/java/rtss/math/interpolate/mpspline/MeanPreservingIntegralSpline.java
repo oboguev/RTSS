@@ -100,7 +100,6 @@ public class MeanPreservingIntegralSpline
                 curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
         }
 
-
         if (options.checkPositive && !Util.isPositive(curve))
             throw new Exception("Curve has negative values");
         

@@ -8,7 +8,9 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
+import org.apache.commons.math3.exception.NoDataException;
 import org.apache.commons.math3.exception.NonMonotonicSequenceException;
+import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.util.MathArrays;
@@ -135,18 +137,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             coefficients[2] = c[i];
             coefficients[3] = d[i];
             final double x0 = x[i - 1];
-            Util.noop(); // ####
-            polynomials[i - 1] = new PolynomialFunction(coefficients)
-            {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public double value(double x)
-                {
-                    // bypass the standard Apache Commons behavior
-                    return super.value(x + x0);
-                }
-            };
+            polynomials[i - 1] = new ConstrainedCubicSplinePolynomialFunction (coefficients, x0);
         }
 
         PolynomialSplineFunction sp = new PolynomialSplineFunction(x, polynomials);
@@ -161,7 +152,26 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
         return sp;
     }
-    
+
+    public static class ConstrainedCubicSplinePolynomialFunction extends PolynomialFunction
+    {
+        private static final long serialVersionUID = 1L;
+
+        private final double x0;
+        public ConstrainedCubicSplinePolynomialFunction(double[] coefficients, double x0) throws NullArgumentException, NoDataException
+        {
+            super(coefficients);
+            this.x0 = x0;
+        }
+
+        @Override
+        public double value(double x)
+        {
+            // bypass the standard Apache Commons behavior
+            return super.value(x + x0);
+        }
+    }
+
     /* ====================================================================================================== */
 
     /*
@@ -240,7 +250,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
                 }
             }
         }
-        
+
         private void coerce_negative()
         {
             Util.noop();

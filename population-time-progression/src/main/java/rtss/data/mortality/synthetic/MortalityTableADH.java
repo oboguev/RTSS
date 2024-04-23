@@ -157,7 +157,7 @@ public class MortalityTableADH
         if (signs == null)
             throw new Exception("Bins are not U-shaped");
 
-        final int ppy = 1000; // ###
+        final int ppy = 10; // ###
         
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
