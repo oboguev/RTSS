@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
@@ -63,23 +64,42 @@ public class MeanPreservingIntegralSpline
             aspline = new AkimaSplineInterpolator().interpolate(cp_x, cp_y);
         else
             throw new IllegalArgumentException("Incorrect spline type");
+        
+        double[] curve = new double[Bins.widths_in_years(bins) * options.ppy];
+        double xstep = 1.0 / options.ppy;
 
-        double[] scurve = new double[Bins.widths_in_years(bins) * options.ppy + 1];
-        for (int k = 0; k < scurve.length; k++)
+        if (Util.False && aspline instanceof PolynomialSplineFunction)
         {
-            double x = cp_x[0] + k * (cp_x[cp_x.length - 1] - cp_x[0]) / (scurve.length - 1);
-            x = Math.max(x, cp_x[0]);
-            x = Math.min(x, cp_x[cp_x.length - 1]);
-            scurve[k] = aspline.value(x);
+            aspline = ((PolynomialSplineFunction) aspline).derivative();
+            for (int k = 0; k < curve.length; k++)
+            {
+                double x = cp_x[0] + k * (cp_x[cp_x.length - 1] - cp_x[0] - xstep) / (curve.length - 1);
+                x = Math.max(x, cp_x[0]);
+                x = Math.min(x, cp_x[cp_x.length - 1]);
+                curve[k] = aspline.value(x);
+            }
+        }
+        else
+        {
+            /*
+             * Calculate spline
+             */
+            double[] scurve = new double[Bins.widths_in_years(bins) * options.ppy + 1];
+            for (int k = 0; k < scurve.length; k++)
+            {
+                double x = cp_x[0] + k * (cp_x[cp_x.length - 1] - cp_x[0]) / (scurve.length - 1);
+                x = Math.max(x, cp_x[0]);
+                x = Math.min(x, cp_x[cp_x.length - 1]);
+                scurve[k] = aspline.value(x);
+            }
+
+            /*
+             * Calculate its derivative
+             */
+            for (int k = 0; k < curve.length; k++)
+                curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
         }
 
-        /*
-         * Calculate its derivative
-         */
-        double[] curve = new double[scurve.length - 1];
-        double xstep = 1.0 / options.ppy;
-        for (int k = 0; k < curve.length; k++)
-            curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
 
         if (options.checkPositive && !Util.isPositive(curve))
             throw new Exception("Curve has negative values");
