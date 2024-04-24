@@ -155,7 +155,37 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
                 throw new Exception("Spline self-test failed");
         }
 
+        if (prev_ff2 != null && prev_ff2.trace)
+            trace(polynomials, params);
+
         return sp;
+    }
+
+    private void trace(PolynomialFunction polynomials[], Map<String, Object> params) throws Exception
+    {
+        String title = (String) params.get("title");
+        if (title == null)
+            title = "unnamed";
+
+        Util.out("Polynomials of " + title);
+        Util.out("    age s s'=f s''=f'");
+        for (PolynomialFunction pp : polynomials)
+        {
+            final double delta = 0.0;
+            ConstrainedCubicSplinePolynomialFunction p = (ConstrainedCubicSplinePolynomialFunction) pp;
+            Util.out(String.format("    %s %.4f %.4f %.4f", f2s(p.x0), p.f(p.x0), p.f1(p.x0), p.f2(p.x0)));
+            if (Util.False)
+            {
+                Util.out(String.format("    %s %.4f %.4f %.4f", f2s(p.x0 + delta), p.f(p.x0 + delta), p.f1(p.x0 + delta), p.f2(p.x0 + delta)));
+                Util.out(String.format("    %s %.4f %.4f %.4f", f2s(p.x1 - delta), p.f(p.x1 - delta), p.f1(p.x1 - delta), p.f2(p.x1 - delta)));
+            }
+            Util.out(String.format("    %s %.4f %.4f %.4f", f2s(p.x1), p.f(p.x1), p.f1(p.x1), p.f2(p.x1)));
+        }
+    }
+
+    private static String f2s(double f) throws Exception
+    {
+        return Util.f2s(f);
     }
 
     public static class ConstrainedCubicSplinePolynomialFunction extends PolynomialFunction
@@ -200,7 +230,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
         public double f1(double x)
         {
-            return b + (2 * c * x ) + (3 * d * x * x);
+            return b + (2 * c * x) + (3 * d * x * x);
         }
 
         public double f2(double x)
@@ -219,6 +249,9 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
     public static PolynomialSplineFunction derivative(PolynomialSplineFunction f)
     {
+        /*
+         * Could also subclass PolynomialSplineFunction and override there derivative() and polynomialSplineDerivative().
+         */
         PolynomialFunction polynomials[] = new PolynomialFunction[f.getPolynomials().length];
         int k = 0;
 
@@ -266,6 +299,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         private double dx;
         private double x1;
         private String title;
+        private boolean trace = false;
 
         private double v1, v1_initial, v2, v2_initial;
 
@@ -294,6 +328,11 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             title = (String) params.get("title");
             if (title == null)
                 title = "unnamed";
+
+            Boolean b = (Boolean) params.get("f2.trace");
+            if (b != null && b)
+                trace = true;
+
         }
 
         private void reeval_cd()
@@ -319,11 +358,11 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
                 break;
 
             case MIN1:
-                // coerce_min1();
+                coerce_min1();
                 break;
 
             case MIN2:
-                // coerce_min2();
+                coerce_min2();
                 break;
 
             case NEUTRAL:
@@ -332,8 +371,8 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             }
 
             reeval_cd();
-            if (Util.True && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
-                Util.out(String.format("Adjusted %s %s-%s %s: [%.3f]-[%.3f] => [%.3f]-[%.3f]", 
+            if (Util.True && trace && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
+                Util.out(String.format("Adjusted %s %s-%s %s: [%.3f]-[%.3f] => [%.3f]-[%.3f]",
                                        title, f2s(x0), f2s(x1 - 1.0), trend.name(), v1_initial, v2_initial, v1, v2));
             Util.noop();
         }
@@ -433,11 +472,6 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
                 return "+";
             else
                 return "0";
-        }
-
-        private String f2s(double f) throws Exception
-        {
-            return Util.f2s(f);
         }
     }
 }

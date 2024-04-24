@@ -6,8 +6,6 @@ import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Early_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 
-import java.math.BigDecimal;
-
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import rtss.data.mortality.CombinedMortalityTable;

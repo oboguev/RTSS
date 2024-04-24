@@ -23,6 +23,7 @@ public class EnsureMonotonicYearlyPoints
         this.curve = curve;
         this.ppy = CurveUtil.ppy(curve, bins);
         this.title = title;
+        Util.unused(ppy);
     }
     
     public void fix() throws Exception
@@ -98,21 +99,22 @@ public class EnsureMonotonicYearlyPoints
     private void fixOneLast(int x)
     {
         Bin bin = Bins.binForAge(x, bins);
+        Util.unused(bin);
         
         if (x == inflection)
         {
-            // ###
-            Util.noop();
+            // TODO
+            notImplemented();
         }
         else if (x < inflection)
         {
-            // ###
-            Util.noop();
+            // TODO
+            notImplemented();
         }
         else
         {
-            // ###
-            Util.noop();
+            // TODO
+            notImplemented();
         }
     }
 
@@ -122,11 +124,12 @@ public class EnsureMonotonicYearlyPoints
     private void fixOneFirst(int x)
     {
         Bin bin = Bins.binForAge(x, bins);
+        Util.unused(bin);
 
         if (x > inflection)
         {
-            // ###
-            Util.noop();
+            // TODO
+            notImplemented();
         }
         else
         {
@@ -140,11 +143,12 @@ public class EnsureMonotonicYearlyPoints
     private void fixOneMiddle(int x)
     {
         Bin bin = Bins.binForAge(x, bins);
+        Util.unused(bin);
 
         if (x > inflection)
         {
-            // ###
-            Util.noop();
+            // TODO
+            notImplemented();
         }
         else
         {
