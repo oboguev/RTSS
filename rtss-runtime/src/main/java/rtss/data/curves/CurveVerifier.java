@@ -236,7 +236,6 @@ public class CurveVerifier
             
             String msg = String.format("Non-monotonic segments in %s at ranges %s and ages %s, minimum segments: %s", 
                                        title, sb.toString(), desc, minsegs);
-            // ### minimum segments...
             if (doThrow)
                 throw new Exception(msg);
             Util.err(msg);

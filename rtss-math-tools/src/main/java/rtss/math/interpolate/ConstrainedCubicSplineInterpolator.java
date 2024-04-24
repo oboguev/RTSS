@@ -104,6 +104,8 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         final double b[] = new double[n + 1];
         final double c[] = new double[n + 1];
         final double d[] = new double[n + 1];
+        
+        F2SignFilter prev_ff2 = null;
 
         for (int i = 1; i <= n; i++)
         {
@@ -116,10 +118,11 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             /*
              * Adjust c and d so that s'' has a desired sign
              */
-            F2SignFilter ff2 = new F2SignFilter(params, c[i], d[i], x[i - 1], dx[i - 1], i - 1);
+            F2SignFilter ff2 = new F2SignFilter(prev_ff2, params, c[i], d[i], x[i - 1], dx[i - 1], i - 1);
             ff2.coerce();
             c[i] = ff2.c;
             d[i] = ff2.d;
+            prev_ff2 = ff2;
 
             b[i] = (dy[i - 1] -
                     c[i] * (x[i] * x[i] - x[i - 1] * x[i - 1]) -
@@ -228,6 +231,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
      */
     public static class F2SignFilter
     {
+        private F2SignFilter prev;
         public double c, c_initial;
         public double d, d_initial;
         private int sign;
@@ -238,8 +242,9 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
         private double v1, v1_initial, v2, v2_initial;
 
-        public F2SignFilter(Map<String, Object> params, double c, double d, double x0, double dx, int iSeg)
+        public F2SignFilter(F2SignFilter prev, Map<String, Object> params, double c, double d, double x0, double dx, int iSeg)
         {
+            this.prev = prev;
             this.c_initial = this.c = c;
             this.d_initial = this.d = d;
             this.x0 = x0;
