@@ -116,7 +116,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             /*
              * Adjust c and d so that s'' has a desired sign
              */
-            FilterF2 ff2 = new FilterF2(params, c[i], d[i], dx[i - 1], i - 1);
+            F2SignFilter ff2 = new F2SignFilter(params, c[i], d[i], dx[i - 1], i - 1);
             ff2.coerce();
             c[i] = ff2.c;
             d[i] = ff2.d;
@@ -187,12 +187,12 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         else
             throw new IllegalArgumentException();
     }
-    
+
     public static PolynomialSplineFunction derivative(PolynomialSplineFunction f)
     {
         PolynomialFunction polynomials[] = new PolynomialFunction[f.getPolynomials().length];
         int k = 0;
-        
+
         for (PolynomialFunction pf : f.getPolynomials())
         {
             if (pf instanceof ConstrainedCubicSplinePolynomialFunction)
@@ -226,7 +226,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
      *      in descending segments (c + d * x) < 0 in the whole range of x = [0...dx].  
      *      in ascending segments (c + d * x) > 0 in the whole range of x = [0...dx].  
      */
-    public static class FilterF2
+    public static class F2SignFilter
     {
         public double c;
         public double d;
@@ -234,7 +234,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         private double dx;
         boolean active = false;
 
-        public FilterF2(Map<String, Object> params, double c, double d, double dx, int iSeg)
+        public F2SignFilter(Map<String, Object> params, double c, double d, double dx, int iSeg)
         {
             this.c = c;
             this.d = d;
@@ -260,14 +260,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
                 if (sign < 0)
                 {
-                    if (v1 <= 0 && v2 <= 0)
-                    {
-                        // do nothing
-                    }
-                    else
-                    {
-                        coerce_negative();
-                    }
+                    coerce_negative();
                 }
                 else if (sign > 0)
                 {
@@ -285,14 +278,55 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
         private void coerce_negative()
         {
-            Util.noop();
-            // ###
+            double v1 = c;
+            double v2 = c + d * dx;
+            double vmin = Math.min(v1, v2);
+            double vmt = 0.2 * vmin; // min target
+
+            switch (sign(c) + sign(d))
+            {
+            case "++":
+            case "00":
+            case "0+":
+            case "+0":
+                // not much we can do
+                return;
+                
+            case "0-":    
+            case "-0":    
+            case "--":
+                // nearly ok, but tweak a bit: make one end to be at least 20% of the other
+                if (v1 > vmt)
+                    c = vmt;
+                if (v2 > vmt)
+                    d = (vmt - c) / dx;
+                return;
+
+            case "+-":
+                c = 0.2 * v2;
+                d = (v2 - c) / dx; 
+                return;
+
+            case "-+":
+                d = -0.8 * c / dx;
+                return;
+            }
         }
 
         private void coerce_positive()
         {
             Util.noop();
             // ###
+        }
+        
+        private String sign(double v)
+        {
+            if (v < 0)
+                return "-";
+            else if (v > 0)
+                return "+";
+            else
+                return "0";
         }
     }
 }
