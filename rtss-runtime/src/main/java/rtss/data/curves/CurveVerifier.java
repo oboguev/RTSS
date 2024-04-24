@@ -82,7 +82,7 @@ public class CurveVerifier
         return true;
     }
 
-    private static boolean error(String title, boolean doThrow, String msg) throws Exception
+    static boolean error(String title, boolean doThrow, String msg) throws Exception
     {
         msg += ": " + title;
         if (doThrow)

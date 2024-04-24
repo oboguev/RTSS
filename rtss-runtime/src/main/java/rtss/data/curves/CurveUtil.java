@@ -178,42 +178,50 @@ public class CurveUtil
     }
     
     /*
-     * If bins are not U-shaped, return null.
-     * If bins are U-shaped, return signs for all segments: -1 descending, 0 minimum (sideways), +1 ascending.
-     * There may be multiple consecutive minimum segments. 
+     * If bins are not U-shaped, throw an exception.
+     * If bins are U-shaped, return trends for all segments.
      */
-    public static int[] getUShapeSigns(Bin[] bins) throws Exception
+    public static CurveSegmentTrend[] getUShapeSegmentTrends(Bin[] bins, String title) throws Exception
     {
-        int[] signs = new int[bins.length];
+        CurveVerifier.verifyUShape(bins, false, title, true);
 
-        Double vmin = null;
+        Bin minBin1 = null;
+        Bin minBin2 = null;
+
         for (Bin bin : bins)
         {
-            if (vmin == null || bin.avg < vmin)
-                vmin = bin.avg;
+            if (minBin1 == null)
+            {
+                minBin1 = bin;
+            }
+            else if (bin.avg < minBin1.avg)
+            {
+                minBin1 = bin;
+                minBin2 = null;
+            }
+            else if (bin.avg == minBin1.avg)
+            {
+                if (bin != minBin1.next)
+                    throw new Exception("Long chain of mimimum bins at " + title);
+                minBin2 = bin;
+            }
         }
         
-        if (!(Bins.firstBin(bins).avg > vmin && Bins.lastBin(bins).avg > vmin))
-            return null;
-        
-        boolean inflected = false;
+        CurveSegmentTrend[] trends = new CurveSegmentTrend[bins.length];
         for (Bin bin : bins)
         {
-            if (bin.avg == vmin)
-            {
-                signs[bin.index] = 0;
-                inflected = true;
-            }
-            else if (inflected && bin.avg < bin.prev.avg)
-            {
-                return null;
-            }
+            if (bin.index < minBin1.index)
+                trends[bin.index] = CurveSegmentTrend.DOWN;
+            else if (bin == minBin1 && minBin2 == null)
+                trends[bin.index] = CurveSegmentTrend.MIN;
+            else if (bin == minBin1 && minBin2 != null)
+                trends[bin.index] = CurveSegmentTrend.MIN1;
+            else if (bin == minBin2)
+                trends[bin.index] = CurveSegmentTrend.MIN2;
             else
-            {
-                signs[bin.index] = inflected ? 1 : -1;
-            }
+                trends[bin.index] = CurveSegmentTrend.UP;
         }
         
-        return signs;
+        return trends;
     }
 }

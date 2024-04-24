@@ -16,6 +16,7 @@ import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.util.MathArrays;
 
+import rtss.data.curves.CurveSegmentTrend;
 import rtss.util.Util;
 
 /**
@@ -104,7 +105,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         final double b[] = new double[n + 1];
         final double c[] = new double[n + 1];
         final double d[] = new double[n + 1];
-        
+
         F2SignFilter prev_ff2 = null;
 
         for (int i = 1; i <= n; i++)
@@ -234,10 +235,9 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         private F2SignFilter prev;
         public double c, c_initial;
         public double d, d_initial;
-        private int sign;
+        private CurveSegmentTrend trend;
         private double x0;
         private double dx;
-        private boolean active = false;
         private String title;
 
         private double v1, v1_initial, v2, v2_initial;
@@ -253,19 +253,19 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             v1_initial = v1 = c + d * x0;
             v2_initial = v2 = c + d * (x0 + dx);
 
-            int[] signs = (int[]) params.get("f2.sign");
-            if (signs == null)
-                return;
-
-            this.sign = signs[iSeg];
-            if (sign == 0)
-                return;
+            CurveSegmentTrend[] trends = (CurveSegmentTrend[]) params.get("f2.trends");
+            if (trends == null)
+            {
+                trend = CurveSegmentTrend.NEUTRAL;
+            }
+            else
+            {
+                this.trend = trends[iSeg];
+            }
 
             title = (String) params.get("title");
             if (title == null)
                 title = "unnamed";
-
-            active = true;
         }
 
         private void reeval_cd()
@@ -276,25 +276,36 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
         public void coerce()
         {
-            if (active)
+            switch (trend)
             {
-                if (sign < 0)
-                {
-                    coerce_negative();
-                    reeval_cd();
-                    if (Util.False && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
-                        Util.out(String.format("Adjusted %s %f: [%f]-[%f] => [%f]-[%f]", title, x0, v1_initial, v2_initial, v1, v2));
-                    Util.noop();
-                }
-                else if (sign > 0)
-                {
-                    coerce_positive();
-                    reeval_cd();
-                    if (Util.False && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
-                        Util.out(String.format("Adjusted %s %f: [%f]-[%f] => [%f]-[%f]", title, x0, v1_initial, v2_initial, v1, v2));
-                    Util.noop();
-                }
+            case DOWN:
+                coerce_negative();
+                break;
+
+            case UP:
+                coerce_positive();
+                break;
+                
+            case MIN:
+                // ###
+                break;
+                
+            case MIN1:    
+                // ###
+                break;
+                
+            case MIN2:    
+                // ###
+                break;
+            
+            case NEUTRAL:
+            default:
+                return;
             }
+
+            reeval_cd();
+            if (Util.False && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
+                Util.out(String.format("Adjusted %s %f: [%f]-[%f] => [%f]-[%f]", title, x0, v1_initial, v2_initial, v1, v2));
         }
 
         private void coerce_negative()

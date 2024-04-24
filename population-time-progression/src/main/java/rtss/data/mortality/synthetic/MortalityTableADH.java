@@ -5,6 +5,7 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveSegmentTrend;
 import rtss.data.curves.CurveUtil;
 import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.EnsureMonotonicYearlyPoints;
@@ -153,16 +154,14 @@ public class MortalityTableADH
     private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
-        int signs[] = CurveUtil.getUShapeSigns(bins);
-        if (signs == null)
-            throw new Exception("Bins are not U-shaped");
+        CurveSegmentTrend[] trends = CurveUtil.getUShapeSegmentTrends(bins, debug_title);
 
         final int ppy = 10; // ###
         
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
         options = options.splineParams("title", debug_title);
-        options = options.splineParams("f2.sign", signs);
+        options = options.splineParams("f2.trends", trends);
         double[] yyy = MeanPreservingIntegralSpline.eval(bins, options);
         double f1n = new TuneCCS(bins, options, yyy).tuneLastSegment();
         options = options.splineParams("f1.n", f1n);
