@@ -161,7 +161,8 @@ public class MortalityTableADH
         
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
-        // ### options = options.splineParams("f2.sign", signs);
+        options = options.splineParams("title", debug_title);
+        options = options.splineParams("f2.sign", signs);
         double[] yyy = MeanPreservingIntegralSpline.eval(bins, options);
         double f1n = new TuneCCS(bins, options, yyy).tuneLastSegment();
         options = options.splineParams("f1.n", f1n);

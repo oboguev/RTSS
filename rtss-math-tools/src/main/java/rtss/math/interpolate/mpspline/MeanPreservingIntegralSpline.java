@@ -124,7 +124,7 @@ public class MeanPreservingIntegralSpline
                 curve[k] = (scurve[k + 1] - scurve[k]) / xstep;
         }
         
-        if (Util.True)
+        if (Util.False)
         {
             double [] xxx = Bins.ppy_x(bins, options.ppy);
             Clipboard.put(" ", xxx, curve);

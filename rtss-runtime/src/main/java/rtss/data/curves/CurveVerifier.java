@@ -221,10 +221,7 @@ public class CurveVerifier
                 recentErrorBin = bin;
                 if (sb.length() != 0)
                     sb.append(" ");
-                if (bin.age_x1 == bin.age_x2)
-                    sb.append(String.format("%d", bin.age_x1));
-                else
-                    sb.append(String.format("%d-%d", bin.age_x1, bin.age_x2));
+                sb.append(binRange(bin));
             }
         }
         
@@ -232,7 +229,14 @@ public class CurveVerifier
         {
             List<List<Integer>> xlist = locateContinuousNonMonotonicPoints(curve, bins, title, tolerance, null);
             String desc = describeContinuousNonMonotonicPoints(xlist);
-            String msg = String.format("Non-monotonic segments in %s at ranges %s and ages %s", title, sb.toString(), desc);
+            
+            String minsegs = binRange(minBin1);
+            if (minBin2 != null)
+                minsegs += " " + binRange(minBin2);
+            
+            String msg = String.format("Non-monotonic segments in %s at ranges %s and ages %s, minimum segments: %s", 
+                                       title, sb.toString(), desc, minsegs);
+            // ### minimum segments...
             if (doThrow)
                 throw new Exception(msg);
             Util.err(msg);
@@ -240,6 +244,14 @@ public class CurveVerifier
         }
         
         return true;
+    }
+    
+    private static String binRange(Bin bin)
+    {
+        if (bin.age_x1 == bin.age_x2)
+            return String.format("%d", bin.age_x1);
+        else
+            return String.format("%d-%d", bin.age_x1, bin.age_x2);
     }
 
     /*

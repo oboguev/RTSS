@@ -116,7 +116,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             /*
              * Adjust c and d so that s'' has a desired sign
              */
-            F2SignFilter ff2 = new F2SignFilter(params, c[i], d[i], dx[i - 1], i - 1);
+            F2SignFilter ff2 = new F2SignFilter(params, c[i], d[i], x[i - 1], dx[i - 1], i - 1);
             ff2.coerce();
             c[i] = ff2.c;
             d[i] = ff2.d;
@@ -228,17 +228,25 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
      */
     public static class F2SignFilter
     {
-        public double c;
-        public double d;
+        public double c, c_initial;
+        public double d, d_initial;
         private int sign;
+        private double x0;
         private double dx;
-        boolean active = false;
+        private boolean active = false;
+        private String title;
 
-        public F2SignFilter(Map<String, Object> params, double c, double d, double dx, int iSeg)
+        private double v1, v1_initial, v2, v2_initial;
+
+        public F2SignFilter(Map<String, Object> params, double c, double d, double x0, double dx, int iSeg)
         {
-            this.c = c;
-            this.d = d;
+            this.c_initial = this.c = c;
+            this.d_initial = this.d = d;
+            this.x0 = x0;
             this.dx = dx;
+
+            v1_initial = v1 = c + d * x0;
+            v2_initial = v2 = c + d * (x0 + dx);
 
             int[] signs = (int[]) params.get("f2.sign");
             if (signs == null)
@@ -248,42 +256,48 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             if (sign == 0)
                 return;
 
+            title = (String) params.get("title");
+            if (title == null)
+                title = "unnamed";
+
             active = true;
+        }
+
+        private void reeval_cd()
+        {
+            d = (v2 - v1) / dx;
+            c = v1 - d * x0;
         }
 
         public void coerce()
         {
             if (active)
             {
-                double v1 = c;
-                double v2 = c + d * dx;
-
                 if (sign < 0)
                 {
                     coerce_negative();
+                    reeval_cd();
+                    if (Util.False && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
+                        Util.out(String.format("Adjusted %s %f: [%f]-[%f] => [%f]-[%f]", title, x0, v1_initial, v2_initial, v1, v2));
+                    Util.noop();
                 }
                 else if (sign > 0)
                 {
-                    if (v1 >= 0 && v2 >= 0)
-                    {
-                        // do nothing
-                    }
-                    else
-                    {
-                        coerce_positive();
-                    }
+                    coerce_positive();
+                    reeval_cd();
+                    if (Util.False && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
+                        Util.out(String.format("Adjusted %s %f: [%f]-[%f] => [%f]-[%f]", title, x0, v1_initial, v2_initial, v1, v2));
+                    Util.noop();
                 }
             }
         }
 
         private void coerce_negative()
         {
-            double v1 = c;
-            double v2 = c + d * dx;
             double vmin = Math.min(v1, v2);
             double vmt = 0.2 * vmin; // min target
 
-            switch (sign(c) + sign(d))
+            switch (sign(v1) + sign(v2))
             {
             case "++":
             case "00":
@@ -291,34 +305,63 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             case "+0":
                 // not much we can do
                 return;
-                
-            case "0-":    
-            case "-0":    
+
+            case "0-":
+            case "-0":
             case "--":
                 // nearly ok, but tweak a bit: make one end to be at least 20% of the other
                 if (v1 > vmt)
-                    c = vmt;
+                    v1 = vmt;
                 if (v2 > vmt)
-                    d = (vmt - c) / dx;
+                    v2 = vmt;
                 return;
 
             case "+-":
-                c = 0.2 * v2;
-                d = (v2 - c) / dx; 
+                v1 = 0.2 * v2;
                 return;
 
             case "-+":
-                d = -0.8 * c / dx;
+                v2 = 0.2 * v1;
                 return;
             }
         }
 
         private void coerce_positive()
         {
+            double vmax = Math.max(v1, v2);
+            double vmt = 0.2 * vmax; // min target
+
             Util.noop();
             // ###
+            switch (sign(v1) + sign(v2))
+            {
+            case "--":
+            case "00":
+            case "0-":
+            case "-0":
+                // not much we can do
+                return;
+
+            case "0+":
+            case "+0":
+            case "++":
+                // nearly ok, but tweak a bit: make one end to be at least 20% of the other
+                if (v1 < vmt)
+                    v1 = vmt;
+                if (v2 < vmt)
+                    v2 = vmt;
+                return;
+
+            case "-+":
+                v1 = 0.2 * v2;
+                return;
+
+            case "+-":
+                v2 = 0.2 * v1;
+                return;
+            }
         }
-        
+
         private String sign(double v)
         {
             if (v < 0)
