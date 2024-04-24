@@ -1,6 +1,7 @@
 package rtss.util;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -152,13 +153,16 @@ public class Util
 
     public static String f2s(double f) throws Exception
     {
-        String s = String.format("%f", f);
-        if (!s.contains("."))
-            return s;
-        while (s.endsWith("0") && !s.endsWith(".0"))
-            s = Util.stripTail(s, "0");
-        if (s.endsWith(".0"))
-            s = Util.stripTail(s, ".0");
+        String s = new BigDecimal(f).toPlainString();
+
+        if (s.contains("."))
+        {
+            while (s.endsWith("0") && !s.endsWith(".0"))
+                s = Util.stripTail(s, "0");
+            if (s.endsWith(".0"))
+                s = Util.stripTail(s, ".0");
+        }
+
         return s;
     }
 
@@ -467,7 +471,7 @@ public class Util
 
         return "";
     }
-
+    
     public static void unused(Object... o)
     {
     }

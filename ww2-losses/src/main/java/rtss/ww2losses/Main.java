@@ -270,17 +270,7 @@ public class Main
 
     private String d2s(double f) throws Exception
     {
-        String s = new BigDecimal(f).toPlainString();
-
-        if (s.contains("."))
-        {
-            while (s.endsWith("0") && !s.endsWith(".0"))
-                s = Util.stripTail(s, "0");
-            if (s.endsWith(".0"))
-                s = Util.stripTail(s, ".0");
-        }
-
-        return s;
+        return Util.f2s(f);
     }
 
     private String ny2s(double f, String suffix) throws Exception

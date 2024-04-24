@@ -142,7 +142,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             coefficients[2] = c[i];
             coefficients[3] = d[i];
             final double x0 = x[i - 1];
-            polynomials[i - 1] = new ConstrainedCubicSplinePolynomialFunction(coefficients, x0);
+            polynomials[i - 1] = new ConstrainedCubicSplinePolynomialFunction(coefficients, x0, x[i]);
         }
 
         PolynomialSplineFunction sp = new PolynomialSplineFunction(x, polynomials);
@@ -163,11 +163,21 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         private static final long serialVersionUID = 1L;
 
         private final double x0;
+        private final double x1;
+        private final double a;
+        private final double b;
+        private final double c;
+        private final double d;
 
-        public ConstrainedCubicSplinePolynomialFunction(double[] coefficients, double x0) throws NullArgumentException, NoDataException
+        public ConstrainedCubicSplinePolynomialFunction(double[] coefficients, double x0, double x1) throws NullArgumentException, NoDataException
         {
             super(coefficients);
             this.x0 = x0;
+            this.x1 = x1;
+            this.a = coefficients[0];
+            this.b = coefficients[1];
+            this.c = coefficients[2];
+            this.d = coefficients[3];
         }
 
         @Override
@@ -180,7 +190,22 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         @Override
         public PolynomialFunction polynomialDerivative()
         {
-            return new ConstrainedCubicSplinePolynomialFunction(differentiate(getCoefficients()), x0);
+            return new ConstrainedCubicSplinePolynomialFunction(differentiate(getCoefficients()), x0, x1);
+        }
+
+        public double f(double x)
+        {
+            return a + (b * x) + (c * x * x) + (d * x * x * x);
+        }
+
+        public double f1(double x)
+        {
+            return b + (2 * c * x ) + (3 * d * x * x);
+        }
+
+        public double f2(double x)
+        {
+            return (2 * c) + (6 * d * x);
         }
     }
 
@@ -238,6 +263,7 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         private CurveSegmentTrend trend;
         private double x0;
         private double dx;
+        private double x1;
         private String title;
 
         private double v1, v1_initial, v2, v2_initial;
@@ -249,9 +275,10 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             this.d_initial = this.d = d;
             this.x0 = x0;
             this.dx = dx;
+            this.x1 = x0 + dx;
 
-            v1_initial = v1 = c + d * x0;
-            v2_initial = v2 = c + d * (x0 + dx);
+            v1_initial = v1 = 2 * c + 6 * d * x0;
+            v2_initial = v2 = 2 * c + 6 * d * x1;
 
             CurveSegmentTrend[] trends = (CurveSegmentTrend[]) params.get("f2.trends");
             if (trends == null)
@@ -270,11 +297,11 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
 
         private void reeval_cd()
         {
-            d = (v2 - v1) / dx;
-            c = v1 - d * x0;
+            d = (v2 - v1) / (6 * dx);
+            c = (v1 - 6 * d * x0) / 2;
         }
 
-        public void coerce()
+        public void coerce() throws Exception
         {
             switch (trend)
             {
@@ -285,27 +312,29 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             case UP:
                 coerce_positive();
                 break;
-                
+
             case MIN:
-                // ###
+                coerce_min();
                 break;
-                
-            case MIN1:    
-                // ###
+
+            case MIN1:
+                // coerce_min1();
                 break;
-                
-            case MIN2:    
-                // ###
+
+            case MIN2:
+                // coerce_min2();
                 break;
-            
+
             case NEUTRAL:
             default:
                 return;
             }
 
             reeval_cd();
-            if (Util.False && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
-                Util.out(String.format("Adjusted %s %f: [%f]-[%f] => [%f]-[%f]", title, x0, v1_initial, v2_initial, v1, v2));
+            if (Util.True && (Util.differ(c, c_initial) || Util.differ(d, d_initial)))
+                Util.out(String.format("Adjusted %s %s-%s %s: [%.3f]-[%.3f] => [%.3f]-[%.3f]", 
+                                       title, f2s(x0), f2s(x1 - 1.0), trend.name(), v1_initial, v2_initial, v1, v2));
+            Util.noop();
         }
 
         private void coerce_negative()
@@ -347,8 +376,6 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             double vmax = Math.max(v1, v2);
             double vmt = 0.2 * vmax; // min target
 
-            Util.noop();
-            // ###
             switch (sign(v1) + sign(v2))
             {
             case "--":
@@ -378,6 +405,25 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
             }
         }
 
+        private void coerce_min()
+        {
+            if (prev != null && prev.v2 <= 0)
+                v1 = Math.min(v1, prev.v2 / 2);
+            if (v1 < 0)
+                v2 = Math.max(v2, -v1 / 4);
+        }
+
+        private void coerce_min1()
+        {
+            if (prev != null && prev.v2 <= 0)
+                v1 = Math.min(v1, prev.v2 / 2);
+        }
+
+        private void coerce_min2()
+        {
+            // ###
+        }
+
         private String sign(double v)
         {
             if (v < 0)
@@ -386,6 +432,11 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
                 return "+";
             else
                 return "0";
+        }
+
+        private String f2s(double f) throws Exception
+        {
+            return Util.f2s(f);
         }
     }
 }
