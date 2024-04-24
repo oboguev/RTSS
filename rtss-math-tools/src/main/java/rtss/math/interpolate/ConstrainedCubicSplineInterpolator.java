@@ -247,13 +247,14 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
      * f' < 0 means s'' < 0
      * f' > 0 means s'' > 0
      * 
-     * s = a + b * dx + c * dx^2 + d *dx^3
-     * s' = b + c * dx + d *dx^2
-     * s'' = c + d * dx
+     * s = a + b * x + c * x^2 + d * x^3
+     * s' = b + 2 * c * x + 3 * d * x^2
+     * s'' = 2 * c + 6 * d * x
      * 
      * We need accordingly ensure that:
-     *      in descending segments (c + d * x) < 0 in the whole range of x = [0...dx].  
-     *      in ascending segments (c + d * x) > 0 in the whole range of x = [0...dx].  
+     *      in descending segments s'' < 0 in the whole range of x = [x0 ... x1].  
+     *      in ascending segments s'' > 0 in the whole range of x = [x0 ... x1].  
+     *      in min segment s'' < 0 on the left side of the segment and > 0 on the right side of the segment  
      */
     public static class F2SignFilter
     {
