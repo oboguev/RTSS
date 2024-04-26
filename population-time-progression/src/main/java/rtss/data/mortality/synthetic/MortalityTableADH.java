@@ -5,8 +5,8 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.curves.CurveSegmentTrend;
-import rtss.data.curves.CurveUtil;
+// import rtss.data.curves.CurveSegmentTrend;
+// import rtss.data.curves.CurveUtil;
 import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.EnsureMonotonicYearlyPoints;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
@@ -22,7 +22,9 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
+import rtss.util.Clipboard;
 import rtss.util.Util;
+// import rtss.util.XY;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
 /*
@@ -154,7 +156,16 @@ public class MortalityTableADH
     private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
-        CurveSegmentTrend[] trends = CurveUtil.getUShapeSegmentTrends(bins, debug_title);
+
+        if (Util.True)
+        {
+            int [] x = Bins.start_x(bins);
+            double[] y = Bins.midpoint_y(bins);
+            Clipboard.put(", " , x, y);
+            Util.noop();
+        }
+        
+        // CurveSegmentTrend[] trends = CurveUtil.getUShapeSegmentTrends(bins, debug_title);
 
         final int ppy = 10; // ###
         

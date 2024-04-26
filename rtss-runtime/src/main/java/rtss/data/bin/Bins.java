@@ -8,6 +8,7 @@ import java.util.List;
 import com.opencsv.CSVReader;
 
 import rtss.util.Util;
+import rtss.util.XY;
 
 public class Bins
 {
@@ -346,6 +347,24 @@ public class Bins
        }
        
        return Bins.bins(list);
+    }
+    
+    public static XY<double[]> cumulativePoints(Bin[] bins)
+    {
+        double[] x = new double[bins.length + 1];
+        double[] y = new double[bins.length + 1];
+        
+        x[0] = bins[0].age_x1;
+        y[0] = 0;
+        int k = 1;
+        for (Bin bin : bins)
+        {
+            x[k] = bin.age_x2 + 1;
+            y[k] = y[k - 1] + bin.avg * bin.widths_in_years;
+            k++;
+        }
+        
+        return XY.of(x, y);
     }
 
     /*
