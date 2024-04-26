@@ -13,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 import rtss.config.Config;
 import rtss.util.Util;
 
+/**
+ * Execute R scripts locally
+ */
 public class RLocal
 {
     private Process process;

@@ -1,12 +1,28 @@
 package rtss.external.R;
 
+/**
+ * Execute R scripts
+ */
 public class R
 {
-    private static RLocal rl = new RLocal().setLog(true); 
+    private static RLocal rlocal; 
     
-    public static String execute(String s, boolean reuse) throws Exception
+    public static synchronized String execute(String s, boolean reuse) throws Exception
     {
-        return rl.execute(s, reuse);
+        if (rlocal == null)
+            rlocal = new RLocal().setLog(true); 
+            
+        String response = rlocal.execute(s, reuse);
+        if (response == null)
+            throw new Exception("No reply from R");
+        return response;
+    }
+    
+    public static synchronized void stop() throws Exception
+    {
+        if (rlocal != null)
+            rlocal.stop();
+        rlocal = null;
     }
     
     private static final String LINE =  "==================================";
