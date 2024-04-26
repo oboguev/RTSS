@@ -23,14 +23,23 @@ public class TestR
         ping("222");
         ping("333");
         R.stop();
+        ping("444");
+        ping("555", false);
+        ping("666");
+        ping("777");
     }
     
     private void ping(String tag) throws Exception
     {
+        ping(tag, true);
+    }
+    
+    private void ping(String tag, boolean reuse) throws Exception
+    {
         String script = Script.script("r-scripts/test.r", "arg", tag);
-        String reply = R.execute(script, true);
-        if (!reply.equals(tag))
+        String reply = R.execute(script, reuse);
+        if (!reply.equals(String.format("%s-1\n%s-2", tag, tag)))
             throw new Exception("R reply was unexpected: " + tag);
-        Util.out("Received expected R response: " + tag);
+        Util.out("Received expected R response for tag " + tag);
     }
 }

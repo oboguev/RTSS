@@ -58,7 +58,7 @@ public class RLocal
 
     private void start() throws Exception
     {
-        String cmd = String.format("%s --vanilla --quiet", Config.asRequiredString("R.executable"));
+        String cmd = String.format("%s", Config.asRequiredString("R.executable"));
         cmd = Util.despace(cmd);
         ProcessBuilder pb = new ProcessBuilder(cmd.split(" ")).redirectErrorStream(true);
         process = pb.start();
@@ -133,6 +133,7 @@ public class RLocal
         script = cmd_begin + nl + script + nl + cmd_end + nl;
 
         os.write(script.getBytes(StandardCharsets.UTF_8));
+        os.flush();
 
         boolean seen_first = false;
         boolean seen_begin = false;
@@ -165,6 +166,10 @@ public class RLocal
                     }
                 }
             }
+            else if (line.startsWith("> "))
+            {
+                // ignore echo lines
+            }
             else
             {
                 log(line);
@@ -174,7 +179,9 @@ public class RLocal
                     seen_end = true;
                     break;
                 }
-
+                
+                if (sb.length() != 0)
+                    sb.append(nl);
                 sb.append(line);
             }
         }

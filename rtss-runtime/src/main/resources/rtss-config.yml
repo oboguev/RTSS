@@ -1,2 +1,2 @@
 # shell command to launch R 
-R.executable: R
+R.executable: R  --vanilla --quiet
