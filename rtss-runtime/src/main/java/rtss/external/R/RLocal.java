@@ -127,8 +127,8 @@ public class RLocal
         log("");
         log(script);
 
-        String cmd_begin = String.format("cat(\"==== %s ===\\n\")", R.BEGIN_SCRIPT);
-        String cmd_end = String.format("cat(\"==== %s ===\\n\")", R.END_SCRIPT);
+        String cmd_begin = String.format("cat(\"%s\\n\")", R.BEGIN_SCRIPT);
+        String cmd_end = String.format("cat(\"%s\\n\")", R.END_SCRIPT);
 
         script = cmd_begin + nl + script + nl + cmd_end + nl;
 

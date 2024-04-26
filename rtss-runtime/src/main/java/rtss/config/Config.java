@@ -2,7 +2,7 @@ package rtss.config;
 
 import java.util.Map;
 
-import org.apache.commons.beanutils.PropertyUtils;
+// import org.apache.commons.beanutils.PropertyUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -50,10 +50,16 @@ public class Config
 
     public static Object asObject(String path, Object defval) throws Exception
     {
-        Object o = PropertyUtils.getProperty(config(), path);
+        Object o = getProperty(path);
         if (o == null)
             o = defval;
         return o;
+    }
+    
+    private static Object getProperty(String path) throws Exception
+    {
+        // return PropertyUtils.getProperty(config(), path);
+        return config().get(path);
     }
 
     /* =========================================== */
@@ -73,7 +79,7 @@ public class Config
 
     public static String asString(String path, String defval) throws Exception
     {
-        Object o = PropertyUtils.getProperty(config(), path);
+        Object o = getProperty(path);
         if (o == null)
             o = defval;
         if (o == null)
