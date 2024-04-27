@@ -168,7 +168,7 @@ public class RLocal implements RCall
                     }
                 }
             }
-            else if (line.startsWith("> "))
+            else if (line.startsWith("> ") || line.startsWith("+ "))
             {
                 // ignore echo lines
             }

@@ -15,6 +15,7 @@ import rtss.data.curves.TuneCCS;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
+import rtss.data.mortality.laws.HeligmanPollard;
 import rtss.data.population.Population;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
@@ -156,8 +157,10 @@ public class MortalityTableADH
     private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
+        
+        new HeligmanPollard(bins); // ###
 
-        if (Util.True)
+        if (Util.False)
         {
             int [] x = Bins.start_x(bins);
             double[] y = Bins.midpoint_y(bins);

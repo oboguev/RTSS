@@ -22,7 +22,7 @@ public class TestMortalityRatesADH
     {
         MortalityTableADH.getMortalityTable(Area.RSFSR, 1946); // ###
         
-        if (Util.False) // ###
+        if (Util.True) // ###
             return;
 
         for (int year = 1927; year <= 1958; year++)

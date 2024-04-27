@@ -1,6 +1,7 @@
 package rtss.external.R;
 
 import rtss.config.Config;
+import rtss.util.Util;
 
 /**
  * Execute R scripts
@@ -51,4 +52,36 @@ public class R
     private static final String LINE =  "==================================";
     static String BEGIN_SCRIPT = LINE + " BEGIN SCRIPT EXECUTION " + LINE;
     static String END_SCRIPT = LINE + " END OF SCRIPT EXECUTION " + LINE;
+    
+    public static String c(int[] values)
+    {
+        StringBuilder sb = new StringBuilder("c(");
+        String sep = "";
+        
+        for (int v : values)
+        {
+            sb.append(sep);
+            sb.append("" + v);
+            sep = ", ";
+        }
+        
+        sb.append(")");
+        return sb.toString();
+    }
+
+    public static String c(double[] values) throws Exception
+    {
+        StringBuilder sb = new StringBuilder("c(");
+        String sep = "";
+        
+        for (double v : values)
+        {
+            sb.append(sep);
+            sb.append(Util.f2s(v));
+            sep = ", ";
+        }
+        
+        sb.append(")");
+        return sb.toString();
+    }
 }
