@@ -1,5 +1,5 @@
 # shell command to launch R 
 R.executable: R --vanilla --quiet
-R.server.host: ub22a.local
-R.server.port: 5777
+#R.server.endpoint: http://ub22a.local:5577
+#R.server.endpoint: http://localhost:5577
 R.server.log: true

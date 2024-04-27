@@ -31,7 +31,7 @@ public class RServer
             return "Hello World";
     }
     
-    @PostMapping(path = "/execute", consumes=MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/execute", consumes=MediaType.APPLICATION_JSON_VALUE, produces = "text/plain")
     public synchronized String execute(@RequestBody T2<String,Boolean> x) throws Exception
     {
         return getLocal().execute(x.a, x.b);

@@ -1,18 +1,17 @@
 package rtss.external.R;
 
+import rtss.config.Config;
+
 /**
  * Execute R scripts
  */
 public class R
 {
-    private static RLocal rlocal;
+    private static RCall rcall;
     
     public static synchronized String execute(String s, boolean reuse) throws Exception
     {
-        if (rlocal == null)
-            rlocal = new RLocal().setLog(true); 
-            
-        String response = rlocal.execute(s, reuse);
+        String response = rcall().execute(s, reuse);
         if (response == null)
             throw new Exception("No reply from R");
         return response;
@@ -20,16 +19,33 @@ public class R
     
     public static synchronized void stop() throws Exception
     {
-        if (rlocal != null)
-            rlocal.stop();
-        rlocal = null;
+        if (rcall!= null)
+            rcall.stop();
+        rcall = null;
     }
     
-    public static synchronized String ping(String tag)
+    public static synchronized String ping(String tag) throws Exception
     {
-        if (rlocal == null)
-            rlocal = new RLocal().setLog(true);
-        return rlocal.ping(tag);
+        return rcall().ping(tag);
+    }
+    
+    private static synchronized RCall rcall() throws Exception
+    {
+        if (rcall == null)
+        {
+            String endpoint = Config.asString("R.server.endpoint", "");
+            endpoint = endpoint.trim();
+            if (endpoint.length() == 0)
+            {
+                rcall = new RLocal().setLog(Config.asBoolean("R.server.log", false));                 
+            }
+            else
+            {
+                rcall = new RClient();
+            }
+        }
+        
+        return rcall;
     }
     
     private static final String LINE =  "==================================";
