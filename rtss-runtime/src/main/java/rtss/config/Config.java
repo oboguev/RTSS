@@ -152,7 +152,8 @@ public class Config
         }
         else if (o instanceof String)
         {
-            return Long.parseLong((String) o);
+            String sv = (String) o;
+            return Long.parseLong(sv.trim());
         }
         else
         {
@@ -171,7 +172,7 @@ public class Config
     /* =========================================== */
 
     /*
-     * Get int property by path
+     * Get integer property by path
      */
     public static int asInteger(String path, Integer defval) throws Exception
     {
@@ -224,7 +225,8 @@ public class Config
         }
         else if (o instanceof String)
         {
-            return Integer.parseInt((String) o);
+            String sv = (String) o;
+            return Integer.parseInt(sv.trim());
         }
         else
         {
@@ -238,5 +240,45 @@ public class Config
         if (v < 0)
             throw new Exception("Value for settigng " + path + " is negative");
         return v;
+    }
+
+    /* =========================================== */
+
+    /*
+     * Get boolean property by path
+     */
+    public static boolean asBoolean(String path, Boolean defval) throws Exception
+    {
+        Object o = asObject(path);
+        if (o == null)
+            o = defval;
+        if (o == null)
+            throw missing(path);
+        return toBoolean(path, o);
+    }
+
+    public static boolean asRequiredBoolean(String path) throws Exception
+    {
+        Object o = asObject(path);
+        if (o == null)
+            throw missing(path);
+        return toBoolean(path, o);
+    }
+
+    private static boolean toBoolean(String path, Object o) throws Exception
+    {
+        if (o instanceof Boolean)
+        {
+            return (Boolean) o;
+        }
+        else if (o instanceof String)
+        {
+            String sv = (String) o;
+            return Boolean.parseBoolean(sv.trim().toLowerCase());
+        }
+        else
+        {
+            throw not(path, "boolean");
+        }
     }
 }
