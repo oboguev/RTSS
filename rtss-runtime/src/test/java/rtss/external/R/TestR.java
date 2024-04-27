@@ -20,7 +20,7 @@ public class TestR
     private void do_main() throws Exception
     {
         if (!R.ping("000").equals("000"))
-            throw new Exception("Server ping failed failed");
+            throw new Exception("Server ping failed");
         
         rping("111");
         rping("222");

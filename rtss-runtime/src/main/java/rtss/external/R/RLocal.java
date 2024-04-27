@@ -125,7 +125,7 @@ public class RLocal implements RCall
             script += nl;
 
         log("");
-        log("**** Sending for execution at " + Instant.now().toString());
+        log("**** Sending to R for execution at " + Instant.now().toString());
         log("");
         log(script);
 
