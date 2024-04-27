@@ -36,6 +36,14 @@ public class Bins
         return bins;
     }
 
+    public static Bin[] clone(Bin... bins) throws Exception
+    {
+        List<Bin> list = new ArrayList<>();
+        for (Bin bin : bins)
+            list.add(new Bin(bin));
+        return Bins.bins(list);
+    }
+    
     public static Bin[] bins(List<Bin> bins) throws Exception
     {
         return bins(bins.toArray(new Bin[0]));

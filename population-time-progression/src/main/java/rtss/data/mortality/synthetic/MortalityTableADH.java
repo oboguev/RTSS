@@ -158,8 +158,19 @@ public class MortalityTableADH
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
         
-        new HeligmanPollard(bins); // ###
-
+        if (Util.True)
+        {
+            int ppy = 10;
+            double[] yy = new HeligmanPollard(bins).curve(ppy);
+            double[] xxx = Bins.ppy_x(bins, ppy);
+            String title = "HP curve " + debug_title;
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("qx", xxx, yy);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.display();
+            Util.noop();
+        }
+        
         if (Util.False)
         {
             int [] x = Bins.start_x(bins);
@@ -195,7 +206,7 @@ public class MortalityTableADH
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
-        if (Util.True)
+        if (Util.False)
         {
             double[] xxx = Bins.ppy_x(bins, 1);
             String title = "MP-integral yearly curve " + debug_title;

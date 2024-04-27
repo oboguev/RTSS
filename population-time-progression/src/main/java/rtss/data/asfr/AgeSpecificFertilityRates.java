@@ -20,7 +20,7 @@ public class AgeSpecificFertilityRates
     
     public AgeSpecificFertilityRates(Bin... bins) throws Exception
     {
-        this.bins = Bins.bins(bins); 
+        this.bins = Bins.clone(bins); 
     }
     
     public double forAge(int age)
