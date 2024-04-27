@@ -114,7 +114,7 @@ public class Config
         return toLong(path, o);
     }
 
-    public static long asRequiredLong(String path, Long defval) throws Exception
+    public static long asRequiredLong(String path) throws Exception
     {
         Object o = asObject(path);
         if (o == null)
@@ -132,7 +132,7 @@ public class Config
         return toUnsignedLong(path, o);
     }
 
-    public static long asRequiredUnsignedLong(String path, Long defval) throws Exception
+    public static long asRequiredUnsignedLong(String path) throws Exception
     {
         Object o = asObject(path);
         if (o == null)
@@ -183,7 +183,7 @@ public class Config
         return toInteger(path, o);
     }
 
-    public static int asRequiredInteger(String path, Integer defval) throws Exception
+    public static int asRequiredInteger(String path) throws Exception
     {
         Object o = asObject(path);
         if (o == null)
@@ -201,7 +201,7 @@ public class Config
         return toUnsignedInteger(path, o);
     }
 
-    public static int asRequiredUnsignedInteger(String path, Integer defval) throws Exception
+    public static int asRequiredUnsignedInteger(String path) throws Exception
     {
         Object o = asObject(path);
         if (o == null)

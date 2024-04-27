@@ -16,7 +16,7 @@ import rtss.util.Util;
 /**
  * Execute R scripts locally
  */
-public class RLocal
+public class RLocal implements RCall
 {
     private Process process;
     private InputStream is; // connected to process stdout + stderr
@@ -31,6 +31,7 @@ public class RLocal
         return this;
     }
 
+    @Override
     public synchronized String execute(String s, boolean reuse) throws Exception
     {
         try
@@ -69,7 +70,8 @@ public class RLocal
         os = process.getOutputStream();
     }
 
-    public void stop()
+    @Override
+    public void stop() throws Exception
     {
         safeClose(reader);
         reader = null;
