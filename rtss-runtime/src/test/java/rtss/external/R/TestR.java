@@ -19,22 +19,29 @@ public class TestR
     
     private void do_main() throws Exception
     {
-        ping("111");
-        ping("222");
-        ping("333");
+        if (!R.ping("000").equals("000"))
+            throw new Exception("Server ping failed failed");
+        
+        rping("111");
+        rping("222");
+        rping("333");
+        
         R.stop();
-        ping("444");
-        ping("555", false);
-        ping("666");
-        ping("777");
+        
+        rping("444");
+        rping("555", false);
+        rping("666");
+        rping("777");
+        
+        R.stop();
     }
     
-    private void ping(String tag) throws Exception
+    private void rping(String tag) throws Exception
     {
-        ping(tag, true);
+        rping(tag, true);
     }
     
-    private void ping(String tag, boolean reuse) throws Exception
+    private void rping(String tag, boolean reuse) throws Exception
     {
         String script = Script.script("r-scripts/test.r", "arg", tag);
         String reply = R.execute(script, reuse);

@@ -232,4 +232,10 @@ public class RLocal implements RCall
             }
         }
     }
+
+    @Override
+    public String ping(String tag)
+    {
+        return tag;
+    }
 }

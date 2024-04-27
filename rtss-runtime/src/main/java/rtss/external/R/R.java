@@ -5,7 +5,7 @@ package rtss.external.R;
  */
 public class R
 {
-    private static RLocal rlocal; 
+    private static RLocal rlocal;
     
     public static synchronized String execute(String s, boolean reuse) throws Exception
     {
@@ -23,6 +23,13 @@ public class R
         if (rlocal != null)
             rlocal.stop();
         rlocal = null;
+    }
+    
+    public static synchronized String ping(String tag)
+    {
+        if (rlocal == null)
+            rlocal = new RLocal().setLog(true);
+        return rlocal.ping(tag);
     }
     
     private static final String LINE =  "==================================";
