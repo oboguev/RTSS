@@ -79,7 +79,7 @@ public class HeligmanPollard
     {
         double qp = qp(x);
         double qx = qp / (1 + qp);
-        return qx * 1000;
+        return qx;
     }
 
     /*
@@ -104,6 +104,9 @@ public class HeligmanPollard
         return Math.log(x);
     }
     
+    /*
+     * Get qx curve recalibrated to promille
+     */
     public double[] curve(int ppy)
     {
         Bin first = Bins.firstBin(bins);
@@ -114,7 +117,7 @@ public class HeligmanPollard
         for (int k = 0; k < curve.length; k++)
         {
             double x = first.age_x1 + ((double) k) / ppy;
-            curve[k] = qx(x);
+            curve[k] = qx(x) * 1000;
         }
         
         return curve;
