@@ -8,6 +8,7 @@ import rtss.data.bin.Bins;
 import rtss.data.curves.PoorCurveException;
 import rtss.external.R.R;
 import rtss.external.R.Script;
+import rtss.util.Util;
 
 import static java.lang.Math.pow; 
 
@@ -39,23 +40,36 @@ public class HeligmanPollard
     
     public HeligmanPollard(Bin[] bins) throws PoorCurveException, Exception
     {
+        /*
+         * Unfortunately, existing R implementation of Heligman-Pollard estimator
+         * fits the curve to points rather than intervals, as the result intervals means are severely 
+         * deviated.
+         * 
+         * Also, for basic "HP" formula it fits qp rather than qx curve.
+         * Although this can perhaps be amended by pre-conversion of input data to the qp form (see qx2qp).   
+         */
+        if (Util.True)
+            bins = Bins.yearlyBins(bins);
+            
         this.bins = bins = Bins.clone(bins);
                 
         int[] bin_start_age = new int[bins.length];
         double[] deaths = new double[bins.length];
+        double[] qp_deaths = new double[bins.length];
         double[] exposure = new double[bins.length];
         
         for (Bin bin : bins)
         {
             int i = bin.index;
             bin_start_age[i] = bin.age_x1;
-            deaths[i] = bin.avg * bin.widths_in_years;
-            exposure[i] = 1000 * bin.widths_in_years;
+            qp_deaths[i] = deaths[i] = bin.avg * bin.widths_in_years / 1000;
+            // qp_deaths[i] = qx2qp(qp_deaths[i]);
+            exposure[i] = bin.widths_in_years;
         }
         
         String script = Script.script("r-scripts/heligman-pollard.r", 
                                "bin_start_age", R.c(bin_start_age),
-                               "death_count", R.c(deaths),
+                               "death_count", R.c(qp_deaths),
                                "exposure", R.c(exposure));
         String reply = R.execute(script, true);
         Map<String,String> m = R.keysFromReply(reply, keys);
@@ -89,10 +103,14 @@ public class HeligmanPollard
     {
         double qp1 = pow(A, pow(x+B, C));
 
-        double v = ln(x) - ln(F);
-        v *= v;
-        v = Math.exp(-E * v);
-        double qp2 = D * v;
+        double qp2 = 0;
+        if (x / F > 1E-8)
+        {
+            double v = ln(x/F);
+            v *= v;
+            v = Math.exp(-E * v);
+            qp2 = D * v;
+        }
         
         double qp3 = G * pow(H, x);
         
@@ -121,5 +139,16 @@ public class HeligmanPollard
         }
         
         return curve;
+    }
+    
+    @SuppressWarnings("unused")
+    private double promille2qp(double promille)
+    {
+        return qx2qp(promille / 1000);
+    }
+    
+    private double qx2qp(double qx)
+    {
+        return qx / (1 - qx);
     }
 }

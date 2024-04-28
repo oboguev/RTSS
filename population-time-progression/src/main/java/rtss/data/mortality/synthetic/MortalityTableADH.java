@@ -1,6 +1,8 @@
 package rtss.data.mortality.synthetic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import rtss.data.bin.Bin;
@@ -158,8 +160,12 @@ public class MortalityTableADH
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
         
-        if (Util.True)
+        if (Util.False)
         {
+            /*
+             * Unfortunately, existing R implementation of Heligman-Pollard estimator
+             * fits the curve to points rather than intervals, and means are severely deviated  
+             */
             int ppy = 10;
             double[] yy = new HeligmanPollard(bins).curve(ppy);
             double[] xxx = Bins.ppy_x(bins, ppy);
@@ -168,6 +174,8 @@ public class MortalityTableADH
             chart.addSeries("qx", xxx, yy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
+            double[] y = Bins.ppy2yearly(yy, ppy);
+            CurveVerifier.validate_means(y, bins);
             Util.noop();
         }
         
@@ -183,31 +191,41 @@ public class MortalityTableADH
 
         final int ppy = 10; // ###
         
+        Bin[] xbins = bins;
+        if (Util.True)
+            xbins = split_1_4(bins);
+        
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
         options = options.splineParams("title", debug_title);
-        // do not use f2.trends since it overdermines the spline and makes value of s' discontinuous between segments 
+        // do not use f2.trends since it over-determines the spline and makes value of s' discontinuous between segments 
         // options = options.splineParams("f2.trends", trends);
-        double[] yyy = MeanPreservingIntegralSpline.eval(bins, options);
-        double f1n = new TuneCCS(bins, options, yyy).tuneLastSegment();
+        double[] yyy = MeanPreservingIntegralSpline.eval(xbins, options);
+        double f1n = new TuneCCS(xbins, options, yyy).tuneLastSegment();
         options = options.splineParams("f1.n", f1n);
         options = options.splineParams("f1.0", yyy[0] * 1.5);
         // options = options.splineParams("f2.trace", true);
-        yyy = MeanPreservingIntegralSpline.eval(bins, options);
+        yyy = MeanPreservingIntegralSpline.eval(xbins, options);
         
         if (Util.False)
         {
-            double[] xxx = Bins.ppy_x(bins, ppy);
+            /*
+             * Display sub-yearly curve
+             */
+            double[] xxx = Bins.ppy_x(xbins, ppy);
             String title = "MP-integral sub-yearly curve " + debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             chart.addSeries("qx", xxx, yyy);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.addSeries("bins", xxx, Bins.ppy_y(xbins, ppy));
             chart.display();
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
         if (Util.False)
         {
+            /*
+             * Display yearly curve
+             */
             double[] xxx = Bins.ppy_x(bins, 1);
             String title = "MP-integral yearly curve " + debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
@@ -217,7 +235,7 @@ public class MortalityTableADH
         }
 
         CurveVerifier.positive(yy, bins, debug_title, true);
-        new EnsureMonotonicYearlyPoints(bins, yy, debug_title).fix();
+        // ### new EnsureMonotonicYearlyPoints(bins, yy, debug_title).fix();
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
         CurveVerifier.validate_means(yy, bins);
 
@@ -425,5 +443,32 @@ public class MortalityTableADH
         double deaths2 = m0.avg * p0.avg + m1.avg * p1.avg + m2.avg * p2.avg;
         if (Util.differ(deaths_012, deaths2))
             throw new Exception("Unable to correct inverted mortality rate at age 40-44");
+    }
+    
+
+    /*
+     * Half of deaths in age range 1 to 4 (until 5) occur in year 1
+     */
+    private static Bin[] split_1_4(Bin[] bins) throws Exception
+    {
+        List<Bin> list = new ArrayList<>();
+
+        for (Bin bin : bins)
+        {
+            if (bin.age_x1 == 1 && bin.age_x2 == 4)
+            {
+                double deaths_1_4 = bin.avg * 4;
+                double deaths_1 = deaths_1_4 * 0.5;
+                double deaths_2_4 = deaths_1_4 - deaths_1;
+                list.add(new Bin(1, 1, deaths_1 / 1));
+                list.add(new Bin(2, 4, deaths_2_4 / 3));
+            }
+            else
+            {
+                list.add(new Bin(bin));
+            }
+        }
+
+        return Bins.bins(list);
     }
 }

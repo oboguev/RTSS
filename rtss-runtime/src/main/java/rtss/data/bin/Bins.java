@@ -36,17 +36,17 @@ public class Bins
         return bins;
     }
 
+    public static Bin[] bins(List<Bin> bins) throws Exception
+    {
+        return bins(bins.toArray(new Bin[0]));
+    }
+
     public static Bin[] clone(Bin... bins) throws Exception
     {
         List<Bin> list = new ArrayList<>();
         for (Bin bin : bins)
             list.add(new Bin(bin));
         return Bins.bins(list);
-    }
-    
-    public static Bin[] bins(List<Bin> bins) throws Exception
-    {
-        return bins(bins.toArray(new Bin[0]));
     }
 
     public static Bin firstBin(Bin... bins)
@@ -92,6 +92,17 @@ public class Bins
         for (Bin bin : bins)
             x[k++] = bin.avg;
         return x;
+    }
+    
+    public static Bin[] yearlyBins(Bin[] bins) throws Exception
+    {
+        List<Bin> list = new ArrayList<Bin>();
+        for (Bin bin : bins)
+        {
+            for (int x = bin.age_x1; x <= bin.age_x2; x++)
+                list.add(new Bin(x, x, bin.avg));
+        }
+        return Bins.bins(list);
     }
 
     public static Bin[] combine_equals(Bin... bins) throws Exception
