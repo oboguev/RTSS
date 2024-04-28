@@ -8,6 +8,7 @@ import rtss.data.population.Population;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
+import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
@@ -20,7 +21,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 {
     public static final int MAX_AGE = Population.MAX_AGE;
 
-    public static double[] curve(Bin[] bins) throws Exception
+    public static double[] curve(Bin[] bins, String title) throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
@@ -39,6 +40,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
+        double[] yyy4 = null;
 
         if (Util.False)
         {
@@ -57,26 +59,38 @@ public class InterpolatePopulationAsMeanPreservingCurve
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
+        
+        if (Util.False)
+        {
+            MeanPreservingIntegralSpline.Options xoptions = new MeanPreservingIntegralSpline.Options();
+            xoptions = xoptions.ppy(ppy).debug_title(title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
+            xoptions = xoptions.splineParams("title", title);
+            // do not use f2.trends since it over-determines the spline and makes value of s' discontinuous between segments 
+            // options = options.splineParams("f2.trends", trends);
+            yyy4 = MeanPreservingIntegralSpline.eval(bins, xoptions);
+        }
 
         double[] yyy = yyy1;
         if (yyy == null)
             yyy = yyy2;
         if (yyy == null)
             yyy = yyy3;
+        if (yyy == null)
+            yyy = yyy4;
         
         yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins);
         
         if (Util.False)
         {
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y").showSplinePane(false);
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             if (yyy1 != null)
                 chart.addSeries("1", xxx, yyy1);
             if (yyy2 != null)
                 chart.addSeries("2", xxx, yyy2);
             if (yyy3 != null)
                 chart.addSeries("3", xxx, yyy3);
-            if (yyy3 != null)
-                chart.addSeries("yyy", xxx, yyy);
+            if (yyy4 != null)
+                chart.addSeries("4", xxx, yyy4);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }

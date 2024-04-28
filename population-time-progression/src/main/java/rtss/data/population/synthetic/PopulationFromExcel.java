@@ -12,6 +12,7 @@ import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 import rtss.util.excel.ExcelLoader;
+import rtss.util.plot.ChartXYSplineAdvanced;
 
 public class PopulationFromExcel extends ExcelLoader
 {
@@ -143,7 +144,8 @@ public class PopulationFromExcel extends ExcelLoader
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        double[] counts = bins2yearly(bins);
+        String title = "Population " + gender.toString() + year;
+        double[] counts = bins2yearly(bins, title);
         
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);
@@ -154,7 +156,7 @@ public class PopulationFromExcel extends ExcelLoader
         return counts;
     }
 
-    private static double[] bins2yearly(Bin[] bins) throws Exception
+    private static double[] bins2yearly(Bin[] bins, String title) throws Exception
     {
         boolean interpolate = false;
 
@@ -171,7 +173,7 @@ public class PopulationFromExcel extends ExcelLoader
                 v[k] = bins[k].avg;
             return v;
         }
-
-        return InterpolatePopulationAsMeanPreservingCurve.curve(bins);
+        
+        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title);
     }
 }
