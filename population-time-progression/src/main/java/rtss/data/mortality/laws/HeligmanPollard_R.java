@@ -18,7 +18,7 @@ import static java.lang.Math.pow;
  * L. Heligman, J. H. Pollard, "Age Pattern of Mortality" // Journal of the Institute of Actuaries (1886-1994), 
  * June 1980, Vol. 107, No. 1, pp. 49-80 
  */
-public class HeligmanPollard
+public class HeligmanPollard_R
 {
     private static final String keyMessage = "fit$opt.diagnosis$message";
     private static final String keyDeviance = "fit$deviance";
@@ -38,7 +38,7 @@ public class HeligmanPollard
     
     private Bin[] bins;
     
-    public HeligmanPollard(Bin[] bins) throws PoorCurveException, Exception
+    public HeligmanPollard_R(Bin[] bins) throws PoorCurveException, Exception
     {
         /*
          * Unfortunately, existing R implementation of Heligman-Pollard estimator
@@ -48,7 +48,7 @@ public class HeligmanPollard
          * Also, for basic "HP" formula it fits qp rather than qx curve.
          * Although this can perhaps be amended by pre-conversion of input data to the qp form (see qx2qp).   
          */
-        if (Util.True)
+        if (Util.False)
             bins = Bins.yearlyBins(bins);
             
         this.bins = bins = Bins.clone(bins);
@@ -68,7 +68,8 @@ public class HeligmanPollard
         }
         
         String script = Script.script("r-scripts/heligman-pollard.r", 
-                               "bin_start_age", R.c(bin_start_age),
+                               // "bin_start_age", R.c(bin_start_age),
+                               "bin_start_age", R.c(Bins.midpoint_x(bins)),
                                "death_count", R.c(qp_deaths),
                                "exposure", R.c(exposure));
         String reply = R.execute(script, true);

@@ -73,4 +73,13 @@ remotes::install_github("timriffe/DemoTools")
 install.packages("devtools")
 devtools::install_github("mpascariu/ungroup")
 devtools::install_github("mpascariu/MortalityLaws")
+
+#
+# install packages required to use PLCM code from Rizzi's article
+#
+install.packages("rgl")
+install.packages("HMDHFDplus")
+#install.packages("MortalitySmooth")
+install.packages("https://cran.r-project.org/src/contrib/Archive/svcm/svcm_0.1.2.tar.gz", repos = NULL, type = "source")
+install.packages("https://cran.r-project.org/src/contrib/Archive/MortalitySmooth/MortalitySmooth_2.3.4.tar.gz", repos = NULL, type = "source")
 ```

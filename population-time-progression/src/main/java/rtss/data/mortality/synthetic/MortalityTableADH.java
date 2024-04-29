@@ -17,7 +17,7 @@ import rtss.data.curves.TuneCCS;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
-import rtss.data.mortality.laws.HeligmanPollard;
+import rtss.data.mortality.laws.HeligmanPollard_R;
 import rtss.data.population.Population;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
@@ -167,7 +167,7 @@ public class MortalityTableADH
              * fits the curve to points rather than intervals, and means are severely deviated  
              */
             int ppy = 10;
-            double[] yy = new HeligmanPollard(bins).curve(ppy);
+            double[] yy = new HeligmanPollard_R(bins).curve(ppy);
             double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "HP curve " + debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
