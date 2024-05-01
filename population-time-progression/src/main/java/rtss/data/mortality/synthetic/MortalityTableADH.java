@@ -159,8 +159,26 @@ public class MortalityTableADH
     
     private static double[] curve_pclm(Bin[] bins, String debug_title) throws Exception
     {
+        /*
+         * To suppress boundary effects, append fake bin with growing rate 
+         */
+        Bin[] xbins = bins;
+        Bin first = Bins.firstBin(bins);
+        Bin last = Bins.lastBin(bins);
+        if (Util.True)
+        {
+            List<Bin> list = new ArrayList<>();
+            for (Bin bin : bins)
+                list.add(new Bin(bin));
+            list.add(new Bin(last.age_x2 + 1, 
+                             last.age_x2 + last.widths_in_years, 
+                             last.avg + 1.6 * (last.avg - last.prev.avg)));
+            xbins = Bins.bins(list);
+        }
+        
         double lambda = 0.0001;
-        double[] yy = PCLM_Rizzi_2015.pclm(bins, lambda);
+        double[] yy = PCLM_Rizzi_2015.pclm(xbins, lambda);
+        yy = Util.splice(yy, first.age_x1, last.age_x2);
 
         if (Util.True)
         {
