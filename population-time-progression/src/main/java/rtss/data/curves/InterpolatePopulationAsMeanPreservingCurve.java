@@ -10,6 +10,7 @@ import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
+import rtss.math.pclm.PCLM_Rizzi_2015;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -22,6 +23,15 @@ public class InterpolatePopulationAsMeanPreservingCurve
     public static final int MAX_AGE = Population.MAX_AGE;
 
     public static double[] curve(Bin[] bins, String title) throws Exception
+    {
+        // return curve_pclm(bins, title);
+        return curve_spline(bins, title);
+    }
+    
+    /*
+     * Spline implementation
+     */
+    private static double[] curve_spline(Bin[] bins, String title) throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
@@ -41,6 +51,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         double[] yyy2 = null;
         double[] yyy3 = null;
         double[] yyy4 = null;
+        double[] yyy5 = null;
 
         if (Util.False)
         {
@@ -70,6 +81,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
             yyy4 = MeanPreservingIntegralSpline.eval(bins, xoptions);
         }
 
+        if (Util.False)
+        {
+            final double lambda = 0.0001;
+            yyy5 = PCLM_Rizzi_2015.pclm(bins, lambda, ppy);
+        }
+
         double[] yyy = yyy1;
         if (yyy == null)
             yyy = yyy2;
@@ -77,6 +94,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
             yyy = yyy3;
         if (yyy == null)
             yyy = yyy4;
+        if (yyy == null)
+            yyy = yyy5;
         
         yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins);
         
@@ -91,6 +110,40 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 chart.addSeries("3", xxx, yyy3);
             if (yyy4 != null)
                 chart.addSeries("4", xxx, yyy4);
+            if (yyy5 != null)
+                chart.addSeries("5", xxx, yyy5);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.display();
+        }
+
+        if (!Util.isNonNegative(yyy))
+            throw new Exception("Error calculating curve (negative value)");
+
+        double[] yy = Bins.ppy2yearly(yyy, ppy);
+
+        if (!Util.isNonNegative(yy))
+            throw new Exception("Error calculating curve (negative value)");
+
+        validate_means(yy, bins);
+
+        return yy;
+    }
+
+    /*
+     * PCLM implementation
+     */
+    private static double[] curve_pclm(Bin[] bins, String title) throws Exception
+    {
+        int ppy = 12;
+        double[] xxx = Bins.ppy_x(bins, ppy);
+
+        final double lambda = 0.0001;
+        double[] yyy = PCLM_Rizzi_2015.pclm(bins, lambda, ppy);
+
+        if (Util.True)
+        {
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("pclm", xxx, yyy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }
