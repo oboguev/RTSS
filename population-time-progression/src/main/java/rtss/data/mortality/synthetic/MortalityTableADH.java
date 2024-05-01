@@ -153,7 +153,33 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        return curve_1(bins, debug_title);
+        // return curve_1(bins, debug_title);
+        return curve_pclm(bins, debug_title);
+    }
+    
+    private static double[] curve_pclm(Bin[] bins, String debug_title) throws Exception
+    {
+        double lambda = 0.0001;
+        double[] yy = PCLM_Rizzi_2015.pclm(bins, lambda);
+
+        if (Util.True)
+        {
+            /*
+             * Display yearly curve
+             */
+            double[] xxx = Bins.ppy_x(bins, 1);
+            String title = "PCLM yearly curve " + debug_title;
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("qx", xxx, yy);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, 1));
+            chart.display();
+        }
+
+        CurveVerifier.positive(yy, bins, debug_title, true);
+        CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
+        CurveVerifier.validate_means(yy, bins);
+        
+        return yy;
     }
 
     @SuppressWarnings("unused")
