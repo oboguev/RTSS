@@ -28,9 +28,6 @@ public class PCLM_Rizzi_2015
     private final int min_year;
     private final int max_year;
 
-    private final int ix2year;
-    private final int year2ix;
-
     /*
      * Lambda is a smoothing parameter.
      * To avoid smoothing, keep it low (e.g. 0.0001).
@@ -44,11 +41,17 @@ public class PCLM_Rizzi_2015
         this.ppy = ppy;
 
         this.xbins = Bins.avg2sum(bins);
+        for (Bin bin: xbins)
+            bin.avg *= ppy;
+        
         this.min_year = Bins.firstBin(xbins).age_x1;
         this.max_year = Bins.lastBin(xbins).age_x2;
+    }
 
-        ix2year = min_year - 1;
-        year2ix = -ix2year;
+    public static double[] pclm(Bin[] bins, int ppy) throws Exception
+    {
+        final double lambda = 0.0001;
+        return pclm(bins, lambda, ppy);
     }
 
     public static double[] pclm(Bin[] bins, double lambda, int ppy) throws Exception
@@ -75,12 +78,12 @@ public class PCLM_Rizzi_2015
         {
             sb.append(String.format("C[%d, %d:%d] <- 1" + nl,
                                     bin.index + 1,
-                                    year2ix(bin.age_x1),
-                                    year2ix(bin.age_x2)));
+                                    year2ix_first(bin.age_x1),
+                                    year2ix_last(bin.age_x2)));
         }
 
         String script = Script.script("r-scripts/PCLM_Rizzi_2015.r",
-                                      "m", i2s(m),
+                                      "m", i2s(m * ppy),
                                       "n", i2s(n),
                                       "y", R.c(y),
                                       "fill_C", sb.toString(),
@@ -92,9 +95,14 @@ public class PCLM_Rizzi_2015
         return d;
     }
 
-    private int year2ix(int year)
+    private int year2ix_first(int year)
     {
-        return year + year2ix;
+        return ppy * (year - min_year) + 1;
+    }
+
+    private int year2ix_last(int year)
+    {
+        return year2ix_first(year) + (ppy - 1);
     }
 
     private static String i2s(int i)
