@@ -126,7 +126,7 @@ public class R
      */
     public static LinkedHashMap<String,Double> namedVectorSD(String vecs) throws Exception
     {
-        LinkedHashMap<String,Double> m = new LinkedHashMap<String,Double>();
+        LinkedHashMap<String,Double> m = new LinkedHashMap<>();
 
         for (String kvs : vecs.trim().split(","))
         {
@@ -137,5 +137,56 @@ public class R
         }
         
         return m;
+    }
+
+    public static LinkedHashMap<Integer,Double> namedVectorID(String vecs) throws Exception
+    {
+        LinkedHashMap<Integer,Double> m = new LinkedHashMap<>();
+
+        for (String kvs : vecs.trim().split(","))
+        {
+            String[] s = kvs.split(":");
+            if (s.length != 2)
+                throw new Exception("Unable to parse named vector");
+            m.put(Integer.parseInt(s[0]), Double.parseDouble(s[1]));
+        }
+        
+        return m;
+    }
+    
+    public static double[] indexedVectorD(String vecs) throws Exception
+    {
+        Integer imin = null;
+        Integer imax = null;
+        
+        LinkedHashMap<Integer,Double> m = namedVectorID(vecs);
+        
+        for (Integer i : m.keySet())
+        {
+            if (imin == null)
+                imin = i;
+            else 
+                imin = Math.min(imin, i);
+
+            if (imax == null)
+                imax = i;
+            else 
+                imax = Math.max(imax, i);
+        }
+        
+        if (imin == null || imax == null || imin != 1)
+            throw new Exception("Invalid indexed vector");
+        
+        double[] d = new double[imax];
+        
+        for (int i = imin; i <= imax; i++)
+        {
+            Double v = m.get(i);
+            if (v == null)
+                throw new Exception("Missing element in an indexed vector");
+            d[i - 1] = v;
+        }
+        
+        return d;
     }
 }

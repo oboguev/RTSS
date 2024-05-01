@@ -25,6 +25,7 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
+import rtss.math.pclm.PCLM_Rizzi_2015;
 import rtss.util.Clipboard;
 import rtss.util.Util;
 // import rtss.util.XY;
@@ -159,6 +160,12 @@ public class MortalityTableADH
     private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
+        
+        if (Util.True)
+        {
+            double lambda = 0.0001;
+            PCLM_Rizzi_2015.pclm(bins, lambda);
+        }
         
         if (Util.False)
         {

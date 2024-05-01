@@ -153,7 +153,7 @@ public class Util
 
     public static String f2s(double f) throws Exception
     {
-        String s = new BigDecimal(f).toPlainString();
+        String s =  new BigDecimal(Double.valueOf(f).toString()).toPlainString(); 
 
         if (s.contains("."))
         {
