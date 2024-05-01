@@ -159,6 +159,8 @@ public class MortalityTableADH
     
     private static double[] curve_pclm(Bin[] bins, String debug_title) throws Exception
     {
+        final int ppy = 1;
+        
         /*
          * To suppress boundary effects, append fake bin with growing rate 
          */
@@ -172,26 +174,28 @@ public class MortalityTableADH
                 list.add(new Bin(bin));
             list.add(new Bin(last.age_x2 + 1, 
                              last.age_x2 + last.widths_in_years, 
-                             last.avg + 1.6 * (last.avg - last.prev.avg)));
+                             last.avg + 1.8 * (last.avg - last.prev.avg)));
             xbins = Bins.bins(list);
         }
         
         double lambda = 0.0001;
-        double[] yy = PCLM_Rizzi_2015.pclm(xbins, lambda);
-        yy = Util.splice(yy, first.age_x1, last.age_x2);
+        double[] yyy = PCLM_Rizzi_2015.pclm(xbins, lambda, ppy);
+        yyy = Util.splice(yyy, first.age_x1, ppy * (last.age_x2 + 1) - 1);
 
         if (Util.True)
         {
             /*
              * Display yearly curve
              */
-            double[] xxx = Bins.ppy_x(bins, 1);
+            double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "PCLM yearly curve " + debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("qx", xxx, yy);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, 1));
+            chart.addSeries("qx", xxx, yyy);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }
+        
+        double[] yy = Bins.ppy2yearly(yyy, ppy);
 
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
@@ -204,12 +208,6 @@ public class MortalityTableADH
     private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
-        
-        if (Util.True)
-        {
-            double lambda = 0.0001;
-            PCLM_Rizzi_2015.pclm(bins, lambda);
-        }
         
         if (Util.False)
         {
