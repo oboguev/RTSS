@@ -38,7 +38,7 @@ public class TestMortalityRatesADH
 
             CombinedMortalityTable cmt = MortalityTableADH.getMortalityTable(Area.RSFSR, year);
 
-            if (Util.False)
+            if (Util.True)
             {
                 File rootDir = new File("P:\\@@\\ADH-RSFSR-mt");
                 File dir = new File(rootDir, "" + year);

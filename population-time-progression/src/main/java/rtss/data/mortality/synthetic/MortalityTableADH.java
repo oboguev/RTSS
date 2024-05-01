@@ -86,6 +86,7 @@ public class MortalityTableADH
             catch (Exception ex)
             {
                 // ignore
+                Util.noop();
             }
         }
 

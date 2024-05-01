@@ -345,7 +345,7 @@ public class SingleMortalityTable
         String nl = "\n";
         StringBuilder sb = new StringBuilder();
         if (comment != null && comment.length() != 0)
-            sb.append(comment + nl);
+            sb.append("# " + comment + nl);
         
         sb.append("# Возраст в годах, Числа доживающих до возраста х лет, Числа умирающих при переходе от возраста x к возрасту х+1 лет, ");
         sb.append("Вероятность умереть в течение предстоящего года жизни, Вероятность дожить до возраста х+1 лет, Числа живущих в возрасте х лет, ");
