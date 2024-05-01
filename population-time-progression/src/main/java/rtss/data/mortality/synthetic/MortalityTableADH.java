@@ -10,7 +10,7 @@ import rtss.data.bin.Bins;
 // import rtss.data.curves.CurveSegmentTrend;
 // import rtss.data.curves.CurveUtil;
 import rtss.data.curves.CurveVerifier;
-import rtss.data.curves.EnsureMonotonicYearlyPoints;
+// import rtss.data.curves.EnsureMonotonicYearlyPoints;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.curves.TuneCCS;
@@ -153,7 +153,8 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        // return curve_1(bins, debug_title);
+        // return curve_hp(bins, debug_title);
+        // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
     }
     
@@ -203,30 +204,39 @@ public class MortalityTableADH
         
         return yy;
     }
-
+    
     @SuppressWarnings("unused")
-    private static double[] curve_1(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_hp(Bin[] bins, String debug_title) throws Exception
     {
-        CurveVerifier.verifyUShape(bins, false, debug_title, true);
+        /*
+         * Unfortunately, existing R implementation of Heligman-Pollard estimator
+         * fits the curve to points rather than intervals, and means are severely deviated  
+         */
+        int ppy = 10; // ###
+        double[] yy = new HeligmanPollard_R(bins).curve(ppy);
         
-        if (Util.False)
+        if (Util.True)
         {
-            /*
-             * Unfortunately, existing R implementation of Heligman-Pollard estimator
-             * fits the curve to points rather than intervals, and means are severely deviated  
-             */
-            int ppy = 10;
-            double[] yy = new HeligmanPollard_R(bins).curve(ppy);
             double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "HP curve " + debug_title;
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             chart.addSeries("qx", xxx, yy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
-            double[] y = Bins.ppy2yearly(yy, ppy);
-            CurveVerifier.validate_means(y, bins);
-            Util.noop();
         }
+
+        double[] y = Bins.ppy2yearly(yy, ppy);
+
+        // will fail here
+        // CurveVerifier.validate_means(y, bins);
+
+        return y;
+    }
+
+    @SuppressWarnings("unused")
+    private static double[] curve_spline_1(Bin[] bins, String debug_title) throws Exception
+    {
+        CurveVerifier.verifyUShape(bins, false, debug_title, true);
         
         if (Util.False)
         {
@@ -238,7 +248,7 @@ public class MortalityTableADH
         
         // CurveSegmentTrend[] trends = CurveUtil.getUShapeSegmentTrends(bins, debug_title);
 
-        final int ppy = 10; // ###
+        final int ppy = 1000;
         
         Bin[] xbins = bins;
         if (Util.True)
@@ -284,7 +294,7 @@ public class MortalityTableADH
         }
 
         CurveVerifier.positive(yy, bins, debug_title, true);
-        // ### new EnsureMonotonicYearlyPoints(bins, yy, debug_title).fix();
+        // new EnsureMonotonicYearlyPoints(bins, yy, debug_title).fix();
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
         CurveVerifier.validate_means(yy, bins);
 
@@ -292,15 +302,15 @@ public class MortalityTableADH
     }
 
     @SuppressWarnings("unused")
-    private static double[] curve_2(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_spline_2(Bin[] bins, String debug_title) throws Exception
     {
-        final int ppy = 10; // ###
+        final int ppy = 1000;
 
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
 
         InterpolateAsMeanPreservingCurve.Options options = new InterpolateAsMeanPreservingCurve.Options();
         options = options.debug_title(debug_title).ensurePositive(true).ensureMonotonicallyDecreasing_1_4_5_9(true);
-        options = options.ppy(ppy).displayCurve(false); // ###
+        options = options.ppy(ppy).displayCurve(false);
         double[] curve = InterpolateAsMeanPreservingCurve.curve(bins, options);
 
         CurveVerifier.positive(curve, bins, debug_title, true);
@@ -310,7 +320,7 @@ public class MortalityTableADH
     }
 
     @SuppressWarnings("unused")
-    private static double[] curve_3(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_spline_3(Bin[] bins, String debug_title) throws Exception
     {
         final int ppy = 1000;
 

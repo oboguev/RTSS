@@ -12,7 +12,6 @@ import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 import rtss.util.excel.ExcelLoader;
-import rtss.util.plot.ChartXYSplineAdvanced;
 
 public class PopulationFromExcel extends ExcelLoader
 {

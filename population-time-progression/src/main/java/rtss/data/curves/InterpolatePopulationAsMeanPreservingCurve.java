@@ -132,6 +132,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
     /*
      * PCLM implementation
      */
+    @SuppressWarnings("unused")
     private static double[] curve_pclm(Bin[] bins, String title) throws Exception
     {
         int ppy = 12;
