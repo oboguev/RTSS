@@ -17,7 +17,7 @@ public class TestInterpolateMortalityTable
             CombinedMortalityTable mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
             mt1.comment("ГКС-СССР-1938");
 
-            CombinedMortalityTable mt2 = new RSFSR_1940();
+            CombinedMortalityTable mt2 = MortalityTableADH.getMortalityTable(Area.RSFSR, 1940);
             mt2.comment("АДХ-РСФСР-1940");
             
             AreaParameters ap = AreaParameters.forArea(Area.USSR);
@@ -34,7 +34,6 @@ public class TestInterpolateMortalityTable
                     4);
             
             Util.unused(cmt);
-
         }
         catch (Throwable ex)
         {
