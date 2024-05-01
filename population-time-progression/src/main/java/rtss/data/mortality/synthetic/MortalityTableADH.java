@@ -178,11 +178,11 @@ public class MortalityTableADH
             xbins = Bins.bins(list);
         }
         
-        double lambda = 0.0001;
+        final double lambda = 0.0001;
         double[] yyy = PCLM_Rizzi_2015.pclm(xbins, lambda, ppy);
         yyy = Util.splice(yyy, first.age_x1, ppy * (last.age_x2 + 1) - 1);
 
-        if (Util.True)
+        if (Util.False)
         {
             /*
              * Display yearly curve
