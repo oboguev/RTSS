@@ -51,8 +51,8 @@ public class MortalityTableADH
     public static final int MAX_AGE = CombinedMortalityTable.MAX_AGE;
     private static Map<String, CombinedMortalityTable> cache = new HashMap<>();
 
-    static public boolean UseCache = false; // ###
-    static public boolean UsePrecomputed = false; // ###
+    static public boolean UsePrecomputed = true;
+    static public boolean UseCache = true;
 
     public static CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
     {
@@ -223,10 +223,11 @@ public class MortalityTableADH
          * Unfortunately, existing R implementation of Heligman-Pollard estimator
          * fits the curve to points rather than intervals, and means are severely deviated  
          */
-        int ppy = 10; // ###
+        boolean display = Util.False;
+        int ppy = display ? 10 : 1000;
         double[] yy = new HeligmanPollard_R(bins).curve(ppy);
         
-        if (Util.True)
+        if (display)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "HP curve " + debug_title;
