@@ -139,6 +139,10 @@ public class R
         return m;
     }
 
+    /*
+     * Parse named vector integer -> double
+     * "1:0.023015645452356,2:0.0525300825459925,3:0.257545159036299,4:2.62975794141521e+22"
+     */    
     public static LinkedHashMap<Integer,Double> namedVectorID(String vecs) throws Exception
     {
         LinkedHashMap<Integer,Double> m = new LinkedHashMap<>();
@@ -154,6 +158,9 @@ public class R
         return m;
     }
     
+    /*
+     * Parse non-sparse named vector integer -> double, starting from index 1
+     */    
     public static double[] indexedVectorD(String vecs) throws Exception
     {
         Integer imin = null;
