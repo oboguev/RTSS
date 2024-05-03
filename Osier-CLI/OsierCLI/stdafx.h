@@ -23,6 +23,7 @@ extern "C"
 }
 
 #include "Util.h"
+#include "Value.h"
 
 extern HMODULE hOsierXLL;
 
