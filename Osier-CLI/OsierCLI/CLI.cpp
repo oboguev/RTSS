@@ -1,5 +1,18 @@
 #include "stdafx.h"
 
+/*
+ * set-cell-empty A1
+ * set-cell-string A1 text
+ * set-cell-integer A1 123
+ * set-cell-double A1 14.32
+ * echo aaa bbb ccc
+ * show cells "A1: " A1 ", A2: " A2 ", A3: " A3
+ * call Z1 func A1 B1:B3 C1:E3
+ * clear-sheet
+ * exit
+ * quit
+ */
+
 void CLI::execute(const string& line)
 {
 	if (line.length() == 0)
