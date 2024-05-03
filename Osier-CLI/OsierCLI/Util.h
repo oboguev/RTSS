@@ -8,6 +8,7 @@ std::string GetLastErrorAsString(void);
 string tchar2string(TCHAR* t);
 char* to_counted_string(const char* s);
 string from_counted_string(const char* s);
+string op2string(const XLOPER* x);
 
 typedef int (WINAPI* p_i_v_t)(void);
 

@@ -2,6 +2,9 @@
 
 enum ValueType { VT_Integer, VT_Double, VT_String };
 
+/*
+ * Cell value
+ */
 class Value
 {
 protected:

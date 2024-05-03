@@ -16,6 +16,8 @@
 
 using namespace std;
 #include <string>
+#include <vector>
+#include <map>
 
 extern "C"
 {
@@ -24,6 +26,9 @@ extern "C"
 
 #include "Util.h"
 #include "Value.h"
+#include "XllFunctionArgument.h"
+#include "XllFunction.h"
 
 extern HMODULE hOsierXLL;
+extern map<string, XllFunction> xllFunctions;
 

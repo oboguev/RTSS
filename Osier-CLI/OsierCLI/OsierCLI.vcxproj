@@ -165,10 +165,12 @@
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="XllFunction.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Value.h" />
+    <ClInclude Include="XllFunctionArgument.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XLCall32\XLCall32.vcxproj">

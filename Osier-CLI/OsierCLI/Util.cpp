@@ -84,3 +84,11 @@ string from_counted_string(const char* s)
 		xs += *s++;
 	return xs;
 }
+
+string op2string(const XLOPER* x)
+{
+	if (x->xltype != xltypeStr)
+		fatal("Unexpected: XLOPER is not a string");
+	string s = from_counted_string(x->val.str);
+	return s;
+}
