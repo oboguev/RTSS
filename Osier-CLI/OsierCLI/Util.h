@@ -18,6 +18,15 @@ void trim(string& s);
 typedef int (WINAPI* p_i_v_t)(void);
 typedef XLOPER* (WINAPI* p_XllFunction_t)();
 XLOPER* call_xll_function(p_XllFunction_t p, vector<XLOPER*> args);
+XLOPER* cellRange(const char* addr);
+
+class RowCol
+{
+public:
+	int col;
+	int row;
+};
+RowCol cellAddress(const char* addr);
 
 static void noop()
 {

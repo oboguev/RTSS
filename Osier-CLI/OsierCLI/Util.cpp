@@ -177,3 +177,59 @@ XLOPER* call_xll_function(p_XllFunction_t p, vector<XLOPER*> args)
 		return NULL;
 	}
 }
+
+RowCol cellAddress(const char* addr)
+{
+	RowCol rc;
+
+	const char* p = addr;
+	char c = *p++;
+	if (!(c >= 'A' && c <= 'Z'))
+		fatal(xprintf("Invalid cell address: %s", addr));
+	rc.col = c - 'A';
+
+	try
+	{
+		int r = stoi(p);
+		if (r < 1)
+			fatal(xprintf("Invalid cell address: %s", addr));
+		rc.row = r - 1;
+	}
+	catch (exception e1)
+	{
+		fatal(xprintf("Invalid cell address: %s", addr));
+	}
+
+	return rc;
+}
+
+XLOPER* cellRange(const char* addr)
+{
+	XLOPER* x = new XLOPER;
+	x->xltype = xltypeSRef;
+	x->val.sref.count = 1;
+
+	char* ap = _strdup(addr);
+	char* p = strchr(ap, ':');
+	if (p)
+	{
+		*p++ = 0;
+		RowCol rc1 = cellAddress(ap);
+		RowCol rc2 = cellAddress(p);
+
+		x->val.sref.ref.colFirst = min(rc1.col, rc2.col);
+		x->val.sref.ref.colLast = max(rc1.col, rc2.col);
+
+		x->val.sref.ref.rwFirst = min(rc1.row, rc2.row);
+		x->val.sref.ref.rwLast = max(rc1.row, rc2.row);
+	}
+	else
+	{
+		RowCol rc = cellAddress(ap);
+		x->val.sref.ref.colFirst = x->val.sref.ref.colLast = rc.col;
+		x->val.sref.ref.rwFirst = x->val.sref.ref.rwLast = rc.row;
+	}
+	
+	free(ap);
+	return x;
+}

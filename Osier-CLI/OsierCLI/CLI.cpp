@@ -179,10 +179,8 @@ void CLI::do_call(const string& retval, const string& fname, vector<string>& arg
 
 	for (int k = 0; k < args.size(); k++)
 	{
-		XLOPER* x = new XLOPER();
+		XLOPER* x = cellRange(args[k].c_str());
 		vop.push_back(x);
-		x->xltype = xltypeSRef;
-		// ###
 	}
 
 	XLOPER* xres = call_xll_function(pfunc, vop);
