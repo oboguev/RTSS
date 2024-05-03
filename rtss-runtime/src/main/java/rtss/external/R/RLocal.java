@@ -1,29 +1,19 @@
 package rtss.external.R;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 
 import rtss.config.Config;
+import rtss.external.ProcessRunner;
 import rtss.util.Util;
 
 /**
  * Execute R scripts locally
  */
-public class RLocal implements RCall
+public class RLocal extends ProcessRunner implements RCall
 {
-    private Process process;
-    private InputStream is; // connected to process stdout + stderr
-    private OutputStream os; // connected to process stdin
-    private BufferedReader reader;
     private boolean log = false;
-    private StopProcessHook stopHook;
 
     public RLocal setLog(boolean log)
     {
@@ -59,62 +49,13 @@ public class RLocal implements RCall
 
     private void start() throws Exception
     {
-        String cmd = String.format("%s", Config.asRequiredString("R.executable"));
-        cmd = Util.despace(cmd);
-        ProcessBuilder pb = new ProcessBuilder(cmd.split(" ")).redirectErrorStream(true);
-        process = pb.start();
-        stopHook = new StopProcessHook(process);
-        stopHook.addHook();
-        is = process.getInputStream();
-        reader = new BufferedReader(new InputStreamReader(is));
-        os = process.getOutputStream();
+        super.start(Config.asRequiredString("R.executable"));
     }
 
     @Override
     public void stop() throws Exception
     {
-        safeClose(reader);
-        reader = null;
-
-        safeClose(is);
-        is = null;
-
-        safeClose(os);
-        os = null;
-
-        if (stopHook != null)
-        {
-            stopHook.removeHook();
-            stopHook = null;
-        }
-
-        if (process != null)
-        {
-            process.destroy();
-            try
-            {
-                process.waitFor(3, TimeUnit.SECONDS);
-            }
-            catch (InterruptedException ex)
-            {
-                // ignore
-            }
-
-            process = null;
-        }
-    }
-
-    private void safeClose(Closeable c)
-    {
-        try
-        {
-            if (c != null)
-                c.close();
-        }
-        catch (Throwable ex)
-        {
-            // ignore
-        }
+        super.stop();
     }
 
     private String execute(String script) throws Exception
@@ -198,39 +139,6 @@ public class RLocal implements RCall
     {
         if (log)
             Util.out(s);
-    }
-
-    static class StopProcessHook extends Thread
-    {
-        private Process process;
-
-        public StopProcessHook(Process process)
-        {
-            this.process = process;
-        }
-
-        @Override
-        public void run()
-        {
-            process.destroy();
-        }
-
-        void addHook()
-        {
-            Runtime.getRuntime().addShutdownHook(this);
-        }
-
-        void removeHook()
-        {
-            try
-            {
-                Runtime.getRuntime().removeShutdownHook(this);
-            }
-            catch (IllegalStateException ex)
-            {
-                // ignore, in shutdown already
-            }
-        }
     }
 
     @Override

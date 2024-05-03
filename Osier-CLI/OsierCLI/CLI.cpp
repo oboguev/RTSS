@@ -15,7 +15,7 @@
 
 void CLI::execute(const string& line)
 {
-	if (line.length() == 0)
+	if (line.length() == 0 || line[0] == '#')
 		return;
 
 	vector<string> tokens = split(line, " ");
