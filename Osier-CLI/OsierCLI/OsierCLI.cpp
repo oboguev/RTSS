@@ -1,43 +1,9 @@
 #include "stdafx.h"
 
 void load_libraries();
-void fatal(const TCHAR* msg);
-void fatal(const char* msg);
-TCHAR* xprintf(const TCHAR* format, ...);
-std::string GetLastErrorAsString(void);
-
-typedef int (WINAPI *p_i_v_t)(void);
-
-static void noop()
-{
-}
-
-static string tchar2string(TCHAR* t)
-{
-	string str = t; 
-	return str;
-}
-
-char* to_counted_string(const char* s)
-{
-	char* p = (char*) malloc(strlen(s) + 2);
-	strcpy(p + 1, s);
-	p[0] = (char) strlen(p + 1);
-	return p;
-}
-
-string from_counted_string(const char* s)
-{
-	string xs;
-	int len = (unsigned char) *s++;
-	for (int k = 0; k < len; k++)
-		xs += *s++;
-	return xs;
-}
-
 
 static HMODULE hXLCall32 = NULL;
-static HMODULE hOsierXLL = NULL;
+HMODULE hOsierXLL = NULL;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -142,72 +108,3 @@ static void load_libraries()
 	noop();
 }
 
-static void fatal(const char* msg)
-{
-	fprintf(stderr, msg);
-	fprintf(stderr, "\n");
-
-	fprintf(stderr, GetLastErrorAsString().c_str());
-	fprintf(stderr, "\n");
-
-	exit(1);
-}
-
-static TCHAR* xprintf(const TCHAR* format, ...)
-{
-	va_list args;
-	va_start(args, format); 
-
-	TCHAR* result = NULL;
-	size_t count = 300;
-
-	for (;;)
-	{
-		if (result != NULL)
-			free(result);
-		result = (TCHAR*) calloc(count, sizeof(TCHAR));
-		if (result == NULL)
-			fatal(_T("Out of memory"));
-
-		int r = _vsntprintf(result, count, format, args);
-		if (result < 0)
-			fatal(_T("Formatting error"));
-		if (r < (int) count)
-		{
-			va_end(args);
-			return result;
-		}
-		else
-		{
-			count *= 2;
-			if (r > (int) count)
-				count = r + 1;
-		}
-	}
-
-	return result;
-}
-
-static string GetLastErrorAsString(void)
-{
-	//Get the error message ID, if any.
-	DWORD errorMessageID = ::GetLastError();
-	if (errorMessageID == 0) {
-		return string(); //No error message has been recorded
-	}
-
-	LPSTR messageBuffer = nullptr;
-
-	//Ask Win32 to give us the string version of that message ID.
-	//The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
-	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-
-	//Copy the error message into a string.
-	string message(messageBuffer, size);
-
-	//Free the Win32's string's buffer.
-	LocalFree(messageBuffer);
-
-	return message;
-}

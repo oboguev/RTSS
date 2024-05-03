@@ -21,3 +21,8 @@ extern "C"
 {
 #include "..\XLCall32\e4v.h"
 }
+
+#include "Util.h"
+
+extern HMODULE hOsierXLL;
+
