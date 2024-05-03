@@ -18,6 +18,12 @@ using namespace std;
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
+#include <iostream>
+#include <regex>
+#include <algorithm> 
+#include <cctype>
+#include <locale>
 
 extern "C"
 {
@@ -28,7 +34,10 @@ extern "C"
 #include "Value.h"
 #include "XllFunctionArgument.h"
 #include "XllFunction.h"
+#include "Sheet.h"
+#include "CLI.h"
 
 extern HMODULE hOsierXLL;
-extern map<string, XllFunction> xllFunctions;
+extern unordered_map<string, XllFunction> xllFunctions;
+extern Sheet sheet;
 

@@ -2,14 +2,26 @@
 
 static HMODULE hXLCall32 = NULL;
 HMODULE hOsierXLL = NULL;
-map<string, XllFunction> xllFunctions;
+unordered_map<string, XllFunction> xllFunctions;
+Sheet sheet;
 
 void load_libraries();
 int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[]);
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-    load_libraries();
+	load_libraries();
+
+	CLI cli;
+
+	for (string line; getline(cin, line); )
+	{
+		line = regex_replace(line, regex("\t"), " ");
+		line = regex_replace(line, regex(" +"), " ");
+		trim(line);
+		cli.execute(line);
+	}
+
 	return 0;
 }
 

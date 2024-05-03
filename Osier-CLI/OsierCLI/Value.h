@@ -1,6 +1,6 @@
 #pragma once
 
-enum ValueType { VT_Integer, VT_Double, VT_String };
+enum ValueType { VT_None, VT_Integer, VT_Double, VT_String };
 
 /*
  * Cell value
@@ -18,6 +18,14 @@ public:
 	string s_value;
 
 public:
+	Value()
+	{
+		value_type = VT_None;
+		ps_counted = NULL;
+		d_value = 0;
+		i_value = 0;
+	}
+
 	Value(const Value& x) : Value(&x)
 	{
 	}
@@ -116,6 +124,10 @@ public:
 
 		case VT_String:
 			return s_value.c_str();
+
+		case VT_None:
+		default:
+			return "";
 		}
 	}
 
@@ -139,6 +151,9 @@ public:
 				free(ps_counted);
 			ps_counted = to_counted_string(s_value.c_str());
 			break;
+
+		case VT_None:
+			fatal("Cell with no value");
 		}
 
 		return &m_xloper;
