@@ -50,16 +50,16 @@ static string GetLastErrorAsString(void)
 {
 	DWORD errorMessageID = ::GetLastError();
 	if (errorMessageID == 0)
-		return string(); //No error message has been recorded
+return string(); //No error message has been recorded
 
-	LPSTR messageBuffer = nullptr;
+LPSTR messageBuffer = nullptr;
 
-	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+	NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
-	string message(messageBuffer, size);
-	LocalFree(messageBuffer);
-	return message;
+string message(messageBuffer, size);
+LocalFree(messageBuffer);
+return message;
 }
 
 string tchar2string(TCHAR* t)
@@ -106,31 +106,74 @@ vector<string> split(const string& str, const string& delim)
 
 	if (start != str.size())
 		result.emplace_back(str.begin() + start, str.end());
-	
+
 	return result;
 }
 
 // trim from start (in place)
-void ltrim(std::string& s) 
+void ltrim(string& s)
 {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) 
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
 		{
 			return !std::isspace(ch);
 		}));
 }
 
 // trim from end (in place)
-void rtrim(std::string& s) 
+void rtrim(string& s)
 {
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) 
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
 		{
 			return !std::isspace(ch);
 		}).base(), s.end());
 }
 
 // trim from both ends (in place)
-void trim(std::string& s) 
+void trim(string& s)
 {
 	rtrim(s);
 	ltrim(s);
+}
+
+typedef XLOPER* (WINAPI* p_XllFunction_1_t)(XLOPER* a1);
+typedef XLOPER* (WINAPI* p_XllFunction_2_t)(XLOPER* a1, XLOPER* a2);
+typedef XLOPER* (WINAPI* p_XllFunction_3_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3);
+typedef XLOPER* (WINAPI* p_XllFunction_4_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3, XLOPER* a4);
+typedef XLOPER* (WINAPI* p_XllFunction_5_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3, XLOPER* a4, XLOPER* a5);
+typedef XLOPER* (WINAPI* p_XllFunction_6_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3, XLOPER* a4, XLOPER* a5, XLOPER* a6);
+typedef XLOPER* (WINAPI* p_XllFunction_7_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3, XLOPER* a4, XLOPER* a5, XLOPER* a6, XLOPER* a7);
+typedef XLOPER* (WINAPI* p_XllFunction_8_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3, XLOPER* a4, XLOPER* a5, XLOPER* a6, XLOPER* a7, XLOPER* a8);
+typedef XLOPER* (WINAPI* p_XllFunction_9_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3, XLOPER* a4, XLOPER* a5, XLOPER* a6, XLOPER* a7, XLOPER* a8, XLOPER* a9);
+typedef XLOPER* (WINAPI* p_XllFunction_10_t)(XLOPER* a1, XLOPER* a2, XLOPER* a3, XLOPER* a4, XLOPER* a5, XLOPER* a6, XLOPER* a7, XLOPER* a8, XLOPER* a9, XLOPER* a10);
+
+XLOPER* call_xll_function(p_XllFunction_t p, vector<XLOPER*> args)
+{
+	switch (args.size())
+	{
+	case 0:
+		return (*p)();
+	case 1:
+		return (*(p_XllFunction_1_t)p)(args[0]);
+	case 2:
+		return (*(p_XllFunction_2_t)p)(args[0], args[1]);
+	case 3:
+		return (*(p_XllFunction_3_t)p)(args[0], args[1], args[2]);
+	case 4:
+		return (*(p_XllFunction_4_t)p)(args[0], args[1], args[2], args[3]);
+	case 5:
+		return (*(p_XllFunction_5_t)p)(args[0], args[1], args[2], args[3], args[4]);
+	case 6:
+		return (*(p_XllFunction_6_t)p)(args[0], args[1], args[2], args[3], args[4], args[5]);
+	case 7:
+		return (*(p_XllFunction_7_t)p)(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+	case 8:
+		return (*(p_XllFunction_8_t)p)(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+	case 9:
+		return (*(p_XllFunction_9_t)p)(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+	case 10:
+		return (*(p_XllFunction_10_t)p)(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+	default:
+		fatal("Function call has too many arguments");
+		return NULL;
+	}
 }

@@ -28,4 +28,15 @@ public:
 		args = x.args;
 		comment = x.comment;
 	}
+
+	int numRequiredArgs()
+	{
+		for (int k = 0; k < args.size(); k++)
+		{
+			if (args[k].optional)
+				return k;
+		}
+
+		return (int) args.size();
+	}
 };

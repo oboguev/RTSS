@@ -8,7 +8,9 @@ void CLI::execute(const string& line)
 	vector<string> tokens = split(line, " ");
 
 	string verb = tokens[0];
-	int argc = (int) tokens.size() - 1;
+	
+	tokens.erase(tokens.begin());
+	int argc = (int) tokens.size();
 
 	if ((verb == "exit" || verb == "quit") && argc == 0)
 	{
@@ -23,11 +25,11 @@ void CLI::execute(const string& line)
 	}
 	else if (verb == "set-cell-empty" && argc == 1)
 	{
-		sheet.erase(tokens[1]);
+		sheet.erase(tokens[0]);
 	}
 	else if (verb == "set-cell-string" && argc == 2)
 	{
-		sheet[tokens[1]] = Value(tokens[2].c_str());
+		sheet[tokens[0]] = Value(tokens[1].c_str());
 	}
 	else if (verb == "set-cell-integer" && argc == 2)
 	{
@@ -35,15 +37,15 @@ void CLI::execute(const string& line)
 
 		try
 		{
-			value = stoi(tokens[2]);
+			value = stoi(tokens[1]);
 		}
 		catch (exception e1)
 		{
-			fprintf(stderr, "Invalid integer value: %s\n", tokens[2].c_str());
+			fprintf(stderr, "Invalid integer value: %s\n", tokens[1].c_str());
 			return;
 		}
 
-		sheet[tokens[1]] = Value(value);
+		sheet[tokens[0]] = Value(value);
 	}
 	else if (verb == "set-cell-double" && argc == 2)
 	{
@@ -51,20 +53,32 @@ void CLI::execute(const string& line)
 
 		try
 		{
-			value = stod(tokens[2], NULL);
+			value = stod(tokens[1], NULL);
 		}
 		catch (exception e1)
 		{
-			fprintf(stderr, "Invalid double value: %s\n", tokens[2].c_str());
+			fprintf(stderr, "Invalid double value: %s\n", tokens[1].c_str());
 			return;
 		}
 
-		sheet[tokens[1]] = Value(value);
+		sheet[tokens[0]] = Value(value);
+	}
+	else if (verb == "echo")
+	{
+		string args;
+		for (int k = 0; k < tokens.size(); k++)
+		{
+			if (args.length() != 0)
+				args += " ";
+			args += tokens[k];
+		}
+
+		cout << args << endl;
 	}
 	else if (verb == "show-cells")
 	{
 		string args;
-		for (int k = 1; k < tokens.size(); k++)
+		for (int k = 0; k < tokens.size(); k++)
 		{
 			if (args.length() != 0)
 				args += " ";
@@ -117,8 +131,64 @@ void CLI::execute(const string& line)
 
 		cout << xs << endl;
 	}
+	else if (verb == "call" && argc >= 0)
+	{
+		/*
+		* call return-value-cell function-name args...
+		*/
+		string retval = tokens[0];
+		tokens.erase(tokens.begin());
+
+		string fname = tokens[0];
+		tokens.erase(tokens.begin());
+
+		do_call(retval, fname, tokens);
+	}
 	else
 	{
 		fprintf(stderr, "Invalid command: %s\n", line.c_str());
 	}
+}
+
+void CLI::do_call(const string& retval, const string& fname, vector<string>& args)
+{
+	if (xllFunctions.find(fname) == xllFunctions.end())
+	{
+		cerr << "Function " << fname << " is not defiend" << endl << flush;
+		return;
+	}
+
+	XllFunction f = xllFunctions[fname];
+	if (args.size() < f.numRequiredArgs())
+	{
+		cerr << "Insufficient number of argument for function " << fname << endl << flush;
+		return;
+	}
+
+	if (args.size() > f.args.size())
+	{
+		cerr << "Too many arguments for function " << fname << endl << flush;
+		return;
+	}
+
+	p_XllFunction_t pfunc = (p_XllFunction_t) GetProcAddress(hOsierXLL, f.dllname.c_str());
+	if (pfunc == NULL)
+		fatal(xprintf("Unable to access function %s)", f.dllname.c_str()));
+
+	vector<XLOPER*> vop;
+
+	for (int k = 0; k < args.size(); k++)
+	{
+		XLOPER* x = new XLOPER();
+		vop.push_back(x);
+		x->xltype = xltypeSRef;
+		// ###
+	}
+
+	XLOPER* xres = call_xll_function(pfunc, vop);
+
+	for (int k = 0; k < vop.size(); k++)
+		delete vop[k];
+
+	sheet[retval] = Value(xres);
 }
