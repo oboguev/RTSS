@@ -15,12 +15,12 @@ public class Server
     {
         try
         {
-            URL url = new URL(Config.asRequiredString("R.server.endpoint"));
+            URL url = new URL(Config.asRequiredString("server.endpoint"));
             int port = url.getPort();
             if (port == -1)
                 port = url.getDefaultPort();
             if (port == -1)
-                throw new Exception("Server port is not defined in configuration property R.server.endpoint");
+                throw new Exception("Server port is not defined in configuration property server.endpoint");
             
             System.setProperty("server.port", "" + port);
             SpringApplication.run(Server.class, args);
