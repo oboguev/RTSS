@@ -46,7 +46,7 @@ public class OsierLocal implements OsierCall
         }
         catch (Throwable ex)
         {
-            Util.err("*** Unable to execute R");
+            Util.err("*** Unable to execute Osier");
             ex.printStackTrace();
             return null;
         }
@@ -59,7 +59,7 @@ public class OsierLocal implements OsierCall
 
     private void start() throws Exception
     {
-        String cmd = String.format("%s", Config.asRequiredString("R.executable"));
+        String cmd = String.format("%s", Config.asRequiredString("Osier.executable"));
         cmd = Util.despace(cmd);
         ProcessBuilder pb = new ProcessBuilder(cmd.split(" ")).redirectErrorStream(true);
         process = pb.start();
@@ -125,7 +125,7 @@ public class OsierLocal implements OsierCall
             script += nl;
 
         log("");
-        log("**** Sending to R for execution at " + Instant.now().toString());
+        log("**** Sending to Osier for execution at " + Instant.now().toString());
         log("");
         log(script);
 
@@ -163,14 +163,10 @@ public class OsierLocal implements OsierCall
                     if (duration.toSeconds() > 30)
                     {
                         // must see begin within a second at most and certainly within 30 seconds
-                        Util.err("No reply from R started within 30 seconds");
+                        Util.err("Reply from Osier did not start within 30 seconds");
                         return null;
                     }
                 }
-            }
-            else if (line.startsWith("> ") || line.startsWith("+ "))
-            {
-                // ignore echo lines
             }
             else
             {

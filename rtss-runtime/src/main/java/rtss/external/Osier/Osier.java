@@ -41,7 +41,7 @@ public class Osier
             }
             else
             {
-                // ### ocall = new RClient();
+                ocall = new OsierClient();
             }
         }
         
