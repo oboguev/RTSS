@@ -10,6 +10,7 @@ public:
 	string dllname;
 
 	boolean is_void;
+	char return_value_type;
 
 	vector<XllFunctionArgument> args;
 

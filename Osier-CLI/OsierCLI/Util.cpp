@@ -92,3 +92,20 @@ string op2string(const XLOPER* x)
 	string s = from_counted_string(x->val.str);
 	return s;
 }
+
+vector<string> split(const string& str, const string& delim)
+{
+	vector<string> result;
+	size_t start = 0;
+
+	for (size_t found = str.find(delim); found != string::npos; found = str.find(delim, start))
+	{
+		result.emplace_back(str.begin() + start, str.begin() + found);
+		start = found + delim.size();
+	}
+
+	if (start != str.size())
+		result.emplace_back(str.begin() + start, str.end());
+	
+	return result;
+}

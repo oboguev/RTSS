@@ -66,7 +66,7 @@ static int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[])
 	{
 		// op[0] is DLL path
 		// op[1] is the name of exported DLL routine for the function
-		// op[2] is argument types such as "RRRRR"
+		// op[2] is argument types such as "RRRRR"; first entry is function return type
 		// op[3] is public function name
 		// op[4] is argument name list such as "MortHandle,Age,[AgeInterval],[Cause]"
 		// op[5] is whether function returns values (1 = yes, 2 = void)
@@ -94,7 +94,7 @@ static int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[])
 
 		XllFunction f;
 		f.dllname = op2string(op[1]);
-		f.dllname = op2string(op[3]);
+		f.name = op2string(op[3]);
 		f.comment = op2string(op[9]);
 
 		s = op2string(op[5]);
@@ -105,8 +105,48 @@ static int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[])
 		else
 			fatal("Unexpected function definition (isvoid)");
 		
-		string argtypes = op2string(op[2]);
-		string argnames = op2string(op[4]);
+		string s_argtypes = op2string(op[2]);
+		const char* argtypes = s_argtypes.c_str();
+		vector<string> argnames = split(op2string(op[4]), ",");
+
+		if (f.name == "MakeVector" && argnames.size() == 20)
+			argtypes = "RRRRRRRRRRRRRRRRRRRRR";
+		else if (f.name == "MakeMatrix" && argnames.size() == 20)
+			argtypes = "RRRRRRRRRRRRRRRRRRRRR";
+		else if (f.name == "GetObj" && argnames.size() == 2)
+			argtypes = "RRR";
+		else if (f.name == "ModifyObj" && argnames.size() == 19)
+			argtypes = "RRRRRRRRRRRRRRRRRRRR";
+
+		if (strlen(argtypes) != 1 + argnames.size())
+			fatal("Unexpected function definition (arg count mismatch)");
+
+		f.return_value_type = argtypes[0];
+		for(int k = 0; k < argnames.size(); k++)
+		{
+			XllFunctionArgument arg;
+			arg.type = argtypes[k + 1];
+			string name = argnames[k];
+			if (name[0] == '[' && name.back() == ']')
+			{
+				arg.optional = true;
+				name = name.substr(1, name.length() - 2);
+			}
+			else
+			{
+				arg.optional = false;
+			}
+			arg.name = name;
+			
+			int cix = 10 + k;
+			if (cix >= count)
+				fatal("Unexpected function definition (missing argument description)");
+			arg.comment = op2string(op[cix]);
+
+			f.args.push_back(arg);
+		}
+
+		xllFunctions[f.name] = f;
 
 		return xlretSuccess;
 	}
