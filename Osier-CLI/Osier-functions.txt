@@ -1,0 +1,112 @@
+xlOsier|R|Osier||1|Osier|||Osier version|
+xlSort|RRRR|ColSort|Range,[SortCol],[Ascend]|1|Osier|||Sorts rows of a range by a specified colum.|The range|Optional. The column to sort by. Defaults to 1|Optional. If <> 0 then sorts in ascending order, else if == 0 sorts descending. Defaults to 1|
+xlResize|RRRR|Resize|Range,Rows,Cols|1|Osier|||Resizes an Excel range|The range|Number of rows|Number of cols|
+xlMakeVector|RRRRRRRRRRRRRRRRRRRRRRRRRR|MakeVector|[Val1],[Val2],[Val3],[Val4],[Val5],[Val6],[Val7],[Val8],[Val9],[Val10],[Val11],[Val12],[Val13],[Val14],[Val15],[Val16],[Val17],[Val18],[Val19],[Val20]|1|Osier|||Makes a vector from a set of elements|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector|Optional. If not specified then not added to vector
+xlMakeMatrix|RRRRRRRRRRRRRRRRRRRRRRRRRR|MakeMatrix|Rows,Columns,[Val1],[Val2],[Val3],[Val4],[Val5],[Val6],[Val7],[Val8],[Val9],[Val10],[Val11],[Val12],[Val13],[Val14],[Val15],[Val16],[Val17],[Val18]|1|Osier|||Makes a matrix from a set of elements|The number of rows|The number of columns|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix|Optional. If not specified then not added to matrix
+xlAppend|RRRRR|Append|Range1,Range2,[Range3],[Range4]|1|Osier|||Appends up to three range on to the end of a range.|The starting range|The range to append to the end of the starting range|Optional. If specified then will be appended after Range2.|Optional. If specified then will be appended after Range3.|
+xlWLTranspose|RR|WLTranspose|Range|1|Osier|||Returns the transpose of a range.|The range|
+xlMakeGrid|RRRR|MakeGrid|Rows,Columns,Range|1|Osier|||Uses Range to make a Rows-by-Columns grid.|The number of rows|The number of columns|The range|
+xlMatrixToList|RRRR|MatrixToList|RowLabels,ColumnLabels,Matrix|1|Osier|||Constructs a list from a matrix with labelled rows and columns. The inverse of ListToMatrix|The row labels|The column labels|The matrix|
+xlListToMatrix|RRRRR|ListToMatrix|RowLabels,ColumnLabels,Values,[LabelType]|1|Osier|||Constructs a matrix from a lists of row labels, column labels and values. The inverse of MatrixToList|The row labels|The column labels|The values|Optional. The type of label. Can be 'NUMBER', 'DATE', 'STRING' or 'INTERVAL'. Defaults to 'NUMBER'.|
+xlFillMatrix|RRRRR|FillMatrix|XRange,YRange,Matrix,[InterpMethod]|1|Osier|||Fills missing values in a matrix by 2D interpolation|X values for each column|Y values for each row|The matrix|Optional. The interpolation method. Can be 1, 2, or 3. Defaults to 1.|
+xlInterpMatrixValue|RRRRRRR|InterpMatrixValue|XRange,YRange,Matrix,XValue,YValue,[InterpMethod]|1|Osier|||Interpolates from [XRange,YRange] to (XValue,YValue)|The X range to interpolate from|The Y range to interpolate from|The matrix of values to interpolate from|The X value to interpolate to|The Y value to interpolate to|Optional. The interpolation method. Defaults to 1|
+xlMatrixInterp|RRRR|MatrixInterp|YValue,XValue,Matrix|1|Osier|||Interpolates a matrix to (XValue,YValue) using bilinear method|The Y value to interpolate to|The X value to interpolate to|The matrix to interpolate from|
+xlCountryNumToAlpha3|RRR|CountryNumToAlpha3|Numeric,[CodeHandle]|1|Osier|||Given the numeric country code returns the corresponding 3-letter code|The numeric country code|Optional. Results handle with ResultsType=COUNTRYCODE. Defaults to ISO3166-1|
+xlCountryNumToAlpha2|RRR|CountryNumToAlpha2|Numeric,[CodeHandle]|1|Osier|||Given the numeric country code returns the corresponding 2-letter code|The numeric country code|Optional. Results handle with ResultsType=COUNTRYCODE. Defaults to ISO3166-1|
+xlCountryNumToName|RRR|CountryNumToName|Numeric,[CodeHandle]|1|Osier|||Given the numeric country code returns the corresponding country name|The numeric country code|Optional. Results handle with ResultsType=COUNTRYCODE. Defaults to ISO3166-1|
+xlCountryAlpha3ToNum|RRR|CountryAlpha3ToNum|Alpha3,[CodeHandle]|1|Osier|||Given the country code returns the corresponding numeric code|The Alpha-3 country code|Optional. Results handle with ResultsType=COUNTRYCODE. Defaults to ISO3166-1|
+xlCountryAlpha2ToNum|RRR|CountryAlpha2ToNum|Alpha2,[CodeHandle]|1|Osier|||Given the 2-letter country code returns the corresponding numeric code|The Alpha-2 country code|Optional. Results handle with ResultsType=COUNTRYCODE. Defaults to ISO3166-1|
+xlCountryNameToNum|RRR|CountryNameToNum|Name,[CodeHandle]|1|Osier|||Given the country code name returns the corresponding numeric code|Country Name|Optional. Results handle with ResultsType=COUNTRYCODE. Defaults to ISO3166-1|
+xlCreateObj|RRRRRRRRRRRRRRRRRRRR|CreateObj|Handle,ObjectType,BodyProps,BodyValues,[TableName],[TableCols],[TableValues],[TableName2],[TableCols2],[TableValues2],[TableName3],[TableCols3],[TableValues3],[TableName4],[TableCols4],[TableValues4],[TableName5],[TableCols5],[TableValues5]|1|Osier|||Creates an object|The name of the object to create|The type of object to create|A list of property names|A matrix of property values|Name of a table|Columns names of the table|Table values|Name of a table 2|Columns names of the table 2|Table 2 values|Name of a table 3|Columns names of the table 3|Table 3 values|Name of a table 4|Columns names of the table 4|Table 4 values|Name of a table 5|Columns names of the table 5|Table 5 values|
+xlCloneObj|RRRRRRRRRRRRRRR|CloneObj|[NewHandle],Handle,ObjectType,[Body],[TableName],[TableBody],[TableName2],[TableBody2],[TableName3],[TableBody3],[TableName4],[TableBody4],[TableName5],[TableBody5]|1|Osier|||Duplicates an object with the option of adding subtables|Name of the new object. Optional. Defaults to Handle|Name of the object duplicated|Type of the object duplicated|Optional. The new body|Optional. The name of a subtable|Optional. The new body body of new subtable. If missing the subtable is removed from the object|Optional. The name of a subtable|Optional. The new body body of new subtable. If missing the subtable is removed from the object|Optional. The name of a subtable|Optional. The new body body of new subtable. If missing the subtable is removed from the object|Optional. The name of a subtable|Optional. The new body body of new subtable. If missing the subtable is removed from the object|Optional. The name of a subtable|Optional. The new body body of new subtable. If missing the subtable is removed from the object|
+xlDeleteObjs|RRR|DeleteObjs|[Handles],ObjectType|1|Osier|||Deletes objects from object pool|The names of the objects to delete. If missing deletes all objects of specified type|The type of objects to delete. If empty string then deletes all objectes|
+xlDisplayObj|RRR|DisplayObj|Handle,ObjectType|1|Osier|||Displays an object|The name of the object to display|The type of object to display|
+xlDisplayObjLabels|RRRR|DisplayObjLabels|Handle,ObjectType,[TableName]|1|Osier|||List property names in an objects body or subtable|Name of the object|Type of the object|Optional. If specified the function returns the subtables column headings. Otherwise return body property names|
+xlDisplaySubtableNames|RRR|DisplaySubtableNames|Handle,ObjectType|1|Osier|||List names of the subtables in an object|Name of the object|Type of the object|
+xlGetObj|RRR!|GetObj|Handle,ObjectType|1|Osier|||Returns the handle and instance of an objet or an error message if the object does not exist. This function is volatile|Name of the object|Type of the object|
+xlGetObjInfo|RRRRRRR|GetObjInfo|Handle,ObjectType,Property,[PropertyNumber],[ColumnName],[RowNumber]|1|Osier|||Returns the value of a body property or a subtable column|Name of the object|Type of the object|Name of the body property or subtable|Optional. Number of the property value. Defaults to 0 if not specified. If < 0 then returns the entire property value vector.|Optional. The name of column of a subtable. If not specified the function will return a body property value|Optional. Rownumber of the property in a subtable. Defaults to 0 if not specified. If <0 then returns the entire column vector.|
+xlGridToObject|RRRR|GridToObject|Handle,ObjectType,Grid|1|Osier|||Creates and object from a grid|Name of the object|Type of the object|The grid|
+xlListObjs|RR|ListObjs|[ObjectType]|1|Osier|||Lists all objects of specified type|Optional. The type of the objects to display.|
+xlLoadObjs|RRRR|LoadObjs|[Handles],[TargetType],FileName|1|Osier|||Loads objects from a file|Optional. A regular expression for the handles to be loaded|Optional. A regular expression for the types to be loaded.|The full pathname of the file to load the objects from.|
+xlModifyObj|RRRRRRRRRRRRRRRRRRRRRRR|ModifyObj|[NewHandle],Handle,ObjectType,[TableName],[ColName],[RowNum],[Vals],[TableName2],[ColName2],[RowNum2],[Vals2],[TableName3],[ColName3],[RowNum3],[Vals3],[TableName4],[ColName4],[RowNum4],[Vals4]|1|Osier|||Modify property values of an object, with the option of creating a new object|Optional. The name of the new object to create.|The handle of the object to modify.|The type of the object to modify.|Optional. The name of the subtable to modify. If not specified the body is modified|Optional. If not given and TableName was specified, drops the whole subtable. Else modifies that property or column within the subtable.|Optional. The row to start modifications at. Value -1 means to fill the column with the single value given. Defaults to 0.|Optional. If not given, drops the column within the subtable. Else the table is modified using as many values as are given.|Optional. The name of the subtable to modify. If not specified the body is modified|Optional. If not given and TableName was specified, drops the whole subtable. Else modifies that property or column within the subtable.|Optional. The row to start modifications at. Value -1 means to fill the column with the single value given. Defaults to 0.|Optional. If not given, drops the column within the subtable. Else the table is modified using as many values as are given.|Optional. The name of the subtable to modify. If not specified the body is modified|Optional. If not given and TableName was specified, drops the whole subtable. Else modifies that property or column within the subtable.|Optional. The row to start modifications at. Value -1 means to fill the column with the single value given. Defaults to 0.|Optional. If not given, drops the column within the subtable. Else the table is modified using as many values as are given.|Optional. The name of the subtable to modify. If not specified the body is modified|Optional. If not given and TableName was specified, drops the whole subtable. Else modifies that property or column within the subtable.|Optional. The row to start modifications at. Value -1 means to fill the column with the single value given. Defaults to 0.|Optional. If not given, drops the column within the subtable. Else the table is modified using as many values as are given.|
+xlSaveObjs|RRRRR|SaveObjs|Handles,ObjectTypes,FileName,[Append]|1|Osier|||Saves object to a file.|Handles to save to file|Types of the objects. Single value or a vector with same lengths as Handles|Name of the file to save to.|Optional. A number. If =1 then objects are appended to the file if it already exists.. Defaults to 0.|
+xlLoadObjsFromDataDirectory|RR|LoadObjsFromDataDirectory|DataDirectory|1|Osier|||Sets and loads objects in the data directory.|The data directory|
+xlSurvFrac|RRRR|SurvFrac|MortHandle,[Age],[Cause]|1|Osier|||Returns the survival fraction for the supplied age.|The mort handle|Optional. The age. If not specified returns all nodes nodes, survival fraction and years lived used to build the curve.|Optional. A comma-separated list of cause-of-death codes|
+xlDeathRate|RRRRR|DeathRate|MortHandle,Age,[AgeInterval],[Cause]|1|Osier|||Returns death rate for age interval [Age,Age+AgeInterval).|The mort handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|Optional. A comma-separated list of cause-of-death codes|
+xlDeaths|RRRRR|Deaths|MortHandle,Age,[AgeInterval],[Cause]|1|Osier|||Returns number of deaths in age interval [Age,Age+AgeInterval).|The mort handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|Optional. A comma-separated list of cause-of-death codes|
+xlDeathProb|RRRRR|DeathProb|MortHandle,Age,[AgeInterval],[Cause]|1|Osier|||Returns the death probability for age interval [Age,Age+AgeInterval).|The mort handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|Optional. A comma-separated list of cause-of-death codes|
+xlSurvProb|RRRR|SurvProb|MortHandle,Age,[AgeInterval]|1|Osier|||Returns the survival probability for age interval [Age,Age+AgeInterval).|The mort handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|
+xlYearsLived|RRRR|YearsLived|MortHandle,Age,[AgeInterval]|1|Osier|||Returns the person-years lived for age interval [Age,Age+AgeInterval).|The mort handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|
+xlYearsLivedAfter|RRR|YearsLivedAfter|MortHandle,Age|1|Osier|||Returns the person-years lived above Age.|The mort handle|The age.|
+xlLifeExp|RRR|LifeExp|MortHandle,[Age]|1|Osier|||Returns the expectation of life at Age.|The mort handle|Optional. The age. If not specified it defaults to 0.|
+xlGetMortParams|RR|GetMortParams|MortHandle|1|Osier|||Returns the buildmethod parameters|The mortality handle|
+xlDeathDist|RRRR|DeathDist|MortHandle,Age,[Cause]|1|Osier|||Returns the cumulative distribution function of death for the supplied age.|The mort handle|The age.|Optional. A comma-separated list of cause-of-death codes for cause-specific death distribution|
+xlDyingProb|RRRR|DyingProb|MortHandle,Cause,Age|1|Osier|||Returns the eventually dying of a specified cause given alive at a given age.|The mort handle|A comma-separated list of cause-of-death codes|The age.|
+xlSDSurvFrac|RRRR|SDSurvFrac|MortHandle,Cause,Age|1|Osier|||Returns the single-decrement survival fraction.|The mort handle|A comma-separated list of cause-of-death codes|The age.|
+xlSDYearsLived|RRRRR|SDYearsLived|MortHandle,Cause,Age,[AgeInterval]|1|Osier|||Returns the single-decrement person-years lived for age interval [Age,Age+AgeInterval).|The mort handle|A comma-separated list of cause-of-death codes|The age.|Optional. The age interval. If not specified it defaults to 1.0|
+xlSDYearsLivedAfter|RRRR|SDYearsLivedAfter|MortHandle,Cause,Age|1|Osier|||Returns the single-decrement person-years lived above Age.|The mort handle|A comma-separated list of cause-of-death codes|The age.|
+xlCreateScenarioMort|RRRR|CreateScenarioMort|NewMortHandle,MortHandle,ScenarioHandle|1|Osier|||Creates a mortaliy object by applying a scenario to an existing mortality|The new mort handle|The existing handle|A results object specifying the scenario|
+xlOutSurvival|RRRRR|OutSurvival|MortHandle1,MortHandle2,[Age],[Omega]|1|Willow|||Returns the probability MortHandle1 outsurvives  MortHandle2 given both alive at Age.|The first mort handle|The second mort handle|Optional. The age. If not specified it defaults to 0.|Optional. Controls upper bound of numerical integral. Defaults to 120.
+xlFertRate|RRRR|FertRate|FertHandle,Age,[AgeInterval]|1|Osier|||Returns the age-specific fertility rate for age interval [Age,Age+AgeInterval).|The fertility handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|
+xlTotalFertRate|RR|TotalFertRate|FertHandle|1|Osier|||Returns the total (period) fertility rate.|The fertility handle|
+xlGetFertParams|RR|GetFertParams|FertHandle|1|Osier|||Returns the buildmethod parameters|The fertility handle|
+xlNetReproRate|RRRRR|NetReproRate|FertHandle,MortHandle,[SexRatio],[Epsilon]|1|Osier|||Returns the Net Reproduction Rate|The fertility handle|The female mortality handle|Optional. The sex ratio. Defaults to 1.05|Optional. Controls local accuracy of numerical integral. Defaults to 1.0e-6|
+xlBirths|RRRR|Births|FertHandle,PCurveHandle,[Epsilon]|1|Osier|||Returns the number of biths per annum|The fertility handle|The pcurve handle|Optional. Controls local accuracy of numerical integral. Defaults to 1.0e-6|
+xlMeanAgeChild|RRR|MeanAgeChild|FertHandle,[Epsilon]|1|Willow|||Returns the Mean Age at Childbearing|The fertility handle|Optional. Controls local accuracy of numerical integral. Defaults to 1.0e-6|
+xlNumber|RRRR|Number|PCurveHandle,Age,[AgeInterval]|1|Osier|||Returns the population number for age interval [Age,Age+AgeInterval).|The PCurve handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|
+xlTotalNumber|RR|TotalNumber|PCurveHandle|1|Osier|||Returns the total number in a population.|The PCurve handle|
+xlGetPCurveParams|RR|GetPCurveParams|PCurveHandle|1|Osier|||Returns the buildmethod parameters|The pcurve handle|
+xlMigrationProb|RRRRR|MigrationProb|MigrationHandle,Age,[AgeInterval],[ToPop]|1|Osier|||Returns the migration probability for age interval [Age,Age+AgeInterval).|The migration handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|Optional. A comma-separated list of destination population codes|
+xlGetMigrationParams|RR|GetMigrationParams|MigrationHandle|1|Osier|||Returns the buildmethod parameters|The migration handle|
+xlMigrationRatio|RRRRR|MigrationRatio|MigrationHandle,Age,[AgeInterval],ToPop|1|Osier|||Returns the migration ratio for age interval [Age,Age+AgeInterval) and destination ToPop.|The migration handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|A comma-separated list of destination population codes|
+xlCalibReturnMigration|RRRRR|CalibReturnMigration|ReturnHandle,OneYearHandle,MultiYearHandle,[ExtraInfo]|1|Osier|||Calibrates a return migration object implied by OneYearHandle and MultiYearHandle.|The object to calibrate|The one year migration object.|The multi-year migration object.|Optional. ExtraInfo string specifying calibration options. Defaults to the empty string|
+xlMultiYearMigrationProb|RRRRR|MultiYearMigrationProb|OneYearHandle,ReturnHandle,Age,[AgeInterval]|1|Osier|||Returns the multi-year migration probability for age interval [Age,Age+AgeInterval) accounting for return migration.|The out migration handle|The return migration handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|
+xlCreateOneYearMig|RRRRR|CreateOneYearMig|OneYearHandle,MultiYearHandle,ReturnHandle,[ExtraInfo]|1|Osier|||Creates a one-year migration object implied by MultiYearHandle and ReturnHandle.|The object to create|The multi-year migration object.|The return migration object.|Optional. ExtraInfo string specifying options. Defaults to the empty string|
+xlGroupedProb|RRRRRRR|GroupedProb|MigrationHandle,PCurveHandle,Age,[AgeInterval],[GroupInterval],[ToPop]|1|Osier|||Returns the grouped migration probability for age group [Age,Age+GroupInterval) over interval AgeInterval.|The migration handle|The exposure pcurve handle|The age.|Optional. The age interval. If not specified it defaults to 1.0|Optional. The age group width. If not specified it defaults to 1.0|Optional. A comma-separated list of destination population codes|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

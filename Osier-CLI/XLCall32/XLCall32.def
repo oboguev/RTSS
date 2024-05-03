@@ -1,0 +1,5 @@
+LIBRARY	"XLCall32"
+
+EXPORTS
+   Excel4    @2
+   Excel4v   @3
