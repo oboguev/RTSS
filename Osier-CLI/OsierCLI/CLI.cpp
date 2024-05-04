@@ -154,6 +154,10 @@ void CLI::execute(const string& line)
 
 		do_call(retval, fname, tokens);
 	}
+	else if (verb == "show-sheet" && argc == 0)
+	{
+		show_sheet();
+    }
 	else
 	{
 		fprintf(stderr, "Invalid command: %s\n", line.c_str());
@@ -224,4 +228,55 @@ string CLI::concat(const vector<string> tokens, const string& sep)
 	}
 
 	return res;
+}
+
+void CLI::show_sheet(void)
+{
+	char max_col = 'A';
+	int max_row = 1;
+
+	for (auto kv : sheet)
+	{
+		string cell = kv.first;
+		char col = cell[0];
+		int row = atoi(cell.c_str() + 1);
+
+		if (col > max_col)
+			max_col = col;
+		if (row > max_row)
+			max_row = row;
+	}
+
+	for (int row = 1; row <= max_row; row++)
+	{
+		for (char col = 'A'; col <= max_col; col++)
+		{
+			if (col != 'A')
+				printf(",");
+			char cell[30];
+			sprintf(cell, "%c%d", col, row);
+
+			Value* v = NULL;
+
+			try
+			{
+				v = sheet.at(cell);
+			}
+			catch (out_of_range ex)
+			{
+				noop();
+			}
+
+			if (v != NULL)
+			{
+				if (v->type() == VT_String)
+					printf("\"");
+				printf("%s", v->toString());
+				if (v->type() == VT_String)
+					printf("\"");
+			}
+		}
+
+		printf("\n");
+	}
 }

@@ -131,13 +131,21 @@ public:
 		}
 	}
 
-	XLOPER* xloper()
+	XLOPER* xloper(boolean asDouble)
 	{
 		switch (value_type)
 		{
 		case VT_Integer:
-			m_xloper.xltype = xltypeInt;
-			m_xloper.val.w = i_value;
+			if (asDouble)
+			{
+				m_xloper.xltype = xltypeNum;
+				m_xloper.val.num = (double)i_value;
+			}
+			else
+			{
+				m_xloper.xltype = xltypeInt;
+				m_xloper.val.w = i_value;
+			}
 			break;
 
 		case VT_Double:

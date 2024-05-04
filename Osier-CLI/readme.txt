@@ -1,3 +1,7 @@
+Unfortunately Osier.xll is tuned to work only with Excel and crashes when hosted by OsierCLI, even though the latter uses Excel API.
+
+*******************************************************
+
 Osier-CLI is used to call Osier library functions.
 These functions interpolate mortality curves and perform other demographic related math computations.
 RTSS invokes Osier library functions through OsierCLI executable.

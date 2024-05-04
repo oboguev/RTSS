@@ -209,6 +209,9 @@ XLOPER* cellRange(const char* addr)
 	x->xltype = xltypeSRef;
 	x->val.sref.count = 1;
 
+	// x64 Excel actually passes 0 rather than 1
+	x->val.sref.count = 0;
+
 	char* ap = _strdup(addr);
 	char* p = strchr(ap, ':');
 	if (p)

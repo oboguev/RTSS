@@ -177,13 +177,13 @@ static int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[])
 				if (op[k]->val.str != NULL)
 				{
 					// what kind of free?
-					op[k]->val.str = NULL;
+					// op[k]->val.str = NULL;
 				}
 			}
 			else if (op[k]->xltype == xltypeRef)
 			{
 				// do nothing
-				op[k]->val.mref.lpmref = NULL;
+				// op[k]->val.mref.lpmref = NULL;
 			}
 			else
 			{
@@ -194,7 +194,7 @@ static int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[])
 		return xlretSuccess;
 	}
 	else if (xlfn == xlCoerce && count == 2 && 
-			op[0]->xltype == xltypeSRef && op[0]->val.sref.count == 1 &&
+			op[0]->xltype == xltypeSRef &&
 			op[1]->xltype == xltypeInt)
 	{
 		coerce(r, op[0]->val.sref.ref, op[1]->val.w);
@@ -229,11 +229,18 @@ static void coerce_multi(XLOPER* r, XLREF ref)
 	r->val.array.columns = ncol;
 	r->val.array.lparray = xop = (XLOPER*)pcalloc(nrow * ncol, sizeof XLOPER);
 
-	for (int col = ref.colFirst; col <= ref.colLast; col++)
+	if (nrow > 3)
+		noop();
+
+	printf("coerce:");
+
+	for (int row = ref.rwFirst; row <= ref.rwLast; row++)
 	{
-		for (int row = ref.rwFirst; row <= ref.rwLast; row++)
+		for (int col = ref.colFirst; col <= ref.colLast; col++)
 		{
 			string cellname = sheet.cell(col, row);
+
+			printf(" %s", cellname.c_str());
 
 			Value* v = NULL;
 
@@ -249,8 +256,13 @@ static void coerce_multi(XLOPER* r, XLREF ref)
 			if (v == NULL)
 				fatal(xprintf("Plugin tried to xlCoerce empty cell %s", cellname.c_str()));
 
-			*xop++ = *v->xloper();
+			*xop++ = *v->xloper(true);
 			noop();
 		}
 	}
+
+	printf("\n");
+	fflush(stdout);
+
+	noop();
 }
