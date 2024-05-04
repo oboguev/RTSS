@@ -7,6 +7,7 @@ import com.sun.jna.platform.win32.COM.util.office.excel.ComIWorkbook;
 import com.sun.jna.platform.win32.COM.util.office.excel.ComIWorksheet;
 
 import rtss.data.bin.Bin;
+import rtss.util.Util;
 // import rtss.util.Util;
 
 public class OsierExcel
@@ -99,6 +100,18 @@ public class OsierExcel
         }
         
         autoFiltAll(aBaseTableValues);
+        
+        // https://stackoverflow.com/questions/25114702/add-ins-not-loading-when-opening-excel-file-programmatically
+        
+        String s = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)", 
+                      aBaseName.toString(),
+                      aBaseObjectType,
+                      aBaseBodyProps,
+                      aBaseBodyValues,
+                      aBaseTableName,
+                      aBaseTableCols,
+                      aBaseTableValues);
+        Util.noop();
 
         // call return-value-cell function-name args...
         // sb.append("call");
