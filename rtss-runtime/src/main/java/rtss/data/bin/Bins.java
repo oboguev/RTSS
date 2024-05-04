@@ -94,6 +94,14 @@ public class Bins
         return x;
     }
     
+    public static Bin[] multiply(Bin[] bins, double f) throws Exception
+    {
+        Bin[] xbins = Bins.clone(bins);
+        for (Bin bin : xbins)
+            bin.avg *= f;
+        return xbins;
+    }
+
     public static Bin[] yearlyBins(Bin[] bins) throws Exception
     {
         List<Bin> list = new ArrayList<Bin>();

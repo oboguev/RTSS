@@ -23,6 +23,7 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.external.Osier.OsierScript;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
@@ -51,8 +52,8 @@ public class MortalityTableADH
     public static final int MAX_AGE = CombinedMortalityTable.MAX_AGE;
     private static Map<String, CombinedMortalityTable> cache = new HashMap<>();
 
-    static public boolean UsePrecomputed = true;
-    static public boolean UseCache = true;
+    static public boolean UsePrecomputed = false; // ###
+    static public boolean UseCache = false; // ###
 
     public static CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
     {
@@ -165,6 +166,12 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
+        // ###
+        OsierScript osier = new OsierScript();
+        osier.clearSheet();
+        osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
+        String script = osier.getScript();
+        // ###
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);

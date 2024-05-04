@@ -7,6 +7,12 @@ Sheet sheet;
 
 void load_libraries();
 int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[]);
+void coerce(XLOPER* r, XLREF ref, int w);
+void coerce_multi(XLOPER* r, XLREF ref);
+
+/* groundwork for pooled allocation (tbd later) */
+static void* palloc(size_t size) { return malloc(size); }
+static void* pcalloc(size_t num, size_t size) { return calloc(num, size);  }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -187,10 +193,60 @@ static int pascal MyExcel4v(int xlfn, LPXLOPER r, int count, LPXLOPER op[])
 
 		return xlretSuccess;
 	}
+	else if (xlfn == xlCoerce && count == 2 && 
+			op[0]->xltype == xltypeSRef && op[0]->val.sref.count == 1 &&
+			op[1]->xltype == xltypeInt)
+	{
+		coerce(r, op[0]->val.sref.ref, op[1]->val.w);
+    }
 	else
 	{
 		fatal(xprintf("Unknown Excel function %d\n", xlfn));
 	}
 
 	return xlretSuccess;
+}
+
+/* ========================================================================================= */
+
+static void coerce(XLOPER* r, XLREF ref, int w)
+{
+	if (w == xltypeMulti)
+		coerce_multi(r, ref);
+	else
+		fatal("Plugin requested xlCoerce to unsupported type");
+}
+
+static void coerce_multi(XLOPER* r, XLREF ref)
+{
+	int ncol = ref.colLast - ref.colFirst + 1;
+	int nrow = ref.rwLast - ref.rwFirst + 1;
+
+	r->xltype = xltypeMulti;
+	r->val.array.rows = nrow;
+	r->val.array.columns = ncol;
+	r->val.array.lparray = (XLOPER*)pcalloc(nrow * ncol, sizeof XLOPER);
+
+	for (int col = ref.colFirst; col <= ref.colLast; col++)
+	{
+		for (int row = ref.rwFirst; row <= ref.rwLast; row++)
+		{
+			char cellname[30];
+			sprintf(cellname, "%c%d", 'A' + col, row + 1);
+
+			Value v;
+
+			try
+			{
+				v = sheet.at(cellname);
+			}
+			catch (out_of_range ex)
+			{
+				noop();
+			}
+
+			noop();
+			// ###
+		}
+	}
 }

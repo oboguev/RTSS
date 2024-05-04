@@ -40,9 +40,12 @@ void CLI::execute(const string& line)
 	{
 		sheet.erase(tokens[0]);
 	}
-	else if (verb == "set-cell-string" && argc == 2)
+	else if (verb == "set-cell-string" && argc >= 2)
 	{
-		sheet[tokens[0]] = Value(tokens[1].c_str());
+		string cell = tokens[0];
+		tokens.erase(tokens.begin());
+		string args = concat(tokens, " ");
+		sheet[cell] = Value(args.c_str());
 	}
 	else if (verb == "set-cell-integer" && argc == 2)
 	{
@@ -78,26 +81,12 @@ void CLI::execute(const string& line)
 	}
 	else if (verb == "echo")
 	{
-		string args;
-		for (int k = 0; k < tokens.size(); k++)
-		{
-			if (args.length() != 0)
-				args += " ";
-			args += tokens[k];
-		}
-
+		string args = concat(tokens, " ");
 		cout << args << endl;
 	}
 	else if (verb == "show-cells")
 	{
-		string args;
-		for (int k = 0; k < tokens.size(); k++)
-		{
-			if (args.length() != 0)
-				args += " ";
-			args += tokens[k];
-		}
-
+		string args = concat(tokens, " ");
 		string xs;
 		boolean inquote = false;
 		string cell;
@@ -202,4 +191,17 @@ void CLI::do_call(const string& retval, const string& fname, vector<string>& arg
 		delete vop[k];
 
 	sheet[retval] = Value(xres);
+}
+
+string CLI::concat(const vector<string> tokens, const string& sep)
+{
+	string res;
+	for (int k = 0; k < tokens.size(); k++)
+	{
+		if (res.length() != 0)
+			res += sep;
+		res += tokens[k];
+	}
+
+	return res;
 }

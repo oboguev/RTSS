@@ -37,8 +37,8 @@ public class CellAddress
     public CellAddress offset(int dx, int dy)
     {
         CellAddress ca = new CellAddress(this);
-        this.col += dy;
-        this.row += dx;
+        ca.col += dx;
+        ca.row += dy;
         return ca;
     }
 }
