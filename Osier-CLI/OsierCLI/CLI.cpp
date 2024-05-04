@@ -21,7 +21,6 @@ void CLI::execute(const string& line)
 	vector<string> tokens = split(line, " ");
 
 	string verb = tokens[0];
-	
 	tokens.erase(tokens.begin());
 	int argc = (int) tokens.size();
 
@@ -34,18 +33,25 @@ void CLI::execute(const string& line)
 	}
 	else if (verb == "clear-sheet" && argc == 0)
 	{
+		vector<Value*> vals;
+		vals.reserve(sheet.size());
+		for (auto kv : sheet)
+			vals.push_back(kv.second);
 		sheet.clear();
+		for (Value* v : vals)
+			delete v;
 	}
 	else if (verb == "set-cell-empty" && argc == 1)
 	{
-		sheet.erase(tokens[0]);
+		sheet.delete_cell(tokens[0]);
 	}
 	else if (verb == "set-cell-string" && argc >= 2)
 	{
 		string cell = tokens[0];
 		tokens.erase(tokens.begin());
 		string args = concat(tokens, " ");
-		sheet[cell] = Value(args.c_str());
+		sheet.delete_cell(cell);
+		sheet[cell] = new Value(args.c_str());
 	}
 	else if (verb == "set-cell-integer" && argc == 2)
 	{
@@ -61,7 +67,8 @@ void CLI::execute(const string& line)
 			return;
 		}
 
-		sheet[tokens[0]] = Value(value);
+		sheet.delete_cell(tokens[0]);
+		sheet[tokens[0]] = new Value(value);
 	}
 	else if (verb == "set-cell-double" && argc == 2)
 	{
@@ -77,7 +84,8 @@ void CLI::execute(const string& line)
 			return;
 		}
 
-		sheet[tokens[0]] = Value(value);
+		sheet.delete_cell(tokens[0]);
+		sheet[tokens[0]] = new Value(value);
 	}
 	else if (verb == "echo")
 	{
@@ -112,8 +120,8 @@ void CLI::execute(const string& line)
 				{
 					try
 					{
-						Value v = sheet.at(cell);
-						xs += v.toString();
+						Value* v = sheet.at(cell);
+						xs += v->toString();
 					}
 					catch (out_of_range ex)
 					{
@@ -190,7 +198,19 @@ void CLI::do_call(const string& retval, const string& fname, vector<string>& arg
 	for (int k = 0; k < vop.size(); k++)
 		delete vop[k];
 
-	sheet[retval] = Value(xres);
+	sheet.delete_cell(retval);
+	Value* rv = new Value(xres);
+	sheet[retval] = rv;
+
+	if (rv->type() == VT_String)
+	{
+		string s = rv->toString();
+		char* xp = _strdup(s.c_str());
+		xp = _strlwr(xp);
+		if (strstr(xp, "err") == xp)
+			fatal(xprintf("Function %s returned error: %s", fname.c_str(), s.c_str()));
+		free(xp);
+	}
 }
 
 string CLI::concat(const vector<string> tokens, const string& sep)

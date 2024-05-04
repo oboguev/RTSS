@@ -70,7 +70,7 @@ public:
 
 	Value(const XLOPER* x)
 	{
-		switch (x->xltype)
+		switch (x->xltype & ~(xlbitXLFree | xlbitDLLFree))
 		{
 		case xltypeStr:
 			value_type = VT_String;
@@ -147,9 +147,9 @@ public:
 
 		case VT_String:
 			m_xloper.xltype = xltypeStr;
-			if (ps_counted)
-				free(ps_counted);
-			ps_counted = to_counted_string(s_value.c_str());
+			if (ps_counted == NULL)
+				ps_counted = to_counted_string(s_value.c_str());
+			m_xloper.val.str = ps_counted;
 			break;
 
 		case VT_None:

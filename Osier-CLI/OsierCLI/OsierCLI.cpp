@@ -222,19 +222,20 @@ static void coerce_multi(XLOPER* r, XLREF ref)
 	int ncol = ref.colLast - ref.colFirst + 1;
 	int nrow = ref.rwLast - ref.rwFirst + 1;
 
+	XLOPER* xop;
+
 	r->xltype = xltypeMulti;
 	r->val.array.rows = nrow;
 	r->val.array.columns = ncol;
-	r->val.array.lparray = (XLOPER*)pcalloc(nrow * ncol, sizeof XLOPER);
+	r->val.array.lparray = xop = (XLOPER*)pcalloc(nrow * ncol, sizeof XLOPER);
 
 	for (int col = ref.colFirst; col <= ref.colLast; col++)
 	{
 		for (int row = ref.rwFirst; row <= ref.rwLast; row++)
 		{
-			char cellname[30];
-			sprintf(cellname, "%c%d", 'A' + col, row + 1);
+			string cellname = sheet.cell(col, row);
 
-			Value v;
+			Value* v = NULL;
 
 			try
 			{
@@ -245,8 +246,11 @@ static void coerce_multi(XLOPER* r, XLREF ref)
 				noop();
 			}
 
+			if (v == NULL)
+				fatal(xprintf("Plugin tried to xlCoerce empty cell %s", cellname.c_str()));
+
+			*xop++ = *v->xloper();
 			noop();
-			// ###
 		}
 	}
 }
