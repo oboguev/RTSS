@@ -6,8 +6,8 @@ import java.util.Map;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.PoorCurveException;
+import rtss.external.Script;
 import rtss.external.R.R;
-import rtss.external.R.Script;
 import rtss.util.Util;
 
 /**

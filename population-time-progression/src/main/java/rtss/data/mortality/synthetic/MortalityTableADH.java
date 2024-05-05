@@ -23,7 +23,6 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
-import rtss.external.Osier.OsierExcel;
 import rtss.external.Osier.OsierScript;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
@@ -168,9 +167,10 @@ public class MortalityTableADH
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
         // ###
-        OsierExcel osier = new OsierExcel();
+        OsierScript osier = new OsierScript();
         osier.start(true);
         osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
+        String sc = osier.getScript();
         osier.stop();
         // ###
         // return curve_hp(bins, debug_title);

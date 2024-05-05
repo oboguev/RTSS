@@ -37,6 +37,7 @@ public class Util
         }
         catch (Exception ex)
         {
+            noop();
         }
 
         System.err.println(s);
@@ -470,6 +471,18 @@ public class Util
         }
 
         return "";
+    }
+    
+    public static void sleep(long ms)
+    {
+        try
+        {
+            Thread.sleep(ms);
+        }
+        catch (Exception ex)
+        {
+            noop();
+        }
     }
     
     public static void unused(Object... o)

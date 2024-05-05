@@ -1,5 +1,6 @@
 package rtss.external.Osier;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -14,6 +15,7 @@ import rtss.util.Util;
 public class OsierLocal extends ProcessRunner implements OsierCall
 {
     private boolean log = false;
+    private boolean hasExcel = false;
 
     public OsierLocal setLog(boolean log)
     {
@@ -49,12 +51,29 @@ public class OsierLocal extends ProcessRunner implements OsierCall
 
     private void start() throws Exception
     {
-        super.start(Config.asRequiredString("Osier.executable"));
+        // super.start(Config.asRequiredString("Osier.executable"));
+        super.start("cscript " + getStdinWrapperScriptFile());
     }
 
     @Override
     public void stop() throws Exception
     {
+        try
+        {
+            if (hasExcel && os != null)
+            {
+                // try to stop excel-way first
+                String script = Util.loadResource("osier-excel/stop-excel.vbs");
+                os.write(script.getBytes(StandardCharsets.UTF_8));
+                os.flush();
+                Util.sleep(2000);
+            }
+        }
+        catch (Throwable ex)
+        {
+            Util.noop();
+        }
+
         super.stop();
     }
 
@@ -70,13 +89,14 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         log("");
         log(script);
 
-        String cmd_begin = String.format("echo %s", Osier.BEGIN_SCRIPT);
-        String cmd_end = String.format("echo %", Osier.END_SCRIPT);
+        String cmd_begin = String.format("WScript.StdOut.WriteLine \"%s\"", Osier.BEGIN_SCRIPT);
+        String cmd_end = String.format("WScript.StdOut.WriteLine \"%s\"", Osier.END_SCRIPT);
 
         script = cmd_begin + nl + script + nl + cmd_end + nl;
 
         os.write(script.getBytes(StandardCharsets.UTF_8));
         os.flush();
+        hasExcel = true;
 
         boolean seen_first = false;
         boolean seen_begin = false;
@@ -141,5 +161,21 @@ public class OsierLocal extends ProcessRunner implements OsierCall
     public String ping(String tag)
     {
         return tag;
+    }
+    
+    private static String StdinWrapperScriptFile = null;
+    
+    private static synchronized String getStdinWrapperScriptFile() throws Exception
+    {
+        if (StdinWrapperScriptFile == null)
+        {
+            File tf = File.createTempFile("rtss-osier-execute-stdin-", ".vbs");
+            String path = tf.getAbsoluteFile().getCanonicalPath();
+            String script = Util.loadResource("osier-excel/execute-stdin.vbs");
+            Util.writeAsFile(path, script);
+            StdinWrapperScriptFile = path;
+        }
+
+        return StdinWrapperScriptFile;
     }
 }

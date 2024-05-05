@@ -1,4 +1,4 @@
-package rtss.external.R;
+package rtss.external;
 
 import java.util.Map;
 

@@ -5,6 +5,7 @@ import java.io.Closeable;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rtss.util.Util;
@@ -40,25 +41,16 @@ public class ProcessRunner
         safeClose(os);
         os = null;
 
+        if (process != null)
+        {
+            destroy(process);
+            process = null;
+        }
+
         if (stopHook != null)
         {
             stopHook.removeHook();
             stopHook = null;
-        }
-
-        if (process != null)
-        {
-            process.destroy();
-            try
-            {
-                process.waitFor(3, TimeUnit.SECONDS);
-            }
-            catch (InterruptedException ex)
-            {
-                // ignore
-            }
-
-            process = null;
         }
     }
 
@@ -74,8 +66,26 @@ public class ProcessRunner
             // ignore
         }
     }
+    
+    public void destroy(Process process)
+    {
+        List<ProcessHandle> descendants = process.toHandle().descendants().toList();
+        
+        process.destroy();
+        try
+        {
+            process.waitFor(3, TimeUnit.SECONDS);
+        }
+        catch (InterruptedException ex)
+        {
+            // ignore
+        }
+        
+        for (ProcessHandle ph : descendants)
+            ph.destroy();
+    }
 
-    public static class StopProcessHook extends Thread
+    public class StopProcessHook extends Thread
     {
         private Process process;
 
@@ -87,6 +97,7 @@ public class ProcessRunner
         @Override
         public void run()
         {
+            ProcessRunner.this.destroy(process);
             process.destroy();
         }
 

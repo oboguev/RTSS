@@ -4,8 +4,8 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.external.Script;
 import rtss.external.R.R;
-import rtss.external.R.Script;
 
 /**
  * Decompose bin data into single-year values with PCLM (penalized composite link model).
