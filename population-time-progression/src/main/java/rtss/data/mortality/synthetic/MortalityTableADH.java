@@ -23,7 +23,6 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
-import rtss.external.ScriptReply;
 import rtss.external.Osier.OsierLocal;
 import rtss.external.Osier.OsierScript;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;

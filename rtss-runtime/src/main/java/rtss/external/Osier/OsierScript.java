@@ -7,6 +7,14 @@ import rtss.external.Script;
 import rtss.external.ScriptReply;
 import rtss.util.Util;
 
+/*
+ * Generate VBScript commands for execution by Windows CScript controlling Excel instance
+ * that hosts Osier add-in. This module only generates script that has to be executed later
+ * by OsierLocal or OsierClient+OsierServer.
+ * 
+ * OsierScript -> OsierCall -> OsierLocal -> CScript -> Excel -> Osier add-in
+ *   
+ */
 public class OsierScript
 {
     private StringBuilder sb = new StringBuilder();
@@ -26,7 +34,7 @@ public class OsierScript
     private CellAddress aModHandle;
     private CellAddress aModRequestedHandle;
     private CellAddress aModBuildMethod;
-
+    
     public String getScript() throws Exception
     {
         String sc = sb.toString();
@@ -41,6 +49,53 @@ public class OsierScript
         sb.setLength(0);
     }
     
+    /* ============================================================================================= */
+
+    public void start(boolean visible) throws Exception
+    {
+        sbnl();
+        sb.append(Script.script("osier-excel/start-excel.vbs", "visible", visible ? "true" : "false"));
+    }
+
+    public void stop() throws Exception
+    {
+        sbnl();
+        sb.append(Script.script("osier-excel/stop-excel.vbs"));
+    }
+    
+    public void say(String text)
+    {
+        sbnl();
+        sb.append(String.format("say \"%s\"" + nl, escape(text)));
+        sb.append(EXEC);
+    }
+    
+    private void show_value(String what, CellAddress ca)
+    {
+        selectCell(ca);
+        sb.append(String.format("say \"%s: \" & CStr([rng].Value)" + nl, what));
+        sb.append(EXEC);
+    }
+    
+    public void clear_worksheet() throws Exception
+    {
+        allocator = new CellAddressAllocator();
+        aBaseHandle = null;
+        aBaseName = null;
+        aBaseObjectType = null;
+        aBaseBodyProps = null;
+        aBaseBodyValues = null;
+        aBaseTableName = null;
+        aBaseTableCols = null;
+        aBaseTableValues = null;
+        aModHandle = null;
+        aModRequestedHandle = null;
+        aModBuildMethod = null;
+
+        sbnl();
+        sb.append(Script.script("osier-excel/clear-worksheet.vbs"));
+    }
+
     /* ============================================================================================= */
 
     public void createBaseMortalityObject(Bin[] bins, String baseName) throws Exception
@@ -178,31 +233,5 @@ public class OsierScript
         int len = sb.length();
         if (len != 0 && sb.charAt(len - 1) != '\n')
             sb.append(nl);
-    }
-
-    public void start(boolean visible) throws Exception
-    {
-        sbnl();
-        sb.append(Script.script("osier-excel/start-excel.vbs", "visible", visible ? "true" : "false"));
-    }
-
-    public void stop() throws Exception
-    {
-        sbnl();
-        sb.append(Script.script("osier-excel/stop-excel.vbs"));
-    }
-    
-    public void say(String text)
-    {
-        sbnl();
-        sb.append(String.format("say \"%s\"" + nl, escape(text)));
-        sb.append(EXEC);
-    }
-    
-    private void show_value(String what, CellAddress ca)
-    {
-        selectCell(ca);
-        sb.append(String.format("say \"%s: \" & CStr([rng].Value)" + nl, what));
-        sb.append(EXEC);
     }
 }
