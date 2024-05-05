@@ -92,7 +92,7 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         String cmd_begin = String.format("WScript.StdOut.WriteLine \"%s\"", Osier.BEGIN_SCRIPT);
         String cmd_end = String.format("WScript.StdOut.WriteLine \"%s\"", Osier.END_SCRIPT);
 
-        script = cmd_begin + nl + script + nl + cmd_end + nl;
+        script = cmd_begin + nl + script + nl + cmd_end + nl + OsierScript.EXEC;
 
         os.write(script.getBytes(StandardCharsets.UTF_8));
         os.flush();

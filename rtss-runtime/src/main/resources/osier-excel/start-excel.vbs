@@ -1,3 +1,7 @@
+Function say(text)
+    WScript.StdOut.WriteLine text & vbCrLf
+End Function
+
 Set fso = CreateObject ("Scripting.FileSystemObject")
 Set Stdout = fso.GetStandardStream (1)
 Set Stderr = fso.GetStandardStream (2)
@@ -35,5 +39,7 @@ Next
 
 ' range, for later use
 dim rng
+
+say "Start script has completed"
 
 '---execute---

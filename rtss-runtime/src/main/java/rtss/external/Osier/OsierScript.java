@@ -8,7 +8,7 @@ public class OsierScript
 {
     private StringBuilder sb = new StringBuilder();
     private static final String nl = "\n";
-    private static final String EXEC = "---execute---\n";
+    public static final String EXEC = "'---execute---\n";
     private CellAddressAllocator allocator = new CellAddressAllocator();
 
     private CellAddress aBaseHandle;
@@ -44,6 +44,8 @@ public class OsierScript
         aBaseTableName = allocator.one();
         aBaseTableCols = allocator.horizontal(3);
         aBaseTableValues = allocator.block(3, bins.length);
+        
+        say("test-002");
 
         sb.append(nl);
         sb.append("'" + nl);
@@ -77,12 +79,17 @@ public class OsierScript
             setCell(aBaseTableValues.upperLeft.offset(1, dy), bin.avg);
             setCell(aBaseTableValues.upperLeft.offset(2, dy), 1);
         }
-
-        selectCell(aBaseHandle);
-        String formula = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)",
-                                       aBaseName, aBaseObjectType, aBaseBodyProps, aBaseBodyValues,
-                                       aBaseTableName, aBaseTableCols, aBaseTableValues);
-        sb.append(String.format("[rng].Formula = \"%s\"" + nl, escape(formula)));
+        
+        say("test-003");
+        
+        if (Util.False)
+        {
+            selectCell(aBaseHandle);
+            String formula = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)",
+                                           aBaseName, aBaseObjectType, aBaseBodyProps, aBaseBodyValues,
+                                           aBaseTableName, aBaseTableCols, aBaseTableValues);
+            sb.append(String.format("[rng].Formula = \"%s\"" + nl, escape(formula)));
+        }
     }
 
     public void setCell(CellAddress ca, String value)
@@ -133,5 +140,12 @@ public class OsierScript
     {
         sbnl();
         sb.append(Script.script("osier-excel/stop-excel.vbs"));
+    }
+    
+    public void say(String text)
+    {
+        sbnl();
+        sb.append(String.format("say \"%s\"" + nl, escape(text)));
+        sb.append(EXEC);
     }
 }

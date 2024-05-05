@@ -1,13 +1,15 @@
-if wb != Nothing then
+if wb Is Nothing then
+else
     wb.Close(false)
     set wb = Nothing
 end if
 
 '---execute---
 
-if app != Nothing then
+If app Is Nothing Then
+else
     app.Quit
     set app = Nothing
-end if
+End If
 
 '---execute---

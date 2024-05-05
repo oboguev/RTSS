@@ -14,6 +14,12 @@ Set StdOut = WScript.StdOut
 dim buffer
 buffer = ""
 
+dim wb
+set wb = Nothing
+
+dim app
+set app = Nothing
+
 Do While Not StdIn.AtEndOfStream
 
      str = StdIn.ReadLine
@@ -29,3 +35,17 @@ Do While Not StdIn.AtEndOfStream
      end if
 
 Loop
+
+' close wb and app on end-of-input, if they were not closed yet
+
+if wb Is Nothing then
+else
+    wb.Close(false)
+    set wb = Nothing
+end if
+
+If app Is Nothing Then
+else
+    app.Quit
+    set app = Nothing
+End If
