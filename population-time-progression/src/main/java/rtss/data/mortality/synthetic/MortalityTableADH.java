@@ -23,6 +23,7 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.external.ScriptReply;
 import rtss.external.Osier.OsierLocal;
 import rtss.external.Osier.OsierScript;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
@@ -173,7 +174,8 @@ public class MortalityTableADH
         osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
         String sc = osier.getScript();
         OsierLocal ocall = new OsierLocal().setLog(true);
-        ocall.execute(sc, true);
+        String reply = ocall.execute(sc, true);
+        osier.replyBaseMortalityObject(reply);
         ocall.stop();
         // ### osier.stop();
         // ###

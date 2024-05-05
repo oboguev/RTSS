@@ -7,6 +7,7 @@ import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.PoorCurveException;
 import rtss.external.Script;
+import rtss.external.ScriptReply;
 import rtss.external.R.R;
 import rtss.util.Util;
 
@@ -62,7 +63,7 @@ public class HeligmanPollard_R extends HeligmanPollard
                                "death_count", R.c(qp_deaths),
                                "exposure", R.c(exposure));
         String reply = R.execute(script, true);
-        Map<String,String> m = R.keysFromReply(reply, keys);
+        Map<String,String> m = ScriptReply.keysFromReply(reply, keys);
 
         if (m.get(keyMessage).contains("false convergence"))
             throw new PoorCurveException("Unable to fit Heligman-Pollard");

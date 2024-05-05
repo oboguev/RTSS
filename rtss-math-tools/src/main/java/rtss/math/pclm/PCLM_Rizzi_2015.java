@@ -5,6 +5,7 @@ import java.util.Map;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.external.Script;
+import rtss.external.ScriptReply;
 import rtss.external.R.R;
 
 /**
@@ -90,7 +91,7 @@ public class PCLM_Rizzi_2015
                                       "lambda", String.format("%s", lambda));
 
         String reply = R.execute(script, true);
-        Map<String, String> rmap = R.keysFromReply(reply, keys);
+        Map<String, String> rmap = ScriptReply.keysFromReply(reply, keys);
         double[] d = R.indexedVectorD(rmap.get(keyModGamma));
         return d;
     }

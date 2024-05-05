@@ -1,5 +1,5 @@
 Function say(text)
-    WScript.StdOut.WriteLine text & vbCrLf
+    WScript.StdOut.WriteLine text ' & vbCrLf
 End Function
 
 Set fso = CreateObject ("Scripting.FileSystemObject")
@@ -25,17 +25,31 @@ dim CurrAddin
 dim s
 
 for Each CurrAddin In app.AddIns
+    say "Addins: " & CurrAddin.Path & " file " & CurrAddin.Name 
     's = "False"
     'if  CurrAddin.Installed then
     '    s = "True"
     'end if
     'Stdout.Write "AddIn: " + CurrAddin.Name + ", Installed: " + s + nl
     if CurrAddin.Name = "ExcelOSR.xla" then
-        Stdout.Write "Reactivating ExcelOSR" + nl
+        Stdout.Write "Reactivating " & CurrAddin.Name & " at " & CurrAddin.Path & nl
         CurrAddin.Installed = False
         CurrAddin.Installed = True
     end if
 Next
+
+'---execute---
+
+for Each CurrAddin In app.AddIns2
+    say "Addins2: " & CurrAddin.Path & " file " & CurrAddin.Name 
+    if CurrAddin.Name = "ExcelOSR.xla" Or CurrAddin.Name = "OSR.xla" then
+        Stdout.Write "Reactivating " & CurrAddin.Name & " at " & CurrAddin.Path & nl
+        CurrAddin.Installed = False
+        CurrAddin.Installed = True
+    end if
+Next
+
+'---execute---
 
 ' range, for later use
 dim rng

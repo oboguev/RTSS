@@ -1,7 +1,10 @@
 package rtss.external.Osier;
 
+import java.util.Map;
+
 import rtss.data.bin.Bin;
 import rtss.external.Script;
+import rtss.external.ScriptReply;
 import rtss.util.Util;
 
 public class OsierScript
@@ -82,14 +85,21 @@ public class OsierScript
         
         say("test-003");
         
-        if (Util.False)
-        {
-            selectCell(aBaseHandle);
-            String formula = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)",
-                                           aBaseName, aBaseObjectType, aBaseBodyProps, aBaseBodyValues,
-                                           aBaseTableName, aBaseTableCols, aBaseTableValues);
-            sb.append(String.format("[rng].Formula = \"%s\"" + nl, escape(formula)));
-        }
+        selectCell(aBaseHandle);
+        String formula = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)",
+                                       aBaseName, aBaseObjectType, aBaseBodyProps, aBaseBodyValues,
+                                       aBaseTableName, aBaseTableCols, aBaseTableValues);
+        sb.append(String.format("[rng].Formula = \"%s\"" + nl, escape(formula)));
+        
+        show_value("BaseHandle", aBaseHandle);
+    }
+    
+    public void replyBaseMortalityObject(String reply) throws Exception
+    {
+        Map<String,String> mss = ScriptReply.keysFromReply(reply, new String[] {"BaseHandle"});
+        String baseHandle = mss.get("BaseHandle");
+        if (!baseHandle.startsWith("XXX:"))
+            throw new Exception("Osier failed to create base handle");
     }
 
     public void setCell(CellAddress ca, String value)
@@ -114,6 +124,7 @@ public class OsierScript
 
     private void selectCell(CellAddress ca)
     {
+        sbnl();
         sb.append(nl);
         sb.append(String.format("set rng = wb.Activesheet.Range(\"%s\")" + nl, ca.toString()));
     }
@@ -146,6 +157,13 @@ public class OsierScript
     {
         sbnl();
         sb.append(String.format("say \"%s\"" + nl, escape(text)));
+        sb.append(EXEC);
+    }
+    
+    private void show_value(String what, CellAddress ca)
+    {
+        selectCell(ca);
+        sb.append(String.format("say \"%s: \" & CStr([rng].Value)" + nl, what));
         sb.append(EXEC);
     }
 }
