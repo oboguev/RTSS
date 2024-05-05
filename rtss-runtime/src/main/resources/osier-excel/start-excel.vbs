@@ -11,7 +11,7 @@ nl = Chr(10)
 
 dim app
 set app = createobject("Excel.Application")
-app.Visible = true
+app.Visible = ${visible}
 app.UserControl = false
 
 dim wb

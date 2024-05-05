@@ -22,6 +22,10 @@ public class OsierScript
     private CellAddress aBaseTableName;
     private CellAddressRange aBaseTableCols;
     private CellAddressRange aBaseTableValues;
+    
+    private CellAddress aModHandle;
+    private CellAddress aModRequestedHandle;
+    private CellAddress aModBuildMethod;
 
     public String getScript() throws Exception
     {
@@ -36,6 +40,8 @@ public class OsierScript
     {
         sb.setLength(0);
     }
+    
+    /* ============================================================================================= */
 
     public void createBaseMortalityObject(Bin[] bins, String baseName) throws Exception
     {
@@ -48,8 +54,6 @@ public class OsierScript
         aBaseTableCols = allocator.horizontal(3);
         aBaseTableValues = allocator.block(3, bins.length);
         
-        say("test-002");
-
         sb.append(nl);
         sb.append("'" + nl);
         sb.append("' create base object" + nl);
@@ -83,14 +87,10 @@ public class OsierScript
             setCell(aBaseTableValues.upperLeft.offset(2, dy), 1);
         }
         
-        say("test-003");
-        
-        selectCell(aBaseHandle);
         String formula = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)",
                                        aBaseName, aBaseObjectType, aBaseBodyProps, aBaseBodyValues,
                                        aBaseTableName, aBaseTableCols, aBaseTableValues);
-        sb.append(String.format("[rng].Formula = \"%s\"" + nl, escape(formula)));
-        
+        setFormula(aBaseHandle, formula);
         show_value("BaseHandle", aBaseHandle);
     }
     
@@ -99,8 +99,35 @@ public class OsierScript
         Map<String,String> mss = ScriptReply.keysFromReply(reply, new String[] {"BaseHandle"});
         String baseHandle = mss.get("BaseHandle");
         if (!baseHandle.startsWith("XXX:"))
-            throw new Exception("Osier failed to create base handle");
+            throw new Exception("Osier failed to create base object handle");
     }
+    
+    /* ============================================================================================= */
+    
+    public void modifyBaseMortalityObject(String buildMethodWithParameters) throws Exception
+    {
+        aModHandle = allocator.one();
+        aModRequestedHandle = allocator.one();
+        aModBuildMethod = allocator.one();
+        
+        setCell(aModRequestedHandle, "XXX_MODIFIED");
+        setCell(aModBuildMethod, buildMethodWithParameters);
+        String formula = String.format("=ModifyObj(%s,%s,%s,,%s,,+%s)", 
+                                       aModRequestedHandle, aBaseHandle, enquote("mortality"),
+                                       enquote("buildmethod"), aModBuildMethod);
+        setFormula(aModHandle, formula);
+        show_value("ModHandle", aModHandle);
+    }
+
+    public void replyModifyBaseMortalityObject(String reply) throws Exception
+    {
+        Map<String,String> mss = ScriptReply.keysFromReply(reply, new String[] {"ModHandle"});
+        String modHandle = mss.get("ModHandle");
+        if (!modHandle.startsWith("XXX_MODIFIED:"))
+            throw new Exception("Osier failed to create modified object handle");
+    }
+    
+    /* ============================================================================================= */
 
     public void setCell(CellAddress ca, String value)
     {
@@ -121,6 +148,12 @@ public class OsierScript
         sb.append(String.format("[rng].Value = \"%f\"" + nl, value));
         sb.append(String.format("[rng].NumberFormat = \"%s\"" + nl, "0.0000"));
     }
+    
+    public void setFormula(CellAddress ca, String formula)
+    {
+        selectCell(ca);
+        sb.append(String.format("[rng].Formula = \"%s\"" + nl, escape(formula)));
+    }
 
     private void selectCell(CellAddress ca)
     {
@@ -129,9 +162,15 @@ public class OsierScript
         sb.append(String.format("set rng = wb.Activesheet.Range(\"%s\")" + nl, ca.toString()));
     }
     
+    private String enquote(String s)
+    {
+        char quote = '"';
+        return quote + s + quote;
+    }
+    
     private String escape(String s)
     {
-        return s.replace("\"", "\\\"");
+        return s.replace("\"", "\"\"");
     }
 
     private void sbnl()

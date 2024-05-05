@@ -171,14 +171,24 @@ public class MortalityTableADH
         // ###
         OsierScript osier = new OsierScript();
         osier.start(true);
-        osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
-        String sc = osier.getScript();
         OsierLocal ocall = new OsierLocal().setLog(true);
-        String reply = ocall.execute(sc, true);
+        String sc, reply;
+
+        // ### bins: qx2mx (asdp -> asdr)
+        osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
+        sc = osier.getScript();
+        reply = ocall.execute(sc, true);
         osier.replyBaseMortalityObject(reply);
+        
+        osier.newScript();
+        osier.modifyBaseMortalityObject("HELIGMAN_POLLARD");
+        sc = osier.getScript();
+        reply = ocall.execute(sc, true);
+        osier.replyModifyBaseMortalityObject(reply);
+        
         ocall.stop();
-        // ### osier.stop();
         // ###
+
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
