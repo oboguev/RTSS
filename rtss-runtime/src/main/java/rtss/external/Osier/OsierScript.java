@@ -22,6 +22,7 @@ public class OsierScript
     private static final String nl = "\n";
     public static final String EXEC = "'---execute---\n";
     private CellAddressAllocator allocator = new CellAddressAllocator();
+    private String baseName;
 
     private CellAddress aBaseHandle;
     private CellAddress aBaseName;
@@ -31,11 +32,11 @@ public class OsierScript
     private CellAddress aBaseTableName;
     private CellAddressRange aBaseTableCols;
     private CellAddressRange aBaseTableValues;
-    
+
     private CellAddress aModHandle;
     private CellAddress aModRequestedHandle;
     private CellAddress aModBuildMethod;
-    
+
     private CellAddressRange aFunctionBlock;
 
     public String getScript() throws Exception
@@ -52,7 +53,7 @@ public class OsierScript
     {
         sb.setLength(0);
     }
-    
+
     /* ============================================================================================= */
 
     public void start(boolean visible) throws Exception
@@ -66,21 +67,21 @@ public class OsierScript
         sbnl();
         sb.append(Script.script("osier-excel/stop-excel.vbs"));
     }
-    
+
     public void say(String text)
     {
         sbnl();
         sb.append(String.format("say \"%s\"" + nl, escape(text)));
         sb.append(EXEC);
     }
-    
+
     private void show_value(String what, CellAddress ca)
     {
         selectCell(ca);
         sb.append(String.format("say \"%s: \" & CStr([rng].Value)" + nl, what));
         sb.append(EXEC);
     }
-    
+
     public void clear_worksheet() throws Exception
     {
         allocator = new CellAddressAllocator();
@@ -96,15 +97,20 @@ public class OsierScript
         aModRequestedHandle = null;
         aModBuildMethod = null;
         aFunctionBlock = null;
-        
+
         sbnl();
         sb.append(Script.script("osier-excel/clear-worksheet.vbs"));
     }
 
     /* ============================================================================================= */
 
-    public void createBaseMortalityObject(Bin[] bins, String baseName) throws Exception
+    /*
+     * mxData = true if bins contain "mx" values, false for "qx"
+     */
+    public void createBaseMortalityObject(Bin[] bins, String baseName, boolean mxData) throws Exception
     {
+        this.baseName = baseName;
+        
         aBaseHandle = allocator.one();
         aBaseName = allocator.one();
         aBaseObjectType = allocator.one();
@@ -113,7 +119,7 @@ public class OsierScript
         aBaseTableName = allocator.one();
         aBaseTableCols = allocator.horizontal(3);
         aBaseTableValues = allocator.block(3, bins.length);
-        
+
         sb.append(nl);
         sb.append("'" + nl);
         sb.append("' create base object" + nl);
@@ -124,7 +130,7 @@ public class OsierScript
         setCell(aBaseObjectType, "MORTALITY");
 
         setCell(aBaseBodyProps.upperLeft, "Population");
-        setCell(aBaseBodyValues.upperLeft, "XXX-M");
+        setCell(aBaseBodyValues.upperLeft, baseName);
 
         setCell(aBaseBodyProps.upperLeft.offset(0, 1), "Date");
         setCell(aBaseBodyValues.upperLeft.offset(0, 1), "20110601");
@@ -132,10 +138,16 @@ public class OsierScript
         setCell(aBaseBodyProps.upperLeft.offset(0, 2), "BuildMethod");
         setCell(aBaseBodyValues.upperLeft.offset(0, 2), "HYBRID_FORCE");
 
-        setCell(aBaseTableName, "Death Rates");
+        if (mxData)
+            setCell(aBaseTableName, "DeathRates");
+        else
+            setCell(aBaseTableName, "DeathProbabilities");
 
         setCell(aBaseTableCols.upperLeft, "Age");
-        setCell(aBaseTableCols.upperLeft.offset(1, 0), "Rate");
+        if (mxData)
+            setCell(aBaseTableCols.upperLeft.offset(1, 0), "Rate");
+        else
+            setCell(aBaseTableCols.upperLeft.offset(1, 0), "Probability");
         setCell(aBaseTableCols.upperLeft.offset(2, 0), "Use");
 
         int dy = -1;
@@ -146,33 +158,33 @@ public class OsierScript
             setCell(aBaseTableValues.upperLeft.offset(1, dy), bin.avg);
             setCell(aBaseTableValues.upperLeft.offset(2, dy), 1);
         }
-        
+
         String formula = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)",
                                        aBaseName, aBaseObjectType, aBaseBodyProps, aBaseBodyValues,
                                        aBaseTableName, aBaseTableCols, aBaseTableValues);
         setFormula(aBaseHandle, formula);
         show_value("BaseHandle", aBaseHandle);
     }
-    
+
     public void replyBaseMortalityObject(String reply) throws Exception
     {
-        Map<String,String> mss = ScriptReply.keysFromReply(reply, new String[] {"BaseHandle"});
+        Map<String, String> mss = ScriptReply.keysFromReply(reply, new String[] { "BaseHandle" });
         String baseHandle = mss.get("BaseHandle");
-        if (!baseHandle.startsWith("XXX:"))
+        if (!baseHandle.startsWith(baseName + ":"))
             throw new Exception("Osier failed to create base object handle");
     }
-    
+
     /* ============================================================================================= */
-    
+
     public void modifyBaseMortalityObject(String buildMethodWithParameters) throws Exception
     {
         aModHandle = allocator.one();
         aModRequestedHandle = allocator.one();
         aModBuildMethod = allocator.one();
-        
-        setCell(aModRequestedHandle, "XXX_MODIFIED");
+
+        setCell(aModRequestedHandle, baseName + "_MODIFIED");
         setCell(aModBuildMethod, buildMethodWithParameters);
-        String formula = String.format("=ModifyObj(%s,%s,%s,,%s,,+%s)", 
+        String formula = String.format("=ModifyObj(%s,%s,%s,,%s,,+%s)",
                                        aModRequestedHandle, aBaseHandle, enquote("mortality"),
                                        enquote("buildmethod"), aModBuildMethod);
         setFormula(aModHandle, formula);
@@ -181,14 +193,14 @@ public class OsierScript
 
     public void replyModifyBaseMortalityObject(String reply) throws Exception
     {
-        Map<String,String> mss = ScriptReply.keysFromReply(reply, new String[] {"ModHandle"});
+        Map<String, String> mss = ScriptReply.keysFromReply(reply, new String[] { "ModHandle" });
         String modHandle = mss.get("ModHandle");
-        if (!modHandle.startsWith("XXX_MODIFIED:"))
+        if (!modHandle.startsWith(baseName + "_MODIFIED:"))
             throw new Exception("Osier failed to create modified object handle");
     }
-    
+
     /* ============================================================================================= */
-    
+
     public void deathProb(double start_x, double step, int npoints) throws Exception
     {
         oneArgFunction("DeathProb", start_x, step, npoints);
@@ -198,16 +210,16 @@ public class OsierScript
     {
         if (aFunctionBlock == null)
             aFunctionBlock = allocator.block(2, npoints);
-        
+
         CellAddressRange aBlock = aFunctionBlock;
-        
+
         CellAddress aBase = aBlock.upperLeft;
-        
+
         for (int k = 0; k < npoints; k++)
         {
             CellAddress aAge = aBase.offset(0, k);
             CellAddress aFunc = aBase.offset(1, k);
-            
+
             String sx;
             if (isInteger(start_x) && isInteger(step))
             {
@@ -217,7 +229,7 @@ public class OsierScript
             }
             else
             {
-                
+
                 double x = start_x + k * step;
                 setCell(aAge, x);
                 sx = Util.f2s(x);
@@ -226,11 +238,11 @@ public class OsierScript
             String formula = String.format("=%s(%s,%s)",
                                            func, aModHandle, aAge);
             setFormula(aFunc, formula);
-            
+
             String what = String.format("%s %s", func, sx);
-            
+
             show_value(what, aFunc);
-            
+
             if ((k % 100) == 0)
             {
                 sbnl();
@@ -238,7 +250,7 @@ public class OsierScript
             }
         }
     }
-    
+
     /* ============================================================================================= */
 
     public void setCell(CellAddress ca, String value)
@@ -260,7 +272,7 @@ public class OsierScript
         sb.append(String.format("[rng].Value = \"%f\"" + nl, value));
         sb.append(String.format("[rng].NumberFormat = \"%s\"" + nl, "0.0000"));
     }
-    
+
     public void setFormula(CellAddress ca, String formula)
     {
         selectCell(ca);
@@ -273,13 +285,13 @@ public class OsierScript
         sb.append(nl);
         sb.append(String.format("set rng = wb.Activesheet.Range(\"%s\")" + nl, ca.toString()));
     }
-    
+
     private String enquote(String s)
     {
         char quote = '"';
         return quote + s + quote;
     }
-    
+
     private String escape(String s)
     {
         return s.replace("\"", "\"\"");
@@ -291,7 +303,7 @@ public class OsierScript
         if (len != 0 && sb.charAt(len - 1) != '\n')
             sb.append(nl);
     }
-    
+
     private boolean isInteger(double x)
     {
         return Math.abs(x - Math.round(x)) < 0.0001;
@@ -299,6 +311,6 @@ public class OsierScript
 
     private int toInteger(double x)
     {
-        return (int) Math.round(x); 
+        return (int) Math.round(x);
     }
 }

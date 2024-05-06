@@ -168,31 +168,34 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        if (Util.False)
+        if (Util.True)
         {
             // ###
             OsierScript osier = new OsierScript();
             osier.start(true);
             OsierLocal ocall = new OsierLocal().setLog(true);
             String sc, reply;
+            boolean mx = false;
 
-            Bin[] mxbins = MortalityUtil.qx2mx(Bins.multiply(bins, 0.001));
-            osier.createBaseMortalityObject(mxbins, "XXX");
+            Bin[] xbins = Bins.multiply(bins, 0.001);
+            if (mx)
+                xbins = MortalityUtil.qx2mx(xbins);
+            osier.createBaseMortalityObject(xbins, "XXX", mx);
             sc = osier.getScript();
             reply = ocall.execute(sc, true);
             osier.replyBaseMortalityObject(reply);
-            
+
             osier.newScript();
             osier.modifyBaseMortalityObject("HELIGMAN_POLLARD8");
             sc = osier.getScript();
             reply = ocall.execute(sc, true);
             osier.replyModifyBaseMortalityObject(reply);
-            
+
             osier.newScript();
             osier.deathProb(Bins.firstBin(bins).age_x1, 1.0, Bins.widths_in_years(bins));
             sc = osier.getScript();
             reply = ocall.execute(sc, true);
-            
+
             ocall.stop();
             // ###
         }
@@ -201,11 +204,11 @@ public class MortalityTableADH
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
     }
-    
+
     private static double[] curve_pclm(Bin[] bins, String debug_title) throws Exception
     {
         final int ppy = 1;
-        
+
         /*
          * To suppress boundary effects, append fake bin with growing rate 
          */
@@ -217,12 +220,12 @@ public class MortalityTableADH
             List<Bin> list = new ArrayList<>();
             for (Bin bin : bins)
                 list.add(new Bin(bin));
-            list.add(new Bin(last.age_x2 + 1, 
-                             last.age_x2 + last.widths_in_years, 
+            list.add(new Bin(last.age_x2 + 1,
+                             last.age_x2 + last.widths_in_years,
                              last.avg + 1.8 * (last.avg - last.prev.avg)));
             xbins = Bins.bins(list);
         }
-        
+
         final double lambda = 0.0001;
         double[] yyy = PCLM_Rizzi_2015.pclm(xbins, lambda, ppy);
         yyy = Util.splice(yyy, first.age_x1, ppy * (last.age_x2 + 1) - 1);
@@ -239,16 +242,16 @@ public class MortalityTableADH
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
         }
-        
+
         double[] yy = Bins.ppy2yearly(yyy, ppy);
 
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
         CurveVerifier.validate_means(yy, bins);
-        
+
         return yy;
     }
-    
+
     @SuppressWarnings("unused")
     private static double[] curve_hp(Bin[] bins, String debug_title) throws Exception
     {
@@ -259,7 +262,7 @@ public class MortalityTableADH
         boolean display = Util.False;
         int ppy = display ? 10 : 1000;
         double[] yy = new HeligmanPollard_R(bins).curve(ppy);
-        
+
         if (display)
         {
             double[] xxx = Bins.ppy_x(bins, ppy);
@@ -282,23 +285,23 @@ public class MortalityTableADH
     private static double[] curve_spline_1(Bin[] bins, String debug_title) throws Exception
     {
         CurveVerifier.verifyUShape(bins, false, debug_title, true);
-        
+
         if (Util.False)
         {
-            int [] x = Bins.start_x(bins);
+            int[] x = Bins.start_x(bins);
             double[] y = Bins.midpoint_y(bins);
-            Clipboard.put(", " , x, y);
+            Clipboard.put(", ", x, y);
             Util.noop();
         }
-        
+
         // CurveSegmentTrend[] trends = CurveUtil.getUShapeSegmentTrends(bins, debug_title);
 
         final int ppy = 1000;
-        
+
         Bin[] xbins = bins;
         if (Util.True)
             xbins = split_1_4(bins);
-        
+
         MeanPreservingIntegralSpline.Options options = new MeanPreservingIntegralSpline.Options();
         options = options.ppy(ppy).debug_title(debug_title).basicSplineType(ConstrainedCubicSplineInterpolator.class);
         options = options.splineParams("title", debug_title);
@@ -310,7 +313,7 @@ public class MortalityTableADH
         options = options.splineParams("f1.0", yyy[0] * 1.5);
         // options = options.splineParams("f2.trace", true);
         yyy = MeanPreservingIntegralSpline.eval(xbins, options);
-        
+
         if (Util.False)
         {
             /*
@@ -548,7 +551,6 @@ public class MortalityTableADH
         if (Util.differ(deaths_012, deaths2))
             throw new Exception("Unable to correct inverted mortality rate at age 40-44");
     }
-    
 
     /*
      * Half of deaths in age range 1 to 4 (until 5) occur in year 1
