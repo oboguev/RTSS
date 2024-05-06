@@ -120,13 +120,10 @@ public class OsierLocal extends ProcessRunner implements OsierCall
                 seen_begin = line.equals(Osier.BEGIN_SCRIPT);
                 if (!seen_begin)
                 {
+                    // must see begin within a second at most and certainly within 30 seconds
                     Duration duration = Duration.between(ts0, Instant.now());
                     if (duration.toSeconds() > 30)
-                    {
-                        // must see begin within a second at most and certainly within 30 seconds
-                        Util.err("Reply from Osier did not start within 30 seconds");
-                        return null;
-                    }
+                        throw new Exception("Reply from Osier did not start within 30 seconds");
                 }
             }
             else
@@ -147,8 +144,8 @@ public class OsierLocal extends ProcessRunner implements OsierCall
 
         if (seen_begin && seen_end)
             return sb.toString();
-        else
-            return null;
+        
+        throw new Exception("Did not receive a reply from Osier");
     }
 
     private void log(String s)

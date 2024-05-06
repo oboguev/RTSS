@@ -24,6 +24,8 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.external.Osier.Osier;
+import rtss.external.Osier.OsierCall;
 import rtss.external.Osier.OsierLocal;
 import rtss.external.Osier.OsierScript;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
@@ -173,7 +175,7 @@ public class MortalityTableADH
             // ###
             OsierScript osier = new OsierScript();
             osier.start(true);
-            OsierLocal ocall = new OsierLocal().setLog(true);
+            OsierCall ocall = Osier.ocall();
             String sc, reply;
             boolean mx = false;
             

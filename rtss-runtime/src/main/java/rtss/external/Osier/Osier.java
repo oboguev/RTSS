@@ -1,6 +1,8 @@
 package rtss.external.Osier;
 
 import rtss.config.Config;
+import rtss.external.ShutdownHook;
+import rtss.util.Util;
 
 /**
  * Execute R commands
@@ -29,7 +31,7 @@ public class Osier
         return ocall().ping(tag);
     }
     
-    private static synchronized OsierCall ocall() throws Exception
+    public static synchronized OsierCall ocall() throws Exception
     {
         if (ocall == null)
         {
@@ -43,13 +45,26 @@ public class Osier
             {
                 ocall = new OsierClient();
             }
+            
+            ShutdownHook.add(Osier::do_stop);
         }
         
         return ocall;
     }
     
+    private static void do_stop()
+    {
+        try
+        {
+            stop();
+        }
+        catch (Exception ex)
+        {
+            Util.noop();
+        }
+    }
+    
     private static final String LINE =  "==================================";
     static String BEGIN_SCRIPT = LINE + " BEGIN SCRIPT EXECUTION " + LINE;
     static String END_SCRIPT = LINE + " END OF SCRIPT EXECUTION " + LINE;
-
 }

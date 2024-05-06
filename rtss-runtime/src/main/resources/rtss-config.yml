@@ -2,6 +2,8 @@
 # RTSS client uses R.server.endpoint and Osier.server.endpoint  
 server.endpoint: http://localhost:5577
 
+################################################################################
+
 # shell command to launch R 
 R.executable: R --vanilla --quiet
 
@@ -10,9 +12,9 @@ R.server.endpoint: http://ub22a.local:5577
 #R.server.endpoint: http://localhost:5577
 R.server.log: true
 
-# Windows console command to launch OsierCLI
-# see Osier-CLI/readme.txt 
-Osier.executable: C:\WINAPPS\Osier\ExcelOSR\Addin\OsierCLI
+################################################################################
+
+# Edit Osier OSR.XLA file in Excel VB editor to disable Willow menu activation
 
 # Osier can optionally be hosted on a remote machine
 #Osier.server.endpoint: http://ub22a.local:5577

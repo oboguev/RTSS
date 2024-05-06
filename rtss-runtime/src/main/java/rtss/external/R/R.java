@@ -3,6 +3,8 @@ package rtss.external.R;
 import java.util.LinkedHashMap;
 
 import rtss.config.Config;
+import rtss.external.ShutdownHook;
+import rtss.external.Osier.Osier;
 import rtss.util.Util;
 
 /**
@@ -46,9 +48,23 @@ public class R
             {
                 rcall = new RClient();
             }
+
+            ShutdownHook.add(R::do_stop);
         }
         
         return rcall;
+    }
+    
+    private static void do_stop()
+    {
+        try
+        {
+            stop();
+        }
+        catch (Exception ex)
+        {
+            Util.noop();
+        }
     }
     
     private static final String LINE =  "==================================";
