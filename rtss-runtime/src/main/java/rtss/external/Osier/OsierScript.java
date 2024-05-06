@@ -17,6 +17,7 @@ import rtss.util.Util;
  */
 public class OsierScript
 {
+    private StringBuilder totalScript = new StringBuilder();
     private StringBuilder sb = new StringBuilder();
     private static final String nl = "\n";
     public static final String EXEC = "'---execute---\n";
@@ -35,12 +36,15 @@ public class OsierScript
     private CellAddress aModRequestedHandle;
     private CellAddress aModBuildMethod;
     
+    private CellAddressRange aFunctionBlock;
+
     public String getScript() throws Exception
     {
         String sc = sb.toString();
         if (Util.lastchar(sc) != '\n')
             sc += nl;
         sc += EXEC;
+        totalScript.append(sc);
         return sc;
     }
 
@@ -91,7 +95,8 @@ public class OsierScript
         aModHandle = null;
         aModRequestedHandle = null;
         aModBuildMethod = null;
-
+        aFunctionBlock = null;
+        
         sbnl();
         sb.append(Script.script("osier-excel/clear-worksheet.vbs"));
     }
@@ -183,6 +188,58 @@ public class OsierScript
     }
     
     /* ============================================================================================= */
+    
+    public void deathProb(double start_x, double step, int npoints) throws Exception
+    {
+        oneArgFunction("DeathProb", start_x, step, npoints);
+    }
+
+    public void oneArgFunction(String func, double start_x, double step, int npoints) throws Exception
+    {
+        if (aFunctionBlock == null)
+            aFunctionBlock = allocator.block(2, npoints);
+        
+        CellAddressRange aBlock = aFunctionBlock;
+        
+        CellAddress aBase = aBlock.upperLeft;
+        
+        for (int k = 0; k < npoints; k++)
+        {
+            CellAddress aAge = aBase.offset(0, k);
+            CellAddress aFunc = aBase.offset(1, k);
+            
+            String sx;
+            if (isInteger(start_x) && isInteger(step))
+            {
+                int x = toInteger(start_x + k * step);
+                setCell(aAge, x);
+                sx = "" + x;
+            }
+            else
+            {
+                
+                double x = start_x + k * step;
+                setCell(aAge, x);
+                sx = Util.f2s(x);
+            }
+
+            String formula = String.format("=%s(%s,%s)",
+                                           func, aModHandle, aAge);
+            setFormula(aFunc, formula);
+            
+            String what = String.format("%s %s", func, sx);
+            
+            show_value(what, aFunc);
+            
+            if ((k % 100) == 0)
+            {
+                sbnl();
+                sb.append(EXEC);
+            }
+        }
+    }
+    
+    /* ============================================================================================= */
 
     public void setCell(CellAddress ca, String value)
     {
@@ -233,5 +290,15 @@ public class OsierScript
         int len = sb.length();
         if (len != 0 && sb.charAt(len - 1) != '\n')
             sb.append(nl);
+    }
+    
+    private boolean isInteger(double x)
+    {
+        return Math.abs(x - Math.round(x)) < 0.0001;
+    }
+
+    private int toInteger(double x)
+    {
+        return (int) Math.round(x); 
     }
 }

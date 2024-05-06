@@ -167,26 +167,34 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        // ###
-        OsierScript osier = new OsierScript();
-        osier.start(true);
-        OsierLocal ocall = new OsierLocal().setLog(true);
-        String sc, reply;
+        if (Util.False)
+        {
+            // ###
+            OsierScript osier = new OsierScript();
+            osier.start(true);
+            OsierLocal ocall = new OsierLocal().setLog(true);
+            String sc, reply;
 
-        // ### bins: qx2mx (asdp -> asdr)
-        osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
-        sc = osier.getScript();
-        reply = ocall.execute(sc, true);
-        osier.replyBaseMortalityObject(reply);
-        
-        osier.newScript();
-        osier.modifyBaseMortalityObject("HELIGMAN_POLLARD");
-        sc = osier.getScript();
-        reply = ocall.execute(sc, true);
-        osier.replyModifyBaseMortalityObject(reply);
-        
-        ocall.stop();
-        // ###
+            // ### bins: qx2mx (asdp -> asdr)
+            osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
+            sc = osier.getScript();
+            reply = ocall.execute(sc, true);
+            osier.replyBaseMortalityObject(reply);
+            
+            osier.newScript();
+            osier.modifyBaseMortalityObject("HELIGMAN_POLLARD8");
+            sc = osier.getScript();
+            reply = ocall.execute(sc, true);
+            osier.replyModifyBaseMortalityObject(reply);
+            
+            osier.newScript();
+            osier.deathProb(Bins.firstBin(bins).age_x1, 1.0, Bins.widths_in_years(bins));
+            sc = osier.getScript();
+            reply = ocall.execute(sc, true);
+            
+            ocall.stop();
+            // ###
+        }
 
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
