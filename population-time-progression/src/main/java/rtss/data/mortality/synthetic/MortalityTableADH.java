@@ -16,6 +16,7 @@ import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.curves.TuneCCS;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.mortality.MortalityUtil;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
 import rtss.data.population.Population;
@@ -175,8 +176,8 @@ public class MortalityTableADH
             OsierLocal ocall = new OsierLocal().setLog(true);
             String sc, reply;
 
-            // ### bins: qx2mx (asdp -> asdr)
-            osier.createBaseMortalityObject(Bins.multiply(bins, 0.001), "XXX");
+            Bin[] mxbins = MortalityUtil.qx2mx(Bins.multiply(bins, 0.001));
+            osier.createBaseMortalityObject(mxbins, "XXX");
             sc = osier.getScript();
             reply = ocall.execute(sc, true);
             osier.replyBaseMortalityObject(reply);
