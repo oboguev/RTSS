@@ -1,5 +1,40 @@
+' range, for later use
+dim rng
+
 Function say(text)
     WScript.StdOut.WriteLine text ' & vbCrLf
+End Function
+
+Function setCellText(ca, value)
+    dim rng2
+    set rng2 = wb.Activesheet.Range(ca)
+    [rng2].Value = value
+End Function
+
+Function setCellFormula(ca, value)
+    dim rng2
+    set rng2 = wb.Activesheet.Range(ca)
+    [rng2].Value = value
+End Function
+
+Function setCellInt(ca, value)
+    dim rng2
+    set rng2 = wb.Activesheet.Range(ca)
+    [rng2].Value = value
+    [rng2].NumberFormat = "0"
+End Function
+
+Function setCellDouble(ca, value)
+    dim rng2
+    set rng2 = wb.Activesheet.Range(ca)
+    [rng2].Value = value
+    [rng2].NumberFormat = "0.0000"
+End Function
+
+Function showCellValue(what, ca)
+    dim rng2
+    set rng2 = wb.Activesheet.Range(ca)
+    say what & CStr([rng2].Value)
 End Function
 
 Set fso = CreateObject ("Scripting.FileSystemObject")
@@ -50,9 +85,6 @@ for Each CurrAddin In app.AddIns2
 Next
 
 '---execute---
-
-' range, for later use
-dim rng
 
 say "Start script has completed"
 

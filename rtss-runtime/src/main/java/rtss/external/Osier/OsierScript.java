@@ -77,9 +77,10 @@ public class OsierScript
 
     private void show_value(String what, CellAddress ca)
     {
-        selectCell(ca);
-        sb.append(String.format("say \"%s: \" & CStr([rng].Value)" + nl, what));
-        sb.append(EXEC);
+        sbnl();
+        sb.append(String.format("showCellValue %s, %s" + nl,
+                                enquote(escape(what + ": ")),
+                                enquote(ca.toString())));
     }
 
     public void clear_worksheet() throws Exception
@@ -110,7 +111,7 @@ public class OsierScript
     public void createBaseMortalityObject(Bin[] bins, String baseName, boolean mxData) throws Exception
     {
         this.baseName = baseName;
-        
+
         aBaseHandle = allocator.one();
         aBaseName = allocator.one();
         aBaseObjectType = allocator.one();
@@ -255,34 +256,39 @@ public class OsierScript
 
     public void setCell(CellAddress ca, String value)
     {
-        selectCell(ca);
-        sb.append(String.format("[rng].Value = \"%s\"" + nl, escape(value)));
+        sbnl();
+        sb.append(String.format("setCellText %s, %s" + nl,
+                                enquote(ca.toString()),
+                                enquote(escape(value))));
     }
 
     public void setCell(CellAddress ca, int value)
     {
-        selectCell(ca);
-        sb.append(String.format("[rng].Value = \"%d\"" + nl, value));
-        sb.append(String.format("[rng].NumberFormat = \"%s\"" + nl, "0"));
+        sbnl();
+        sb.append(String.format("setCellInt %s, %s" + nl,
+                                enquote(ca.toString()),
+                                enquote(String.format("%d", value))));
     }
 
     public void setCell(CellAddress ca, double value)
     {
-        selectCell(ca);
-        sb.append(String.format("[rng].Value = \"%f\"" + nl, value));
-        sb.append(String.format("[rng].NumberFormat = \"%s\"" + nl, "0.0000"));
+        sbnl();
+        sb.append(String.format("setCellDouble %s, %s" + nl,
+                                enquote(ca.toString()),
+                                enquote(String.format("%f", value))));
     }
 
     public void setFormula(CellAddress ca, String formula)
     {
-        selectCell(ca);
-        sb.append(String.format("[rng].Formula = \"%s\"" + nl, escape(formula)));
+        sbnl();
+        sb.append(String.format("setCellFormula %s, %s" + nl,
+                                enquote(ca.toString()),
+                                enquote(escape(formula))));
     }
 
     private void selectCell(CellAddress ca)
     {
         sbnl();
-        sb.append(nl);
         sb.append(String.format("set rng = wb.Activesheet.Range(\"%s\")" + nl, ca.toString()));
     }
 

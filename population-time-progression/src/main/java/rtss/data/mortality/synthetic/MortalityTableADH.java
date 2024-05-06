@@ -176,7 +176,7 @@ public class MortalityTableADH
             OsierLocal ocall = new OsierLocal().setLog(true);
             String sc, reply;
             boolean mx = false;
-
+            
             Bin[] xbins = Bins.multiply(bins, 0.001);
             if (mx)
                 xbins = MortalityUtil.qx2mx(xbins);
