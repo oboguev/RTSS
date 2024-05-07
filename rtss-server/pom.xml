@@ -5,11 +5,16 @@
 	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>rtss</groupId>
 	<artifactId>rtss-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>rtss-server</name>
 	<description>Server to allow RTSS invoke remote R</description>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>rtss</groupId>
+		<artifactId>rtss</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
@@ -39,7 +44,7 @@
 		<dependency>
 			<groupId>rtss</groupId>
 			<artifactId>rtss-runtime</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -61,6 +66,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.2.5</version>
 				<configuration>
 					<mainClass>rtss.external.server.Server</mainClass>
 					<layout>JAR</layout>

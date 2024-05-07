@@ -5,11 +5,16 @@
 	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>rtss</groupId>
 	<artifactId>rtss-tools</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>rtss-tools</name>
 	<description>Interactive tools</description>
+        <packaging>jar</packaging>
+
+        <parent>
+            <groupId>rtss</groupId>
+            <artifactId>rtss</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </parent>
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
@@ -25,7 +30,7 @@
 		<dependency>
 			<groupId>rtss</groupId>
 			<artifactId>population-time-progression</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

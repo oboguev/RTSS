@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<project xmlns="https://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>rtss</groupId>
+	<artifactId>rtss</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>rtss</name>
+	<description>Parent project file for RTSS Java components</description>
+	<packaging>pom</packaging>
+
+	<properties>
+		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<java.version>17</java.version>
+		<javac.src.version>17</javac.src.version>
+		<javac.target.version>17</javac.target.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>3.2.5</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<modules>
+	    <module>rtss-runtime</module>
+	    <module>rtss-math-tools</module>
+	    <module>population-time-progression</module>
+	    <module>rtss-server</module>
+	    <module>rtss-tools</module>
+	    <module>ww2-losses</module>
+	</modules>
+
+</project>
