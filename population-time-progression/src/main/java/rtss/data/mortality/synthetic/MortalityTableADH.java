@@ -166,7 +166,7 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        if (Util.True)
+        if (Util.False)
         {
             // ###
             double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD8", 10);

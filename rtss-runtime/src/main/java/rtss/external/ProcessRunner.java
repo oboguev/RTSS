@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import rtss.util.Util;
 
@@ -116,6 +117,31 @@ public class ProcessRunner
             {
                 // ignore, in shutdown already
             }
+        }
+    }
+    
+    public static String gatherOutput(String cmd) throws Exception
+    {
+        return new ProcessRunner().do_gatherOutput(cmd);
+    }
+
+    private String do_gatherOutput(String cmd) throws Exception
+    {
+        try
+        {
+            start(cmd);
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while (null != (line = reader.readLine()))
+            {
+                sb.append(line);
+                sb.append("\n");
+            }
+            return sb.toString();
+        }
+        finally
+        {
+            stop();
         }
     }
 }

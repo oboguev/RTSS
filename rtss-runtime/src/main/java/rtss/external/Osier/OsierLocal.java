@@ -4,6 +4,9 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import rtss.config.Config;
 // import rtss.config.Config;
@@ -73,8 +76,11 @@ public class OsierLocal extends ProcessRunner implements OsierCall
 
     private void start() throws Exception
     {
+        killBackgroundExcelInstances();
+        
         if (shutdownHook == null)
             shutdownHook = ShutdownHook.add(this::do_stop);
+        
         // super.start(Config.asRequiredString("Osier.executable"));
         super.start("cscript " + getStdinWrapperScriptFile());
     }
@@ -107,6 +113,8 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         super.stop();
         
         uploadedStartupScript = false;
+
+        killBackgroundExcelInstances();
     }
     
     private void do_stop()
@@ -227,5 +235,67 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         }
 
         return StdinWrapperScriptFile;
+    }
+    
+    /* =========================================================================== */
+    
+    private static void killBackgroundExcelInstances()
+    {
+        try
+        {
+            do_killBackgroundExcelInstances();
+        }
+        catch (Exception ex)
+        {
+            Util.err("Failed to terminate automated Excel instances");
+        }
+    }
+    
+    /*
+     * Java ProcessHandle API is broken in JDK 17 (Windows), it returns no parent 
+     * or full child information, and no command line, therefore use WMIC instead. 
+     */
+    private static void do_killBackgroundExcelInstances() throws Exception
+    {
+        Set<Long> embeddedExcels = new HashSet<>(); 
+
+        String psout = ProcessRunner.gatherOutput("wmic process get commandline,processid");
+        for (String line : psout.split("\n"))
+        {
+            line = Util.despace(line).toLowerCase();
+            if (line.contains("\\excel.exe") && line.contains("/automation") && line.contains("-embedding"))
+            {
+                String[] sa = line.split(" ");
+                String pid_str = sa[sa.length - 1];
+                embeddedExcels.add(Long.parseUnsignedLong(pid_str));
+            }
+        }
+        
+        for (ProcessHandle ph : ProcessHandle.allProcesses().toList())
+        {
+            if (ph.isAlive() && embeddedExcels.contains(ph.pid()))
+            {
+                ProcessHandle.Info info = ph.info();
+
+                if (!isCurrentUser(info))
+                    continue;
+                
+                if (!info.command().isPresent())
+                    continue;
+                
+                String cmd = info.command().get().toLowerCase();
+                if (!cmd.endsWith("\\excel.exe"))
+                    continue;
+                
+                Util.out(String.format("Killing background Excel with pid %d", ph.pid()));
+                ph.destroyForcibly();
+            }
+        }
+    }
+    
+    private static boolean isCurrentUser(ProcessHandle.Info info)
+    {
+        ProcessHandle.Info cpinfo = ProcessHandle.current().info();
+        return cpinfo.user().isPresent() && info.user().isPresent() && cpinfo.user().get().equals(info.user().get());
     }
 }
