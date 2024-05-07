@@ -6,6 +6,7 @@ import java.time.Instant;
 
 import rtss.config.Config;
 import rtss.external.ProcessRunner;
+import rtss.external.ShutdownHook;
 import rtss.util.Util;
 
 /**
@@ -14,6 +15,7 @@ import rtss.util.Util;
 public class RLocal extends ProcessRunner implements RCall
 {
     private boolean log = false;
+    private static ShutdownHook shutdownHook = null;  
 
     public RLocal setLog(boolean log)
     {
@@ -49,13 +51,33 @@ public class RLocal extends ProcessRunner implements RCall
 
     private void start() throws Exception
     {
+        if (shutdownHook == null)
+            shutdownHook = ShutdownHook.add(this::do_stop);
         super.start(Config.asRequiredString("R.executable"));
     }
 
     @Override
     public void stop() throws Exception
     {
+        if (shutdownHook != null)
+        {
+            shutdownHook.remove();
+            shutdownHook = null;
+        }
+
         super.stop();
+    }
+    
+    private void do_stop()
+    {
+        try
+        {
+            stop();
+        }
+        catch (Exception ex)
+        {
+            Util.noop();
+        }
     }
 
     private String execute(String script) throws Exception

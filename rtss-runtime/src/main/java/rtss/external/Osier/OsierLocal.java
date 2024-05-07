@@ -8,6 +8,7 @@ import java.time.Instant;
 import rtss.config.Config;
 // import rtss.config.Config;
 import rtss.external.ProcessRunner;
+import rtss.external.ShutdownHook;
 import rtss.util.Util;
 
 /**
@@ -21,6 +22,7 @@ public class OsierLocal extends ProcessRunner implements OsierCall
     private boolean uploadedStartupScript = false;
     private String startupScript = null;
     private static final String nl = "\n";
+    private static ShutdownHook shutdownHook = null;  
 
     public OsierLocal setLog(boolean log)
     {
@@ -71,6 +73,8 @@ public class OsierLocal extends ProcessRunner implements OsierCall
 
     private void start() throws Exception
     {
+        if (shutdownHook == null)
+            shutdownHook = ShutdownHook.add(this::do_stop);
         // super.start(Config.asRequiredString("Osier.executable"));
         super.start("cscript " + getStdinWrapperScriptFile());
     }
@@ -78,6 +82,12 @@ public class OsierLocal extends ProcessRunner implements OsierCall
     @Override
     public void stop() throws Exception
     {
+        if (shutdownHook != null)
+        {
+            shutdownHook.remove();
+            shutdownHook = null;
+        }
+
         try
         {
             if (hasExcel && os != null)
@@ -97,6 +107,19 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         super.stop();
         
         uploadedStartupScript = false;
+    }
+    
+    private void do_stop()
+    {
+        try
+        {
+            // Util.out("Calling OsierLocal shutdown hook");
+            stop();
+        }
+        catch (Exception ex)
+        {
+            Util.noop();
+        }
     }
 
     private String execute(String script) throws Exception

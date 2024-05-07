@@ -12,6 +12,11 @@ public class ShutdownHook extends Thread
         return hook;
     }
     
+    public void remove()
+    {
+        Runtime.getRuntime().removeShutdownHook(this);
+    }
+    
     /* ================================================= */
     
     private Runnable c; 
