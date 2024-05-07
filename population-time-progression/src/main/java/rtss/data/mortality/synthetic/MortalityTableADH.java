@@ -238,7 +238,7 @@ public class MortalityTableADH
         {
             String title = "Osier curve (" + method + ") "+ debug_title;
             // ViewCurve.view(title, bins, "qx", yy);
-            ViewCurve.view(title, MortalityUtil.proqx2mx(bins), "qx", MortalityUtil.proqx2mx(yy));
+            ViewCurve.view(title, MortalityUtil.proqx2mx(bins), "mx", MortalityUtil.proqx2mx(yy));
         }
         double[] y = Bins.ppy2yearly(yy, ppy);
         // will fail here
