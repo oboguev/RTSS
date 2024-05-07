@@ -335,6 +335,21 @@ public class Util
         else
             return splice(y, 0, y.length - 1);
     }
+    
+    // concatenate arrays a and d
+    public static double[] concat(double[]a, double[] b)
+    {
+        double[] r = new double[a.length + b.length];
+        int ix = 0;
+        
+        for (int k = 0; k < a.length; k++)
+            r[ix++] = a[k];
+
+        for (int k = 0; k < b.length; k++)
+            r[ix++] = b[k];
+
+        return r;
+    }
 
     // generate sequence of integers k1 ... k2 
     public static int[] seq_int(int k1, int k2)

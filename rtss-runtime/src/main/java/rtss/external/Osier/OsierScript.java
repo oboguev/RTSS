@@ -201,39 +201,35 @@ public class OsierScript
     }
 
     /* ============================================================================================= */
-
-    public void deathProb(double start_x, double step, int npoints) throws Exception
-    {
-        oneArgFunction("DeathProb", start_x, step, npoints);
-    }
-
-    public void oneArgFunction(String func, double start_x, double step, int npoints) throws Exception
+    
+    public void oneArgFunction(String func, double[] x, boolean isIntegerX) throws Exception
     {
         if (aFunctionBlock == null)
-            aFunctionBlock = allocator.block(2, npoints);
-
+            aFunctionBlock = allocator.block(2, Math.max(200, x.length));
+        
         CellAddressRange aBlock = aFunctionBlock;
-
         CellAddress aBase = aBlock.upperLeft;
-
-        for (int k = 0; k < npoints; k++)
+        
+        int nonexec = 0;
+        
+        for (int k = 0; k < x.length; k++)
         {
             CellAddress aAge = aBase.offset(0, k);
             CellAddress aFunc = aBase.offset(1, k);
 
             String sx;
-            if (isInteger(start_x) && isInteger(step))
+            if (isIntegerX)
             {
-                int x = toInteger(start_x + k * step);
-                setCell(aAge, x);
-                sx = "" + x;
+                int xx = toInteger(x[k]);
+                setCell(aAge, xx);
+                sx = "" + xx;
             }
             else
             {
 
-                double x = start_x + k * step;
-                setCell(aAge, x);
-                sx = Util.f2s(x);
+                double xx = x[k];
+                setCell(aAge, xx);
+                sx = Util.f2s(xx);
             }
 
             String formula = String.format("=%s(%s,%s)",
@@ -243,12 +239,20 @@ public class OsierScript
             String what = String.format("%s %s", func, sx);
 
             show_value(what, aFunc);
+            nonexec++;
 
             if ((k % 100) == 0)
             {
                 sbnl();
                 sb.append(EXEC);
+                nonexec = 0;
             }
+        }
+        
+        if (nonexec != 0)
+        {
+            sbnl();
+            sb.append(EXEC);
         }
     }
 
@@ -286,6 +290,7 @@ public class OsierScript
                                 enquote(escape(formula))));
     }
 
+    @SuppressWarnings("unused")
     private void selectCell(CellAddress ca)
     {
         sbnl();

@@ -13,6 +13,7 @@ import rtss.data.curves.CurveVerifier;
 // import rtss.data.curves.EnsureMonotonicYearlyPoints;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
+import rtss.data.curves.OsierTask;
 import rtss.data.curves.TuneCCS;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
@@ -26,7 +27,6 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.external.Osier.Osier;
 import rtss.external.Osier.OsierCall;
-import rtss.external.Osier.OsierLocal;
 import rtss.external.Osier.OsierScript;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
@@ -172,6 +172,12 @@ public class MortalityTableADH
     {
         if (Util.True)
         {
+            double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD8", 10);
+            yy = null;
+        }
+        
+        if (Util.False)
+        {
             // ###
             OsierScript osier = new OsierScript();
             osier.start(true);
@@ -194,7 +200,7 @@ public class MortalityTableADH
             osier.replyModifyBaseMortalityObject(reply);
 
             osier.newScript();
-            osier.deathProb(Bins.firstBin(bins).age_x1, 1.0, Bins.widths_in_years(bins));
+            // ### osier.deathProb(Bins.firstBin(bins).age_x1, 1.0, Bins.widths_in_years(bins));
             sc = osier.getScript();
             reply = ocall.execute(sc, true);
 

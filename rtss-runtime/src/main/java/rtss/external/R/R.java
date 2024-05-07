@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 
 import rtss.config.Config;
 import rtss.external.ShutdownHook;
-import rtss.external.Osier.Osier;
 import rtss.util.Util;
 
 /**
