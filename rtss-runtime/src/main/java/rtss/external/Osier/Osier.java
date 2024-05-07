@@ -10,6 +10,7 @@ import rtss.util.Util;
 public class Osier
 {
     private static OsierCall ocall;
+    private static ShutdownHook shutdownHook;  
     
     public static synchronized String execute(String s, boolean reuse) throws Exception
     {
@@ -21,7 +22,7 @@ public class Osier
     
     public static synchronized void stop() throws Exception
     {
-        if (ocall!= null)
+        if (ocall != null)
             ocall.stop();
         ocall = null;
     }
@@ -35,6 +36,9 @@ public class Osier
     {
         if (ocall == null)
         {
+            if (shutdownHook == null)
+                shutdownHook = ShutdownHook.add(Osier::do_stop);
+
             String endpoint = Config.asString("Osier.server.endpoint", "");
             endpoint = endpoint.trim();
             if (endpoint.length() == 0)
@@ -45,8 +49,6 @@ public class Osier
             {
                 ocall = new OsierClient();
             }
-            
-            ShutdownHook.add(Osier::do_stop);
         }
         
         return ocall;

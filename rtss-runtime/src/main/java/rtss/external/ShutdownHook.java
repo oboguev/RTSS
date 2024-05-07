@@ -5,9 +5,11 @@ package rtss.external;
  */
 public class ShutdownHook extends Thread
 {
-    public static void add(Runnable c) 
+    public static ShutdownHook add(Runnable c) 
     {
-        Runtime.getRuntime().addShutdownHook(new ShutdownHook(c));
+        ShutdownHook hook = new ShutdownHook(c);
+        Runtime.getRuntime().addShutdownHook(hook);
+        return hook;
     }
     
     /* ================================================= */

@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import rtss.config.Config;
 import rtss.external.ShutdownHook;
+import rtss.external.Osier.Osier;
 import rtss.util.Util;
 
 /**
@@ -12,6 +13,7 @@ import rtss.util.Util;
 public class R
 {
     private static RCall rcall;
+    private static ShutdownHook shutdownHook;  
     
     public static synchronized String execute(String s, boolean reuse) throws Exception
     {
@@ -23,7 +25,7 @@ public class R
     
     public static synchronized void stop() throws Exception
     {
-        if (rcall!= null)
+        if (rcall != null)
             rcall.stop();
         rcall = null;
     }
@@ -37,6 +39,9 @@ public class R
     {
         if (rcall == null)
         {
+            if (shutdownHook == null)
+                shutdownHook = ShutdownHook.add(R::do_stop);
+
             String endpoint = Config.asString("R.server.endpoint", "");
             endpoint = endpoint.trim();
             if (endpoint.length() == 0)
@@ -47,8 +52,6 @@ public class R
             {
                 rcall = new RClient();
             }
-
-            ShutdownHook.add(R::do_stop);
         }
         
         return rcall;
