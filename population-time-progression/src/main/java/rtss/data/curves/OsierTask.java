@@ -25,19 +25,19 @@ public class OsierTask
     private double[] do_mortality(Bin[] bins, String datasetName, String method, int ppy) throws Exception
     {
         String sc, reply;
-        boolean mx = false;
+        boolean use_mx = true;
         boolean visible = true;
 
-        /* convert pro mille values to qx or mx */
+        /* convert pro mille values from qx to mx */
         Bin[] xbins = Bins.multiply(bins, 0.001);
-        if (mx)
+        if (use_mx)
             xbins = MortalityUtil.qx2mx(xbins);
         
         /* if not called here, will be defaulted to the setting in rtss-config.yml */
         ocall.setDefaultStartupScript(visible);
 
         osier.clear_worksheet();
-        osier.createBaseMortalityObject(xbins, datasetName, mx);
+        osier.createBaseMortalityObject(xbins, datasetName, use_mx);
         sc = osier.getScript();
         reply = ocall.execute(sc, true);
         osier.replyBaseMortalityObject(reply);
@@ -49,6 +49,8 @@ public class OsierTask
         osier.replyModifyBaseMortalityObject(reply);
 
         double[] curve = getCurve("DeathProb", bins, ppy);
+        if (use_mx)
+            curve = MortalityUtil.mx2qx(curve); 
         // ocall.stop();
         curve = Util.multiply(curve, 1000.0);
         return curve;

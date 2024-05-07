@@ -2,6 +2,7 @@ package rtss.data.mortality;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.util.Util;
 
 public class MortalityUtil
 {
@@ -51,6 +52,16 @@ public class MortalityUtil
         return bins;
     }
     
+    public static Bin[] proqx2mx(Bin[] bins) throws Exception
+    {
+        return qx2mx(Bins.multiply(bins, 0.001));
+    }
+    
+    public static double[] proqx2mx(double[] proqx) throws Exception
+    {
+        return qx2mx(Util.multiply(proqx, 0.001));
+    }
+
     private static double validate_qx(double qx) throws Exception
     {
         if (qx >= 0 && qx <= 1.0)

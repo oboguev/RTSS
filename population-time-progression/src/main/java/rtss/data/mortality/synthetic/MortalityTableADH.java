@@ -18,6 +18,7 @@ import rtss.data.curves.TuneCCS;
 import rtss.data.curves.ViewCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.mortality.MortalityUtil;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
 import rtss.data.population.Population;
@@ -167,7 +168,20 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        curve_osier(bins, "BRASS", debug_title);
+        // curve_osier(bins, "HELIGMAN_POLLARD", debug_title);
+        // curve_osier(bins, "HELIGMAN_POLLARD8", debug_title);
+        // curve_osier(bins, "ADJUSTED_HELIGMAN_POLLARD8", debug_title);
+        // curve_osier(bins, "BRASS", debug_title);
+        // curve_osier(bins, "PCLM", debug_title);
+        // curve_osier(bins, "CALIBRATED_SPLINE", debug_title);
+        // curve_osier(bins, "TOPALS", debug_title);
+        // curve_osier(bins, "PTOPALS", debug_title);
+        // curve_osier(bins, "KERNEL_REGRESSION", debug_title);
+        // curve_osier(bins, "SVM", debug_title);
+        // curve_osier(bins, "SMOOTHED_ASDR", debug_title);
+        // curve_osier(bins, "HYBRID_FORCE", debug_title);
+        // curve_osier(bins, "MOD_QUADRATIC_FORCE", debug_title);
+        // curve_osier(bins, "NIDI", debug_title);
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
@@ -218,12 +232,13 @@ public class MortalityTableADH
 
     private static double[] curve_osier(Bin[] bins, String method, String debug_title) throws Exception
     {
-        int ppy = 10;
+        int ppy = 1;
         double[] yy = OsierTask.mortality(bins, "XXX", method, ppy);
         if (Util.True)
         {
             String title = "Osier curve (" + method + ") "+ debug_title;
-            ViewCurve.view(title, bins, "qx", yy);
+            // ViewCurve.view(title, bins, "qx", yy);
+            ViewCurve.view(title, MortalityUtil.proqx2mx(bins), "qx", MortalityUtil.proqx2mx(yy));
         }
         double[] y = Bins.ppy2yearly(yy, ppy);
         // will fail here
