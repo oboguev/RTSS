@@ -24,14 +24,19 @@ public class OsierTask
     
     private double[] do_mortality(Bin[] bins, String datasetName, String method, int ppy) throws Exception
     {
+        String sc, reply;
         boolean mx = false;
+        boolean visible = true;
+
+        /* convert pro mille values to qx or mx */
         Bin[] xbins = Bins.multiply(bins, 0.001);
         if (mx)
             xbins = MortalityUtil.qx2mx(xbins);
+        
+        /* if not called here, will be defaulted to the setting in rtss-config.yml */
+        ocall.setDefaultStartupScript(visible);
 
-        osier.start(true); // ###
-        String sc, reply;
-
+        // ### osier.clear_worksheet();
         osier.createBaseMortalityObject(xbins, datasetName, mx);
         sc = osier.getScript();
         reply = ocall.execute(sc, true);

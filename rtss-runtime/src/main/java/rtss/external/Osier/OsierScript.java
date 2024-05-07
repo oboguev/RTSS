@@ -59,7 +59,12 @@ public class OsierScript
     public void start(boolean visible) throws Exception
     {
         sbnl();
-        sb.append(Script.script("osier-excel/start-excel.vbs", "visible", visible ? "true" : "false"));
+        sb.append(getDefaultStartupScript(visible));
+    }
+    
+    public static String getDefaultStartupScript(boolean visible) throws Exception
+    {
+        return Script.script("osier-excel/start-excel.vbs", "visible", visible ? "true" : "false");
     }
 
     public void stop() throws Exception
@@ -313,11 +318,6 @@ public class OsierScript
         int len = sb.length();
         if (len != 0 && sb.charAt(len - 1) != '\n')
             sb.append(nl);
-    }
-
-    private boolean isInteger(double x)
-    {
-        return Math.abs(x - Math.round(x)) < 0.0001;
     }
 
     private int toInteger(double x)

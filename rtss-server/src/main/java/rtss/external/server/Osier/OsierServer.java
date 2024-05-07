@@ -31,6 +31,13 @@ public class OsierServer
             return "Hello World";
     }
     
+    @PostMapping(path = "/setStartupScript", consumes=MediaType.TEXT_PLAIN_VALUE, produces = "text/plain")
+    public synchronized String setStartupScript(@RequestBody String sc) throws Exception
+    {
+        getLocal().setStartupScript(sc);
+        return "OK";
+    }
+
     @PostMapping(path = "/execute", consumes=MediaType.APPLICATION_JSON_VALUE, produces = "text/plain")
     public synchronized String execute(@RequestBody T2<String,Boolean> x) throws Exception
     {

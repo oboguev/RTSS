@@ -14,9 +14,34 @@ import rtss.types.T2;
  */
 public class OsierClient implements OsierCall
 {
+    private boolean definedStartupScript = false;
+    
+    @Override
+    public void setDefaultStartupScript(boolean visible) throws Exception
+    {
+        setStartupScript(OsierScript.getDefaultStartupScript(visible));
+    }
+    
+    @Override
+    public void setStartupScript(String sc) throws Exception
+    {
+        RestTemplate restTemplate = makeRestTemplate();
+        String url = url("Osier/setStartupScript");
+        String res = restTemplate.postForObject(url, sc, String.class);
+        if (!res.equals("OK"))
+            throw new Exception("Failed to set startup script");
+        definedStartupScript = true;
+    }
+    
     @Override
     public String execute(String s, boolean reuse) throws Exception
     {
+        if (!definedStartupScript)
+        {
+            boolean visible = Config.asBoolean("Osier.excel.visible", false);
+            setDefaultStartupScript(visible);
+        }
+        
         RestTemplate restTemplate = makeRestTemplate();
         String url = url("Osier/execute");
         T2<String,Boolean> x = new T2<String,Boolean>(s, reuse);

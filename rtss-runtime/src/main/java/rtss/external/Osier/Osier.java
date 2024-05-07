@@ -5,7 +5,7 @@ import rtss.external.ShutdownHook;
 import rtss.util.Util;
 
 /**
- * Execute R commands
+ * Execute Osier commands
  */
 public class Osier
 {

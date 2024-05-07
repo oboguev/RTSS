@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 
+import rtss.config.Config;
 // import rtss.config.Config;
 import rtss.external.ProcessRunner;
 import rtss.util.Util;
@@ -16,11 +17,30 @@ public class OsierLocal extends ProcessRunner implements OsierCall
 {
     private boolean log = false;
     private boolean hasExcel = false;
+    private boolean definedStartupScript = false;
+    private boolean uploadedStartupScript = false;
+    private String startupScript = null;
+    private static final String nl = "\n";
 
     public OsierLocal setLog(boolean log)
     {
         this.log = log;
         return this;
+    }
+    
+    @Override
+    public void setDefaultStartupScript(boolean visible) throws Exception
+    {
+        setStartupScript(OsierScript.getDefaultStartupScript(visible));
+    }
+    
+    @Override
+    public void setStartupScript(String sc) throws Exception
+    {
+        if (!sc.endsWith(nl))
+            sc += nl;
+        startupScript = sc;
+        definedStartupScript = true;
     }
 
     @Override
@@ -75,14 +95,23 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         }
 
         super.stop();
+        
+        uploadedStartupScript = false;
     }
 
     private String execute(String script) throws Exception
     {
-        String nl = "\n";
+        if (!definedStartupScript)
+        {
+            boolean visible = Config.asBoolean("Osier.excel.visible", false);
+            setDefaultStartupScript(visible);
+        }
 
         if (!script.endsWith(nl))
             script += nl;
+        
+        if (!uploadedStartupScript)
+            script = startupScript + script;
 
         log("");
         log("**** Sending to Osier for execution at " + Instant.now().toString());
@@ -97,6 +126,7 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         os.write(script.getBytes(StandardCharsets.UTF_8));
         os.flush();
         hasExcel = true;
+        uploadedStartupScript = true;
 
         boolean seen_first = false;
         boolean seen_begin = false;

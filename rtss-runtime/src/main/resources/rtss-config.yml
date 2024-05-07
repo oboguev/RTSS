@@ -19,3 +19,6 @@ R.server.log: true
 # Osier can optionally be hosted on a remote machine
 #Osier.server.endpoint: http://ub22a.local:5577
 Osier.server.log: false
+
+# configures whether Excel is ran as visible or hidden 
+Osier.excel.visible: true

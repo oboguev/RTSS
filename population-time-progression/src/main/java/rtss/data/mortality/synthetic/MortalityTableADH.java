@@ -172,42 +172,11 @@ public class MortalityTableADH
     {
         if (Util.True)
         {
+            // ###
             double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD8", 10);
             yy = null;
         }
         
-        if (Util.False)
-        {
-            // ###
-            OsierScript osier = new OsierScript();
-            osier.start(true);
-            OsierCall ocall = Osier.ocall();
-            String sc, reply;
-            boolean mx = false;
-            
-            Bin[] xbins = Bins.multiply(bins, 0.001);
-            if (mx)
-                xbins = MortalityUtil.qx2mx(xbins);
-            osier.createBaseMortalityObject(xbins, "XXX", mx);
-            sc = osier.getScript();
-            reply = ocall.execute(sc, true);
-            osier.replyBaseMortalityObject(reply);
-
-            osier.newScript();
-            osier.modifyBaseMortalityObject("HELIGMAN_POLLARD8");
-            sc = osier.getScript();
-            reply = ocall.execute(sc, true);
-            osier.replyModifyBaseMortalityObject(reply);
-
-            osier.newScript();
-            // ### osier.deathProb(Bins.firstBin(bins).age_x1, 1.0, Bins.widths_in_years(bins));
-            sc = osier.getScript();
-            reply = ocall.execute(sc, true);
-
-            ocall.stop();
-            // ###
-        }
-
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
