@@ -168,20 +168,20 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        // curve_osier(bins, "HELIGMAN_POLLARD", debug_title);
-        // curve_osier(bins, "HELIGMAN_POLLARD8", debug_title);
-        // curve_osier(bins, "ADJUSTED_HELIGMAN_POLLARD8", debug_title);
-        // curve_osier(bins, "BRASS", debug_title);
-        // curve_osier(bins, "PCLM", debug_title);
-        // curve_osier(bins, "CALIBRATED_SPLINE", debug_title);
-        // curve_osier(bins, "TOPALS", debug_title);
-        // curve_osier(bins, "PTOPALS", debug_title);
-        // curve_osier(bins, "KERNEL_REGRESSION", debug_title);
-        // curve_osier(bins, "SVM", debug_title);
-        // curve_osier(bins, "SMOOTHED_ASDR", debug_title);
-        // curve_osier(bins, "HYBRID_FORCE", debug_title);
-        // curve_osier(bins, "MOD_QUADRATIC_FORCE", debug_title);
-        // curve_osier(bins, "NIDI", debug_title);
+        // curve_osier(bins, "HELIGMAN_POLLARD", "", debug_title);
+        // curve_osier(bins, "HELIGMAN_POLLARD8", "", debug_title);
+        // curve_osier(bins, "ADJUSTED_HELIGMAN_POLLARD8", "", debug_title);
+        // curve_osier(bins, "BRASS", "", debug_title);
+        // curve_osier(bins, "PCLM", "MaxAge=100", debug_title);
+        // curve_osier(bins, "CALIBRATED_SPLINE", "", debug_title);
+        // curve_osier(bins, "TOPALS", "", debug_title);
+        // curve_osier(bins, "PTOPALS", "", debug_title);
+        // curve_osier(bins, "KERNEL_REGRESSION", "", debug_title);
+        // curve_osier(bins, "SVM", "", debug_title);
+        // curve_osier(bins, "SMOOTHED_ASDR", "", debug_title);
+        // curve_osier(bins, "HYBRID_FORCE", "", debug_title);
+        // curve_osier(bins, "MOD_QUADRATIC_FORCE", "", debug_title);
+        // curve_osier(bins, "NIDI", "", debug_title);
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
@@ -230,9 +230,12 @@ public class MortalityTableADH
         return yy;
     }
 
-    private static double[] curve_osier(Bin[] bins, String method, String debug_title) throws Exception
+    @SuppressWarnings("unused")
+    private static double[] curve_osier(Bin[] bins, String method, String params, String debug_title) throws Exception
     {
         int ppy = 1;
+        if (params != null && params.length() != 0)
+            method += ":\"" + params + "\"";
         double[] yy = OsierTask.mortality(bins, "XXX", method, ppy);
         if (Util.True)
         {

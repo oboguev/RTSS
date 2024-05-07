@@ -64,6 +64,11 @@ public class OsierClient implements OsierCall
         return restTemplate.getForObject(url, String.class, tag);
     }
     
+    public void enableLocalLog(boolean log)
+    {
+        // this.log = log;
+    }
+    
     private String url(String uri) throws Exception
     {
         URL url = new URL(Config.asRequiredString("Osier.server.endpoint"));

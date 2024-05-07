@@ -24,6 +24,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     public static double[] curve(Bin[] bins, String title) throws Exception
     {
+        // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);
         return curve_spline(bins, title);
     }
@@ -143,10 +144,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         if (Util.True)
         {
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("pclm", xxx, yyy);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
-            chart.display();
+            ViewCurve.view(title, bins, "pclm", yyy);
         }
 
         if (!Util.isNonNegative(yyy))
@@ -160,6 +158,24 @@ public class InterpolatePopulationAsMeanPreservingCurve
         validate_means(yy, bins);
 
         return yy;
+    }
+    
+    @SuppressWarnings("unused")
+    private static double[] curve_osier(Bin[] bins, String method, String params, String title) throws Exception
+    {
+        int ppy = 1;
+        if (params != null && params.length() != 0)
+            method += ":\"" + params + "\"";
+        double[] yy = OsierTask.mortality(bins, "XXX", method, ppy);
+        if (Util.True)
+        {
+            String chartTitle = "Osier curve (" + method + ") "+ title;
+            ViewCurve.view(chartTitle, bins, yy);
+        }
+        double[] y = Bins.ppy2yearly(yy, ppy);
+        // will fail here
+        // CurveVerifier.validate_means(y, bins);
+        return y;
     }
 
     /*

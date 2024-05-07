@@ -32,6 +32,11 @@ public class OsierLocal extends ProcessRunner implements OsierCall
         return this;
     }
     
+    public void enableLocalLog(boolean log)
+    {
+        this.log = log;
+    }
+    
     @Override
     public void setDefaultStartupScript(boolean visible) throws Exception
     {

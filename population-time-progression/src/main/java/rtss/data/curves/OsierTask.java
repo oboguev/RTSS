@@ -12,16 +12,22 @@ public class OsierTask
 {
     private OsierScript osier = new OsierScript();
     private OsierCall ocall = Osier.ocall();
-    
+
     private OsierTask() throws Exception
     {
+        // ocall.enableLocalLog(true);
     }
-    
+
     public static double[] mortality(Bin[] bins, String datasetName, String method, int ppy) throws Exception
     {
         return new OsierTask().do_mortality(bins, datasetName, method, ppy);
     }
-    
+
+    public static double[] population(Bin[] bins, String datasetName, String method, int ppy) throws Exception
+    {
+        return new OsierTask().do_population(bins, datasetName, method, ppy);
+    }
+
     private double[] do_mortality(Bin[] bins, String datasetName, String method, int ppy) throws Exception
     {
         String sc, reply;
@@ -32,7 +38,7 @@ public class OsierTask
         Bin[] xbins = Bins.multiply(bins, 0.001);
         if (use_mx)
             xbins = MortalityUtil.qx2mx(xbins);
-        
+
         /* if not called here, will be defaulted to the setting in rtss-config.yml */
         ocall.setDefaultStartupScript(visible);
 
@@ -50,7 +56,33 @@ public class OsierTask
 
         double[] curve = getCurve("DeathProb", bins, ppy);
         if (use_mx)
-            curve = MortalityUtil.mx2qx(curve); 
+            curve = MortalityUtil.mx2qx(curve);
+        // ocall.stop();
+        curve = Util.multiply(curve, 1000.0);
+        return curve;
+    }
+
+    private double[] do_population(Bin[] bins, String datasetName, String method, int ppy) throws Exception
+    {
+        String sc, reply;
+        boolean visible = true;
+
+        /* if not called here, will be defaulted to the setting in rtss-config.yml */
+        ocall.setDefaultStartupScript(visible);
+
+        osier.clear_worksheet();
+        osier.createBasePopulationObject(bins, datasetName);
+        sc = osier.getScript();
+        reply = ocall.execute(sc, true);
+        osier.replyBasePopulationObject(reply);
+
+        osier.newScript();
+        osier.modifyBasePopulationObject(method);
+        sc = osier.getScript();
+        reply = ocall.execute(sc, true);
+        osier.replyModifyBasePopulationObject(reply);
+
+        double[] curve = getCurve("Number", bins, ppy);
         // ocall.stop();
         curve = Util.multiply(curve, 1000.0);
         return curve;
@@ -65,21 +97,21 @@ public class OsierTask
     {
         if (x.length <= 190)
             return getCurveChunk(func, x, isIntegerX);
-        
+
         double[] result = null;
-        
+
         int chunk = 0;
-        for (int ix = 0 ; ix < x.length; ix += chunk)
+        for (int ix = 0; ix < x.length; ix += chunk)
         {
             chunk = x.length - ix;
             if (chunk >= 200)
                 chunk = Math.min(chunk, 100);
-            
+
             double[] xx = Util.splice(x, ix, ix + chunk - 1);
             double[] yy = getCurveChunk(func, xx, isIntegerX);
             if (result == null)
                 result = yy;
-            else 
+            else
                 result = Util.concat(result, yy);
 
         }
@@ -91,11 +123,19 @@ public class OsierTask
     {
         double[] y = new double[x.length];
         osier.newScript();
-        osier.oneArgFunction(func, x, isIntegerX);
+        if (func.equals("Number"))
+        {
+            int interval = 1;
+            osier.twoArgFunction(func, x, isIntegerX, interval);
+        }
+        else
+        {
+            osier.oneArgFunction(func, x, isIntegerX);
+        }
         String sc = osier.getScript();
         String reply = ocall.execute(sc, true);
         int ix = 0;
- 
+
         for (String line : reply.split("\n"))
         {
             if (line.startsWith(func + " "))
@@ -113,7 +153,7 @@ public class OsierTask
                 y[ix++] = yv;
             }
         }
-        
+
         if (ix != x.length)
             throw new Exception("Unexpected incomplete response from Osier");
 

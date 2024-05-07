@@ -128,7 +128,7 @@ public class OsierScript
 
         sb.append(nl);
         sb.append("'" + nl);
-        sb.append("' create base object" + nl);
+        sb.append("' create base mortality object" + nl);
         sb.append("'" + nl);
         sb.append(nl);
 
@@ -184,6 +184,12 @@ public class OsierScript
 
     public void modifyBaseMortalityObject(String buildMethodWithParameters) throws Exception
     {
+        sb.append(nl);
+        sb.append("'" + nl);
+        sb.append("' modify base mortality object" + nl);
+        sb.append("'" + nl);
+        sb.append(nl);
+
         aModHandle = allocator.one();
         aModRequestedHandle = allocator.one();
         aModBuildMethod = allocator.one();
@@ -205,6 +211,104 @@ public class OsierScript
             throw new Exception("Osier failed to create modified object handle");
     }
 
+    /* ============================================================================================= */
+    
+    public void createBasePopulationObject(Bin[] bins, String baseName) throws Exception
+    {
+        this.baseName = baseName;
+
+        aBaseHandle = allocator.one();
+        aBaseName = allocator.one();
+        aBaseObjectType = allocator.one();
+        aBaseBodyProps = allocator.vertical(5);
+        aBaseBodyValues = aBaseBodyProps.offset(1, 0);
+        aBaseTableName = allocator.one();
+        aBaseTableCols = allocator.horizontal(2);
+        aBaseTableValues = allocator.block(2, bins.length);
+
+        sb.append(nl);
+        sb.append("'" + nl);
+        sb.append("' create base population object" + nl);
+        sb.append("'" + nl);
+        sb.append(nl);
+
+        setCell(aBaseName, baseName);
+        setCell(aBaseObjectType, "PCURVE");
+
+        setCell(aBaseBodyProps.upperLeft, "Population");
+        setCell(aBaseBodyValues.upperLeft, baseName);
+
+        setCell(aBaseBodyProps.upperLeft.offset(0, 1), "Date");
+        setCell(aBaseBodyValues.upperLeft.offset(0, 1), "20110601");
+
+        setCell(aBaseBodyProps.upperLeft.offset(0, 2), "BuildMethod");
+        setCell(aBaseBodyValues.upperLeft.offset(0, 2), "CONSTANT_DENSITY");
+
+        setCell(aBaseBodyProps.upperLeft.offset(0, 3), "Source");
+        setCell(aBaseBodyValues.upperLeft.offset(0, 3), "other");
+        
+        setCell(aBaseBodyProps.upperLeft.offset(0, 4), "Comment");
+        setCell(aBaseBodyValues.upperLeft.offset(0, 4), "none");
+        
+        setCell(aBaseTableName, "Numbers");
+
+        setCell(aBaseTableCols.upperLeft, "Age");
+        setCell(aBaseTableCols.upperLeft.offset(1, 0), "Number");
+
+        int dy = -1;
+        for (Bin bin : bins)
+        {
+            dy++;
+            setCell(aBaseTableValues.upperLeft.offset(0, dy), bin.age_x1);
+            setCell(aBaseTableValues.upperLeft.offset(1, dy), bin.avg);
+        }
+
+        String formula = String.format("=CreateObj(%s,%s,%s,%s,%s,%s,%s)",
+                                       aBaseName, aBaseObjectType, aBaseBodyProps, aBaseBodyValues,
+                                       aBaseTableName, aBaseTableCols, aBaseTableValues);
+        setFormula(aBaseHandle, formula);
+        show_value("BaseHandle", aBaseHandle);
+    }
+
+    public void replyBasePopulationObject(String reply) throws Exception
+    {
+        Map<String, String> mss = ScriptReply.keysFromReply(reply, new String[] { "BaseHandle" });
+        String baseHandle = mss.get("BaseHandle");
+        if (!baseHandle.startsWith(baseName + ":"))
+            throw new Exception("Osier failed to create base object handle");
+    }
+
+    /* ============================================================================================= */
+    
+    public void modifyBasePopulationObject(String buildMethodWithParameters) throws Exception
+    {
+        sb.append(nl);
+        sb.append("'" + nl);
+        sb.append("' modify base population object" + nl);
+        sb.append("'" + nl);
+        sb.append(nl);
+
+        aModHandle = allocator.one();
+        aModRequestedHandle = allocator.one();
+        aModBuildMethod = allocator.one();
+
+        setCell(aModRequestedHandle, baseName + "_MODIFIED");
+        setCell(aModBuildMethod, buildMethodWithParameters);
+        String formula = String.format("=ModifyObj(%s,%s,%s,,%s,,%s)",
+                                       aModRequestedHandle, aBaseHandle, enquote("pcurve"),
+                                       enquote("buildmethod"), aModBuildMethod);
+        setFormula(aModHandle, formula);
+        show_value("ModHandle", aModHandle);
+    }
+
+    public void replyModifyBasePopulationObject(String reply) throws Exception
+    {
+        Map<String, String> mss = ScriptReply.keysFromReply(reply, new String[] { "ModHandle" });
+        String modHandle = mss.get("ModHandle");
+        if (!modHandle.startsWith(baseName + "_MODIFIED:"))
+            throw new Exception("Osier failed to create modified object handle");
+    }
+    
     /* ============================================================================================= */
     
     public void oneArgFunction(String func, double[] x, boolean isIntegerX) throws Exception
@@ -261,6 +365,60 @@ public class OsierScript
         }
     }
 
+    public void twoArgFunction(String func, double[] x, boolean isIntegerX, int interval) throws Exception
+    {
+        if (aFunctionBlock == null)
+            aFunctionBlock = allocator.block(2, Math.max(200, x.length));
+        
+        CellAddressRange aBlock = aFunctionBlock;
+        CellAddress aBase = aBlock.upperLeft;
+        
+        int nonexec = 0;
+        
+        for (int k = 0; k < x.length; k++)
+        {
+            CellAddress aAge = aBase.offset(0, k);
+            CellAddress aFunc = aBase.offset(1, k);
+
+            String sx;
+            if (isIntegerX)
+            {
+                int xx = toInteger(x[k]);
+                setCell(aAge, xx);
+                sx = "" + xx;
+            }
+            else
+            {
+
+                double xx = x[k];
+                setCell(aAge, xx);
+                sx = Util.f2s(xx);
+            }
+
+            String formula = String.format("=%s(%s,%s,%d)",
+                                           func, aModHandle, aAge, interval);
+            setFormula(aFunc, formula);
+
+            String what = String.format("%s %s", func, sx);
+
+            show_value(what, aFunc);
+            nonexec++;
+
+            if ((k % 100) == 0)
+            {
+                sbnl();
+                sb.append(EXEC);
+                nonexec = 0;
+            }
+        }
+        
+        if (nonexec != 0)
+        {
+            sbnl();
+            sb.append(EXEC);
+        }
+    }
+    
     /* ============================================================================================= */
 
     public void setCell(CellAddress ca, String value)
