@@ -15,6 +15,7 @@ import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.curves.OsierTask;
 import rtss.data.curves.TuneCCS;
+import rtss.data.curves.ViewCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.SingleMortalityTable;
@@ -166,13 +167,7 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        if (Util.False)
-        {
-            // ###
-            double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD8", 10);
-            yy = null;
-        }
-        
+        curve_hp_osier(bins, debug_title);
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
@@ -208,12 +203,8 @@ public class MortalityTableADH
             /*
              * Display yearly curve
              */
-            double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "PCLM yearly curve " + debug_title;
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("qx", xxx, yyy);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
-            chart.display();
+            ViewCurve.view(title, bins, "qx", yyy);
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
@@ -238,12 +229,8 @@ public class MortalityTableADH
 
         if (display)
         {
-            double[] xxx = Bins.ppy_x(bins, ppy);
             String title = "HP curve " + debug_title;
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("qx", xxx, yy);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
-            chart.display();
+            ViewCurve.view(title, bins, "qx", yy);
         }
 
         double[] y = Bins.ppy2yearly(yy, ppy);
@@ -254,6 +241,25 @@ public class MortalityTableADH
         return y;
     }
 
+    /*
+     * Generated curve is incorrect
+     */
+    @SuppressWarnings("unused")
+    private static double[] curve_hp_osier(Bin[] bins, String debug_title) throws Exception
+    {
+        int ppy = 10;
+        double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD8", ppy);
+        if (Util.True)
+        {
+            String title = "Osier HP curve " + debug_title;
+            ViewCurve.view(title, bins, "qx", yy);
+        }
+        double[] y = Bins.ppy2yearly(yy, ppy);
+        // will fail here
+        // CurveVerifier.validate_means(y, bins);
+        return y;
+    }
+    
     @SuppressWarnings("unused")
     private static double[] curve_spline_1(Bin[] bins, String debug_title) throws Exception
     {
@@ -292,12 +298,8 @@ public class MortalityTableADH
             /*
              * Display sub-yearly curve
              */
-            double[] xxx = Bins.ppy_x(xbins, ppy);
             String title = "MP-integral sub-yearly curve " + debug_title;
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("qx", xxx, yyy);
-            chart.addSeries("bins", xxx, Bins.ppy_y(xbins, ppy));
-            chart.display();
+            ViewCurve.view(title, bins, "qx", yyy);
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
@@ -306,12 +308,8 @@ public class MortalityTableADH
             /*
              * Display yearly curve
              */
-            double[] xxx = Bins.ppy_x(bins, 1);
             String title = "MP-integral yearly curve " + debug_title;
-            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("qx", xxx, yy);
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, 1));
-            chart.display();
+            ViewCurve.view(title, bins, "qx", yy);
         }
 
         CurveVerifier.positive(yy, bins, debug_title, true);

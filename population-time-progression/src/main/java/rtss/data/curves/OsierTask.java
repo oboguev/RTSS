@@ -36,7 +36,7 @@ public class OsierTask
         /* if not called here, will be defaulted to the setting in rtss-config.yml */
         ocall.setDefaultStartupScript(visible);
 
-        // ### osier.clear_worksheet();
+        osier.clear_worksheet();
         osier.createBaseMortalityObject(xbins, datasetName, mx);
         sc = osier.getScript();
         reply = ocall.execute(sc, true);
@@ -48,9 +48,10 @@ public class OsierTask
         reply = ocall.execute(sc, true);
         osier.replyModifyBaseMortalityObject(reply);
 
-        // ocall.stop(); 
-
-        return getCurve("DeathProb", bins, ppy);
+        double[] curve = getCurve("DeathProb", bins, ppy);
+        // ocall.stop();
+        curve = Util.multiply(curve, 1000.0);
+        return curve;
     }
 
     private double[] getCurve(String func, Bin[] bins, int ppy) throws Exception
