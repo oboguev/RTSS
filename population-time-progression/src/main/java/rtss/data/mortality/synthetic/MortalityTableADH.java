@@ -167,7 +167,7 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        curve_hp_osier(bins, debug_title);
+        curve_osier(bins, "BRASS", debug_title);
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
         return curve_pclm(bins, debug_title);
@@ -216,6 +216,21 @@ public class MortalityTableADH
         return yy;
     }
 
+    private static double[] curve_osier(Bin[] bins, String method, String debug_title) throws Exception
+    {
+        int ppy = 10;
+        double[] yy = OsierTask.mortality(bins, "XXX", method, ppy);
+        if (Util.True)
+        {
+            String title = "Osier curve (" + method + ") "+ debug_title;
+            ViewCurve.view(title, bins, "qx", yy);
+        }
+        double[] y = Bins.ppy2yearly(yy, ppy);
+        // will fail here
+        // CurveVerifier.validate_means(y, bins);
+        return y;
+    }
+    
     @SuppressWarnings("unused")
     private static double[] curve_hp(Bin[] bins, String debug_title) throws Exception
     {
@@ -245,7 +260,7 @@ public class MortalityTableADH
      * Generated curve is incorrect
      */
     @SuppressWarnings("unused")
-    private static double[] curve_hp_osier(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_osier_hp8(Bin[] bins, String debug_title) throws Exception
     {
         int ppy = 10;
         double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD8", ppy);
@@ -260,6 +275,44 @@ public class MortalityTableADH
         return y;
     }
     
+    /*
+     * Fails
+     */
+    @SuppressWarnings("unused")
+    private static double[] curve_osier_hp8_adjusted(Bin[] bins, String debug_title) throws Exception
+    {
+        int ppy = 10;
+        double[] yy = OsierTask.mortality(bins, "XXX", "ADJUSTED_HELIGMAN_POLLARD8", ppy);
+        if (Util.True)
+        {
+            String title = "Osier HP curve " + debug_title;
+            ViewCurve.view(title, bins, "qx", yy);
+        }
+        double[] y = Bins.ppy2yearly(yy, ppy);
+        // will fail here
+        // CurveVerifier.validate_means(y, bins);
+        return y;
+    }
+
+    /*
+     * Fails
+     */
+    @SuppressWarnings("unused")
+    private static double[] curve_osier_hp(Bin[] bins, String debug_title) throws Exception
+    {
+        int ppy = 1;
+        double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD", ppy);
+        if (Util.True)
+        {
+            String title = "Osier HP curve " + debug_title;
+            ViewCurve.view(title, bins, "qx", yy);
+        }
+        double[] y = Bins.ppy2yearly(yy, ppy);
+        // will fail here
+        // CurveVerifier.validate_means(y, bins);
+        return y;
+    }
+
     @SuppressWarnings("unused")
     private static double[] curve_spline_1(Bin[] bins, String debug_title) throws Exception
     {
