@@ -187,12 +187,12 @@ public class MortalityTableADH
         // requires standard mortality object
         // curve_osier(bins, "BRASS", "", debug_title);
 
-        // ###
-        // curve_osier(appendFakeBin(bins), "PCLM", "", debug_title);
+        // not mean-preserving for 80-84
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "PCLM", "P=12000000;MaxIts=100;KnotSpacing=2;Degree=3;Penalty=AIC", debug_title);
 
         // mx: works but not mean-preserving
         // qx: works but incorrect
-        // curve_osier(bins, "CALIBRATED_SPLINE", "", debug_title);
+        // curve_osier(appendFakeBin(bins), "CALIBRATED_SPLINE", "", debug_title);
 
         // requires standard mortality object
         // curve_osier(bins, "TOPALS", "", debug_title);
@@ -208,13 +208,13 @@ public class MortalityTableADH
         // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=AIC", debug_title);
         // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=MSE", debug_title);
 
-        // ###
+        // it is a smoothing of HYBRID_FORCE
         // curve_osier(bins, "SVM", "", debug_title);
 
         // mx: works but not mean-preserving
         // curve_osier(bins, "SMOOTHED_ASDR", "", debug_title);
 
-        // mx: supposed to be mean-preserving but is not for the pre-last bib
+        // mx: supposed to be mean-preserving but is not for the pre-last bin
         // curve_osier(bins, "HYBRID_FORCE", "", debug_title);
 
         // ###
