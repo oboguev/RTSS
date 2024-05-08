@@ -197,8 +197,8 @@ public class MortalityTableADH
         // requires standard mortality object
         // curve_osier(bins, "TOPALS", "", debug_title);
 
-        // ###
-        // curve_osier(appendFakeBin(bins), "PTOPALS", "Degree=2", debug_title);
+        // requires standard mortality, by default non mean-preserving for 80-84
+        // curve_osier(appendFakeBin(bins), "PTOPALS", "", debug_title);
 
         // not mean preserving for the pre-last bin
         // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=CV", debug_title);
@@ -214,7 +214,7 @@ public class MortalityTableADH
         // mx: works but not mean-preserving
         // curve_osier(bins, "SMOOTHED_ASDR", "", debug_title);
 
-        // mx: supposed to be mean-preserving but is not for the pre-last bin
+        // mx: supposed to be mean-preserving but is not for 80-84
         // curve_osier(bins, "HYBRID_FORCE", "", debug_title);
 
         // ###
