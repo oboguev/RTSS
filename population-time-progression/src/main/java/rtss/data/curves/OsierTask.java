@@ -5,6 +5,7 @@ import rtss.data.bin.Bins;
 import rtss.data.mortality.MortalityUtil;
 import rtss.external.Osier.Osier;
 import rtss.external.Osier.OsierCall;
+import rtss.external.Osier.OsierMortalityType;
 import rtss.external.Osier.OsierScript;
 import rtss.util.Util;
 
@@ -18,9 +19,9 @@ public class OsierTask
         // ocall.enableLocalLog(true);
     }
 
-    public static double[] mortality(Bin[] bins, String datasetName, String method, int ppy) throws Exception
+    public static double[] mortality(Bin[] bins, OsierMortalityType mtype, String datasetName, String method, int ppy) throws Exception
     {
-        return new OsierTask().do_mortality(bins, datasetName, method, ppy);
+        return new OsierTask().do_mortality(bins, mtype, datasetName, method, ppy);
     }
 
     public static double[] population(Bin[] bins, String datasetName, String method, int ppy) throws Exception
@@ -28,22 +29,21 @@ public class OsierTask
         return new OsierTask().do_population(bins, datasetName, method, ppy);
     }
 
-    private double[] do_mortality(Bin[] bins, String datasetName, String method, int ppy) throws Exception
+    private double[] do_mortality(Bin[] bins, OsierMortalityType mtype, String datasetName, String method, int ppy) throws Exception
     {
         String sc, reply;
-        boolean use_mx = true;
         boolean visible = true;
 
         /* convert pro mille values from qx to mx */
         Bin[] xbins = Bins.multiply(bins, 0.001);
-        if (use_mx)
+        if (mtype == OsierMortalityType.QX2MX)
             xbins = MortalityUtil.qx2mx(xbins);
 
         /* if not called here, will be defaulted to the setting in rtss-config.yml */
         ocall.setDefaultStartupScript(visible);
 
         osier.clear_worksheet();
-        osier.createBaseMortalityObject(xbins, datasetName, use_mx);
+        osier.createBaseMortalityObject(xbins, datasetName, mtype == OsierMortalityType.MX || mtype == OsierMortalityType.QX2MX);
         sc = osier.getScript();
         reply = ocall.execute(sc, true);
         osier.replyBaseMortalityObject(reply);
@@ -55,7 +55,7 @@ public class OsierTask
         osier.replyModifyBaseMortalityObject(reply);
 
         double[] curve = getCurve("DeathProb", bins, ppy);
-        if (use_mx)
+        if (mtype == OsierMortalityType.QX2MX)
             curve = MortalityUtil.mx2qx(curve);
         // ocall.stop();
         curve = Util.multiply(curve, 1000.0);

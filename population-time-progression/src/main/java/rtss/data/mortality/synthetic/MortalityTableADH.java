@@ -26,6 +26,7 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.external.Osier.OsierMortalityType;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
@@ -168,22 +169,63 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
+        // mx: works but last bins are poor fit
+        // qx: fails
         // curve_osier(bins, "HELIGMAN_POLLARD", "", debug_title);
+
+        // mx: works but not mean preserving
+        // qx: Works but incorrect
         // curve_osier(bins, "HELIGMAN_POLLARD8", "", debug_title);
+
+        // mx: works with a glitch (and does not work with added Use=0 bin)
+        // qx: fails
         // curve_osier(bins, "ADJUSTED_HELIGMAN_POLLARD8", "", debug_title);
-        // curve_osier(bins, "BRASS", "", debug_title);
-        // curve_osier(bins, "PCLM", "MaxAge=100", debug_title);
-        // curve_osier(bins, "CALIBRATED_SPLINE", "", debug_title);
-        // curve_osier(bins, "TOPALS", "", debug_title);
-        // curve_osier(bins, "PTOPALS", "", debug_title);
-        // curve_osier(bins, "KERNEL_REGRESSION", "", debug_title);
-        // curve_osier(bins, "SVM", "", debug_title);
-        // curve_osier(bins, "SMOOTHED_ASDR", "", debug_title);
-        // curve_osier(bins, "HYBRID_FORCE", "", debug_title);
-        // curve_osier(bins, "MOD_QUADRATIC_FORCE", "", debug_title);
+
+        // mx: works but not mean preserving
         // curve_osier(bins, "NIDI", "", debug_title);
+
+        // requires standard mortality object
+        // curve_osier(bins, "BRASS", "", debug_title);
+
+        // ###
+        // curve_osier(appendFakeBin(bins), "PCLM", "", debug_title);
+
+        // mx: works but not mean-preserving
+        // qx: works but incorrect
+        // curve_osier(bins, "CALIBRATED_SPLINE", "", debug_title);
+
+        // requires standard mortality object
+        // curve_osier(bins, "TOPALS", "", debug_title);
+
+        // ###
+        // curve_osier(appendFakeBin(bins), "PTOPALS", "Degree=2", debug_title);
+
+        // not mean preserving for the pre-last bin
+        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=CV", debug_title);
+        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=GCV", debug_title);
+        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=ROT", debug_title);
+        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=IROT", debug_title);
+        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=AIC", debug_title);
+        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=MSE", debug_title);
+
+        // ###
+        // curve_osier(bins, "SVM", "", debug_title);
+
+        // mx: works but not mean-preserving
+        // curve_osier(bins, "SMOOTHED_ASDR", "", debug_title);
+
+        // mx: supposed to be mean-preserving but is not for the pre-last bib
+        // curve_osier(bins, "HYBRID_FORCE", "", debug_title);
+
+        // ###
+        // curve_osier(appendFakeBin(bins), "CUBIC_SF", "", debug_title);
+
+        // mx: works but not mean-preserving
+        // curve_osier(bins, "MOD_QUADRATIC_FORCE", "", debug_title);
+
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
+
         return curve_pclm(bins, debug_title);
     }
 
@@ -198,15 +240,7 @@ public class MortalityTableADH
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
         if (Util.True)
-        {
-            List<Bin> list = new ArrayList<>();
-            for (Bin bin : bins)
-                list.add(new Bin(bin));
-            list.add(new Bin(last.age_x2 + 1,
-                             last.age_x2 + last.widths_in_years,
-                             last.avg + 1.8 * (last.avg - last.prev.avg)));
-            xbins = Bins.bins(list);
-        }
+            xbins = appendFakeBin(bins);
 
         final double lambda = 0.0001;
         double[] yyy = PCLM_Rizzi_2015.pclm(xbins, lambda, ppy);
@@ -230,25 +264,75 @@ public class MortalityTableADH
         return yy;
     }
 
+    /*
+     * To suppress boundary effects, append fake bin with growing rate 
+     */
+    private static Bin[] appendFakeBin(Bin[] bins) throws Exception
+    {
+        Bin last = Bins.lastBin(bins);
+        List<Bin> list = new ArrayList<>();
+        for (Bin bin : bins)
+            list.add(new Bin(bin));
+        list.add(new Bin(last.age_x2 + 1,
+                         last.age_x2 + last.widths_in_years,
+                         last.avg + 1.8 * (last.avg - last.prev.avg)));
+        return Bins.bins(list);
+    }
+
     @SuppressWarnings("unused")
     private static double[] curve_osier(Bin[] bins, String method, String params, String debug_title) throws Exception
     {
+        return curve_osier(bins, OsierMortalityType.QX2MX, method, params, debug_title);
+    }
+
+    private static double[] curve_osier(Bin[] bins, OsierMortalityType mtype, String method, String params, String debug_title) throws Exception
+    {
         int ppy = 1;
+
         if (params != null && params.length() != 0)
-            method += ":\"" + params + "\"";
-        double[] yy = OsierTask.mortality(bins, "XXX", method, ppy);
+        {
+            boolean first = true;
+            for (String ps : params.split(";"))
+            {
+                if (first)
+                {
+                    method += ":";
+                    first = false;
+                }
+                else
+                {
+                    method += ",";
+                }
+                
+                method += '"' + ps + '"';
+            }
+        }
+
+        double[] yy = OsierTask.mortality(bins, mtype, "XXX", method, ppy);
         if (Util.True)
         {
-            String title = "Osier curve (" + method + ") "+ debug_title;
-            // ViewCurve.view(title, bins, "qx", yy);
-            ViewCurve.view(title, MortalityUtil.proqx2mx(bins), "mx", MortalityUtil.proqx2mx(yy));
+            String title = "Osier curve (" + method + ") " + debug_title;
+            switch (mtype)
+            {
+            case QX:
+                ViewCurve.view(title, bins, "qx", yy);
+                break;
+
+            case MX:
+                ViewCurve.view(title, bins, "mx", yy);
+                break;
+
+            case QX2MX:
+                ViewCurve.view(title, MortalityUtil.proqx2mx(bins), "mx", MortalityUtil.proqx2mx(yy));
+                break;
+            }
         }
         double[] y = Bins.ppy2yearly(yy, ppy);
         // will fail here
         // CurveVerifier.validate_means(y, bins);
         return y;
     }
-    
+
     @SuppressWarnings("unused")
     private static double[] curve_hp(Bin[] bins, String debug_title) throws Exception
     {
@@ -281,7 +365,7 @@ public class MortalityTableADH
     private static double[] curve_osier_hp8(Bin[] bins, String debug_title) throws Exception
     {
         int ppy = 10;
-        double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD8", ppy);
+        double[] yy = OsierTask.mortality(bins, OsierMortalityType.QX2MX, "XXX", "HELIGMAN_POLLARD8", ppy);
         if (Util.True)
         {
             String title = "Osier HP curve " + debug_title;
@@ -292,7 +376,7 @@ public class MortalityTableADH
         // CurveVerifier.validate_means(y, bins);
         return y;
     }
-    
+
     /*
      * Fails
      */
@@ -300,7 +384,7 @@ public class MortalityTableADH
     private static double[] curve_osier_hp8_adjusted(Bin[] bins, String debug_title) throws Exception
     {
         int ppy = 10;
-        double[] yy = OsierTask.mortality(bins, "XXX", "ADJUSTED_HELIGMAN_POLLARD8", ppy);
+        double[] yy = OsierTask.mortality(bins, OsierMortalityType.QX2MX, "XXX", "ADJUSTED_HELIGMAN_POLLARD8", ppy);
         if (Util.True)
         {
             String title = "Osier HP curve " + debug_title;
@@ -319,7 +403,7 @@ public class MortalityTableADH
     private static double[] curve_osier_hp(Bin[] bins, String debug_title) throws Exception
     {
         int ppy = 1;
-        double[] yy = OsierTask.mortality(bins, "XXX", "HELIGMAN_POLLARD", ppy);
+        double[] yy = OsierTask.mortality(bins, OsierMortalityType.QX2MX, "XXX", "HELIGMAN_POLLARD", ppy);
         if (Util.True)
         {
             String title = "Osier HP curve " + debug_title;

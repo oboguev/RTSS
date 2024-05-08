@@ -166,7 +166,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         int ppy = 1;
         if (params != null && params.length() != 0)
             method += ":\"" + params + "\"";
-        double[] yy = OsierTask.mortality(bins, "XXX", method, ppy);
+        double[] yy = OsierTask.population(bins, "XXX", method, ppy);
         if (Util.True)
         {
             String chartTitle = "Osier curve (" + method + ") "+ title;
