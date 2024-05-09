@@ -181,13 +181,13 @@ public class MortalityTableADH
         // qx: fails
         // curve_osier(bins, "ADJUSTED_HELIGMAN_POLLARD8", "", debug_title);
 
-        // mx: works but not mean preserving
+        // mx: works but not mean preserving (and severely deviates from bin unless tuned)
         // curve_osier(bins, "NIDI", "", debug_title);
 
         // requires standard mortality object
         // curve_osier(bins, "BRASS", "", debug_title);
 
-        // not mean-preserving for 80-84
+        // not mean-preserving for upper bins
         // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "PCLM", "P=12000000;MaxIts=100;KnotSpacing=2;Degree=3;Penalty=AIC", debug_title);
 
         // mx: works but not mean-preserving
@@ -200,27 +200,31 @@ public class MortalityTableADH
         // requires standard mortality, by default non mean-preserving for 80-84
         // curve_osier(appendFakeBin(bins), "PTOPALS", "", debug_title);
 
-        // not mean preserving for the pre-last bin
-        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=CV", debug_title);
-        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=GCV", debug_title);
-        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=ROT", debug_title);
-        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=IROT", debug_title);
-        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=AIC", debug_title);
-        // curve_osier(bins, OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=MSE", debug_title);
+        // not mean preserving for the last bin
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "", debug_title);
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=CV", debug_title);
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=GCV", debug_title);
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=ROT", debug_title);
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=5;Bandwidth=IROT", debug_title);
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=AIC", debug_title);
+        // curve_osier(appendFakeBin(bins), OsierMortalityType.QX2MX, "KERNEL_REGRESSION", "Degree=3;Bandwidth=MSE", debug_title);
 
         // it is a smoothing of HYBRID_FORCE
         // curve_osier(bins, "SVM", "", debug_title);
 
-        // mx: works but not mean-preserving
+        // mx: mean-preserving?
         // curve_osier(bins, "SMOOTHED_ASDR", "", debug_title);
 
-        // mx: supposed to be mean-preserving but is not for 80-84
-        // curve_osier(bins, "HYBRID_FORCE", "", debug_title);
+        // qx: does not compute correctly
+        // mx: has a curvature bend in 80-84
+        // mx avg deviation under 1% for ages 0-69, under 2% for ages 70-84, large (20%) for 85+
+        // however when back-converted to qx deviation becomes much larger (e.g. 5% for bin 1-4)
+        // curve_osier(bins, OsierMortalityType.QX2MX, "HYBRID_FORCE", "", debug_title);
 
-        // ###
+        // does not work correctly
         // curve_osier(appendFakeBin(bins), "CUBIC_SF", "", debug_title);
 
-        // mx: works but not mean-preserving
+        // mean-preserving?
         // curve_osier(bins, "MOD_QUADRATIC_FORCE", "", debug_title);
 
         // return curve_hp(bins, debug_title);
@@ -303,7 +307,7 @@ public class MortalityTableADH
                 {
                     method += ",";
                 }
-                
+
                 method += '"' + ps + '"';
             }
         }
@@ -327,9 +331,11 @@ public class MortalityTableADH
                 break;
             }
         }
+
         double[] y = Bins.ppy2yearly(yy, ppy);
-        // will fail here
-        // CurveVerifier.validate_means(y, bins);
+        if (bins[0].widths_in_years == 1 && !Util.differ(y[0], bins[0].avg, 0.05))
+            y[0] = bins[0].avg;
+        CurveVerifier.validate_means(y, bins);
         return y;
     }
 

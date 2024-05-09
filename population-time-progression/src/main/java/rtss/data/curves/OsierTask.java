@@ -53,8 +53,21 @@ public class OsierTask
         sc = osier.getScript();
         reply = ocall.execute(sc, true);
         osier.replyModifyBaseMortalityObject(reply);
+        
+        String funcname = null;
+        switch (mtype)
+        {
+        case QX:
+            funcname = "DeathProb";
+            break;
+        
+        case MX:
+        case QX2MX:
+            funcname = "DeathRate";
+            break;
+        }
 
-        double[] curve = getCurve("DeathProb", bins, ppy);
+        double[] curve = getCurve(funcname, bins, ppy);
         if (mtype == OsierMortalityType.QX2MX)
             curve = MortalityUtil.mx2qx(curve);
         // ocall.stop();
