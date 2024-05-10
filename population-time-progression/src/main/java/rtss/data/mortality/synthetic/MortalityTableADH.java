@@ -169,7 +169,6 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
-        
         /*
          * Tried to use Osier library (see Sigurd Dyrting, "Osier : A Library for Demographic Calculations"
          * https://www.researchgate.net/publication/325818052_Osier_A_Library_for_Demographic_Calculations).
@@ -238,6 +237,18 @@ public class MortalityTableADH
 
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
+        
+        /*
+         * Another approach to explore for mean-preserving decomposition could have been the 
+         * use of B-splines with smoothness criteria plus mean-preservation criteria, then 
+         * perhaps solved via optimization toolbox.
+         * 
+         * Also see MATLAB psplines  
+         *   https://www.mathworks.com/help/curvefit/smoothing-splines.html
+         *   https://www.mathworks.com/help/curvefit/smoothing-data.html
+         * and google ("penalized spline" source code). This can also be used to impose
+         * piece-wise monotonicity (U-shape) criteria.     
+         */
 
         return curve_pclm(bins, debug_title);
     }
