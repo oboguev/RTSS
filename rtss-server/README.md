@@ -82,4 +82,9 @@ install.packages("HMDHFDplus")
 #install.packages("MortalitySmooth")
 install.packages("https://cran.r-project.org/src/contrib/Archive/svcm/svcm_0.1.2.tar.gz", repos = NULL, type = "source")
 install.packages("https://cran.r-project.org/src/contrib/Archive/MortalitySmooth/MortalitySmooth_2.3.4.tar.gz", repos = NULL, type = "source")
+
+#
+# install packages required to use PLCM code from Eilers & Marx book "Practical Smoothing. The Joys of P-splines" (chapter 6).
+#
+install.packages("JOPS")
 ```

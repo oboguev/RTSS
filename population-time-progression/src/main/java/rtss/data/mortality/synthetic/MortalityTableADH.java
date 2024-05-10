@@ -55,8 +55,8 @@ public class MortalityTableADH
     public static final int MAX_AGE = CombinedMortalityTable.MAX_AGE;
     private static Map<String, CombinedMortalityTable> cache = new HashMap<>();
 
-    static public boolean UsePrecomputed = false; // ###
-    static public boolean UseCache = false; // ###
+    static public boolean UsePrecomputedFiles = true;
+    static public boolean UseCache = true;
 
     public static CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
     {
@@ -78,7 +78,7 @@ public class MortalityTableADH
         }
 
         // try loading from resource
-        if (UsePrecomputed)
+        if (UsePrecomputedFiles)
         {
             try
             {
@@ -169,6 +169,15 @@ public class MortalityTableADH
 
     private static double[] curve(Bin[] bins, String debug_title) throws Exception
     {
+        
+        /*
+         * Tried to use Osier library (see Sigurd Dyrting, "Osier : A Library for Demographic Calculations"
+         * https://www.researchgate.net/publication/325818052_Osier_A_Library_for_Demographic_Calculations).
+         * 
+         * Unfortunately, most of its methods work only in mx space, not qx space, and since mx -> qx transform
+         * is nonlinear, it breaks mean preservation.
+         */
+
         // mx: works but last bins are poor fit
         // qx: fails
         // curve_osier(bins, "HELIGMAN_POLLARD", "", debug_title);
