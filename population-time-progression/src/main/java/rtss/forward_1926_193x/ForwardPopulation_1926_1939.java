@@ -30,8 +30,10 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
     {
     }
 
-    public void forward() throws Exception
+    public void forward(boolean useADHInfantMortalityRate) throws Exception
     {
+        tuneInfantMortalityRate(useADHInfantMortalityRate);
+        
         /*
          * Вычислить рождаемость городского и сельского населения в 1926 году 
          */

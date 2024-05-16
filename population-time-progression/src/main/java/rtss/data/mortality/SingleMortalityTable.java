@@ -385,6 +385,11 @@ public class SingleMortalityTable
             return false;
         return ((SingleMortalityTable)x).tid.equals(tid);
     }
+    
+    public String source()
+    {
+        return source;
+    }
 
     /*****************************************************************************************************/
     
