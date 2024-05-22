@@ -339,6 +339,42 @@ public class SingleMortalityTable
     }
 
     /*****************************************************************************************************/
+
+    /*
+     * Вычислить таблицу из массива lx.
+     */
+    public static SingleMortalityTable from_lx(String path, double[] lx) throws Exception
+    {
+        return from_qx(path, lx2qx(lx));
+    }
+    
+    public static double[] lx2qx(double[] lx) throws Exception
+    {
+        if (lx.length != MAX_AGE + 1)
+            throw new IllegalArgumentException("Incorrect lx length");
+
+        if (Util.differ(lx[0], 100_000))
+            throw new IllegalArgumentException("Invalid lx[0]");
+        
+        double[] qx = new double[lx.length];
+        
+        for (int age = 0; age <= lx.length; age++)
+        {
+            if (age < lx.length && lx[age] > 0)
+            {
+                double dx = lx[age] - lx[age + 1];
+                qx[age] = dx / lx[age];
+            }
+            else
+            {
+                qx[age] = qx[age - 1] * (qx[age-1] / qx[age - 2]);
+            }
+        }
+
+        return qx;
+    }
+    
+    /*****************************************************************************************************/
     
     public void saveTable(String filepath, String comment) throws Exception
     {
