@@ -58,6 +58,7 @@ public class DoubleArray
     public void set(int age, double v) throws Exception
     {
         values[age] = Util.validate(v);
+        checkValueRange(values[age]);
     }
 
     public void add(int age, double v) throws Exception
