@@ -32,6 +32,11 @@
 			<artifactId>population-time-progression</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>rtss</groupId>
+			<artifactId>rtss-math-tools</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>
