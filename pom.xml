@@ -42,6 +42,7 @@
 	    <module>rtss-server</module>
 	    <module>rtss-tools</module>
 	    <module>ww2-losses</module>
+	    <module>rtss-mexico</module>
 	</modules>
 
 </project>
