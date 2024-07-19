@@ -29,7 +29,7 @@ public class Population
     double female_total = 0;
     double both_unknown = 0;
     double both_total = 0;
-    
+
     private DoubleArray newDoubleArray()
     {
         return new DoubleArray(MAX_AGE, ValueConstraint.NON_NEGATIVE);
@@ -49,24 +49,24 @@ public class Population
     public Population(Locality locality, double[] m, double m_unknown, double[] f, double f_unknown) throws Exception
     {
         this.locality = locality;
-        
+
         if (m.length != MAX_AGE + 1 || f.length != m.length)
             throw new IllegalArgumentException();
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             set(Gender.MALE, age, m[age]);
             set(Gender.FEMALE, age, f[age]);
         }
-        
+
         male_unknown = m_unknown;
         female_unknown = f_unknown;
 
         both = null;
         recalcTotal();
-        
+
         makeBoth();
-        
+
         validate();
     }
 
@@ -200,7 +200,7 @@ public class Population
             return null;
         }
     }
-    
+
     public double[] asArray(Gender gender) throws Exception
     {
         return forGender(gender).asUnboxedArray();
@@ -226,7 +226,7 @@ public class Population
         if (both != null)
             both_total = Util.validate(this.sum(Gender.BOTH, 0, MAX_AGE) + both_unknown);
     }
-    
+
     public double getUnknown(Gender gender) throws Exception
     {
         switch (gender)
@@ -443,7 +443,7 @@ public class Population
             double m = male.get(age);
             double f = female.get(age);
             double b = both.get(age);
-            
+
             Util.checkValid(m);
             Util.checkValid(f);
             Util.checkValid(b);
@@ -458,7 +458,7 @@ public class Population
             sum_f += f;
             sum_b += b;
         }
-        
+
         Util.checkValid(male_unknown);
         Util.checkValid(female_unknown);
         Util.checkValid(both_unknown);
@@ -470,7 +470,7 @@ public class Population
         Util.checkValid(sum_m);
         Util.checkValid(sum_f);
         Util.checkValid(sum_b);
-        
+
         if (male_unknown < 0 || female_unknown < 0 || both_unknown < 0)
             negative();
 
@@ -548,21 +548,21 @@ public class Population
         makeBoth();
         validate();
     }
-    
+
     public double[] toArray(Gender gender) throws Exception
     {
         int maxage = -1;
         DoubleArray m = forGender(gender);
         Double[] x = m.get();
-        
+
         for (int age = 0; age < x.length; age++)
         {
             if (x[age] != null)
                 maxage = Math.max(age, maxage);
         }
-        
+
         double d[] = new double[maxage + 1];
-        
+
         for (int age = 0; age <= maxage; age++)
         {
             Double v = m.get(age);
@@ -612,14 +612,14 @@ public class Population
             throw new Exception("Smoothing error");
         return d2;
     }
-    
+
     /*
      * Value returned in bin "avg" field is SUM rather than AVG
      */
     public Bin[] binSumByAge(Gender gender, final Bin[] ages) throws Exception
     {
         Bin[] bins = new Bin[ages.length];
-        
+
         for (int k = 0; k < ages.length; k++)
         {
             double sum = this.sum(gender, ages[k].age_x1, ages[k].age_x2);
@@ -627,6 +627,37 @@ public class Population
         }
 
         return Bins.bins(bins);
+    }
+
+    public void zero() throws Exception
+    {
+        zero(Gender.MALE);
+        zero(Gender.FEMALE);
+        zero(Gender.BOTH);
+    }
+    
+    public void zero(Gender gender) throws Exception
+    {
+        for (int age = 0; age <= MAX_AGE; age++)
+            set(gender, age, 0);
+
+        switch (gender)
+        {
+        case MALE:
+            male_unknown = 0;
+            male_total = 0;
+            break;
+        case FEMALE:
+            female_unknown = 0;
+            female_total = 0;
+            break;
+        case BOTH:
+            both_unknown = 0;
+            both_total = 0;
+            break;
+        default:
+            throw new IllegalArgumentException();
+        }
     }
 
     /****************************************************************************************************/
@@ -658,10 +689,10 @@ public class Population
             s = s.substring(1);
         return s;
     }
-    
-    public static final String STRUCT_014 = "0 1-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85+"; 
-    public static final String STRUCT_0459 = "0-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85+"; 
-    
+
+    public static final String STRUCT_014 = "0 1-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85+";
+    public static final String STRUCT_0459 = "0-4 5-9 10-14 15-19 20-24 25-29 30-34 35-39 40-44 45-49 50-54 55-59 60-64 65-69 70-74 75-79 80-84 85+";
+
     public String ageStructure014() throws Exception
     {
         return ageStructure(STRUCT_014);
@@ -693,16 +724,16 @@ public class Population
         case "f":
         case "female":
             return ageStructure(struct, Gender.FEMALE);
-            
+
         default:
             throw new Exception("Invalid gender selector: " + which);
         }
     }
-    
+
     public String ageStructure(String struct, Gender gender) throws Exception
     {
         StringBuilder sb = new StringBuilder();
-        
+
         double tot = sum(gender, 0, MAX_AGE);
 
         for (String s : struct.split(" "))
@@ -712,12 +743,12 @@ public class Population
             s = s.trim();
             if (s.length() == 0)
                 continue;
-            
+
             s = s.replace("+", "-" + MAX_AGE);
-            
+
             int age1;
             int age2;
-            
+
             if (s.contains("-"))
             {
                 String[] sa = s.split("-");
@@ -730,13 +761,13 @@ public class Population
             {
                 age1 = age2 = Integer.parseUnsignedInt(s);
             }
-            
+
             double v = sum(gender, age1, age2);
-            
+
             String s_age = "";
             if (age1 == age2)
             {
-                s_age += age1; 
+                s_age += age1;
             }
             else if (age2 == MAX_AGE)
             {
@@ -746,13 +777,13 @@ public class Population
             {
                 s_age += age1 + "-" + age2;
             }
-            
+
             if (sb.length() != 0)
                 sb.append("\n");
-            
+
             sb.append(String.format("%-5s %s (%.2f%%)", s_age, f2k(v), 100 * v / tot));
         }
-        
+
         return sb.toString();
     }
 }

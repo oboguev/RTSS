@@ -6,11 +6,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.FunctionRangeExtenderDirect;
-import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.util.Util;
 import rtss.util.plot.ChartXY;
 

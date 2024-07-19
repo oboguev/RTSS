@@ -15,28 +15,28 @@ public class PopulationByLocality
     private Population rural;
     private Population urban;
     private Population total;
-    
+
     private PopulationByLocality()
     {
     }
 
     public PopulationByLocality(Population total) throws Exception
     {
-        this.total = total; 
+        this.total = total;
         validate();
     }
 
     public PopulationByLocality(Population total, Population urban, Population rural) throws Exception
     {
-        this.total = total; 
-        this.urban = urban; 
+        this.total = total;
+        this.urban = urban;
         this.rural = rural;
         validate();
     }
 
     public PopulationByLocality(Population urban, Population rural) throws Exception
     {
-        this.urban = urban; 
+        this.urban = urban;
         this.rural = rural;
         recalcTotalLocalityFromUrbanRural();
         validate();
@@ -75,13 +75,13 @@ public class PopulationByLocality
     public PopulationByLocality cloneTotalOnly()
     {
         PopulationByLocality p = new PopulationByLocality();
-        
+
         if (total != null)
             p.total = total.clone();
 
         return p;
     }
-    
+
     public boolean hasRuralUrban()
     {
         return rural != null && urban != null;
@@ -91,7 +91,7 @@ public class PopulationByLocality
     {
         return total != null;
     }
-    
+
     /****************************************************************************************************/
 
     public double get(Locality locality, Gender gender, int age) throws Exception
@@ -159,13 +159,20 @@ public class PopulationByLocality
         forLocality(locality).makeBoth();
     }
 
+    public void recalcFromUrbanRuralBasic() throws Exception
+    {
+        makeBoth(Locality.RURAL);
+        makeBoth(Locality.URBAN);
+        recalcTotalLocalityFromUrbanRural();
+    }
+
     /****************************************************************************************************/
 
     public static PopulationByLocality census(Area area, int year) throws Exception
     {
         return load(String.format("population_data/%s/%d", area.name(), year));
     }
-    
+
     public static PopulationByLocality load(String path) throws Exception
     {
         PopulationByLocality p = new PopulationByLocality();
@@ -211,7 +218,7 @@ public class PopulationByLocality
 
     public void validate() throws Exception
     {
-        if (rural != null) 
+        if (rural != null)
         {
             if (rural.locality != Locality.RURAL)
                 mismatch();
@@ -224,14 +231,14 @@ public class PopulationByLocality
                 mismatch();
             urban.validate();
         }
-        
+
         if (total != null)
         {
             if (total.locality != Locality.TOTAL)
                 mismatch();
             total.validate();
         }
-        
+
         if (rural != null && urban != null)
         {
             for (int age = 0; age <= MAX_AGE; age++)
@@ -280,7 +287,7 @@ public class PopulationByLocality
     }
 
     /****************************************************************************************************/
-    
+
     public PopulationByLocality smooth(boolean doSmooth) throws Exception
     {
         PopulationByLocality p = clone();
@@ -297,7 +304,7 @@ public class PopulationByLocality
             {
                 p.total.smooth();
             }
-            
+
             validate();
         }
 
@@ -317,17 +324,17 @@ public class PopulationByLocality
         try
         {
             StringBuilder sb = new StringBuilder();
-            
+
             if (total != null)
                 sb.append(total.toString("total."));
-            
+
             if (urban != null)
             {
                 if (sb.length() != 0)
                     sb.append(" ");
                 sb.append(urban.toString("urban."));
             }
-            
+
             if (rural != null)
             {
                 if (sb.length() != 0)
@@ -343,8 +350,8 @@ public class PopulationByLocality
         }
     }
 
-    public static final String STRUCT_014 = Population.STRUCT_014; 
-    public static final String STRUCT_0459 = Population.STRUCT_0459; 
+    public static final String STRUCT_014 = Population.STRUCT_014;
+    public static final String STRUCT_0459 = Population.STRUCT_0459;
 
     public String ageStructure014() throws Exception
     {
@@ -365,25 +372,25 @@ public class PopulationByLocality
     {
         Locality locality;
         Gender gender;
-        
+
         switch (whichLocality.trim().toLowerCase())
         {
         case "total":
             locality = Locality.TOTAL;
             break;
-            
+
         case "rural":
             locality = Locality.RURAL;
             break;
-            
+
         case "urban":
             locality = Locality.URBAN;
             break;
-            
+
         default:
             throw new Exception("Invalid locality selector: " + whichLocality);
         }
-        
+
         switch (whichGender.trim().toLowerCase())
         {
         case "mf":
@@ -401,27 +408,27 @@ public class PopulationByLocality
         case "female":
             gender = Gender.FEMALE;
             break;
-            
+
         default:
             throw new Exception("Invalid gender selector: " + whichGender);
         }
 
         return ageStructure(struct, locality, gender);
     }
-    
+
     public String ageStructure(String struct, Locality locality, Gender gender) throws Exception
     {
         switch (locality)
         {
         case TOTAL:
             return total.ageStructure(struct, gender);
-            
+
         case URBAN:
             return urban.ageStructure(struct, gender);
-            
+
         case RURAL:
             return rural.ageStructure(struct, gender);
-            
+
         default:
             throw new IllegalArgumentException();
         }
