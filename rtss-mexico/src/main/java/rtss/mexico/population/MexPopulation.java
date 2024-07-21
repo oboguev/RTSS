@@ -1,3 +1,6 @@
+/**
+ * Вычислить погодовое население интерполяцией сплайном между данными перипесй. 
+ */
 package rtss.mexico.population;
 
 import java.util.ArrayList;
@@ -20,7 +23,13 @@ public class MexPopulation
     {
         try
         {
-            new MexPopulation().do_main();
+            Util.out("Население на середину года");
+            new MexPopulation().do_main(0.5);
+
+            Util.out("");
+            Util.out("Население на начало года:");
+            new MexPopulation().do_main(0.0);
+
             Util.noop();
         }
         catch (Throwable ex)
@@ -71,7 +80,7 @@ public class MexPopulation
         public long population;
     }
 
-    private void do_main() throws Exception
+    private void do_main(double offset) throws Exception
     {
         double[] x = new double[censuses.length];
         double[] y = new double[censuses.length];
@@ -91,8 +100,8 @@ public class MexPopulation
         List<Double> yy = new ArrayList<Double>();
         for (int k = 1895; k <= 2020; k++)
         {
-            xx.add(k + 0.5);
-            yy.add(f.value(k + 0.5));
+            xx.add(k + offset);
+            yy.add(f.value(k + offset));
         }
         
         ChartXY chart = new ChartXY();
@@ -100,14 +109,17 @@ public class MexPopulation
         chart.addSeries("spline", asArray(xx), asArray(yy));
         chart.display();
         
-        xx.add(2021 + 0.5);
-        yy.add((double) 127_839);
-        
-        xx.add(2022 + 0.5);
-        yy.add((double) 129_535);
-        
-        xx.add(2023 + 0.5);
-        yy.add((double) 131_230);
+        if (offset == 0.5)
+        {
+            xx.add(2021 + 0.5);
+            yy.add((double) 127_839);
+            
+            xx.add(2022 + 0.5);
+            yy.add((double) 129_535);
+            
+            xx.add(2023 + 0.5);
+            yy.add((double) 131_230);
+        }
         
         for (int k = 0; k < xx.size(); k++)
         {
