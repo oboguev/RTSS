@@ -43,6 +43,7 @@
 	    <module>rtss-tools</module>
 	    <module>ww2-losses</module>
 	    <module>rtss-mexico</module>
+	    <module>rtss-pre1917</module>
 	</modules>
 
 </project>
