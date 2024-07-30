@@ -27,79 +27,89 @@ public class Excel
      */
     public static List<List<Object>> readSheet(String path, boolean cached, String... matchingSheetNames) throws Exception
     {
-        List<List<Object>> xrows = new ArrayList<>();
         XSSFWorkbook wb = null;
 
         try
         {
             wb = loadWorkbook(path, cached);
-            FormulaEvaluator evaluator = new XSSFFormulaEvaluator(wb);
             XSSFSheet sheet = findSheet(wb, matchingSheetNames);
-            int nrow = 0;
-
-            for (Row row : toIterable(sheet.rowIterator()))
-            {
-                List<Object> xrow = new ArrayList<>();
-                int ncol = 0;
-
-                for (Cell cell : toIterable(row.cellIterator()))
-                {
-                    switch (cell.getCellType())
-                    {
-                    case BLANK:
-                        xrow.add(null);
-                        continue;
-                        
-                    default:
-                        break;
-                    }
-
-                    CellValue cv = evaluator.evaluate(cell);
-                    // Util.out(String.format("%s => %s", cell.toString(), cv.toString()));
-                    
-                    switch (cv.getCellType())
-                    {
-                    case BLANK:
-                        xrow.add(null);
-                        break;
-
-                    case STRING:
-                        xrow.add(cv.getStringValue());
-                        break;
-
-                    case BOOLEAN:
-                        xrow.add(cv.getBooleanValue());
-                        break;
-
-                    case NUMERIC:
-                        xrow.add(cv.getNumberValue());
-                        break;
-
-                    default:
-                        throw new Exception(String.format("Unsupported cell type %s in resource file %s, row=%d, col=%d",
-                                                          cell.getCellType().name(),
-                                                          path, nrow + 1, ncol + 1));
-                    }
-
-                    ncol++;
-                }
-
-                xrows.add(xrow);
-                nrow++;
-            }
+            return readSheet(wb, sheet, path);
         }
         finally
         {
             if (!cached && wb != null)
                 wb.close();
         }
-
-        return xrows;
     }
 
     private static <T> Iterable<T> toIterable(Iterator<T> it)
     {
         return () -> it;
+    }
+    
+    public static List<List<Object>> readSheet(XSSFWorkbook wb, XSSFSheet sheet, String path) throws Exception
+    {
+        List<List<Object>> xrows = new ArrayList<>();
+        FormulaEvaluator evaluator = new XSSFFormulaEvaluator(wb);
+        String sheetName = sheet.getSheetName();
+        if (sheetName == null || sheetName.trim().length() == 0)
+            sheetName = "<unnamed>";
+        
+        int nrow = 0;
+
+        for (Row row : toIterable(sheet.rowIterator()))
+        {
+            List<Object> xrow = new ArrayList<>();
+            int ncol = 0;
+
+            for (Cell cell : toIterable(row.cellIterator()))
+            {
+                switch (cell.getCellType())
+                {
+                case BLANK:
+                    xrow.add(null);
+                    continue;
+                    
+                default:
+                    break;
+                }
+
+                CellValue cv = evaluator.evaluate(cell);
+                // Util.out(String.format("%s => %s", cell.toString(), cv.toString()));
+                
+                switch (cv.getCellType())
+                {
+                case BLANK:
+                    xrow.add(null);
+                    break;
+
+                case STRING:
+                    xrow.add(cv.getStringValue());
+                    break;
+
+                case BOOLEAN:
+                    xrow.add(cv.getBooleanValue());
+                    break;
+
+                case NUMERIC:
+                    xrow.add(cv.getNumberValue());
+                    break;
+
+                default:
+                    throw new Exception(String.format("Unsupported cell type %s in resource file %s (sheet %s), row=%d, col=%d",
+                                                      cell.getCellType().name(),
+                                                      path, sheetName, 
+                                                      nrow + 1, ncol + 1));
+                }
+
+                ncol++;
+            }
+
+            xrows.add(xrow);
+            nrow++;
+        }
+        
+        return xrows;
     }
 
     private static Map<String, XSSFWorkbook> path2workbook = new HashMap<>();
@@ -113,7 +123,7 @@ public class Excel
                 XSSFWorkbook wb = path2workbook.get(path);
                 if (wb == null)
                 {
-                    wb = loadWorkbook(path, false);
+                    wb = loadWorkbook(path);
                     path2workbook.put(path, wb);
                 }
                 return wb;
@@ -121,12 +131,17 @@ public class Excel
         }
         else
         {
-            try (InputStream is = new ByteArrayInputStream(Util.loadResourceAsBytes(path)))
-            {
-                XSSFWorkbook wb = new XSSFWorkbook(is);
-                wb.getCreationHelper().createFormulaEvaluator().evaluateAll();
-                return wb;
-            }
+            return loadWorkbook(path);
+        }
+    }
+    
+    public static XSSFWorkbook loadWorkbook(String path) throws Exception
+    {
+        try (InputStream is = new ByteArrayInputStream(Util.loadResourceAsBytes(path)))
+        {
+            XSSFWorkbook wb = new XSSFWorkbook(is);
+            wb.getCreationHelper().createFormulaEvaluator().evaluateAll();
+            return wb;
         }
     }
 
