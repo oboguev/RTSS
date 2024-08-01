@@ -13,7 +13,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -46,7 +48,7 @@ public class Excel
     {
         return () -> it;
     }
-    
+
     public static List<List<Object>> readSheet(XSSFWorkbook wb, XSSFSheet sheet, String path) throws Exception
     {
         List<List<Object>> xrows = new ArrayList<>();
@@ -54,7 +56,90 @@ public class Excel
         String sheetName = sheet.getSheetName();
         if (sheetName == null || sheetName.trim().length() == 0)
             sheetName = "<unnamed>";
-        
+
+        int nr1 = sheet.getFirstRowNum();
+        int nr2 = sheet.getLastRowNum();
+
+        for (int nr = 0; nr <= nr2; nr++)
+        {
+            List<Object> xrow = new ArrayList<>();
+
+            if (nr >= nr1 && sheet.getRow(nr) != null)
+            {
+                XSSFRow row = sheet.getRow(nr);
+                int nc1 = row.getFirstCellNum();
+                int nc2 = row.getLastCellNum();
+                for (int nc = 0; nc <= nc2; nc++)
+                {
+                    if (nc < nc1)
+                    {
+                        xrow.add(null);
+                    }
+                    else
+                    {
+                        XSSFCell cell = row.getCell(nc,  Row.MissingCellPolicy.RETURN_NULL_AND_BLANK);
+                        
+                        if (cell == null)
+                        {
+                            xrow.add(null);
+                            continue;
+                        }
+
+                        switch (cell.getCellType())
+                        {
+                        case BLANK:
+                            xrow.add(null);
+                            continue;
+
+                        default:
+                            break;
+                        }
+
+                        CellValue cv = evaluator.evaluate(cell);
+                        // Util.out(String.format("%s => %s", cell.toString(), cv.toString()));
+
+                        switch (cv.getCellType())
+                        {
+                        case BLANK:
+                            xrow.add(null);
+                            break;
+
+                        case STRING:
+                            xrow.add(cv.getStringValue());
+                            break;
+
+                        case BOOLEAN:
+                            xrow.add(cv.getBooleanValue());
+                            break;
+
+                        case NUMERIC:
+                            xrow.add(cv.getNumberValue());
+                            break;
+
+                        default:
+                            throw new Exception(String.format("Unsupported cell type %s in resource file %s (sheet %s), row=%d, col=%d",
+                                                              cell.getCellType().name(),
+                                                              path, sheetName,
+                                                              nr + 1, nc + 1));
+                        }
+                    }
+                }
+            }
+            
+            xrows.add(xrow);
+        }
+
+        return xrows;
+    }
+
+    public static List<List<Object>> readSheet_old(XSSFWorkbook wb, XSSFSheet sheet, String path) throws Exception
+    {
+        List<List<Object>> xrows = new ArrayList<>();
+        FormulaEvaluator evaluator = new XSSFFormulaEvaluator(wb);
+        String sheetName = sheet.getSheetName();
+        if (sheetName == null || sheetName.trim().length() == 0)
+            sheetName = "<unnamed>";
+
         int nrow = 0;
 
         for (Row row : toIterable(sheet.rowIterator()))
@@ -69,14 +154,14 @@ public class Excel
                 case BLANK:
                     xrow.add(null);
                     continue;
-                    
+
                 default:
                     break;
                 }
 
                 CellValue cv = evaluator.evaluate(cell);
                 // Util.out(String.format("%s => %s", cell.toString(), cv.toString()));
-                
+
                 switch (cv.getCellType())
                 {
                 case BLANK:
@@ -98,7 +183,7 @@ public class Excel
                 default:
                     throw new Exception(String.format("Unsupported cell type %s in resource file %s (sheet %s), row=%d, col=%d",
                                                       cell.getCellType().name(),
-                                                      path, sheetName, 
+                                                      path, sheetName,
                                                       nrow + 1, ncol + 1));
                 }
 
@@ -108,7 +193,7 @@ public class Excel
             xrows.add(xrow);
             nrow++;
         }
-        
+
         return xrows;
     }
 
@@ -134,7 +219,7 @@ public class Excel
             return loadWorkbook(path);
         }
     }
-    
+
     public static XSSFWorkbook loadWorkbook(String path) throws Exception
     {
         try (InputStream is = new ByteArrayInputStream(Util.loadResourceAsBytes(path)))

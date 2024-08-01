@@ -71,7 +71,7 @@ public class Territory
         if (aliases.containsKey(ter))
             ter = aliases.get(ter);
 
-        if (ter.equals("Еьлецкая"))
+        if (ter.startsWith("1894."))
         {
             Util.noop();
         }
