@@ -98,8 +98,17 @@ public class LoadData
 
                 if (!headers.containsKey("губ"))
                     throw new Exception("Нет колоники для губернии");
-                int gc = headers.get("губ");
-                scanGubColumn(rc, gc);
+                if (!headers.containsKey("год"))
+                    throw new Exception("Нет колоники для год");
+                
+                int gcol = headers.get("губ");
+                int ycol = headers.get("год");
+                scanGubColumn(rc, gcol);
+                scanMultiYearColumn(rc, gcol, ycol, headers, "р");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "с");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чж в сл. году");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чр");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чу");
             }
         }
     }
@@ -176,18 +185,117 @@ public class LoadData
         }
     }
 
+    private void scanMultiYearColumn(List<List<Object>> rc, int gcol, int ycol, Map<String, Integer> headers, String what) throws Exception
+    {
+        if (!headers.containsKey(what))
+            return;
+        int wcol = headers.get(what);
+        
+        String gub = null;
+        
+        double avg_sum = 0;
+        double avg_count = 0;
+
+        for (int nr = 1; nr < rc.size(); nr++)
+        {
+            // губ
+            Object o = RC.get(rc, nr, gcol);
+            if (o == null)
+                o = "";
+            String xgub = o.toString();
+            xgub = TerritoryNames.canonic(xgub);
+            if (xgub.length() != 0)
+                gub = xgub;
+            
+            // год
+            o = RC.get(rc, nr, ycol);
+            if (o == null)
+                o = "";
+            int year;
+            if (o.toString().trim().equals(""))
+            {
+                continue;
+            }
+            else if (o.toString().trim().equals("сред"))
+            {
+                year = -1;
+            }
+            else
+            {
+                year = (int) (long) asLong(o);
+            }
+            
+            // what-value
+            o = RC.get(rc, nr, wcol);
+            if (o == null)
+                o = "";
+            switch (o.toString().trim())
+            {
+            case "":
+            case "-":
+                continue;
+            default:
+                break;
+                
+            }
+            
+            String xwhat = what;
+            if (what.equals("чж в сл. году") && year != -1)
+            {
+                xwhat = "чж";
+                year += 1;
+            }
+            
+            if (typeof(xwhat) == Long.class)
+            {
+                long v = asLong(o);
+                if (year >= 0)
+                {
+                    territoryYear(gub, year).setValue(xwhat, v);
+                    avg_sum += v;
+                    avg_count++;
+                }
+                else
+                {
+                    double avg = avg_sum / avg_count;
+                    if (Util.False && Math.abs(avg - v) > 1)
+                        throw new Exception("Averages differ");
+                }
+            }
+            else if (typeof(xwhat) == Double.class)
+            {
+                double v = asDouble(o);
+                if (year >= 0)
+                {
+                    territoryYear(gub, year).setValue(xwhat, v);
+                    avg_sum += v;
+                    avg_count++;
+                }
+                else
+                {
+                    double avg = avg_sum / avg_count;
+                    if (Util.False && Math.abs(avg - v) > 0.1)
+                        throw new Exception("Averages differ");
+                }
+            }
+        }
+    }
+    
     private Class typeof(String what) throws Exception
     {
         switch (what)
         {
+        case "чж в сл. году":
         case "чж":
         case "чр":
         case "чу":
             return Long.class;
+
         case "р":
         case "с":
         case "п":
             return Double.class;
+        
         default:
             throw new Exception("Invalid selector");
         }
@@ -208,60 +316,67 @@ public class LoadData
         
         if (typeof(what) == Double.class)
         {
-            Double v = null;
-            
-            if (o instanceof Double)
-            {
-                v = (Double) o;
-            }
-            else if (o instanceof Long)
-            {
-                v = ((Long) o).doubleValue();
-            }
-            else if (o instanceof Integer)
-            {
-                v = ((Integer) o).doubleValue();
-            }
-            else if (o instanceof String)
-            {
-                v = Double.parseDouble(so);
-            }
-            else
-            {
-                throw new Exception("Invalid cell data type (for expected Double)");
-            }
-            
-            territoryYear(gub, year).setValue(what, v);
+            territoryYear(gub, year).setValue(what, asDouble(o));
         }
         else if (typeof(what) == Long.class)
         {
-            Long v = null;
-            
-            if (o instanceof Long)
-            {
-                v = ((Long) o).longValue();
-            }
-            else if (o instanceof Integer)
-            {
-                v = ((Integer) o).longValue();
-            }
-            else if (o instanceof String)
-            {
-                v = Long.parseLong(so);
-            }
-            else if (o instanceof Double)
-            {
-                double dv = (Double) o;
-                v = Math.round(dv);
-                if (dv - v != 0)
-                    throw new Exception("Expected cell value: long/integer, actual: double");
-            }
-            else
-            {
-                throw new Exception("Invalid cell data type (for expected Long)");
-            }
-
-            territoryYear(gub, year).setValue(what, v);
+            territoryYear(gub, year).setValue(what, asLong(o));
+        }
+    }
+    
+    private double asDouble(Object o) throws Exception
+    {
+        if (o instanceof Double)
+        {
+            return (Double) o;
+        }
+        else if (o instanceof Long)
+        {
+            return ((Long) o).doubleValue();
+        }
+        else if (o instanceof Integer)
+        {
+            return ((Integer) o).doubleValue();
+        }
+        else if (o instanceof String)
+        {
+            String so = o.toString();
+            so = Util.despace(so).trim();
+            return Double.parseDouble(so);
+        }
+        else
+        {
+            throw new Exception("Invalid cell data type (for expected Double)");
+        }
+    }
+    
+    private Long asLong(Object o) throws Exception
+    {
+        if (o instanceof Long)
+        {
+            return ((Long) o).longValue();
+        }
+        else if (o instanceof Integer)
+        {
+            return ((Integer) o).longValue();
+        }
+        else if (o instanceof String)
+        {
+            String so = o.toString();
+            so = Util.despace(so).trim();
+            return Long.parseLong(so);
+        }
+        else if (o instanceof Double)
+        {
+            double dv = (Double) o;
+            long v = Math.round(dv);
+            if (dv - v != 0)
+                throw new Exception("Expected cell value: long/integer, actual: double");
+            return v;
+        }
+        else
+        {
+            throw new Exception("Invalid cell data type (for expected Long)");
         }
     }
 
