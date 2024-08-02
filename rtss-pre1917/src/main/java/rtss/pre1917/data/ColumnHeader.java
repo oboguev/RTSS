@@ -8,7 +8,9 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import rtss.util.Util;
@@ -29,28 +31,42 @@ public class ColumnHeader
     public static List<ColumnHeader> getHeaders(XSSFSheet sheet,  List<List<Object>> rc) throws Exception
     {
         List<ColumnHeader> headers = new ArrayList<>();
-     
-        int nrow = 0;
-        for (Row row : toIterable(sheet.rowIterator()))
+        
+        int nr1 = sheet.getFirstRowNum();
+        int nr2 = sheet.getLastRowNum();
+
+        for (int nr = 0; nr <= nr2; nr++)
         {
-            int ncol = 0;
-            for (Cell cell : toIterable(row.cellIterator()))
+            if (nr >= nr1 && sheet.getRow(nr) != null)
             {
-                if (isHeaderCellStyle(sheet,  cell))
+                XSSFRow row = sheet.getRow(nr);
+                int nc1 = row.getFirstCellNum();
+                int nc2 = row.getLastCellNum();
+                
+                for (int nc = 0; nc <= nc2; nc++)
                 {
-                    Object o = RC.get(rc, nrow, ncol);
-                    if (o == null)
-                        continue;
-                    String text = o.toString().trim();
-                    text = Util.despace(text);
-                    if (text.length() == 0)
-                        continue;
-                    
-                    headers.add(new ColumnHeader(text, nrow, ncol));
+                    if (nc >= nc1)
+                    {
+                        XSSFCell cell = row.getCell(nc,  Row.MissingCellPolicy.RETURN_NULL_AND_BLANK);
+                        if (cell != null)
+                        {
+                            if (isHeaderCellStyle(sheet,  cell))
+                            {
+                                Object o = RC.get(rc, nr, nc);
+                                if (o == null)
+                                    continue;
+                                String text = o.toString().trim();
+                                text = Util.despace(text);
+                                if (text.length() == 0)
+                                    continue;
+                                
+                                headers.add(new ColumnHeader(text, nr, nc));
+                            }
+                        }
+                    }
+
                 }
-                ncol++;
             }
-            nrow++;
         }
      
         return headers;
@@ -61,11 +77,6 @@ public class ColumnHeader
         int fx = cell.getCellStyle().getFontIndex();
         XSSFFont font = sheet.getWorkbook().getFontAt(fx);
         return font.getBold();
-    }
-
-    private static <T> Iterable<T> toIterable(Iterator<T> it)
-    {
-        return () -> it;
     }
 
     public static Map<String, Integer> getTopHeaders(XSSFSheet sheet,  List<List<Object>> rc) throws Exception

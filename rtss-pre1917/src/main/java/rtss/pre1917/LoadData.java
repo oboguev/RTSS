@@ -31,7 +31,7 @@ public class LoadData
             ex.printStackTrace();
         }
     }
-    
+
     private Map<String, Territory> territories = new HashMap<>();
 
     public Map<String, Territory> loadAllData() throws Exception
@@ -51,7 +51,7 @@ public class LoadData
         loadUGVI("1912");
         loadUGVI("1913");
         loadUGVI("1914");
-        
+
         return territories;
     }
 
@@ -100,7 +100,7 @@ public class LoadData
                     throw new Exception("Нет колоники для губернии");
                 if (!headers.containsKey("год"))
                     throw new Exception("Нет колоники для год");
-                
+
                 int gcol = headers.get("губ");
                 int ycol = headers.get("год");
                 scanGubColumn(rc, gcol);
@@ -130,7 +130,8 @@ public class LoadData
                 break;
             }
 
-            if (h.startsWith("р ") ||
+            if (h.startsWith("v") ||
+                h.startsWith("р ") ||
                 h.startsWith("с ") ||
                 h.startsWith("п ") ||
                 h.startsWith("чж ") ||
@@ -190,9 +191,9 @@ public class LoadData
         if (!headers.containsKey(what))
             return;
         int wcol = headers.get(what);
-        
+
         String gub = null;
-        
+
         double avg_sum = 0;
         double avg_count = 0;
 
@@ -206,7 +207,7 @@ public class LoadData
             xgub = TerritoryNames.canonic(xgub);
             if (xgub.length() != 0)
                 gub = xgub;
-            
+
             // год
             o = RC.get(rc, nr, ycol);
             if (o == null)
@@ -224,7 +225,7 @@ public class LoadData
             {
                 year = (int) (long) asLong(o);
             }
-            
+
             // what-value
             o = RC.get(rc, nr, wcol);
             if (o == null)
@@ -236,16 +237,16 @@ public class LoadData
                 continue;
             default:
                 break;
-                
+
             }
-            
+
             String xwhat = what;
             if (what.equals("чж в сл. году") && year != -1)
             {
                 xwhat = "чж";
                 year += 1;
             }
-            
+
             if (typeof(xwhat) == Long.class)
             {
                 long v = asLong(o);
@@ -280,7 +281,7 @@ public class LoadData
             }
         }
     }
-    
+
     private Class typeof(String what) throws Exception
     {
         switch (what)
@@ -295,7 +296,7 @@ public class LoadData
         case "с":
         case "п":
             return Double.class;
-        
+
         default:
             throw new Exception("Invalid selector");
         }
@@ -310,10 +311,10 @@ public class LoadData
         so = Util.despace(so).trim();
         if (so.length() == 0)
             return;
-        
+
         if (so.equals("-"))
             return;
-        
+
         if (typeof(what) == Double.class)
         {
             territoryYear(gub, year).setValue(what, asDouble(o));
@@ -323,7 +324,7 @@ public class LoadData
             territoryYear(gub, year).setValue(what, asLong(o));
         }
     }
-    
+
     private double asDouble(Object o) throws Exception
     {
         if (o instanceof Double)
@@ -349,7 +350,7 @@ public class LoadData
             throw new Exception("Invalid cell data type (for expected Double)");
         }
     }
-    
+
     private Long asLong(Object o) throws Exception
     {
         if (o instanceof Long)
@@ -383,10 +384,10 @@ public class LoadData
     private TerritoryYear territoryYear(String gub, int year)
     {
         Territory t = territories.get(gub);
-        
+
         if (t == null)
         {
-            t  = new Territory(gub);
+            t = new Territory(gub);
             territories.put(gub, t);
         }
 
