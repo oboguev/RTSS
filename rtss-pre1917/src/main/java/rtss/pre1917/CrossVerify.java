@@ -13,10 +13,10 @@ public class CrossVerify
 {
     public void verify(Map<String, Territory> territories)
     {
-        calc_1893(territories);
-        check_population_jump(territories);
+        // calc_1893(territories);
+        // check_population_jump(territories);
         
-        
+        // ### check taxonomy sums
         // ### population jump year-to-next over 2%
         // ### population jump  mismatching births - deaths
         // ### implied (calculated) CBR or CDR mismatching listed

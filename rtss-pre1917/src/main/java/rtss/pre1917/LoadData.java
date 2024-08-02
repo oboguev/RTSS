@@ -36,6 +36,8 @@ public class LoadData
 
     public Map<String, Territory> loadAllData() throws Exception
     {
+        loadUGVI("1891");
+        loadUGVI("1892");
         loadUGVI("1893-1895", 1893, 1895);
         loadUGVI("1896-1901", 1896, 1901);
         loadUGVI("1902");
