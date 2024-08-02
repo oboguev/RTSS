@@ -51,6 +51,8 @@ public class LoadData
         loadUGVI("1912");
         loadUGVI("1913");
         loadUGVI("1914");
+        
+        new CrossVerify().verify(territories);
 
         return territories;
     }
