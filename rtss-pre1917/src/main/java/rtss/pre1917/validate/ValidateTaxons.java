@@ -15,7 +15,7 @@ public class ValidateTaxons
         TerritoryDataSet t2 = territories.dup();
         t2.evalTaxon("Империя", true);
 
-        for (int year = 1891; year <= 1914; year++)
+        for (int year = 1891; year <= 1915; year++)
         {
             Taxon tx = Taxon.of("Империя", year);
             Set<String> txnames = tx.allCompositeSubTaxons(true);
@@ -41,17 +41,18 @@ public class ValidateTaxons
         TerritoryYear ty = ter.territoryYear(year);
         TerritoryYear ty2 = ter2.territoryYear(year);
 
-        if (differ(ty.population, ty2.population))
+        if (differ(ty.population, ty2.population, 0.005))
         {
-            msg = String.format("Taxon differs: %s %d population listed=%,3d calculated=%,3d", 
-                                txname, year, ty.population, ty2.population);
+            msg = String.format("Taxon differs: %s %d population listed=%,3d calculated=%,3d diff=%.2f%%",
+                                txname, year, ty.population, ty2.population, 
+                                pctDiff(ty.population, ty2.population));
             Util.out(msg);
         }
 
-        // ###
+        // ### validate births, deaths, cbr, cdr
     }
 
-    private boolean differ(Long a, Long b)
+    private boolean differ(Long a, Long b, double tolerance)
     {
         if (a == null || b == null)
             return false;
@@ -59,15 +60,29 @@ public class ValidateTaxons
             return false;
         if (a == 0 && b == 0)
             return false;
-        return Math.abs(a - b) / Math.max(a, b) > 0.01;
+        return (double) Math.abs(a - b) / (double) Math.max(a, b) > tolerance;
     }
 
-    private boolean differ(Double a, Double b)
+    private boolean differ(Double a, Double b, double tolerance)
     {
         if (a == null || b == null)
             return false;
         if (a == 0 && b == 0)
             return false;
-        return Math.abs(a - b) / Math.max(a, b) > 0.05;
+        return Math.abs(a - b) / Math.max(a, b) > tolerance;
+    }
+
+    private double pctDiff(double a, double b)
+    {
+        double min = Math.min(a, b);
+        double max = Math.max(a, b);
+        if (min > 0)
+        {
+            return 100 * (max - min) / min;
+        }
+        else
+        {
+            return 100 * (max - min) / max;
+        }
     }
 }

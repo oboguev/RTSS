@@ -58,7 +58,7 @@ public class CrossVerify
         {
             int previous_year = -1;
             long previous_population = 0;
-            for (int year = 1893; year <= 1914; year++)
+            for (int year = 1893; year <= 1915; year++)
             {
                 TerritoryYear ty = ter.territoryYear(year);
                 

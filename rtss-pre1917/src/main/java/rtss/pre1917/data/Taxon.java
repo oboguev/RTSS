@@ -69,7 +69,7 @@ public class Taxon
                     .add("Плоцкая")
                     .add("Радомская")
                     .add("Сувалкская");
-            if (year <= 1912)
+            if (year <= 1913)
                 t.add("Седлецкая");
             break;
 

@@ -18,7 +18,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
 
     public void evalTaxon(String name, boolean overwrite)
     {
-        for (int year = 1891; year <= 1914; year++)
+        for (int year = 1891; year <= 1915; year++)
             evalTaxon(name, year, overwrite);
     }
 
