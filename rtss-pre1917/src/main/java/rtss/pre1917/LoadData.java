@@ -286,7 +286,7 @@ public class LoadData
         }
     }
 
-    private Class typeof(String what) throws Exception
+    private Class<?> typeof(String what) throws Exception
     {
         switch (what)
         {
