@@ -12,6 +12,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.validate.CrossVerify;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 
@@ -22,7 +23,7 @@ public class LoadData
         try
         {
             new LoadData().loadAllData();
-            TerritoryNames.printSeen();
+            // TerritoryNames.printSeen();
             Util.out("** Done");
         }
         catch (Throwable ex)

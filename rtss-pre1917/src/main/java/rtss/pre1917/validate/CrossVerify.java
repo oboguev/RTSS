@@ -1,4 +1,4 @@
-package rtss.pre1917;
+package rtss.pre1917.validate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,10 +13,7 @@ public class CrossVerify
 {
     public void verify(TerritoryDataSet territories)
     {
-        TerritoryDataSet t2 = territories.dup();
-        t2.evalTaxon("Империя", true);
-        Util.noop();
-        
+        new ValidateTaxons().validate_taxons(territories);
         // calc_1893(territories);
         // check_population_jump(territories);
         

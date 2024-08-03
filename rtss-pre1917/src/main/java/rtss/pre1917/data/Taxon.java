@@ -1,11 +1,15 @@
 package rtss.pre1917.data;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Taxon
 {
     public final Map<String, Double> territories = new HashMap<>();
+    private String name;
+    private int year;
 
     private Taxon add(String name)
     {
@@ -21,6 +25,8 @@ public class Taxon
     public static Taxon of(String name, int year)
     {
         Taxon t = new Taxon();
+        t.name = name;
+        t.year = year;
 
         switch (name)
         {
@@ -177,5 +183,24 @@ public class Taxon
         add("Ярославская");
         if (year >= 1914)
             add("Ростовское и./Д град.");
+    }
+    
+    public Set<String> allCompositeSubTaxons(boolean self)
+    {
+        Set<String> xs = new HashSet<String>();
+        allCompositeSubTaxons(xs);
+        if (self)
+            xs.add(name);
+        return xs;
+    }
+    
+    private void allCompositeSubTaxons(Set<String> xs)
+    {
+        for (String xname : territories.keySet())
+        {
+            Taxon tx = of(xname, year);
+            if (tx != null)
+                xs.addAll(tx.allCompositeSubTaxons(true));
+        }
     }
 }
