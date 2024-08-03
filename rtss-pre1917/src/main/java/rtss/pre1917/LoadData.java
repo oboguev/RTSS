@@ -1,6 +1,5 @@
 package rtss.pre1917;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import rtss.pre1917.data.ColumnHeader;
 import rtss.pre1917.data.RC;
 import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
@@ -32,9 +32,9 @@ public class LoadData
         }
     }
 
-    private Map<String, Territory> territories = new HashMap<>();
+    private TerritoryDataSet territories = new TerritoryDataSet();
 
-    public Map<String, Territory> loadAllData() throws Exception
+    public TerritoryDataSet loadAllData() throws Exception
     {
         loadUGVI("1891");
         loadUGVI("1892");

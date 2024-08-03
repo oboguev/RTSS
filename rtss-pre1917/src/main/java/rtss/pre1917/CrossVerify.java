@@ -3,16 +3,20 @@ package rtss.pre1917;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
 public class CrossVerify
 {
-    public void verify(Map<String, Territory> territories)
+    public void verify(TerritoryDataSet territories)
     {
+        TerritoryDataSet t2 = territories.dup();
+        t2.evalTaxon("Империя", true);
+        Util.noop();
+        
         // calc_1893(territories);
         // check_population_jump(territories);
         
@@ -26,7 +30,7 @@ public class CrossVerify
     /**
      * Вычислить население на начало 1893 года по косвенным данным
      */
-    private void calc_1893(Map<String, Territory> territories)
+    private void calc_1893(TerritoryDataSet territories)
     {
         for (Territory ter : territories.values())
         {
@@ -49,7 +53,7 @@ public class CrossVerify
         }
     }
     
-    private void check_population_jump(Map<String, Territory> territories)
+    private void check_population_jump(TerritoryDataSet territories)
     {
         List<String> msgs = new ArrayList<>(); 
         

@@ -8,7 +8,7 @@ public class TerritoryYear
         this.year = year;
     }
 
-    public final Territory territory;
+    public Territory territory;
     public final int year;
 
     /*
@@ -79,5 +79,17 @@ public class TerritoryYear
         default:
             throw new Exception("Invalid selector");
         }
+    }
+    
+    public TerritoryYear dup()
+    {
+        TerritoryYear ty = new TerritoryYear(this.territory, this.year);
+        ty.cbr = this.cbr;
+        ty.cdr = this.cdr;
+        ty.ngr = this.ngr;
+        ty.population = this.population;
+        ty.births = this.births;
+        ty.deaths = this.deaths;
+        return ty;
     }
 }
