@@ -64,6 +64,9 @@ public class ValidateTaxons
                                 pctDiff(ty.deaths, ty2.deaths));
             Util.out(msg);
         }
+        
+        // Число смертей в Сибири (уезды) в 1902 расходится на 20 тыс. с пообластными данными
+
 
         // ### validate deaths, cbr, cdr
     }
