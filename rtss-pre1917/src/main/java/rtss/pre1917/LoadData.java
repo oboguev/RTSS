@@ -69,6 +69,10 @@ public class LoadData
             for (int k = 0; k < wb.getNumberOfSheets(); k++)
             {
                 XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+                
                 List<List<Object>> rc = Excel.readSheet(wb, sheet, fpath);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
                 validateHeaders(headers);
@@ -98,6 +102,10 @@ public class LoadData
             for (int k = 0; k < wb.getNumberOfSheets(); k++)
             {
                 XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+                
                 List<List<Object>> rc = Excel.readSheet(wb, sheet, fpath);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
 
