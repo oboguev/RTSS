@@ -57,7 +57,15 @@ public class ValidateTaxons
             Util.out(msg);
         }
 
-        // ### validate births, deaths, cbr, cdr
+        if (differ(ty.deaths, ty2.deaths, 0.01))
+        {
+            msg = String.format("Taxon differs: %s %d deaths listed=%,3d calculated=%,3d diff=%.2f%%",
+                                txname, year, ty.deaths, ty2.deaths, 
+                                pctDiff(ty.deaths, ty2.deaths));
+            Util.out(msg);
+        }
+
+        // ### validate deaths, cbr, cdr
     }
 
     private boolean differ(Long a, Long b, double tolerance)
