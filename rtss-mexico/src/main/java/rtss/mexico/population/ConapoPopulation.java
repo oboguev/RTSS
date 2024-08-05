@@ -14,6 +14,9 @@ import rtss.mexico.util.RC;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 
+/**
+ * Численность населения Мексики по CONAPO
+ */
 public class ConapoPopulation
 {
     public static void main(String[] args)
@@ -133,8 +136,6 @@ public class ConapoPopulation
             
             Util.out(String.format("%s %d", year, count));
         }
-        
-        Util.noop();
     }
     
     private String asString(List<List<Object>> rc, int nr, int nc) throws Exception
