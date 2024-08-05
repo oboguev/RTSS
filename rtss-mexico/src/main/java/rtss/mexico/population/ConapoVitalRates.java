@@ -21,7 +21,7 @@ public class ConapoVitalRates
         try
         {
             org.apache.poi.util.IOUtils.setByteArrayMaxOverride(300_000_000);
-            Util.out("Рождаемость и смертность населения Мексики:");
+            Util.out("Рождаемость, смертность и суммарный коэффициент рождаемости населения Мексики:");
             Util.out("");
             new ConapoVitalRates().do_main("conapo/ConDem50a19_ProyPob20a70/5_Indicadores_demográficos_proyecciones.xlsx");
 
@@ -49,12 +49,13 @@ public class ConapoVitalRates
 
     private void do_process(List<List<Object>> rc, Map<String, Integer> headers) throws Exception
     {
-        Util.out("год рождаемость смертность");
+        Util.out("год рождаемость смертность СКР");
         
         int ixYear = ColumnHeader.getRequiredHeader(headers, "AÑO");
         int ixEntityCode = ColumnHeader.getRequiredHeader(headers, "CVE_GEO");
         int ixCBR = ColumnHeader.getRequiredHeader(headers, "T_BRU_NAT");
         int ixCDR = ColumnHeader.getRequiredHeader(headers, "T_BRU_MOR");
+        int ixTFR = ColumnHeader.getRequiredHeader(headers, "TGF");
 
         for (int nr = 1; nr < rc.size(); nr++)
         {
@@ -64,7 +65,8 @@ public class ConapoVitalRates
                 int year = asInt(rc, nr, ixYear);
                 double cbr = asDouble(rc, nr, ixCBR);
                 double cdr = asDouble(rc, nr, ixCDR);
-                Util.out(String.format("%d %.1f %.1f", year, cbr, cdr ));
+                double tfr = asDouble(rc, nr, ixTFR);
+                Util.out(String.format("%d %.1f %.1f %.1f", year, cbr, cdr, tfr));
             }
         }
     }
