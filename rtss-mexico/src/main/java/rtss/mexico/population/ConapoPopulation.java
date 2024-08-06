@@ -24,11 +24,23 @@ public class ConapoPopulation
         try
         {
             org.apache.poi.util.IOUtils.setByteArrayMaxOverride(300_000_000);
-            Util.out("Население Мексики на середину года:");
-            Util.out("");
-            new ConapoPopulation().do_main("conapo/ConDem50a19_ProyPob20a70/0_Pob_Mitad_1950_2070.xlsx");
 
-            Util.noop();
+            if (Util.True)
+            {
+                Util.out("=======================================================");
+                Util.out("Население Мексики на середину года:");
+                Util.out("");
+                new ConapoPopulation().do_main("conapo/ConDem50a19_ProyPob20a70/0_Pob_Mitad_1950_2070.xlsx");
+            }
+
+            if (Util.True)
+            {
+                Util.out("");
+                Util.out("=======================================================");
+                Util.out("Население Мексики на начало года:");
+                Util.out("");
+                new ConapoPopulation().do_main("conapo/ConDem50a19_ProyPob20a70/0_Pob_Inicio_1950_2070.xlsx");
+            }
         }
         catch (Throwable ex)
         {

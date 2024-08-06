@@ -14,6 +14,9 @@ public class CrossVerify
     public void verify(TerritoryDataSet territories)
     {
         new ValidateTaxons().validate_taxons(territories);
+        validate_vital_rates(territories);
+        
+        
         // calc_1893(territories);
         // check_population_jump(territories);
         
@@ -22,6 +25,48 @@ public class CrossVerify
         // ### population jump  mismatching births - deaths
         // ### implied (calculated) CBR or CDR mismatching listed
         // ### back-calculate population
+    }
+    
+    private void validate_vital_rates(TerritoryDataSet territories)
+    {
+        String msg;
+        
+        for (Territory ter : territories.values())
+        {
+            for (int year = 1891; year <= 1915; year++)
+            {
+                TerritoryYear ty = ter.territoryYear(year);
+                TerritoryYear ty2 = ter.territoryYear(year + 1);
+                
+                if (ty.population != null && ty.births != null && ty.cbr != null)
+                {
+                    /*
+                     * pop1: 1029 mismatches
+                     * popm: 933 mismatches
+                     * pop2: 693 mismatches
+                     * ty2.population: 153 mismatches
+                     */
+                    long pop1 = ty.population;
+                    long pop2 = ty.population + ty.births - ty.deaths;
+                    long popm = (pop1 + pop2) / 2;
+                    double cbr = (1000.0 * ty.births) / pop2;
+                    
+                    if (Util.True)
+                    {
+                        if (ty2.population == null)
+                            continue;
+                        cbr = (1000.0 * ty.births) / ty2.population;
+                    }
+                    
+                    if (Math.abs(cbr - ty.cbr) > 0.2)
+                    {
+                        msg = String.format("CBR differs: %s %d listed=%.1f calculated=%.1f, diff=%.1f", 
+                                            ter.name, year, ty.cbr, cbr, cbr - ty.cbr);
+                        Util.out(msg);
+                    }
+                }
+            }
+        }
     }
     
     /**
