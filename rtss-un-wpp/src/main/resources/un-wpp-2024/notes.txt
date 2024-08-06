@@ -1,0 +1,3 @@
+UN World Population Prospects 2024
+https://population.un.org/wpp/Download/Standard/MostUsed
+https://population.un.org/wpp/Download/Files/1_Indicator%20(Standard)/EXCEL_FILES/1_General/WPP2024_GEN_F01_DEMOGRAPHIC_INDICATORS_FULL.xlsx

@@ -44,6 +44,7 @@
 	    <module>ww2-losses</module>
 	    <module>rtss-mexico</module>
 	    <module>rtss-pre1917</module>
+	    <module>rtss-un-wpp</module>
 	</modules>
 
 </project>
