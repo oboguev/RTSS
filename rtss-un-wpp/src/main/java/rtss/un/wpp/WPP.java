@@ -121,9 +121,110 @@ public class WPP implements AutoCloseable
     /**
      * Extract country values year -> (key -> value)
      */
-    public Map<Integer, Map<String, Object>> getCountryValues(String country)
+    public Map<Integer, Map<String, Object>> getCountryValues(String country) throws Exception
     {
+        for (int nr = iyTitleRow + 1; nr < rc.size(); nr++)
+        {
+            List<Object> row = rc.get(nr);
+            Object oc = row.get(ixCountry);
+            Object oy = row.get(ixYear); 
+            if (oc == null || oy == null)
+                continue;
+            
+            String xcountry = Util.despace(country.toString()).trim();
+            if (country.equals(xcountry))
+            {
+                int year = asInt(oy); 
+            }
+            
+        }
         // ###
         return null;
+    }
+
+    private double asDouble(Object o) throws Exception
+    {
+        if (o instanceof Double)
+        {
+            return (Double) o;
+        }
+        else if (o instanceof Long)
+        {
+            return ((Long) o).doubleValue();
+        }
+        else if (o instanceof Integer)
+        {
+            return ((Integer) o).doubleValue();
+        }
+        else if (o instanceof String)
+        {
+            String so = o.toString();
+            so = Util.despace(so).trim();
+            return Double.parseDouble(so);
+        }
+        else
+        {
+            throw new Exception("Invalid cell data type (for expected Double)");
+        }
+    }
+
+    private Long asLong(Object o) throws Exception
+    {
+        if (o instanceof Long)
+        {
+            return ((Long) o).longValue();
+        }
+        else if (o instanceof Integer)
+        {
+            return ((Integer) o).longValue();
+        }
+        else if (o instanceof String)
+        {
+            String so = o.toString();
+            so = Util.despace(so).trim();
+            return Long.parseLong(so);
+        }
+        else if (o instanceof Double)
+        {
+            double dv = (Double) o;
+            long v = Math.round(dv);
+            if (dv - v != 0)
+                throw new Exception("Expected cell value: long/integer, actual: double");
+            return v;
+        }
+        else
+        {
+            throw new Exception("Invalid cell data type (for expected Long)");
+        }
+    }
+
+    private Integer asInt(Object o) throws Exception
+    {
+        if (o instanceof Long)
+        {
+            return ((Long) o).intValue();
+        }
+        else if (o instanceof Integer)
+        {
+            return ((Integer) o).intValue();
+        }
+        else if (o instanceof String)
+        {
+            String so = o.toString();
+            so = Util.despace(so).trim();
+            return Integer.parseInt(so);
+        }
+        else if (o instanceof Double)
+        {
+            double dv = (Double) o;
+            long v = Math.round(dv);
+            if (dv - v != 0)
+                throw new Exception("Expected cell value: long/integer, actual: double");
+            return (int) v;
+        }
+        else
+        {
+            throw new Exception("Invalid cell data type (for expected Integer)");
+        }
     }
 }
