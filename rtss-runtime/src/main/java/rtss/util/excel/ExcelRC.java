@@ -24,6 +24,14 @@ public class ExcelRC extends ArrayList<List<Object>>
     }
 
     /* =================================================================== */
+    
+    public boolean isEmpty(int nr, int nc) throws Exception
+    {
+        String s = asString(nr, nc);
+        return s == null || s.length() == 0;
+    }
+
+    /* =================================================================== */
 
     public String asString(int nr, int nc) throws Exception
     {
