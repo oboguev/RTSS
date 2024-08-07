@@ -70,7 +70,7 @@ public class WPP implements AutoCloseable
         }
     }
     
-    private Object rc(int row, int col)
+    public static Object rc(List<List<Object>> rc, int row, int col)
     {
         if (row >= rc.size())
             return null;
@@ -78,6 +78,11 @@ public class WPP implements AutoCloseable
         if (col >= r.size())
             return null;
         return r.get(col);
+    }
+    
+    public Object rc(int row, int col)
+    {
+        return rc(this.rc, row, col);
     }
     
     private void locateTitleRow() throws Exception
@@ -151,8 +156,33 @@ public class WPP implements AutoCloseable
         return m;
     }
 
-    @SuppressWarnings("unused")
-    private double asDouble(Object o) throws Exception
+    /* ============================================================================================ */
+    
+    public String asString(int nr, int nc) throws Exception
+    {
+        return asString(rc(nr, nc));
+    }
+    
+    public static String asString(Object o) throws Exception
+    {
+        if (o == null)
+            return null;
+        String s = o.toString();
+        s = Util.despace(s).trim();
+        return s;
+    }
+    
+    public double asDouble(int nr, int nc) throws Exception
+    {
+        return asDouble(rc(nr, nc));
+    }
+
+    public static double asDouble(List<List<Object>> rc, int nr, int nc) throws Exception
+    {
+        return asDouble(rc(rc, nr, nc));
+    }
+
+    public static Double asDouble(Object o) throws Exception
     {
         if (o instanceof Double)
         {
@@ -177,9 +207,13 @@ public class WPP implements AutoCloseable
             throw new Exception("Invalid cell data type (for expected Double)");
         }
     }
+    
+    public long asLong(int nr, int nc) throws Exception
+    {
+        return asLong(rc(nr, nc));
+    }
 
-    @SuppressWarnings("unused")
-    private Long asLong(Object o) throws Exception
+    public static Long asLong(Object o) throws Exception
     {
         if (o instanceof Long)
         {
@@ -209,7 +243,17 @@ public class WPP implements AutoCloseable
         }
     }
 
-    private Integer asInt(Object o) throws Exception
+    public int asInt(int nr, int nc) throws Exception
+    {
+        return asInt(rc(nr, nc));
+    }
+
+    public static int asInt(List<List<Object>> rc, int nr, int nc) throws Exception
+    {
+        return asInt(rc(rc, nr, nc));
+    }
+
+    public static Integer asInt(Object o) throws Exception
     {
         if (o instanceof Long)
         {

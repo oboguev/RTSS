@@ -76,13 +76,13 @@ public class MexVitalRates
 
         for (int nr = 1; nr < rc.size(); nr++)
         {
-            int entityCode = asInt(rc, nr, ixEntityCode);
+            int entityCode = WPP.asInt(rc, nr, ixEntityCode);
             if (entityCode == 0) 
             {
-                int year = asInt(rc, nr, ixYear);
-                double cbr = asDouble(rc, nr, ixCBR);
-                double cdr = asDouble(rc, nr, ixCDR);
-                double tfr = asDouble(rc, nr, ixTFR);
+                int year = WPP.asInt(rc, nr, ixYear);
+                double cbr = WPP.asDouble(rc, nr, ixCBR);
+                double cdr = WPP.asDouble(rc, nr, ixCDR);
+                double tfr = WPP.asDouble(rc, nr, ixTFR);
                 Util.out(String.format("%d %.1f %.1f %.1f", year, cbr, cdr, tfr));
             }
         }
@@ -111,19 +111,19 @@ public class MexVitalRates
                 {
                     if (key.toLowerCase().contains("Crude Birth Rate".toLowerCase()))
                     {
-                        cbr = asDouble(m.get(key));
+                        cbr = WPP.asDouble(m.get(key));
                     }
                     else if (key.toLowerCase().contains("Crude Death Rate".toLowerCase()))
                     {
-                        cdr = asDouble(m.get(key));
+                        cdr = WPP.asDouble(m.get(key));
                     }
                     else if (key.toLowerCase().contains("Total Fertility Rate".toLowerCase()))
                     {
-                        tfr = asDouble(m.get(key));
+                        tfr = WPP.asDouble(m.get(key));
                     }
                     else if (key.toLowerCase().contains("Net Reproduction Rate".toLowerCase()))
                     {
-                        nrr = asDouble(m.get(key));
+                        nrr = WPP.asDouble(m.get(key));
                     }
                 }
                 
@@ -138,64 +138,5 @@ public class MexVitalRates
             return "-";
         else
             return String.format("%.1f", v);
-    }
-    
-    /* ============================================================================================ */
-
-    @SuppressWarnings("unused")
-    private String asString(List<List<Object>> rc, int nr, int nc) throws Exception
-    {
-        return asString(RC.get(rc, nr, nc));
-    }
-    
-    private String asString(Object o) throws Exception
-    {
-        if (o == null)
-            return null;
-        String s = o.toString();
-        s = Util.despace(s).trim();
-        return s;
-    }
-
-    private int asInt(List<List<Object>> rc, int nr, int nc) throws Exception
-    {
-        return asInt(RC.get(rc, nr, nc));
-    }
-
-    private int asInt(Object o) throws Exception
-    {
-        if (o == null)
-            throw new Exception("Missing integer data");
-
-        if (o instanceof Integer)
-            return ((Integer) o).intValue();
-
-        if (o instanceof Long)
-            return ((Long) o).intValue();
-
-        String s = asString(o);
-        if (s.endsWith(".0"))
-            s = Util.stripTail(s, ".0");
-        return Integer.parseInt(s);
-    }
-
-    private double asDouble(List<List<Object>> rc, int nr, int nc) throws Exception
-    {
-        return asDouble(RC.get(rc, nr, nc));
-    }
-    
-    private double asDouble(Object o) throws Exception
-    {
-        if (o == null)
-            throw new Exception("Missing double data");
-
-        if (o instanceof Double)
-            return (Double) o;
-
-        if (o instanceof Float)
-            return (Float) o;
-
-        String s = asString(o);
-        return Double.parseDouble(s);
     }
 }

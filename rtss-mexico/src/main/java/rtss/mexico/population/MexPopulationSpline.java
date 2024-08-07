@@ -17,18 +17,18 @@ import rtss.util.plot.ChartXY;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
-public class MexSplinePopulation
+public class MexPopulationSpline
 {
     public static void main(String[] args)
     {
         try
         {
             Util.out("Население на середину года");
-            new MexSplinePopulation().do_main(0.5);
+            new MexPopulationSpline().do_main(0.5);
 
             Util.out("");
             Util.out("Население на начало года:");
-            new MexSplinePopulation().do_main(0.0);
+            new MexPopulationSpline().do_main(0.0);
 
             Util.noop();
         }
