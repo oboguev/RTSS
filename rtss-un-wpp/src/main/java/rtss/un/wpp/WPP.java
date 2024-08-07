@@ -10,12 +10,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.util.Util;
 import rtss.util.excel.Excel;
+import rtss.util.excel.ExcelRC;
 
 public class WPP implements AutoCloseable
 {
     private XSSFWorkbook wb;
     private XSSFSheet sheet;
-    private List<List<Object>> rc;
+    private ExcelRC rc;
     private int iyTitleRow;
     private int ixCountry;
     private int ixYear;
@@ -141,7 +142,7 @@ public class WPP implements AutoCloseable
             String xcountry = Util.despace(oc.toString()).trim();
             if (xcountry.equals(country))
             {
-                int year = asInt(oy);
+                int year = ExcelRC.asInt(oy);
                 if (m.containsKey(year))
                     throw new Exception("Duplicate year data");
                 
@@ -160,126 +161,21 @@ public class WPP implements AutoCloseable
     
     public String asString(int nr, int nc) throws Exception
     {
-        return asString(rc(nr, nc));
-    }
-    
-    public static String asString(Object o) throws Exception
-    {
-        if (o == null)
-            return null;
-        String s = o.toString();
-        s = Util.despace(s).trim();
-        return s;
+        return rc.asString(nr, nc);
     }
     
     public double asDouble(int nr, int nc) throws Exception
     {
-        return asDouble(rc(nr, nc));
+        return rc.asRequiredDouble(nr, nc);
     }
 
-    public static double asDouble(List<List<Object>> rc, int nr, int nc) throws Exception
-    {
-        return asDouble(rc(rc, nr, nc));
-    }
-
-    public static Double asDouble(Object o) throws Exception
-    {
-        if (o instanceof Double)
-        {
-            return (Double) o;
-        }
-        else if (o instanceof Long)
-        {
-            return ((Long) o).doubleValue();
-        }
-        else if (o instanceof Integer)
-        {
-            return ((Integer) o).doubleValue();
-        }
-        else if (o instanceof String)
-        {
-            String so = o.toString();
-            so = Util.despace(so).trim();
-            return Double.parseDouble(so);
-        }
-        else
-        {
-            throw new Exception("Invalid cell data type (for expected Double)");
-        }
-    }
-    
     public long asLong(int nr, int nc) throws Exception
     {
-        return asLong(rc(nr, nc));
-    }
-
-    public static Long asLong(Object o) throws Exception
-    {
-        if (o instanceof Long)
-        {
-            return ((Long) o).longValue();
-        }
-        else if (o instanceof Integer)
-        {
-            return ((Integer) o).longValue();
-        }
-        else if (o instanceof String)
-        {
-            String so = o.toString();
-            so = Util.despace(so).trim();
-            return Long.parseLong(so);
-        }
-        else if (o instanceof Double)
-        {
-            double dv = (Double) o;
-            long v = Math.round(dv);
-            if (dv - v != 0)
-                throw new Exception("Expected cell value: long/integer, actual: double");
-            return v;
-        }
-        else
-        {
-            throw new Exception("Invalid cell data type (for expected Long)");
-        }
+        return rc.asRequiredLong(nr, nc);
     }
 
     public int asInt(int nr, int nc) throws Exception
     {
-        return asInt(rc(nr, nc));
-    }
-
-    public static int asInt(List<List<Object>> rc, int nr, int nc) throws Exception
-    {
-        return asInt(rc(rc, nr, nc));
-    }
-
-    public static Integer asInt(Object o) throws Exception
-    {
-        if (o instanceof Long)
-        {
-            return ((Long) o).intValue();
-        }
-        else if (o instanceof Integer)
-        {
-            return ((Integer) o).intValue();
-        }
-        else if (o instanceof String)
-        {
-            String so = o.toString();
-            so = Util.despace(so).trim();
-            return Integer.parseInt(so);
-        }
-        else if (o instanceof Double)
-        {
-            double dv = (Double) o;
-            long v = Math.round(dv);
-            if (dv - v != 0)
-                throw new Exception("Expected cell value: long/integer, actual: double");
-            return (int) v;
-        }
-        else
-        {
-            throw new Exception("Invalid cell data type (for expected Integer)");
-        }
+        return rc.asRequiredInt(nr, nc);
     }
 }

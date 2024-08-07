@@ -7,7 +7,7 @@ import rtss.util.Util;
 
 /**
  * Excel sheet values (RC or row-column style).
- * Row-wise first.
+ * Row-wise first (rows of columns).
  */
 public class ExcelRC extends ArrayList<List<Object>>
 {
@@ -79,7 +79,7 @@ public class ExcelRC extends ArrayList<List<Object>>
         }
     }
 
-    public double asRequiedDouble(int nr, int nc) throws Exception
+    public double asRequiredDouble(int nr, int nc) throws Exception
     {
         return asRequiredDouble(get(nr, nc));
     }
@@ -117,6 +117,9 @@ public class ExcelRC extends ArrayList<List<Object>>
         {
             String so = o.toString();
             so = Util.despace(so).trim();
+            if (so.equals(""))
+                return null;
+            so = so.replace(",", "");
             return Long.parseLong(so);
         }
         else if (o instanceof Double)
@@ -171,6 +174,9 @@ public class ExcelRC extends ArrayList<List<Object>>
         {
             String so = o.toString();
             so = Util.despace(so).trim();
+            if (so.equals(""))
+                return null;
+            so = so.replace(",", "");
             return Integer.parseInt(so);
         }
         else if (o instanceof Double)

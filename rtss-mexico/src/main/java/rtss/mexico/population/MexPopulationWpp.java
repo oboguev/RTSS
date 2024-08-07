@@ -8,6 +8,7 @@ import java.util.Map;
 import rtss.un.wpp.WPP;
 import rtss.un.wpp.WPP2024;
 import rtss.util.Util;
+import rtss.util.excel.ExcelRC;
 
 public class MexPopulationWpp
 {
@@ -51,11 +52,11 @@ public class MexPopulationWpp
                 {
                     if (key.toLowerCase().contains("Total Population, as of 1 January".toLowerCase()))
                     {
-                        pi = WPP.asDouble(m.get(key));
+                        pi = ExcelRC.asDouble(m.get(key));
                     }
                     else if (key.toLowerCase().contains("Total Population, as of 1 July ".toLowerCase()))
                     {
-                        pm = WPP.asDouble(m.get(key));
+                        pm = ExcelRC.asDouble(m.get(key));
                     }
                 }
                 

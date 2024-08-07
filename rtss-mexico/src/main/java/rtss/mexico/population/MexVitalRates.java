@@ -77,13 +77,13 @@ public class MexVitalRates
 
         for (int nr = 1; nr < rc.size(); nr++)
         {
-            int entityCode = WPP.asInt(rc, nr, ixEntityCode);
+            int entityCode = rc.asRequiredInt(nr, ixEntityCode);
             if (entityCode == 0) 
             {
-                int year = WPP.asInt(rc, nr, ixYear);
-                double cbr = WPP.asDouble(rc, nr, ixCBR);
-                double cdr = WPP.asDouble(rc, nr, ixCDR);
-                double tfr = WPP.asDouble(rc, nr, ixTFR);
+                int year = rc.asRequiredInt(nr, ixYear);
+                double cbr = rc.asRequiredDouble(nr, ixCBR);
+                double cdr = rc.asRequiredDouble(nr, ixCDR);
+                double tfr = rc.asRequiredDouble(nr, ixTFR);
                 Util.out(String.format("%d %.1f %.1f %.1f", year, cbr, cdr, tfr));
             }
         }
@@ -112,19 +112,19 @@ public class MexVitalRates
                 {
                     if (key.toLowerCase().contains("Crude Birth Rate".toLowerCase()))
                     {
-                        cbr = WPP.asDouble(m.get(key));
+                        cbr = ExcelRC.asRequiredDouble(m.get(key));
                     }
                     else if (key.toLowerCase().contains("Crude Death Rate".toLowerCase()))
                     {
-                        cdr = WPP.asDouble(m.get(key));
+                        cdr = ExcelRC.asRequiredDouble(m.get(key));
                     }
                     else if (key.toLowerCase().contains("Total Fertility Rate".toLowerCase()))
                     {
-                        tfr = WPP.asDouble(m.get(key));
+                        tfr = ExcelRC.asRequiredDouble(m.get(key));
                     }
                     else if (key.toLowerCase().contains("Net Reproduction Rate".toLowerCase()))
                     {
-                        nrr = WPP.asDouble(m.get(key));
+                        nrr = ExcelRC.asRequiredDouble(m.get(key));
                     }
                 }
                 
