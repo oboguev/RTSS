@@ -12,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import rtss.util.Util;
+import rtss.util.excel.ExcelRC;
 
 public class ColumnHeader
 {
@@ -26,7 +27,7 @@ public class ColumnHeader
         this.col = col;
     }
     
-    public static List<ColumnHeader> getHeaders(XSSFSheet sheet,  List<List<Object>> rc) throws Exception
+    public static List<ColumnHeader> getHeaders(XSSFSheet sheet,  ExcelRC rc) throws Exception
     {
         List<ColumnHeader> headers = new ArrayList<>();
         
@@ -51,7 +52,7 @@ public class ColumnHeader
                         {
                             if (isHeaderCellStyle(sheet,  cell))
                             {
-                                Object o = RC.get(rc, nr, nc);
+                                Object o = rc.get(nr, nc);
                                 if (o == null)
                                     continue;
                                 String text = o.toString().trim();
@@ -76,7 +77,7 @@ public class ColumnHeader
         return true;
     }
 
-    public static Map<String, Integer> getTopHeaders(XSSFSheet sheet,  List<List<Object>> rc) throws Exception
+    public static Map<String, Integer> getTopHeaders(XSSFSheet sheet,  ExcelRC rc) throws Exception
     {
         Map<String, Integer> m = new HashMap<>();
         

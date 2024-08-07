@@ -1,13 +1,11 @@
 package rtss.pre1917;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.data.ColumnHeader;
-import rtss.pre1917.data.RC;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
@@ -15,6 +13,7 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
+import rtss.util.excel.ExcelRC;
 
 public class LoadData
 {
@@ -73,7 +72,7 @@ public class LoadData
                 if (sname != null && sname.trim().toLowerCase().contains("note"))
                     continue;
                 
-                List<List<Object>> rc = Excel.readSheet(wb, sheet, fpath);
+                ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
                 validateHeaders(headers);
 
@@ -106,7 +105,7 @@ public class LoadData
                 if (sname != null && sname.trim().toLowerCase().contains("note"))
                     continue;
                 
-                List<List<Object>> rc = Excel.readSheet(wb, sheet, fpath);
+                ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
 
                 if (!headers.containsKey("губ"))
@@ -158,11 +157,11 @@ public class LoadData
         }
     }
 
-    private void scanGubColumn(List<List<Object>> rc, int gcol) throws Exception
+    private void scanGubColumn(ExcelRC rc, int gcol) throws Exception
     {
         for (int nr = 1; nr < rc.size(); nr++)
         {
-            Object o = RC.get(rc, nr, gcol);
+            Object o = rc.get(nr, gcol);
             if (o == null)
                 o = "";
             String gub = o.toString();
@@ -170,7 +169,7 @@ public class LoadData
         }
     }
 
-    private void scanYearColumn(List<List<Object>> rc, int gcol, Map<String, Integer> headers, String what) throws Exception
+    private void scanYearColumn(ExcelRC rc, int gcol, Map<String, Integer> headers, String what) throws Exception
     {
         for (String h : headers.keySet())
         {
@@ -182,24 +181,24 @@ public class LoadData
         }
     }
 
-    private void scanYearColumn(List<List<Object>> rc, int gcol, String what, int year, int wcol) throws Exception
+    private void scanYearColumn(ExcelRC rc, int gcol, String what, int year, int wcol) throws Exception
     {
         for (int nr = 1; nr < rc.size(); nr++)
         {
-            Object o = RC.get(rc, nr, gcol);
+            Object o = rc.get(nr, gcol);
             if (o == null)
                 o = "";
             String gub = o.toString();
             gub = TerritoryNames.canonic(gub);
             if (gub.length() != 0)
             {
-                o = RC.get(rc, nr, wcol);
+                o = rc.get(nr, wcol);
                 setValue(gub, year, what, o);
             }
         }
     }
 
-    private void scanMultiYearColumn(List<List<Object>> rc, int gcol, int ycol, Map<String, Integer> headers, String what) throws Exception
+    private void scanMultiYearColumn(ExcelRC rc, int gcol, int ycol, Map<String, Integer> headers, String what) throws Exception
     {
         if (!headers.containsKey(what))
             return;
@@ -213,7 +212,7 @@ public class LoadData
         for (int nr = 1; nr < rc.size(); nr++)
         {
             // губ
-            Object o = RC.get(rc, nr, gcol);
+            Object o = rc.get(nr, gcol);
             if (o == null)
                 o = "";
             String xgub = o.toString();
@@ -222,7 +221,7 @@ public class LoadData
                 gub = xgub;
 
             // год
-            o = RC.get(rc, nr, ycol);
+            o = rc.get(nr, ycol);
             if (o == null)
                 o = "";
             int year;
@@ -240,7 +239,7 @@ public class LoadData
             }
 
             // what-value
-            o = RC.get(rc, nr, wcol);
+            o = rc.get(nr, wcol);
             if (o == null)
                 o = "";
             switch (o.toString().trim())

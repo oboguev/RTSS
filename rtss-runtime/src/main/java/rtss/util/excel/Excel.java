@@ -49,9 +49,9 @@ public class Excel
         return () -> it;
     }
 
-    public static List<List<Object>> readSheet(XSSFWorkbook wb, XSSFSheet sheet, String path) throws Exception
+    public static ExcelRC readSheet(XSSFWorkbook wb, XSSFSheet sheet, String path) throws Exception
     {
-        List<List<Object>> xrows = new ArrayList<>();
+        ExcelRC xrows = new ExcelRC();
         FormulaEvaluator evaluator = new XSSFFormulaEvaluator(wb);
         String sheetName = sheet.getSheetName();
         if (sheetName == null || sheetName.trim().length() == 0)
@@ -132,9 +132,9 @@ public class Excel
         return xrows;
     }
 
-    public static List<List<Object>> readSheet_old(XSSFWorkbook wb, XSSFSheet sheet, String path) throws Exception
+    public static ExcelRC readSheet_old(XSSFWorkbook wb, XSSFSheet sheet, String path) throws Exception
     {
-        List<List<Object>> xrows = new ArrayList<>();
+        ExcelRC xrows = new ExcelRC();
         FormulaEvaluator evaluator = new XSSFFormulaEvaluator(wb);
         String sheetName = sheet.getSheetName();
         if (sheetName == null || sheetName.trim().length() == 0)

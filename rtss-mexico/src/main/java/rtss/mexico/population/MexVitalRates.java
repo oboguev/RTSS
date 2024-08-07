@@ -11,6 +11,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import rtss.mexico.util.ColumnHeader;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
+import rtss.util.excel.ExcelRC;
+
 import rtss.un.wpp.WPP;
 import rtss.un.wpp.WPP2024;
 
@@ -57,13 +59,13 @@ public class MexVitalRates
             if (wb.getNumberOfSheets() != 1)
                 throw new Exception("Unexpected multiple sheets in file");
             XSSFSheet sheet = wb.getSheetAt(0);
-            List<List<Object>> rc = Excel.readSheet(wb, sheet, fpath);
+            ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
             Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
             do_conapo_process(rc, headers);
         }
     }
 
-    private void do_conapo_process(List<List<Object>> rc, Map<String, Integer> headers) throws Exception
+    private void do_conapo_process(ExcelRC rc, Map<String, Integer> headers) throws Exception
     {
         Util.out("год рождаемость смертность СКР");
         

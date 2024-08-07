@@ -10,9 +10,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.mexico.util.ColumnHeader;
-import rtss.mexico.util.RC;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
+import rtss.util.excel.ExcelRC;
 
 /**
  * Численность населения Мексики по CONAPO
@@ -56,7 +56,7 @@ public class MexPopulationConapo
             if (wb.getNumberOfSheets() != 1)
                 throw new Exception("Unexpected multiple sheets in file");
             XSSFSheet sheet = wb.getSheetAt(0);
-            List<List<Object>> rc = Excel.readSheet(wb, sheet, fpath);
+            ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
             Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
             do_process(rc, headers);
         }
@@ -76,7 +76,7 @@ public class MexPopulationConapo
     
     private Map<Integer, YearData> years = new HashMap<>(); 
     
-    private void do_process(List<List<Object>> rc, Map<String, Integer> headers) throws Exception
+    private void do_process(ExcelRC rc, Map<String, Integer> headers) throws Exception
     {
         int ixYear = ColumnHeader.getRequiredHeader(headers, "AÑO");
         int ixEntityCode = ColumnHeader.getRequiredHeader(headers, "CVE_GEO");
@@ -150,9 +150,9 @@ public class MexPopulationConapo
         }
     }
     
-    private String asString(List<List<Object>> rc, int nr, int nc) throws Exception
+    private String asString(ExcelRC rc, int nr, int nc) throws Exception
     {
-        Object o = RC.get(rc, nr, nc);
+        Object o = rc.get(nr, nc);
         if (o == null)
             return null;
         String s = o.toString();
@@ -160,9 +160,9 @@ public class MexPopulationConapo
         return s;
     }
 
-    private int asInt(List<List<Object>> rc, int nr, int nc) throws Exception
+    private int asInt(ExcelRC rc, int nr, int nc) throws Exception
     {
-        Object o = RC.get(rc, nr, nc);
+        Object o = rc.get(nr, nc);
         
         if (o == null)
             throw new Exception("Missing integer data");
