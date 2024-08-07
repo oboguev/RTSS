@@ -82,13 +82,13 @@ public class WPP implements AutoCloseable
     
     private void locateTitleRow() throws Exception
     {
-        for (int nr = 0; nr < 100 && nr <= rc.size(); nr++)
+        for (int nr = 0; nr < 100 && nr < rc.size(); nr++)
         {
             Object c0 = rc(nr, 0);
             Object c1 = rc(nr, 1);
             Object c2 = rc(nr, 2);
             
-            if (c0 != null && c1 != null && c2 != null);
+            if (c0 != null && c1 != null && c2 != null)
             {
                 String s0 = c0.toString().trim();
                 String s1 = c1.toString().trim();
@@ -121,8 +121,10 @@ public class WPP implements AutoCloseable
     /**
      * Extract country values year -> (key -> value)
      */
-    public Map<Integer, Map<String, Object>> getCountryValues(String country) throws Exception
+    public Map<Integer, Map<String, Object>> forCountry(String country) throws Exception
     {
+        Map<Integer, Map<String, Object>> m = new HashMap<>();
+        
         for (int nr = iyTitleRow + 1; nr < rc.size(); nr++)
         {
             List<Object> row = rc.get(nr);
@@ -131,17 +133,25 @@ public class WPP implements AutoCloseable
             if (oc == null || oy == null)
                 continue;
             
-            String xcountry = Util.despace(country.toString()).trim();
-            if (country.equals(xcountry))
+            String xcountry = Util.despace(oc.toString()).trim();
+            if (xcountry.equals(country))
             {
-                int year = asInt(oy); 
+                int year = asInt(oy);
+                if (m.containsKey(year))
+                    throw new Exception("Duplicate year data");
+                
+                Map<String, Object> mm = new HashMap<>();
+                m.put(year, mm);
+                
+                for (String title : columnTitles.keySet())
+                    mm.put(title, row.get(columnTitles.get(title)));
             }
-            
         }
-        // ###
-        return null;
+
+        return m;
     }
 
+    @SuppressWarnings("unused")
     private double asDouble(Object o) throws Exception
     {
         if (o instanceof Double)
@@ -168,6 +178,7 @@ public class WPP implements AutoCloseable
         }
     }
 
+    @SuppressWarnings("unused")
     private Long asLong(Object o) throws Exception
     {
         if (o instanceof Long)

@@ -95,6 +95,7 @@ public class ValidateTaxons
         return (double) Math.abs(a - b) / (double) Math.max(a, b) > tolerance;
     }
 
+    @SuppressWarnings("unused")
     private boolean differ(Double a, Double b, double tolerance)
     {
         if (a == null || b == null)

@@ -48,6 +48,7 @@ public class CrossVerify
                      */
                     long pop1 = ty.population;
                     long pop2 = ty.population + ty.births - ty.deaths;
+                    @SuppressWarnings("unused")
                     long popm = (pop1 + pop2) / 2;
                     double cbr = (1000.0 * ty.births) / pop2;
                     
