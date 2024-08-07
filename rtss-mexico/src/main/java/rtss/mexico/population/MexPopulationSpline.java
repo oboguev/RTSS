@@ -40,6 +40,7 @@ public class MexPopulationSpline
     }
 
     static Census[] censuses = {
+                                 // год, месяц, дата, численность
                                  new Census(1895, 10, 20, 12_700),
                                  new Census(1900, 10, 28, 13_607),
                                  new Census(1910, 10, 27, 15_160),
