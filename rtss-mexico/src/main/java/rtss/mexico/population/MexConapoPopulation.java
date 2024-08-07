@@ -17,7 +17,7 @@ import rtss.util.excel.Excel;
 /**
  * Численность населения Мексики по CONAPO
  */
-public class ConapoPopulation
+public class MexConapoPopulation
 {
     public static void main(String[] args)
     {
@@ -30,7 +30,7 @@ public class ConapoPopulation
                 Util.out("=======================================================");
                 Util.out("Население Мексики на середину года:");
                 Util.out("");
-                new ConapoPopulation().do_main("conapo/ConDem50a19_ProyPob20a70/0_Pob_Mitad_1950_2070.xlsx");
+                new MexConapoPopulation().do_main("conapo/ConDem50a19_ProyPob20a70/0_Pob_Mitad_1950_2070.xlsx");
             }
 
             if (Util.True)
@@ -39,7 +39,7 @@ public class ConapoPopulation
                 Util.out("=======================================================");
                 Util.out("Население Мексики на начало года:");
                 Util.out("");
-                new ConapoPopulation().do_main("conapo/ConDem50a19_ProyPob20a70/0_Pob_Inicio_1950_2070.xlsx");
+                new MexConapoPopulation().do_main("conapo/ConDem50a19_ProyPob20a70/0_Pob_Inicio_1950_2070.xlsx");
             }
         }
         catch (Throwable ex)

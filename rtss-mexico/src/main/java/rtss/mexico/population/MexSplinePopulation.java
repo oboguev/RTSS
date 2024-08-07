@@ -1,5 +1,5 @@
 /**
- * Вычислить погодовое население интерполяцией сплайном между данными перипесй. 
+ * Вычислить погодовое население Мексики интерполяцией сплайном между данными периписей. 
  */
 package rtss.mexico.population;
 
@@ -17,18 +17,18 @@ import rtss.util.plot.ChartXY;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
-public class MexPopulation
+public class MexSplinePopulation
 {
     public static void main(String[] args)
     {
         try
         {
             Util.out("Население на середину года");
-            new MexPopulation().do_main(0.5);
+            new MexSplinePopulation().do_main(0.5);
 
             Util.out("");
             Util.out("Население на начало года:");
-            new MexPopulation().do_main(0.0);
+            new MexSplinePopulation().do_main(0.0);
 
             Util.noop();
         }
