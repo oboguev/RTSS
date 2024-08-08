@@ -1,5 +1,8 @@
 package rtss.mexico.population;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +49,8 @@ public class MexPopulationCombineEstimates
 
     private void do_combine_process(ExcelRC rc, Map<String, Integer> headers) throws Exception
     {
+        Map<Integer,Double> y2p = new HashMap<>();
+        
         int ixYear = ColumnHeader.getRequiredHeader(headers, "год");
         int ixA = ColumnHeader.getRequiredHeader(headers, "А");
         int ixB = ColumnHeader.getRequiredHeader(headers, "Б");
@@ -62,22 +67,48 @@ public class MexPopulationCombineEstimates
             Set<Double> xs = new HashSet<>();
             
             int year = rc.asRequiredInt(nr, ixYear);
-            addUnique(xs, rc.asDouble(nr, ixA)); 
-            addUnique(xs, rc.asDouble(nr, ixB)); 
-            addUnique(xs, rc.asDouble(nr, ixV)); 
-            addUnique(xs, rc.asDouble(nr, ixG)); 
-            addUnique(xs, rc.asDouble(nr, ixD)); 
-            // add(xs, rc.asDouble(nr, ixE)); 
+            
+            Double pa = rc.asDouble(nr, ixA); 
+            Double pb = rc.asDouble(nr, ixB); 
+            Double pv = rc.asDouble(nr, ixV); 
+            Double pg = rc.asDouble(nr, ixG); 
+            Double pd = rc.asDouble(nr, ixD);
+            
+            if (pb != null)
+            {
+                pb = pa;
+                pb = null;
+            }
 
-            Double e = rc.asDouble(nr, ixE);
+            addUnique(xs, pa); 
+            addUnique(xs, pb); 
+            addUnique(xs, pv); 
+            addUnique(xs, pg); 
+            addUnique(xs, pd); 
+
+            Double pe = rc.asDouble(nr, ixE);
             
             Double v = average(xs);
             
             if (v == null)
-                v = e;
-            else if (e != null)
-                v = 1.0/3 * v + 2.0/3 * e;
+                v = pe;
+            else if (pe != null)
+                v = 1.0/3 * v + 2.0/3 * pe;
             
+            y2p.put(year, v);
+        }
+        
+        List<Integer> years = new ArrayList<>(y2p.keySet());
+        Collections.sort(years);
+        
+        interpolate(y2p, 1946, 1953);
+        
+        years = new ArrayList<>(y2p.keySet());
+        Collections.sort(years);
+        for (int year : years)
+        {
+            Double v = y2p.get(year);
+
             String sv = "";
             if (v != null) 
                 sv = String.format("%,3d", Math.round(v));
@@ -93,7 +124,7 @@ public class MexPopulationCombineEstimates
 
         for (double v : xs)
         {
-            if (Math.abs(v - d) < 1)
+            if (Math.abs(v - d) <= 1)
                 return;
         }
         
@@ -110,5 +141,20 @@ public class MexPopulationCombineEstimates
             v += x;
         
         return v / xs.size();
+    }
+
+    private void interpolate(Map<Integer,Double> m, int y1, int y2)
+    {
+        double yv1 = m.get(y1);
+        double yv2 = m.get(y2);
+        
+        double ym = Math.pow(yv2 / yv1, 1.0 / (y2 - y1));
+
+        double v = yv1;
+        for (int y = y1 + 1; y < y2; y++)
+        {
+            v *= ym;
+            m.put(y, v);
+        }
     }
 }
