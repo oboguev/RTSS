@@ -1,5 +1,7 @@
 package rtss.pre1917.data;
 
+import rtss.util.Util;
+
 public class TerritoryYear
 {
     public TerritoryYear(Territory territory, int year)
@@ -29,6 +31,8 @@ public class TerritoryYear
 
     public void setValue(String what, Double v) throws Exception
     {
+        interceptSetValue(what);
+        
         switch (what)
         {
         case "р":
@@ -56,28 +60,44 @@ public class TerritoryYear
 
     public void setValue(String what, Long v) throws Exception
     {
+        interceptSetValue(what);
+
         switch (what)
         {
         case "чж":
             if (population != null)
-                throw new Exception("Duplicate value");
+                duplicateValue(what);
             population = v;
             break;
 
         case "чр":
             if (births != null)
-                throw new Exception("Duplicate value");
+                duplicateValue(what);
             births = v;
             break;
         
         case "чу":
             if (deaths != null)
-                throw new Exception("Duplicate value");
+                duplicateValue(what);
             deaths = v;
             break;
         
         default:
             throw new Exception("Invalid selector");
+        }
+    }
+    
+    private void duplicateValue(String what) throws Exception
+    {
+        throw new Exception(String.format("Duplicate value %s for %s %d", what, territory.name, year));
+    }
+    
+    private void interceptSetValue(String what)
+    {
+        if (Util.True)
+        {
+            if (year == 1897 && what.equals("чж") && territory.name.equals("Область войска Донского"))
+                Util.noop();
         }
     }
     
