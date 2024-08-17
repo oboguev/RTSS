@@ -29,10 +29,25 @@ public class TerritoryYear
     public Long births;
     public Long deaths;
 
+    public Long population_urban_male;
+    public Long population_urban_female;
+    public Long population_rural_male;
+    public Long population_rural_female;
+
+    public Long births_urban_male;
+    public Long births_urban_female;
+    public Long births_rural_male;
+    public Long births_rural_female;
+
+    public Long deaths_urban_male;
+    public Long deaths_urban_female;
+    public Long deaths_rural_male;
+    public Long deaths_rural_female;
+
     public void setValue(String what, Double v) throws Exception
     {
         interceptSetValue(what);
-        
+
         switch (what)
         {
         case "р":
@@ -46,13 +61,13 @@ public class TerritoryYear
                 throw new Exception("Duplicate value");
             cdr = v;
             break;
-        
+
         case "п":
             if (ngr != null)
                 throw new Exception("Duplicate value");
             ngr = v;
             break;
-        
+
         default:
             throw new Exception("Invalid selector");
         }
@@ -75,23 +90,95 @@ public class TerritoryYear
                 duplicateValue(what);
             births = v;
             break;
-        
+
         case "чу":
             if (deaths != null)
                 duplicateValue(what);
             deaths = v;
             break;
-        
+
+        case "чж-гор-м ":
+            if (population_urban_male != null)
+                duplicateValue(what);
+            population_urban_male = v;
+            break;
+
+        case "чж-гор-ж ":
+            if (population_urban_female != null)
+                duplicateValue(what);
+            population_urban_female = v;
+            break;
+
+        case "чж-уез-м ":
+            if (population_rural_male != null)
+                duplicateValue(what);
+            population_rural_male = v;
+            break;
+
+        case "чж-уез-ж ":
+            if (population_rural_female != null)
+                duplicateValue(what);
+            population_rural_female = v;
+            break;
+
+        case "чр-гор-м ":
+            if (births_urban_male != null)
+                duplicateValue(what);
+            births_urban_male = v;
+            break;
+
+        case "чр-гор-ж ":
+            if (births_urban_female != null)
+                duplicateValue(what);
+            births_urban_female = v;
+            break;
+
+        case "чр-уез-м ":
+            if (births_rural_male != null)
+                duplicateValue(what);
+            births_rural_male = v;
+            break;
+
+        case "чр-уез-ж ":
+            if (births_rural_female != null)
+                duplicateValue(what);
+            births_rural_female = v;
+            break;
+
+        case "чс-гор-м ":
+            if (deaths_urban_male != null)
+                duplicateValue(what);
+            deaths_urban_male = v;
+            break;
+
+        case "чс-гор-ж ":
+            if (deaths_urban_female != null)
+                duplicateValue(what);
+            deaths_urban_female = v;
+            break;
+
+        case "чс-уез-м ":
+            if (deaths_rural_male != null)
+                duplicateValue(what);
+            deaths_rural_male = v;
+            break;
+
+        case "чс-уез-ж ":
+            if (deaths_rural_female != null)
+                duplicateValue(what);
+            deaths_rural_female = v;
+            break;
+
         default:
             throw new Exception("Invalid selector");
         }
     }
-    
+
     private void duplicateValue(String what) throws Exception
     {
         throw new Exception(String.format("Duplicate value %s for %s %d", what, territory.name, year));
     }
-    
+
     private void interceptSetValue(String what)
     {
         if (Util.True)
@@ -100,7 +187,7 @@ public class TerritoryYear
                 Util.noop();
         }
     }
-    
+
     public TerritoryYear dup()
     {
         TerritoryYear ty = new TerritoryYear(this.territory, this.year);

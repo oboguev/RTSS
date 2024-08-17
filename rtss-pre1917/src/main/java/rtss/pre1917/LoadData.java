@@ -77,7 +77,7 @@ public class LoadData
                 validateHeaders(headers);
 
                 if (!headers.containsKey("губ"))
-                    throw new Exception("Нет колоники для губернии");
+                    throw new Exception("Нет колонки для губернии");
                 int gcol = headers.get("губ");
                 scanGubColumn(rc, gcol);
 
@@ -88,6 +88,19 @@ public class LoadData
                 scanYearColumn(rc, gcol, headers, "чж");
                 scanYearColumn(rc, gcol, headers, "чр");
                 scanYearColumn(rc, gcol, headers, "чу");
+
+                scanYearColumn(rc, gcol, headers, "чж-гор-м ");
+                scanYearColumn(rc, gcol, headers, "чж-гор-ж ");
+                scanYearColumn(rc, gcol, headers, "чр-гор-м ");
+                scanYearColumn(rc, gcol, headers, "чр-гор-ж ");
+                scanYearColumn(rc, gcol, headers, "чс-гор-м ");
+                scanYearColumn(rc, gcol, headers, "чс-гор-ж ");
+                scanYearColumn(rc, gcol, headers, "чж-уез-м ");
+                scanYearColumn(rc, gcol, headers, "чж-уез-ж ");
+                scanYearColumn(rc, gcol, headers, "чр-уез-м ");
+                scanYearColumn(rc, gcol, headers, "чр-уез-ж ");
+                scanYearColumn(rc, gcol, headers, "чс-уез-м ");
+                scanYearColumn(rc, gcol, headers, "чс-уез-ж ");
             }
         }
     }
@@ -109,9 +122,9 @@ public class LoadData
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
 
                 if (!headers.containsKey("губ"))
-                    throw new Exception("Нет колоники для губернии");
+                    throw new Exception("Нет колонки для губернии");
                 if (!headers.containsKey("год"))
-                    throw new Exception("Нет колоники для год");
+                    throw new Exception("Нет колонки для год");
 
                 int gcol = headers.get("губ");
                 int ycol = headers.get("год");
@@ -148,7 +161,19 @@ public class LoadData
                 h.startsWith("п ") ||
                 h.startsWith("чж ") ||
                 h.startsWith("чр ") ||
-                h.startsWith("чу "))
+                h.startsWith("чу ") ||
+                h.startsWith("чж-гор-м ") ||
+                h.startsWith("чж-гор-ж ") ||
+                h.startsWith("чр-гор-м ") ||
+                h.startsWith("чр-гор-ж ") ||
+                h.startsWith("чс-гор-м ") ||
+                h.startsWith("чс-гор-ж ") ||
+                h.startsWith("чж-уез-м ") ||
+                h.startsWith("чж-уез-ж ") ||
+                h.startsWith("чр-уез-м ") ||
+                h.startsWith("чр-уез-ж ") ||
+                h.startsWith("чс-уез-м ") ||
+                h.startsWith("чс-уез-ж "))
             {
                 continue;
             }
@@ -302,6 +327,18 @@ public class LoadData
         case "чж":
         case "чр":
         case "чу":
+        case "чж-гор-м ":
+        case "чж-гор-ж ":
+        case "чр-гор-м ":
+        case "чр-гор-ж ":
+        case "чс-гор-м ":
+        case "чс-гор-ж ":
+        case "чж-уез-м ":
+        case "чж-уез-ж ":
+        case "чр-уез-м ":
+        case "чр-уез-ж ":
+        case "чс-уез-м ":
+        case "чс-уез-ж ":
             return Long.class;
 
         case "р":
