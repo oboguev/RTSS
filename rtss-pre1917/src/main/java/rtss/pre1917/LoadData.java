@@ -33,6 +33,7 @@ public class LoadData
     }
 
     private TerritoryDataSet territories = new TerritoryDataSet();
+    private Integer currentFileYear = null;
 
     public TerritoryDataSet loadAllData() throws Exception
     {
@@ -53,7 +54,7 @@ public class LoadData
         loadUGVI("1912");
         loadUGVI("1913");
         loadUGVI("1914");
-        
+
         new CrossVerify().verify(territories);
 
         return territories;
@@ -61,6 +62,8 @@ public class LoadData
 
     private void loadUGVI(String fn) throws Exception
     {
+        currentFileYear = Integer.parseInt(fn);
+
         String fpath = String.format("ugvi/%s.xlsx", fn);
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(fpath);)
@@ -71,7 +74,7 @@ public class LoadData
                 String sname = sheet.getSheetName();
                 if (sname != null && sname.trim().toLowerCase().contains("note"))
                     continue;
-                
+
                 ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
                 validateHeaders(headers);
@@ -103,6 +106,8 @@ public class LoadData
                 scanYearColumn(rc, gcol, headers, "чс-уез-ж ");
             }
         }
+
+        currentFileYear = null;
     }
 
     private void loadUGVI(String fn, int y1, int y2) throws Exception
@@ -117,7 +122,7 @@ public class LoadData
                 String sname = sheet.getSheetName();
                 if (sname != null && sname.trim().toLowerCase().contains("note"))
                     continue;
-                
+
                 ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
 
@@ -198,10 +203,29 @@ public class LoadData
     {
         for (String h : headers.keySet())
         {
-            if (h.startsWith(what + " ") && h.length() == what.length() + 5)
+            if (h.startsWith(what + " "))
             {
-                int year = Integer.parseInt(h.substring(what.length() + 1));
-                scanYearColumn(rc, gcol, what, year, headers.get(h));
+                String ys = h.substring(what.length() + 1);
+
+                int year = -1;
+                
+                if (ys.equals("YY") && currentFileYear != null)
+                {
+                    year = currentFileYear;
+                }
+                else if (ys.equals("NYY") && currentFileYear != null)
+                {
+                    year = currentFileYear + 1;
+                }
+                else if (ys.length() == 4)
+                {
+                    year = Integer.parseInt(ys);
+                }
+
+                if (year > 0)
+                {
+                    scanYearColumn(rc, gcol, what, year, headers.get(h));
+                }
             }
         }
     }
