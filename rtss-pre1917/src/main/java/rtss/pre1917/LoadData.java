@@ -167,18 +167,30 @@ public class LoadData
                 h.startsWith("чж ") ||
                 h.startsWith("чр ") ||
                 h.startsWith("чу ") ||
+                // --------------------------
                 h.startsWith("чж-гор-м ") ||
                 h.startsWith("чж-гор-ж ") ||
+                h.startsWith("чж-гор-о ") ||
+                // --------------------------
                 h.startsWith("чр-гор-м ") ||
                 h.startsWith("чр-гор-ж ") ||
+                h.startsWith("чр-гор-о ") ||
+                // --------------------------
                 h.startsWith("чс-гор-м ") ||
                 h.startsWith("чс-гор-ж ") ||
+                h.startsWith("чс-гор-о ") ||
+                // --------------------------
                 h.startsWith("чж-уез-м ") ||
                 h.startsWith("чж-уез-ж ") ||
+                h.startsWith("чж-уез-о ") ||
+                // --------------------------
                 h.startsWith("чр-уез-м ") ||
                 h.startsWith("чр-уез-ж ") ||
+                h.startsWith("чр-уез-о ") ||
+                // --------------------------
                 h.startsWith("чс-уез-м ") ||
-                h.startsWith("чс-уез-ж "))
+                h.startsWith("чс-уез-ж ") ||
+                h.startsWith("чс-уез-о "))
             {
                 continue;
             }
@@ -208,7 +220,7 @@ public class LoadData
                 String ys = h.substring(what.length() + 1);
 
                 int year = -1;
-                
+
                 if (ys.equals("YY") && currentFileYear != null)
                 {
                     year = currentFileYear;
@@ -351,18 +363,30 @@ public class LoadData
         case "чж":
         case "чр":
         case "чу":
+            // ---------------
         case "чж-гор-м ":
         case "чж-гор-ж ":
+        case "чж-гор-о ":
+            // ---------------
         case "чр-гор-м ":
         case "чр-гор-ж ":
+        case "чр-гор-о ":
+            // ---------------
         case "чс-гор-м ":
         case "чс-гор-ж ":
+        case "чс-гор-о ":
+            // ---------------
         case "чж-уез-м ":
         case "чж-уез-ж ":
+        case "чж-уез-о ":
+            // ---------------
         case "чр-уез-м ":
         case "чр-уез-ж ":
+        case "чр-уез-о ":
+            // ---------------
         case "чс-уез-м ":
         case "чс-уез-ж ":
+        case "чс-уез-о ":
             return Long.class;
 
         case "р":

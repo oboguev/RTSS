@@ -25,24 +25,33 @@ public class TerritoryYear
      * Население, число рождений и число смертей 
      * null = no data
      */
-    public Long population;
+    public URValue xpopulation = new URValue();
     public Long births;
     public Long deaths;
 
     public Long population_urban_male;
     public Long population_urban_female;
+    public Long population_urban_both;
+
     public Long population_rural_male;
     public Long population_rural_female;
+    public Long population_rural_both;
 
     public Long births_urban_male;
     public Long births_urban_female;
+    public Long births_urban_both;
+
     public Long births_rural_male;
     public Long births_rural_female;
+    public Long births_rural_both;
 
     public Long deaths_urban_male;
     public Long deaths_urban_female;
+    public Long deaths_urban_both;
+
     public Long deaths_rural_male;
     public Long deaths_rural_female;
+    public Long deaths_rural_both;
 
     public void setValue(String what, Double v) throws Exception
     {
@@ -77,7 +86,7 @@ public class TerritoryYear
     {
         interceptSetValue(what);
 
-        switch (what)
+        switch (what.trim())
         {
         case "чж":
             if (population != null)
@@ -97,76 +106,124 @@ public class TerritoryYear
             deaths = v;
             break;
 
-        case "чж-гор-м ":
+        // -----------------
+
+        case "чж-гор-м":
             if (population_urban_male != null)
                 duplicateValue(what);
             population_urban_male = v;
             break;
 
-        case "чж-гор-ж ":
+        case "чж-гор-ж":
             if (population_urban_female != null)
                 duplicateValue(what);
             population_urban_female = v;
             break;
 
-        case "чж-уез-м ":
+        case "чж-гор-о":
+            if (population_urban_both != null)
+                duplicateValue(what);
+            population_urban_both = v;
+            break;
+
+        // -----------------
+
+        case "чж-уез-м":
             if (population_rural_male != null)
                 duplicateValue(what);
             population_rural_male = v;
             break;
 
-        case "чж-уез-ж ":
+        case "чж-уез-ж":
             if (population_rural_female != null)
                 duplicateValue(what);
             population_rural_female = v;
             break;
 
-        case "чр-гор-м ":
+        case "чж-уез-о":
+            if (population_rural_both != null)
+                duplicateValue(what);
+            population_rural_both = v;
+            break;
+
+        // -----------------
+
+        case "чр-гор-м":
             if (births_urban_male != null)
                 duplicateValue(what);
             births_urban_male = v;
             break;
 
-        case "чр-гор-ж ":
+        case "чр-гор-ж":
             if (births_urban_female != null)
                 duplicateValue(what);
             births_urban_female = v;
             break;
 
-        case "чр-уез-м ":
+        case "чр-гор-о":
+            if (births_urban_both != null)
+                duplicateValue(what);
+            births_urban_both = v;
+            break;
+
+        // -----------------
+
+        case "чр-уез-м":
             if (births_rural_male != null)
                 duplicateValue(what);
             births_rural_male = v;
             break;
 
-        case "чр-уез-ж ":
+        case "чр-уез-ж":
             if (births_rural_female != null)
                 duplicateValue(what);
             births_rural_female = v;
             break;
 
-        case "чс-гор-м ":
+        case "чр-уез-о":
+            if (births_rural_both != null)
+                duplicateValue(what);
+            births_rural_both = v;
+            break;
+
+        // -----------------
+
+        case "чс-гор-м":
             if (deaths_urban_male != null)
                 duplicateValue(what);
             deaths_urban_male = v;
             break;
 
-        case "чс-гор-ж ":
+        case "чс-гор-ж":
             if (deaths_urban_female != null)
                 duplicateValue(what);
             deaths_urban_female = v;
             break;
 
-        case "чс-уез-м ":
+        case "чс-гор-о":
+            if (deaths_urban_both != null)
+                duplicateValue(what);
+            deaths_urban_both = v;
+            break;
+
+        // -----------------
+
+        case "чс-уез-м":
             if (deaths_rural_male != null)
                 duplicateValue(what);
             deaths_rural_male = v;
             break;
 
-        case "чс-уез-ж ":
+        case "чс-уез-ж":
             if (deaths_rural_female != null)
                 duplicateValue(what);
             deaths_rural_female = v;
+            break;
+
+        case "чс-уез-о":
+            if (deaths_rural_both != null)
+                duplicateValue(what);
+            deaths_rural_both = v;
             break;
 
         default:
