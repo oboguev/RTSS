@@ -19,9 +19,10 @@ public class LoadData
 {
     public static void main(String[] args)
     {
+        LoadData self = new LoadData();
         try
         {
-            new LoadData().loadAllData();
+            self.loadAllData();
             // TerritoryNames.printSeen();
             Util.out("** Done");
         }
@@ -29,11 +30,19 @@ public class LoadData
         {
             Util.err("** Exception: ");
             ex.printStackTrace();
+            
+            if (self.currentNR != null)
+            {
+                Util.out(String.format("File %s, col %c (%d), row %s", self.currentFile, 'A' + self.currentWCOL, self.currentWCOL + 1, self.currentNR + 1));
+            }
         }
     }
 
     private TerritoryDataSet territories = new TerritoryDataSet();
     private Integer currentFileYear = null;
+    private String currentFile = null;
+    private Integer currentWCOL = null;
+    private Integer currentNR = null;
 
     public TerritoryDataSet loadAllData() throws Exception
     {
@@ -65,6 +74,7 @@ public class LoadData
         currentFileYear = Integer.parseInt(fn);
 
         String fpath = String.format("ugvi/%s.xlsx", fn);
+        currentFile = fpath;
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(fpath);)
         {
@@ -92,27 +102,40 @@ public class LoadData
                 scanYearColumn(rc, gcol, headers, "чр");
                 scanYearColumn(rc, gcol, headers, "чу");
 
-                scanYearColumn(rc, gcol, headers, "чж-гор-м ");
-                scanYearColumn(rc, gcol, headers, "чж-гор-ж ");
-                scanYearColumn(rc, gcol, headers, "чр-гор-м ");
-                scanYearColumn(rc, gcol, headers, "чр-гор-ж ");
-                scanYearColumn(rc, gcol, headers, "чс-гор-м ");
-                scanYearColumn(rc, gcol, headers, "чс-гор-ж ");
-                scanYearColumn(rc, gcol, headers, "чж-уез-м ");
-                scanYearColumn(rc, gcol, headers, "чж-уез-ж ");
-                scanYearColumn(rc, gcol, headers, "чр-уез-м ");
-                scanYearColumn(rc, gcol, headers, "чр-уез-ж ");
-                scanYearColumn(rc, gcol, headers, "чс-уез-м ");
-                scanYearColumn(rc, gcol, headers, "чс-уез-ж ");
+                scanYearColumn(rc, gcol, headers, "чж-гор-м");
+                scanYearColumn(rc, gcol, headers, "чж-гор-ж");
+                scanYearColumn(rc, gcol, headers, "чж-гор-о");
+                
+                scanYearColumn(rc, gcol, headers, "чр-гор-м");
+                scanYearColumn(rc, gcol, headers, "чр-гор-ж");
+                scanYearColumn(rc, gcol, headers, "чр-гор-о");
+                
+                scanYearColumn(rc, gcol, headers, "чс-гор-м");
+                scanYearColumn(rc, gcol, headers, "чс-гор-ж");
+                scanYearColumn(rc, gcol, headers, "чс-гор-о");
+                
+                scanYearColumn(rc, gcol, headers, "чж-уез-м");
+                scanYearColumn(rc, gcol, headers, "чж-уез-ж");
+                scanYearColumn(rc, gcol, headers, "чж-уез-о");
+                
+                scanYearColumn(rc, gcol, headers, "чр-уез-м");
+                scanYearColumn(rc, gcol, headers, "чр-уез-ж");
+                scanYearColumn(rc, gcol, headers, "чр-уез-о");
+                
+                scanYearColumn(rc, gcol, headers, "чс-уез-м");
+                scanYearColumn(rc, gcol, headers, "чс-уез-ж");
+                scanYearColumn(rc, gcol, headers, "чс-уез-о");
             }
         }
 
         currentFileYear = null;
+        currentFile = null;
     }
 
     private void loadUGVI(String fn, int y1, int y2) throws Exception
     {
         String fpath = String.format("ugvi/%s.xlsx", fn);
+        currentFile = fpath;
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(fpath);)
         {
@@ -141,6 +164,8 @@ public class LoadData
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чу");
             }
         }
+
+        currentFile = null;
     }
 
     private void validateHeaders(Map<String, Integer> headers) throws Exception
@@ -244,8 +269,12 @@ public class LoadData
 
     private void scanYearColumn(ExcelRC rc, int gcol, String what, int year, int wcol) throws Exception
     {
+        currentWCOL = wcol;
+        
         for (int nr = 1; nr < rc.size(); nr++)
         {
+            currentNR = nr;
+            
             Object o = rc.get(nr, gcol);
             if (o == null)
                 o = "";
@@ -257,6 +286,9 @@ public class LoadData
                 setValue(gub, year, what, o);
             }
         }
+
+        currentWCOL = null;
+        currentNR = null;
     }
 
     private void scanMultiYearColumn(ExcelRC rc, int gcol, int ycol, Map<String, Integer> headers, String what) throws Exception
@@ -364,29 +396,29 @@ public class LoadData
         case "чр":
         case "чу":
             // ---------------
-        case "чж-гор-м ":
-        case "чж-гор-ж ":
-        case "чж-гор-о ":
+        case "чж-гор-м":
+        case "чж-гор-ж":
+        case "чж-гор-о":
             // ---------------
-        case "чр-гор-м ":
-        case "чр-гор-ж ":
-        case "чр-гор-о ":
+        case "чр-гор-м":
+        case "чр-гор-ж":
+        case "чр-гор-о":
             // ---------------
-        case "чс-гор-м ":
-        case "чс-гор-ж ":
-        case "чс-гор-о ":
+        case "чс-гор-м":
+        case "чс-гор-ж":
+        case "чс-гор-о":
             // ---------------
-        case "чж-уез-м ":
-        case "чж-уез-ж ":
-        case "чж-уез-о ":
+        case "чж-уез-м":
+        case "чж-уез-ж":
+        case "чж-уез-о":
             // ---------------
-        case "чр-уез-м ":
-        case "чр-уез-ж ":
-        case "чр-уез-о ":
+        case "чр-уез-м":
+        case "чр-уез-ж":
+        case "чр-уез-о":
             // ---------------
-        case "чс-уез-м ":
-        case "чс-уез-ж ":
-        case "чс-уез-о ":
+        case "чс-уез-м":
+        case "чс-уез-ж":
+        case "чс-уез-о":
             return Long.class;
 
         case "р":
@@ -409,7 +441,7 @@ public class LoadData
         if (so.length() == 0)
             return;
 
-        if (so.equals("-"))
+        if (so.equals("-") || so.equals("—"))
             return;
 
         if (typeof(what) == Double.class)
