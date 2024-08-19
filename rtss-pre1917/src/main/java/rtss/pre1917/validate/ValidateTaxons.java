@@ -42,19 +42,19 @@ public class ValidateTaxons
         TerritoryYear ty = ter.territoryYear(year);
         TerritoryYear ty2 = ter2.territoryYear(year);
 
-        if (differ(ty.population, ty2.population, 0.01))
+        if (differ(ty.population.all, ty2.population.all, 0.01))
         {
             msg = String.format("Taxon differs: %s %d population listed=%,3d calculated=%,3d diff=%.2f%%",
-                                txname, year, ty.population, ty2.population, 
-                                pctDiff(ty.population, ty2.population));
+                                txname, year, ty.population.all, ty2.population.all, 
+                                pctDiff(ty.population.all, ty2.population.all));
             Util.out(msg);
         }
 
-        if (differ(ty.births, ty2.births, 0.01))
+        if (differ(ty.births.all, ty2.births.all, 0.01))
         {
             msg = String.format("Taxon differs: %s %d births listed=%,3d calculated=%,3d diff=%.2f%%",
-                                txname, year, ty.births, ty2.births, 
-                                pctDiff(ty.births, ty2.births));
+                                txname, year, ty.births.all, ty2.births.all, 
+                                pctDiff(ty.births.all, ty2.births.all));
             Util.out(msg);
         }
 

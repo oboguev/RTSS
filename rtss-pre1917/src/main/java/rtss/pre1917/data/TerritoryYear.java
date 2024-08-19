@@ -25,8 +25,8 @@ public class TerritoryYear
      * Население, число рождений и число смертей 
      * null = no data
      */
-    public URValue xpopulation = new URValue();
-    public Long births;
+    public URValue population = new URValue();
+    public URValue births = new URValue();;
     public Long deaths;
 
     public Long population_urban_male;
@@ -89,15 +89,15 @@ public class TerritoryYear
         switch (what.trim())
         {
         case "чж":
-            if (population != null)
+            if (population.all != null)
                 duplicateValue(what);
-            population = v;
+            population.all = v;
             break;
 
         case "чр":
-            if (births != null)
+            if (births.all != null)
                 duplicateValue(what);
-            births = v;
+            births.all = v;
             break;
 
         case "чу":
@@ -251,8 +251,8 @@ public class TerritoryYear
         ty.cbr = this.cbr;
         ty.cdr = this.cdr;
         ty.ngr = this.ngr;
-        ty.population = this.population;
-        ty.births = this.births;
+        ty.population.all = this.population.all;
+        ty.births.all = this.births.all;
         ty.deaths = this.deaths;
         return ty;
     }

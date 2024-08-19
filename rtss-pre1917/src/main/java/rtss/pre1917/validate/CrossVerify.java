@@ -44,26 +44,26 @@ public class CrossVerify
                 TerritoryYear ty = ter.territoryYear(year);
                 TerritoryYear ty2 = ter.territoryYear(year + 1);
 
-                if (ty.population != null && ty.births != null && ty.cbr != null)
+                if (ty.population.all != null && ty.births.all != null && ty.cbr != null)
                 {
                     /*
                      * pop1: 1029 mismatches
                      * popm: 933 mismatches
                      * pop2: 693 mismatches
-                     * ty2.population: 153 mismatches
+                     * ty2.population.all: 153 mismatches
                      */
-                    long pop1 = ty.population;
-                    long pop2 = ty.population + ty.births - ty.deaths;
+                    long pop1 = ty.population.all;
+                    long pop2 = ty.population.all + ty.births.all - ty.deaths;
                     @SuppressWarnings("unused")
                     long popm = (pop1 + pop2) / 2;
                     
-                    double cbr = (1000.0 * ty.births) / pop2;
+                    double cbr = (1000.0 * ty.births.all) / pop2;
 
                     if (Util.False)
                     {
-                        if (ty2.population == null)
+                        if (ty2.population.all == null)
                             continue;
-                        cbr = (1000.0 * ty.births) / ty2.population;
+                        cbr = (1000.0 * ty.births.all) / ty2.population.all;
                     }
 
                     cbr_seen++;
@@ -78,16 +78,16 @@ public class CrossVerify
                     }
                 }
 
-                if (ty.population != null && ty.deaths != null && ty.cdr != null)
+                if (ty.population.all != null && ty.deaths != null && ty.cdr != null)
                 {
                     /*
                      * pop1: 1029 mismatches
                      * popm: 933 mismatches
                      * pop2: 693 mismatches
-                     * ty2.population: 153 mismatches
+                     * ty2.population.all: 153 mismatches
                      */
-                    long pop1 = ty.population;
-                    long pop2 = ty.population + ty.births - ty.deaths;
+                    long pop1 = ty.population.all;
+                    long pop2 = ty.population.all + ty.births.all - ty.deaths;
                     @SuppressWarnings("unused")
                     long popm = (pop1 + pop2) / 2;
                     
@@ -95,9 +95,9 @@ public class CrossVerify
 
                     if (Util.False)
                     {
-                        if (ty2.population == null)
+                        if (ty2.population.all == null)
                             continue;
-                        cdr = (1000.0 * ty.deaths) / ty2.population;
+                        cdr = (1000.0 * ty.deaths) / ty2.population.all;
                     }
 
                     cdr_seen++;
@@ -128,14 +128,14 @@ public class CrossVerify
             TerritoryYear t93 = ter.territoryYear(1893);
             TerritoryYear t94 = ter.territoryYear(1894);
 
-            if (t93.population == null && t93.births != null && t93.deaths != null && t94.population != null)
+            if (t93.population.all == null && t93.births.all != null && t93.deaths != null && t94.population.all != null)
             {
-                t93.population = t94.population - (t93.births - t93.deaths);
+                t93.population.all = t94.population.all - (t93.births.all - t93.deaths);
             }
-            else if (t93.population == null && t93.cdr != null && t93.cbr != null && t94.population != null)
+            else if (t93.population.all == null && t93.cdr != null && t93.cbr != null && t94.population.all != null)
             {
                 double v = 1 + (t93.cbr - t93.cdr) / 1000.0;
-                t93.population = Math.round(t94.population / v);
+                t93.population.all = Math.round(t94.population.all / v);
             }
             else
             {
@@ -156,11 +156,11 @@ public class CrossVerify
             {
                 TerritoryYear ty = ter.territoryYear(year);
 
-                if (ty.population != null)
+                if (ty.population.all != null)
                 {
                     if (previous_year != -1)
                     {
-                        double v = (double) ty.population / previous_population;
+                        double v = (double) ty.population.all / previous_population;
                         double vv = Math.pow(v, 1.0 / (year - previous_year));
                         if (vv < 0.9 || vv > 1.15)
                         {
@@ -171,7 +171,7 @@ public class CrossVerify
                     }
 
                     previous_year = year;
-                    previous_population = ty.population;
+                    previous_population = ty.population.all;
                 }
             }
         }

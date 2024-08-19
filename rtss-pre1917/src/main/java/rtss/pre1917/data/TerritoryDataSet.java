@@ -48,18 +48,18 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             if (xter.hasYear(year))
             {
                 TerritoryYear xty = xter.territoryYear(year);
-                if (xty.population != null)
+                if (xty.population.all != null)
                 {
-                    if (cty.population == null)
-                        cty.population = 0L;
-                    cty.population = Math.round(cty.population + fraction * xty.population);
+                    if (cty.population.all == null)
+                        cty.population.all = 0L;
+                    cty.population.all = Math.round(cty.population.all + fraction * xty.population.all);
                 }
 
-                if (xty.births != null)
+                if (xty.births.all != null)
                 {
-                    if (cty.births == null)
-                        cty.births = 0L;
-                    cty.births = Math.round(cty.births + fraction * xty.births);
+                    if (cty.births.all == null)
+                        cty.births.all = 0L;
+                    cty.births.all = Math.round(cty.births.all + fraction * xty.births.all);
                 }
 
                 if (xty.deaths != null)
@@ -69,10 +69,10 @@ public class TerritoryDataSet extends HashMap<String, Territory>
                     cty.deaths = Math.round(cty.deaths + fraction * xty.deaths);
                 }
 
-                if (cty.population != null && xty.cbr != null)
-                    av_cbr.add(xty.cbr, cty.population);
-                if (cty.population != null && xty.cdr != null)
-                    av_cdr.add(xty.cdr, cty.population);
+                if (cty.population.all != null && xty.cbr != null)
+                    av_cbr.add(xty.cbr, cty.population.all);
+                if (cty.population.all != null && xty.cdr != null)
+                    av_cdr.add(xty.cdr, cty.population.all);
             }
         }
 
@@ -85,11 +85,11 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         /* merge cty to ty */
         TerritoryYear ty = ter.territoryYear(year);
 
-        if (cty.population != null && (overwrite || ty.population == null))
-            ty.population = cty.population;
+        if (cty.population.all != null && (overwrite || ty.population.all == null))
+            ty.population.all = cty.population.all;
 
-        if (cty.births != null && (overwrite || ty.births == null))
-            ty.births = cty.births;
+        if (cty.births.all != null && (overwrite || ty.births.all == null))
+            ty.births.all = cty.births.all;
 
         if (cty.deaths != null && (overwrite || ty.deaths == null))
             ty.deaths = cty.deaths;
