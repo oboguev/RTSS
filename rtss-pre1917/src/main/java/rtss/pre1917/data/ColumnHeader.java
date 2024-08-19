@@ -82,14 +82,18 @@ public class ColumnHeader
     public static Map<String, Integer> getTopHeaders(XSSFSheet sheet,  ExcelRC rc) throws Exception
     {
         Map<String, Integer> m = new HashMap<>();
+        
         for (ColumnHeader h : getHeaders(sheet,  rc))
         {
             if (h.row != 0)
                 throw new Exception("Column header not in the top row");
+            if (h.text.equals("v"))
+                continue;
             if (m.containsKey(h.text))
                 throw new Exception("Duplicate column header");
             m.put(h.text, h.col);
         }
+
         return m;
     }
 }
