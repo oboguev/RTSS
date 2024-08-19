@@ -53,7 +53,7 @@ public class CrossVerify
                      * ty2.population.all: 153 mismatches
                      */
                     long pop1 = ty.population.all;
-                    long pop2 = ty.population.all + ty.births.all - ty.deaths;
+                    long pop2 = ty.population.all + ty.births.all - ty.deaths.all;
                     @SuppressWarnings("unused")
                     long popm = (pop1 + pop2) / 2;
                     
@@ -78,7 +78,7 @@ public class CrossVerify
                     }
                 }
 
-                if (ty.population.all != null && ty.deaths != null && ty.cdr != null)
+                if (ty.population.all != null && ty.deaths.all != null && ty.cdr != null)
                 {
                     /*
                      * pop1: 1029 mismatches
@@ -87,17 +87,17 @@ public class CrossVerify
                      * ty2.population.all: 153 mismatches
                      */
                     long pop1 = ty.population.all;
-                    long pop2 = ty.population.all + ty.births.all - ty.deaths;
+                    long pop2 = ty.population.all + ty.births.all - ty.deaths.all;
                     @SuppressWarnings("unused")
                     long popm = (pop1 + pop2) / 2;
                     
-                    double cdr = (1000.0 * ty.deaths) / pop2;
+                    double cdr = (1000.0 * ty.deaths.all) / pop2;
 
                     if (Util.False)
                     {
                         if (ty2.population.all == null)
                             continue;
-                        cdr = (1000.0 * ty.deaths) / ty2.population.all;
+                        cdr = (1000.0 * ty.deaths.all) / ty2.population.all;
                     }
 
                     cdr_seen++;
@@ -128,9 +128,9 @@ public class CrossVerify
             TerritoryYear t93 = ter.territoryYear(1893);
             TerritoryYear t94 = ter.territoryYear(1894);
 
-            if (t93.population.all == null && t93.births.all != null && t93.deaths != null && t94.population.all != null)
+            if (t93.population.all == null && t93.births.all != null && t93.deaths.all != null && t94.population.all != null)
             {
-                t93.population.all = t94.population.all - (t93.births.all - t93.deaths);
+                t93.population.all = t94.population.all - (t93.births.all - t93.deaths.all);
             }
             else if (t93.population.all == null && t93.cdr != null && t93.cbr != null && t94.population.all != null)
             {

@@ -58,7 +58,7 @@ public class ValidateTaxons
             Util.out(msg);
         }
 
-        if (differ(ty.deaths, ty2.deaths, 0.01))
+        if (differ(ty.deaths.all, ty2.deaths.all, 0.01))
         {
             if (squash)
             {
@@ -73,8 +73,8 @@ public class ValidateTaxons
             }
             
             msg = String.format("Taxon differs: %s %d deaths listed=%,3d calculated=%,3d diff=%.2f%%",
-                                txname, year, ty.deaths, ty2.deaths, 
-                                pctDiff(ty.deaths, ty2.deaths));
+                                txname, year, ty.deaths.all, ty2.deaths.all, 
+                                pctDiff(ty.deaths.all, ty2.deaths.all));
             Util.out(msg);
         }
         

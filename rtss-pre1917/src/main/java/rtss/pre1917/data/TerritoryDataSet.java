@@ -62,11 +62,11 @@ public class TerritoryDataSet extends HashMap<String, Territory>
                     cty.births.all = Math.round(cty.births.all + fraction * xty.births.all);
                 }
 
-                if (xty.deaths != null)
+                if (xty.deaths.all != null)
                 {
-                    if (cty.deaths == null)
-                        cty.deaths = 0L;
-                    cty.deaths = Math.round(cty.deaths + fraction * xty.deaths);
+                    if (cty.deaths.all == null)
+                        cty.deaths.all = 0L;
+                    cty.deaths.all = Math.round(cty.deaths.all + fraction * xty.deaths.all);
                 }
 
                 if (cty.population.all != null && xty.cbr != null)
