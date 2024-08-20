@@ -28,14 +28,14 @@ public class ColumnHeader
         this.col = col;
     }
     
-    public static List<ColumnHeader> getHeaders(XSSFSheet sheet,  ExcelRC rc) throws Exception
+    public static List<ColumnHeader> getHeaders(XSSFSheet sheet, ExcelRC rc) throws Exception
     {
         List<ColumnHeader> headers = new ArrayList<>();
         
         int nr1 = sheet.getFirstRowNum();
         int nr2 = sheet.getLastRowNum();
 
-        for (int nr = 0; nr <= nr2; nr++)
+        for (int nr = 0; nr <= nr2 && !rc.isEndRow(nr); nr++)
         {
             if (nr >= nr1 && sheet.getRow(nr) != null)
             {

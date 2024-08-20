@@ -116,6 +116,10 @@ public class Excel
                             xrow.add(cv.getNumberValue());
                             break;
 
+                        case ERROR:
+                            xrow.add("#ERROR");
+                            break;
+
                         default:
                             throw new Exception(String.format("Unsupported cell type %s in resource file %s (sheet %s), row=%d, col=%d",
                                                               cell.getCellType().name(),

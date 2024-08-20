@@ -226,7 +226,7 @@ public class LoadData
 
     private void scanGubColumn(ExcelRC rc, int gcol) throws Exception
     {
-        for (int nr = 1; nr < rc.size(); nr++)
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             Object o = rc.get(nr, gcol);
             if (o == null)
@@ -271,7 +271,7 @@ public class LoadData
     {
         currentWCOL = wcol;
         
-        for (int nr = 1; nr < rc.size(); nr++)
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             currentNR = nr;
             
@@ -302,7 +302,7 @@ public class LoadData
         double avg_sum = 0;
         double avg_count = 0;
 
-        for (int nr = 1; nr < rc.size(); nr++)
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             // губ
             Object o = rc.get(nr, gcol);
@@ -386,7 +386,7 @@ public class LoadData
             }
         }
     }
-
+    
     private Class<?> typeof(String what) throws Exception
     {
         switch (what)

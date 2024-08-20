@@ -213,4 +213,26 @@ public class ExcelRC extends ArrayList<List<Object>>
             throw new Exception("Missing long cell value");
         return v;
     }
+
+    /* =================================================================== */
+
+    public boolean isEndRow(int nr) throws Exception
+    {
+        return isEndRow(nr, 0) || isEndRow(nr, 1); 
+    }
+
+    public boolean isEndRow(int nr, int nc) throws Exception
+    {
+        Object o = get(nr, nc);
+
+        if (o != null)
+        {
+            String s = o.toString();
+            s = Util.despace(s).trim();
+            if (s.contains("note"))
+                return true;
+        }
+        
+        return false; 
+    }
 }
