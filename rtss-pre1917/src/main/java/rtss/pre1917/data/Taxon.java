@@ -8,12 +8,19 @@ import java.util.Set;
 public class Taxon
 {
     public final Map<String, Double> territories = new HashMap<>();
-    private String name;
-    private int year;
+    private final String name;
+    private final int year;
+    public static Double DoubleONE = Double.valueOf(1.0);
+    
+    public Taxon(String name, int year)
+    {
+        this.name = name;
+        this.year = year;
+    }
 
     private Taxon add(String name) throws Exception
     {
-        return add(name, 1.0);
+        return add(name, DoubleONE);
     }
 
     private Taxon add(String name, double fraction) throws Exception
@@ -24,9 +31,7 @@ public class Taxon
 
     public static Taxon of(String name, int year) throws Exception
     {
-        Taxon t = new Taxon();
-        t.name = name;
-        t.year = year;
+        Taxon t = new Taxon(name, year);
 
         switch (name)
         {
@@ -231,5 +236,44 @@ public class Taxon
         }
 
         return false;
+    }
+
+    /*
+     * Редуцировать таксон до базовых областей
+     */
+    public Taxon flatten() throws Exception
+    {
+        Taxon tx = new Taxon(name, year);
+        flatten(tx.territories, DoubleONE);
+        return tx;
+    }
+    
+    private void flatten(Map<String, Double> out, Double pweight) throws Exception
+    {
+        for (String tname : territories.keySet())
+        {
+            Double weight = territories.get(tname);
+            
+            if (weight == DoubleONE && pweight == DoubleONE)
+            {
+                weight = DoubleONE;
+            }
+            else
+            {
+                weight *= pweight;
+            }
+    
+            if (!isComposite(tname))
+            {
+                if (out.containsKey(tname))
+                    throw new Exception("Overlapping taxons");
+                out.put(tname, weight);
+            }
+            else
+            {
+                Taxon t2 = Taxon.of(tname, year).flatten();
+                t2.flatten(out, weight);
+            }
+        }
     }
 }
