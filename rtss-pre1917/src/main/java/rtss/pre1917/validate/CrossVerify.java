@@ -240,9 +240,9 @@ public class CrossVerify
             for (int year : ter.years())
             {
                 TerritoryYear ty = ter.territoryYear(year);
-                validateRuralUrbanAll(ter, year, ty.population, "население городов");
-                validateRuralUrbanAll(ter, year, ty.births, "рождения в городах");
-                validateRuralUrbanAll(ter, year, ty.deaths, "смерти в городах");
+                validateRuralUrbanAll(ter, year, ty.population, "население");
+                validateRuralUrbanAll(ter, year, ty.births, "рождения");
+                validateRuralUrbanAll(ter, year, ty.deaths, "смерти");
             }
         }
     }
@@ -267,7 +267,7 @@ public class CrossVerify
         {
             String msg = String.format("Расхождение (города + уезды - сумма) для %d %s %s на %,d (%s + %s - %s)",
                                        year, ter.name, what, Math.abs(vall - vsum), 
-                                       l2s(value.urban.both), l2s(value.urban.both), l2s(value.all));
+                                       l2s(value.urban.both), l2s(value.rural.both), l2s(value.all));
             Util.err(msg);
         }
     }
