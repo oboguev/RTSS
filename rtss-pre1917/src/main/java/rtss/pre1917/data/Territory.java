@@ -37,6 +37,7 @@ public class Territory
     public Territory dup()
     {
         Territory t = new Territory(name);
+        
         for (int year : year2value.keySet())
         {
             TerritoryYear ty = year2value.get(year);
@@ -44,6 +45,7 @@ public class Territory
             ty.territory = t;
             t.year2value.put(year, ty);
         }
+        
         return t;
     }
     

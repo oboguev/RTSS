@@ -227,9 +227,9 @@ public class TerritoryYear
         ty.cbr = this.cbr;
         ty.cdr = this.cdr;
         ty.ngr = this.ngr;
-        ty.population.all = this.population.all;
-        ty.births.all = this.births.all;
-        ty.deaths = this.deaths;
+        ty.population = this.population.dup();
+        ty.births = this.births.dup();
+        ty.deaths = this.deaths.dup();
         return ty;
     }
 }
