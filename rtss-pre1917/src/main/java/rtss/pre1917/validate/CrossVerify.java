@@ -8,6 +8,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.ValueByGender;
 import rtss.util.Util;
 
@@ -15,7 +16,8 @@ public class CrossVerify
 {
     public void verify(TerritoryDataSet territories) throws Exception
     {
-        validateMFB(territories);
+        validateMaleFemaleBoth(territories);
+        validateRuralUrbanAll(territories);
         // ### проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
         // ### проверить URValue.all против суммы URValue.rural.both + URValue.urban.both   
         new ValidateTaxons().validate_taxons(territories);
@@ -187,10 +189,10 @@ public class CrossVerify
     }
     
     /*
-     * Проверить что значения муж. и жен., когда указаны, согласуются для обеих полов.
+     * Проверить что значения муж. и жен., когда указаны, в сумме согласуются для обеих полов.
      * Проверка только для базовых областей, не составных таксонов.
      */
-    private void validateMFB(TerritoryDataSet territories)
+    private void validateMaleFemaleBoth(TerritoryDataSet territories)
     {
         for (Territory ter : territories.values())
         {
@@ -200,17 +202,17 @@ public class CrossVerify
             for (int year : ter.years())
             {
                 TerritoryYear ty = ter.territoryYear(year);
-                validateMFB(ter, year, ty.population.urban, "население городов");
-                validateMFB(ter, year, ty.population.rural, "население узедов");
-                validateMFB(ter, year, ty.births.urban, "рождения в городах");
-                validateMFB(ter, year, ty.births.rural, "рождения в узедах");
-                validateMFB(ter, year, ty.deaths.urban, "смерти в городах");
-                validateMFB(ter, year, ty.deaths.rural, "смерти в узедах");
+                validateMaleFemaleBoth(ter, year, ty.population.urban, "население городов");
+                validateMaleFemaleBoth(ter, year, ty.population.rural, "население узедов");
+                validateMaleFemaleBoth(ter, year, ty.births.urban, "рождения в городах");
+                validateMaleFemaleBoth(ter, year, ty.births.rural, "рождения в узедах");
+                validateMaleFemaleBoth(ter, year, ty.deaths.urban, "смерти в городах");
+                validateMaleFemaleBoth(ter, year, ty.deaths.rural, "смерти в узедах");
             }
         }
     }
 
-    private void validateMFB(Territory ter, int year, ValueByGender value, String what)
+    private void validateMaleFemaleBoth(Territory ter, int year, ValueByGender value, String what)
     {
         if (value.male != null && value.female != null && value.both != null)
         {
@@ -222,5 +224,59 @@ public class CrossVerify
                 Util.err(msg);
             }
         }
+    }
+
+    /*
+     * Проверить что сумма значений городских и уездных численостей, когда указаны, согласуются с общей величиной для территории.
+     * Проверка только для базовых областей, не составных таксонов.
+     */
+    private void validateRuralUrbanAll(TerritoryDataSet territories)
+    {
+        for (Territory ter : territories.values())
+        {
+            if (Taxon.isComposite(ter.name))
+                continue;
+            
+            for (int year : ter.years())
+            {
+                TerritoryYear ty = ter.territoryYear(year);
+                validateRuralUrbanAll(ter, year, ty.population, "население городов");
+                validateRuralUrbanAll(ter, year, ty.births, "рождения в городах");
+                validateRuralUrbanAll(ter, year, ty.deaths, "смерти в городах");
+            }
+        }
+    }
+
+    private void validateRuralUrbanAll(Territory ter, int year, URValue value, String what)
+    {
+        long vsum = 0;
+        long vall = 0;
+        
+        if (value.urban.both == null && value.rural.both == null)
+            return;
+        
+        if (value.urban.both != null)
+            vsum += value.urban.both;
+        if (value.rural.both != null)
+            vsum += value.rural.both;
+        
+        if (value.all != null)
+            vall += value.all;
+        
+        if (vsum != vall)
+        {
+            String msg = String.format("Расхождение (города + уезды - сумма) для %d %s %s на %,d (%s + %s - %s)",
+                                       year, ter.name, what, Math.abs(vall - vsum), 
+                                       l2s(value.urban.both), l2s(value.urban.both), l2s(value.all));
+            Util.err(msg);
+        }
+    }
+    
+    private String l2s(Long v)
+    {
+        if (v == null)
+            return "[no data]";
+        else
+            return String.format("%,d", v);
     }
 }
