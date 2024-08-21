@@ -73,7 +73,7 @@ public class LoadData
     {
         currentFileYear = Integer.parseInt(fn);
 
-        String fpath = String.format("ugvi/%s.xlsx", fn);
+        String fpath = String.format("ugvi/year-volumes/%s.xlsx", fn);
         currentFile = fpath;
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(fpath);)
@@ -134,7 +134,7 @@ public class LoadData
 
     private void loadUGVI(String fn, int y1, int y2) throws Exception
     {
-        String fpath = String.format("ugvi/%s.xlsx", fn);
+        String fpath = String.format("ugvi/year-volumes/%s.xlsx", fn);
         currentFile = fpath;
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(fpath);)
