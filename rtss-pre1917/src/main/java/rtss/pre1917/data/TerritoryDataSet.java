@@ -16,13 +16,13 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         return tds;
     }
 
-    public void evalTaxon(String name, boolean overwrite)
+    public void evalTaxon(String name, boolean overwrite) throws Exception
     {
         for (int year = 1891; year <= 1915; year++)
             evalTaxon(name, year, overwrite);
     }
 
-    public void evalTaxon(String name, int year, boolean overwrite)
+    public void evalTaxon(String name, int year, boolean overwrite) throws Exception
     {
         Taxon tx = Taxon.of(name, year);
         if (tx == null)

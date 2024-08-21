@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.ValueByGender;
 import rtss.util.Util;
 
 public class CrossVerify
 {
-    public void verify(TerritoryDataSet territories)
+    public void verify(TerritoryDataSet territories) throws Exception
     {
+        validateMFB(territories);
+        // ### проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
+        // ### проверить URValue.all против суммы URValue.rural.both + URValue.urban.both   
         new ValidateTaxons().validate_taxons(territories);
         validate_vital_rates(territories);
 
@@ -179,5 +184,43 @@ public class CrossVerify
         Collections.sort(msgs);
         for (String s : msgs)
             Util.err(s);
+    }
+    
+    /*
+     * Проверить что значения муж. и жен., когда указаны, согласуются для обеих полов.
+     * Проверка только для базовых областей, не составных таксонов.
+     */
+    private void validateMFB(TerritoryDataSet territories)
+    {
+        for (Territory ter : territories.values())
+        {
+            if (Taxon.isComposite(ter.name))
+                continue;
+            
+            for (int year : ter.years())
+            {
+                TerritoryYear ty = ter.territoryYear(year);
+                validateMFB(ter, year, ty.population.urban, "население городов");
+                validateMFB(ter, year, ty.population.rural, "население узедов");
+                validateMFB(ter, year, ty.births.urban, "рождения в городах");
+                validateMFB(ter, year, ty.births.rural, "рождения в узедах");
+                validateMFB(ter, year, ty.deaths.urban, "смерти в городах");
+                validateMFB(ter, year, ty.deaths.rural, "смерти в узедах");
+            }
+        }
+    }
+
+    private void validateMFB(Territory ter, int year, ValueByGender value, String what)
+    {
+        if (value.male != null && value.female != null && value.both != null)
+        {
+            long df = Math.abs(value.male + value.female - value.both);
+            if (df != 0)
+            {
+                String msg = String.format("Расхождение (муж + жен - оба пола) %d %s %s на %,d (%,d + %,d - %,d)", 
+                                           year, ter.name, what, df, value.male, value.female, value.both);
+                Util.err(msg);
+            }
+        }
     }
 }

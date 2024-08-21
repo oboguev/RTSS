@@ -10,7 +10,7 @@ import rtss.util.Util;
 
 public class ValidateTaxons
 {
-    public void validate_taxons(TerritoryDataSet territories)
+    public void validate_taxons(TerritoryDataSet territories) throws Exception
     {
         TerritoryDataSet t2 = territories.dup();
         t2.evalTaxon("Империя", true);

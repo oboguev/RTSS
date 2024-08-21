@@ -1,6 +1,9 @@
 package rtss.pre1917.data;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Territory
@@ -42,5 +45,12 @@ public class Territory
             t.year2value.put(year, ty);
         }
         return t;
+    }
+    
+    public List<Integer> years()
+    {
+        List<Integer> list = new ArrayList<>(year2value.keySet());
+        Collections.sort(list);
+        return list;
     }
 }

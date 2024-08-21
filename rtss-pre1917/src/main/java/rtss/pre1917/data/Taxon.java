@@ -11,18 +11,18 @@ public class Taxon
     private String name;
     private int year;
 
-    private Taxon add(String name)
+    private Taxon add(String name) throws Exception
     {
         return add(name, 1.0);
     }
 
-    private Taxon add(String name, double fraction)
+    private Taxon add(String name, double fraction) throws Exception
     {
         territories.put(name, fraction);
         return this;
     }
 
-    public static Taxon of(String name, int year)
+    public static Taxon of(String name, int year) throws Exception
     {
         Taxon t = new Taxon();
         t.name = name;
@@ -124,7 +124,7 @@ public class Taxon
         return t;
     }
 
-    private void add50(int year)
+    private void add50(int year) throws Exception
     {
         add("Архангельская");
         add("Астраханская");
@@ -184,17 +184,20 @@ public class Taxon
         if (year >= 1914)
             add("Ростовское и./Д град.");
     }
-    
-    public Set<String> allCompositeSubTaxons(boolean self)
+
+    /*
+     * Имена всех составных таксонов входящих в данный таксон, рекурсивно
+     */
+    public Set<String> allCompositeSubTaxons(boolean includeSelf) throws Exception
     {
         Set<String> xs = new HashSet<String>();
         allCompositeSubTaxons(xs);
-        if (self)
+        if (includeSelf)
             xs.add(name);
         return xs;
     }
-    
-    private void allCompositeSubTaxons(Set<String> xs)
+
+    private void allCompositeSubTaxons(Set<String> xs) throws Exception
     {
         for (String xname : territories.keySet())
         {
@@ -202,5 +205,31 @@ public class Taxon
             if (tx != null)
                 xs.addAll(tx.allCompositeSubTaxons(true));
         }
+    }
+
+    /*
+     * Проверить, является ли поименованная территория составным таксоном
+     */
+    public static boolean isComposite(String name)
+    {
+        switch (name)
+        {
+        case "Империя":
+        case "Европейская Россия":
+        case "51 губерния Европейской России":
+        case "50 губерний Европейской России":
+        case "Остзейские губернии":
+        case "привислинские губернии":
+        case "Азиатская Россия":
+        case "Кавказ":
+        case "Сибирь":
+        case "Средняя Азия":
+            return true;
+
+        default:
+            break;
+        }
+
+        return false;
     }
 }
