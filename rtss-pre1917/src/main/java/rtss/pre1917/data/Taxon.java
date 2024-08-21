@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/*
+ * Таксон (или составной таксон) -- это территория состоящая из других областей,
+ * в т.ч. рекурсивно других составных таксонов. 
+ */
 public class Taxon
 {
     public final Map<String, Double> territories = new HashMap<>();
