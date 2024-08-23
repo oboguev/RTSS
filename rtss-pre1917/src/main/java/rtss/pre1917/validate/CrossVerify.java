@@ -16,6 +16,7 @@ public class CrossVerify
 {
     public void verify(TerritoryDataSet territories) throws Exception
     {
+        validateHasYearData(territories);
         validateMaleFemaleBoth(territories);
         validateRuralUrbanAll(territories);
         // ### проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
@@ -32,6 +33,8 @@ public class CrossVerify
         // ### implied (calculated) CBR or CDR mismatching listed
         // ### back-calculate population
     }
+
+    /* =============================================================================================================== */
 
     private void validate_vital_rates(TerritoryDataSet territories)
     {
@@ -63,7 +66,7 @@ public class CrossVerify
                     long pop2 = ty.population.all + ty.births.all - ty.deaths.all;
                     @SuppressWarnings("unused")
                     long popm = (pop1 + pop2) / 2;
-                    
+
                     double cbr = (1000.0 * ty.births.all) / pop2;
 
                     if (Util.False)
@@ -97,7 +100,7 @@ public class CrossVerify
                     long pop2 = ty.population.all + ty.births.all - ty.deaths.all;
                     @SuppressWarnings("unused")
                     long popm = (pop1 + pop2) / 2;
-                    
+
                     double cdr = (1000.0 * ty.deaths.all) / pop2;
 
                     if (Util.False)
@@ -120,10 +123,12 @@ public class CrossVerify
                 }
             }
         }
-        
-        Util.out(String.format("CBR differ: %f%%", (100.0 * cbr_differ) /cbr_seen));
-        Util.out(String.format("CDR differ: %f%%", (100.0 * cdr_differ) /cdr_seen));
+
+        Util.out(String.format("CBR differ: %f%%", (100.0 * cbr_differ) / cbr_seen));
+        Util.out(String.format("CDR differ: %f%%", (100.0 * cdr_differ) / cdr_seen));
     }
+
+    /* =============================================================================================================== */
 
     /**
      * Вычислить население на начало 1893 года по косвенным данным
@@ -150,6 +155,8 @@ public class CrossVerify
             }
         }
     }
+
+    /* =============================================================================================================== */
 
     private void check_population_jump(TerritoryDataSet territories)
     {
@@ -187,7 +194,9 @@ public class CrossVerify
         for (String s : msgs)
             Util.err(s);
     }
-    
+
+    /* =============================================================================================================== */
+
     /*
      * Проверить что значения муж. и жен., когда указаны, в сумме согласуются для обеих полов.
      * Проверка только для базовых областей, не составных таксонов.
@@ -198,16 +207,16 @@ public class CrossVerify
         {
             if (Taxon.isComposite(ter.name))
                 continue;
-            
+
             for (int year : ter.years())
             {
                 TerritoryYear ty = ter.territoryYear(year);
                 validateMaleFemaleBoth(ter, year, ty.population.urban, "население городов");
-                validateMaleFemaleBoth(ter, year, ty.population.rural, "население узедов");
+                validateMaleFemaleBoth(ter, year, ty.population.rural, "население уездов");
                 validateMaleFemaleBoth(ter, year, ty.births.urban, "рождения в городах");
-                validateMaleFemaleBoth(ter, year, ty.births.rural, "рождения в узедах");
+                validateMaleFemaleBoth(ter, year, ty.births.rural, "рождения в уездах");
                 validateMaleFemaleBoth(ter, year, ty.deaths.urban, "смерти в городах");
-                validateMaleFemaleBoth(ter, year, ty.deaths.rural, "смерти в узедах");
+                validateMaleFemaleBoth(ter, year, ty.deaths.rural, "смерти в уездах");
             }
         }
     }
@@ -219,13 +228,15 @@ public class CrossVerify
             long df = Math.abs(value.male + value.female - value.both);
             if (df != 0)
             {
-                String msg = String.format("Расхождение (муж + жен - оба пола) %d %s %s на %,d (%,d + %,d - %,d)", 
+                String msg = String.format("Расхождение (муж + жен - оба пола) %d %s %s на %,d (%,d + %,d - %,d)",
                                            year, ter.name, what, df, value.male, value.female, value.both);
                 Util.err(msg);
             }
         }
     }
 
+    /* =============================================================================================================== */
+    
     /*
      * Проверить что сумма значений городских и уездных численостей, когда указаны, согласуются с общей величиной для территории.
      * Проверка только для базовых областей, не составных таксонов.
@@ -236,7 +247,7 @@ public class CrossVerify
         {
             if (Taxon.isComposite(ter.name))
                 continue;
-            
+
             for (int year : ter.years())
             {
                 TerritoryYear ty = ter.territoryYear(year);
@@ -251,32 +262,64 @@ public class CrossVerify
     {
         long vsum = 0;
         long vall = 0;
-        
+
         if (value.urban.both == null && value.rural.both == null)
             return;
-        
+
         if (value.urban.both != null)
             vsum += value.urban.both;
         if (value.rural.both != null)
             vsum += value.rural.both;
-        
+
         if (value.all != null)
             vall += value.all;
-        
+
         if (vsum != vall)
         {
             String msg = String.format("Расхождение (города + уезды - сумма) для %d %s %s на %,d (%s + %s - %s)",
-                                       year, ter.name, what, Math.abs(vall - vsum), 
+                                       year, ter.name, what, Math.abs(vall - vsum),
                                        l2s(value.urban.both), l2s(value.rural.both), l2s(value.all));
             Util.err(msg);
         }
     }
-    
+
     private String l2s(Long v)
     {
         if (v == null)
             return "[no data]";
         else
             return String.format("%,d", v);
+    }
+    
+    /* =============================================================================================================== */
+
+    private void validateHasYearData(TerritoryDataSet territories) throws Exception
+    {
+        for (int year = 1892; year <= 1914; year++)
+        {
+            if (!hasYearData(territories, year))
+                Util.err(String.format("Отсутствуют данные за %d год", year));
+        }
+    }
+
+    private boolean hasYearData(TerritoryDataSet territories, int year) throws Exception
+    {
+        return hasYearData(territories, "Архангельская", year) &&
+               hasYearData(territories, "Ярославская", year) &&
+               hasYearData(territories, "Империя", year);
+    }
+
+    private boolean hasYearData(TerritoryDataSet territories, String tname, int year) throws Exception
+    {
+        Territory ter = territories.get(tname);
+        if (ter == null || !ter.hasYear(year))
+            return false;
+
+        TerritoryYear ty = ter.territoryYear(year);
+
+        if (ty.population.all == null || ty.births.all == null || ty.deaths == null)
+            return false;
+
+        return true;
     }
 }
