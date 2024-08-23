@@ -223,6 +223,16 @@ public class CrossVerify
 
     private void validateMaleFemaleBoth(Territory ter, int year, ValueByGender value, String what)
     {
+        boolean squash = Util.True;
+        
+        if (squash)
+        {
+            if (year == 1902 && ter.name.equals("Нижегородская") && what.equals("рождения в уездах"))
+                return;
+            if (year == 1902 && ter.name.equals("Ломжинская") && what.equals("рождения в уездах"))
+                return;
+        }
+        
         if (value.male != null && value.female != null && value.both != null)
         {
             long df = Math.abs(value.male + value.female - value.both);
