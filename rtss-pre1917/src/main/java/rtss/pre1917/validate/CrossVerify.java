@@ -19,6 +19,7 @@ public class CrossVerify
         validateHasYearData(territories);
         validateMaleFemaleBoth(territories);
         validateRuralUrbanAll(territories);
+        validateGradualPopulationIncrease(territories);
         // ### проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
         // ### проверить URValue.all против суммы URValue.rural.both + URValue.urban.both   
         new ValidateTaxons().validate_taxons(territories);
@@ -224,7 +225,7 @@ public class CrossVerify
     private void validateMaleFemaleBoth(Territory ter, int year, ValueByGender value, String what)
     {
         boolean squash = Util.True;
-        
+
         if (squash)
         {
             if (year == 1902 && ter.name.equals("Нижегородская") && what.equals("рождения в уездах"))
@@ -232,7 +233,7 @@ public class CrossVerify
             if (year == 1902 && ter.name.equals("Ломжинская") && what.equals("рождения в уездах"))
                 return;
         }
-        
+
         if (value.male != null && value.female != null && value.both != null)
         {
             long df = Math.abs(value.male + value.female - value.both);
@@ -246,7 +247,7 @@ public class CrossVerify
     }
 
     /* =============================================================================================================== */
-    
+
     /*
      * Проверить что сумма значений городских и уездных численостей, когда указаны, согласуются с общей величиной для территории.
      * Проверка только для базовых областей, не составных таксонов.
@@ -300,7 +301,7 @@ public class CrossVerify
         else
             return String.format("%,d", v);
     }
-    
+
     /* =============================================================================================================== */
 
     private void validateHasYearData(TerritoryDataSet territories) throws Exception
@@ -331,5 +332,80 @@ public class CrossVerify
             return false;
 
         return true;
+    }
+
+    /* =============================================================================================================== */
+
+    /*
+     * Проверить, что население год от года нарастает постепенно
+     */
+    private void validateGradualPopulationIncrease(TerritoryDataSet territories)
+    {
+        for (String tname : territories.keySet())
+        {
+            Territory ter = territories.get(tname);
+            validateGradualPopulationIncrease(ter);
+        }
+    }
+
+    private void validateGradualPopulationIncrease(Territory ter)
+    {
+        List<TerritoryYear> tylist = new ArrayList<>();
+
+        for (int year : ter.years())
+        {
+            TerritoryYear ty = ter.territoryYear(year);
+            if (ty.population.all != null)
+                tylist.add(ty);
+        }
+
+        while (tylist.size() >= 3)
+        {
+            TerritoryYear ty1 = tylist.get(0);
+            TerritoryYear ty2 = tylist.get(1);
+            TerritoryYear ty3 = tylist.get(2);
+            
+            String sdv = "ill-defined";
+            long v1 = ty1.population.all;
+            long v2 = ty2.population.all;
+            long v3 = ty3.population.all;
+            if (v3 != v1)
+            {
+                double fdv = (double) (v2 - v1) / (v3 - v1);
+                if (fdv >= 0 && fdv <= 1.0)
+                    sdv = String.format("%.1f", fdv * 100.0);
+            }
+            
+
+            if (!validateGradualPopulationIncrease(ty1, ty2, ty3))
+            {
+                String msg = String.format("Годовое изменение населения %s [%d - %d - %d] %,d - %,d - %,d [%s]",
+                                           ter.name, ty1.year, ty2.year, ty3.year,
+                                           ty1.population.all, ty2.population.all, ty3.population.all,
+                                           sdv);
+                Util.err(msg);
+            }
+
+            tylist.remove(0);
+        }
+    }
+
+    private boolean validateGradualPopulationIncrease(TerritoryYear ty1, TerritoryYear ty2, TerritoryYear ty3)
+    {
+        long v1 = ty1.population.all;
+        long v2 = ty2.population.all;
+        long v3 = ty3.population.all;
+        
+        if (v1 == v2 && v2 == v3)
+            return true;
+
+        if (!(v1 < v3))
+            return false;
+
+        double dv = (v3 - v1);
+        if (v2 >= v1 + 0.25 * dv && v2 <= v1 + 0.75 * dv)
+            return true;
+
+        return false;
     }
 }
