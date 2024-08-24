@@ -15,7 +15,7 @@ public class Taxon
     private final String name;
     private final int year;
     public static Double DoubleONE = Double.valueOf(1.0);
-    
+
     public Taxon(String name, int year)
     {
         this.name = name;
@@ -80,6 +80,64 @@ public class Taxon
                     .add("Сувалкская");
             if (year <= 1913)
                 t.add("Седлецкая");
+            break;
+
+        case "неземские губернии":
+            t.add("Архангельская ")
+                    .add("Астраханская")
+                    .add("Виленская")
+                    .add("Витебская ")
+                    .add("Волынская")
+                    .add("Гродненская")
+                    .add("Киевская")
+                    .add("Ковенская")
+                    .add("Минская")
+                    .add("Могилевская")
+                    .add("Оренбургская")
+                    .add("Подольская");
+            break;
+
+        case "земские губернии":
+            t.add("Бессарабская")
+                    .add("Владимирская")
+                    .add("Вологодская")
+                    .add("Воронежская")
+                    .add("Вятская")
+                    .add("Екатеринославская")
+                    .add("Казанская")
+                    .add("Калужская")
+                    .add("Костромская")
+                    .add("Курская")
+                    .add("Московская")
+                    .add("г. Москва")
+                    .add("Нижегородская")
+                    .add("Новгородская")
+                    .add("Олонецкая")
+                    .add("Орловская")
+                    .add("Пензенская")
+                    .add("Пермская")
+                    .add("Полтавская")
+                    .add("Псковская")
+                    .add("Рязанская")
+                    .add("Самарская")
+                    .add("Санкт-Петербургская")
+                    .add("г. Санкт-Петербург")
+                    .add("Саратовская")
+                    .add("Симбирская")
+                    .add("Смоленская")
+                    .add("Таврическая")
+                    .add("г. Севастополь")
+                    .add("Тамбовская")
+                    .add("Тверская")
+                    .add("Тульская")
+                    .add("Уфимская")
+                    .add("Харьковская")
+                    .add("Херсонская")
+                    .add("г. Николаев")
+                    .add("г. Одесса")
+                    .add("Черниговская")
+                    .add("Ярославская")
+                    .add("Ростовское и./Д град.");
             break;
 
         case "Азиатская Россия":
@@ -253,13 +311,13 @@ public class Taxon
         flatten(tx.territories, DoubleONE);
         return tx;
     }
-    
+
     private void flatten(Map<String, Double> out, Double pweight) throws Exception
     {
         for (String tname : territories.keySet())
         {
             Double weight = territories.get(tname);
-            
+
             if (weight == DoubleONE && pweight == DoubleONE)
             {
                 weight = DoubleONE;
@@ -268,7 +326,7 @@ public class Taxon
             {
                 weight *= pweight;
             }
-    
+
             if (!isComposite(tname))
             {
                 if (out.containsKey(tname))
