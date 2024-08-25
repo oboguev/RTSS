@@ -402,8 +402,11 @@ public class CrossVerify
         if (!(v1 < v3))
             return false;
 
+        if (v1 == v2 || v2 == v3)
+            return true;
+
         double dv = (v3 - v1);
-        if (v2 >= v1 + 0.25 * dv && v2 <= v1 + 0.75 * dv)
+        if (v2 >= v1 + 0.05 * dv && v2 <= v1 + 0.95 * dv)
             return true;
 
         return false;
