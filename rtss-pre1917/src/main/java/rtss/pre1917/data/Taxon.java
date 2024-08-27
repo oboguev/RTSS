@@ -33,7 +33,12 @@ public class Taxon
         return this;
     }
 
-    public static Taxon of(String name, int year) throws Exception
+    public static Taxon of(String name, int year, TerritoryDataSet territories) throws Exception
+    {
+        return of(name, year, territories.dataSetType);
+    }
+    
+    public static Taxon of(String name, int year, DataSetType dataSetType) throws Exception
     {
         Taxon t = new Taxon(name, year);
 
@@ -255,22 +260,22 @@ public class Taxon
     /*
      * Имена всех составных таксонов входящих в данный таксон, рекурсивно
      */
-    public Set<String> allCompositeSubTaxons(boolean includeSelf) throws Exception
+    public Set<String> allCompositeSubTaxons(boolean includeSelf, DataSetType dataSetType) throws Exception
     {
         Set<String> xs = new HashSet<String>();
-        allCompositeSubTaxons(xs);
+        allCompositeSubTaxons(xs, dataSetType);
         if (includeSelf)
             xs.add(name);
         return xs;
     }
 
-    private void allCompositeSubTaxons(Set<String> xs) throws Exception
+    private void allCompositeSubTaxons(Set<String> xs, DataSetType dataSetType) throws Exception
     {
         for (String xname : territories.keySet())
         {
-            Taxon tx = of(xname, year);
+            Taxon tx = of(xname, year, dataSetType);
             if (tx != null)
-                xs.addAll(tx.allCompositeSubTaxons(true));
+                xs.addAll(tx.allCompositeSubTaxons(true, dataSetType));
         }
     }
 
@@ -305,14 +310,14 @@ public class Taxon
     /*
      * Редуцировать таксон до базовых областей
      */
-    public Taxon flatten() throws Exception
+    public Taxon flatten(DataSetType dataSetType) throws Exception
     {
         Taxon tx = new Taxon(name, year);
-        flatten(tx.territories, DoubleONE);
+        flatten(tx.territories, DoubleONE, dataSetType);
         return tx;
     }
 
-    private void flatten(Map<String, Double> out, Double pweight) throws Exception
+    private void flatten(Map<String, Double> out, Double pweight, DataSetType dataSetType) throws Exception
     {
         for (String tname : territories.keySet())
         {
@@ -335,8 +340,8 @@ public class Taxon
             }
             else
             {
-                Taxon t2 = Taxon.of(tname, year).flatten();
-                t2.flatten(out, weight);
+                Taxon t2 = Taxon.of(tname, year, dataSetType).flatten(dataSetType);
+                t2.flatten(out, weight, dataSetType);
             }
         }
     }

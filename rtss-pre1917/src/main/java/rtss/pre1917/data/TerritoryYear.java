@@ -65,7 +65,7 @@ public class TerritoryYear
         switch (what.trim())
         {
         case "чж":
-        case "чж-o":
+        case "чж-о":
             if (population.total.both != null)
                 duplicateValue(what);
             population.total.both = v;

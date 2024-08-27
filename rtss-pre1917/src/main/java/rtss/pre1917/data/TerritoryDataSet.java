@@ -3,6 +3,7 @@ package rtss.pre1917.data;
 import java.util.HashMap;
 
 import rtss.pre1917.util.WeightedAverage;
+import rtss.util.Util;
 
 public class TerritoryDataSet extends HashMap<String, Territory>
 {
@@ -31,7 +32,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
 
     public void evalTaxon(String name, int year, boolean overwrite) throws Exception
     {
-        Taxon tx = Taxon.of(name, year);
+        Taxon tx = Taxon.of(name, year, dataSetType);
         if (tx == null)
             return;
 
@@ -40,6 +41,8 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             evalTaxon(xname, year, overwrite);
 
         Territory ter = get(name);
+        if (ter == null)
+            Util.noop();
 
         /* calculated TerritoryYear */
         TerritoryYear cty = new TerritoryYear(ter, year);
@@ -51,8 +54,8 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             /* child and Territory TerritoryYear */
             Territory xter = get(xname);
             double fraction = tx.territories.get(xname);
-
-            if (xter.hasYear(year))
+            
+            if (xter != null && xter.hasYear(year))
             {
                 TerritoryYear xty = xter.territoryYear(year);
                 if (xty.population.all() != null)

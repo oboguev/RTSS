@@ -32,10 +32,11 @@ public class LoadData
         {
             Util.err("** Exception: ");
             ex.printStackTrace();
-            
+
             if (self.currentNR != null)
             {
-                Util.out(String.format("File %s, col %c (%d), row %s", self.currentFile, 'A' + self.currentWCOL, self.currentWCOL + 1, self.currentNR + 1));
+                Util.out(String.format("File %s, col %c (%d), row %s", self.currentFile, 'A' + self.currentWCOL, self.currentWCOL + 1,
+                                       self.currentNR + 1));
             }
         }
     }
@@ -45,7 +46,7 @@ public class LoadData
     private String currentFile = null;
     private Integer currentWCOL = null;
     private Integer currentNR = null;
-    
+
     /* ================================================================================================= */
 
     public TerritoryDataSet loadCensus1897() throws Exception
@@ -54,7 +55,7 @@ public class LoadData
 
         currentFileYear = 1897;
         currentFile = "census-1897/census-1897.xlsx";
-        
+
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
             for (int k = 0; k < wb.getNumberOfSheets(); k++)
@@ -74,24 +75,26 @@ public class LoadData
                 scanGubColumn(rc, gcol);
 
                 // scan column "key yyyy" 
-                scanYearColumn(rc, gcol, headers, "чж-м");
-                scanYearColumn(rc, gcol, headers, "чж-ж");
-                scanYearColumn(rc, gcol, headers, "чж-о");
+                scanThisYearColumn(rc, gcol, headers, "чж-м");
+                scanThisYearColumn(rc, gcol, headers, "чж-ж");
+                scanThisYearColumn(rc, gcol, headers, "чж-о");
             }
         }
 
         currentFileYear = null;
         currentFile = null;
 
+        new CrossVerify().verify(territories);
+
         return territories;
     }
-    
+
     /* ================================================================================================= */
 
     public TerritoryDataSet loadUGVI() throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.UGVI);
-        
+
         loadUGVI("1891");
         loadUGVI("1892");
         loadUGVI("1893-1895", 1893, 1895);
@@ -151,23 +154,23 @@ public class LoadData
                 scanYearColumn(rc, gcol, headers, "чж-гор-м");
                 scanYearColumn(rc, gcol, headers, "чж-гор-ж");
                 scanYearColumn(rc, gcol, headers, "чж-гор-о");
-                
+
                 scanYearColumn(rc, gcol, headers, "чр-гор-м");
                 scanYearColumn(rc, gcol, headers, "чр-гор-ж");
                 scanYearColumn(rc, gcol, headers, "чр-гор-о");
-                
+
                 scanYearColumn(rc, gcol, headers, "чс-гор-м");
                 scanYearColumn(rc, gcol, headers, "чс-гор-ж");
                 scanYearColumn(rc, gcol, headers, "чс-гор-о");
-                
+
                 scanYearColumn(rc, gcol, headers, "чж-уез-м");
                 scanYearColumn(rc, gcol, headers, "чж-уез-ж");
                 scanYearColumn(rc, gcol, headers, "чж-уез-о");
-                
+
                 scanYearColumn(rc, gcol, headers, "чр-уез-м");
                 scanYearColumn(rc, gcol, headers, "чр-уез-ж");
                 scanYearColumn(rc, gcol, headers, "чр-уез-о");
-                
+
                 scanYearColumn(rc, gcol, headers, "чс-уез-м");
                 scanYearColumn(rc, gcol, headers, "чс-уез-ж");
                 scanYearColumn(rc, gcol, headers, "чс-уез-о");
@@ -318,14 +321,25 @@ public class LoadData
         }
     }
 
+    private void scanThisYearColumn(ExcelRC rc, int gcol, Map<String, Integer> headers, String what) throws Exception
+    {
+        for (String h : headers.keySet())
+        {
+            if (h.equals(what))
+            {
+                scanYearColumn(rc, gcol, what, currentFileYear.intValue(), headers.get(h));
+            }
+        }
+    }
+
     private void scanYearColumn(ExcelRC rc, int gcol, String what, int year, int wcol) throws Exception
     {
         currentWCOL = wcol;
-        
+
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             currentNR = nr;
-            
+
             Object o = rc.get(nr, gcol);
             if (o == null)
                 o = "";
@@ -437,13 +451,16 @@ public class LoadData
             }
         }
     }
-    
+
     private Class<?> typeof(String what) throws Exception
     {
         switch (what)
         {
         case "чж в сл. году":
         case "чж":
+        case "чж-м":
+        case "чж-ж":
+        case "чж-о":
         case "чр":
         case "чу":
             // ---------------

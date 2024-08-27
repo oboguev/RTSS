@@ -17,8 +17,8 @@ public class ValidateTaxons
 
         for (int year = 1891; year <= 1915; year++)
         {
-            Taxon tx = Taxon.of("Империя", year);
-            Set<String> txnames = tx.allCompositeSubTaxons(true);
+            Taxon tx = Taxon.of("Империя", year, territories);
+            Set<String> txnames = tx.allCompositeSubTaxons(true, territories.dataSetType);
             for (String txname : txnames)
             {
                 validate_taxon(txname, year, territories, t2);

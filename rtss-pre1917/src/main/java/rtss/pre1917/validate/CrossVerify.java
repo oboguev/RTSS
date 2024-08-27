@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -308,6 +309,9 @@ public class CrossVerify
     {
         for (int year = 1892; year <= 1914; year++)
         {
+            if (territories.dataSetType == DataSetType.CENSUS_1897 && year != 1897)
+                continue;
+
             if (!hasYearData(territories, year))
                 Util.err(String.format("Отсутствуют данные за %d год", year));
         }
@@ -327,9 +331,19 @@ public class CrossVerify
             return false;
 
         TerritoryYear ty = ter.territoryYear(year);
+        
+        switch (territories.dataSetType)
+        {
+        case CENSUS_1897:
+            if (ty.population.all() == null)
+                return false;
+            break;
 
-        if (ty.population.all() == null || ty.births.all() == null || ty.deaths == null)
-            return false;
+        default:    
+            if (ty.population.all() == null || ty.births.all() == null || ty.deaths == null)
+                return false;
+            break;
+        }
 
         return true;
     }
