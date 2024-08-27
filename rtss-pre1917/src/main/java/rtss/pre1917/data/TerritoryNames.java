@@ -25,10 +25,17 @@ public class TerritoryNames
 
     public static String canonic(String ter) throws Exception
     {
+        ter = ter.replace("(", " ");
+        ter = ter.replace(")", " ");
+        
         ter = Util.despace(ter).trim();
         if (ter.equals(""))
             return "";
 
+        ter = ter.replace("c", "с"); // latin c with Cyrillic с
+        ter = ter.replace("o", "о"); // latin o with Cyrillic о
+        ter = ter.replace("P", "Р"); // latin P with Cyrillic р
+        ter = ter.replace("p", "р"); // latin p with Cyrillic р
         ter = ter.replace("і", "и");
         ter = ter.replace("i", "и");
         ter = ter.replace("ѣ", "е");
@@ -36,6 +43,8 @@ public class TerritoryNames
         ter = ter.replace("ъ-", "-");
         if (ter.endsWith("ъ"))
             ter = Util.stripTail(ter, "ъ");
+        ter = ter.replace("въ т.ч. ", "");
+        ter = ter.replace("в т.ч. ", "");
         ter = ter.replace(" вь ", " в ");
         ter = ter.replace("Итога ", "Итого ");
         ter = ter.replace("Итого в ", "");
@@ -52,6 +61,7 @@ public class TerritoryNames
         ter = ter.replace("Петроградская", "Санкт-Петербургская");
         ter = ter.replace("С.-Петербургcкая", "Санкт-Петербургская");
         ter = ter.replace("С.-Петербургская", "Санкт-Петербургская");
+        ter = ter.replace("с Петербургом", "с Санкт-Петербургом");
 
         if (ter.startsWith("В "))
             ter = Util.stripStart(ter, "В ");
@@ -128,7 +138,8 @@ public class TerritoryNames
         aliases("Империя", "Империи", "всей Империи");
         aliases("Дагестанская обл.", "Дагестанская");
         aliases("Область войска Донского", "Донскаго в обл.", "Донскаго войска область", "Донская", 
-                "Обл Войска Донского", "Области Войска Донского");
+                "Обл Войска Донского", "Области Войска Донского", "Донского войска обл",
+                "Донского войска обл.");
         aliases("Забайкальская обл.", "Забайкальская", "Забайкальсая");
         aliases("Закаспийская обл.", "Закаспийская");
         aliases("Елисаветпольская", "Елизаветпольская", "Елисаветнодьекая", "Елисаветпольскаа",
@@ -140,7 +151,7 @@ public class TerritoryNames
         aliases("г. Санкт-Петербург", "г. Петербург", "г. Петроград", "г. С.-Петербург", "С.-Петербург");
         aliases("привислинские губернии", "привислинские губ.", "привисленских губ.",
                 "привислинск губ.", "привислинских губерний", "привислинcк губ.", "привислинских губ.",
-                "привнслинск губ.", "привислинских губерниях");
+                "привнслинск губ.", "привислинских губерниях", "Привислинские губ.");
         aliases("Гродненская", "гродненская");
         aliases("Эстляндская", "Эстляндсхая");
         aliases("Ферганская обл.", "Ферганская", "Фергранская");
@@ -205,7 +216,7 @@ public class TerritoryNames
         aliases("Петроковская", "Петрояовская");
         aliases("Тифлисская", "Тисяисская");
         aliases("г. Баку", "Бакинское градонач", "Бакинское градояан");
-        aliases("Келецкая", "Кедецкая");
+        aliases("Келецкая", "Кедецкая", "Келцкая");
         aliases("Люблинская", "Люблянская");
         aliases("Седлецкая", "Седлцкая", "Седлевская", "Седледкая");
         aliases("Кубанская обл.", "Кубанская");

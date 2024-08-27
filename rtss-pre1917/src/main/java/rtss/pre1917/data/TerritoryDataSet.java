@@ -7,10 +7,17 @@ import rtss.pre1917.util.WeightedAverage;
 public class TerritoryDataSet extends HashMap<String, Territory>
 {
     private static final long serialVersionUID = 1L;
+    
+    public final DataSetType dataSetType;
+    
+    public TerritoryDataSet(DataSetType dataSetType)
+    {
+        this.dataSetType = dataSetType;
+    }
 
     public TerritoryDataSet dup()
     {
-        TerritoryDataSet tds = new TerritoryDataSet();
+        TerritoryDataSet tds = new TerritoryDataSet(dataSetType);
         for (String name : keySet())
             tds.put(name, get(name).dup());
         return tds;
@@ -48,31 +55,31 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             if (xter.hasYear(year))
             {
                 TerritoryYear xty = xter.territoryYear(year);
-                if (xty.population.all != null)
+                if (xty.population.all() != null)
                 {
-                    if (cty.population.all == null)
-                        cty.population.all = 0L;
-                    cty.population.all = Math.round(cty.population.all + fraction * xty.population.all);
+                    if (cty.population.all() == null)
+                        cty.population.total.both = 0L;
+                    cty.population.total.both = Math.round(cty.population.all() + fraction * xty.population.all());
                 }
 
-                if (xty.births.all != null)
+                if (xty.births.all() != null)
                 {
-                    if (cty.births.all == null)
-                        cty.births.all = 0L;
-                    cty.births.all = Math.round(cty.births.all + fraction * xty.births.all);
+                    if (cty.births.all() == null)
+                        cty.births.total.both = 0L;
+                    cty.births.total.both = Math.round(cty.births.all() + fraction * xty.births.all());
                 }
 
-                if (xty.deaths.all != null)
+                if (xty.deaths.all() != null)
                 {
-                    if (cty.deaths.all == null)
-                        cty.deaths.all = 0L;
-                    cty.deaths.all = Math.round(cty.deaths.all + fraction * xty.deaths.all);
+                    if (cty.deaths.all() == null)
+                        cty.deaths.total.both = 0L;
+                    cty.deaths.total.both = Math.round(cty.deaths.all() + fraction * xty.deaths.all());
                 }
 
-                if (cty.population.all != null && xty.cbr != null)
-                    av_cbr.add(xty.cbr, cty.population.all);
-                if (cty.population.all != null && xty.cdr != null)
-                    av_cdr.add(xty.cdr, cty.population.all);
+                if (cty.population.all() != null && xty.cbr != null)
+                    av_cbr.add(xty.cbr, cty.population.all());
+                if (cty.population.all() != null && xty.cdr != null)
+                    av_cdr.add(xty.cdr, cty.population.all());
             }
         }
 
@@ -85,11 +92,11 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         /* merge cty to ty */
         TerritoryYear ty = ter.territoryYear(year);
 
-        if (cty.population.all != null && (overwrite || ty.population.all == null))
-            ty.population.all = cty.population.all;
+        if (cty.population.all() != null && (overwrite || ty.population.all() == null))
+            ty.population.total.both = cty.population.all();
 
-        if (cty.births.all != null && (overwrite || ty.births.all == null))
-            ty.births.all = cty.births.all;
+        if (cty.births.all() != null && (overwrite || ty.births.all() == null))
+            ty.births.total.both = cty.births.all();
 
         if (cty.deaths != null && (overwrite || ty.deaths == null))
             ty.deaths = cty.deaths;

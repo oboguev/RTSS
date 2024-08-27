@@ -229,7 +229,7 @@ public class ExcelRC extends ArrayList<List<Object>>
         {
             String s = o.toString();
             s = Util.despace(s).trim();
-            if (s.contains("note"))
+            if (s.contains("note") || s.contains("verify") || s.contains("verification"))
                 return true;
         }
         

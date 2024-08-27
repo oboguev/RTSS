@@ -6,6 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.data.ColumnHeader;
+import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
@@ -22,7 +23,8 @@ public class LoadData
         LoadData self = new LoadData();
         try
         {
-            self.loadAllData();
+            self.loadCensus1897();
+            // self.loadUGVI();
             // TerritoryNames.printSeen();
             Util.out("** Done");
         }
@@ -38,14 +40,58 @@ public class LoadData
         }
     }
 
-    private TerritoryDataSet territories = new TerritoryDataSet();
+    private TerritoryDataSet territories;
     private Integer currentFileYear = null;
     private String currentFile = null;
     private Integer currentWCOL = null;
     private Integer currentNR = null;
+    
+    /* ================================================================================================= */
 
-    public TerritoryDataSet loadAllData() throws Exception
+    public TerritoryDataSet loadCensus1897() throws Exception
     {
+        territories = new TerritoryDataSet(DataSetType.CENSUS_1897);
+
+        currentFileYear = 1897;
+        currentFile = "census-1897/census-1897.xlsx";
+        
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                validateHeaders(headers);
+
+                if (!headers.containsKey("губ"))
+                    throw new Exception("Нет колонки для губернии");
+                int gcol = headers.get("губ");
+                scanGubColumn(rc, gcol);
+
+                // scan column "key yyyy" 
+                scanYearColumn(rc, gcol, headers, "чж-м");
+                scanYearColumn(rc, gcol, headers, "чж-ж");
+                scanYearColumn(rc, gcol, headers, "чж-о");
+            }
+        }
+
+        currentFileYear = null;
+        currentFile = null;
+
+        return territories;
+    }
+    
+    /* ================================================================================================= */
+
+    public TerritoryDataSet loadUGVI() throws Exception
+    {
+        territories = new TerritoryDataSet(DataSetType.UGVI);
+        
         loadUGVI("1891");
         loadUGVI("1892");
         loadUGVI("1893-1895", 1893, 1895);
@@ -168,6 +214,8 @@ public class LoadData
         currentFile = null;
     }
 
+    /* ================================================================================================= */
+
     private void validateHeaders(Map<String, Integer> headers) throws Exception
     {
         for (String h : headers.keySet())
@@ -175,6 +223,9 @@ public class LoadData
             switch (h)
             {
             case "губ":
+            case "чж-о":
+            case "чж-м":
+            case "чж-ж":
             case "чр":
             case "чу":
             case "р":

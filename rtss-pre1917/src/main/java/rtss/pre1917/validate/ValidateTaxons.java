@@ -42,23 +42,23 @@ public class ValidateTaxons
         TerritoryYear ty = ter.territoryYear(year);
         TerritoryYear ty2 = ter2.territoryYear(year);
 
-        if (differ(ty.population.all, ty2.population.all, 0.01))
+        if (differ(ty.population.all(), ty2.population.all(), 0.01))
         {
             msg = String.format("Taxon differs: %s %d population listed=%,3d calculated=%,3d diff=%.2f%%",
-                                txname, year, ty.population.all, ty2.population.all, 
-                                pctDiff(ty.population.all, ty2.population.all));
+                                txname, year, ty.population.all(), ty2.population.all(), 
+                                pctDiff(ty.population.all(), ty2.population.all()));
             Util.out(msg);
         }
 
-        if (differ(ty.births.all, ty2.births.all, 0.01))
+        if (differ(ty.births.all(), ty2.births.all(), 0.01))
         {
             msg = String.format("Taxon differs: %s %d births listed=%,3d calculated=%,3d diff=%.2f%%",
-                                txname, year, ty.births.all, ty2.births.all, 
-                                pctDiff(ty.births.all, ty2.births.all));
+                                txname, year, ty.births.all(), ty2.births.all(), 
+                                pctDiff(ty.births.all(), ty2.births.all()));
             Util.out(msg);
         }
 
-        if (differ(ty.deaths.all, ty2.deaths.all, 0.01))
+        if (differ(ty.deaths.all(), ty2.deaths.all(), 0.01))
         {
             if (squash)
             {
@@ -73,8 +73,8 @@ public class ValidateTaxons
             }
             
             msg = String.format("Taxon differs: %s %d deaths listed=%,3d calculated=%,3d diff=%.2f%%",
-                                txname, year, ty.deaths.all, ty2.deaths.all, 
-                                pctDiff(ty.deaths.all, ty2.deaths.all));
+                                txname, year, ty.deaths.all(), ty2.deaths.all(), 
+                                pctDiff(ty.deaths.all(), ty2.deaths.all()));
             Util.out(msg);
         }
         

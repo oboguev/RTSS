@@ -65,21 +65,34 @@ public class TerritoryYear
         switch (what.trim())
         {
         case "чж":
-            if (population.all != null)
+        case "чж-o":
+            if (population.total.both != null)
                 duplicateValue(what);
-            population.all = v;
+            population.total.both = v;
+            break;
+
+        case "чж-м":
+            if (population.total.male != null)
+                duplicateValue(what);
+            population.total.male = v;
+            break;
+
+        case "чж-ж":
+            if (population.total.female != null)
+                duplicateValue(what);
+            population.total.female = v;
             break;
 
         case "чр":
-            if (births.all != null)
+            if (births.total.both != null)
                 duplicateValue(what);
-            births.all = v;
+            births.total.both = v;
             break;
 
         case "чу":
-            if (deaths.all != null)
+            if (deaths.total.both != null)
                 duplicateValue(what);
-            deaths.all = v;
+            deaths.total.both = v;
             break;
 
         // -----------------
