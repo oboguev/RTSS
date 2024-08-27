@@ -23,7 +23,8 @@ public class LoadData
         LoadData self = new LoadData();
         try
         {
-            self.loadCensus1897();
+            self.loadEvroChast();
+            // self.loadCensus1897();
             // self.loadUGVI();
             // TerritoryNames.printSeen();
             Util.out("** Done");
@@ -47,6 +48,68 @@ public class LoadData
     private Integer currentWCOL = null;
     private Integer currentNR = null;
 
+    /* ================================================================================================= */
+
+    public TerritoryDataSet loadEvroChast() throws Exception
+    {
+        territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII);
+        
+        for (int year = 1897; year <= 1910; year++)
+            loadEvroChast(year); 
+
+        new CrossVerify().verify(territories);
+        
+        return territories;
+    }
+    
+    private void loadEvroChast(int year) throws Exception
+    {
+        currentFileYear = year;
+        currentFile = String.format("csk-dvizhenie-evropriskoi-chasti-rossii/year-volumes/%d.xlsx", year);
+        
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                validateHeaders(headers);
+
+                if (!headers.containsKey("губ"))
+                    throw new Exception("Нет колонки для губернии");
+                int gcol = headers.get("губ");
+                scanGubColumn(rc, gcol);
+
+                // scan column "key yyyy" 
+                // ### чж PYY
+                scanYearColumn(rc, gcol, headers, "р");
+                scanYearColumn(rc, gcol, headers, "с");
+                scanYearColumn(rc, gcol, headers, "еп");
+                scanYearColumn(rc, gcol, headers, "чр-м");
+                scanYearColumn(rc, gcol, headers, "чр-ж");
+                scanYearColumn(rc, gcol, headers, "чр-о");
+                scanYearColumn(rc, gcol, headers, "чс-м");
+                scanYearColumn(rc, gcol, headers, "чс-ж");
+                scanYearColumn(rc, gcol, headers, "чс-о");
+            }
+        }
+        finally
+        {
+            currentFileYear = null;
+            currentFile = null;
+        }
+
+
+        currentFileYear = null;
+        currentFile = null;
+    }
+
+    
     /* ================================================================================================= */
 
     public TerritoryDataSet loadCensus1897() throws Exception
@@ -80,9 +143,13 @@ public class LoadData
                 scanThisYearColumn(rc, gcol, headers, "чж-о");
             }
         }
+        finally
+        {
+            currentFileYear = null;
+            currentFile = null;
+        }
 
-        currentFileYear = null;
-        currentFile = null;
+        new CrossVerify().verify(territories);
 
         new CrossVerify().verify(territories);
 
