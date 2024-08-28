@@ -312,6 +312,9 @@ public class CrossVerify
             if (territories.dataSetType == DataSetType.CENSUS_1897 && year != 1897)
                 continue;
 
+            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && !(year >= 1897 && year <= 1910))
+                continue;
+
             if (!hasYearData(territories, year))
                 Util.err(String.format("Отсутствуют данные за %d год", year));
         }
@@ -319,9 +322,13 @@ public class CrossVerify
 
     private boolean hasYearData(TerritoryDataSet territories, int year) throws Exception
     {
+        String whole = "Империя";
+        if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII)
+            whole = "50 губерний Европейской России";
+        
         return hasYearData(territories, "Архангельская", year) &&
                hasYearData(territories, "Ярославская", year) &&
-               hasYearData(territories, "Империя", year);
+               hasYearData(territories, whole, year);
     }
 
     private boolean hasYearData(TerritoryDataSet territories, String tname, int year) throws Exception
@@ -340,7 +347,7 @@ public class CrossVerify
             break;
 
         default:    
-            if (ty.population.all() == null || ty.births.all() == null || ty.deaths == null)
+            if (ty.population.all() == null || ty.births.all() == null || ty.deaths.all() == null)
                 return false;
             break;
         }

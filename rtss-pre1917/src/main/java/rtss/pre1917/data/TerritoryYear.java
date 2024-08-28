@@ -48,6 +48,7 @@ public class TerritoryYear
             break;
 
         case "п":
+        case "еп":
             if (ngr != null)
                 throw new Exception("Duplicate value");
             ngr = v;
@@ -84,15 +85,41 @@ public class TerritoryYear
             break;
 
         case "чр":
+        case "чр-о":
             if (births.total.both != null)
                 duplicateValue(what);
             births.total.both = v;
             break;
+            
+        case "чр-м":
+            if (births.total.male!= null)
+                duplicateValue(what);
+            births.total.male = v;
+            break;
+
+        case "чр-ж":
+            if (births.total.female != null)
+                duplicateValue(what);
+            births.total.female = v;
+            break;
 
         case "чу":
+        case "чс-о":
             if (deaths.total.both != null)
                 duplicateValue(what);
             deaths.total.both = v;
+            break;
+
+        case "чс-м":
+            if (deaths.total.male!= null)
+                duplicateValue(what);
+            deaths.total.male = v;
+            break;
+
+        case "чс-ж":
+            if (deaths.total.female != null)
+                duplicateValue(what);
+            deaths.total.female = v;
             break;
 
         // -----------------

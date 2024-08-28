@@ -87,15 +87,15 @@ public class LoadData
 
                 // scan column "key yyyy" 
                 // ### чж PYY
-                scanYearColumn(rc, gcol, headers, "р");
-                scanYearColumn(rc, gcol, headers, "с");
-                scanYearColumn(rc, gcol, headers, "еп");
-                scanYearColumn(rc, gcol, headers, "чр-м");
-                scanYearColumn(rc, gcol, headers, "чр-ж");
-                scanYearColumn(rc, gcol, headers, "чр-о");
-                scanYearColumn(rc, gcol, headers, "чс-м");
-                scanYearColumn(rc, gcol, headers, "чс-ж");
-                scanYearColumn(rc, gcol, headers, "чс-о");
+                scanThisYearColumn(rc, gcol, headers, "р");
+                scanThisYearColumn(rc, gcol, headers, "с");
+                scanThisYearColumn(rc, gcol, headers, "еп");
+                scanThisYearColumn(rc, gcol, headers, "чр-м");
+                scanThisYearColumn(rc, gcol, headers, "чр-ж");
+                scanThisYearColumn(rc, gcol, headers, "чр-о");
+                scanThisYearColumn(rc, gcol, headers, "чс-м");
+                scanThisYearColumn(rc, gcol, headers, "чс-ж");
+                scanThisYearColumn(rc, gcol, headers, "чс-о");
             }
         }
         finally
@@ -422,6 +422,10 @@ public class LoadData
             if (o == null)
                 o = "";
             String gub = o.toString();
+
+            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
+                gub = "50 губерний Европейской России";
+            
             gub = TerritoryNames.canonic(gub);
             if (gub.length() != 0)
             {
@@ -540,6 +544,12 @@ public class LoadData
         case "чж-ж":
         case "чж-о":
         case "чр":
+        case "чр-м":
+        case "чр-ж":
+        case "чр-о":
+        case "чс-м":
+        case "чс-ж":
+        case "чс-о":
         case "чу":
             // ---------------
         case "чж-гор-м":
@@ -570,6 +580,7 @@ public class LoadData
         case "р":
         case "с":
         case "п":
+        case "еп":
             return Double.class;
 
         default:
