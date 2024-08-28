@@ -297,9 +297,16 @@ public class LoadData
             case "чж-м":
             case "чж-ж":
             case "чр":
+            case "чр-м":
+            case "чр-ж":
+            case "чр-о":
+            case "чс-м":
+            case "чс-ж":
+            case "чс-о":
             case "чу":
             case "р":
             case "с":
+            case "еп":
             case "чж в сл. году":
                 continue;
             default:
@@ -353,6 +360,10 @@ public class LoadData
             if (o == null)
                 o = "";
             String gub = o.toString();
+            
+            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
+                gub = "50 губерний Европейской России";
+            
             gub = TerritoryNames.canonic(gub);
         }
     }
