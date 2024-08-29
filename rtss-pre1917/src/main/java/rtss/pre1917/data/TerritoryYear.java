@@ -26,6 +26,7 @@ public class TerritoryYear
      * null = no data
      */
     public URValue population = new URValue();
+    public URValue midyear_population = new URValue();
     public URValue births = new URValue();
     public URValue deaths = new URValue();;
 
@@ -65,6 +66,12 @@ public class TerritoryYear
 
         switch (what.trim())
         {
+        case "MYY-чж":
+            if (midyear_population.total.both != null)
+                duplicateValue(what);
+            midyear_population.total.both = v;
+            break;
+
         case "чж":
         case "чж-о":
             if (population.total.both != null)
@@ -249,7 +256,10 @@ public class TerritoryYear
 
     private void duplicateValue(String what) throws Exception
     {
-        throw new Exception(String.format("Duplicate value %s for %s %d", what, territory.name, year));
+        String msg = String.format("Duplicate value %s for %s %d", what, territory.name, year);
+        Util.err(msg);
+        
+        // ### throw new Exception(msg);
     }
 
     private void interceptSetValue(String what)
@@ -267,6 +277,7 @@ public class TerritoryYear
         ty.cbr = this.cbr;
         ty.cdr = this.cdr;
         ty.ngr = this.ngr;
+        ty.midyear_population = this.midyear_population.dup();
         ty.population = this.population.dup();
         ty.births = this.births.dup();
         ty.deaths = this.deaths.dup();

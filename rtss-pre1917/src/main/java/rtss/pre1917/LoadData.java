@@ -11,6 +11,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -56,6 +57,8 @@ public class LoadData
         
         for (int year = 1897; year <= 1910; year++)
             loadEvroChast(year); 
+        
+        new EvalEvroChastPopulation().eval(territories);
 
         new CrossVerify().verify(territories);
         
@@ -85,8 +88,7 @@ public class LoadData
                 int gcol = headers.get("губ");
                 scanGubColumn(rc, gcol);
 
-                // scan column "key yyyy" 
-                // ### чж PYY
+                scanYearColumn(rc, gcol, headers, "чж");
                 scanThisYearColumn(rc, gcol, headers, "р");
                 scanThisYearColumn(rc, gcol, headers, "с");
                 scanThisYearColumn(rc, gcol, headers, "еп");
@@ -103,7 +105,6 @@ public class LoadData
             currentFileYear = null;
             currentFile = null;
         }
-
 
         currentFileYear = null;
         currentFile = null;
@@ -382,9 +383,18 @@ public class LoadData
                 {
                     year = currentFileYear;
                 }
+                else if (ys.equals("MYY") && currentFileYear != null)
+                {
+                    year = currentFileYear;
+                    what = "MYY-" + what;
+                }
                 else if (ys.equals("NYY") && currentFileYear != null)
                 {
                     year = currentFileYear + 1;
+                }
+                else if (ys.equals("PYY") && currentFileYear != null)
+                {
+                    year = currentFileYear - 1;
                 }
                 else if (ys.length() == 4)
                 {
@@ -539,6 +549,7 @@ public class LoadData
         switch (what)
         {
         case "чж в сл. году":
+        case "MYY-чж":
         case "чж":
         case "чж-м":
         case "чж-ж":
