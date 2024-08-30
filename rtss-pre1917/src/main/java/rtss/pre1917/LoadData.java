@@ -59,6 +59,8 @@ public class LoadData
         loadEzhegodnikRossii(1904); 
         loadEzhegodnikRossii(1905); 
         
+        territories.mergeCities();
+        
         new CrossVerify().verify(territories);
         
         return territories;

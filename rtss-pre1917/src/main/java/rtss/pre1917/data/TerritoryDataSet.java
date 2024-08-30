@@ -2,6 +2,7 @@ package rtss.pre1917.data;
 
 import java.util.HashMap;
 
+import rtss.pre1917.eval.MergeCities;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
 
@@ -112,5 +113,10 @@ public class TerritoryDataSet extends HashMap<String, Territory>
 
         if (cty.ngr != null && (overwrite || ty.ngr == null))
             ty.ngr = cty.ngr;
+    }
+    
+    public void mergeCities() throws Exception
+    {
+        new MergeCities(this).merge();  
     }
 }

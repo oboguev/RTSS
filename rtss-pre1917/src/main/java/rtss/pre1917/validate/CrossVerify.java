@@ -20,12 +20,13 @@ public class CrossVerify
         validateHasYearData(territories);
         validateMaleFemaleBoth(territories);
         validateRuralUrbanAll(territories);
-        validateGradualPopulationIncrease(territories);
+        
         // ### проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
         // ### проверить URValue.all против суммы URValue.rural.both + URValue.urban.both   
-        new ValidateTaxons().validate_taxons(territories);
+        new ValidateTaxons(territories).validate_taxons();
         validate_vital_rates(territories);
 
+        validateGradualPopulationIncrease(territories);
         // calc_1893(territories);
         // check_population_jump(territories);
 

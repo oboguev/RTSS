@@ -12,12 +12,17 @@ public class WeightedAverage
         weight_sum = 0;
         count = 0;
     }
+    
+    public int count()
+    {
+        return count;
+    }
 
     public void add(double value, double weight)
     {
         value_weight_sum += value * weight;
         weight_sum += weight;
-        count = 0;
+        count++;
     }
     
     public Double doubleResult()

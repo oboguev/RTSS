@@ -37,7 +37,7 @@ public class Taxon
     {
         return of(name, year, territories.dataSetType);
     }
-    
+
     public static Taxon of(String name, int year, DataSetType dataSetType) throws Exception
     {
         Taxon t = new Taxon(name, year);
@@ -193,7 +193,7 @@ public class Taxon
 
         case "Империя с Финляндией":
             t.add("Империя")
-            .add("Финляндия");
+                    .add("Финляндия");
             break;
 
         case "Средняя Азия":
@@ -316,6 +316,8 @@ public class Taxon
         case "Кавказ":
         case "Сибирь":
         case "Средняя Азия":
+        case "Финляндия":
+        case "Империя с Финляндией":
             return true;
 
         default:

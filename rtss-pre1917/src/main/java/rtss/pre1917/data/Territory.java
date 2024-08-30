@@ -29,6 +29,18 @@ public class Territory
         return ty;
     }
     
+    public TerritoryYear territoryYearOrNull(int year)
+    {
+        return year2value.get(year);
+    }
+    
+    public void copyYear(TerritoryYear ty)
+    {
+        ty = ty.dup();
+        ty.territory = this;
+        year2value.put(ty.year, ty);
+    }
+
     public boolean hasYear(int year)
     {
         return year2value.containsKey(year);

@@ -286,4 +286,69 @@ public class TerritoryYear
         ty.deaths = this.deaths.dup();
         return ty;
     }
+    
+    public void merge(TerritoryYear ty) throws Exception
+    {
+        Long p1 = population.total.both;
+        if (p1 == null)
+            p1 = midyear_population.total.both;
+        if (p1 != null && p1 == 0)
+            p1 = null;
+
+        Long p2 = ty.population.total.both;
+        if (p2 == null)
+            p2 = ty.midyear_population.total.both;
+        if (p2 != null && p2 == 0)
+            p2 = null;
+        
+        if (p1 == null && p2 == null)
+        {
+            // do nothing
+        }
+        else if (p1 != null && p2 != null)
+        {
+            cbr = rate(p1, cbr, p2, ty.cbr);
+            cdr = rate(p1, cdr, p2, ty.cdr);
+        }
+        else if (p1 == null)
+        {
+            cbr = ty.cbr;
+            cdr = ty.cdr;
+        }
+        else // if (p2 == null) 
+        {
+            // do nothing
+        }
+        
+        if (ngr != null)
+        {
+            if (cbr != null && cdr != null)
+                ngr = cbr - cdr;
+            else
+                ngr = null;
+        }
+        
+        /* --------------------------------------------- */
+
+        population.merge(ty.population);
+        midyear_population.merge(ty.midyear_population);
+        births.merge(ty.births);
+        deaths.merge(ty.deaths);
+    }
+    
+    private Double rate(long p1, Double r1, long p2, Double r2) throws Exception
+    {
+        if (r1 == null && r2 == null)
+        {
+            return null;
+        }
+        else if (r1 != null && r2 != null)
+        {
+            return (r1 * p1 + r2 * p2) / (p1 + p2);
+        }
+        else
+        {
+            throw new Exception("Unable to merge CBR/CDR");
+        }
+    }
 }
