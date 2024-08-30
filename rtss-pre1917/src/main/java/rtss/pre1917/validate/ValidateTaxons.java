@@ -3,6 +3,7 @@ package rtss.pre1917.validate;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.eval.MergeTaxon;
 
 public class ValidateTaxons
 {
@@ -24,10 +25,11 @@ public class ValidateTaxons
     
     private void validate_taxon(String txname) throws Exception
     {
-        Territory ter = territories.get(txname);
-        for (int year : ter.years())
+        Territory t = territories.get(txname);
+        Territory tm = new MergeTaxon(territories).mergeTeaxon(txname);
+        for (int year : t.years())
         {
-            
+            // ###
         }
     }
 }

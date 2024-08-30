@@ -118,7 +118,7 @@ public class MergeTaxon
     
     private Long getLong(Object o, String selector) throws Exception
     {
-        String[] sa = selector.split(".");
+        String[] sa = selector.split("\\.");
         
         for (String s : sa)
         {
@@ -132,7 +132,7 @@ public class MergeTaxon
 
     private void setLong(Object o, String selector, Long value) throws Exception
     {
-        String[] sa = selector.split(".");
+        String[] sa = selector.split("\\.");
         
         for (int k = 0; k < sa.length; k++)
         {
@@ -154,7 +154,7 @@ public class MergeTaxon
 
     private Double getDouble(Object o, String selector) throws Exception
     {
-        String[] sa = selector.split(".");
+        String[] sa = selector.split("\\.");
         
         for (String s : sa)
         {
@@ -168,7 +168,7 @@ public class MergeTaxon
 
     private void setDouble(Object o, String selector, Double value) throws Exception
     {
-        String[] sa = selector.split(".");
+        String[] sa = selector.split("\\.");
         
         for (int k = 0; k < sa.length; k++)
         {
