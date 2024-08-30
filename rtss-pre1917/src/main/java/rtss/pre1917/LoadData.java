@@ -24,7 +24,8 @@ public class LoadData
         LoadData self = new LoadData();
         try
         {
-            self.loadEvroChast();
+            self.loadEzhegodnikRossii();
+            // self.loadEvroChast();
             // self.loadCensus1897();
             // self.loadUGVI();
             // TerritoryNames.printSeen();
@@ -49,6 +50,66 @@ public class LoadData
     private Integer currentWCOL = null;
     private Integer currentNR = null;
 
+    /* ================================================================================================= */
+    
+    public TerritoryDataSet loadEzhegodnikRossii() throws Exception
+    {
+        territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII);
+        
+        loadEzhegodnikRossii(1904); 
+        loadEzhegodnikRossii(1905); 
+        
+        new CrossVerify().verify(territories);
+        
+        return territories;
+    }
+
+    private void loadEzhegodnikRossii(int year) throws Exception
+    {
+        currentFileYear = year;
+        currentFile = String.format("csk-ezhegodnik-rossii/year-volumes/%d.xlsx", year);
+        
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                validateHeaders(headers);
+
+                if (!headers.containsKey("губ"))
+                    throw new Exception("Нет колонки для губернии");
+                int gcol = headers.get("губ");
+                scanGubColumn(rc, gcol);
+
+                scanThisYearColumn(rc, gcol, headers, "чж-уез-м");
+                scanThisYearColumn(rc, gcol, headers, "чж-уез-ж");
+                scanThisYearColumn(rc, gcol, headers, "чж-уез-о");
+
+                scanThisYearColumn(rc, gcol, headers, "чж-гор-м");
+                scanThisYearColumn(rc, gcol, headers, "чж-гор-ж");
+                scanThisYearColumn(rc, gcol, headers, "чж-гор-о");
+
+                scanThisYearColumn(rc, gcol, headers, "чж-всего-м");
+                scanThisYearColumn(rc, gcol, headers, "чж-всего-ж");
+                scanThisYearColumn(rc, gcol, headers, "чж-всего-о");
+            }
+        }
+        finally
+        {
+            currentFileYear = null;
+            currentFile = null;
+        }
+
+        currentFileYear = null;
+        currentFile = null;
+    }
+    
     /* ================================================================================================= */
 
     public TerritoryDataSet loadEvroChast() throws Exception
@@ -109,7 +170,6 @@ public class LoadData
         currentFileYear = null;
         currentFile = null;
     }
-
     
     /* ================================================================================================= */
 
@@ -297,6 +357,15 @@ public class LoadData
             case "чж-о":
             case "чж-м":
             case "чж-ж":
+            case "чж-уез-м":
+            case "чж-уез-ж":
+            case "чж-уез-о":
+            case "чж-гор-м":
+            case "чж-гор-ж":
+            case "чж-гор-о":
+            case "чж-всего-м":
+            case "чж-всего-ж":
+            case "чж-всего-о":
             case "чр":
             case "чр-м":
             case "чр-ж":
@@ -606,13 +675,14 @@ public class LoadData
 
         String so = o.toString();
         so = Util.despace(so).trim();
-        if (so.length() == 0)
+        if (so.length() == 0 || so.equals("-") || so.equals("—"))
             return;
-
-        if (so.equals("-") || so.equals("—"))
-            return;
-
-        if (typeof(what) == Double.class)
+        
+        if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж"))
+        {
+            territoryYear(gub, year).setValue(what, asLongThousands(o));
+        }
+        else if (typeof(what) == Double.class)
         {
             territoryYear(gub, year).setValue(what, asDouble(o));
         }
@@ -676,6 +746,12 @@ public class LoadData
         {
             throw new Exception("Invalid cell data type (for expected Long)");
         }
+    }
+
+    private Long asLongThousands(Object o) throws Exception
+    {
+        double v = asDouble(o);
+        return Math.round(1000 * v);
     }
 
     private TerritoryYear territoryYear(String gub, int year)

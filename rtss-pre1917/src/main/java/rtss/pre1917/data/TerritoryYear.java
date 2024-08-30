@@ -74,18 +74,21 @@ public class TerritoryYear
 
         case "чж":
         case "чж-о":
+        case "чж-всего-о":
             if (population.total.both != null)
                 duplicateValue(what);
             population.total.both = v;
             break;
 
         case "чж-м":
+        case "чж-всего-м":
             if (population.total.male != null)
                 duplicateValue(what);
             population.total.male = v;
             break;
 
         case "чж-ж":
+        case "чж-всего-ж":
             if (population.total.female != null)
                 duplicateValue(what);
             population.total.female = v;
