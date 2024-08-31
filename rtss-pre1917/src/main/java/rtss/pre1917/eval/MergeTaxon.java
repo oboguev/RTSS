@@ -78,7 +78,8 @@ public class MergeTaxon
                 Long lv = getLong(ty2, selector);
                 if (lv != null)
                 {
-                    res += lv * tx.territories.get(tname);
+                    double weight = tx.territories.get(tname);
+                    res += lv * weight;
                     count++;
                 }
             }
@@ -104,9 +105,11 @@ public class MergeTaxon
                     pop = ty2.midyear_population.total.both;
 
                 Double rate = getDouble(ty2, selector);
+
+                double weight = tx.territories.get(tname);
                 
                 if (pop != null && rate != null)
-                    wa.add(rate, pop);
+                    wa.add(rate, pop * weight);
             }
         }
         
