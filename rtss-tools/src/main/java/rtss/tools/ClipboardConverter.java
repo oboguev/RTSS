@@ -17,7 +17,7 @@ public class ClipboardConverter
                 Util.err("Clipboard is empty");
                 return;
             }
-            
+
             if (s.startsWith("."))
                 s = "1" + s;
 
@@ -32,6 +32,8 @@ public class ClipboardConverter
             s = s.replace("i", "1");
             s = s.replace("o", "0");
             s = s.replace("о", "0");
+
+            s = cleanCharset(s);
 
             s = preprocessLines(s);
             s = s.replace('\n', ' ');
@@ -168,7 +170,7 @@ public class ClipboardConverter
     {
         boolean hasDot = s.contains(".");
         boolean hasComma = s.contains(",");
-        
+
         if (hasComma && hasDot)
         {
             s = s.replace('.', '@');
@@ -192,5 +194,26 @@ public class ClipboardConverter
         {
             return s;
         }
+    }
+
+    private static String cleanCharset(String s)
+    {
+        StringBuilder sb = new StringBuilder ();
+        for (char c : s.toCharArray())
+        {
+            if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
+            {
+                sb.append(c);
+            }
+            else if (c >= 0 && c <= '9')
+            {
+                sb.append(c);
+            }
+            else if (c == ',' || c == '.')
+            {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 }
