@@ -17,11 +17,15 @@ public class ClipboardConverter
                 Util.err("Clipboard is empty");
                 return;
             }
+            
+            if (s.startsWith("."))
+                s = "1" + s;
 
             s = s.replace("\'", "");
             s = s.replace(";", "");
             s = s.replace("I", "");
             s = s.replace("І", "");
+            s = s.replace(" 1\n", " 1");
             s = s.replace(' ', '\t');
             s = s.replace(". ", ".");
             s = s.replace(" .", ".");
