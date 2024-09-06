@@ -51,18 +51,18 @@ public class LoadData
     private Integer currentNR = null;
 
     /* ================================================================================================= */
-    
+
     public TerritoryDataSet loadEzhegodnikRossii() throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII);
-        
-        loadEzhegodnikRossii(1904); 
-        loadEzhegodnikRossii(1905); 
-        
+
+        for (int year = 1904; year <= 1909; year++)
+            loadEzhegodnikRossii(year);
+
         territories.mergeCities();
-        
+
         new CrossVerify().verify(territories);
-        
+
         return territories;
     }
 
@@ -70,7 +70,7 @@ public class LoadData
     {
         currentFileYear = year;
         currentFile = String.format("csk-ezhegodnik-rossii/year-volumes/%d.xlsx", year);
-        
+
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
             for (int k = 0; k < wb.getNumberOfSheets(); k++)
@@ -111,28 +111,28 @@ public class LoadData
         currentFileYear = null;
         currentFile = null;
     }
-    
+
     /* ================================================================================================= */
 
     public TerritoryDataSet loadEvroChast() throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII);
-        
+
         for (int year = 1897; year <= 1910; year++)
-            loadEvroChast(year); 
-        
+            loadEvroChast(year);
+
         new EvalEvroChastPopulation().eval(territories);
 
         new CrossVerify().verify(territories);
-        
+
         return territories;
     }
-    
+
     private void loadEvroChast(int year) throws Exception
     {
         currentFileYear = year;
         currentFile = String.format("csk-dvizhenie-evropriskoi-chasti-rossii/year-volumes/%d.xlsx", year);
-        
+
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
             for (int k = 0; k < wb.getNumberOfSheets(); k++)
@@ -172,7 +172,7 @@ public class LoadData
         currentFileYear = null;
         currentFile = null;
     }
-    
+
     /* ================================================================================================= */
 
     public TerritoryDataSet loadCensus1897() throws Exception
@@ -432,10 +432,10 @@ public class LoadData
             if (o == null)
                 o = "";
             String gub = o.toString();
-            
+
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
-            
+
             gub = TerritoryNames.canonic(gub);
         }
     }
@@ -506,7 +506,7 @@ public class LoadData
 
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
-            
+
             gub = TerritoryNames.canonic(gub);
             if (gub.length() != 0)
             {
@@ -679,7 +679,7 @@ public class LoadData
         so = Util.despace(so).trim();
         if (so.length() == 0 || so.equals("-") || so.equals("—"))
             return;
-        
+
         if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж"))
         {
             territoryYear(gub, year).setValue(what, asLongThousands(o));
