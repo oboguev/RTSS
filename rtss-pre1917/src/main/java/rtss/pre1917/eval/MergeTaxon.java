@@ -1,12 +1,11 @@
 package rtss.pre1917.eval;
 
-import java.lang.reflect.Field;
-
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.util.WeightedAverage;
+import rtss.pre1917.validate.FieldValue;
 
 public class MergeTaxon
 {
@@ -17,7 +16,7 @@ public class MergeTaxon
         this.territories = territories;
     }
     
-    public Territory mergeTeaxon(String txname) throws Exception
+    public Territory mergeTaxon(String txname) throws Exception
     {
         Territory src = territories.get(txname);
         Territory res = new Territory(txname); 
@@ -75,7 +74,7 @@ public class MergeTaxon
             if (ter2 != null && ter2.hasYear(ty.year))
             {
                 TerritoryYear ty2 = ter2.territoryYear(ty.year);
-                Long lv = getLong(ty2, selector);
+                Long lv = FieldValue.getLong(ty2, selector);
                 if (lv != null)
                 {
                     double weight = tx.territories.get(tname);
@@ -86,7 +85,7 @@ public class MergeTaxon
         }
         
         if (count != 0)
-            setLong(ty, selector, Math.round(res));
+            FieldValue.setLong(ty, selector, Math.round(res));
     }
     
     private void rate(TerritoryYear ty, String selector, Taxon tx) throws Exception
@@ -104,7 +103,7 @@ public class MergeTaxon
                 if (pop == null)
                     pop = ty2.midyear_population.total.both;
 
-                Double rate = getDouble(ty2, selector);
+                Double rate = FieldValue.getDouble(ty2, selector);
 
                 double weight = tx.territories.get(tname);
                 
@@ -114,80 +113,6 @@ public class MergeTaxon
         }
         
         if (wa.count() != 0)
-            setDouble(ty, selector, wa.doubleResult());
-    }
-    
-    /* ================================================================================ */
-    
-    private Long getLong(Object o, String selector) throws Exception
-    {
-        String[] sa = selector.split("\\.");
-        
-        for (String s : sa)
-        {
-            Field field = o.getClass().getDeclaredField(s);    
-            field.setAccessible(true);
-            o = field.get(o);            
-        }
-
-        return (Long) o;
-    }
-
-    private void setLong(Object o, String selector, Long value) throws Exception
-    {
-        String[] sa = selector.split("\\.");
-        
-        for (int k = 0; k < sa.length; k++)
-        {
-            String s = sa[k];
-            
-            Field field = o.getClass().getDeclaredField(s);    
-            field.setAccessible(true);
-
-            if (k == sa.length - 1)
-            {
-                field.set(o, value);
-            }
-            else
-            {
-                o = field.get(o);            
-            }
-        }
-    }
-
-    private Double getDouble(Object o, String selector) throws Exception
-    {
-        String[] sa = selector.split("\\.");
-        
-        for (String s : sa)
-        {
-            Field field = o.getClass().getDeclaredField(s);    
-            field.setAccessible(true);
-            o = field.get(o);            
-        }
-
-        return (Double) o;
-    }
-
-    private void setDouble(Object o, String selector, Double value) throws Exception
-    {
-        String[] sa = selector.split("\\.");
-        
-        for (int k = 0; k < sa.length; k++)
-        {
-            String s = sa[k];
-            
-            Field field = o.getClass().getDeclaredField(s);    
-            field.setAccessible(true);
-
-            if (k == sa.length - 1)
-            {
-                field.set(o, value);
-            }
-            else
-            {
-                o = field.get(o);            
-            }
-        }
+            FieldValue.setDouble(ty, selector, wa.doubleResult());
     }
 }

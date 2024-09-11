@@ -682,7 +682,13 @@ public class LoadData
 
         if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж"))
         {
-            territoryYear(gub, year).setValue(what, asLongThousands(o));
+            Long v = asLongThousands(o);
+            if (v != null && (v % 100) != 0)
+            {
+                String msg = String.format("Значение не округлено до 0.1 тысячи: %d %s %s", year, gub, what);
+                Util.err(msg);
+            }
+            territoryYear(gub, year).setValue(what, v);
         }
         else if (typeof(what) == Double.class)
         {
