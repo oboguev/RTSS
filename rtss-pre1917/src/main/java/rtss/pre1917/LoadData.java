@@ -507,6 +507,20 @@ public class LoadData
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
 
+            if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII)
+            {
+                switch(gub)
+                {
+                case "Бакинская":
+                    gub = "Бакинская с Баку";
+                    break;
+                    
+                case "Таврическая":
+                    gub = "Таврическая с Севастополем";
+                    break;
+                }
+            }
+
             gub = TerritoryNames.canonic(gub);
             if (gub.length() != 0)
             {
