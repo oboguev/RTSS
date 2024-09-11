@@ -243,4 +243,10 @@ public class TerritoryNames
 
         return validTerritoryNames;
     }
+    
+    public static void checkValidTerritoryName(String name) throws Exception
+    {
+        if (!getValidTerritoryNames().contains(name))
+            throw new Exception("Inavlid territory name: " + name);
+    }
 }
