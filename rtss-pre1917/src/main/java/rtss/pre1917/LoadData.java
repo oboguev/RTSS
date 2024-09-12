@@ -56,7 +56,7 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII);
 
-        for (int year = 1904; year <= 1914; year++)
+        for (int year = 1904; year <= 1915; year++)
             loadEzhegodnikRossii(year);
 
         territories.mergeCities();
