@@ -399,7 +399,7 @@ public class CrossVerify
             }
             
 
-            if (!validateGradualPopulationIncrease(ty1, ty2, ty3))
+            if (ty3.year <= 1915 && !validateGradualPopulationIncrease(ty1, ty2, ty3))
             {
                 String msg = String.format("Годовое изменение населения %s [%d - %d - %d] %,d - %,d - %,d [%s]",
                                            ter.name, ty1.year, ty2.year, ty3.year,

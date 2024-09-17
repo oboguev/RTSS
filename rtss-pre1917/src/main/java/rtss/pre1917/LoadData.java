@@ -56,7 +56,7 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII);
 
-        for (int year = 1904; year <= 1916; year++)
+        for (int year = 1904; year <= 1917; year++)
             loadEzhegodnikRossii(year);
 
         territories.mergeCities();
@@ -694,7 +694,7 @@ public class LoadData
         if (so.length() == 0 || so.equals("-") || so.equals("—"))
             return;
 
-        if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж"))
+        if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж") && year != 1917)
         {
             Long v = asLongThousands(o);
             if (v != null && (v % 100) != 0)
@@ -703,6 +703,10 @@ public class LoadData
                 Util.err(msg);
             }
             territoryYear(gub, year).setValue(what, v);
+        }
+        else if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж") && year == 1917)
+        {
+            territoryYear(gub, year).setValue(what, asLong(o));
         }
         else if (typeof(what) == Double.class)
         {
