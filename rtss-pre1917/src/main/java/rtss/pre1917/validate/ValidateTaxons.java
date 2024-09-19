@@ -58,10 +58,10 @@ public class ValidateTaxons
 
             if (mv != null && v != null && !mv.equals(v)) 
             {
-                String msg = String.format("Расхождение таксона с составляющими %d %s %s: %,d vs %,d (merged vs. excel-value)",
+                String msg = String.format("Расхождение таксона с составляющими %d %s %s: %,d vs %,d (merged vs. excel-value, diff: %,d)",
                                            mty.year,
                                            mty.territory.name, fn,
-                                           mv, v);
+                                           mv, v, Math.abs(mv - v));
                 Util.err(msg);
             }
         }

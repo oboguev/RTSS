@@ -24,8 +24,8 @@ public class LoadData
         LoadData self = new LoadData();
         try
         {
-            self.loadEzhegodnikRossii();
-            // self.loadEvroChast();
+            // self.loadEzhegodnikRossii();
+            self.loadEvroChast();
             // self.loadCensus1897();
             // self.loadUGVI();
             // TerritoryNames.printSeen();
@@ -118,7 +118,7 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII);
 
-        for (int year = 1897; year <= 1910; year++)
+        for (int year = 1897; year <= 1914; year++)
             loadEvroChast(year);
 
         new EvalEvroChastPopulation().eval(territories);
