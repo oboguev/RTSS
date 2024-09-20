@@ -261,8 +261,7 @@ public class TerritoryYear
     {
         String msg = String.format("Duplicate value %s for %s %d", what, territory.name, year);
         Util.err(msg);
-        
-        // ### throw new Exception(msg);
+        // throw new Exception(msg);
     }
 
     private void interceptSetValue(String what)

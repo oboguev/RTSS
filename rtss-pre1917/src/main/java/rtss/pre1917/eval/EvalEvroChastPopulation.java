@@ -16,7 +16,7 @@ public class EvalEvroChastPopulation
         }
         
         // show(tds, "Ярославская");
-        show(tds, "50 губерний Европейской России");
+        // show(tds, "50 губерний Европейской России");
     }
     
     private void eval(Territory t) throws Exception

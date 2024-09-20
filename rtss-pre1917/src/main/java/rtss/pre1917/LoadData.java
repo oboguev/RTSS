@@ -29,10 +29,10 @@ public class LoadData
         LoadData self = new LoadData();
         try
         {
-            // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            // self.loadCensus1897(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadEvroChast(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
-            self.loadCensus1897(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
-            // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
             Util.out("** Done");
         }
@@ -129,7 +129,7 @@ public class LoadData
             loadEvroChast(year);
 
         new EvalEvroChastPopulation().eval(territories);
-        
+
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
 
@@ -162,7 +162,8 @@ public class LoadData
                 int gcol = headers.get("губ");
                 scanGubColumn(rc, gcol);
 
-                scanYearColumn(rc, gcol, headers, "чж");
+                if (year != 1903)
+                    scanYearColumn(rc, gcol, headers, "чж");
                 scanThisYearColumn(rc, gcol, headers, "р");
                 scanThisYearColumn(rc, gcol, headers, "с");
                 scanThisYearColumn(rc, gcol, headers, "еп");
