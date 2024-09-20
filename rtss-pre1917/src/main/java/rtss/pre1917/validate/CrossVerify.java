@@ -313,7 +313,7 @@ public class CrossVerify
             if (territories.dataSetType == DataSetType.CENSUS_1897 && year != 1897)
                 continue;
 
-            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && !(year >= 1897 && year <= 1910))
+            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && !(year >= 1897 && year <= 1914))
                 continue;
 
             if (!hasYearData(territories, year))

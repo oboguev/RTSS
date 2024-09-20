@@ -351,4 +351,9 @@ public class TerritoryYear
             throw new Exception("Unable to merge CBR/CDR");
         }
     }
+
+    public String toString()
+    {
+        return territory.toString() + " " + year;
+    }
 }

@@ -33,6 +33,9 @@ public class MergeCities
     private void merge(String dstname, String srcname, String... cities) throws Exception
     {
         Territory dst = territories.get(dstname);
+        
+        if (dst == null)
+            territories.put(dstname, dst = new Territory(dstname));
 
         if (srcname == null)
         {
@@ -74,7 +77,7 @@ public class MergeCities
         for (int year : years)
         {
             TerritoryYear tydst = dst.territoryYearOrNull(year);
-            TerritoryYear tysrc = dst.territoryYearOrNull(year);
+            TerritoryYear tysrc = src.territoryYearOrNull(year);
             if (tysrc == null)
             {
                 // do nothing

@@ -19,15 +19,20 @@ import rtss.util.excel.ExcelRC;
 
 public class LoadData
 {
+    public static enum LoadOptions
+    {
+        NONE, VERIFY, DONT_VERIFY, MERGE_CITIES, DONT_MERGE_CITIES
+    }
+
     public static void main(String[] args)
     {
         LoadData self = new LoadData();
         try
         {
-            // self.loadEzhegodnikRossii();
-            self.loadEvroChast();
-            // self.loadCensus1897();
-            // self.loadUGVI();
+            // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            // self.loadEvroChast(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            self.loadCensus1897(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
+            // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // TerritoryNames.printSeen();
             Util.out("** Done");
         }
@@ -52,16 +57,18 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    public TerritoryDataSet loadEzhegodnikRossii() throws Exception
+    public TerritoryDataSet loadEzhegodnikRossii(LoadOptions... options) throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII);
 
         for (int year = 1904; year <= 1917; year++)
             loadEzhegodnikRossii(year);
 
-        territories.mergeCities();
+        if (hasOption(LoadOptions.MERGE_CITIES, options))
+            territories.mergeCities();
 
-        new CrossVerify().verify(territories);
+        if (hasOption(LoadOptions.VERIFY, options))
+            new CrossVerify().verify(territories);
 
         return territories;
     }
@@ -114,7 +121,7 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    public TerritoryDataSet loadEvroChast() throws Exception
+    public TerritoryDataSet loadEvroChast(LoadOptions... options) throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII);
 
@@ -122,8 +129,12 @@ public class LoadData
             loadEvroChast(year);
 
         new EvalEvroChastPopulation().eval(territories);
+        
+        if (hasOption(LoadOptions.MERGE_CITIES, options))
+            territories.mergeCities();
 
-        new CrossVerify().verify(territories);
+        if (hasOption(LoadOptions.VERIFY, options))
+            new CrossVerify().verify(territories);
 
         return territories;
     }
@@ -175,7 +186,7 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    public TerritoryDataSet loadCensus1897() throws Exception
+    public TerritoryDataSet loadCensus1897(LoadOptions... options) throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CENSUS_1897);
 
@@ -212,16 +223,18 @@ public class LoadData
             currentFile = null;
         }
 
-        new CrossVerify().verify(territories);
+        if (hasOption(LoadOptions.MERGE_CITIES, options))
+            territories.mergeCities();
 
-        new CrossVerify().verify(territories);
+        if (hasOption(LoadOptions.VERIFY, options))
+            new CrossVerify().verify(territories);
 
         return territories;
     }
 
     /* ================================================================================================= */
 
-    public TerritoryDataSet loadUGVI() throws Exception
+    public TerritoryDataSet loadUGVI(LoadOptions... options) throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.UGVI);
 
@@ -243,7 +256,11 @@ public class LoadData
         loadUGVI("1913");
         loadUGVI("1914");
 
-        new CrossVerify().verify(territories);
+        if (hasOption(LoadOptions.MERGE_CITIES, options))
+            territories.mergeCities();
+
+        if (hasOption(LoadOptions.VERIFY, options))
+            new CrossVerify().verify(territories);
 
         return territories;
     }
@@ -509,12 +526,12 @@ public class LoadData
 
             if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII)
             {
-                switch(gub)
+                switch (gub)
                 {
                 case "Бакинская":
                     gub = "Бакинская с Баку";
                     break;
-                    
+
                 case "Таврическая":
                     gub = "Таврическая с Севастополем";
                     break;
@@ -791,5 +808,16 @@ public class LoadData
         }
 
         return t.territoryYear(year);
+    }
+
+    private boolean hasOption(LoadOptions option, LoadOptions[] options)
+    {
+        for (int k = 0; k < options.length; k++)
+        {
+            if (options[k] == option)
+                return true;
+        }
+
+        return false;
     }
 }

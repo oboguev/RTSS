@@ -21,7 +21,7 @@ public class ValueByGender
     {
         male = merge(male, v.male);
         female = merge(female, v.female);
-        both = merge(male, v.both);
+        both = merge(both, v.both);
     }
     
     private Long merge(Long v1, Long v2)

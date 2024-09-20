@@ -67,4 +67,9 @@ public class Territory
         Collections.sort(list);
         return list;
     }
+    
+    public String toString()
+    {
+        return name;
+    }
 }

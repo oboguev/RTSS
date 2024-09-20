@@ -24,7 +24,7 @@ public class MergeTaxon
         for (int year : src.years())
         {
             Taxon tx = Taxon.of(txname, year, territories);
-            tx = tx.flatten(territories.dataSetType);
+            tx = tx.flatten(territories, year);
             
             TerritoryYear ty = res.territoryYear(year);
             

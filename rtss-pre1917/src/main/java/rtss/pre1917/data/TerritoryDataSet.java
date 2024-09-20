@@ -33,7 +33,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
 
     public void evalTaxon(String name, int year, boolean overwrite) throws Exception
     {
-        Taxon tx = Taxon.of(name, year, dataSetType);
+        Taxon tx = Taxon.of(name, year, this);
         if (tx == null)
             return;
 

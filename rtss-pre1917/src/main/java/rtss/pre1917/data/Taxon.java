@@ -34,12 +34,7 @@ public class Taxon
         return this;
     }
 
-    public static Taxon of(String name, int year, TerritoryDataSet territories) throws Exception
-    {
-        return of(name, year, territories.dataSetType);
-    }
-
-    public static Taxon of(String name, int year, DataSetType dataSetType) throws Exception
+    public static Taxon of(String name, int year, TerritoryDataSet tds) throws Exception
     {
         Taxon t = new Taxon(name, year);
 
@@ -213,6 +208,7 @@ public class Taxon
                     .add("Тургайская обл.")
                     .add("Уральская обл.")
                     .add("Ферганская обл.");
+            break;
         }
 
         if (t.territories.size() == 0)
@@ -289,22 +285,22 @@ public class Taxon
     /*
      * Имена всех составных таксонов входящих в данный таксон, рекурсивно
      */
-    public Set<String> allCompositeSubTaxons(boolean includeSelf, DataSetType dataSetType) throws Exception
+    public Set<String> allCompositeSubTaxons(boolean includeSelf, TerritoryDataSet tds) throws Exception
     {
         Set<String> xs = new HashSet<String>();
-        allCompositeSubTaxons(xs, dataSetType);
+        allCompositeSubTaxons(xs, tds);
         if (includeSelf)
             xs.add(name);
         return xs;
     }
 
-    private void allCompositeSubTaxons(Set<String> xs, DataSetType dataSetType) throws Exception
+    private void allCompositeSubTaxons(Set<String> xs, TerritoryDataSet tds) throws Exception
     {
         for (String xname : territories.keySet())
         {
-            Taxon tx = of(xname, year, dataSetType);
+            Taxon tx = of(xname, year, tds);
             if (tx != null)
-                xs.addAll(tx.allCompositeSubTaxons(true, dataSetType));
+                xs.addAll(tx.allCompositeSubTaxons(true, tds));
         }
     }
 
@@ -341,14 +337,15 @@ public class Taxon
     /*
      * Редуцировать таксон до базовых областей
      */
-    public Taxon flatten(DataSetType dataSetType) throws Exception
+    public Taxon flatten(TerritoryDataSet tds, int year) throws Exception
     {
         Taxon tx = new Taxon(name, year);
-        flatten(tx.territories, DoubleONE, dataSetType);
+        flatten(tx.territories, DoubleONE, tds, year);
+        tx.weedOutCities(tds, year);
         return tx;
     }
 
-    private void flatten(Map<String, Double> out, Double pweight, DataSetType dataSetType) throws Exception
+    private void flatten(Map<String, Double> out, Double pweight, TerritoryDataSet tds, int year) throws Exception
     {
         for (String tname : territories.keySet())
         {
@@ -371,9 +368,31 @@ public class Taxon
             }
             else
             {
-                Taxon t2 = Taxon.of(tname, year, dataSetType).flatten(dataSetType);
-                t2.flatten(out, weight, dataSetType);
+                Taxon t2 = Taxon.of(tname, year, tds).flatten(tds, year);
+                t2.flatten(out, weight, tds, year);
             }
+        }
+    }
+    
+    private void weedOutCities(TerritoryDataSet tds, int year)
+    {
+        weed(tds, year, "Московская с Москвой", "Московская", "г. Москва");
+        weed(tds, year, "Санкт-Петербургская с Санкт-Петербургом", "Санкт-Петербургская", "г. Санкт-Петербург");
+        weed(tds, year, "Варшавская с Варшавой", "Варшавская", "г. Варшава");
+        weed(tds, year, "Херсонская с Одессой", "Херсонская", "г. Николаев", "г. Одесса");
+        weed(tds, year, "Таврическая с Севастополем", "Таврическая", "г. Севастополь");
+        weed(tds, year, "Бакинская с Баку", "Бакинская", "г. Баку");
+        weed(tds, year, "Область войска Донского", null, "Ростовское и./Д град.");
+    }
+    
+    private void weed(TerritoryDataSet tds, int year, String dstname, String srcname, String... cities)
+    {
+        if (territories.containsKey(dstname) && tds.containsKey(dstname) && tds.get(dstname).hasYear(year))
+        {
+            if (srcname != null)
+                territories.remove(srcname);
+            for (String city : cities)
+                territories.remove(city);
         }
     }
 }
