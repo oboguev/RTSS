@@ -20,7 +20,7 @@ public class CrossVerify
         validateHasYearData(territories);
         validateMaleFemaleBoth(territories);
         validateRuralUrbanAll(territories);
-        
+
         // ### проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
         // ### проверить URValue.all против суммы URValue.rural.both + URValue.urban.both   
         new ValidateTaxons(territories).validate_taxons();
@@ -127,8 +127,11 @@ public class CrossVerify
             }
         }
 
-        Util.out(String.format("CBR differ: %f%%", (100.0 * cbr_differ) / cbr_seen));
-        Util.out(String.format("CDR differ: %f%%", (100.0 * cdr_differ) / cdr_seen));
+        if (cbr_seen > 0)
+            Util.out(String.format("CBR differ: %f%%", (100.0 * cbr_differ) / cbr_seen));
+
+        if (cdr_seen > 0)
+            Util.out(String.format("CDR differ: %f%%", (100.0 * cdr_differ) / cdr_seen));
     }
 
     /* =============================================================================================================== */
@@ -326,7 +329,7 @@ public class CrossVerify
         String whole = "Империя";
         if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII)
             whole = "50 губерний Европейской России";
-        
+
         return hasYearData(territories, "Архангельская", year) &&
                hasYearData(territories, "Ярославская", year) &&
                hasYearData(territories, whole, year);
@@ -339,7 +342,7 @@ public class CrossVerify
             return false;
 
         TerritoryYear ty = ter.territoryYear(year);
-        
+
         switch (territories.dataSetType)
         {
         case CENSUS_1897:
@@ -347,7 +350,7 @@ public class CrossVerify
                 return false;
             break;
 
-        default:    
+        default:
             if (ty.population.all() == null || ty.births.all() == null || ty.deaths.all() == null)
                 return false;
             break;
@@ -386,7 +389,7 @@ public class CrossVerify
             TerritoryYear ty1 = tylist.get(0);
             TerritoryYear ty2 = tylist.get(1);
             TerritoryYear ty3 = tylist.get(2);
-            
+
             String sdv = "ill-defined";
             long v1 = ty1.population.all();
             long v2 = ty2.population.all();
@@ -397,7 +400,6 @@ public class CrossVerify
                 if (fdv >= 0 && fdv <= 1.0)
                     sdv = String.format("%.1f", fdv * 100.0);
             }
-            
 
             if (ty3.year <= 1915 && !validateGradualPopulationIncrease(ty1, ty2, ty3))
             {
@@ -417,7 +419,7 @@ public class CrossVerify
         long v1 = ty1.population.all();
         long v2 = ty2.population.all();
         long v3 = ty3.population.all();
-        
+
         if (v1 == v2 && v2 == v3)
             return true;
 

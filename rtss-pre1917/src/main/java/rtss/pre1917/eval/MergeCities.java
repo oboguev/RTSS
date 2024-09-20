@@ -32,24 +32,25 @@ public class MergeCities
 
     private void merge(String dstname, String srcname, String... cities) throws Exception
     {
-        Territory dst = territories.get(dstname);
-        
-        if (dst == null)
-            territories.put(dstname, dst = new Territory(dstname));
-
         if (srcname == null)
         {
+            Territory dst = territories.get(dstname);
+            if (dst == null)
+                territories.put(dstname, dst = new Territory(dstname));
+
             merge(dst, cities);
         }
         else
         {
             Territory src = territories.get(srcname);
+
             if (src != null)
             {
                 src = src.dup();
                 merge(src, cities);
-                merge(dst, src);
+                territories.put(dstname, src);
             }
+            
             territories.remove(srcname);
         }
         
