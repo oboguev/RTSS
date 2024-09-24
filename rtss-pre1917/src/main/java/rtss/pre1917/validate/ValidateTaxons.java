@@ -9,6 +9,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.MergeTaxon;
+import rtss.pre1917.util.FieldValue;
 import rtss.util.Util;
 
 public class ValidateTaxons

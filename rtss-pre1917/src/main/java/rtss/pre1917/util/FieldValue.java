@@ -1,4 +1,4 @@
-package rtss.pre1917.validate;
+package rtss.pre1917.util;
 
 import java.lang.reflect.Field;
 
