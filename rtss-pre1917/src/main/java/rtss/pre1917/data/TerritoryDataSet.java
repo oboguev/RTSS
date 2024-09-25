@@ -24,6 +24,50 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             tds.put(name, get(name).dup());
         return tds;
     }
+    
+    public int minYear(int dflt)
+    {
+        int res = -1;
+        
+        for (Territory t : this.values())
+        {
+            int mv = t.minYear(-1);
+            if (mv != -1)
+            {
+                if (res == -1)
+                    res = mv;
+                else 
+                    res = Math.min(res, mv);
+            }
+        }
+        
+        if (res == -1)
+            res = dflt;
+        
+        return res;
+    }
+    
+    public int maxYear(int dflt)
+    {
+        int res = -1;
+        
+        for (Territory t : this.values())
+        {
+            int mv = t.maxYear(-1);
+            if (mv != -1)
+            {
+                if (res == -1)
+                    res = mv;
+                else 
+                    res = Math.max(res, mv);
+            }
+        }
+        
+        if (res == -1)
+            res = dflt;
+        
+        return res;
+    }
 
     public void evalTaxon(String name, boolean overwrite) throws Exception
     {

@@ -68,6 +68,42 @@ public class Territory
         return list;
     }
     
+    public int minYear(int dflt)
+    {
+        int res = -1;
+        
+        for (int year : years())
+        {
+            if (res == -1)
+                res = year;
+            else
+                res = Math.min(res, year);
+        }
+        
+        if (res == -1)
+            res = dflt;
+        
+        return res;
+    }
+    
+    public int maxYear(int dflt)
+    {
+        int res = -1;
+        
+        for (int year : years())
+        {
+            if (res == -1)
+                res = year;
+            else
+                res = Math.max(res, year);
+        }
+        
+        if (res == -1)
+            res = dflt;
+        
+        return res;
+    }
+    
     public String toString()
     {
         return name;

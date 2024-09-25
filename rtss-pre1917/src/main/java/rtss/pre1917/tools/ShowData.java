@@ -22,7 +22,7 @@ public class ShowData
             // TerritoryDataSet tds = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
             // new ShowData().show(tds, "50 губерний Европейской России", "population.total.both", 1904, 1914);
             
-            TerritoryDataSet tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.DONT_MERGE_CITIES);
+            TerritoryDataSet tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
             new ShowData().show(tds, "Астраханская", "population.total.both", 1897, 1915);
             new ShowData().show(tds, "Владимирская", "population.total.both", 1897, 1915);
             new ShowData().show(tds, "Вологодская", "population.total.both", 1897, 1915);

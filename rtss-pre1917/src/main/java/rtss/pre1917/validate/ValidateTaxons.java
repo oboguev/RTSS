@@ -9,6 +9,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.MergeTaxon;
+import rtss.pre1917.eval.MergeTaxon.WhichYears;
 import rtss.pre1917.util.FieldValue;
 import rtss.util.Util;
 
@@ -33,7 +34,7 @@ public class ValidateTaxons
     private void validate_taxon(String txname) throws Exception
     {
         Territory t = territories.get(txname);
-        Territory mt = new MergeTaxon(territories).mergeTaxon(txname);
+        Territory mt = MergeTaxon.mergeTaxon(territories, txname, WhichYears.TaxonExistingYears);
 
         for (int year : t.years())
         {

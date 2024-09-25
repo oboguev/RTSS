@@ -1,5 +1,8 @@
 package rtss.pre1917.eval;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -9,19 +12,46 @@ import rtss.pre1917.util.WeightedAverage;
 
 public class MergeTaxon
 {
+    public static enum WhichYears
+    {
+        TaxonExistingYears,
+        AllSetYears
+    }
+    
     private TerritoryDataSet territories;
+    
+    public static Territory mergeTaxon(TerritoryDataSet territories, String txname, WhichYears whichYears) throws Exception
+    {
+        return new MergeTaxon(territories).mergeTaxon(txname, whichYears);
+    }
     
     public MergeTaxon(TerritoryDataSet territories)
     {
         this.territories = territories;
     }
     
-    public Territory mergeTaxon(String txname) throws Exception
+    public Territory mergeTaxon(String txname, WhichYears whichYears) throws Exception
     {
         Territory src = territories.get(txname);
         Territory res = new Territory(txname); 
         
-        for (int year : src.years())
+        List<Integer> years;
+        if (whichYears == WhichYears.TaxonExistingYears)
+        {
+            years = src.years();
+        }
+        else
+        {
+            years = new ArrayList<>();
+            int y1 = territories.minYear(-1);
+            int y2 = territories.maxYear(-1);
+            if (y1 < 0 || y2 < 0)
+                throw new Exception("Empty set");
+            for (int y = y1; y <= y2; y++)
+                years.add(y);
+        }
+        
+        for (int year : years)
         {
             Taxon tx = Taxon.of(txname, year, territories);
             tx = tx.flatten(territories, year);
