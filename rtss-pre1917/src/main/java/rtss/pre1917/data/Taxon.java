@@ -431,7 +431,7 @@ public class Taxon
         weed(tds, year, "Херсонская с Одессой", "Херсонская", "г. Николаев", "г. Одесса");
         weed(tds, year, "Таврическая с Севастополем", "Таврическая", "г. Севастополь");
         weed(tds, year, "Бакинская с Баку", "Бакинская", "г. Баку");
-        weed(tds, year, "Область войска Донского", null, "Ростовское и./Д град.");
+        // weed(tds, year, "Область войска Донского", null, "Ростовское и./Д град.");
     }
 
     private void weed(TerritoryDataSet tds, int year, String dstname, String srcname, String... cities)

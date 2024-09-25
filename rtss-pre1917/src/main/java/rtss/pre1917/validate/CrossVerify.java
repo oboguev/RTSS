@@ -366,7 +366,7 @@ public class CrossVerify
      */
     private void validateGradualPopulationIncrease(TerritoryDataSet territories)
     {
-        for (String tname : territories.keySet())
+        for (String tname : Util.sort(territories.keySet()))
         {
             Territory ter = territories.get(tname);
             validateGradualPopulationIncrease(ter);

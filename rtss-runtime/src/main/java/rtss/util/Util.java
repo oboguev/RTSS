@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class Util
 {
@@ -459,6 +463,14 @@ public class Util
         }
 
         return sb.toString();
+    }
+    
+    public static <T extends Comparable<T>> List<T> sort(Collection<T> coll)
+    {
+        List<T> list = new ArrayList<T>();
+        list.addAll(coll);
+        Collections.sort(list);
+        return list;
     }
     
     /*
