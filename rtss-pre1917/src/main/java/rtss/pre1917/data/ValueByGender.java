@@ -19,9 +19,17 @@ public class ValueByGender
     
     public void merge(ValueByGender v) 
     {
+        boolean clearFM = oneNull(male, v.male) || oneNull(female, v.female); 
+
         male = merge(male, v.male);
         female = merge(female, v.female);
         both = merge(both, v.both);
+        
+        if (clearFM)
+        {
+            male = null;
+            female = null;
+        }
     }
     
     private Long merge(Long v1, Long v2)
@@ -42,5 +50,15 @@ public class ValueByGender
         {
             return null;
         }
+    }
+    
+    private boolean oneNull(Long v1, Long v2)
+    {
+        if (v1 == null && v2 == null)
+            return false; 
+        else if (v1 != null && v2 != null)
+            return false; 
+        else
+            return true;
     }
 }

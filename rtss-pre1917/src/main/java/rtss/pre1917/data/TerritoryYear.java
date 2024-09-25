@@ -347,7 +347,8 @@ public class TerritoryYear
         }
         else
         {
-            throw new Exception("Unable to merge CBR/CDR");
+            return null;
+            // throw new Exception("Unable to merge CBR/CDR");
         }
     }
 

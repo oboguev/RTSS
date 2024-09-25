@@ -48,6 +48,11 @@ public class Territory
 
     public Territory dup()
     {
+        return dup(name);
+    }
+    
+    public Territory dup(String name)
+    {
         Territory t = new Territory(name);
         
         for (int year : year2value.keySet())

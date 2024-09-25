@@ -46,7 +46,7 @@ public class MergeCities
 
             if (src != null)
             {
-                src = src.dup();
+                src = src.dup(dstname);
                 merge(src, cities);
                 territories.put(dstname, src);
             }
