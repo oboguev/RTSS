@@ -28,6 +28,7 @@ public class EvalDivergence_CSK_50
         }
     }
     
+    @SuppressWarnings("unused")
     private void calc() throws Exception
     {
         TerritoryDataSet tdsPOP = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
@@ -51,6 +52,24 @@ public class EvalDivergence_CSK_50
             long incrEP50 = tyEP50.births.total.both - tyEP50.deaths.total.both;
             
             Util.out(String.format("%d %,d %,d %,d", year, incrEP50, incrPOP50, incrPOP_EMPIRE));
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void calc_2() throws Exception
+    {
+        TerritoryDataSet tdsPOP = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        
+        Territory tmPOP50 = MergeTaxon.mergeTaxon(tdsPOP, "50 губерний Европейской России", WhichYears.AllSetYears);
+        Territory tmPOP_EMPIRE = MergeTaxon.mergeTaxon(tdsPOP, "Империя", WhichYears.AllSetYears);
+        Territory tmEP50 = MergeTaxon.mergeTaxon(tdsEP, "50 губерний Европейской России", WhichYears.AllSetYears);
+        
+        for (int year = 1904; year <= 1915; year++)
+        {
+            TerritoryYear tyPOP50 = tmPOP50.territoryYear(year);
+            
+            Util.out(String.format("%d %,d", year, tyPOP50.population.total.both));
         }
     }
 }

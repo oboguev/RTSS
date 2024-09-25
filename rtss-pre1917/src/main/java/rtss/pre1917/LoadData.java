@@ -31,8 +31,8 @@ public class LoadData
         {
             // self.loadCensus1897(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadEvroChast(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
-            // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
-            self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
+            self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
             Util.out("** Done");
         }

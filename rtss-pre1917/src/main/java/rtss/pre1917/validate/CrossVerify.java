@@ -21,8 +21,8 @@ public class CrossVerify
         validateMaleFemaleBoth(territories);
         validateRuralUrbanAll(territories);
 
-        // ### проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
-        // ### проверить URValue.all против суммы URValue.rural.both + URValue.urban.both   
+        // TODO: проверить составные таксоны: расхождение (муж + жен - оба пола) равно отсутствующим данным в составных элементах
+        // TODO: проверить URValue.all против суммы URValue.rural.both + URValue.urban.both   
         new ValidateTaxons(territories).validate_taxons();
         validate_vital_rates(territories);
 
@@ -30,11 +30,10 @@ public class CrossVerify
         // calc_1893(territories);
         // check_population_jump(territories);
 
-        // ### check taxonomy sums
-        // ### population jump year-to-next over 2%
-        // ### population jump  mismatching births - deaths
-        // ### implied (calculated) CBR or CDR mismatching listed
-        // ### back-calculate population
+        // TODO: population jump year-to-next over 2%
+        // TODO: population jump  mismatching births - deaths
+        // TODO: implied (calculated) CBR or CDR mismatching listed
+        // TODO: back-calculate population
     }
 
     /* =============================================================================================================== */
