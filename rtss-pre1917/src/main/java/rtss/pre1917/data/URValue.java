@@ -85,6 +85,13 @@ public class URValue
 
     public void adjustBirths()
     {
-        // ###
+        if (rural.adjustBirths() || urban.adjustBirths())
+        {
+            total.recalcAsSum(rural, urban);
+        }
+        else
+        {
+            total.adjustBirths();
+        }
     }
 }

@@ -1,5 +1,7 @@
 package rtss.pre1917.data;
 
+import rtss.util.Util;
+
 public class ValueByGender
 {
     public Long male;
@@ -68,9 +70,31 @@ public class ValueByGender
         else
             return true;
     }
-
-    public void adjustBirths()
+    
+    public void recalcAsSum(ValueByGender v1, ValueByGender v2)
     {
-        // ###
+        male = merge(v1.male, v2.male);
+        female = merge(v1.female, v2.female);
+        both = merge(v1.both, v2.both);
+    }
+    
+    public static final double MaleFemaleBirthRatio = 1.06;
+
+    public boolean adjustBirths()
+    {
+        if (male != null && female != null)
+        {
+            long min_female = Math.round(male / MaleFemaleBirthRatio);
+            
+            if (female < min_female)
+            {
+                female = min_female;
+                both = male + female;
+                Util.out("ADJUSTED BIRTHS");
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
