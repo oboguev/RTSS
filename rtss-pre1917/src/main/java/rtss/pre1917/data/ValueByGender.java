@@ -103,7 +103,7 @@ public class ValueByGender
                                            urValue.territoryYear.territory.name,
                                            which.toString(),
                                            pct);
-                Util.out(msg);
+                // Util.out(msg);
                 return true;
             }
         }
