@@ -7,6 +7,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.MergeTaxon;
 import rtss.pre1917.eval.MergeTaxon.WhichYears;
+import rtss.pre1917.util.FieldValue;
 import rtss.util.Util;
 
 /*
@@ -20,6 +21,8 @@ public class CSK_VS_UGVI
         {
             new CSK_VS_UGVI().calc_population("Империя");
             new CSK_VS_UGVI().calc_population("50 губерний Европейской России");
+            new CSK_VS_UGVI().calc_movement_50("births.total.both");
+            new CSK_VS_UGVI().calc_movement_50("deaths.total.both");
         }
         catch (Throwable ex)
         {
@@ -31,7 +34,7 @@ public class CSK_VS_UGVI
     private void calc_population(String txname) throws Exception
     {
         Util.out("");
-        Util.out(String.format("Численность насления по ЦСУ и УГВИ для территории: %s", txname));
+        Util.out(String.format("Численность населения по ЦСК и по УГВИ для территории: %s", txname));
         Util.out("");
         
         TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
@@ -49,4 +52,29 @@ public class CSK_VS_UGVI
         }
     }
 
+    private void calc_movement_50(String field) throws Exception
+    {
+        final String txname = "50 губерний Европейской России"; 
+
+        Util.out("");
+        Util.out(String.format("Движение населения по ЦСК и по УГВИ для территории: %s, поле %s ", txname, field));
+        Util.out("");
+        
+        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        Territory tmEP50 = MergeTaxon.mergeTaxon(tdsEP, txname, WhichYears.AllSetYears);
+
+        TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        Territory tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, txname, WhichYears.AllSetYears);
+        
+        for (int year = 1897; year <= 1914; year++)
+        {
+            TerritoryYear tyUGVI = tmUGVI.territoryYear(year);
+            TerritoryYear tyCSK = tmEP50.territoryYear(year);
+            
+            Long vUGVI = FieldValue.getLong(tyUGVI, field);
+            Long vCSK = FieldValue.getLong(tyCSK, field);
+            
+            Util.out(String.format("%d %,d %,d", year, vCSK, vUGVI));
+        }
+    }
 }
