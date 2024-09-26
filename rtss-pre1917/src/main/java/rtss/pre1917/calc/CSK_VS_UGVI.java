@@ -18,7 +18,8 @@ public class CSK_VS_UGVI
     {
         try
         {
-            new CSK_VS_UGVI().calc();
+            new CSK_VS_UGVI().calc_population("Империя");
+            new CSK_VS_UGVI().calc_population("50 губерний Европейской России");
         }
         catch (Throwable ex)
         {
@@ -27,13 +28,17 @@ public class CSK_VS_UGVI
         }
     }
 
-    private void calc() throws Exception
+    private void calc_population(String txname) throws Exception
     {
+        Util.out("");
+        Util.out(String.format("Численность насления по ЦСУ и УГВИ для территории: %s", txname));
+        Util.out("");
+        
         TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
         TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
 
-        Territory tmCSK = MergeTaxon.mergeTaxon(tdsCSK, "Империя", WhichYears.AllSetYears);
-        Territory tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, "Империя", WhichYears.AllSetYears);
+        Territory tmCSK = MergeTaxon.mergeTaxon(tdsCSK, txname, WhichYears.AllSetYears);
+        Territory tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, txname, WhichYears.AllSetYears);
 
         for (int year = 1904; year <= 1915; year++)
         {
