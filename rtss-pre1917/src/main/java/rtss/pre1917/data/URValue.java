@@ -1,23 +1,33 @@
 package rtss.pre1917.data;
 
+/*
+ * Содержит данные раздельно для городского и сельского населения, и их сумму.
+ */
 public class URValue
 {
-    public ValueByGender total = new ValueByGender();
-    public ValueByGender rural = new ValueByGender();
-    public ValueByGender urban = new ValueByGender();
+    public ValueByGender total = new ValueByGender(this);
+    public ValueByGender rural = new ValueByGender(this);
+    public ValueByGender urban = new ValueByGender(this);
+    
+    public final TerritoryYear territoryYear;
+    
+    public URValue(TerritoryYear territoryYear)
+    {
+        this.territoryYear = territoryYear;
+    }
     
     public Long all()
     {
         return total.both;
     }
     
-    public URValue dup()
+    public URValue dup(TerritoryYear territoryYear)
     {
-        URValue x = new URValue();
+        URValue x = new URValue(territoryYear);
         
-        x.total = this.total.dup();
-        x.rural = this.rural.dup();
-        x.urban = this.urban.dup();
+        x.total = this.total.dup(x);
+        x.rural = this.rural.dup(x);
+        x.urban = this.urban.dup(x);
         
         return x;
     }

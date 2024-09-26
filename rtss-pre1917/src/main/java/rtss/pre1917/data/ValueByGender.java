@@ -6,9 +6,16 @@ public class ValueByGender
     public Long female;
     public Long both;
     
-    public ValueByGender dup()
+    public final URValue urValue;
+    
+    public ValueByGender(URValue urValue)
     {
-        ValueByGender x = new ValueByGender();
+        this.urValue = urValue;
+    }
+    
+    public ValueByGender dup(URValue urValue)
+    {
+        ValueByGender x = new ValueByGender(urValue);
         
         x.male = this.male;
         x.female = this.female;
@@ -60,5 +67,10 @@ public class ValueByGender
             return false; 
         else
             return true;
+    }
+
+    public void adjustBirths()
+    {
+        // ###
     }
 }

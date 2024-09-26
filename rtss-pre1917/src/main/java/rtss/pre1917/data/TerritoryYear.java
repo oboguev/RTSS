@@ -25,10 +25,10 @@ public class TerritoryYear
      * Население, число рождений и число смертей 
      * null = no data
      */
-    public URValue population = new URValue();
-    public URValue midyear_population = new URValue();
-    public URValue births = new URValue();
-    public URValue deaths = new URValue();;
+    public URValue population = new URValue(this);
+    public URValue midyear_population = new URValue(this);
+    public URValue births = new URValue(this);
+    public URValue deaths = new URValue(this);
 
     public void setValue(String what, Double v) throws Exception
     {
@@ -279,10 +279,10 @@ public class TerritoryYear
         ty.cbr = this.cbr;
         ty.cdr = this.cdr;
         ty.ngr = this.ngr;
-        ty.midyear_population = this.midyear_population.dup();
-        ty.population = this.population.dup();
-        ty.births = this.births.dup();
-        ty.deaths = this.deaths.dup();
+        ty.midyear_population = this.midyear_population.dup(ty);
+        ty.population = this.population.dup(ty);
+        ty.births = this.births.dup(ty);
+        ty.deaths = this.deaths.dup(ty);
         return ty;
     }
     
@@ -359,6 +359,6 @@ public class TerritoryYear
 
     public void adjustBirths()
     {
-        // ###
+        births.adjustBirths();
     }
 }
