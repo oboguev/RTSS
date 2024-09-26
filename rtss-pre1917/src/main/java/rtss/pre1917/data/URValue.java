@@ -72,4 +72,9 @@ public class URValue
         if (vb != null && vb != vm + vf)
             throw new Exception("Mismatch: both != male + female");
     }
+
+    public void adjustBirths()
+    {
+        // ###
+    }
 }

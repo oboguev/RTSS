@@ -21,7 +21,14 @@ public class LoadData
 {
     public static enum LoadOptions
     {
-        NONE, VERIFY, DONT_VERIFY, MERGE_CITIES, DONT_MERGE_CITIES
+        NONE,
+        // проверка внутренней согласованности загруженных данных
+        VERIFY, DONT_VERIFY,
+        // удалить записи для городов, включив их население в состав соотв. губерний
+        MERGE_CITIES, DONT_MERGE_CITIES,
+        // произвести поправку на недорегистрацию рождений девочкек:
+        // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
+        ADJUST_BIRTHS, DONT_ADJUST_BIRTHS,
     }
 
     public static void main(String[] args)
@@ -63,6 +70,9 @@ public class LoadData
 
         for (int year = 1904; year <= 1917; year++)
             loadEzhegodnikRossii(year);
+        
+        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
+            territories.adjustBirths();
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
@@ -127,6 +137,9 @@ public class LoadData
 
         for (int year = 1897; year <= 1914; year++)
             loadEvroChast(year);
+
+        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
+            territories.adjustBirths();
 
         new EvalEvroChastPopulation().eval(territories);
 
@@ -224,6 +237,9 @@ public class LoadData
             currentFile = null;
         }
 
+        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
+            territories.adjustBirths();
+
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
 
@@ -256,6 +272,9 @@ public class LoadData
         loadUGVI("1912");
         loadUGVI("1913");
         loadUGVI("1914");
+
+        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
+            territories.adjustBirths();
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();

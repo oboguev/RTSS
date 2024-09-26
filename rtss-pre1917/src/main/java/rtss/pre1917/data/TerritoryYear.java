@@ -10,8 +10,8 @@ public class TerritoryYear
         this.year = year;
     }
 
-    public Territory territory;
-    public final int year;
+    final public Territory territory;
+    final public int year;
 
     /*
      * Рождаемость, смертность и темп естественного роста.
@@ -273,9 +273,9 @@ public class TerritoryYear
         }
     }
 
-    public TerritoryYear dup()
+    public TerritoryYear dup(Territory t)
     {
-        TerritoryYear ty = new TerritoryYear(this.territory, this.year);
+        TerritoryYear ty = new TerritoryYear(t, this.year);
         ty.cbr = this.cbr;
         ty.cdr = this.cdr;
         ty.ngr = this.ngr;
@@ -355,5 +355,10 @@ public class TerritoryYear
     public String toString()
     {
         return territory.toString() + " " + year;
+    }
+
+    public void adjustBirths()
+    {
+        // ###
     }
 }

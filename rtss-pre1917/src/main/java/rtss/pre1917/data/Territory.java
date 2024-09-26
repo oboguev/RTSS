@@ -36,8 +36,7 @@ public class Territory
     
     public void copyYear(TerritoryYear ty)
     {
-        ty = ty.dup();
-        ty.territory = this;
+        ty = ty.dup(this);
         year2value.put(ty.year, ty);
     }
 
@@ -58,8 +57,7 @@ public class Territory
         for (int year : year2value.keySet())
         {
             TerritoryYear ty = year2value.get(year);
-            ty = ty.dup();
-            ty.territory = t;
+            ty = ty.dup(t);
             t.year2value.put(year, ty);
         }
         
@@ -112,5 +110,11 @@ public class Territory
     public String toString()
     {
         return name;
+    }
+
+    public void adjustBirths()
+    {
+        for (TerritoryYear ty : year2value.values())
+            ty.adjustBirths();
     }
 }

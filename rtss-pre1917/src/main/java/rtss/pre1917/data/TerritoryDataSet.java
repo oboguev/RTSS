@@ -163,4 +163,10 @@ public class TerritoryDataSet extends HashMap<String, Territory>
     {
         new MergeCities(this).merge();  
     }
+    
+    public void adjustBirths()
+    {
+        for (Territory t : values())
+            t.adjustBirths();
+    }
 }
