@@ -1,5 +1,6 @@
 package rtss.pre1917.data;
 
+import rtss.pre1917.data.URValue.URValueWhich;
 import rtss.util.Util;
 
 public class ValueByGender
@@ -9,15 +10,17 @@ public class ValueByGender
     public Long both;
     
     public final URValue urValue;
+    public final URValueWhich which;
     
-    public ValueByGender(URValue urValue)
+    public ValueByGender(URValue urValue, URValueWhich which)
     {
         this.urValue = urValue;
+        this.which = which;
     }
     
     public ValueByGender dup(URValue urValue)
     {
-        ValueByGender x = new ValueByGender(urValue);
+        ValueByGender x = new ValueByGender(urValue, which);
         
         x.male = this.male;
         x.female = this.female;
@@ -78,7 +81,7 @@ public class ValueByGender
         both = merge(v1.both, v2.both);
     }
     
-    public static final double MaleFemaleBirthRatio = 1.06;
+    public static final double MaleFemaleBirthRatio = 1.055;
 
     public boolean adjustBirths()
     {
@@ -88,9 +91,19 @@ public class ValueByGender
             
             if (female < min_female)
             {
+                long old_female = female; 
                 female = min_female;
                 both = male + female;
-                Util.out("ADJUSTED BIRTHS");
+                
+                double pct = female - old_female;
+                pct = 100.0 * pct / old_female;
+                
+                String msg = String.format("Исправлено число рождений девочек %d %s (%s) увеличено на %.1f%%",
+                                           urValue.territoryYear.year,
+                                           urValue.territoryYear.territory.name,
+                                           which.toString(),
+                                           pct);
+                Util.out(msg);
                 return true;
             }
         }
