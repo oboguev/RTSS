@@ -46,7 +46,7 @@ public class Eval_RSFSR
     private void calc() throws Exception
     {
         calcYearlyNaturalGrowth();
-        // ### добавить механический прирост
+        calcYearlyMigrationGrowth();
         seed1897();
 
         for (int year = 1898; year <= 1914; year++)
@@ -62,8 +62,8 @@ public class Eval_RSFSR
             double cbr = (1000.0 * ty.births.total.both) / pop;
             double cdr = (1000.0 * ty.deaths.total.both) / pop;
             double ngr = cbr - cdr;
-            Util.out(String.format("%d %,d %.1f %.1f %.1f %,d", 
-                                   year, pop, cbr, cdr, ngr, 
+            Util.out(String.format("%d %,d %.1f %.1f %.1f %,d",
+                                   year, pop, cbr, cdr, ngr,
                                    year2population.get(year + 1) - pop));
         }
 
@@ -98,5 +98,17 @@ public class Eval_RSFSR
             TerritoryYear ty = tmUGVI.territoryYear(year);
             year2growth.put(year, ty.births.total.both - ty.deaths.total.both);
         }
+    }
+
+    private void calcYearlyMigrationGrowth()
+    {
+        for (int year = 1896; year <= 1910; year++)
+            year2growth.put(year, year2growth.get(year) + 86_490);
+
+        for (int year = 1911; year <= 1913; year++)
+            year2growth.put(year, year2growth.get(year) + 64_831);
+
+        for (int year = 1914; year <= 1914; year++)
+            year2growth.put(year, year2growth.get(year) + 38_898);
     }
 }
