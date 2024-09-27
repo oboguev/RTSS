@@ -14,15 +14,15 @@ import rtss.util.Util;
 
 /*
  * Определить численность, рождаемость и смертность населения 
- * в границах РСФСР-1991 для 1896-1914 гг.
+ * в границах Российской Империи для 1896-1913 гг.
  */
-public class Eval_RSFSR
+public class Eval_Empire
 {
     public static void main(String[] args)
     {
         try
         {
-            new Eval_RSFSR().calc();
+            new Eval_Empire().calc();
         }
         catch (Throwable ex)
         {
@@ -46,16 +46,16 @@ public class Eval_RSFSR
     private void calc() throws Exception
     {
         calcYearlyNaturalGrowth();
-        // ### добавить механический прирост
+        adjustForEmigration();
         seed1897();
 
         for (int year = 1898; year <= 1914; year++)
             year2population.put(year + 1, year2population.get(year) + year2growth.get(year));
 
-        Util.out("Численность населения в границах РСФСР-1991, рождаемость, смертность, естественный прирост, ест. + мех. изменение численности");
+        Util.out("Численность населения в границах Росийской Империи, рождаемость, смертность, естественный прирост, ест. + мех. изменение численности");
         Util.out("");
 
-        for (int year = 1896; year <= 1914; year++)
+        for (int year = 1896; year <= 1913; year++)
         {
             long pop = year2population.get(year);
             TerritoryYear ty = tmUGVI.territoryYear(year);
@@ -67,13 +67,13 @@ public class Eval_RSFSR
                                    year2population.get(year + 1) - pop));
         }
 
-        Util.out(String.format("%d %,d", 1915, year2population.get(1915)));
+        Util.out(String.format("%d %,d", 1914, year2population.get(1914)));
     }
 
     private void seed1897() throws Exception
     {
         TerritoryDataSet tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
-        Territory tm = MergeTaxon.mergeTaxon(tdsCensus, "РСФСР-1991", WhichYears.AllSetYears);
+        Territory tm = MergeTaxon.mergeTaxon(tdsCensus, "Империя", WhichYears.AllSetYears);
         TerritoryYear ty = tm.territoryYear(1897);
 
         long yincr = year2growth.get(1897);
@@ -91,12 +91,20 @@ public class Eval_RSFSR
     {
         // вычислить естественное приращение
         TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.ADJUST_BIRTHS);
-        tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, "РСФСР-1991", WhichYears.AllSetYears);
+        tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, "Империя", WhichYears.AllSetYears);
 
         for (int year = 1896; year <= 1914; year++)
         {
             TerritoryYear ty = tmUGVI.territoryYear(year);
             year2growth.put(year, ty.births.total.both - ty.deaths.total.both);
         }
+    }
+
+    private void adjustForEmigration() throws Exception
+    {
+        Map<Integer,Long> emigration = new LoadData().loadEmigration();
+
+        for (int year = 1896; year <= 1914; year++)
+            year2growth.put(year, year2growth.get(year) - emigration.get(year));
     }
 }
