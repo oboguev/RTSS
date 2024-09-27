@@ -138,6 +138,7 @@ public class CrossVerify
     /**
      * Вычислить население на начало 1893 года по косвенным данным
      */
+    @SuppressWarnings("unused")
     private void calc_1893(TerritoryDataSet territories)
     {
         for (Territory ter : territories.values())
@@ -163,6 +164,7 @@ public class CrossVerify
 
     /* =============================================================================================================== */
 
+    @SuppressWarnings("unused")
     private void check_population_jump(TerritoryDataSet territories)
     {
         List<String> msgs = new ArrayList<>();

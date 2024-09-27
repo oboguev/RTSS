@@ -1,5 +1,6 @@
 package rtss.pre1917;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -34,13 +35,15 @@ public class LoadData
     public static void main(String[] args)
     {
         LoadData self = new LoadData();
+
         try
         {
             // self.loadCensus1897(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadEvroChast(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
-            self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
+            self.loadEmigration();
             Util.out("** Done");
         }
         catch (Throwable ex)
@@ -839,5 +842,58 @@ public class LoadData
         }
 
         return false;
+    }
+
+    /* ================================================================================================= */
+    
+    public Map<Integer,Long> loadEmigration() throws Exception
+    {
+        Map<Integer,Long> m = new HashMap<>();
+
+        currentFile = "emigration.xlsx";
+        
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                loadEmigration(m, rc, headers.get("год"), headers.get("во все страны без финнов"));
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+        
+        return m;
+    }
+    
+    private void loadEmigration(Map<Integer,Long> m, ExcelRC rc, int colYear, int colAmount) throws Exception
+    {
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            Object o = rc.get(nr, colYear);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+            
+            int year = (int) (long) asLong(o);
+            o = rc.get(nr, colAmount);
+            double amount = asDouble(o);
+            
+            if (m.containsKey(year))
+                throw new Exception("Duplicate year");
+            
+            m.put(year, (long) Math.round(amount));
+        }
+
+        currentNR = null;
     }
 }

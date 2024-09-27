@@ -38,6 +38,7 @@ public class EvalEvroChastPopulation
         }
     }
     
+    @SuppressWarnings("unused")
     private void show(TerritoryDataSet tds, String tname)
     {
         Territory t = tds.get(tname);
