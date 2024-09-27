@@ -13,6 +13,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
+import rtss.pre1917.eval.FillMissingBD;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -30,6 +31,8 @@ public class LoadData
         // произвести поправку на недорегистрацию рождений девочкек:
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
         ADJUST_BIRTHS, DONT_ADJUST_BIRTHS,
+        // заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
+        FILL_MISSING_BD, DONT_FILL_MISSING_BD
     }
 
     public static void main(String[] args)
@@ -278,6 +281,9 @@ public class LoadData
 
         if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
             territories.adjustBirths();
+
+        if (hasOption(LoadOptions.FILL_MISSING_BD, options))
+            new FillMissingBD(territories).fillMissingBD();
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
@@ -881,7 +887,7 @@ public class LoadData
             currentNR = nr;
 
             Object o = rc.get(nr, colYear);
-            if (o == null || o.toString().trim().length() == 0)
+            if (o == null || o.toString().trim().length() == 0 || o.toString().contains("-"))
                 continue;
             
             int year = (int) (long) asLong(o);

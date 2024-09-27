@@ -90,7 +90,10 @@ public class Eval_Empire
     private void calcYearlyNaturalGrowth() throws Exception
     {
         // вычислить естественное приращение
-        TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.ADJUST_BIRTHS);
+        TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, 
+                                                           LoadOptions.MERGE_CITIES, 
+                                                           LoadOptions.ADJUST_BIRTHS,
+                                                           LoadOptions.FILL_MISSING_BD);
         tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, "Империя", WhichYears.AllSetYears);
 
         for (int year = 1896; year <= 1914; year++)
