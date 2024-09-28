@@ -46,7 +46,8 @@ public class LoadData
             // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
-            self.loadEmigration();
+            // self.loadEmigration();
+            self.loadJews();
             Util.out("** Done");
         }
         catch (Throwable ex)
@@ -76,7 +77,7 @@ public class LoadData
 
         for (int year = 1904; year <= 1917; year++)
             loadEzhegodnikRossii(year);
-        
+
         if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
             territories.adjustBirths();
 
@@ -851,13 +852,13 @@ public class LoadData
     }
 
     /* ================================================================================================= */
-    
-    public Map<Integer,Long> loadEmigration() throws Exception
+
+    public Map<Integer, Long> loadEmigration() throws Exception
     {
-        Map<Integer,Long> m = new HashMap<>();
+        Map<Integer, Long> m = new HashMap<>();
 
         currentFile = "emigration.xlsx";
-        
+
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
             for (int k = 0; k < wb.getNumberOfSheets(); k++)
@@ -876,11 +877,11 @@ public class LoadData
         {
             currentFile = null;
         }
-        
+
         return m;
     }
-    
-    private void loadEmigration(Map<Integer,Long> m, ExcelRC rc, int colYear, int colAmount) throws Exception
+
+    private void loadEmigration(Map<Integer, Long> m, ExcelRC rc, int colYear, int colAmount) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -889,17 +890,95 @@ public class LoadData
             Object o = rc.get(nr, colYear);
             if (o == null || o.toString().trim().length() == 0 || o.toString().contains("-"))
                 continue;
-            
+
             int year = (int) (long) asLong(o);
             o = rc.get(nr, colAmount);
             double amount = asDouble(o);
-            
+
             if (m.containsKey(year))
                 throw new Exception("Duplicate year");
-            
+
             m.put(year, (long) Math.round(amount));
         }
 
         currentNR = null;
+    }
+
+    /* ================================================================================================= */
+
+    public Map<String, Double> loadJews() throws Exception
+    {
+        Map<String, Double> m = new HashMap<>();
+
+        currentFile = "juifs.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                loadJews(m, rc, headers.get("губ"), headers.get("% иудеев"));
+
+                replicateJews(m, "Московская с Москвой", "Московская");
+                replicateJews(m, "Санкт-Петербургская с Санкт-Петербургом", "Санкт-Петербургская");
+                replicateJews(m, "Варшавская с Варшавой", "Варшавская");
+                replicateJews(m, "Херсонская с Одессой", "Херсонская");
+                replicateJews(m, "Таврическая с Севастополем", "Таврическая");
+                replicateJews(m, "Бакинская с Баку", "Бакинская");
+
+                replicateJews(m, "Московская", "г. Москва");
+                replicateJews(m, "Санкт-Петербургская", "г. Санкт-Петербург");
+                replicateJews(m, "Варшавская", "г. Варшава");
+                replicateJews(m, "Херсонская", "г. Николаев");
+                replicateJews(m, "Херсонская", "г. Одесса");
+                replicateJews(m, "Таврическая", "г. Севастополь");
+                replicateJews(m, "Бакинская", "г. Баку");
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+
+        return m;
+
+    }
+
+    private void loadJews(Map<String, Double> m, ExcelRC rc, int colGub, int colAmount) throws Exception
+    {
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            Object o = rc.get(nr, colGub);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+            String gub = o.toString();
+            gub = TerritoryNames.canonic(gub);
+            TerritoryNames.checkValidTerritoryName(gub);
+
+            double amount = asDouble(rc.get(nr, colAmount));
+
+            if (m.containsKey(gub))
+                throw new Exception("Duplicate territory");
+
+            m.put(gub, amount);
+        }
+
+        currentNR = null;
+    }
+
+    private void replicateJews(Map<String, Double> m, String g1, String g2)
+    {
+        if (m.containsKey(g1))
+            m.put(g2, m.get(g1));
+        else if (m.containsKey(g2))
+            m.put(g1, m.get(g2));
     }
 }

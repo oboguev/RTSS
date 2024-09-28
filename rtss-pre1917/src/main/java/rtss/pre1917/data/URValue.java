@@ -24,6 +24,11 @@ public class URValue
             }
         }
     }
+    
+    public String toString()
+    {
+        return territoryYear.toString();
+    }
 
     public ValueByGender total = new ValueByGender(this, URValueWhich.TOTAL);
     public ValueByGender rural = new ValueByGender(this, URValueWhich.RURAL);
@@ -54,10 +59,18 @@ public class URValue
 
     public void merge(URValue v) throws Exception
     {
+        validate();
+        v.validate();
+
         total.merge(v.total);
         rural.merge(v.rural);
         urban.merge(v.urban);
-
+        
+        validate();
+    }
+    
+    public void validate() throws Exception
+    {
         // check that total is compatible with rural + urban
         check_urt(total.both, rural.both, urban.both);
         check_urt(total.male, rural.male, urban.male);
