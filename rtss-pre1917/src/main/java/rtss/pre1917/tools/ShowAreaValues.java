@@ -76,8 +76,8 @@ public class ShowAreaValues
         Util.out("");
         Util.out("Рождаемость и смертность для " + tname);
         Util.out("");
-        Util.out("год       ЦСК             УГВИ        ");
-        Util.out("==== =========== =====================");
+        Util.out("год       ЦСК             УГВИ               прогрессивные   ");
+        Util.out("==== =========== =====================  =====================");
         
         Territory t = tdsUGVI.get(tname);
         if (t == null)
@@ -90,9 +90,12 @@ public class ShowAreaValues
             if (year >= 1896 && year <= 1914)
             {
                 TerritoryYear ty = t.territoryYear(year);
-                Double cbr = rate(ty.births.total.both, ty.population.total.both);
-                Double cdr = rate(ty.deaths.total.both, ty.population.total.both);
+                Double cbrUGVI = rate(ty.births.total.both, ty.population.total.both);
+                Double cdrUGVI = rate(ty.deaths.total.both, ty.population.total.both);
 
+                Double cbrProgressive = rate(ty.births.total.both, ty.progressive_population.total.both);
+                Double cdrProgressive = rate(ty.deaths.total.both, ty.progressive_population.total.both);
+                
                 TerritoryYear tyCSK = null;
                 Long popCSK = null;
                 if (tCSK != null)
@@ -100,10 +103,12 @@ public class ShowAreaValues
                 if (tyCSK != null)
                     popCSK = tyCSK.population.total.both;
                 
-                Util.out(String.format("%d %s %s %s %s", year, 
+                Util.out(String.format("%d %s %s %s %s %s %s %s", year, 
                                        s_pop(popCSK), 
                                        s_pop(ty.population.total.both), 
-                                       s_rate(cbr), s_rate(cdr)));
+                                       s_rate(cbrUGVI), s_rate(cdrUGVI),
+                                       s_pop(ty.progressive_population.total.both), 
+                                       s_rate(cbrProgressive), s_rate(cdrProgressive)));
             }
         }
     }
@@ -121,7 +126,7 @@ public class ShowAreaValues
     private String s_rate(Double d)
     {
         if (d == null)
-            return "----";
+            return "    ";
         else
             return String.format("%2.1f", d);
     }

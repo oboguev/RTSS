@@ -27,6 +27,11 @@ public class TerritoryYear
      */
     public URValue population = new URValue(this);
     public URValue midyear_population = new URValue(this);
+    /*
+     * progressive_population вычисляется отчётом от переписи 1897 года с приложением ежегодных
+     * сведений о числе рождений, смертей и внутренней миграции. Только для набора данных УГВИ.
+     */
+    public URValue progressive_population = new URValue(this);
     public URValue births = new URValue(this);
     public URValue deaths = new URValue(this);
 
