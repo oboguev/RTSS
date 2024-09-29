@@ -74,7 +74,7 @@ public class ShowAreaValues
         Util.out("");
         Util.out("Рождаемость и смертность для " + tname);
         Util.out("");
-        Util.out("год       ЦСК             УГВИ               прогрессивные   ");
+        Util.out("год       ЦСК             УГВИ          прогрессивные от 1897");
         Util.out("==== =========== =====================  =====================");
         
         Territory t = tdsUGVI.get(tname);
@@ -123,10 +123,12 @@ public class ShowAreaValues
     
     private String s_rate(Double d)
     {
-        if (d == null)
-            return "    ";
-        else
-            return String.format("%2.1f", d);
+        String s = "";
+        if (d != null)
+            s = String.format("%2.1f", d);
+        while (s.length() < 4)
+            s = " " + s;
+        return s;
     }
 
     private Double rate(Long v, Long pop)
