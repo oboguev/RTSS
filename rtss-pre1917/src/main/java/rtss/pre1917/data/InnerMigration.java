@@ -3,6 +3,8 @@ package rtss.pre1917.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.util.Util;
+
 public class InnerMigration
 {
     public static class InnerMigrationAmount
@@ -21,12 +23,12 @@ public class InnerMigration
 
     public void setInFlow(String tname, int year, long amount) throws Exception
     {
-        setValue(makeInnerMigrationAmount(tname).year2inflow, year, amount);
+        setValue(tname, makeInnerMigrationAmount(tname).year2inflow, year, amount);
     }
 
     public void setOutFlow(String tname, int year, long amount) throws Exception
     {
-        setValue(makeInnerMigrationAmount(tname).year2outflow, year, amount);
+        setValue(tname, makeInnerMigrationAmount(tname).year2outflow, year, amount);
     }
 
     private InnerMigrationAmount makeInnerMigrationAmount(String tname)
@@ -43,12 +45,16 @@ public class InnerMigration
 
     }
 
-    private void setValue(Map<Integer, Long> year2flow, int year, long amount) throws Exception
+    private void setValue(String tname, Map<Integer, Long> year2flow, int year, long amount) throws Exception
     {
         if (year2flow.containsKey(year))
-            throw new Exception("Dupicate data");
-
-        year2flow.put(year, amount);
+        {
+            year2flow.put(year, amount + year2flow.get(year));
+        }
+        else
+        {
+            year2flow.put(year, amount);
+        }
     }
 
     private String mapTerritoryName(String tname)
