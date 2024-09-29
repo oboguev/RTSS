@@ -292,11 +292,11 @@ public class LoadData
         if (hasOption(LoadOptions.FILL_MISSING_BD, options))
             new FillMissingBD(territories).fillMissingBD();
 
-        if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
-            new EvalProgressive(territories).evalProgressive();
-
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
+
+        if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
+            new EvalProgressive(territories).evalProgressive();
 
         if (hasOption(LoadOptions.VERIFY, options))
             new CrossVerify().verify(territories);

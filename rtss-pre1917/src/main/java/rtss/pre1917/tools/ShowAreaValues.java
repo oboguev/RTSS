@@ -10,9 +10,6 @@ import rtss.util.Util;
 
 public class ShowAreaValues
 {
-    private TerritoryDataSet tdsUGVI;
-    private TerritoryDataSet tdsCSK;
-
     public static void main(String[] args)
     {
         try
@@ -26,15 +23,19 @@ public class ShowAreaValues
             ex.printStackTrace();
         }
     }
+    
+    private final TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE);
+    private final TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
+
+    private ShowAreaValues() throws Exception
+    {
+    }
 
     /* ============================================================================================== */
 
     @SuppressWarnings("unused")
     private void show_values_central_asia() throws Exception
     {
-        tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY);
-        tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
-
         show_values("Акмолинская обл.");
         show_values("Закаспийская обл.");
         show_values("Самаркандская обл.");
@@ -49,9 +50,6 @@ public class ShowAreaValues
     @SuppressWarnings("unused")
     private void show_values_causases() throws Exception
     {
-        tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY);
-        tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
-
         show_values("г. Баку");
         show_values("Бакинская");
         show_values("Батумская");

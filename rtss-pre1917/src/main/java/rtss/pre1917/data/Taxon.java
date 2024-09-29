@@ -389,6 +389,7 @@ public class Taxon
         case "приозерный район":
         case "приуральский район":
         case "северный район":            
+        case "РСФСР-1991":            
             return true;
 
         default:
