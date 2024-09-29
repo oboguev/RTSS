@@ -14,6 +14,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
+import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FillMissingBD;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.util.Util;
@@ -33,7 +34,10 @@ public class LoadData
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
         ADJUST_BIRTHS, DONT_ADJUST_BIRTHS,
         // заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
-        FILL_MISSING_BD, DONT_FILL_MISSING_BD
+        FILL_MISSING_BD, DONT_FILL_MISSING_BD,
+        // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
+        // и сохранить её в поле progressive_population, параллельно собственным данным УГВИ
+        EVAL_PROGRESSIVE, DONT_EVAL_PROGRESSIVE
     }
 
     public static void main(String[] args)
@@ -287,6 +291,9 @@ public class LoadData
 
         if (hasOption(LoadOptions.FILL_MISSING_BD, options))
             new FillMissingBD(territories).fillMissingBD();
+
+        if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
+            new EvalProgressive(territories).evalProgressive();
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
@@ -1097,7 +1104,7 @@ public class LoadData
                 case "убытие":
                     im.setOutFlow(gub, year, amount);
                     break;
-                
+
                 default:
                     throw new Exception("Invalid selector");
                 }

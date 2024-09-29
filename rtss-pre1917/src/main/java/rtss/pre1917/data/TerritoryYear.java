@@ -284,8 +284,9 @@ public class TerritoryYear
         ty.cbr = this.cbr;
         ty.cdr = this.cdr;
         ty.ngr = this.ngr;
-        ty.midyear_population = this.midyear_population.dup(ty);
         ty.population = this.population.dup(ty);
+        ty.midyear_population = this.midyear_population.dup(ty);
+        ty.progressive_population = this.progressive_population.dup(ty);
         ty.births = this.births.dup(ty);
         ty.deaths = this.deaths.dup(ty);
         return ty;
@@ -336,6 +337,7 @@ public class TerritoryYear
 
         population.merge(ty.population);
         midyear_population.merge(ty.midyear_population);
+        progressive_population.merge(ty.progressive_population);
         births.merge(ty.births);
         deaths.merge(ty.deaths);
     }
