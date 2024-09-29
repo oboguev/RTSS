@@ -162,14 +162,32 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             ty.ngr = cty.ngr;
     }
     
+    /*
+     * Скомбинировать города с соотв. губерниями, создав
+     * записи с новым именем
+     */
     public void mergeCities() throws Exception
     {
         new MergeCities(this).merge();  
     }
     
+    /*
+     * Скорректировать значения числа рождений девочек,
+     * если они черезчур числа рождений мальчиков / 1.055.
+     */
     public void adjustBirths()
     {
         for (Territory t : values())
             t.adjustBirths();
+    }
+    
+    /*
+     * Оставить в полях численности населения и числа рождений и смертей
+     * только величины total.both, поставив другие в null.
+     */
+    public void leaveOnlyTotalBoth()
+    {
+        for (Territory t : values())
+            t.leaveOnlyTotalBoth();
     }
 }

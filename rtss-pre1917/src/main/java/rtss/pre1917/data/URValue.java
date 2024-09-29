@@ -127,4 +127,11 @@ public class URValue
             total.adjustBirths();
         }
     }
+
+    public void leaveOnlyTotalBoth()
+    {
+        rural.clear();
+        urban.clear();
+        total.leaveOnlyBoth();
+    }
 }

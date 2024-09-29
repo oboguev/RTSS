@@ -119,4 +119,14 @@ public class ValueByGender
         
         return false;
     }
+
+    public void leaveOnlyBoth()
+    {
+        male = female = null;
+    }
+
+    public void clear()
+    {
+        both = male = female = null;
+    }
 }

@@ -117,4 +117,10 @@ public class Territory
         for (TerritoryYear ty : year2value.values())
             ty.adjustBirths();
     }
+
+    public void leaveOnlyTotalBoth()
+    {
+        for (TerritoryYear ty : year2value.values())
+            ty.leaveOnlyTotalBoth();
+    }
 }

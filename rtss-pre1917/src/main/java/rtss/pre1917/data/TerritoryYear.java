@@ -368,4 +368,13 @@ public class TerritoryYear
     {
         births.adjustBirths();
     }
+
+    public void leaveOnlyTotalBoth()
+    {
+        population.leaveOnlyTotalBoth();
+        midyear_population.leaveOnlyTotalBoth();
+        progressive_population.leaveOnlyTotalBoth();
+        births.leaveOnlyTotalBoth();
+        deaths.leaveOnlyTotalBoth();
+    }
 }
