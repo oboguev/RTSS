@@ -3,8 +3,6 @@ package rtss.pre1917.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import rtss.util.Util;
-
 public class InnerMigration
 {
     public static class InnerMigrationAmount
@@ -88,6 +86,8 @@ public class InnerMigration
 
         return tname;
     }
+    
+    /* ==================================================================== */
 
     public long inFlow(String tname, int year)
     {
