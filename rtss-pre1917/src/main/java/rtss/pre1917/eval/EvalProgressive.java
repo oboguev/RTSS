@@ -100,9 +100,25 @@ public class EvalProgressive
             ty1896.progressive_population.total.both =  ty1897.progressive_population.total.both - in;
         }
         
-        for (int year = 1899; year <= 1916; year++)
+        for (int year = 1898; year <= 1916; year++)
         {
-            // ###
+            TerritoryYear xty = xt.territoryYearOrNull(year);
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
+
+            if (ty == null || ty_next == null || xty == null)
+                continue;
+
+            in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
+            in += innerMigration.inFlow(tname, year);
+            in -= innerMigration.outFlow(tname, year);
+
+            ty_next.progressive_population.total.both =  ty.progressive_population.total.both + in;
         }
+    }
+    
+    private long null2zero(Long v)
+    {
+        return v == null ? 0 : v;
     }
 }
