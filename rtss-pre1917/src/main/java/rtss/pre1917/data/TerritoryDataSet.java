@@ -12,6 +12,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
     private static final long serialVersionUID = 1L;
     
     public final DataSetType dataSetType;
+    public boolean filledMissingBD = false;
     
     public TerritoryDataSet(DataSetType dataSetType)
     {
@@ -23,6 +24,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         TerritoryDataSet tds = new TerritoryDataSet(dataSetType);
         for (String name : keySet())
             tds.put(name, get(name).dup());
+        tds.filledMissingBD = this.filledMissingBD;
         return tds;
     }
     

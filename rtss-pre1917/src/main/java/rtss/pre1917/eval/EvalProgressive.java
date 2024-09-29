@@ -38,6 +38,7 @@ public class EvalProgressive
         this.tds = tds;
         this.xtds = tds.dup();
         xtds.adjustBirths();
+        new FillMissingBD(xtds).fillMissingBD();
     }
 
     public void evalProgressive() throws Exception

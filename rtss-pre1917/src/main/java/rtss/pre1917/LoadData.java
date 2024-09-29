@@ -1055,8 +1055,6 @@ public class LoadData
             y1 = y2 = Integer.parseInt(years);
         }
 
-        int nyears = y2 - y1 + 1;
-
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             currentNR = nr;
@@ -1091,18 +1089,17 @@ public class LoadData
                 continue;
 
             long amount = asLong(o);
-            amount = Math.round((1.0 * amount) / nyears);
 
             for (int year = y1; year <= y2; year++)
             {
                 switch (what)
                 {
                 case "прибытие":
-                    im.setInFlow(gub, year, amount);
+                    im.setInFlow(gub, year, year_amount(amount, year, y1, y2));
                     break;
 
                 case "убытие":
-                    im.setOutFlow(gub, year, amount);
+                    im.setOutFlow(gub, year, year_amount(amount, year, y1, y2));
                     break;
 
                 default:
@@ -1112,5 +1109,22 @@ public class LoadData
         }
 
         currentNR = null;
+    }
+    
+    private long year_amount(long amount, int year, int y1, int y2)
+    {
+        if (y1 == 1911 && y2 == 1915)
+        {
+            final double weights[] = {1, 1, 1, 0.6, 0};
+            double sum_weights = 0;
+            for (double w : weights)
+                sum_weights += w;
+            return Math.round(amount * weights[year - 1911] / sum_weights);
+        }
+        else
+        {
+            int nyears = y2 - y1 + 1;
+            return Math.round((1.0 * amount) / nyears);
+        }
     }
 }
