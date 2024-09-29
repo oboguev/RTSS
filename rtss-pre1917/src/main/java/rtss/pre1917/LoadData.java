@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.data.ColumnHeader;
 import rtss.pre1917.data.DataSetType;
+import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
@@ -47,7 +48,8 @@ public class LoadData
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
             // self.loadEmigration();
-            self.loadJews();
+            // self.loadJews();
+            self.loadInnerMigration();
             Util.out("** Done");
         }
         catch (Throwable ex)
@@ -980,5 +982,128 @@ public class LoadData
             m.put(g2, m.get(g1));
         else if (m.containsKey(g2))
             m.put(g1, m.get(g2));
+    }
+
+    /* ================================================================================================= */
+
+    public InnerMigration loadInnerMigration() throws Exception
+    {
+        InnerMigration im = new InnerMigration();
+
+        currentFile = "inner-migration/inner-migration-loadable.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().startsWith("баланс-"))
+                {
+                    ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                    Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                    loadInnerMigration(im, rc, headers);
+                }
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+
+        return im;
+    }
+
+    private void loadInnerMigration(InnerMigration im, ExcelRC rc, Map<String, Integer> headers) throws Exception
+    {
+        int colGub = headers.get("губ");
+
+        for (String header : headers.keySet())
+        {
+            String htext = Util.despace(header);
+            if (htext.startsWith("прибытие "))
+            {
+                loadInnerMigration(im, rc, colGub, headers.get(header), "прибытие", htext.substring("прибытие ".length()));
+            }
+            else if (htext.startsWith("убытие "))
+            {
+                loadInnerMigration(im, rc, colGub, headers.get(header), "убытие", htext.substring("убытие ".length()));
+            }
+        }
+    }
+
+    private void loadInnerMigration(InnerMigration im, ExcelRC rc, int colGub, int col, String what, String years) throws Exception
+    {
+        int y1;
+        int y2;
+
+        if (years.contains("-"))
+        {
+            String[] sa = years.split("-");
+            y1 = Integer.parseInt(sa[0]);
+            y2 = Integer.parseInt(sa[1]);
+        }
+        else
+        {
+            y1 = y2 = Integer.parseInt(years);
+        }
+
+        int nyears = y2 - y1 + 1;
+
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            Object o = rc.get(nr, colGub);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+
+            String gub = o.toString().trim();
+            switch (gub)
+            {
+            case "прочие губ. Европейской России":
+            case "Прочие":
+            case "Иностранные подданные":
+            case "Всего":
+            case "Итого":
+            case "Урянхайский край":
+            case "Туркестан":
+            case "из неуказанных областей":
+            case "вернувшихся с пути":
+                continue;
+            }
+
+            gub = TerritoryNames.canonic(gub);
+            TerritoryNames.checkValidTerritoryName(gub);
+
+            o = rc.get(nr, col);
+            if (o == null)
+                continue;
+            String so = o.toString().trim();
+            if (so.length() == 0 || so.equals("-"))
+                continue;
+
+            long amount = asLong(o);
+            amount = Math.round((1.0 * amount) / nyears);
+
+            for (int year = y1; year <= y2; year++)
+            {
+                switch (what)
+                {
+                case "прибытие":
+                    im.setInFlow(gub, year, amount);
+                    break;
+
+                case "убытие":
+                    im.setOutFlow(gub, year, amount);
+                    break;
+                
+                default:
+                    throw new Exception("Invalid selector");
+                }
+            }
+        }
+
+        currentNR = null;
     }
 }
