@@ -2,9 +2,11 @@ package rtss.pre1917.tools;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.util.FieldValue;
 import rtss.util.Util;
 
@@ -28,7 +30,11 @@ public class ShowAreaValues
             Util.out("Прогрессивная оценка не вычисляется для");
             Util.out("    Камчатской области (создана в 1909), Батумской области (создана в 1903), Холмской губернии (создана в 1912)");
             Util.out("т.к. для промежутка между 1897 годом и моментом их создания сведения о естественом движении");
-            Util.out("не включены в базу (но могут быть добавлены позднее, из уездных сведений УГВИ).");
+            Util.out("не включены в базу (хотя могут быть добавлены позднее, из уездных сведений УГВИ).");
+            Util.out("");
+            Util.out("Оценка по стабилизированному участку вычисляется на основе лет, в которые была достигнута");
+            Util.out("удовлетворительная полнота регистрации рождений и смертей, в предположении, что в остальные годы");
+            Util.out("рождаемость и смертность была такой же, как в среднем по стаб. участку.");
             Util.out("");
             new ShowAreaValues().show_values_central_asia();
             new ShowAreaValues().show_values_causases();
@@ -42,7 +48,10 @@ public class ShowAreaValues
     
     private final TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE);
     private final TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
-
+    private final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+    private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
+    private final EvalGrowthRate evalGrowthRate = new  EvalGrowthRate(tdsCensus1897, innerMigration);
+    
     private ShowAreaValues() throws Exception
     {
     }
@@ -84,22 +93,37 @@ public class ShowAreaValues
         show_values("Сухумский окр.");
     }
 
-    private void show_values(String tname)
+    private void show_values(String tname) throws Exception
     {
+        Territory t = tdsUGVI.get(tname);
+        if (t == null)
+        {
+            Util.out("************************************************************");
+            Util.out("");
+            Util.out("Нет сведений для " + tname);
+            Util.out("");
+            return;
+        }
+
+        Territory tCSK = tdsCSK.get(tname);
+        Territory tEval = evalGrowthRate.evalTerritory(t);
+
         Util.out("");
         Util.out("************************************************************");
         Util.out("");
         Util.out("Рождаемость и смертность для " + tname);
         Util.out("");
-        Util.out("год       ЦСК             УГВИ          прогрессивные от 1897");
-        Util.out("==== =========== =====================  =====================");
+        if (tEval == null)
+        {
+            Util.out("год       ЦСК             УГВИ          прогрессивные от 1897");
+            Util.out("==== =========== =====================  =====================");
+        }
+        else
+        {
+            Util.out("год       ЦСК             УГВИ          прогрессивные от 1897  по стабилиз. участку");
+            Util.out("==== =========== =====================  =====================  =====================");
+        }
         
-        Territory t = tdsUGVI.get(tname);
-        if (t == null)
-            return;
-
-        Territory tCSK = tdsCSK.get(tname);
-
         for (int year : t.years())
         {
             if (year >= 1896 && year <= 1914)
@@ -111,6 +135,19 @@ public class ShowAreaValues
                 Double cbrProgressive = rate(ty.births.total.both, ty.progressive_population.total.both);
                 Double cdrProgressive = rate(ty.deaths.total.both, ty.progressive_population.total.both);
                 
+                TerritoryYear tyEval = null;
+                Double cbrEval = null;
+                Double cdrEval = null;
+                Long popEval = null;
+
+                if (tEval != null)
+                {
+                    tyEval = tEval.territoryYear(year);
+                    popEval = tyEval.population.total.both;
+                    cbrEval = rate(tyEval.births.total.both, popEval);
+                    cdrEval = rate(tyEval.deaths.total.both, popEval);
+                }
+                
                 TerritoryYear tyCSK = null;
                 Long popCSK = null;
                 if (tCSK != null)
@@ -118,12 +155,14 @@ public class ShowAreaValues
                 if (tyCSK != null)
                     popCSK = tyCSK.population.total.both;
                 
-                Util.out(String.format("%d %s %s %s %s %s %s %s", year, 
+                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s", year, 
                                        s_pop(popCSK), 
                                        s_pop(ty.population.total.both), 
                                        s_rate(cbrUGVI), s_rate(cdrUGVI),
                                        s_pop(ty.progressive_population.total.both), 
-                                       s_rate(cbrProgressive), s_rate(cdrProgressive)));
+                                       s_rate(cbrProgressive), s_rate(cdrProgressive),
+                                       s_pop(popEval),
+                                       s_rate(cbrEval), s_rate(cdrEval)));
             }
         }
     }
