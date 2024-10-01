@@ -135,13 +135,13 @@ public class ShowAreaValues
         Util.out("");
         if (tEval == null)
         {
-            Util.out("год       ЦСК             УГВИ                чр     чс     прогрессивный от 1897");
-            Util.out("==== =========== =========================================  =====================");
+            Util.out("год       ЦСК             УГВИ                 чр      чс       прогрессивный от 1897");
+            Util.out("==== =========== ==========================================   ========================");
         }
         else
         {
-            Util.out("год       ЦСК             УГВИ                чр     чс     прогрессивный от 1897  по стабилиз. участку       чр      чс     учёт %");
-            Util.out("==== =========== =========================================  =====================  ========================================= =======");
+            Util.out("год       ЦСК             УГВИ                 чр      чс       прогрессивный от 1897      по стабилиз. участку     чр      чс    учёт %");
+            Util.out("==== =========== ==========================================   ========================  ========================================= =======");
         }
         
         for (int year : t.years())
@@ -198,7 +198,7 @@ public class ShowAreaValues
                                        s_rate(cbrProgressive), s_rate(cdrProgressive), s_ep(cbrProgressive, cdrProgressive),
                                        // по стаб. участку
                                        s_population(popEval),
-                                       s_rate(cbrEval), s_rate(cdrEval),
+                                       s_rate(cbrEval), s_rate(cdrEval), s_ep(cbrEval, cdrEval),
                                        s_bd(birthsEval), s_bd(deathsEval),
                                        stable,
                                        s_pct(ty.births.total.both, birthsEval), s_pct(ty.deaths.total.both, deathsEval)));
