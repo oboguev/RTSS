@@ -6,12 +6,12 @@ import java.util.Map;
 import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.TerritoryYear;
 
 /*
  * Пересчитать население за 1896-1915 гг. на основе сведений о естественом движении за промежуток, 
  * когда была достигнута удовлетворительная степень регистрации рождений и смертей, в предположении,
- * что в остальный годы уровень рождаемости и смертности был таков же, как в этом промежутке
- * в среднем.
+ * что в остальные годы уровень рождаемости и смертности был таков же, как в этом промежутке в среднем.
  */
 public class EvalGrowthRate
 {
@@ -20,6 +20,8 @@ public class EvalGrowthRate
 
     private final TerritoryDataSet tdsCensus1897;
     private final InnerMigration innerMigration;
+
+    private final double PROMILLE = 1000.0;
 
     public EvalGrowthRate(TerritoryDataSet tdsCensus1897, InnerMigration innerMigration)
     {
@@ -67,7 +69,66 @@ public class EvalGrowthRate
 
         int y1 = tname_y1.get(t.name);
         int y2 = tname_y2.get(t.name);
+        int nyears = y2 - y1 + 1;
 
-        return null;
+        CalcGrowthRate cgr = new CalcGrowthRate(t, tCensus1897, innerMigration);
+
+        double ngr = 0;
+        for (int y = y1; y <= y2; y++)
+        {
+            double a = cgr.calcNaturalGrowthRate(y);
+            ngr += a;
+        }
+
+        ngr = ngr / nyears;
+
+        double ymult = 1 + ngr / PROMILLE;
+
+        /* =========================================================================== */
+
+        long p1897 = cgr.population_1897_Jan1();
+
+        Territory xt = t.dup();
+        xt.leaveOnlyTotalBoth();
+        xt.territoryYear(1897).population.total.both = p1897;
+        xt.territoryYear(1896).population.total.both = Math.round(p1897 / ymult);
+
+        // движение за @year, т.е. от @year к @year + 1
+        for (int year = 1897; year <= 1915; year++)
+        {
+            if (year >= y1 && year <= y2)
+            {
+                xt.territoryYear(year + 1).population.total.both = xt.territoryYear(year).population.total.both + cgr.increase(year);
+            }
+            else
+            {
+                xt.territoryYear(year + 1).population.total.both = Math.round(ymult * xt.territoryYear(year).population.total.both);
+            }
+        }
+
+        // средние уровни рождаемости и смертности в стабилизированном участке
+        double cbr = 0;
+        double cdr = 0;
+        for (int year = y1; year <= y2; year++)
+        {
+            TerritoryYear ty = xt.territoryYearOrNull(year);
+            cbr += (PROMILLE * ty.births.total.both) / ty.population.total.both;
+            cdr += (PROMILLE * ty.deaths.total.both) / ty.population.total.both;
+        }
+        cbr /= nyears;
+        cdr /= nyears;
+        
+        // пересчитать число рождений и смертей вне стабилизированого участка
+        for (int year = 1896; year <= 1916; year++)
+        {
+            if (!(year >= y1 && year <= y2))
+            {
+                TerritoryYear ty = xt.territoryYearOrNull(year);
+                ty.births.total.both = Math.round(ty.population.total.both * cbr / PROMILLE); 
+                ty.deaths.total.both = Math.round(ty.population.total.both * cdr / PROMILLE); 
+            }
+        }
+
+        return xt;
     }
 }
