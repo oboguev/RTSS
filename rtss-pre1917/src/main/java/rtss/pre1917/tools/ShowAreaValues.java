@@ -34,7 +34,8 @@ public class ShowAreaValues
             Util.out("");
             Util.out("Оценка по стабилизированному участку вычисляется на основе лет, в которые была достигнута");
             Util.out("удовлетворительная полнота регистрации рождений и смертей, в предположении, что в остальные годы");
-            Util.out("рождаемость и смертность была такой же, как в среднем по стаб. участку.");
+            Util.out("рождаемость и смертность была такой же, как в среднем по стабилизированному участку.");
+            Util.out("Годы стабилизированного участка помечены звёздочкой");
             Util.out("");
             new ShowAreaValues().show_values_central_asia();
             new ShowAreaValues().show_values_causases();
@@ -120,8 +121,8 @@ public class ShowAreaValues
         }
         else
         {
-            Util.out("год       ЦСК             УГВИ          прогрессивные от 1897  по стабилиз. участку");
-            Util.out("==== =========== =====================  =====================  =====================");
+            Util.out("год       ЦСК             УГВИ          прогрессивные от 1897  по стабилизир. участку");
+            Util.out("==== =========== =====================  =====================  =======================");
         }
         
         for (int year : t.years())
@@ -155,14 +156,19 @@ public class ShowAreaValues
                 if (tyCSK != null)
                     popCSK = tyCSK.population.total.both;
                 
-                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s", year, 
+                String stable = " ";
+                if (evalGrowthRate.is_stable_year(t.name, year))
+                    stable = "*";
+                
+                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s", year, 
                                        s_pop(popCSK), 
                                        s_pop(ty.population.total.both), 
                                        s_rate(cbrUGVI), s_rate(cdrUGVI),
                                        s_pop(ty.progressive_population.total.both), 
                                        s_rate(cbrProgressive), s_rate(cdrProgressive),
                                        s_pop(popEval),
-                                       s_rate(cbrEval), s_rate(cdrEval)));
+                                       s_rate(cbrEval), s_rate(cdrEval),
+                                       stable));
             }
         }
     }

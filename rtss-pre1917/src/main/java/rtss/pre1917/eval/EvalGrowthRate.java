@@ -50,6 +50,20 @@ public class EvalGrowthRate
         tname_y1.put(tname, y1);
         tname_y2.put(tname, y2);
     }
+    
+    public boolean is_stable_year(String tname, int year)
+    {
+        if (tname_y1.containsKey(tname))
+        {
+            int y1 = tname_y1.get(tname);
+            int y2 = tname_y2.get(tname);
+            return (year >= y1 && year <= y2);
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     /* =============================================================== */
 
