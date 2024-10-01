@@ -2,6 +2,7 @@ package rtss.pre1917.tools;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.calc.AdjustTerritories;
 import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -38,7 +39,8 @@ public class ShowAreaValues
             Util.out("");
             new ShowAreaValues().show_values_select();
             new ShowAreaValues().show_values_central_asia();
-            new ShowAreaValues().show_values_causases();
+            new ShowAreaValues().show_values_cacauses();
+            new ShowAreaValues().show_values_fixed();
         }
         catch (Throwable ex)
         {
@@ -89,7 +91,7 @@ public class ShowAreaValues
     }
 
     @SuppressWarnings("unused")
-    private void show_values_causases() throws Exception
+    private void show_values_cacauses() throws Exception
     {
         Util.out("");
         Util.out("===================================== КАВКАЗ ===================================== ");
@@ -112,6 +114,20 @@ public class ShowAreaValues
         show_values("Закатальский окр.");
         show_values("Сухумский окр.");
     }
+
+    @SuppressWarnings("unused")
+    private void show_values_fixed() throws Exception
+    {
+        Util.out("");
+        Util.out("===================================== СКОРРЕКТИРОВАННЫЕ ЗНАЧЕНИЯ ===================================== ");
+        Util.out("");
+        
+        new AdjustTerritories(tdsUGVI).fixDagestan();;
+
+        show_values("Дагестанская обл.");
+    }
+
+    /* ============================================================================================== */
 
     private void show_values(String tname) throws Exception
     {
