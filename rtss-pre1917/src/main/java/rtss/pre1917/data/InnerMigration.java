@@ -87,7 +87,7 @@ public class InnerMigration
 
         return tname;
     }
-    
+
     /* ==================================================================== */
 
     public long inFlow(String tname, int year)
@@ -114,5 +114,10 @@ public class InnerMigration
             v = 0L;
 
         return v;
+    }
+
+    public long saldo(String tname, int year)
+    {
+        return inFlow(tname, year) - outFlow(tname, year);
     }
 }

@@ -100,8 +100,7 @@ public class CalcGrowthRate
         for (int year = 1898;; year++)
         {
             p *= (1 + a);
-            p += innerMigration.inFlow(t.name, year - 1);
-            p -= innerMigration.outFlow(t.name, year - 1);
+            p += innerMigration.saldo(t.name, year - 1);
             if (year == ytarget)
                 return p;
         }
@@ -122,8 +121,7 @@ public class CalcGrowthRate
     {
         TerritoryYear tc = tCensus1897.territoryYearOrNull(year);
         double in = a * tc.population.total.both;
-        in += innerMigration.inFlow(t.name, year);
-        in -= innerMigration.outFlow(t.name, year);
+        in += innerMigration.saldo(t.name, year);
         return Math.round(in);
     }
 
@@ -131,8 +129,7 @@ public class CalcGrowthRate
     {
         TerritoryYear ty = t.territoryYearOrNull(year);
         long in = ty.births.total.both - ty.deaths.total.both;
-        in += innerMigration.inFlow(t.name, year);
-        in -= innerMigration.outFlow(t.name, year);
+        in += innerMigration.saldo(t.name, year);
         return in;
     }
 }

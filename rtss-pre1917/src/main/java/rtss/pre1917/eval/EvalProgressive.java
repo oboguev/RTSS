@@ -51,7 +51,7 @@ public class EvalProgressive
             Territory tCensus = census.get(censusTerritoryName(tname));
             if (tCensus == null)
                 continue;
-            
+
             evalProgressive(tname, tCensus);
         }
     }
@@ -70,7 +70,7 @@ public class EvalProgressive
         }
         return tname;
     }
-    
+
     private void evalProgressive(String tname, Territory tCensus) throws Exception
     {
         TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
@@ -83,24 +83,22 @@ public class EvalProgressive
         Territory xt = xtds.get(tname);
         TerritoryYear xty1896 = xt.territoryYearOrNull(1896);
         TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
-        
+
         long in = xty1897.births.total.both - xty1897.deaths.total.both;
-        in += innerMigration.inFlow(tname, 1897);
-        in -= innerMigration.outFlow(tname, 1897);
+        in += innerMigration.saldo(tname, 1897);
         long in1 = Math.round(in * 27.0 / 365.0);
         long in2 = in - in1;
-        
+
         ty1897.progressive_population.total.both = tyCensus.population.total.both - in1;
         ty1898.progressive_population.total.both = tyCensus.population.total.both + in2;
-        
+
         if (xty1896 != null)
         {
             in = xty1896.births.total.both - xty1896.deaths.total.both;
-            in += innerMigration.inFlow(tname, 1896);
-            in -= innerMigration.outFlow(tname, 1896);
-            ty1896.progressive_population.total.both =  ty1897.progressive_population.total.both - in;
+            in += innerMigration.saldo(tname, 1896);
+            ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
         }
-        
+
         for (int year = 1898; year <= 1916; year++)
         {
             TerritoryYear xty = xt.territoryYearOrNull(year);
@@ -111,13 +109,12 @@ public class EvalProgressive
                 continue;
 
             in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
-            in += innerMigration.inFlow(tname, year);
-            in -= innerMigration.outFlow(tname, year);
+            in += innerMigration.saldo(tname, year);
 
-            ty_next.progressive_population.total.both =  ty.progressive_population.total.both + in;
+            ty_next.progressive_population.total.both = ty.progressive_population.total.both + in;
         }
     }
-    
+
     private long null2zero(Long v)
     {
         return v == null ? 0 : v;
