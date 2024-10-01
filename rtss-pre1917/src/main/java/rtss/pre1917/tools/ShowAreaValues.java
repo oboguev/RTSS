@@ -135,13 +135,13 @@ public class ShowAreaValues
         Util.out("");
         if (tEval == null)
         {
-            Util.out("год       ЦСК             УГВИ            чр     чс     прогрессивный от 1897");
-            Util.out("==== =========== =====================================  =====================");
+            Util.out("год       ЦСК             УГВИ                чр     чс     прогрессивный от 1897");
+            Util.out("==== =========== =========================================  =====================");
         }
         else
         {
-            Util.out("год       ЦСК             УГВИ            чр     чс     прогрессивный от 1897  по стабилиз. участку   чр      чс     учёт %");
-            Util.out("==== =========== =====================================  =====================  ===================================== =======");
+            Util.out("год       ЦСК             УГВИ                чр     чс     прогрессивный от 1897  по стабилиз. участку       чр      чс     учёт %");
+            Util.out("==== =========== =========================================  =====================  ========================================= =======");
         }
         
         for (int year : t.years())
@@ -183,19 +183,19 @@ public class ShowAreaValues
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
                 
-                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
+                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
                                        // год
                                        year, 
                                        // ЦСК
                                        s_population(popCSK), 
                                        // УГВИ
                                        s_population(ty.population.total.both), 
-                                       s_rate(cbrUGVI), s_rate(cdrUGVI),
+                                       s_rate(cbrUGVI), s_rate(cdrUGVI), s_ep(cbrUGVI, cdrUGVI),
                                        s_bd(ty.births.total.both),
                                        s_bd(ty.deaths.total.both),
                                        // прогрессивное
                                        s_population(ty.progressive_population.total.both), 
-                                       s_rate(cbrProgressive), s_rate(cdrProgressive),
+                                       s_rate(cbrProgressive), s_rate(cdrProgressive), s_ep(cbrProgressive, cdrProgressive),
                                        // по стаб. участку
                                        s_population(popEval),
                                        s_rate(cbrEval), s_rate(cdrEval),
@@ -230,11 +230,19 @@ public class ShowAreaValues
         return pad(s, 7);
     }
     
-    private String s_rate(Double d)
+    private String s_rate(Double rate)
     {
         String s = "";
-        if (d != null)
-            s = String.format("%2.1f", d);
+        if (rate != null)
+            s = String.format("%2.1f", rate);
+        return pad(s, 4);
+    }
+
+    private String s_ep(Double cbr, Double cdr)
+    {
+        String s = "";
+        if (cbr != null && cdr != null)
+            s = String.format("%2.1f", cbr - cdr);
         return pad(s, 4);
     }
 
