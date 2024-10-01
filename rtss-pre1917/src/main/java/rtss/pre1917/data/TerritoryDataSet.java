@@ -2,7 +2,6 @@ package rtss.pre1917.data;
 
 import java.util.HashMap;
 
-import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.MergeCities;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;

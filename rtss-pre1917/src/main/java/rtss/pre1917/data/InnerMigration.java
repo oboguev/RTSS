@@ -12,6 +12,7 @@ public class InnerMigration
             this.tname = tname;
         }
 
+        @SuppressWarnings("unused")
         private String tname;
         Map<Integer, Long> year2inflow = new HashMap<>();
         Map<Integer, Long> year2outflow = new HashMap<>();;

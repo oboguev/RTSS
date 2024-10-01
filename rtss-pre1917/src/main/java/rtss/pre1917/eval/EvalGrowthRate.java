@@ -32,7 +32,7 @@ public class EvalGrowthRate
 
     private void define()
     {
-        define("Акмолинская обл.", 1906, 1914);
+        define("Акмолинская обл.", 1910, 1914);
         define("Закаспийская обл.", 1911, 1913);
         define("Семиреченская обл.", 1912, 1914);
         define("Сыр-Дарьинская обл.", 1908);
@@ -101,7 +101,7 @@ public class EvalGrowthRate
 
         /* =========================================================================== */
 
-        long p1897 = cgr.population_1897_Jan1();
+        long p1897 = cgr.population_1897_Jan1(ngr/ PROMILLE);
 
         Territory xt = t.dup();
         xt.leaveOnlyTotalBoth();
@@ -113,7 +113,7 @@ public class EvalGrowthRate
         {
             if (year >= y1 && year <= y2)
             {
-                xt.territoryYear(year + 1).population.total.both = xt.territoryYear(year).population.total.both + cgr.increase(year);
+                xt.territoryYear(year + 1).population.total.both = xt.territoryYear(year).population.total.both + cgr.increaseUGVI(year);
             }
             else
             {

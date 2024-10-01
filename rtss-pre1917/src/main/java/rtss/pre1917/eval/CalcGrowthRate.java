@@ -3,7 +3,6 @@ package rtss.pre1917.eval;
 import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.util.Util;
 
 public class CalcGrowthRate
 {
@@ -95,7 +94,7 @@ public class CalcGrowthRate
     private double p2(double a, int ytarget)
     {
         // best estimate of population at the start of 1897 (Jan 1)
-        double p = population_1897_Jan1();
+        double p = population_1897_Jan1(a);
 
         // population at the the start of "year"
         for (int year = 1898;; year++)
@@ -108,18 +107,27 @@ public class CalcGrowthRate
         }
     }
     
-    public long population_1897_Jan1()
+    public long population_1897_Jan1(double a)
     {
         // population at the time of 1897 census (Jan 28)
         TerritoryYear tc = tCensus1897.territoryYearOrNull(1897);
         long p = tc.population.total.both;
 
         // best estimate of population at the start of 1897 (Jan 1)
-        return p - Math.round(increase(1897) * 27.0 / 365.0);
+        return p - Math.round(increase(1897, a) * 27.0 / 365.0);
     }
     
     // прирост населения за год
-    public long increase(int year)
+    public long increase(int year, double a)
+    {
+        TerritoryYear tc = tCensus1897.territoryYearOrNull(year);
+        double in = a * tc.population.total.both;
+        in += innerMigration.inFlow(t.name, year);
+        in -= innerMigration.outFlow(t.name, year);
+        return Math.round(in);
+    }
+
+    public long increaseUGVI(int year)
     {
         TerritoryYear ty = t.territoryYearOrNull(year);
         long in = ty.births.total.both - ty.deaths.total.both;
