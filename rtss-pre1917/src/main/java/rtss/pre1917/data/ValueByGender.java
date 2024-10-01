@@ -89,7 +89,7 @@ public class ValueByGender
         both = merge(v1.both, v2.both);
     }
     
-    public static final double MaleFemaleBirthRatio = 1.055;
+    public static final double MaleFemaleBirthRatio = 1.06;
 
     public boolean adjustBirths()
     {

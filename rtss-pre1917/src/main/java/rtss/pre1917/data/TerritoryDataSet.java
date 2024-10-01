@@ -178,7 +178,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
     
     /*
      * Скорректировать значения числа рождений девочек,
-     * если они черезчур числа рождений мальчиков / 1.055.
+     * если они черезчур числа рождений мальчиков / 1.06.
      */
     public void adjustBirths()
     {
