@@ -35,8 +35,9 @@ public class ShowAreaValues
             Util.out("Оценка по стабилизированному участку вычисляется на основе лет, в которые была достигнута");
             Util.out("удовлетворительная полнота регистрации рождений и смертей, в предположении, что в остальные годы");
             Util.out("рождаемость и смертность была такой же, как в среднем по стабилизированному участку.");
-            Util.out("Годы стабилизированного участка помечены звёздочкой");
+            Util.out("Годы стабилизированного участка помечены звёздочкой cправа.");
             Util.out("");
+            new ShowAreaValues().show_values_select();
             new ShowAreaValues().show_values_central_asia();
             new ShowAreaValues().show_values_causases();
         }
@@ -94,6 +95,12 @@ public class ShowAreaValues
         show_values("Сухумский окр.");
     }
 
+    @SuppressWarnings("unused")
+    private void show_values_select() throws Exception
+    {
+        show_values("Терская обл.");
+    }
+
     private void show_values(String tname) throws Exception
     {
         Territory t = tdsUGVI.get(tname);
@@ -116,13 +123,13 @@ public class ShowAreaValues
         Util.out("");
         if (tEval == null)
         {
-            Util.out("год       ЦСК             УГВИ          прогрессивные от 1897");
-            Util.out("==== =========== =====================  =====================");
+            Util.out("год       ЦСК             УГВИ            чр     чс     прогрессивные от 1897");
+            Util.out("==== =========== =====================================  =====================");
         }
         else
         {
-            Util.out("год       ЦСК             УГВИ          прогрессивные от 1897  по стабилизир. участку");
-            Util.out("==== =========== =====================  =====================  =======================");
+            Util.out("год       ЦСК             УГВИ            чр     чс     прогрессивные от 1897  по стабилиз. участку   чр      чс    ");
+            Util.out("==== =========== =====================================  =====================  =====================================");
         }
         
         for (int year : t.years())
@@ -140,13 +147,17 @@ public class ShowAreaValues
                 Double cbrEval = null;
                 Double cdrEval = null;
                 Long popEval = null;
+                Long birthsEval = null; 
+                Long deathsEval = null; 
 
                 if (tEval != null)
                 {
                     tyEval = tEval.territoryYear(year);
                     popEval = tyEval.population.total.both;
-                    cbrEval = rate(tyEval.births.total.both, popEval);
-                    cdrEval = rate(tyEval.deaths.total.both, popEval);
+                    birthsEval = tyEval.births.total.both; 
+                    deathsEval = tyEval.deaths.total.both; 
+                    cbrEval = rate(birthsEval, popEval);
+                    cdrEval = rate(deathsEval, popEval);
                 }
                 
                 TerritoryYear tyCSK = null;
@@ -160,14 +171,23 @@ public class ShowAreaValues
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
                 
-                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s", year, 
+                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
+                                       // год
+                                       year, 
+                                       // ЦСК
                                        s_pop(popCSK), 
+                                       // УГВИ
                                        s_pop(ty.population.total.both), 
                                        s_rate(cbrUGVI), s_rate(cdrUGVI),
+                                       s_bd(ty.births.total.both),
+                                       s_bd(ty.deaths.total.both),
+                                       // прогрессивное
                                        s_pop(ty.progressive_population.total.both), 
                                        s_rate(cbrProgressive), s_rate(cdrProgressive),
+                                       // по стаб. участку
                                        s_pop(popEval),
                                        s_rate(cbrEval), s_rate(cdrEval),
+                                       s_bd(birthsEval), s_bd(deathsEval),
                                        stable));
             }
         }
@@ -178,9 +198,15 @@ public class ShowAreaValues
         String s = "";
         if (v != null)
             s = String.format("%,d", v);
-        while (s.length() < 11)
-            s = " " + s;
-        return s;
+        return pad(s, 11);
+    }
+    
+    private String s_bd(Long v)
+    {
+        String s = "";
+        if (v != null)
+            s = String.format("%,d", v);
+        return pad(s, 7);
     }
     
     private String s_rate(Double d)
@@ -188,9 +214,7 @@ public class ShowAreaValues
         String s = "";
         if (d != null)
             s = String.format("%2.1f", d);
-        while (s.length() < 4)
-            s = " " + s;
-        return s;
+        return pad(s, 4);
     }
 
     private Double rate(Long v, Long pop)
@@ -199,5 +223,12 @@ public class ShowAreaValues
             return null;
         else
             return (v * 1000.0) / pop;
+    }
+    
+    private String pad(String s, int length)
+    {
+        while (s.length() < length)
+            s = " " + s;
+        return s;
     }
 }
