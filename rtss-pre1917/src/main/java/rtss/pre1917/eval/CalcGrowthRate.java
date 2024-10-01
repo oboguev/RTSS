@@ -115,7 +115,7 @@ public class CalcGrowthRate
         long p = tc.population.total.both;
 
         // best estimate of population at the start of 1897 (Jan 1)
-        return p - Math.round(increase(1897) * 27.0 / 356.0);
+        return p - Math.round(increase(1897) * 27.0 / 365.0);
     }
     
     // прирост населения за год
