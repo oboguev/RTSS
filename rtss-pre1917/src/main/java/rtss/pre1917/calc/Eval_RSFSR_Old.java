@@ -16,13 +16,13 @@ import rtss.util.Util;
  * Определить численность, рождаемость и смертность населения 
  * в границах РСФСР-1991 для 1896-1914 гг.
  */
-public class Eval_RSFSR
+public class Eval_RSFSR_Old
 {
     public static void main(String[] args)
     {
         try
         {
-            new Eval_RSFSR().calc();
+            new Eval_RSFSR_Old().calc();
         }
         catch (Throwable ex)
         {
@@ -95,6 +95,7 @@ public class Eval_RSFSR
                                                            LoadOptions.ADJUST_BIRTHS, 
                                                            LoadOptions.FILL_MISSING_BD,
                                                            LoadOptions.EVAL_PROGRESSIVE);
+        
         tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, "РСФСР-1991", WhichYears.AllSetYears);
 
         for (int year = 1896; year <= 1914; year++)

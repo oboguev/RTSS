@@ -59,6 +59,7 @@ public class MergeTaxon
             TerritoryYear ty = res.territoryYear(year);
             
             sum_ur(ty, "population", tx);
+            sum_ur(ty, "progressive_population", tx);
             sum_ur(ty, "midyear_population", tx);
             sum_ur(ty, "births", tx);
             sum_ur(ty, "deaths", tx);
