@@ -60,8 +60,23 @@ public class ShowAreaValues
     /* ============================================================================================== */
 
     @SuppressWarnings("unused")
+    private void show_values_select() throws Exception
+    {
+        Util.out("");
+        Util.out("===================================== РАЗНЫЕ ОБЛАСТИ ===================================== ");
+        Util.out("");
+
+        show_values("Уральская обл.");
+        show_values("Терская обл.");
+    }
+
+    @SuppressWarnings("unused")
     private void show_values_central_asia() throws Exception
     {
+        Util.out("");
+        Util.out("===================================== СРЕДНЯЯ АЗИЯ ===================================== ");
+        Util.out("");
+
         show_values("Акмолинская обл.");
         show_values("Закаспийская обл.");
         show_values("Самаркандская обл.");
@@ -76,6 +91,10 @@ public class ShowAreaValues
     @SuppressWarnings("unused")
     private void show_values_causases() throws Exception
     {
+        Util.out("");
+        Util.out("===================================== КАВКАЗ ===================================== ");
+        Util.out("");
+
         show_values("г. Баку");
         show_values("Бакинская");
         show_values("Бакинская с Баку");
@@ -92,12 +111,6 @@ public class ShowAreaValues
         show_values("Эриванская");
         show_values("Закатальский окр.");
         show_values("Сухумский окр.");
-    }
-
-    @SuppressWarnings("unused")
-    private void show_values_select() throws Exception
-    {
-        show_values("Терская обл.");
     }
 
     private void show_values(String tname) throws Exception
@@ -127,8 +140,8 @@ public class ShowAreaValues
         }
         else
         {
-            Util.out("год       ЦСК             УГВИ            чр     чс     прогрессивные от 1897  по стабилиз. участку   чр      чс    ");
-            Util.out("==== =========== =====================================  =====================  =====================================");
+            Util.out("год       ЦСК             УГВИ            чр     чс     прогрессивные от 1897  по стабилиз. участку   чр      чс     учёт %");
+            Util.out("==== =========== =====================================  =====================  ===================================== =======");
         }
         
         for (int year : t.years())
@@ -170,29 +183,38 @@ public class ShowAreaValues
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
                 
-                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
+                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
                                        // год
                                        year, 
                                        // ЦСК
-                                       s_pop(popCSK), 
+                                       s_population(popCSK), 
                                        // УГВИ
-                                       s_pop(ty.population.total.both), 
+                                       s_population(ty.population.total.both), 
                                        s_rate(cbrUGVI), s_rate(cdrUGVI),
                                        s_bd(ty.births.total.both),
                                        s_bd(ty.deaths.total.both),
                                        // прогрессивное
-                                       s_pop(ty.progressive_population.total.both), 
+                                       s_population(ty.progressive_population.total.both), 
                                        s_rate(cbrProgressive), s_rate(cdrProgressive),
                                        // по стаб. участку
-                                       s_pop(popEval),
+                                       s_population(popEval),
                                        s_rate(cbrEval), s_rate(cdrEval),
                                        s_bd(birthsEval), s_bd(deathsEval),
-                                       stable));
+                                       stable,
+                                       s_pct(ty.births.total.both, birthsEval), s_pct(ty.deaths.total.both, deathsEval)));
             }
         }
     }
     
-    private String s_pop(Long v)
+    private String s_pct(Long a, Long b)
+    {
+        String s = "";
+        if (a != null && b != null)
+            s += Math.round((100.0 * a) / b);
+        return pad(s, 3);
+    }
+    
+    private String s_population(Long v)
     {
         String s = "";
         if (v != null)
