@@ -71,6 +71,12 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         
         return res;
     }
+    
+    public TerritoryYear territoryYearOrNull(String tname, int year)
+    {
+        Territory t = get(tname);
+        return t == null ? null : t.territoryYearOrNull(year); 
+    }
 
     public void evalTaxon(String name, boolean overwrite) throws Exception
     {
