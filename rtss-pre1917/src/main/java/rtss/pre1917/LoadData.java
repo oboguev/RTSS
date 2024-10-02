@@ -1,7 +1,13 @@
 package rtss.pre1917;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -1071,12 +1077,38 @@ public class LoadData
             if (o == null || o.toString().trim().length() == 0)
                 continue;
             String syear = o.toString();
+            if (sheetName.startsWith("1910-1914 "))
+            {
+                switch (syear)
+                {
+                case "1896-1909":
+                case "1896-1914":
+                    continue;
+                
+                case "1910-1914":
+                    syear = "всего";
+                    break;
+                }
+            }
+            
             int year = -1;
             if (!syear.equals("всего"))
             {
                 year = (int) (long) asLong(o);
-                if (!(year >= 1896 && year <= 1909))
-                    throw new Exception("Invalid year");
+                if (sheetName.startsWith("1896-1909 "))
+                {
+                    if (!(year >= 1896 && year <= 1909))
+                        throw new Exception("Invalid year");
+                }
+                else if (sheetName.startsWith("1910-1914 "))
+                {
+                    if (!(year >= 1910 && year <= 1914))
+                        throw new Exception("Invalid year");
+                }
+                else
+                {
+                    throw new Exception("Unexpected sheet name: " + sheetName);
+                }
             }
 
             // величина
@@ -1276,7 +1308,7 @@ public class LoadData
         aggregate = canonicAreaName(aggregate);
         AreaData adAggregate = a2d.get(aggregate);
 
-        for (int year : adAggregate.keySet())
+        for (int year : orderYears(adAggregate.keySet()))
         {
             long sum = 0;
 
@@ -1294,16 +1326,28 @@ public class LoadData
             Long agg = adAggregate.get(year);
             if (agg == null)
                 agg = 0L;
-
-            if (Math.abs(sum - agg) > 10)
+            
+            if (sum != agg)
             {
-                throw new Exception("Migration aggregate value mismatch");
-            }
-            else if (sum != agg)
-            {
-                // Util.err(String.format("Migration aggregate value mismatch %s %d by %d", aggregate, year, Math.abs(sum - agg)));
+                String msg = String.format("Migration aggregate value mismatch for [%s, год %d]: %,d vs %,d (listed vs. computed), diff: %,d", 
+                                           aggregate, year, agg, sum, Math.abs(agg - sum));
+                // Util.err(msg);
+                if (Math.abs(sum - agg) >= 100)
+                    throw new Exception(msg);
             }
         }
+    }
+    
+    private List<Integer> orderYears(Collection<Integer> years)
+    {
+        Set<Integer> xs = new HashSet<Integer>(years);
+        boolean hasTotal = xs.contains(-1);
+        xs.remove(-1);
+        List<Integer> list = new ArrayList<Integer>(xs);
+        Collections.sort(list);
+        if (hasTotal)
+            list.add(-1);
+        return list;
     }
 
     private String canonicAreaName(String aname) throws Exception
