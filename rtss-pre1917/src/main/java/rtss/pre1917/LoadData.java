@@ -996,8 +996,136 @@ public class LoadData
     public InnerMigration loadInnerMigration() throws Exception
     {
         InnerMigration im = new InnerMigration();
+        loadInnerMigrationYearly(im);
+        loadInnerMigrationCorarse(im);
+        return im;
+    }
 
-        currentFile = "inner-migration/inner-migration-loadable.xlsx";
+    private void loadInnerMigrationYearly(InnerMigration im) throws Exception
+    {
+        currentFile = "inner-migration/inner-migration-yearly.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                loadInnerMigrationYearly(im, rc, headers);
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+    }
+
+    private void loadInnerMigrationYearly(InnerMigration im, ExcelRC rc, Map<String, Integer> headers) throws Exception
+    {
+        int colGub = headers.get("губ");
+        int colYear = headers.get("год");
+        loadInnerMigrationYearly(im, rc, colGub, colYear, headers.get("прибыло"), "прибыло");
+        loadInnerMigrationYearly(im, rc, colGub, colYear, headers.get("убыло"), "убыло");
+    }
+    
+    private static class AreaData extends HashMap<Integer, Long>
+    {
+        private static final long serialVersionUID = 1L;
+        private final String gub;
+        public AreaData (String gub)
+        {
+            this.gub = gub;
+        }
+        
+    }
+    private static class AreaToData extends HashMap<String, AreaData> 
+    {
+        private static final long serialVersionUID = 1L;
+    }
+    
+    private void loadInnerMigrationYearly(InnerMigration im, ExcelRC rc, int colGub, int colYear, int colWhat, String what) throws Exception
+    {
+        AreaToData a2d = new AreaToData();
+        String gub = null;
+
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            // губерния, область или группировка
+            Object o = rc.get(nr, colGub);
+            if (o != null && o.toString().trim().length() != 0)
+                gub = o.toString();
+
+            // год
+            o = rc.get(nr, colYear);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+            String syear = o.toString();
+            int year = -1;
+            if (!syear.equals("всего"))
+            {
+                year = (int) (long) asLong(o);
+                if (!(year >= 1896 && year <= 1909))
+                    throw new Exception("Invalid year");
+            }
+            
+            // величина
+            Long v = null;
+            o = rc.get(nr, colWhat);
+            if (o != null && o.toString().trim().length() != 0)
+                v = asLong(o);
+            
+            AreaData ad = a2d.get(gub);
+            if (ad == null)
+            {
+                ad = new AreaData(gub);
+                a2d.put(gub, ad);
+            }
+            
+            if (ad.containsKey(year))
+                throw new Exception("Duplicate year data");
+            ad.put(year, v);
+        }
+        
+        validate_vsego(a2d);
+
+        currentNR = null;
+    }
+    
+    private void validate_vsego(AreaToData a2d)  throws Exception
+    {
+        for (String gub : a2d.keySet())
+            validate_vsego(a2d.get(gub));
+    }
+    
+    private void validate_vsego(AreaData ad) throws Exception
+    {
+        long sum = 0;
+        for (int year : ad.keySet())
+        {
+            if (year != -1 && ad.get(year) != null)
+                sum += ad.get(year);
+        }
+        
+        Long xsum = ad.get(-1);
+        if (xsum == null)
+            xsum = 0L;
+
+        if (sum != xsum)
+            throw new Exception("Mismatching всего для " + ad.gub);
+    }
+    
+    /* ------------------------------------------------------------------------------------------- */
+    
+    private void loadInnerMigrationCorarse(InnerMigration im) throws Exception
+    {
+        currentFile = "inner-migration/inner-migration-coarse-loadable.xlsx";
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
@@ -1009,7 +1137,7 @@ public class LoadData
                 {
                     ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
                     Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
-                    loadInnerMigration(im, rc, headers);
+                    loadInnerMigrationCoarse(im, rc, headers);
                 }
             }
         }
@@ -1017,11 +1145,9 @@ public class LoadData
         {
             currentFile = null;
         }
-
-        return im;
     }
 
-    private void loadInnerMigration(InnerMigration im, ExcelRC rc, Map<String, Integer> headers) throws Exception
+    private void loadInnerMigrationCoarse(InnerMigration im, ExcelRC rc, Map<String, Integer> headers) throws Exception
     {
         int colGub = headers.get("губ");
 
@@ -1030,16 +1156,16 @@ public class LoadData
             String htext = Util.despace(header);
             if (htext.startsWith("прибытие "))
             {
-                loadInnerMigration(im, rc, colGub, headers.get(header), "прибытие", htext.substring("прибытие ".length()));
+                loadInnerMigrationCoarse(im, rc, colGub, headers.get(header), "прибытие", htext.substring("прибытие ".length()));
             }
             else if (htext.startsWith("убытие "))
             {
-                loadInnerMigration(im, rc, colGub, headers.get(header), "убытие", htext.substring("убытие ".length()));
+                loadInnerMigrationCoarse(im, rc, colGub, headers.get(header), "убытие", htext.substring("убытие ".length()));
             }
         }
     }
 
-    private void loadInnerMigration(InnerMigration im, ExcelRC rc, int colGub, int col, String what, String years) throws Exception
+    private void loadInnerMigrationCoarse(InnerMigration im, ExcelRC rc, int colGub, int col, String what, String years) throws Exception
     {
         int y1;
         int y2;
@@ -1110,12 +1236,12 @@ public class LoadData
 
         currentNR = null;
     }
-    
+
     private long year_amount(long amount, int year, int y1, int y2)
     {
         if (y1 == 1911 && y2 == 1915)
         {
-            final double weights[] = {1, 1, 1, 0.6, 0};
+            final double weights[] = { 1, 1, 1, 0.6, 0 };
             double sum_weights = 0;
             for (double w : weights)
                 sum_weights += w;
