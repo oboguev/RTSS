@@ -1016,7 +1016,7 @@ public class LoadData
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
-                loadInnerMigrationYearly(im, rc, headers);
+                loadInnerMigrationYearly(im, sname, rc, headers);
             }
         }
         finally
@@ -1025,30 +1025,33 @@ public class LoadData
         }
     }
 
-    private void loadInnerMigrationYearly(InnerMigration im, ExcelRC rc, Map<String, Integer> headers) throws Exception
+    private void loadInnerMigrationYearly(InnerMigration im, String sheetName, ExcelRC rc, Map<String, Integer> headers) throws Exception
     {
         int colGub = headers.get("губ");
         int colYear = headers.get("год");
-        loadInnerMigrationYearly(im, rc, colGub, colYear, headers.get("прибыло"), "прибыло");
-        loadInnerMigrationYearly(im, rc, colGub, colYear, headers.get("убыло"), "убыло");
+        loadInnerMigrationYearly(im, sheetName, rc, colGub, colYear, headers.get("прибыло"), "прибыло");
+        loadInnerMigrationYearly(im, sheetName, rc, colGub, colYear, headers.get("убыло"), "убыло");
     }
-    
+
     private static class AreaData extends HashMap<Integer, Long>
     {
         private static final long serialVersionUID = 1L;
         private final String gub;
-        public AreaData (String gub)
+
+        public AreaData(String gub)
         {
             this.gub = gub;
         }
-        
+
     }
-    private static class AreaToData extends HashMap<String, AreaData> 
+
+    private static class AreaToData extends HashMap<String, AreaData>
     {
         private static final long serialVersionUID = 1L;
     }
-    
-    private void loadInnerMigrationYearly(InnerMigration im, ExcelRC rc, int colGub, int colYear, int colWhat, String what) throws Exception
+
+    private void loadInnerMigrationYearly(InnerMigration im, String sheetName, ExcelRC rc, int colGub, int colYear, int colWhat, String what)
+            throws Exception
     {
         AreaToData a2d = new AreaToData();
         String gub = null;
@@ -1061,6 +1064,7 @@ public class LoadData
             Object o = rc.get(nr, colGub);
             if (o != null && o.toString().trim().length() != 0)
                 gub = o.toString();
+            gub = canonicAreaName(gub);
 
             // год
             o = rc.get(nr, colYear);
@@ -1074,36 +1078,171 @@ public class LoadData
                 if (!(year >= 1896 && year <= 1909))
                     throw new Exception("Invalid year");
             }
-            
+
             // величина
             Long v = null;
             o = rc.get(nr, colWhat);
             if (o != null && o.toString().trim().length() != 0)
                 v = asLong(o);
-            
+
             AreaData ad = a2d.get(gub);
             if (ad == null)
             {
                 ad = new AreaData(gub);
                 a2d.put(gub, ad);
             }
-            
+
             if (ad.containsKey(year))
                 throw new Exception("Duplicate year data");
             ad.put(year, v);
         }
-        
-        validate_vsego(a2d);
 
         currentNR = null;
+
+        validate_vsego(a2d);
+
+        if (sheetName.endsWith(" выход"))
+        {
+            validate(a2d,
+                     "Итого по Черноземной и Степной полосам",
+                     "Курская",
+                     "Тамбовская",
+                     "Пензенская",
+                     "Орловская",
+                     "Черниговская",
+                     "Тульская",
+                     "Рязанская",
+                     "Полтавская",
+                     "Харьковская",
+                     "Воронежская",
+                     "Киевская",
+                     "Подольская",
+                     "Волынская",
+                     "Бессарабская",
+                     "Екатеринославская",
+                     "Херсонская",
+                     "Таврическая",
+                     "Область Войска Донского",
+                     "Астраханская",
+                     "Казанская",
+                     "Нижегородская",
+                     "Симбирская",
+                     "Саратовская",
+                     "Самарская",
+                     "Уфимская",
+                     "Оренбургская",
+                     "Уральская обл.",
+                     "Ставропольская",
+                     "Кубанская обл.",
+                     "Терская обл.",
+                     "Кутаисская",
+                     "Черноморская",
+                     "Тифлисская",
+                     "Дагестанская обл.",
+                     "Бакинская",
+                     "Эриванская",
+                     "Елизаветпольская",
+                     "Карсская");
+
+            validate(a2d,
+                     "Итого по Нечерноземной полосе",
+                     "Московская",
+                     "Калужская",
+                     "Владимирская",
+                     "Тверская",
+                     "Смоленская",
+                     "Гродненская",
+                     "Виленская",
+                     "Ковенская",
+                     "Могилевская",
+                     "Витебская",
+                     "Минская",
+                     "Костромская",
+                     "Вятская",
+                     "Пермская",
+                     "Псковская",
+                     "Новгородская",
+                     "Санкт-Петербургская",
+                     "Лифляндская",
+                     "Курляндская",
+                     "Эстляндская",
+                     "Вологодская",
+                     "Люблинская",
+                     "Прочие губернии Нечерноземной полосы");
+
+            validate(a2d,
+                     "Общий итог",
+                     "Итого по Черноземной и Степной полосам",
+                     "Итого по Нечерноземной полосе",
+                     "Прочие губернии и области",
+                     "Иностранные подданные");
+        }
+
+        if (sheetName.endsWith(" назначение"))
+        {
+            validate(a2d,
+                     "Итого по Степному краю и Туркестану",
+                     "Тургайская",
+                     "Уральская",
+                     "Акмолинская",
+                     "Семипалатинская",
+                     "Семиреченская",
+                     "Сыр-Дарьинская",
+                     "Ферганская",
+                     "Прочие области Туркестана");
+
+            validate(a2d,
+                     "Томская (всего)",
+                     "Томская (на казённые земли)",
+                     "Томская (на кабинетские земли)",
+                     "Томская (на невыяснено какие земли)");
+
+            validate(a2d,
+                     "Итого по Сибирским губерниям",
+                     "Тобольская",
+                     "Томская (всего)",
+                     "Енисейская",
+                     "Иркутская");
+
+            validate(a2d,
+                     "Итого по степному краю, Туркестану и Сибирским губерниям",
+                     "Итого по Степному краю и Туркестану",
+                     "Итого по Сибирским губерниям");
+
+            validate(a2d,
+                     "Итого по Дальнему востоку ",
+                     "Забайкальская",
+                     "Амурская",
+                     "Приморская",
+                     "Якутская");
+
+            validate(a2d,
+                     "Итого по Азиатской России",
+                     "Итого по степному краю, Туркестану и Сибирским губерниям",
+                     "Итого по Дальнему востоку");
+
+            validate(a2d,
+                     "Итого по приуральским губерниям Европейской России",
+                     "Оренбургская",
+                     "Уфимская",
+                     "Самарская",
+                     "Пермская");
+
+            validate(a2d,
+                     "Общий итог",
+                     "Итого по Азиатской России",
+                     "Итого по приуральским губерниям Европейской России",
+                     "Вернулись с пути",
+                     "Невыяснено");
+        }
     }
-    
-    private void validate_vsego(AreaToData a2d)  throws Exception
+
+    private void validate_vsego(AreaToData a2d) throws Exception
     {
         for (String gub : a2d.keySet())
             validate_vsego(a2d.get(gub));
     }
-    
+
     private void validate_vsego(AreaData ad) throws Exception
     {
         long sum = 0;
@@ -1112,7 +1251,7 @@ public class LoadData
             if (year != -1 && ad.get(year) != null)
                 sum += ad.get(year);
         }
-        
+
         Long xsum = ad.get(-1);
         if (xsum == null)
             xsum = 0L;
@@ -1120,9 +1259,76 @@ public class LoadData
         if (sum != xsum)
             throw new Exception("Mismatching всего для " + ad.gub);
     }
-    
+
+    private void validate(AreaToData a2d, String aggregate, String... parts) throws Exception
+    {
+        aggregate = canonicAreaName(aggregate);
+        AreaData adAggregate = a2d.get(aggregate);
+
+        for (int year : adAggregate.keySet())
+        {
+            long sum = 0;
+
+            for (String part : parts)
+            {
+                part = canonicAreaName(part);
+                AreaData ad = a2d.get(part);
+                Long v = ad.get(year);
+                if (v != null)
+                    sum += v;
+            }
+
+            Long agg = adAggregate.get(year);
+            if (agg == null)
+                agg = 0L;
+
+            if (Math.abs(sum - agg) > 10)
+            {
+                throw new Exception("Migration aggregate value mismatch");
+            }
+            else if (sum != agg)
+            {
+                // Util.err(String.format("Migration aggregate value mismatch %s %d by %d", aggregate, year, Math.abs(sum - agg)));
+            }
+        }
+    }
+
+    private String canonicAreaName(String aname) throws Exception
+    {
+        aname = Util.despace(aname).trim();
+
+        switch (aname)
+        {
+        case "Общий итог":
+        case "Итого по Черноземной и Степной полосам":
+        case "Итого по Нечерноземной полосе":
+        case "Прочие губернии и области":
+        case "Иностранные подданные":
+        case "Прочие губернии Нечерноземной полосы":
+        case "Прочие области Туркестана":
+        case "Итого по Степному краю и Туркестану":
+        case "Томская (на казённые земли)":
+        case "Томская (на кабинетские земли)":
+        case "Томская (на невыяснено какие земли)":
+        case "Томская (всего)":
+        case "Итого по Сибирским губерниям":
+        case "Итого по степному краю, Туркестану и Сибирским губерниям":
+        case "Итого по Дальнему востоку":
+        case "Итого по Азиатской России":
+        case "Итого по приуральским губерниям Европейской России":
+        case "Вернулись с пути":
+        case "Невыяснено":
+            return aname;
+
+        default:
+            aname = TerritoryNames.canonic(aname);
+            TerritoryNames.checkValidTerritoryName(aname);
+            return aname;
+        }
+    }
+
     /* ------------------------------------------------------------------------------------------- */
-    
+
     private void loadInnerMigrationCorarse(InnerMigration im) throws Exception
     {
         currentFile = "inner-migration/inner-migration-coarse-loadable.xlsx";
