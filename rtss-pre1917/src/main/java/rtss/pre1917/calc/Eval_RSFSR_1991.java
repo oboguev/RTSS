@@ -62,8 +62,6 @@ public class Eval_RSFSR_1991
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, "РСФСР-1991", WhichYears.AllSetYears);
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, "РСФСР-1991", WhichYears.AllSetYears);
         
-        // ### миграционный баланс ???
-        
         Util.out("Численность населения в границах РСФСР-1991, рождаемость, смертность, естественный прирост, ест. + мех. изменение численности");
         Util.out("");
 
