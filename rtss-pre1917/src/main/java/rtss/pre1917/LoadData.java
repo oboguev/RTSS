@@ -1100,6 +1100,15 @@ public class LoadData
         currentNR = null;
 
         validate_vsego(a2d);
+        
+        String extra1 = null;
+        String extra2 = null;
+        
+        if (sheetName.startsWith("1910-1914 "))
+        {
+            extra1 = "Батумская обл.";
+            extra2 = "Холмская";
+        }
 
         if (sheetName.endsWith(" выход"))
         {
@@ -1141,6 +1150,7 @@ public class LoadData
                      "Дагестанская обл.",
                      "Бакинская",
                      "Эриванская",
+                     extra1,
                      "Елизаветпольская",
                      "Карсская");
 
@@ -1167,6 +1177,7 @@ public class LoadData
                      "Курляндская",
                      "Эстляндская",
                      "Вологодская",
+                     extra2,
                      "Люблинская",
                      "Прочие губернии Нечерноземной полосы");
 
@@ -1271,6 +1282,8 @@ public class LoadData
 
             for (String part : parts)
             {
+                if (part == null)
+                    continue;
                 part = canonicAreaName(part);
                 AreaData ad = a2d.get(part);
                 Long v = ad.get(year);
