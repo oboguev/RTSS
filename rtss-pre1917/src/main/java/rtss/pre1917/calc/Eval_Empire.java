@@ -92,7 +92,7 @@ public class Eval_Empire
         // вычислить естественное приращение
         TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, 
                                                            LoadOptions.MERGE_CITIES, 
-                                                           LoadOptions.ADJUST_BIRTHS,
+                                                           LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                            LoadOptions.FILL_MISSING_BD);
         tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, "Империя", WhichYears.AllSetYears);
 

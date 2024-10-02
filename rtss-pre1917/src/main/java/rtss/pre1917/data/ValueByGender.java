@@ -91,7 +91,7 @@ public class ValueByGender
     
     public static final double MaleFemaleBirthRatio = 1.06;
 
-    public boolean adjustBirths()
+    public boolean adjustFemaleBirths()
     {
         if (male != null && female != null)
         {

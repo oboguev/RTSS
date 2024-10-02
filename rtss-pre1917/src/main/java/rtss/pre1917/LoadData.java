@@ -32,7 +32,7 @@ public class LoadData
         MERGE_CITIES, DONT_MERGE_CITIES,
         // произвести поправку на недорегистрацию рождений девочкек:
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
-        ADJUST_BIRTHS, DONT_ADJUST_BIRTHS,
+        ADJUST_FEMALE_BIRTHS, DONT_ADJUST_FEMALE_BIRTHS,
         // заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
         FILL_MISSING_BD, DONT_FILL_MISSING_BD,
         // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
@@ -84,8 +84,8 @@ public class LoadData
         for (int year = 1904; year <= 1917; year++)
             loadEzhegodnikRossii(year);
 
-        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
-            territories.adjustBirths();
+        if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
+            territories.adjustFemaleBirths();
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
@@ -151,8 +151,8 @@ public class LoadData
         for (int year = 1897; year <= 1914; year++)
             loadEvroChast(year);
 
-        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
-            territories.adjustBirths();
+        if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
+            territories.adjustFemaleBirths();
 
         new EvalEvroChastPopulation().eval(territories);
 
@@ -250,8 +250,8 @@ public class LoadData
             currentFile = null;
         }
 
-        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
-            territories.adjustBirths();
+        if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
+            territories.adjustFemaleBirths();
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
@@ -286,8 +286,8 @@ public class LoadData
         loadUGVI("1913");
         loadUGVI("1914");
 
-        if (hasOption(LoadOptions.ADJUST_BIRTHS, options))
-            territories.adjustBirths();
+        if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
+            territories.adjustFemaleBirths();
 
         if (hasOption(LoadOptions.FILL_MISSING_BD, options))
             new FillMissingBD(territories).fillMissingBD();

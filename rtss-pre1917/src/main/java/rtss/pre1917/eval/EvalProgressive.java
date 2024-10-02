@@ -37,7 +37,7 @@ public class EvalProgressive
             throw new Exception("Прогрессивная численность населения может быть расчитана только для набора УГВИ");
         this.tds = tds;
         this.xtds = tds.dup();
-        xtds.adjustBirths();
+        xtds.adjustFemaleBirths();
         new FillMissingBD(xtds).fillMissingBD();
     }
 

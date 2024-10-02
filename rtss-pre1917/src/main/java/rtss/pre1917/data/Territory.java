@@ -112,10 +112,10 @@ public class Territory
         return name;
     }
 
-    public void adjustBirths()
+    public void adjustFemaleBirths()
     {
         for (TerritoryYear ty : year2value.values())
-            ty.adjustBirths();
+            ty.adjustFemaleBirths();
     }
 
     public void leaveOnlyTotalBoth()

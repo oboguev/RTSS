@@ -364,9 +364,9 @@ public class TerritoryYear
         return territory.toString() + " " + year;
     }
 
-    public void adjustBirths()
+    public void adjustFemaleBirths()
     {
-        births.adjustBirths();
+        births.adjustFemaleBirths();
     }
 
     public void leaveOnlyTotalBoth()

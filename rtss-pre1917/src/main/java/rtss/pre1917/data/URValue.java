@@ -116,15 +116,15 @@ public class URValue
             throw new Exception("Mismatch: both != male + female");
     }
 
-    public void adjustBirths()
+    public void adjustFemaleBirths()
     {
-        if (rural.adjustBirths() || urban.adjustBirths())
+        if (rural.adjustFemaleBirths() || urban.adjustFemaleBirths())
         {
             total.recalcAsSum(rural, urban);
         }
         else
         {
-            total.adjustBirths();
+            total.adjustFemaleBirths();
         }
     }
 
