@@ -156,7 +156,7 @@ public class InnerMigration
                 if (coarse.inFlow != null)
                     setInFlow(coarse.tname, 1916, coarse.inFlow);
                 if (coarse.outFlow != null)
-                    setInFlow(coarse.tname, 1916, coarse.outFlow);
+                    setOutFlow(coarse.tname, 1916, coarse.outFlow);
             }
             else if (coarse.y1 == 1896 && coarse.y2 == 1910)
             {
