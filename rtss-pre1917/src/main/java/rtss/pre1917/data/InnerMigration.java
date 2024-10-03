@@ -3,6 +3,8 @@ package rtss.pre1917.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.util.Util;
+
 public class InnerMigration
 {
     public static class InnerMigrationAmount
@@ -79,8 +81,8 @@ public class InnerMigration
         private final int y1;
         private final int y2;
 
-        public Long inFlow;
-        public Long outFlow;
+        public Long inFlow = null;
+        public Long outFlow = null;
 
         public void addInFlow(Long v)
         {
@@ -142,6 +144,8 @@ public class InnerMigration
 
     public void build() throws Exception
     {
+        Util.err("=== Building InnerMigration ===");
+        
         for (CoarseData coarse : coarseDataHolder.values())
         {
             if (coarse.y1 == 1916 && coarse.y2 == 1916)
@@ -154,16 +158,65 @@ public class InnerMigration
             else if (coarse.y1 == 1896 && coarse.y2 == 1910)
             {
                 long v = sumInFlow(coarse.tname, 1896, 1910);
-                // ###
+                if (null2zero(coarse.inFlow) != v)
+                {
+                    String msg = String.format("Sum of yearly inflow migration data for 1896-1910 [%s] differs from coarse value: %,d vs. %,d, difference: %,d", 
+                                               coarse.tname, v, null2zero(coarse.inFlow), Math.abs(v - null2zero(coarse.inFlow))); 
+                    Util.err(msg);
+                    // ###
+                    Util.noop();
+                }
+                
+                v = sumOutFlow(coarse.tname, 1896, 1910);
+                if (null2zero(coarse.outFlow) != v)
+                {
+                    String msg = String.format("Sum of yearly outflow migration data for 1896-1910 [%s] differs from coarse value: %,d vs. %,d, difference: %,d", 
+                                               coarse.tname, v, null2zero(coarse.outFlow), Math.abs(v - null2zero(coarse.outFlow))); 
+                    Util.err(msg);
+                    // ###
+                    Util.noop();
+                }
             }
             else if (coarse.y1 == 1911 && coarse.y2 == 1915)
             {
+                long v = sumInFlow(coarse.tname, 1911, 1914);
+                if (v > null2zero(coarse.inFlow))
+                {
+                    String msg = String.format("Sum of yearly inflow migration data for 1911-1914 [%s] exceeds coarse value for 1911-1915: %,d vs. %,d, difference: %,d", 
+                                               coarse.tname, v, coarse.inFlow, Math.abs(v - coarse.inFlow)); 
+                    Util.err(msg);
+                    // ###
+                    Util.noop();
+                }
+
+                v = sumOutFlow(coarse.tname, 1911, 1914);
+                if (v > null2zero(coarse.outFlow))
+                {
+                    String msg = String.format("Sum of yearly outflow migration data for 1911-1914 [%s] exceeds coarse value for 1911-1915: %,d vs. %,d, difference: %,d", 
+                                               coarse.tname, v, null2zero(coarse.outFlow), Math.abs(v - null2zero(coarse.outFlow))); 
+                    Util.err(msg);
+                    // ###
+                    Util.noop();
+                }
+                
                 // ###
             }
             else
             {
                 throw new Exception("Unxpected coarse data time range");
             }
+        }
+        
+        /* ======================================== */
+        
+        // make sure yearly balance across all migrations is near-zero
+        
+        Util.out("Migration inflow-outflow balance per year");
+        for (int year = 1896; year <= 1916; year++)
+        {
+            long inflow = sumInFlow(year);
+            long outflow = sumOutFlow(year);
+            Util.out(String.format("%d %,d %,d", year, inflow, outflow));
         }
     }
     
@@ -183,6 +236,33 @@ public class InnerMigration
         return v;
     }
     
+    private long null2zero(Long v)
+    {
+        return v == null ? 0 : v;
+    }
+    
+    private long sumInFlow(int year)
+    {
+        long v = 0;
+        for (String tname : tname2ima.keySet())
+        {
+            InnerMigrationAmount ima = tname2ima.get(tname);
+            v += null2zero(ima.year2inflow.get(year));
+        }
+        return v;
+    }
+    
+    private long sumOutFlow(int year)
+    {
+        long v = 0;
+        for (String tname : tname2ima.keySet())
+        {
+            InnerMigrationAmount ima = tname2ima.get(tname);
+            v += null2zero(ima.year2outflow.get(year));
+        }
+        return v;
+    }
+
     /* ==================================================================== */
 
     public long inFlow(String tname, int year)
