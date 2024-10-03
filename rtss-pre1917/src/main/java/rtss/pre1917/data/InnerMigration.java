@@ -142,7 +142,7 @@ public class InnerMigration
         coarseDataHolder.ondemand(tname, y1, y2).addOutFlow(amount);
     }
 
-    private final boolean domsg = Util.True;
+    private final boolean domsg = Util.False;
 
     public void build() throws Exception
     {
@@ -215,13 +215,16 @@ public class InnerMigration
         /* ======================================== */
 
         // make sure yearly balance across all migrations is near-zero
-
-        Util.out("Migration inflow-outflow balance per year");
-        for (int year = 1896; year <= 1916; year++)
+        
+        if (domsg)
         {
-            long inflow = sumInFlow(year);
-            long outflow = sumOutFlow(year);
-            Util.out(String.format("%d %,d %,d", year, inflow, outflow));
+            Util.out("Migration inflow-outflow balance per year");
+            for (int year = 1896; year <= 1916; year++)
+            {
+                long inflow = sumInFlow(year);
+                long outflow = sumOutFlow(year);
+                Util.out(String.format("%d %,d %,d", year, inflow, outflow));
+            }
         }
     }
 

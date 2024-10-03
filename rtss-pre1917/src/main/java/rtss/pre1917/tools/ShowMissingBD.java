@@ -8,7 +8,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
-public class Missing_BD
+public class ShowMissingBD
 {
     public static void main(String[] args)
     {
