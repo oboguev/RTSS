@@ -59,7 +59,7 @@ public class InnerMigration
     }
 
     /* ==================================================================== */
-    
+
     /*
      * Yearly data as published is [1896...1914]. 
      * Coarse data is 1896-1910, 1911-1915, 1916.
@@ -100,7 +100,7 @@ public class InnerMigration
             }
         }
     }
-    
+
     private class CoarseDataHolder extends HashMap<String, CoarseData>
     {
         private static final long serialVersionUID = 1L;
@@ -111,7 +111,7 @@ public class InnerMigration
             String key = coarseKey(tname, y1, y2);
             return get(key);
         }
-        
+
         public CoarseData ondemand(String tname, int y1, int y2)
         {
             String key = coarseKey(tname, y1, y2);
@@ -129,8 +129,8 @@ public class InnerMigration
             return String.format("%s-%d-%s", tname, y1, y2);
         }
     }
-    
-    private final CoarseDataHolder coarseDataHolder = new CoarseDataHolder(); 
+
+    private final CoarseDataHolder coarseDataHolder = new CoarseDataHolder();
 
     public void setInFlowCoarse(String tname, Long amount, int y1, int y2) throws Exception
     {
@@ -142,10 +142,13 @@ public class InnerMigration
         coarseDataHolder.ondemand(tname, y1, y2).addOutFlow(amount);
     }
 
+    private final boolean domsg = Util.True;
+
     public void build() throws Exception
     {
-        Util.err("=== Building InnerMigration ===");
-        
+        if (domsg)
+            Util.err("=== Building InnerMigration ===");
+
         for (CoarseData coarse : coarseDataHolder.values())
         {
             if (coarse.y1 == 1916 && coarse.y2 == 1916)
@@ -158,59 +161,61 @@ public class InnerMigration
             else if (coarse.y1 == 1896 && coarse.y2 == 1910)
             {
                 long v = sumInFlow(coarse.tname, 1896, 1910);
-                if (null2zero(coarse.inFlow) != v)
+                if (null2zero(coarse.inFlow) != v && domsg)
                 {
-                    String msg = String.format("Sum of yearly inflow migration data for 1896-1910 [%s] differs from coarse value: %,d vs. %,d, difference: %,d", 
-                                               coarse.tname, v, null2zero(coarse.inFlow), Math.abs(v - null2zero(coarse.inFlow))); 
+                    String msg = String
+                            .format("Sum of yearly inflow migration data for 1896-1910 [%s] differs from coarse value: %,d vs. %,d, difference: %,d",
+                                    coarse.tname, v, null2zero(coarse.inFlow), Math.abs(v - null2zero(coarse.inFlow)));
                     Util.err(msg);
-                    // ###
-                    Util.noop();
                 }
-                
+
                 v = sumOutFlow(coarse.tname, 1896, 1910);
-                if (null2zero(coarse.outFlow) != v)
+                if (null2zero(coarse.outFlow) != v && domsg)
                 {
-                    String msg = String.format("Sum of yearly outflow migration data for 1896-1910 [%s] differs from coarse value: %,d vs. %,d, difference: %,d", 
-                                               coarse.tname, v, null2zero(coarse.outFlow), Math.abs(v - null2zero(coarse.outFlow))); 
+                    String msg = String
+                            .format("Sum of yearly outflow migration data for 1896-1910 [%s] differs from coarse value: %,d vs. %,d, difference: %,d",
+                                    coarse.tname, v, null2zero(coarse.outFlow), Math.abs(v - null2zero(coarse.outFlow)));
                     Util.err(msg);
-                    // ###
-                    Util.noop();
                 }
             }
             else if (coarse.y1 == 1911 && coarse.y2 == 1915)
             {
                 long v = sumInFlow(coarse.tname, 1911, 1914);
-                if (v > null2zero(coarse.inFlow))
+                if (v > null2zero(coarse.inFlow) && domsg)
                 {
-                    String msg = String.format("Sum of yearly inflow migration data for 1911-1914 [%s] exceeds coarse value for 1911-1915: %,d vs. %,d, difference: %,d", 
-                                               coarse.tname, v, coarse.inFlow, Math.abs(v - coarse.inFlow)); 
+                    String msg = String
+                            .format("Sum of yearly inflow migration data for 1911-1914 [%s] exceeds coarse value for 1911-1915: %,d vs. %,d, difference: %,d",
+                                    coarse.tname, v, coarse.inFlow, Math.abs(v - coarse.inFlow));
                     Util.err(msg);
-                    // ###
-                    Util.noop();
+                }
+                else
+                {
+                    setInFlow(coarse.tname, 1915, null2zero(coarse.inFlow) - v);
                 }
 
                 v = sumOutFlow(coarse.tname, 1911, 1914);
-                if (v > null2zero(coarse.outFlow))
+                if (v > null2zero(coarse.outFlow) && domsg)
                 {
-                    String msg = String.format("Sum of yearly outflow migration data for 1911-1914 [%s] exceeds coarse value for 1911-1915: %,d vs. %,d, difference: %,d", 
-                                               coarse.tname, v, null2zero(coarse.outFlow), Math.abs(v - null2zero(coarse.outFlow))); 
+                    String msg = String
+                            .format("Sum of yearly outflow migration data for 1911-1914 [%s] exceeds coarse value for 1911-1915: %,d vs. %,d, difference: %,d",
+                                    coarse.tname, v, null2zero(coarse.outFlow), Math.abs(v - null2zero(coarse.outFlow)));
                     Util.err(msg);
-                    // ###
-                    Util.noop();
                 }
-                
-                // ###
+                else
+                {
+                    setOutFlow(coarse.tname, 1915, null2zero(coarse.outFlow) - v);
+                }
             }
             else
             {
                 throw new Exception("Unxpected coarse data time range");
             }
         }
-        
+
         /* ======================================== */
-        
+
         // make sure yearly balance across all migrations is near-zero
-        
+
         Util.out("Migration inflow-outflow balance per year");
         for (int year = 1896; year <= 1916; year++)
         {
@@ -219,7 +224,7 @@ public class InnerMigration
             Util.out(String.format("%d %,d %,d", year, inflow, outflow));
         }
     }
-    
+
     private long sumInFlow(String tname, int y1, int y2)
     {
         long v = 0;
@@ -235,12 +240,12 @@ public class InnerMigration
             v += outFlow(tname, year);
         return v;
     }
-    
+
     private long null2zero(Long v)
     {
         return v == null ? 0 : v;
     }
-    
+
     private long sumInFlow(int year)
     {
         long v = 0;
@@ -251,7 +256,7 @@ public class InnerMigration
         }
         return v;
     }
-    
+
     private long sumOutFlow(int year)
     {
         long v = 0;
