@@ -1004,6 +1004,7 @@ public class LoadData
         InnerMigration im = new InnerMigration();
         loadInnerMigrationYearly(im);
         loadInnerMigrationCorarse(im);
+        im.build();
         return im;
     }
 
@@ -1048,7 +1049,6 @@ public class LoadData
         {
             this.gub = gub;
         }
-
     }
 
     private static class AreaToData extends HashMap<String, AreaData>
@@ -1084,13 +1084,13 @@ public class LoadData
                 case "1896-1909":
                 case "1896-1914":
                     continue;
-                
+
                 case "1910-1914":
                     syear = "всего";
                     break;
                 }
             }
-            
+
             int year = -1;
             if (!syear.equals("всего"))
             {
@@ -1132,10 +1132,10 @@ public class LoadData
         currentNR = null;
 
         validate_vsego(a2d);
-        
+
         String extra1 = null;
         String extra2 = null;
-        
+
         if (sheetName.startsWith("1910-1914 "))
         {
             extra1 = "Батумская обл.";
@@ -1278,6 +1278,35 @@ public class LoadData
                      "Вернулись с пути",
                      "Невыяснено");
         }
+
+        // load to im
+        for (String aname : a2d.keySet())
+        {
+            String tname = aname;
+            if (aname.equals("Томская (всего)"))
+                tname = TerritoryNames.canonic("Томская"); 
+            if (isAggregateAreaName(tname))
+                continue;
+            
+            AreaData ad = a2d.get(aname);
+
+            for (int year : ad.keySet())
+            {
+                if (year != -1 && ad.get(year) != null) 
+                {
+                    switch (what)
+                    {
+                    case "прибыло":
+                        im.setInFlow(tname, year, ad.get(year));
+                        break;
+                        
+                    case "убыло":
+                        im.setOutFlow(tname, year, ad.get(year));
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private void validate_vsego(AreaToData a2d) throws Exception
@@ -1326,10 +1355,10 @@ public class LoadData
             Long agg = adAggregate.get(year);
             if (agg == null)
                 agg = 0L;
-            
+
             if (sum != agg)
             {
-                String msg = String.format("Migration aggregate value mismatch for [%s, год %d]: %,d vs %,d (listed vs. computed), diff: %,d", 
+                String msg = String.format("Migration aggregate value mismatch for [%s, год %d]: %,d vs %,d (listed vs. computed), diff: %,d",
                                            aggregate, year, agg, sum, Math.abs(agg - sum));
                 // Util.err(msg);
                 if (Math.abs(sum - agg) >= 100)
@@ -1337,7 +1366,7 @@ public class LoadData
             }
         }
     }
-    
+
     private List<Integer> orderYears(Collection<Integer> years)
     {
         Set<Integer> xs = new HashSet<Integer>(years);
@@ -1351,6 +1380,19 @@ public class LoadData
     }
 
     private String canonicAreaName(String aname) throws Exception
+    {
+        aname = Util.despace(aname).trim();
+
+        if (!isAggregateAreaName(aname))
+        {
+            aname = TerritoryNames.canonic(aname);
+            TerritoryNames.checkValidTerritoryName(aname);
+        }
+
+        return aname;
+    }
+
+    private boolean isAggregateAreaName(String aname) throws Exception
     {
         aname = Util.despace(aname).trim();
 
@@ -1375,12 +1417,10 @@ public class LoadData
         case "Итого по приуральским губерниям Европейской России":
         case "Вернулись с пути":
         case "Невыяснено":
-            return aname;
+            return true;
 
         default:
-            aname = TerritoryNames.canonic(aname);
-            TerritoryNames.checkValidTerritoryName(aname);
-            return aname;
+            return false;
         }
     }
 
@@ -1479,20 +1519,39 @@ public class LoadData
 
             long amount = asLong(o);
 
-            for (int year = y1; year <= y2; year++)
+            if (Util.True)
             {
                 switch (what)
                 {
                 case "прибытие":
-                    im.setInFlow(gub, year, year_amount(amount, year, y1, y2));
+                    im.setInFlowCoarse(gub, amount, y1, y2);
                     break;
 
                 case "убытие":
-                    im.setOutFlow(gub, year, year_amount(amount, year, y1, y2));
+                    im.setOutFlowCoarse(gub, amount, y1, y2);
                     break;
 
                 default:
                     throw new Exception("Invalid selector");
+                }
+            }
+            else
+            {
+                for (int year = y1; year <= y2; year++)
+                {
+                    switch (what)
+                    {
+                    case "прибытие":
+                        im.setInFlow(gub, year, year_amount(amount, year, y1, y2));
+                        break;
+
+                    case "убытие":
+                        im.setOutFlow(gub, year, year_amount(amount, year, y1, y2));
+                        break;
+
+                    default:
+                        throw new Exception("Invalid selector");
+                    }
                 }
             }
         }
@@ -1500,6 +1559,7 @@ public class LoadData
         currentNR = null;
     }
 
+    @SuppressWarnings("unused")
     private long year_amount(long amount, int year, int y1, int y2)
     {
         if (y1 == 1911 && y2 == 1915)
