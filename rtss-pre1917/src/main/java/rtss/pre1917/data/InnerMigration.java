@@ -3,8 +3,6 @@ package rtss.pre1917.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import rtss.util.Util;
-
 public class InnerMigration
 {
     public static class InnerMigrationAmount
@@ -103,6 +101,9 @@ public class InnerMigration
     
     private class CoarseDataHolder extends HashMap<String, CoarseData>
     {
+        private static final long serialVersionUID = 1L;
+
+        @SuppressWarnings("unused")
         public CoarseData get(String tname, int y1, int y2)
         {
             String key = coarseKey(tname, y1, y2);
@@ -141,10 +142,47 @@ public class InnerMigration
 
     public void build() throws Exception
     {
-        Util.noop();
-        // ###
+        for (CoarseData coarse : coarseDataHolder.values())
+        {
+            if (coarse.y1 == 1916 && coarse.y2 == 1916)
+            {
+                if (coarse.inFlow != null)
+                    setInFlow(coarse.tname, 1916, coarse.inFlow);
+                if (coarse.outFlow != null)
+                    setInFlow(coarse.tname, 1916, coarse.outFlow);
+            }
+            else if (coarse.y1 == 1896 && coarse.y2 == 1910)
+            {
+                long v = sumInFlow(coarse.tname, 1896, 1910);
+                // ###
+            }
+            else if (coarse.y1 == 1911 && coarse.y2 == 1915)
+            {
+                // ###
+            }
+            else
+            {
+                throw new Exception("Unxpected coarse data time range");
+            }
+        }
+    }
+    
+    private long sumInFlow(String tname, int y1, int y2)
+    {
+        long v = 0;
+        for (int year = y1; year <= y2; year++)
+            v += inFlow(tname, year);
+        return v;
     }
 
+    private long sumOutFlow(String tname, int y1, int y2)
+    {
+        long v = 0;
+        for (int year = y1; year <= y2; year++)
+            v += outFlow(tname, year);
+        return v;
+    }
+    
     /* ==================================================================== */
 
     public long inFlow(String tname, int year)
