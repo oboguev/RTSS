@@ -1,4 +1,4 @@
-package rtss.pre1917.eval;
+package rtss.pre1917.merge;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,26 +10,24 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 
-public class MergeCities
+public class MergeTerritories
 {
     private TerritoryDataSet territories;
 
-    public MergeCities(TerritoryDataSet territories)
+    public MergeTerritories(TerritoryDataSet territories)
     {
         this.territories = territories;
     }
-
-    public void merge() throws Exception
+    
+    public void merge(List<MergeDescriptor> mds) throws Exception
     {
-        merge("Московская с Москвой", "Московская", "г. Москва");
-        merge("Санкт-Петербургская с Санкт-Петербургом", "Санкт-Петербургская", "г. Санкт-Петербург");
-        merge("Варшавская с Варшавой", "Варшавская", "г. Варшава");
-        merge("Херсонская с Одессой", "Херсонская", "г. Николаев", "г. Одесса");
-        merge("Таврическая с Севастополем", "Таврическая", "г. Севастополь");
-        merge("Бакинская с Баку", "Бакинская", "г. Баку");
-        merge("Область войска Донского", null, "Ростовское и./Д град.");
+        for (MergeDescriptor md : mds)
+            merge(md.root, md.parent, md.children.toArray(new String[0]));
     }
 
+    /*
+     * Если @srcname == null, то сливается с существующим @dstname.
+     */
     private void merge(String dstname, String srcname, String... cities) throws Exception
     {
         if (srcname == null)

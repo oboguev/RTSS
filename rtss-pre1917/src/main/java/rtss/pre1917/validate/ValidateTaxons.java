@@ -8,8 +8,8 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.pre1917.eval.MergeTaxon;
-import rtss.pre1917.eval.MergeTaxon.WhichYears;
+import rtss.pre1917.merge.MergeTaxon;
+import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.util.FieldValue;
 import rtss.util.Util;
 

@@ -1,4 +1,4 @@
-package rtss.pre1917.eval;
+package rtss.pre1917.merge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,13 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.util.FieldValue;
 import rtss.pre1917.util.WeightedAverage;
 
+/*
+ * Вычислить сумму по демографических данных по географическому таксону.
+ * 
+ * В отличие от MergeTerritories и MergeCities, MergeTaxon суммирует территории с весами 
+ * не обязятельно равными единице для каждой из суммируемых территорий, но может включать
+ * в сумму также и часть теорритории с весом менее 1.0. 
+ */
 public class MergeTaxon
 {
     public static enum WhichYears
