@@ -50,6 +50,9 @@ public class Eval_RSFSR_1991
         tdsPopulation.leaveOnlyTotalBoth();
         eval_1896(tdsPopulation);
         
+        FilterByTaxon.filteredOutByTaxon("РСФСР-1991", tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
+        
+        tdsPopulation = FilterByTaxon.filterByTaxon("РСФСР-1991", tdsPopulation);
         tdsPopulation.showTerritoryNames("Территории для численности населения");
         
         tdsVitalRates = tdsPopulation.dup();

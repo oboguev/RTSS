@@ -27,7 +27,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         return tds;
     }
 
-    public int minYear(int dflt)
+    public int minYear() throws Exception
     {
         int res = -1;
 
@@ -44,12 +44,12 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         }
 
         if (res == -1)
-            res = dflt;
+            throw new Exception("Empty territory dataset");
 
         return res;
     }
 
-    public int maxYear(int dflt)
+    public int maxYear() throws Exception
     {
         int res = -1;
 
@@ -66,7 +66,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         }
 
         if (res == -1)
-            res = dflt;
+            throw new Exception("Empty territory dataset");
 
         return res;
     }

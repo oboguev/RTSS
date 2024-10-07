@@ -50,11 +50,7 @@ public class MergeTaxon
         else
         {
             years = new ArrayList<>();
-            int y1 = territories.minYear(-1);
-            int y2 = territories.maxYear(-1);
-            if (y1 < 0 || y2 < 0)
-                throw new Exception("Empty set");
-            for (int y = y1; y <= y2; y++)
+            for (int y = territories.minYear(); y <= territories.maxYear(); y++)
                 years.add(y);
         }
         

@@ -1,14 +1,9 @@
 package rtss.pre1917.merge;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
-import rtss.pre1917.data.TerritoryYear;
 
 public class MergeCities
 {
