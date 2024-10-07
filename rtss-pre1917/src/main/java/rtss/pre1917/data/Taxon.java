@@ -447,7 +447,7 @@ public class Taxon
         for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
         {
             if (md.parent != null)
-                weed(tds, year, md.root, md.parent, md.childrenAsArray());
+                weed(tds, year, md.combined, md.parent, md.childrenAsArray());
         }
     }
 

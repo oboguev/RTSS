@@ -22,7 +22,7 @@ public class MergeTerritories
     public void merge(List<MergeDescriptor> mds) throws Exception
     {
         for (MergeDescriptor md : mds)
-            merge(md.root, md.parent, md.childrenAsArray());
+            merge(md.combined, md.parent, md.childrenAsArray());
     }
 
     /*

@@ -5,13 +5,13 @@ import java.util.List;
 
 public class MergeDescriptor
 {
-    public final String root;
+    public final String combined;
     public final String parent;
     public final List<String> children = new ArrayList<>();
     
-    public MergeDescriptor(String root, String parent, String... children)
+    public MergeDescriptor(String combined, String parent, String... children)
     {
-        this.root = root;
+        this.combined= combined;
         this.parent = parent;
         for (String child : children)
             this.children.add(child);

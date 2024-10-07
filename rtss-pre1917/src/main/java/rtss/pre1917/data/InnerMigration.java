@@ -3,6 +3,8 @@ package rtss.pre1917.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.pre1917.merge.MergeCities;
+import rtss.pre1917.merge.MergeDescriptor;
 import rtss.util.Util;
 
 public class InnerMigration
@@ -306,31 +308,13 @@ public class InnerMigration
 
     private String mapTerritoryName(String tname)
     {
-        switch (tname)
+        for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
         {
-        case "Бакинская с Баку":
-            tname = "Бакинская";
-            break;
-
-        case "Варшавская с Варшавой":
-            tname = "Варшавская";
-            break;
-
-        case "Московская с Москвой":
-            tname = "Московская";
-            break;
-
-        case "Санкт-Петербургская с Санкт-Петербургом":
-            tname = "Санкт-Петербургская";
-            break;
-
-        case "Таврическая с Севастополем":
-            tname = "Таврическая";
-            break;
-
-        case "Херсонская с Одессой":
-            tname = "Херсонская";
-            break;
+            if (tname.equals(md.combined) && md.parent != null)
+            {
+                tname = md.parent;
+                break;
+            }
         }
 
         return tname;

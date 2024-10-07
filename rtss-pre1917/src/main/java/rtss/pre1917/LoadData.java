@@ -981,10 +981,10 @@ public class LoadData
     private void replicateJews(Map<String, Double> m, MergeDescriptor md)
     {
         if (md.parent != null)
-            replicateJews(m, md.root, md.parent);
+            replicateJews(m, md.combined, md.parent);
 
         for (String child : md.children)
-            replicateJews(m, md.root, child);
+            replicateJews(m, md.combined, child);
     }
     
     private void replicateJews(Map<String, Double> m, String g1, String g2)
