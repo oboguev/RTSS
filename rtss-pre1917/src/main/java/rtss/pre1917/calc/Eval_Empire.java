@@ -9,6 +9,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
+import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.pre1917.data.Territory;
 import rtss.util.Util;
 
@@ -94,6 +95,8 @@ public class Eval_Empire
                                                            LoadOptions.MERGE_CITIES, 
                                                            LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                            LoadOptions.FILL_MISSING_BD);
+
+        new CheckProgressiveAvailable(tdsUGVI).check();
         tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, "Империя", WhichYears.AllSetYears);
 
         for (int year = 1896; year <= 1914; year++)

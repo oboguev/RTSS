@@ -150,13 +150,13 @@ public class ShowAreaValues
         Util.out("");
         if (tEval == null)
         {
-            Util.out("год       ЦСК             УГВИ                 чр      чс       прогрессивный от 1897");
-            Util.out("==== =========== ==========================================   ========================");
+            Util.out("год       ЦСК             УГВИ                 чр      чс    мигр      прогрессивный от 1897");
+            Util.out("==== =========== ========================================== =======  ========================");
         }
         else
         {
-            Util.out("год       ЦСК             УГВИ                 чр      чс       прогрессивный от 1897      по стабилиз. участку     чр      чс    учёт %");
-            Util.out("==== =========== ==========================================   ========================  ========================================= =======");
+            Util.out("год       ЦСК             УГВИ                 чр      чс    мигр      прогрессивный от 1897      по стабилиз. участку     чр      чс    учёт %");
+            Util.out("==== =========== ========================================== =======  ========================  ========================================= =======");
         }
         
         for (int year : t.years())
@@ -198,7 +198,9 @@ public class ShowAreaValues
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
                 
-                Util.out(String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
+                long saldo = innerMigration.saldo(tname, year);
+                
+                String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
                                        // год
                                        year, 
                                        // ЦСК
@@ -208,7 +210,9 @@ public class ShowAreaValues
                                        s_rate(cbrUGVI), s_rate(cdrUGVI), s_ep(cbrUGVI, cdrUGVI),
                                        s_bd(ty.births.total.both),
                                        s_bd(ty.deaths.total.both),
-                                       // прогрессивное
+                                       // миграционное сальдо
+                                       s_saldo(saldo), 
+                                       // прогрессивный расчёт
                                        s_population(ty.progressive_population.total.both), 
                                        s_rate(cbrProgressive), s_rate(cdrProgressive), s_ep(cbrProgressive, cdrProgressive),
                                        // по стаб. участку
@@ -216,7 +220,9 @@ public class ShowAreaValues
                                        s_rate(cbrEval), s_rate(cdrEval), s_ep(cbrEval, cdrEval),
                                        s_bd(birthsEval), s_bd(deathsEval),
                                        stable,
-                                       s_pct(ty.births.total.both, birthsEval), s_pct(ty.deaths.total.both, deathsEval)));
+                                       s_pct(ty.births.total.both, birthsEval), s_pct(ty.deaths.total.both, deathsEval));
+                
+                Util.out(s.trim());
             }
         }
     }
@@ -235,6 +241,14 @@ public class ShowAreaValues
         if (v != null)
             s = String.format("%,d", v);
         return pad(s, 11);
+    }
+    
+    private String s_saldo(Long v)
+    {
+        String s = "";
+        if (v != null)
+            s = String.format("%,d", v);
+        return pad(s, 7);
     }
     
     private String s_bd(Long v)

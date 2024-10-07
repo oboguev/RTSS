@@ -9,6 +9,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
+import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.util.Util;
 
 public class Eval_RSFSR_1991
@@ -54,6 +55,8 @@ public class Eval_RSFSR_1991
         
         tdsPopulation = FilterByTaxon.filterByTaxon("РСФСР-1991", tdsPopulation);
         tdsPopulation.showTerritoryNames("Территории для численности населения");
+        new CheckProgressiveAvailable(tdsPopulation).check();
+        
         
         tdsVitalRates = tdsPopulation.dup();
 
