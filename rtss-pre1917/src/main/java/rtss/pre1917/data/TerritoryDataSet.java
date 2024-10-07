@@ -9,10 +9,10 @@ import rtss.util.Util;
 public class TerritoryDataSet extends HashMap<String, Territory>
 {
     private static final long serialVersionUID = 1L;
-    
+
     public final DataSetType dataSetType;
     public boolean filledMissingBD = false;
-    
+
     public TerritoryDataSet(DataSetType dataSetType)
     {
         this.dataSetType = dataSetType;
@@ -26,11 +26,11 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         tds.filledMissingBD = this.filledMissingBD;
         return tds;
     }
-    
+
     public int minYear(int dflt)
     {
         int res = -1;
-        
+
         for (Territory t : this.values())
         {
             int mv = t.minYear(-1);
@@ -38,21 +38,21 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             {
                 if (res == -1)
                     res = mv;
-                else 
+                else
                     res = Math.min(res, mv);
             }
         }
-        
+
         if (res == -1)
             res = dflt;
-        
+
         return res;
     }
-    
+
     public int maxYear(int dflt)
     {
         int res = -1;
-        
+
         for (Territory t : this.values())
         {
             int mv = t.maxYear(-1);
@@ -60,21 +60,21 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             {
                 if (res == -1)
                     res = mv;
-                else 
+                else
                     res = Math.max(res, mv);
             }
         }
-        
+
         if (res == -1)
             res = dflt;
-        
+
         return res;
     }
-    
+
     public TerritoryYear territoryYearOrNull(String tname, int year)
     {
         Territory t = get(tname);
-        return t == null ? null : t.territoryYearOrNull(year); 
+        return t == null ? null : t.territoryYearOrNull(year);
     }
 
     public void evalTaxon(String name, boolean overwrite) throws Exception
@@ -107,7 +107,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             /* child and Territory TerritoryYear */
             Territory xter = get(xname);
             double fraction = tx.territories.get(xname);
-            
+
             if (xter != null && xter.hasYear(year))
             {
                 TerritoryYear xty = xter.territoryYear(year);
@@ -166,16 +166,16 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         if (cty.ngr != null && (overwrite || ty.ngr == null))
             ty.ngr = cty.ngr;
     }
-    
+
     /*
      * Скомбинировать города с соотв. губерниями, создав
      * записи с новым именем
      */
     public void mergeCities() throws Exception
     {
-        new MergeCities(this).merge();  
+        new MergeCities(this).merge();
     }
-    
+
     /*
      * Скорректировать значения числа рождений девочек,
      * если они черезчур числа рождений мальчиков / 1.06.
@@ -185,7 +185,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         for (Territory t : values())
             t.adjustFemaleBirths();
     }
-    
+
     /*
      * Оставить в полях численности населения и числа рождений и смертей
      * только величины total.both, поставив другие в null.
@@ -194,5 +194,14 @@ public class TerritoryDataSet extends HashMap<String, Territory>
     {
         for (Territory t : values())
             t.leaveOnlyTotalBoth();
+    }
+
+    public void showTerritoryNames(String comment)
+    {
+        if (comment != null)
+            Util.out(comment);
+
+        for (String tname : Util.sort(this.keySet()))
+            Util.out("    " + tname);
     }
 }

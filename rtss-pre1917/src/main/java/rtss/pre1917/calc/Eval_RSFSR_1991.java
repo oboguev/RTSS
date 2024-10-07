@@ -50,6 +50,8 @@ public class Eval_RSFSR_1991
         tdsPopulation.leaveOnlyTotalBoth();
         eval_1896(tdsPopulation);
         
+        tdsPopulation.showTerritoryNames("Территории для численности населения");
+        
         tdsVitalRates = tdsPopulation.dup();
 
         /* пересчёт населения для Дагестана */

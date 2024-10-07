@@ -22,6 +22,8 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FillMissingBD;
+import rtss.pre1917.merge.MergeCities;
+import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -939,21 +941,9 @@ public class LoadData
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
                 loadJews(m, rc, headers.get("губ"), headers.get("% иудеев"));
-
-                replicateJews(m, "Московская с Москвой", "Московская");
-                replicateJews(m, "Санкт-Петербургская с Санкт-Петербургом", "Санкт-Петербургская");
-                replicateJews(m, "Варшавская с Варшавой", "Варшавская");
-                replicateJews(m, "Херсонская с Одессой", "Херсонская");
-                replicateJews(m, "Таврическая с Севастополем", "Таврическая");
-                replicateJews(m, "Бакинская с Баку", "Бакинская");
-
-                replicateJews(m, "Московская", "г. Москва");
-                replicateJews(m, "Санкт-Петербургская", "г. Санкт-Петербург");
-                replicateJews(m, "Варшавская", "г. Варшава");
-                replicateJews(m, "Херсонская", "г. Николаев");
-                replicateJews(m, "Херсонская", "г. Одесса");
-                replicateJews(m, "Таврическая", "г. Севастополь");
-                replicateJews(m, "Бакинская", "г. Баку");
+                
+                for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
+                    replicateJews(m, md);
             }
         }
         finally
@@ -962,7 +952,6 @@ public class LoadData
         }
 
         return m;
-
     }
 
     private void loadJews(Map<String, Double> m, ExcelRC rc, int colGub, int colAmount) throws Exception
@@ -989,6 +978,15 @@ public class LoadData
         currentNR = null;
     }
 
+    private void replicateJews(Map<String, Double> m, MergeDescriptor md)
+    {
+        if (md.parent != null)
+            replicateJews(m, md.root, md.parent);
+
+        for (String child : md.children)
+            replicateJews(m, md.root, child);
+    }
+    
     private void replicateJews(Map<String, Double> m, String g1, String g2)
     {
         if (m.containsKey(g1))

@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import rtss.pre1917.merge.MergeCities;
+import rtss.pre1917.merge.MergeDescriptor;
+
 /*
  * Таксон (или составной таксон) -- это территория состоящая из других областей,
  * в т.ч. рекурсивно других составных таксонов. 
@@ -388,8 +391,8 @@ public class Taxon
         case "малороссийский район":
         case "приозерный район":
         case "приуральский район":
-        case "северный район":            
-        case "РСФСР-1991":            
+        case "северный район":
+        case "РСФСР-1991":
             return true;
 
         default:
@@ -441,13 +444,11 @@ public class Taxon
 
     private void weedOutCities(TerritoryDataSet tds, int year)
     {
-        weed(tds, year, "Московская с Москвой", "Московская", "г. Москва");
-        weed(tds, year, "Санкт-Петербургская с Санкт-Петербургом", "Санкт-Петербургская", "г. Санкт-Петербург");
-        weed(tds, year, "Варшавская с Варшавой", "Варшавская", "г. Варшава");
-        weed(tds, year, "Херсонская с Одессой", "Херсонская", "г. Николаев", "г. Одесса");
-        weed(tds, year, "Таврическая с Севастополем", "Таврическая", "г. Севастополь");
-        weed(tds, year, "Бакинская с Баку", "Бакинская", "г. Баку");
-        // weed(tds, year, "Область войска Донского", null, "Ростовское и./Д град.");
+        for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
+        {
+            if (md.parent != null)
+                weed(tds, year, md.root, md.parent, md.childrenAsArray());
+        }
     }
 
     private void weed(TerritoryDataSet tds, int year, String dstname, String srcname, String... cities)
