@@ -40,6 +40,8 @@ public class EvalGrowthRate
         define("Ферганская обл.", 1912);
         define("Терская обл.", 1912, 1914);
         define("Карсская обл.", 1907, 1913);
+        define("Тифлисская", 1903, 1914);
+        define("Елисаветпольская", 1911, 1914);
     }
 
     private void define(String tname, int year)
