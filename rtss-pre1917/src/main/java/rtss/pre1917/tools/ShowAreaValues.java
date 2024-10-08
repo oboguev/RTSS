@@ -48,14 +48,19 @@ public class ShowAreaValues
         }
     }
     
-    private final TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE, LoadOptions.ADJUST_FEMALE_BIRTHS, LoadOptions.FILL_MISSING_BD);
-    private final TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
-    private final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
-    private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
-    private final EvalGrowthRate evalGrowthRate = new  EvalGrowthRate(tdsCensus1897, innerMigration);
+    private final TerritoryDataSet tdsUGVI;
+    private final TerritoryDataSet tdsCSK;
+    private final TerritoryDataSet tdsCensus1897;
+    private final InnerMigration innerMigration;
+    private final EvalGrowthRate evalGrowthRate;
     
     private ShowAreaValues() throws Exception
     {
+        tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE, LoadOptions.ADJUST_FEMALE_BIRTHS, LoadOptions.FILL_MISSING_BD);
+        tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
+        tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        innerMigration = new LoadData().loadInnerMigration();
+        evalGrowthRate = new  EvalGrowthRate(tdsCensus1897, innerMigration);
     }
 
     /* ============================================================================================== */
