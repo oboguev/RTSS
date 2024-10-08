@@ -56,8 +56,13 @@ public class FillMissingBD
             t3.births.total.both = t2.births.total.both = (t1.births.total.both + t4.births.total.both) / 2;
             t3.deaths.total.both = t2.deaths.total.both = (t1.deaths.total.both + t4.deaths.total.both) / 2;
         }
+        
+        // Черноморская губерния (с центром в Новороссийске) была образована в мае 1896 года выделением из Кубанской области, 
+        // поэтому сведения о числе рождений и смертей в ней собираются с 1897 года. Установть для 1896 года в Черноморской губ.
+        // число рождений и смертей как среднее за 1897-1900. 
+        average("Черноморская", 1896, 1897, 1900);
 
-        // исправть число рождений и смертей для губерний с иудеями
+        // исправить число рождений и смертей для губерний с иудеями
         fixJews();
 
         tds.filledMissingBD = true;
@@ -88,6 +93,66 @@ public class FillMissingBD
         Territory t = tds.get(tname);
         TerritoryYear ty = t.territoryYear(year);
         return ty.births.total.both != null && ty.deaths.total.both != null;
+    }
+
+    private void average(String tname, int yto, int y1, int y2) throws Exception
+    {
+        Territory t = tds.get(tname);
+        TerritoryYear ty2 = t.territoryYear(yto);
+        if (ty2.births.total.both != null || ty2.deaths.total.both != null)
+            throw new Exception("Already have BD data");
+        
+        ty2.births.total.both = null;
+        ty2.deaths.total.both = null;
+
+        ty2.births.urban.both = null;
+        ty2.deaths.urban.both = null;
+
+        ty2.births.rural.both = null;
+        ty2.deaths.rural.both = null;
+
+        for (int y = y1; y <= y2; y++)
+        {
+            TerritoryYear ty1 = t.territoryYear(y);
+            
+            ty2.births.total.both = sum(ty2.births.total.both, ty1.births.total.both);
+            ty2.deaths.total.both = sum(ty2.deaths.total.both, ty1.deaths.total.both);
+            ty2.births.urban.both = sum(ty2.births.urban.both, ty1.births.urban.both);
+            ty2.deaths.urban.both = sum(ty2.deaths.urban.both, ty1.deaths.urban.both);
+            ty2.births.rural.both = sum(ty2.births.rural.both, ty1.births.rural.both);
+            ty2.deaths.rural.both = sum(ty2.deaths.rural.both, ty1.deaths.rural.both);
+        }
+        
+        int nyears = y2 - y1 + 1;
+        
+        ty2.births.total.both = div(ty2.births.total.both, nyears);
+        ty2.deaths.total.both = div(ty2.deaths.total.both, nyears);
+
+        ty2.births.urban.both = div(ty2.births.urban.both, nyears);
+        ty2.deaths.urban.both = div(ty2.deaths.urban.both, nyears);
+        
+        ty2.births.rural.both = div(ty2.births.rural.both, nyears);
+        ty2.deaths.rural.both = div(ty2.deaths.rural.both, nyears);
+    }
+    
+    private Long sum(Long v1, Long v2)
+    {
+        if (v1 == null && v2 == null)
+            return null;
+        else if (v1 == null)
+            return v2;
+        else if (v2 == null)
+            return v1;
+        else
+            return v1 + v2;
+    }
+    
+    private Long div(Long v, int ny)
+    {
+        if (v == null)
+            return null;
+        else
+            return Math.round((double) v / ny);
     }
 
     /* =============================================================================================== */
