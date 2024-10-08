@@ -34,18 +34,24 @@ public class LoadData
     public static enum LoadOptions
     {
         NONE,
+
         // проверка внутренней согласованности загруженных данных
         VERIFY, DONT_VERIFY,
+        
         // удалить записи для городов, включив их население в состав соотв. губерний
         MERGE_CITIES, DONT_MERGE_CITIES,
+        
         // слить губернии и области образованные после переписи 1897 года с губерниями, из состава
         // которых они были выделены, образовав новые составные записи
         MERGE_POST1897_REGIONS, DONT_MERGE_POST1897_REGIONS,
+        
         // произвести поправку на недорегистрацию рождений девочкек:
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
         ADJUST_FEMALE_BIRTHS, DONT_ADJUST_FEMALE_BIRTHS,
+        
         // заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
         FILL_MISSING_BD, DONT_FILL_MISSING_BD,
+        
         // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
         // и сохранить её в поле progressive_population, параллельно собственным данным УГВИ
         EVAL_PROGRESSIVE, DONT_EVAL_PROGRESSIVE
@@ -88,6 +94,11 @@ public class LoadData
 
     /* ================================================================================================= */
 
+    public TerritoryDataSet loadEzhegodnikRossii(Set<LoadOptions> options) throws Exception
+    {
+        return loadEzhegodnikRossii(options.toArray(new LoadOptions[0]));
+    }
+    
     public TerritoryDataSet loadEzhegodnikRossii(LoadOptions... options) throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII, Set.of(options));
@@ -157,6 +168,11 @@ public class LoadData
     }
 
     /* ================================================================================================= */
+    
+    public TerritoryDataSet loadEvroChast(Set<LoadOptions> options) throws Exception
+    {
+        return loadEvroChast(options.toArray(new LoadOptions[0]));
+    }
 
     public TerritoryDataSet loadEvroChast(LoadOptions... options) throws Exception
     {
@@ -230,6 +246,11 @@ public class LoadData
 
     /* ================================================================================================= */
 
+    public TerritoryDataSet loadCensus1897(Set<LoadOptions> options) throws Exception
+    {
+        return loadCensus1897(options.toArray(new LoadOptions[0]));
+    }
+
     public TerritoryDataSet loadCensus1897(LoadOptions... options) throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CENSUS_1897, Set.of(options));
@@ -283,6 +304,11 @@ public class LoadData
     }
 
     /* ================================================================================================= */
+
+    public TerritoryDataSet loadUGVI(Set<LoadOptions> options) throws Exception
+    {
+        return loadUGVI(options.toArray(new LoadOptions[0]));
+    }
 
     public TerritoryDataSet loadUGVI(LoadOptions... options) throws Exception
     {
