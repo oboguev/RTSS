@@ -25,11 +25,6 @@ public class URValue
         }
     }
     
-    public String toString()
-    {
-        return territoryYear.toString();
-    }
-
     public ValueByGender total = new ValueByGender(this, URValueWhich.TOTAL);
     public ValueByGender rural = new ValueByGender(this, URValueWhich.RURAL);
     public ValueByGender urban = new ValueByGender(this, URValueWhich.URBAN);
@@ -61,11 +56,22 @@ public class URValue
     {
         validate();
         v.validate();
-
+        
+        boolean mOnlyTotal = this.hasOnlyTotal(Gender.MALE) || v.hasOnlyTotal(Gender.MALE);  
+        boolean fOnlyTotal = this.hasOnlyTotal(Gender.FEMALE) || v.hasOnlyTotal(Gender.FEMALE);  
+        boolean bOnlyTotal = this.hasOnlyTotal(Gender.BOTH) || v.hasOnlyTotal(Gender.BOTH);  
+        
         total.merge(v.total);
         rural.merge(v.rural);
         urban.merge(v.urban);
         
+        if (mOnlyTotal)
+            leaveOnlyTotal(Gender.MALE);
+        if (fOnlyTotal)
+            leaveOnlyTotal(Gender.FEMALE);
+        if (bOnlyTotal)
+            leaveOnlyTotal(Gender.BOTH);
+
         validate();
     }
     
@@ -133,5 +139,25 @@ public class URValue
         rural.clear();
         urban.clear();
         total.leaveOnlyBoth();
+    }
+
+    public void leaveOnlyTotal(Gender gender) throws Exception
+    {
+        urban.clear(gender);
+        rural.clear(gender);
+    }
+    
+    public String toString()
+    {
+        return String.format("%s: U = (%s), R = (%s), T = (%s)",
+                             territoryYear.toString(),
+                             urban.toString(),
+                             rural.toString(),
+                             total.toString());
+    }
+    
+    public boolean hasOnlyTotal(Gender gender) throws Exception
+    {
+        return urban.get(gender) == null && rural.get(gender) == null && total.get(gender) != null;
     }
 }

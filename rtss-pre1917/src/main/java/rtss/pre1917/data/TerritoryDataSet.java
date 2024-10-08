@@ -24,6 +24,18 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         this.dataSetType = dataSetType;
         this.loadOptions = loadOptions;
     }
+    
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder(); 
+        for (String tname : Util.sort(keySet()))
+        {
+            if (sb.length() != 0)
+                sb.append(", ");
+            sb.append(tname);
+        }
+        return sb.toString();
+    }
 
     public TerritoryDataSet dup()
     {

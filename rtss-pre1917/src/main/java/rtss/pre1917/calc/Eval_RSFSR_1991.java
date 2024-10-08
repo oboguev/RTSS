@@ -45,6 +45,7 @@ public class Eval_RSFSR_1991
     {
         tdsPopulation = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
                                                 LoadOptions.MERGE_CITIES,
+                                                LoadOptions.MERGE_POST1897_REGIONS,
                                                 LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                 LoadOptions.FILL_MISSING_BD,
                                                 LoadOptions.EVAL_PROGRESSIVE);
