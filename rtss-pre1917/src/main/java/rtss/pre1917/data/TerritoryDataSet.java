@@ -1,8 +1,12 @@
 package rtss.pre1917.data;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
+import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.merge.MergeCities;
+import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
 
@@ -11,16 +15,19 @@ public class TerritoryDataSet extends HashMap<String, Territory>
     private static final long serialVersionUID = 1L;
 
     public final DataSetType dataSetType;
+    public final Set<LoadOptions> loadOptions;
+
     public boolean filledMissingBD = false;
 
-    public TerritoryDataSet(DataSetType dataSetType)
+    public TerritoryDataSet(DataSetType dataSetType, Set<LoadOptions> loadOptions)
     {
         this.dataSetType = dataSetType;
+        this.loadOptions = loadOptions;
     }
 
     public TerritoryDataSet dup()
     {
-        TerritoryDataSet tds = new TerritoryDataSet(dataSetType);
+        TerritoryDataSet tds = new TerritoryDataSet(dataSetType, new HashSet<>(loadOptions));
         for (String name : keySet())
             tds.put(name, get(name).dup());
         tds.filledMissingBD = this.filledMissingBD;
@@ -174,6 +181,11 @@ public class TerritoryDataSet extends HashMap<String, Territory>
     public void mergeCities() throws Exception
     {
         new MergeCities(this).merge();
+    }
+    
+    public void mergePost1897Regions() throws Exception
+    {
+        new MergePost1897Regions(this).merge();
     }
 
     /*

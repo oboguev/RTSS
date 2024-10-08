@@ -38,6 +38,9 @@ public class LoadData
         VERIFY, DONT_VERIFY,
         // удалить записи для городов, включив их население в состав соотв. губерний
         MERGE_CITIES, DONT_MERGE_CITIES,
+        // слить губернии и области образованные после переписи 1897 года с губерниями, из состава
+        // которых они были выделены, образовав новые составные записи
+        MERGE_POST1897_REGIONS, DONT_MERGE_POST1897_REGIONS,
         // произвести поправку на недорегистрацию рождений девочкек:
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
         ADJUST_FEMALE_BIRTHS, DONT_ADJUST_FEMALE_BIRTHS,
@@ -87,7 +90,7 @@ public class LoadData
 
     public TerritoryDataSet loadEzhegodnikRossii(LoadOptions... options) throws Exception
     {
-        territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII);
+        territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII, Set.of(options));
 
         for (int year = 1904; year <= 1917; year++)
             loadEzhegodnikRossii(year);
@@ -97,6 +100,9 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
+        
+        if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
+            territories.mergePost1897Regions();
 
         if (hasOption(LoadOptions.VERIFY, options))
             new CrossVerify().verify(territories);
@@ -154,7 +160,7 @@ public class LoadData
 
     public TerritoryDataSet loadEvroChast(LoadOptions... options) throws Exception
     {
-        territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII);
+        territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII, Set.of(options));
 
         for (int year = 1897; year <= 1914; year++)
             loadEvroChast(year);
@@ -166,6 +172,9 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
+
+        if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
+            territories.mergePost1897Regions();
 
         if (hasOption(LoadOptions.VERIFY, options))
             new CrossVerify().verify(territories);
@@ -223,7 +232,7 @@ public class LoadData
 
     public TerritoryDataSet loadCensus1897(LoadOptions... options) throws Exception
     {
-        territories = new TerritoryDataSet(DataSetType.CENSUS_1897);
+        territories = new TerritoryDataSet(DataSetType.CENSUS_1897, Set.of(options));
 
         currentFileYear = 1897;
         currentFile = "census-1897/census-1897.xlsx";
@@ -264,6 +273,9 @@ public class LoadData
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
 
+        if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
+            territories.mergePost1897Regions();
+        
         if (hasOption(LoadOptions.VERIFY, options))
             new CrossVerify().verify(territories);
 
@@ -274,7 +286,7 @@ public class LoadData
 
     public TerritoryDataSet loadUGVI(LoadOptions... options) throws Exception
     {
-        territories = new TerritoryDataSet(DataSetType.UGVI);
+        territories = new TerritoryDataSet(DataSetType.UGVI, Set.of(options));
 
         loadUGVI("1891");
         loadUGVI("1892");
@@ -303,6 +315,9 @@ public class LoadData
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
 
+        if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
+            territories.mergePost1897Regions();
+        
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
             new EvalProgressive(territories).evalProgressive();
 

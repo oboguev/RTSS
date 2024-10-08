@@ -5,6 +5,7 @@ import java.util.Map;
 
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
+import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.util.Util;
 
 public class InnerMigration
@@ -217,7 +218,7 @@ public class InnerMigration
         /* ======================================== */
 
         // make sure yearly balance across all migrations is near-zero
-        
+
         if (domsg)
         {
             Util.out("Migration inflow-outflow balance per year");
@@ -277,28 +278,56 @@ public class InnerMigration
 
     public long inFlow(String tname, int year)
     {
-        InnerMigrationAmount ima = tname2ima.get(mapTerritoryName(tname));
-        if (ima == null)
-            return 0;
+        MergeDescriptor md = MergePost1897Regions.find(tname);
 
-        Long v = ima.year2inflow.get(year);
-        if (v == null)
-            v = 0L;
+        if (md == null)
+        {
+            InnerMigrationAmount ima = tname2ima.get(mapTerritoryName(tname));
+            if (ima == null)
+                return 0;
 
-        return v;
+            Long v = ima.year2inflow.get(year);
+            if (v == null)
+                v = 0L;
+
+            return v;
+        }
+        else
+        {
+            long v = 0;
+            for (String xtn : md.parentWithChildren())
+            {
+                v += inFlow(xtn, year);
+            }
+            return v;
+        }
     }
 
     public long outFlow(String tname, int year)
     {
-        InnerMigrationAmount ima = tname2ima.get(mapTerritoryName(tname));
-        if (ima == null)
-            return 0;
+        MergeDescriptor md = MergePost1897Regions.find(tname);
 
-        Long v = ima.year2outflow.get(year);
-        if (v == null)
-            v = 0L;
+        if (md == null)
+        {
+            InnerMigrationAmount ima = tname2ima.get(mapTerritoryName(tname));
+            if (ima == null)
+                return 0;
 
-        return v;
+            Long v = ima.year2outflow.get(year);
+            if (v == null)
+                v = 0L;
+
+            return v;
+        }
+        else
+        {
+            long v = 0;
+            for (String xtn : md.parentWithChildren())
+            {
+                v += outFlow(xtn, year);
+            }
+            return v;
+        }
     }
 
     public long saldo(String tname, int year)

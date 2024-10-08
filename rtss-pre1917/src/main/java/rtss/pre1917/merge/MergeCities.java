@@ -20,9 +20,9 @@ public class MergeCities
         define("Область войска Донского", null, "Ростовское и./Д град.");
     }
     
-    static void define(String root, String parent, String... children)
+    private static void define(String combined, String parent, String... children)
     {
-        MergeCitiesDescriptors.add(new MergeDescriptor(root, parent, children));     
+        MergeCitiesDescriptors.add(new MergeDescriptor(combined, parent, children));     
     }
 
     /* ================================================================== */
