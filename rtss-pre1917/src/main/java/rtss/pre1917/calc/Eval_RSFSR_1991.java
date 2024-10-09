@@ -44,10 +44,10 @@ public class Eval_RSFSR_1991
     private void calc() throws Exception
     {
         tdsPopulation = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
-                                                LoadOptions.MERGE_CITIES,
-                                                LoadOptions.MERGE_POST1897_REGIONS,
                                                 LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                 LoadOptions.FILL_MISSING_BD,
+                                                LoadOptions.MERGE_CITIES,
+                                                LoadOptions.MERGE_POST1897_REGIONS,
                                                 LoadOptions.EVAL_PROGRESSIVE);
         tdsPopulation.leaveOnlyTotalBoth();
         eval_1896(tdsPopulation);

@@ -1,5 +1,8 @@
 package rtss.pre1917.tools;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.AdjustTerritories;
@@ -40,6 +43,7 @@ public class ShowAreaValues
             new ShowAreaValues().show_values_central_asia();
             new ShowAreaValues().show_values_cacauses();
             new ShowAreaValues().show_values_fixed();
+            new ShowAreaValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_post1897();
         }
         catch (Throwable ex)
         {
@@ -54,13 +58,28 @@ public class ShowAreaValues
     private final InnerMigration innerMigration;
     private final EvalGrowthRate evalGrowthRate;
     
-    private ShowAreaValues() throws Exception
+    private ShowAreaValues(LoadOptions... options) throws Exception
     {
-        tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE, LoadOptions.ADJUST_FEMALE_BIRTHS, LoadOptions.FILL_MISSING_BD);
-        tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
-        tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        Set<LoadOptions> xo = Set.of(options);
+        
+        tdsUGVI = new LoadData().loadUGVI(unite(xo, LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE, LoadOptions.ADJUST_FEMALE_BIRTHS, LoadOptions.FILL_MISSING_BD));
+        tdsCSK = new LoadData().loadEzhegodnikRossii(unite(xo, LoadOptions.DONT_VERIFY));
+        tdsCensus1897 = new LoadData().loadCensus1897(unite(xo, LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES));
         innerMigration = new LoadData().loadInnerMigration();
         evalGrowthRate = new  EvalGrowthRate(tdsCensus1897, innerMigration);
+    }
+    
+    private ShowAreaValues() throws Exception
+    {
+        this(new LoadOptions[0]);
+    }
+    
+    private Set<LoadOptions> unite(Set<LoadOptions> xo, LoadOptions... options)
+    {
+        xo = new HashSet<>(xo);
+        for (LoadOptions opt : options)
+            xo.add(opt);
+        return xo;
     }
 
     /* ============================================================================================== */
@@ -126,9 +145,24 @@ public class ShowAreaValues
         Util.out("===================================== СКОРРЕКТИРОВАННЫЕ ЗНАЧЕНИЯ ===================================== ");
         Util.out("");
         
-        new AdjustTerritories(tdsUGVI).fixDagestan();;
+        new AdjustTerritories(tdsUGVI).fixDagestan();
 
         show_values("Дагестанская обл.");
+    }
+
+
+    /* ============================================================================================== */
+
+    @SuppressWarnings("unused")
+    private void show_values_post1897() throws Exception
+    {
+        Util.out("");
+        Util.out("============= КОМИБИНИРОВАННЫЕ ЗНАЧЕНИЯ С ГУБЕРНИЯМИ ОБЛАСТЯМИ СОЗДАННЫМИ ПОСЛЕ 1897 ГОДА =============");
+        Util.out("");
+        
+        show_values("Кутаисская с Батумской");
+        show_values("Иркутская с Камчатской");
+        show_values("Люблинская с Седлецкой и Холмской");
     }
 
     /* ============================================================================================== */
