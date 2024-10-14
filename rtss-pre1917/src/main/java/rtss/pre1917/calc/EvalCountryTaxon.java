@@ -2,6 +2,8 @@ package rtss.pre1917.calc;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.calc.containers.TaxonYearData;
+import rtss.pre1917.calc.containers.TaxonYearlyPopulationData;
 import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -12,13 +14,14 @@ import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.util.Util;
 
-public class Eval_RSFSR_1991
+public class EvalCountryTaxon
 {
     public static void main(String[] args)
     {
         try
         {
-            new Eval_RSFSR_1991().calc();
+            new EvalCountryTaxon("русские губернии Европейской России", 1914).calc().print();
+            new EvalCountryTaxon("РСФСР-1991", 1914).calc().print();
         }
         catch (Throwable ex)
         {
@@ -37,12 +40,24 @@ public class Eval_RSFSR_1991
     
     private final double PROMILLE = 1000.0;
     
-    private Eval_RSFSR_1991() throws Exception
+    private final String taxonName;
+    private final int toYear;
+    
+    private EvalCountryTaxon(String taxonName, int toYear) throws Exception
     {
+        this.taxonName = taxonName;
+        this.toYear = toYear;
     }
-
-    private void calc() throws Exception
+    
+    private TaxonYearlyPopulationData calc() throws Exception
     {
+        Util.out("***************************************************************************************************");
+        Util.out("");
+        Util.out("Расчёт для " + taxonName);
+        Util.out("");
+
+        /* ===================== Численность населения ===================== */
+        
         tdsPopulation = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
                                                 LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                 LoadOptions.FILL_MISSING_BD,
@@ -52,30 +67,42 @@ public class Eval_RSFSR_1991
         tdsPopulation.leaveOnlyTotalBoth();
         eval_1896(tdsPopulation);
         
-        FilterByTaxon.filteredOutByTaxon("РСФСР-1991", tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
+        FilterByTaxon.filteredOutByTaxon(taxonName, tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
         
-        tdsPopulation = FilterByTaxon.filterByTaxon("РСФСР-1991", tdsPopulation);
+        tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
         tdsPopulation.showTerritoryNames("Территории для численности населения");
         new CheckProgressiveAvailable(tdsPopulation).check();
         
-        
+        /* ===================== Естественное движение ===================== */
+
         tdsVitalRates = tdsPopulation.dup();
 
-        /* пересчёт населения для Дагестана */
-        new AdjustTerritories(tdsPopulation).fixDagestan();;
-
-        /* не включать Дагестан в подсчёт рождаемости и смертности */
-        Territory t = tdsVitalRates.get("Дагестанская обл.");
-        tdsVitalRates.remove(t.name);
+        /* ===================== Правки ===================== */
         
-        tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, "РСФСР-1991", WhichYears.AllSetYears);
-        tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, "РСФСР-1991", WhichYears.AllSetYears);
-        
-        Util.out("Численность населения в границах РСФСР-1991, рождаемость, смертность, естественный прирост, ест. + мех. изменение численности");
-        Util.out("");
-
-        for (int year = 1896; year <= 1914; year++)
+        if (taxonName.equals("РСФСР-1991"))
         {
+            /* пересчёт населения для Дагестана */
+            new AdjustTerritories(tdsPopulation).fixDagestan();
+
+            /* не включать Дагестан в подсчёт рождаемости и смертности */
+            Territory t = tdsVitalRates.get("Дагестанская обл.");
+            tdsVitalRates.remove(t.name);
+        }
+        
+        /* ===================== Суммирование ===================== */
+
+        tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears);
+        tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
+        
+        /* ====================================== */
+        
+        TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName);
+        TaxonYearData yd;
+
+        for (int year = 1896; year <= toYear; year++)
+        {
+            yd = new TaxonYearData();
+            
             long pop_total = tmPopulation.territoryYear(year).progressive_population.total.both;
             long pop_total_next = tmPopulation.territoryYear(year + 1).progressive_population.total.both;
             
@@ -84,16 +111,25 @@ public class Eval_RSFSR_1991
             
             double cbr = (PROMILLE * ty.births.total.both) / pop_vital;
             double cdr = (PROMILLE * ty.deaths.total.both) / pop_vital;
-            double ngr = cbr - cdr;
             
-            Util.out(String.format("%d %,d %.1f %.1f %.1f %,d",
-                                   year, pop_total, cbr, cdr, ngr,
-                                   pop_total_next - pop_total));
+            yd.population = pop_total;
+            yd.cbr = cbr;
+            yd.cdr = cdr;
+            yd.population_increase = pop_total_next - pop_total;
+            
+            cd.put(year, yd);
         }
 
-        Util.out(String.format("%d %,d", 1915, tmPopulation.territoryYear(1915).progressive_population.total.both));
+        yd = new TaxonYearData();
+        yd.population = tmPopulation.territoryYear(toYear + 1).progressive_population.total.both;
+        cd.put(toYear + 1, yd);
+        
+        return cd;
     }
     
+    /*
+     * Вычислить численность населения губерний и областей на начало 1896 года (прогрессвная оценка)
+     */
     private void eval_1896(TerritoryDataSet tds)
     {
         for (String tname : tds.keySet())
