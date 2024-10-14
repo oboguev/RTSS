@@ -37,21 +37,21 @@ public class LoadData
 
         // проверка внутренней согласованности загруженных данных
         VERIFY, DONT_VERIFY,
-        
+
         // удалить записи для городов, включив их население в состав соотв. губерний
         MERGE_CITIES, DONT_MERGE_CITIES,
-        
+
         // слить губернии и области образованные после переписи 1897 года с губерниями, из состава
         // которых они были выделены, образовав новые составные записи
         MERGE_POST1897_REGIONS, DONT_MERGE_POST1897_REGIONS,
-        
+
         // произвести поправку на недорегистрацию рождений девочкек:
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
         ADJUST_FEMALE_BIRTHS, DONT_ADJUST_FEMALE_BIRTHS,
-        
+
         // заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
         FILL_MISSING_BD, DONT_FILL_MISSING_BD,
-        
+
         // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
         // и сохранить её в поле progressive_population, параллельно собственным данным УГВИ
         EVAL_PROGRESSIVE, DONT_EVAL_PROGRESSIVE
@@ -99,7 +99,7 @@ public class LoadData
     {
         return loadEzhegodnikRossii(options.toArray(new LoadOptions[0]));
     }
-    
+
     public TerritoryDataSet loadEzhegodnikRossii(LoadOptions... options) throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.CSK_EZHEGODNIK_ROSSII, Set.of(options));
@@ -112,7 +112,7 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_CITIES, options))
             territories.mergeCities();
-        
+
         if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
             territories.mergePost1897Regions();
 
@@ -169,7 +169,7 @@ public class LoadData
     }
 
     /* ================================================================================================= */
-    
+
     public TerritoryDataSet loadEvroChast(Set<LoadOptions> options) throws Exception
     {
         return loadEvroChast(options.toArray(new LoadOptions[0]));
@@ -297,7 +297,7 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
             territories.mergePost1897Regions();
-        
+
         if (hasOption(LoadOptions.VERIFY, options))
             new CrossVerify().verify(territories);
 
@@ -333,6 +333,8 @@ public class LoadData
         loadUGVI("1913");
         loadUGVI("1914");
 
+        addFinland(territories);
+
         if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
             territories.adjustFemaleBirths();
 
@@ -344,7 +346,7 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
             territories.mergePost1897Regions();
-        
+
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
             new EvalProgressive(territories).evalProgressive();
 
@@ -983,7 +985,7 @@ public class LoadData
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
                 loadJews(m, rc, headers.get("губ"), headers.get("% иудеев"));
-                
+
                 for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
                     replicateJews(m, md);
             }
@@ -1028,7 +1030,7 @@ public class LoadData
         for (String child : md.children)
             replicateJews(m, md.combined, child);
     }
-    
+
     private void replicateJews(Map<String, Double> m, String g1, String g2)
     {
         if (m.containsKey(g1))
@@ -1324,22 +1326,22 @@ public class LoadData
         {
             String tname = aname;
             if (aname.equals("Томская (всего)"))
-                tname = TerritoryNames.canonic("Томская"); 
+                tname = TerritoryNames.canonic("Томская");
             if (isAggregateAreaName(tname))
                 continue;
-            
+
             AreaData ad = a2d.get(aname);
 
             for (int year : ad.keySet())
             {
-                if (year != -1 && ad.get(year) != null) 
+                if (year != -1 && ad.get(year) != null)
                 {
                     switch (what)
                     {
                     case "прибыло":
                         im.setInFlow(tname, year, ad.get(year));
                         break;
-                        
+
                     case "убыло":
                         im.setOutFlow(tname, year, ad.get(year));
                         break;
@@ -1619,7 +1621,6 @@ public class LoadData
 
     /* ================================================================================================= */
 
-
     public TerritoryDataSet loadFinland() throws Exception
     {
         territories = new TerritoryDataSet(DataSetType.FINLAND, new HashSet<LoadOptions>());
@@ -1665,5 +1666,28 @@ public class LoadData
         }
 
         return territories;
+    }
+
+    public void addFinland(TerritoryDataSet tds) throws Exception
+    {
+        TerritoryDataSet tdsFinland = new LoadData().loadFinland();
+        for (String name : tdsFinland.keySet())
+        {
+            addFinlandProgressive(tdsFinland.get(name));
+            tds.put(name, tdsFinland.get(name));
+
+        }
+    }
+    
+    private void addFinlandProgressive(Territory t)
+    {
+        /*
+         * Население по финской статистике уже учитывает миграцию
+         */
+        for (int year : t.years())
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            ty.progressive_population.total.both = ty.population.total.both;  
+        }
     }
 }
