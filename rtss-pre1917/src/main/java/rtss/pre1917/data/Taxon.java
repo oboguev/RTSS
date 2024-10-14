@@ -265,8 +265,8 @@ public class Taxon
                 t.add("Ростовское и./Д град.");
             break;
 
-        case "русские губернии Европейской России":
-            t.add_rus_evro(year);
+        case "русские губернии Европейской России и Кавказа, кроме Черноморской":
+            t.add_rus_evro_kavkaz(year);
             break;
         }
 
@@ -341,7 +341,7 @@ public class Taxon
             add("Ростовское и./Д град.");
     }
 
-    private void add_rus_evro(int year) throws Exception
+    private void add_rus_evro_kavkaz(int year) throws Exception
     {
         add("Архангельская");
         add("Астраханская");
@@ -396,8 +396,13 @@ public class Taxon
         add("г. Одесса");
         add("Черниговская");
         add("Ярославская");
+        
+        add("Кубанская обл.");
+        add("Ставропольская");
+        
         if (year >= 1913)
             add("Холмская");
+        
         if (year >= 1914)
             add("Ростовское и./Д град.");
     }

@@ -1041,13 +1041,20 @@ public class LoadData
 
     /* ================================================================================================= */
 
+    private static InnerMigration cachedInnerMigration;
+
     public InnerMigration loadInnerMigration() throws Exception
     {
-        InnerMigration im = new InnerMigration();
-        loadInnerMigrationYearly(im);
-        loadInnerMigrationCorarse(im);
-        im.build();
-        return im;
+        if (cachedInnerMigration == null)
+        {
+            InnerMigration im = new InnerMigration();
+            loadInnerMigrationYearly(im);
+            loadInnerMigrationCorarse(im);
+            im.build();
+            cachedInnerMigration = im;
+        }
+        
+        return cachedInnerMigration;
     }
 
     private void loadInnerMigrationYearly(InnerMigration im) throws Exception
@@ -1678,7 +1685,7 @@ public class LoadData
 
         }
     }
-    
+
     private void addFinlandProgressive(Territory t)
     {
         /*
@@ -1687,7 +1694,7 @@ public class LoadData
         for (int year : t.years())
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
-            ty.progressive_population.total.both = ty.population.total.both;  
+            ty.progressive_population.total.both = ty.population.total.both;
         }
     }
 }
