@@ -70,7 +70,8 @@ public class LoadData
             // TerritoryNames.printSeen();
             // self.loadEmigration();
             // self.loadJews();
-            self.loadInnerMigration();
+            // self.loadInnerMigration();
+            self.loadFinland();
             Util.out("** Done");
         }
         catch (Throwable ex)
@@ -785,7 +786,7 @@ public class LoadData
             return Double.class;
 
         default:
-            throw new Exception("Invalid selector");
+            throw new Exception("Invalid selector: " + what);
         }
     }
 
@@ -1614,5 +1615,55 @@ public class LoadData
             int nyears = y2 - y1 + 1;
             return Math.round((1.0 * amount) / nyears);
         }
+    }
+
+    /* ================================================================================================= */
+
+
+    public TerritoryDataSet loadFinland() throws Exception
+    {
+        territories = new TerritoryDataSet(DataSetType.FINLAND, new HashSet<LoadOptions>());
+
+        String fpath = String.format("Finland.xlsx");
+        currentFile = fpath;
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(fpath);)
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+
+                if (!headers.containsKey("губ"))
+                    throw new Exception("Нет колонки для губернии");
+                if (!headers.containsKey("год"))
+                    throw new Exception("Нет колонки для год");
+                if (!headers.containsKey("чж-о"))
+                    throw new Exception("Нет колонки для чж-о");
+                if (!headers.containsKey("чр"))
+                    throw new Exception("Нет колонки для чр");
+                if (!headers.containsKey("чу"))
+                    throw new Exception("Нет колонки для чу");
+
+                int gcol = headers.get("губ");
+                int ycol = headers.get("год");
+
+                scanGubColumn(rc, gcol);
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чж-о");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чр");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чу");
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+
+        return territories;
     }
 }
