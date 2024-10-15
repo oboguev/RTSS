@@ -20,6 +20,11 @@ public class CheckProgressiveAvailable
     
     public void check() throws Exception
     {
+        check(-1);
+    }
+    
+    public void check(int toYear) throws Exception
+    {
         for (String tname : Util.sort(tds.keySet()))
         {
             if (Taxon.isComposite(tname))
@@ -27,6 +32,9 @@ public class CheckProgressiveAvailable
             
             for (int year = 1896; year <= 1915; year++)
             {
+                if (toYear > 0 && year > toYear)
+                    break;
+                
                 if (!available(tname, year))
                     Util.err(String.format("Прогрессивный расчёт отсутствет для %s %d", tname, year));
             }
