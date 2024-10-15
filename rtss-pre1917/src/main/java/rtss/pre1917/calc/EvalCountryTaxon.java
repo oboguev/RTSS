@@ -94,15 +94,25 @@ public class EvalCountryTaxon
         {
             // no-op
         }
-        else
+        else if (taxonName.equals("Империя"))
+        {
+            // ###
+        }
+        else if (taxonName.equals("СССР-1991"))
+        {
+            // ###
+        }
+        else if (taxonName.equals("РСФСР-1991"))
         {
             /* пересчёт численности населения для Дагестана */
             new AdjustTerritories(tdsPopulation).fixDagestan();
 
             /* не включать Дагестан в подсчёт рождаемости и смертности */
             excludeFromVitalRates("Дагестанская обл.");
-            
-            // ### черноморск
+        }
+        else
+        {
+            throw new Exception("Неверный таксон " + taxonName);
         }
 
         /* ===================== Суммирование по таксону ===================== */
@@ -116,6 +126,7 @@ public class EvalCountryTaxon
         {
             // ### потери 1905
             // ### потери 1914
+            // ### черноморск
         }
 
         /* ===================== Построить структуру с результатом ===================== */
