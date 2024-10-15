@@ -123,4 +123,18 @@ public class Territory
         for (TerritoryYear ty : year2value.values())
             ty.leaveOnlyTotalBoth();
     }
+    
+    /*
+     * Изменить progressive_population.total.both начиная с года (@year + 1) и во все последующие годы на величину @delta.
+     * Соответствует дополнительному приросту (или потерям) населения за год @year. 
+     */
+    public void cascadeAdjustProgressivePopulation(int year, long delta)
+    {
+        for (int y : years())
+        {
+            TerritoryYear ty = this.territoryYearOrNull(y);
+            if (ty != null && y >= year + 1 && ty.progressive_population.total.both != null)
+                ty.progressive_population.total.both += delta;
+        }
+    }
 }

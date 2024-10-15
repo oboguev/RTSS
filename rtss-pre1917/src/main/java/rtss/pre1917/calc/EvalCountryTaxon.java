@@ -102,24 +102,21 @@ public class EvalCountryTaxon
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
 
         /* ===================== Учёт военных потерь и эмиграции ===================== */
-
+        
         if (taxonName.equals("Империя"))
         {
             // ### потери 1905
             // ### потери 1914
-            // ### черноморск 1300
         }
         else if (taxonName.equals("СССР-1991"))
         {
             // ### потери 1905
             // ### потери 1914
-            // ### черноморск 1300
         }
         else if (taxonName.equals("РСФСР-1991"))
         {
             // ### потери 1905
             // ### потери 1914
-            // ### черноморск 1300 + 1600
         }
 
         /* ===================== Построить структуру с результатом ===================== */
@@ -163,6 +160,8 @@ public class EvalCountryTaxon
 
         if (taxonName.equals("русские губернии Европейской России и Кавказа, кроме Черноморской"))
             return;
+        
+        Long nAddChernomorskaya = null;
 
         if (taxonName.equals("Империя") || taxonName.equals("СССР-1991") || taxonName.equals("РСФСР-1991"))
         {
@@ -171,6 +170,8 @@ public class EvalCountryTaxon
 
             /* не включать Дагестан в подсчёт рождаемости и смертности */
             excludeFromVitalRates("Дагестанская обл.");
+            
+            nAddChernomorskaya = (long) 1_300 + 1_600;
 
             match = true;
         }
@@ -189,9 +190,20 @@ public class EvalCountryTaxon
             // ### особо: Уральской област
             // ### особо: Бакинская губерния с Баку: 
             // ### особо: Кутаисская губерния с Батумской областью
+            
+            nAddChernomorskaya = (long) 1_300;
 
             excludeFromVitalRates("Елисаветпольская");
             match = true;
+        }
+        
+        if (nAddChernomorskaya != null)
+        {
+            for (int year = 1896; year <= toYear; year++)
+            {
+                tdsPopulation.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
+                tdsVitalRates.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
+            }
         }
 
         if (!match)
