@@ -38,6 +38,10 @@ public class EvalCountryTaxon
     private Territory tmVitalRates;
 
     private final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+    private final TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY,
+                                                                                LoadOptions.ADJUST_FEMALE_BIRTHS,
+                                                                                LoadOptions.MERGE_CITIES,
+                                                                                LoadOptions.MERGE_POST1897_REGIONS);
     private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
     private final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897, innerMigration);
 
@@ -184,16 +188,20 @@ public class EvalCountryTaxon
             useStabilized("Ферганская обл.", 1912);
             useStabilized("Карсская обл.", 1907, 1913);
             useStabilized("Тифлисская", 1903, 1914);
+            
+            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
 
-            // ### особо: Самаркандской 
-            // ### особо: Семипалатинской 
-            // ### особо: Уральской област
-            // ### особо: Бакинская губерния с Баку: 
-            // ### особо: Кутаисская губерния с Батумской областью
+            // ### особо: Самаркандская обл. 
+            // ### особо: Семипалатинская обл. 
+            // ### особо: Уральская обл.
+            // ### особо: Бакинская с Баку 
+            // ### особо: Кутаисская с Батумской
             
             nAddChernomorskaya = (long) 1_300;
 
             excludeFromVitalRates("Елисаветпольская");
+            excludeFromVitalRates("Самаркандская обл.");
+            
             match = true;
         }
         
