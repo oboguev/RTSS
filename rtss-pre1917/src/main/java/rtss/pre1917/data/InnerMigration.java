@@ -24,6 +24,7 @@ public class InnerMigration
     }
 
     private Map<String, InnerMigrationAmount> tname2ima = new HashMap<>();
+    private boolean readonly = false;
 
     public void setInFlow(String tname, int year, long amount) throws Exception
     {
@@ -35,8 +36,10 @@ public class InnerMigration
         setValue(tname, makeInnerMigrationAmount(tname).year2outflow, year, amount);
     }
 
-    private InnerMigrationAmount makeInnerMigrationAmount(String tname)
+    private InnerMigrationAmount makeInnerMigrationAmount(String tname) throws Exception
     {
+        checkWritable();
+
         InnerMigrationAmount ima = tname2ima.get(tname);
 
         if (ima == null)
@@ -51,6 +54,8 @@ public class InnerMigration
 
     private void setValue(String tname, Map<Integer, Long> year2flow, int year, long amount) throws Exception
     {
+        checkWritable();
+
         if (year2flow.containsKey(year))
         {
             year2flow.put(year, amount + year2flow.get(year));
@@ -137,11 +142,13 @@ public class InnerMigration
 
     public void setInFlowCoarse(String tname, Long amount, int y1, int y2) throws Exception
     {
+        checkWritable();
         coarseDataHolder.ondemand(tname, y1, y2).addInFlow(amount);
     }
 
     public void setOutFlowCoarse(String tname, Long amount, int y1, int y2) throws Exception
     {
+        checkWritable();
         coarseDataHolder.ondemand(tname, y1, y2).addOutFlow(amount);
     }
 
@@ -149,6 +156,8 @@ public class InnerMigration
 
     public void build() throws Exception
     {
+        checkWritable();
+        
         if (domsg)
             Util.err("=== Building InnerMigration ===");
 
@@ -229,6 +238,8 @@ public class InnerMigration
                 Util.out(String.format("%d %,d %,d", year, inflow, outflow));
             }
         }
+        
+        readonly = true;
     }
 
     private long sumInFlow(String tname, int y1, int y2)
@@ -347,5 +358,11 @@ public class InnerMigration
         }
 
         return tname;
+    }
+    
+    private void checkWritable() throws Exception
+    {
+        if (readonly)
+            throw new Exception("Trying to modify sealed read-only instance of InnerMigration");
     }
 }

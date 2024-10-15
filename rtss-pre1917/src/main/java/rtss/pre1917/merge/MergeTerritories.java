@@ -76,11 +76,6 @@ public class MergeTerritories
         
         for (int year : years)
         {
-            if (src.name.equals("Батумская") && year == 1904)
-            {
-                Util.noop(); // ###
-            }
-            
             TerritoryYear tydst = dst.territoryYearOrNull(year);
             TerritoryYear tysrc = src.territoryYearOrNull(year);
             if (tysrc == null)
