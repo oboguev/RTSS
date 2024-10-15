@@ -193,8 +193,6 @@ public class EvalCountryTaxon
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
 
-            // ### особо: Кутаисская с Батумской
-            
             nAddChernomorskaya = (long) 1_300;
 
             excludeFromVitalRates("Елисаветпольская");
@@ -202,6 +200,7 @@ public class EvalCountryTaxon
             excludeFromVitalRates("Семипалатинская обл.");
             excludeFromVitalRates("Уральская обл.");
             excludeFromVitalRates("Бакинская с Баку");
+            excludeFromVitalRates("Кутаисская с Батумской");
             
             match = true;
         }
