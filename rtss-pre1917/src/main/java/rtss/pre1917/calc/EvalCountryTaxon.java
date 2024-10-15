@@ -191,9 +191,8 @@ public class EvalCountryTaxon
             
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
+            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
 
-            // ### особо: Уральская обл.
-            // ### особо: Бакинская с Баку 
             // ### особо: Кутаисская с Батумской
             
             nAddChernomorskaya = (long) 1_300;
@@ -202,6 +201,7 @@ public class EvalCountryTaxon
             excludeFromVitalRates("Самаркандская обл.");
             excludeFromVitalRates("Семипалатинская обл.");
             excludeFromVitalRates("Уральская обл.");
+            excludeFromVitalRates("Бакинская с Баку");
             
             match = true;
         }

@@ -66,7 +66,7 @@ public class AdjustTerritories
 
     /*
      * Исправление для Уральской области.
-     * Использовать прогрессивный расчёт (1896-1904), затем расчёт ЦСК (1905-1914).
+     * Использовать прогрессивный расчёт (1896-1903), затем расчёт ЦСК (1905-1914), среднее для 1904.
      */
     public void fixUralskaia() throws Exception
     {
@@ -85,6 +85,26 @@ public class AdjustTerritories
             {
                 ty.progressive_population.total.both = tyCSK.population.total.both;
             }
+        }
+    }
+    
+    /*
+     * Исправление для Бакинской губернии с Баку.
+     * 
+     * 1. Предварительно устранить в оценке УГВИ осцилляции путём экспоненциального интерполирования (с постоянным годовым темпом роста) 
+     *    численности населения между значениями 1903 и 1914 годов.
+     *    
+     * 2. Погодовое усреднение двух оценок: прогрессивной и УГВИ.
+     */
+    public void fixBakinskaiaWithBaku() throws Exception
+    {
+        Territory t = tds.get("Бакинская с Баку");
+        interpolate_population(t, 1903, 1914);
+        
+        for (int year = 1896; year <= 1914; year++)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            ty.progressive_population.total.both = (ty.population.total.both + ty.progressive_population.total.both) / 2;
         }
     }
 
@@ -108,6 +128,27 @@ public class AdjustTerritories
             pop *= a;
             TerritoryYear ty = t.territoryYearOrNull(y);
             ty.progressive_population.total.both = Math.round(pop);
+        }
+    }
+
+    private void interpolate_population(Territory t, int y1, int y2)
+    {
+        int nyears = y2 - y1;
+
+        TerritoryYear ty1 = t.territoryYearOrNull(y1);
+        TerritoryYear ty2 = t.territoryYearOrNull(y2);
+
+        double a = ty2.population.total.both;
+        a /= ty1.population.total.both;
+
+        a = Math.pow(a, 1.0 / nyears);
+        double pop = ty1.population.total.both;
+
+        for (int y = y1 + 1; y < y2; y++)
+        {
+            pop *= a;
+            TerritoryYear ty = t.territoryYearOrNull(y);
+            ty.population.total.both = Math.round(pop);
         }
     }
 }
