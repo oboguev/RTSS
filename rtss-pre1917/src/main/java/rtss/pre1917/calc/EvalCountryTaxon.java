@@ -78,8 +78,10 @@ public class EvalCountryTaxon
             FilterByTaxon.filteredOutByTaxon(taxonName, tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
 
         tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
+        
         if (verbose)
             tdsPopulation.showTerritoryNames("Территории для численности населения");
+        
         new CheckProgressiveAvailable(tdsPopulation).check();
 
         /* ===================== Естественное движение ===================== */
@@ -88,14 +90,17 @@ public class EvalCountryTaxon
 
         /* ===================== Правки ===================== */
 
+        /* пересчёт численности населения для Дагестана */
+        new AdjustTerritories(tdsPopulation).fixDagestan();
+
+        /* не включать Дагестан в подсчёт рождаемости и смертности */
+        excludeFromVitalRates("Дагестанская обл.");
+
         if (taxonName.equals("РСФСР-1991"))
         {
-            /* пересчёт населения для Дагестана */
-            new AdjustTerritories(tdsPopulation).fixDagestan();
-
-            /* не включать Дагестан в подсчёт рождаемости и смертности */
-            Territory t = tdsVitalRates.get("Дагестанская обл.");
-            tdsVitalRates.remove(t.name);
+            
+            // ### потери 1905
+            // ### потери 1914
         }
 
         /* ===================== Суммирование ===================== */
@@ -103,7 +108,7 @@ public class EvalCountryTaxon
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears);
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
 
-        /* ====================================== */
+        /* ===================== Построить структуру с результатом ===================== */
 
         TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName);
         TaxonYearData yd;
@@ -157,5 +162,12 @@ public class EvalCountryTaxon
                 ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
             }
         }
+    }
+    
+    private void excludeFromVitalRates(String tname)
+    {
+        // проверка против опечаток
+        Territory t = tdsVitalRates.get(tname);
+        tdsVitalRates.remove(t.name);
     }
 }
