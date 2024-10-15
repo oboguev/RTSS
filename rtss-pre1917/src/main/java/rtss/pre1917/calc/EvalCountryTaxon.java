@@ -190,9 +190,8 @@ public class EvalCountryTaxon
             useStabilized("Тифлисская", 1903, 1914);
             
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
+            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
 
-            // ### особо: Самаркандская обл. 
-            // ### особо: Семипалатинская обл. 
             // ### особо: Уральская обл.
             // ### особо: Бакинская с Баку 
             // ### особо: Кутаисская с Батумской
@@ -201,6 +200,8 @@ public class EvalCountryTaxon
 
             excludeFromVitalRates("Елисаветпольская");
             excludeFromVitalRates("Самаркандская обл.");
+            excludeFromVitalRates("Семипалатинская обл.");
+            excludeFromVitalRates("Уральская обл.");
             
             match = true;
         }

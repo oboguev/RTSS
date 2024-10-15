@@ -8,12 +8,12 @@ public class AdjustTerritories
 {
     private final TerritoryDataSet tds;
     private TerritoryDataSet tdsCSK;
-    
+
     public AdjustTerritories(TerritoryDataSet tds)
     {
         this.tds = tds;
     }
-    
+
     public AdjustTerritories setCSK(TerritoryDataSet tdsCSK)
     {
         this.tdsCSK = tdsCSK;
@@ -27,15 +27,15 @@ public class AdjustTerritories
      */
     public void fixDagestan() throws Exception
     {
-       Territory t = tds.get("Дагестанская обл."); 
-       TerritoryYear ty1897 = t.territoryYearOrNull(1897);
-       long delta = ty1897.progressive_population.total.both - ty1897.population.total.both; 
-       
-       for (int year = 1896; year <= 1914; year++)
-       {
-           TerritoryYear ty = t.territoryYearOrNull(year);
-           ty.population.total.both += delta;
-       }
+        Territory t = tds.get("Дагестанская обл.");
+        TerritoryYear ty1897 = t.territoryYearOrNull(1897);
+        long delta = ty1897.progressive_population.total.both - ty1897.population.total.both;
+
+        for (int year = 1896; year <= 1914; year++)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            ty.population.total.both += delta;
+        }
     }
 
     /*
@@ -47,36 +47,62 @@ public class AdjustTerritories
     {
         Territory t = tds.get("Самаркандская обл.");
         Territory tCSK = tdsCSK.get("Самаркандская обл.");
-        
+
         for (int year = 1896; year <= 1901; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             ty.progressive_population.total.both = ty.population.total.both;
         }
-        
+
         for (int year = 1904; year <= 1914; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             TerritoryYear tyCSK = tCSK.territoryYearOrNull(year);
             ty.progressive_population.total.both = tyCSK.population.total.both;
         }
-        
+
         interpolate_progressive_population(t, 1901, 1904);
     }
-    
+
+    /*
+     * Исправление для Уральской области.
+     * Использовать прогрессивный расчёт (1896-1904), затем расчёт ЦСК (1905-1914).
+     */
+    public void fixUralskaia() throws Exception
+    {
+        Territory t = tds.get("Уральская обл.");
+        Territory tCSK = tdsCSK.get("Уральская обл.");
+
+        for (int year = 1904; year <= 1914; year++)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            TerritoryYear tyCSK = tCSK.territoryYearOrNull(year);
+            if (year == 1904)
+            {
+                ty.progressive_population.total.both = (tyCSK.population.total.both + ty.progressive_population.total.both) / 2;
+            }
+            else
+            {
+                ty.progressive_population.total.both = tyCSK.population.total.both;
+            }
+        }
+    }
+
+    /* ===================================================================================== */
+
     private void interpolate_progressive_population(Territory t, int y1, int y2)
     {
         int nyears = y2 - y1;
 
         TerritoryYear ty1 = t.territoryYearOrNull(y1);
         TerritoryYear ty2 = t.territoryYearOrNull(y2);
-        
-        double a = ty2.progressive_population.total.both; 
+
+        double a = ty2.progressive_population.total.both;
         a /= ty1.progressive_population.total.both;
-        
+
         a = Math.pow(a, 1.0 / nyears);
         double pop = ty1.progressive_population.total.both;
-        
+
         for (int y = y1 + 1; y < y2; y++)
         {
             pop *= a;
