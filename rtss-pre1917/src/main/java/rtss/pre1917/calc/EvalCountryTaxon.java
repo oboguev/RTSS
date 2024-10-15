@@ -127,7 +127,6 @@ public class EvalCountryTaxon
             {
                 // ### потери 1905
                 // ### потери 1914
-                // ### эмиграция
             }
             else if (taxonName.equals("РСФСР-1991"))
             {

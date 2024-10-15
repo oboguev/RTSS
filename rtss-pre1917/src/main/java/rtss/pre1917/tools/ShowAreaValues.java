@@ -53,13 +53,13 @@ public class ShowAreaValues
         }
     }
     
-    private final TerritoryDataSet tdsUGVI;
-    private final TerritoryDataSet tdsCSK;
-    private final TerritoryDataSet tdsCensus1897;
-    private final InnerMigration innerMigration;
-    private final EvalGrowthRate evalGrowthRate;
+    protected final TerritoryDataSet tdsUGVI;
+    protected final TerritoryDataSet tdsCSK;
+    protected final TerritoryDataSet tdsCensus1897;
+    protected final InnerMigration innerMigration;
+    protected final EvalGrowthRate evalGrowthRate;
     
-    private ShowAreaValues(LoadOptions... options) throws Exception
+    protected ShowAreaValues(LoadOptions... options) throws Exception
     {
         Set<LoadOptions> xo = Set.of(options);
         
@@ -70,7 +70,7 @@ public class ShowAreaValues
         evalGrowthRate = new  EvalGrowthRate(tdsCensus1897, innerMigration);
     }
     
-    private ShowAreaValues() throws Exception
+    protected ShowAreaValues() throws Exception
     {
         this(new LoadOptions[0]);
     }
@@ -185,7 +185,7 @@ public class ShowAreaValues
     
     /* ============================================================================================== */
 
-    private void show_values(String tname) throws Exception
+    protected void show_values(String tname) throws Exception
     {
         Territory t = tdsUGVI.get(tname);
         if (t == null)

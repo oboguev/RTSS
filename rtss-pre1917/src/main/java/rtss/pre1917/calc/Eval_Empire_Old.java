@@ -18,13 +18,13 @@ import rtss.util.Util;
  * Определить численность, рождаемость и смертность населения 
  * в границах Российской Империи для 1896-1913 гг.
  */
-public class Eval_Empire
+public class Eval_Empire_Old
 {
     public static void main(String[] args)
     {
         try
         {
-            new Eval_Empire().calc();
+            new Eval_Empire_Old().calc();
         }
         catch (Throwable ex)
         {
