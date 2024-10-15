@@ -96,17 +96,18 @@ public class EvalCountryTaxon
         /* не включать Дагестан в подсчёт рождаемости и смертности */
         excludeFromVitalRates("Дагестанская обл.");
 
-        if (taxonName.equals("РСФСР-1991"))
-        {
-            
-            // ### потери 1905
-            // ### потери 1914
-        }
-
-        /* ===================== Суммирование ===================== */
+        /* ===================== Суммирование по таксону ===================== */
 
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears);
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
+
+        /* ===================== Учёт военных потерь и эмиграции ===================== */
+
+        if (taxonName.equals("РСФСР-1991"))
+        {
+            // ### потери 1905
+            // ### потери 1914
+        }
 
         /* ===================== Построить структуру с результатом ===================== */
 
