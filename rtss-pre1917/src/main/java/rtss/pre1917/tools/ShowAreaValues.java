@@ -44,6 +44,7 @@ public class ShowAreaValues
             new ShowAreaValues().show_values_cacauses();
             new ShowAreaValues().show_values_fixed();
             new ShowAreaValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_post1897();
+            new ShowAreaValues().show_values_southern();
         }
         catch (Throwable ex)
         {
@@ -165,6 +166,23 @@ public class ShowAreaValues
         show_values("Люблинская с Седлецкой и Холмской");
     }
 
+    /* ============================================================================================== */
+
+    @SuppressWarnings("unused")
+    private void show_values_southern() throws Exception
+    {
+        Util.out("");
+        Util.out("============= НЕКОТОРЫЕ ЮЖНЫЕ ГУБЕРНИИ =============");
+        Util.out("");
+        
+        show_values("Воронежская");
+        show_values("Полтавская");
+        show_values("Харьковская");
+        show_values("Астраханская");
+        show_values("Курская");
+        show_values("Екатеринославская");
+    }
+    
     /* ============================================================================================== */
 
     private void show_values(String tname) throws Exception

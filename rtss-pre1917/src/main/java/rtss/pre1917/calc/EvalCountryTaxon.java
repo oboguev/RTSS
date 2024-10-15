@@ -95,6 +95,8 @@ public class EvalCountryTaxon
 
         /* не включать Дагестан в подсчёт рождаемости и смертности */
         excludeFromVitalRates("Дагестанская обл.");
+        
+        // ### черноморск
 
         /* ===================== Суммирование по таксону ===================== */
 
@@ -167,7 +169,7 @@ public class EvalCountryTaxon
     
     private void excludeFromVitalRates(String tname)
     {
-        // проверка против опечаток
+        // проверка против опечаток: отсутствующее имя вызовет NullPointerException
         Territory t = tdsVitalRates.get(tname);
         tdsVitalRates.remove(t.name);
     }
