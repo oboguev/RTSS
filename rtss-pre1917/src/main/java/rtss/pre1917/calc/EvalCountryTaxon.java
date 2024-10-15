@@ -9,6 +9,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
@@ -21,6 +22,7 @@ public class EvalCountryTaxon
         try
         {
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
+            new EvalCountryTaxon("Империя", 1913).calc(true).print();
         }
         catch (Throwable ex)
         {
@@ -34,8 +36,10 @@ public class EvalCountryTaxon
 
     private TerritoryDataSet tdsVitalRates;
     private Territory tmVitalRates;
-
+    
+    private final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
     private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
+    private final EvalGrowthRate evalGrowthRate = new  EvalGrowthRate(tdsCensus1897, innerMigration);
 
     private final double PROMILLE = 1000.0;
 
@@ -78,11 +82,12 @@ public class EvalCountryTaxon
             FilterByTaxon.filteredOutByTaxon(taxonName, tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
 
         tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
-        
+
         if (verbose)
             tdsPopulation.showTerritoryNames("Территории для численности населения");
-        
+
         new CheckProgressiveAvailable(tdsPopulation).check();
+        
 
         /* ===================== Естественное движение ===================== */
 
@@ -94,21 +99,34 @@ public class EvalCountryTaxon
         {
             // no-op
         }
-        else if (taxonName.equals("Империя"))
-        {
-            // ###
-        }
-        else if (taxonName.equals("СССР-1991"))
-        {
-            // ###
-        }
-        else if (taxonName.equals("РСФСР-1991"))
+        else if (taxonName.equals("Империя") || taxonName.equals("СССР-1991") || taxonName.equals("РСФСР-1991"))
         {
             /* пересчёт численности населения для Дагестана */
             new AdjustTerritories(tdsPopulation).fixDagestan();
 
             /* не включать Дагестан в подсчёт рождаемости и смертности */
             excludeFromVitalRates("Дагестанская обл.");
+        }
+        else if (taxonName.equals("Империя") || taxonName.equals("СССР-1991"))
+        {
+            if (Util.False)
+            {
+                // ###
+                useStabilized("Закаспийская обл.", 1911, 1913);
+                useStabilized("Семиреченская обл.", 1912, 1914);
+                useStabilized("Сыр-Дарьинская обл.", 1908);
+                useStabilized("Ферганская обл.", 1912);
+                useStabilized("Карсская обл.", 1907, 1913);
+                useStabilized("Тифлисская", 1903, 1914);
+            }
+
+            // ### особо: Самаркандской 
+            // ### особо: Семипалатинской 
+            // ### особо: Уральской област
+            // ### особо: Бакинская губерния с Баку: 
+            // ### особо: Кутаисская губерния с Батумской областью
+            
+            excludeFromVitalRates("Елисаветпольская");
         }
         else
         {
@@ -122,11 +140,23 @@ public class EvalCountryTaxon
 
         /* ===================== Учёт военных потерь и эмиграции ===================== */
 
-        if (taxonName.equals("РСФСР-1991"))
+        if (taxonName.equals("Империя"))
         {
             // ### потери 1905
             // ### потери 1914
-            // ### черноморск
+            // ### черноморск 1300
+        }
+        else if (taxonName.equals("СССР-1991"))
+        {
+            // ### потери 1905
+            // ### потери 1914
+            // ### черноморск 1300
+        }
+        else if (taxonName.equals("РСФСР-1991"))
+        {
+            // ### потери 1905
+            // ### потери 1914
+            // ### черноморск 1300 + 1600
         }
 
         /* ===================== Построить структуру с результатом ===================== */
@@ -161,9 +191,11 @@ public class EvalCountryTaxon
 
         return cd;
     }
+    
+    /* ================================================================================================ */
 
     /*
-     * Вычислить численность населения губерний и областей на начало 1896 года (прогрессвная оценка)
+     * Вычислить численность населения губерний и областей на начало 1896 года (прогрессивная оценка)
      */
     private void eval_1896(TerritoryDataSet tds)
     {
@@ -184,11 +216,34 @@ public class EvalCountryTaxon
             }
         }
     }
-    
+
     private void excludeFromVitalRates(String tname)
     {
         // проверка против опечаток: отсутствующее имя вызовет NullPointerException
         Territory t = tdsVitalRates.get(tname);
         tdsVitalRates.remove(t.name);
+    }
+    
+    private void useStabilized(String tname, int year) throws Exception
+    {
+        useStabilized(tname, year, year);
+    }
+
+    /*
+     * Пересчитать территорию по стабилизированному участку
+     */
+    private void useStabilized(String tname, int y1, int y2) throws Exception
+    {
+        Territory t = tdsPopulation.get(tname);
+        Territory tEval = evalGrowthRate.evalTerritory(t);
+        
+        for (int year : tEval.years())
+        {
+            TerritoryYear ty = tEval.territoryYearOrNull(year);
+            ty.progressive_population = ty.population.dup(ty);
+        }
+        
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
     }
 }

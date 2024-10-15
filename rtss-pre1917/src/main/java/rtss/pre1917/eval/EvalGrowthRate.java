@@ -81,12 +81,18 @@ public class EvalGrowthRate
         if (!tname_y1.containsKey(t.name))
             return null;
 
+        int y1 = tname_y1.get(t.name);
+        int y2 = tname_y2.get(t.name);
+        
+        return evalTerritory(t, y1, y2);
+    }
+    
+    public Territory evalTerritory(Territory t, int y1, int y2) throws Exception
+    {
         Territory tCensus1897 = tdsCensus1897.get(t.name);
         if (tCensus1897 == null)
             throw new Exception("Missing 1897 census territory data for " + t.name);
 
-        int y1 = tname_y1.get(t.name);
-        int y2 = tname_y2.get(t.name);
         int nyears = y2 - y1 + 1;
 
         CalcGrowthRate cgr = new CalcGrowthRate(t, tCensus1897, innerMigration);
