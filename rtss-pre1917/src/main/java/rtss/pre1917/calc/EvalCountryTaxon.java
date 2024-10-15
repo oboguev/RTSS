@@ -51,6 +51,8 @@ public class EvalCountryTaxon
     private final int toYear;
 
     private static TaxonYearlyPopulationData typdRusEvro;
+    
+    private final static boolean DoCountMilitaryDeaths = Util.True;
 
     private EvalCountryTaxon(String taxonName, int toYear) throws Exception
     {
@@ -107,22 +109,29 @@ public class EvalCountryTaxon
 
         /* ===================== Учёт военных потерь и эмиграции ===================== */
         
-        if (taxonName.equals("Империя"))
+        if (DoCountMilitaryDeaths)
         {
-            // ### потери 1905
-            // ### потери 1914
-        }
-        else if (taxonName.equals("СССР-1991"))
-        {
-            // ### потери 1905
-            // ### потери 1914
-        }
-        else if (taxonName.equals("РСФСР-1991"))
-        {
-            // ### потери 1905
-            // ### потери 1914
+            if (taxonName.equals("Империя"))
+            {
+                extraDeaths(1904, 25_589);
+                extraDeaths(1905, 25_363);
+            }
+            else if (taxonName.equals("СССР-1991"))
+            {
+                // ### потери 1905
+                // ### потери 1914
+                // ### эмиграция
+            }
+            else if (taxonName.equals("РСФСР-1991"))
+            {
+                extraDeaths(1904, 13_444);
+                extraDeaths(1905, 13_325);
+                extraDeaths(1914, 94_000);
+            }
         }
 
+        // ### эмиграция
+        
         /* ===================== Построить структуру с результатом ===================== */
 
         TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName);
@@ -271,5 +280,11 @@ public class EvalCountryTaxon
 
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
+    }
+    
+    private void extraDeaths(int year, long deaths) throws Exception
+    {
+        tmPopulation.extraDeaths(year, deaths);
+        tmVitalRates.extraDeaths(year, deaths);
     }
 }

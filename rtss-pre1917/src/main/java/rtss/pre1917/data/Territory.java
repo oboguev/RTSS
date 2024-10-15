@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rtss.util.Util;
+
 public class Territory
 {
     public final String name;
@@ -135,6 +137,28 @@ public class Territory
             TerritoryYear ty = this.territoryYearOrNull(y);
             if (ty != null && y >= year + 1 && ty.progressive_population.total.both != null)
                 ty.progressive_population.total.both += delta;
+        }
+    }
+    
+    /*
+     * В году @year произошли дополнительные @extraDeaths смертей
+     */
+    public void extraDeaths(int year, long extraDeaths)
+    {
+        for (int y : years())
+        {
+            TerritoryYear ty = this.territoryYearOrNull(y);
+            if (ty != null)
+            {
+                if (y == year)
+                    ty.deaths.total.both += extraDeaths;
+                
+                if (y > year && ty.population.total.both != null && Util.False)
+                    ty.population.total.both -= extraDeaths;
+
+                if (y > year && ty.progressive_population.total.both != null)
+                    ty.progressive_population.total.both -= extraDeaths;
+            }
         }
     }
 }
