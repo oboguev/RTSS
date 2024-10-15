@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.data.ColumnHeader;
 import rtss.pre1917.data.DataSetType;
+import rtss.pre1917.data.EmigrationYear;
 import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -914,9 +915,9 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    public Map<Integer, Long> loadEmigration() throws Exception
+    public Map<Integer, EmigrationYear> loadEmigration() throws Exception
     {
-        Map<Integer, Long> m = new HashMap<>();
+        Map<Integer, EmigrationYear> m = new HashMap<>();
 
         currentFile = "emigration.xlsx";
 
@@ -942,7 +943,7 @@ public class LoadData
         return m;
     }
 
-    private void loadEmigration(Map<Integer, Long> m, ExcelRC rc, int colYear, int colAmount) throws Exception
+    private void loadEmigration(Map<Integer, EmigrationYear> m, ExcelRC rc, int colYear, int colAmount) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -958,8 +959,11 @@ public class LoadData
 
             if (m.containsKey(year))
                 throw new Exception("Duplicate year");
+            
+            EmigrationYear yd = new EmigrationYear();
+            yd.total = Math.round(amount);
 
-            m.put(year, (long) Math.round(amount));
+            m.put(year, yd);
         }
 
         currentNR = null;

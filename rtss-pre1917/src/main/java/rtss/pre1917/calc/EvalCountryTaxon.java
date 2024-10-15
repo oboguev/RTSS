@@ -1,9 +1,12 @@
 package rtss.pre1917.calc;
 
+import java.util.Map;
+
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.containers.TaxonYearData;
 import rtss.pre1917.calc.containers.TaxonYearlyPopulationData;
+import rtss.pre1917.data.EmigrationYear;
 import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -44,6 +47,7 @@ public class EvalCountryTaxon
                                                                                 LoadOptions.MERGE_POST1897_REGIONS);
     private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
     private final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897, innerMigration);
+    private final Map<Integer,EmigrationYear> emigration = new LoadData().loadEmigration();
 
     private final double PROMILLE = 1000.0;
 
@@ -111,6 +115,9 @@ public class EvalCountryTaxon
         
         if (DoCountMilitaryDeaths)
         {
+            /*
+             * Военные потери
+             */
             if (taxonName.equals("Империя"))
             {
                 extraDeaths(1904, 25_589);
@@ -124,13 +131,32 @@ public class EvalCountryTaxon
             }
             else if (taxonName.equals("РСФСР-1991"))
             {
-                extraDeaths(1904, 13_444);
-                extraDeaths(1905, 13_325);
+                extraDeaths(1904, 13_491);
+                extraDeaths(1905, 13_372);
                 extraDeaths(1914, 94_000);
             }
         }
-
-        // ### эмиграция
+        
+        /*
+         * Внешняя эмиграция за границы России
+         */
+        if (taxonName.equals("Империя"))
+        {
+            for (int year : Util.sort(emigration.keySet()))
+            {
+                EmigrationYear yd = emigration.get(year);
+                tmPopulation.cascadeAdjustProgressivePopulation(year, -yd.total);
+                tmVitalRates.cascadeAdjustProgressivePopulation(year, -yd.total);
+            }
+        }
+        else if (taxonName.equals("СССР-1991"))
+        {
+            // ### эмиграция
+        }
+        else if (taxonName.equals("РСФСР-1991"))
+        {
+            // пренебрежима
+        }
         
         /* ===================== Построить структуру с результатом ===================== */
 
