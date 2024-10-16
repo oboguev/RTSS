@@ -70,10 +70,10 @@ public class LoadData
             // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
-            // self.loadEmigration();
+            self.loadEmigration();
             // self.loadJews();
             // self.loadInnerMigration();
-            self.loadFinland();
+            // self.loadFinland();
             Util.out("** Done");
         }
         catch (Throwable ex)
@@ -933,18 +933,20 @@ public class LoadData
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
-                loadEmigration(em, rc, headers.get("год"), headers.get("во все страны без финнов"));
+                loadEmigration(em, rc, headers.get("год"), headers);
             }
         }
         finally
         {
             currentFile = null;
         }
+        
+        em.build();
 
         return em;
     }
 
-    private void loadEmigration(Emigration em, ExcelRC rc, int colYear, int colAmount) throws Exception
+    private void loadEmigration(Emigration em, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -954,20 +956,33 @@ public class LoadData
             if (o == null || o.toString().trim().length() == 0 || o.toString().contains("-"))
                 continue;
 
-            int year = (int) (long) asLong(o);
-            o = rc.get(nr, colAmount);
-            double amount = asDouble(o);
-
-            if (em.containsKey(year))
-                throw new Exception("Duplicate year");
-            
             EmigrationYear yd = new EmigrationYear();
-            yd.total = Math.round(amount);
+            yd.year = (int) (long) asLong(o);
+            
+            yd.total = getEmigration(rc, nr, headers, "всего");
+            yd.armenians = getEmigration(rc, nr, headers, "армяне");
+            yd.finns = getEmigration(rc, nr, headers, "финны");
+            yd.germans = getEmigration(rc, nr, headers, "немцы");
+            yd.greeks = getEmigration(rc, nr, headers, "греки");
+            yd.hebrews = getEmigration(rc, nr, headers, "евреи");
+            yd.lithuanians = getEmigration(rc, nr, headers, "литовцы");
+            yd.poles = getEmigration(rc, nr, headers, "поляки");
+            yd.russians = getEmigration(rc, nr, headers, "русские");
+            yd.ruthenians = getEmigration(rc, nr, headers, "русины");
+            yd.scandinavians = getEmigration(rc, nr, headers, "скандинавы");
+            yd.others = getEmigration(rc, nr, headers, "другие");
 
-            em.put(year, yd);
+            em.setYearData(yd);
         }
 
         currentNR = null;
+    }
+
+    private long getEmigration(ExcelRC rc, int nr, Map<String, Integer> headers, String what) throws Exception
+    {
+        int col = headers.get(what);
+        Object o = rc.get(nr, col);
+        return Math.round(asDouble(o));
     }
 
     /* ================================================================================================= */

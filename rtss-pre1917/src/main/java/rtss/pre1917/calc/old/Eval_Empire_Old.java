@@ -7,7 +7,7 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.pre1917.data.migration.EmigrationYear;
+import rtss.pre1917.data.migration.Emigration;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
@@ -109,7 +109,7 @@ public class Eval_Empire_Old
 
     private void adjustForEmigration() throws Exception
     {
-        Map<Integer,EmigrationYear> emigration = new LoadData().loadEmigration();
+        Emigration emigration = new LoadData().loadEmigration();
 
         for (int year = 1896; year <= 1914; year++)
             year2growth.put(year, year2growth.get(year) - emigration.get(year).total);

@@ -1,7 +1,5 @@
 package rtss.pre1917.calc;
 
-import java.util.Map;
-
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.containers.TaxonYearData;
@@ -10,6 +8,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.Emigration;
 import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
@@ -47,7 +46,7 @@ public class EvalCountryTaxon
                                                                                 LoadOptions.MERGE_POST1897_REGIONS);
     private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
     private final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
-    private final Map<Integer,EmigrationYear> emigration = new LoadData().loadEmigration();
+    private final Emigration emigration = new LoadData().loadEmigration();
 
     private final double PROMILLE = 1000.0;
 
