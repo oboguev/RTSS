@@ -18,6 +18,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.Emigration;
 import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.data.migration.InnerMigration;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
@@ -915,9 +916,9 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    public Map<Integer, EmigrationYear> loadEmigration() throws Exception
+    public Emigration loadEmigration() throws Exception
     {
-        Map<Integer, EmigrationYear> m = new HashMap<>();
+        Emigration em = new Emigration();
 
         currentFile = "emigration.xlsx";
 
@@ -932,7 +933,7 @@ public class LoadData
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
-                loadEmigration(m, rc, headers.get("год"), headers.get("во все страны без финнов"));
+                loadEmigration(em, rc, headers.get("год"), headers.get("во все страны без финнов"));
             }
         }
         finally
@@ -940,10 +941,10 @@ public class LoadData
             currentFile = null;
         }
 
-        return m;
+        return em;
     }
 
-    private void loadEmigration(Map<Integer, EmigrationYear> m, ExcelRC rc, int colYear, int colAmount) throws Exception
+    private void loadEmigration(Emigration em, ExcelRC rc, int colYear, int colAmount) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -957,13 +958,13 @@ public class LoadData
             o = rc.get(nr, colAmount);
             double amount = asDouble(o);
 
-            if (m.containsKey(year))
+            if (em.containsKey(year))
                 throw new Exception("Duplicate year");
             
             EmigrationYear yd = new EmigrationYear();
             yd.total = Math.round(amount);
 
-            m.put(year, yd);
+            em.put(year, yd);
         }
 
         currentNR = null;
