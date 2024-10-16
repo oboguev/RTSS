@@ -3,10 +3,10 @@ package rtss.pre1917.eval;
 import java.util.HashMap;
 import java.util.Map;
 
-import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.TotalMigration;
 
 /*
  * Пересчитать население за 1896-1915 гг. на основе сведений о естественом движении за промежуток, 
@@ -19,13 +19,12 @@ public class EvalGrowthRate
     private final Map<String, Integer> tname_y2 = new HashMap<>();
 
     private final TerritoryDataSet tdsCensus1897;
-    private final InnerMigration innerMigration;
-
+    TotalMigration totalMigration = TotalMigration.getTotalMigration();
+    
     private final double PROMILLE = 1000.0;
 
-    public EvalGrowthRate(TerritoryDataSet tdsCensus1897, InnerMigration innerMigration)
+    public EvalGrowthRate(TerritoryDataSet tdsCensus1897) throws Exception
     {
-        this.innerMigration = innerMigration;
         this.tdsCensus1897 = tdsCensus1897;
         define();
     }
@@ -95,7 +94,7 @@ public class EvalGrowthRate
 
         int nyears = y2 - y1 + 1;
 
-        CalcGrowthRate cgr = new CalcGrowthRate(t, tCensus1897, innerMigration);
+        CalcGrowthRate cgr = new CalcGrowthRate(t, tCensus1897, totalMigration);
 
         double ngr = 0;
         for (int y = y1; y <= y2; y++)

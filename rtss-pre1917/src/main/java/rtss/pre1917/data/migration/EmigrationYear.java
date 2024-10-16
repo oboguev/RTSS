@@ -1,4 +1,4 @@
-package rtss.pre1917.data;
+package rtss.pre1917.data.migration;
 
 public class EmigrationYear
 {

@@ -1,24 +1,24 @@
 package rtss.pre1917.eval;
 
-import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.TotalMigration;
 
 public class CalcGrowthRate
 {
     private final Territory t;
     private final Territory tCensus1897;
-    private final InnerMigration innerMigration;
+    private final TotalMigration totalMigration;
 
     /*
      * t contains births and deaths
      * xt contains 1897 census data
      */
-    public CalcGrowthRate(Territory t, Territory tCensus1897, InnerMigration innerMigration)
+    public CalcGrowthRate(Territory t, Territory tCensus1897, TotalMigration totalMigration)
     {
         this.t = t;
         this.tCensus1897 = tCensus1897;
-        this.innerMigration = innerMigration;
+        this.totalMigration = totalMigration;
     }
 
     private final double PROMILLE = 1000.0;
@@ -100,7 +100,7 @@ public class CalcGrowthRate
         for (int year = 1898;; year++)
         {
             p *= (1 + a);
-            p += innerMigration.saldo(t.name, year - 1);
+            p += totalMigration.saldo(t.name, year - 1);
             if (year == ytarget)
                 return p;
         }
@@ -121,7 +121,7 @@ public class CalcGrowthRate
     {
         TerritoryYear tc = tCensus1897.territoryYearOrNull(year);
         double in = a * tc.population.total.both;
-        in += innerMigration.saldo(t.name, year);
+        in += totalMigration.saldo(t.name, year);
         return Math.round(in);
     }
 
@@ -129,7 +129,7 @@ public class CalcGrowthRate
     {
         TerritoryYear ty = t.territoryYearOrNull(year);
         long in = ty.births.total.both - ty.deaths.total.both;
-        in += innerMigration.saldo(t.name, year);
+        in += totalMigration.saldo(t.name, year);
         return in;
     }
 }

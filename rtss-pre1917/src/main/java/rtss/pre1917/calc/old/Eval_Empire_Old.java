@@ -7,10 +7,10 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
-import rtss.pre1917.data.EmigrationYear;
 import rtss.pre1917.data.Territory;
 import rtss.util.Util;
 

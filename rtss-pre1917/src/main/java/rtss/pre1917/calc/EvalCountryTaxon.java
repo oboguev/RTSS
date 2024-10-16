@@ -6,12 +6,12 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.containers.TaxonYearData;
 import rtss.pre1917.calc.containers.TaxonYearlyPopulationData;
-import rtss.pre1917.data.EmigrationYear;
-import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.EmigrationYear;
+import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
@@ -45,8 +45,8 @@ public class EvalCountryTaxon
                                                                                 LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                                                 LoadOptions.MERGE_CITIES,
                                                                                 LoadOptions.MERGE_POST1897_REGIONS);
-    private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
-    private final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897, innerMigration);
+    private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
+    private final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
     private final Map<Integer,EmigrationYear> emigration = new LoadData().loadEmigration();
 
     private final double PROMILLE = 1000.0;
@@ -271,7 +271,7 @@ public class EvalCountryTaxon
             if (ty1897 != null && ty1896 != null)
             {
                 long in = ty1896.births.total.both - ty1896.deaths.total.both;
-                in += innerMigration.saldo(tname, 1896);
+                in += totalMigration.saldo(tname, 1896);
                 ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
             }
         }

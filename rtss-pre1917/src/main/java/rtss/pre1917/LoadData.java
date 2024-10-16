@@ -14,12 +14,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.data.ColumnHeader;
 import rtss.pre1917.data.DataSetType;
-import rtss.pre1917.data.EmigrationYear;
-import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.EmigrationYear;
+import rtss.pre1917.data.migration.InnerMigration;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FillMissingBD;

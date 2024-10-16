@@ -6,10 +6,10 @@ import java.util.Set;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.AdjustTerritories;
-import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.util.Util;
 
@@ -56,7 +56,7 @@ public class ShowAreaValues
     protected final TerritoryDataSet tdsUGVI;
     protected final TerritoryDataSet tdsCSK;
     protected final TerritoryDataSet tdsCensus1897;
-    protected final InnerMigration innerMigration;
+    protected final TotalMigration totalMigration;
     protected final EvalGrowthRate evalGrowthRate;
     
     protected ShowAreaValues(LoadOptions... options) throws Exception
@@ -66,8 +66,8 @@ public class ShowAreaValues
         tdsUGVI = new LoadData().loadUGVI(unite(xo, LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE, LoadOptions.ADJUST_FEMALE_BIRTHS, LoadOptions.FILL_MISSING_BD));
         tdsCSK = new LoadData().loadEzhegodnikRossii(unite(xo, LoadOptions.DONT_VERIFY));
         tdsCensus1897 = new LoadData().loadCensus1897(unite(xo, LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES));
-        innerMigration = new LoadData().loadInnerMigration();
-        evalGrowthRate = new  EvalGrowthRate(tdsCensus1897, innerMigration);
+        totalMigration = TotalMigration.getTotalMigration();
+        evalGrowthRate = new  EvalGrowthRate(tdsCensus1897);
     }
     
     protected ShowAreaValues() throws Exception
@@ -255,7 +255,7 @@ public class ShowAreaValues
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
                 
-                long saldo = innerMigration.saldo(tname, year);
+                long saldo = totalMigration.saldo(tname, year);
                 
                 String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
                                        // год

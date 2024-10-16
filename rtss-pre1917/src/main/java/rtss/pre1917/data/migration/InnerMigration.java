@@ -1,4 +1,4 @@
-package rtss.pre1917.data;
+package rtss.pre1917.data.migration;
 
 import java.util.HashMap;
 import java.util.Map;

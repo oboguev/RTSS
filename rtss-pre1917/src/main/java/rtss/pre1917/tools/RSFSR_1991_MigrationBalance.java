@@ -2,15 +2,15 @@ package rtss.pre1917.tools;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
-import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.migration.InnerMigration;
 import rtss.util.Util;
 
 public class RSFSR_1991_MigrationBalance
 {
-    private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
     private final TerritoryDataSet tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY);
+    private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
 
     public static void main(String[] args)
     {

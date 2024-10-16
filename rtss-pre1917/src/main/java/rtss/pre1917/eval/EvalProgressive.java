@@ -3,11 +3,11 @@ package rtss.pre1917.eval;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.DataSetType;
-import rtss.pre1917.data.InnerMigration;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.TotalMigration;
 
 /*
  * Вычислить progressive_population отчётом от переписи 1897 года с приложением ежегодных
@@ -26,7 +26,7 @@ import rtss.pre1917.data.TerritoryYear;
  */
 public class EvalProgressive
 {
-    private final InnerMigration innerMigration = new LoadData().loadInnerMigration();
+    private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
     private final TerritoryDataSet census;
 
     private final TerritoryDataSet tds;
@@ -77,7 +77,7 @@ public class EvalProgressive
         TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
 
         long in = xty1897.births.total.both - xty1897.deaths.total.both;
-        in += innerMigration.saldo(tname, 1897);
+        in += totalMigration.saldo(tname, 1897);
         long in1 = Math.round(in * 27.0 / 365.0);
         long in2 = in - in1;
 
@@ -87,7 +87,7 @@ public class EvalProgressive
         if (xty1896 != null)
         {
             in = xty1896.births.total.both - xty1896.deaths.total.both;
-            in += innerMigration.saldo(tname, 1896);
+            in += totalMigration.saldo(tname, 1896);
             ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
         }
 
@@ -101,7 +101,7 @@ public class EvalProgressive
                 continue;
 
             in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
-            in += innerMigration.saldo(tname, year);
+            in += totalMigration.saldo(tname, year);
 
             ty_next.progressive_population.total.both = ty.progressive_population.total.both + in;
         }
