@@ -28,10 +28,28 @@ public class Emigration
         return null;
     }
 
-    /* ================================================================ */
+    /* ================================== FETCH DATA ================================== */
+    
+    public long emigrants(String tname, int year)
+    {
+        String key = key(tname, year);
+        
+        Double v = tname2amount.get(key);
+        if (v == null)
+        {
+            // ###
+            v = 0.0;
+        }
+        
+        return Math.round(v * 1.05);
+    }
+    
+    /* ================================== INNER DATA ================================== */
 
     /* количество эмигрантов для губернии и года */
     private Map<String, Double> tname2amount = new HashMap<>();
+    
+    private boolean sealed = false;
 
     private String key(String tname, int year)
     {
@@ -46,8 +64,14 @@ public class Emigration
             v = 0.0;
         tname2amount.put(key, v + value);
     }
+    
+    private void checkWritable() throws Exception
+    {
+        if (sealed)
+            throw new Exception("Emigration instance is readonly");
+    }
 
-    /* ================================================================ */
+    /* ================================== CONSTRUCTION ================================== */
 
     @SuppressWarnings("unused")
     private static final long serialVersionUID = 1L;
@@ -56,6 +80,8 @@ public class Emigration
 
     public void setYearData(EmigrationYear yd) throws Exception
     {
+        checkWritable();
+
         if (y2yd.containsKey(yd.year))
             throw new Exception("Duplicate year");
         y2yd.put(yd.year, yd);
@@ -67,6 +93,8 @@ public class Emigration
 
     public void build() throws Exception
     {
+        checkWritable();
+        
         jews = new LoadData().loadJews();
         tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
 
@@ -76,6 +104,8 @@ public class Emigration
             build(yd);
             validate(yd);
         }
+        
+        sealed = true;
     }
 
     private void build(EmigrationYear yd) throws Exception
