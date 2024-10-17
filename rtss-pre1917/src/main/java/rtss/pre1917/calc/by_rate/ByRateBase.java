@@ -98,7 +98,7 @@ public abstract class ByRateBase extends EvalCountryBase
         
         for (TerritoryResult r : results)
         {
-            Util.out(String.format("%s %.1f", r.tname, r.rate));
+            Util.out(String.format("\"%s\" %.1f", r.tname, r.rate));
         }
     }
     
