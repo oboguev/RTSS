@@ -51,7 +51,7 @@ public class EvalCountryTaxon
     private final int toYear;
 
     private static TaxonYearlyPopulationData typdRusEvro;
-    
+
     private final static boolean DoCountMilitaryDeaths = Util.True;
 
     private EvalCountryTaxon(String taxonName, int toYear) throws Exception
@@ -108,7 +108,7 @@ public class EvalCountryTaxon
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
 
         /* ===================== Учёт военных потерь и эмиграции ===================== */
-        
+
         if (DoCountMilitaryDeaths)
         {
             /*
@@ -131,7 +131,7 @@ public class EvalCountryTaxon
                 extraDeaths(1914, 94_000);
             }
         }
-        
+
         /* ===================== Построить структуру с результатом ===================== */
 
         TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName);
@@ -173,7 +173,7 @@ public class EvalCountryTaxon
 
         if (taxonName.equals("русские губернии Европейской России и Кавказа, кроме Черноморской"))
             return;
-        
+
         Long nAddChernomorskaya = null;
 
         if (taxonName.equals("Империя") || taxonName.equals("СССР-1991") || taxonName.equals("РСФСР-1991"))
@@ -183,7 +183,7 @@ public class EvalCountryTaxon
 
             /* не включать Дагестан в подсчёт рождаемости и смертности */
             excludeFromVitalRates("Дагестанская обл.");
-            
+
             nAddChernomorskaya = (long) 1_300 + 1_600;
 
             match = true;
@@ -197,7 +197,7 @@ public class EvalCountryTaxon
             useStabilized("Ферганская обл.", 1912);
             useStabilized("Карсская обл.", 1907, 1913);
             useStabilized("Тифлисская", 1903, 1914);
-            
+
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
@@ -210,10 +210,10 @@ public class EvalCountryTaxon
             excludeFromVitalRates("Уральская обл.");
             excludeFromVitalRates("Бакинская с Баку");
             excludeFromVitalRates("Кутаисская с Батумской");
-            
+
             match = true;
         }
-        
+
         if (nAddChernomorskaya != null)
         {
             for (int year = 1896; year <= toYear; year++)
@@ -232,7 +232,7 @@ public class EvalCountryTaxon
     /*
      * Вычислить численность населения губерний и областей на начало 1896 года (прогрессивная оценка)
      */
-    private void eval_1896(TerritoryDataSet tds)
+    private void eval_1896(TerritoryDataSet tds) throws Exception
     {
         for (String tname : tds.keySet())
         {
@@ -281,7 +281,7 @@ public class EvalCountryTaxon
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
     }
-    
+
     private void extraDeaths(int year, long deaths) throws Exception
     {
         tmPopulation.extraDeaths(year, deaths);

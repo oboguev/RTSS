@@ -12,28 +12,39 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.merge.MergeCities;
+import rtss.pre1917.merge.MergeDescriptor;
+import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.util.Util;
 
 public class Emigration
 {
     /* ================================== FETCH DATA ================================== */
 
-    public long emigrants(String tname, int year)
+    public long emigrants(String tname, int year) throws Exception
     {
         String key = key(tname, year);
 
         Double v = tname2amount.get(key);
+
         if (v == null)
         {
-
-            // ### Иркутская с Камчатской
-            // ### Кутаисская с Батумской
-            // ### Люблинская с Седлецкой и Холмской
-            // ### Сахалин
-            
-            Util.err("Нет эмигр " + tname);
-            // ###
             v = 0.0;
+
+            MergeDescriptor md = MergePost1897Regions.find(tname);
+            
+            if (md != null)
+            {
+                for (String xtn : md.parentWithChildren())
+                    v += emigrants(xtn, year);
+            }
+            else if (union("Холмская", "Сахалин", "Камчатская").contains(tname))
+            {
+                // leave zero
+            }
+            else
+            {
+                throw new Exception(String.format("Нет данных об эмиграции из %s в %в году", tname, year));
+            }
         }
 
         return Math.round(v * 1.05);
@@ -50,7 +61,7 @@ public class Emigration
     {
         return year + " @ " + tname;
     }
-
+    
     private void addAmount(String tname, int year, double value)
     {
         String key = key(tname, year);

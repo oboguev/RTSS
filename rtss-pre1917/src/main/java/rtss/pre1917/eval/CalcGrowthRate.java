@@ -80,7 +80,7 @@ public class CalcGrowthRate
 
     /* ================================================================== */
 
-    private double diff_p(double a, int ytarget)
+    private double diff_p(double a, int ytarget) throws Exception
     {
         return p1(a, ytarget) - p2(a, ytarget);
     }
@@ -91,7 +91,7 @@ public class CalcGrowthRate
         return (ty.births.total.both - ty.deaths.total.both) / a;
     }
 
-    private double p2(double a, int ytarget)
+    private double p2(double a, int ytarget) throws Exception
     {
         // best estimate of population at the start of 1897 (Jan 1)
         double p = population_1897_Jan1(a);
@@ -105,8 +105,8 @@ public class CalcGrowthRate
                 return p;
         }
     }
-    
-    public long population_1897_Jan1(double a)
+
+    public long population_1897_Jan1(double a) throws Exception
     {
         // population at the time of 1897 census (Jan 28)
         TerritoryYear tc = tCensus1897.territoryYearOrNull(1897);
@@ -115,9 +115,9 @@ public class CalcGrowthRate
         // best estimate of population at the start of 1897 (Jan 1)
         return p - Math.round(increase(1897, a) * 27.0 / 365.0);
     }
-    
+
     // прирост населения за год
-    public long increase(int year, double a)
+    public long increase(int year, double a) throws Exception
     {
         TerritoryYear tc = tCensus1897.territoryYearOrNull(year);
         double in = a * tc.population.total.both;
@@ -125,7 +125,7 @@ public class CalcGrowthRate
         return Math.round(in);
     }
 
-    public long increaseUGVI(int year)
+    public long increaseUGVI(int year) throws Exception
     {
         TerritoryYear ty = t.territoryYearOrNull(year);
         long in = ty.births.total.both - ty.deaths.total.both;

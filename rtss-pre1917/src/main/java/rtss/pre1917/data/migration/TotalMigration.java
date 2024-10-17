@@ -21,7 +21,7 @@ public class TotalMigration
         return _instance;
     }
     
-    public long saldo(String tname, int year)
+    public long saldo(String tname, int year) throws Exception
     {
         return innerMigration.saldo(tname, year) - emigration.emigrants(tname, year);
     }
