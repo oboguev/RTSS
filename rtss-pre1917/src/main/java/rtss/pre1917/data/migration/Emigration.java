@@ -74,28 +74,28 @@ public class Emigration
         {
             EmigrationYear yd = y2yd.get(year);
             build(yd);
+            validate(yd);
         }
     }
 
     private void build(EmigrationYear yd) throws Exception
     {
-        Set<String> xs = jews.keySet();
-        xs = MergeCities.leaveOnlyCombined(xs);
-        scatter(yd.hebrews, xs, PopulationSelector.HEBREW, yd.year);
-
-        scatter(yd.finns * 0.16, union("Выборгская"), PopulationSelector.ALL, yd.year);
-        scatter(yd.lithuanians, union("Виленская", "Ковенская", tsBaltic()), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.poles, tsPolish(yd.year), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.armenians, union("Эриванская"), PopulationSelector.ALL, yd.year);
-        scatter(yd.ruthenians, union("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.russians, tsEuropeanRussian(), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.finns * 0.16, union("Выборгская"), PopulationSelector.ALL, yd.year);
         scatter(yd.germans * 0.75, union("Саратовская", "Самарская"), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.germans * 0.25, tsBaltic(), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.others, union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)), PopulationSelector.NON_HEBREW, yd.year);
 
-        // validate
+        Set<String> xs = MergeCities.leaveOnlyCombined(jews.keySet());
+        scatter(yd.hebrews, xs, PopulationSelector.HEBREW, yd.year);
+
+        scatter(yd.lithuanians, union("Виленская", "Ковенская", tsBaltic()), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.poles, tsPolish(yd.year), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.russians, tsEuropeanRussian(), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.ruthenians, union("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
         
-        // ###
+        scatter(yd.others + yd.greeks + yd.scandinavians, 
+                union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)), 
+                PopulationSelector.NON_HEBREW, yd.year);
     }
 
     private static enum PopulationSelector
@@ -255,5 +255,19 @@ public class Emigration
         }
 
         return xs;
+    }
+
+    private void validate (EmigrationYear yd) throws Exception
+    {
+        double v = 0;
+        
+        for (String key : tname2amount.keySet())
+        {
+            if (key.startsWith("" + yd.year + " @ "))
+                v += tname2amount.get(key);
+        }
+        
+        if (Math.abs(yd.total - 0.84 * yd.finns - v) > 5)
+            throw new Exception("Emigration builder self-check failed for year " + yd.year);
     }
 }
