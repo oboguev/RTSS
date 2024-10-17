@@ -43,13 +43,21 @@ public class CSK_VS_UGVI
         Territory tmCSK = MergeTaxon.mergeTaxon(tdsCSK, txname, WhichYears.AllSetYears);
         Territory tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, txname, WhichYears.AllSetYears);
 
-        for (int year = 1904; year <= 1915; year++)
+        for (int year = 1896; year <= 1915; year++)
         {
             TerritoryYear tyCSK = tmCSK.territoryYear(year);
             TerritoryYear tyUGVI = tmUGVI.territoryYear(year);
 
-            Util.out(String.format("%d %,d %,d", year, tyCSK.population.total.both, tyUGVI.population.total.both));
+            Util.out(String.format("%d %s %s", year, s_pop(tyCSK.population.total.both), s_pop(tyUGVI.population.total.both)));
         }
+    }
+    
+    private String s_pop(Long v)
+    {
+        if (v == null)
+            return "-";
+        else
+            return String.format("%,d", v);
     }
 
     private void calc_movement_50(String field) throws Exception
