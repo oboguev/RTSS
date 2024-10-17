@@ -16,39 +16,34 @@ import rtss.util.Util;
 
 public class Emigration
 {
-    public Set<Integer> keySet()
-    {
-        // ###
-        return null;
-    }
-
-    public EmigrationYear get(int year)
-    {
-        // ###
-        return null;
-    }
-
     /* ================================== FETCH DATA ================================== */
-    
+
     public long emigrants(String tname, int year)
     {
         String key = key(tname, year);
-        
+
         Double v = tname2amount.get(key);
         if (v == null)
         {
+
+            // ### Иркутская с Камчатской
+            // ### Кутаисская с Батумской
+            // ### Люблинская с Седлецкой и Холмской
+            // ### Сахалин
+            
+            Util.err("Нет эмигр " + tname);
             // ###
             v = 0.0;
         }
-        
+
         return Math.round(v * 1.05);
     }
-    
+
     /* ================================== INNER DATA ================================== */
 
     /* количество эмигрантов для губернии и года */
     private Map<String, Double> tname2amount = new HashMap<>();
-    
+
     private boolean sealed = false;
 
     private String key(String tname, int year)
@@ -64,7 +59,7 @@ public class Emigration
             v = 0.0;
         tname2amount.put(key, v + value);
     }
-    
+
     private void checkWritable() throws Exception
     {
         if (sealed)
@@ -94,7 +89,7 @@ public class Emigration
     public void build() throws Exception
     {
         checkWritable();
-        
+
         jews = new LoadData().loadJews();
         tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
 
@@ -104,7 +99,7 @@ public class Emigration
             build(yd);
             validate(yd);
         }
-        
+
         sealed = true;
     }
 
@@ -122,9 +117,9 @@ public class Emigration
         scatter(yd.poles, tsPolish(yd.year), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.russians, tsEuropeanRussian(), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.ruthenians, union("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
-        
-        scatter(yd.others + yd.greeks + yd.scandinavians, 
-                union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)), 
+
+        scatter(yd.others + yd.greeks + yd.scandinavians,
+                union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
                 PopulationSelector.NON_HEBREW, yd.year);
     }
 
@@ -156,7 +151,7 @@ public class Emigration
     {
         if (tname.equals("Выборгская"))
             return 386_440;
-        
+
         Territory t = tdsCensus.get(tname);
         if (t == null && tname.equals("Батумская"))
             return 0;
@@ -184,7 +179,7 @@ public class Emigration
 
         return pop;
     }
-    
+
     /* =================================================================================================== */
 
     private Collection<String> tsBaltic()
@@ -287,16 +282,16 @@ public class Emigration
         return xs;
     }
 
-    private void validate (EmigrationYear yd) throws Exception
+    private void validate(EmigrationYear yd) throws Exception
     {
         double v = 0;
-        
+
         for (String key : tname2amount.keySet())
         {
             if (key.startsWith("" + yd.year + " @ "))
                 v += tname2amount.get(key);
         }
-        
+
         if (Math.abs(yd.total - 0.84 * yd.finns - v) > 5)
             throw new Exception("Emigration builder self-check failed for year " + yd.year);
     }

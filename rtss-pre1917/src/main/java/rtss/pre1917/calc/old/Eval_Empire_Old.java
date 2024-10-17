@@ -7,7 +7,6 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.pre1917.data.migration.Emigration;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
@@ -48,7 +47,6 @@ public class Eval_Empire_Old
     private void calc() throws Exception
     {
         calcYearlyNaturalGrowth();
-        adjustForEmigration();
         seed1897();
 
         for (int year = 1898; year <= 1914; year++)
@@ -105,13 +103,5 @@ public class Eval_Empire_Old
             TerritoryYear ty = tmUGVI.territoryYear(year);
             year2growth.put(year, ty.births.total.both - ty.deaths.total.both);
         }
-    }
-
-    private void adjustForEmigration() throws Exception
-    {
-        Emigration emigration = new LoadData().loadEmigration();
-
-        for (int year = 1896; year <= 1914; year++)
-            year2growth.put(year, year2growth.get(year) - emigration.get(year).total);
     }
 }

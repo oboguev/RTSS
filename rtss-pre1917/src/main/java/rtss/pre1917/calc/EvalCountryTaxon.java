@@ -8,8 +8,6 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.pre1917.data.migration.Emigration;
-import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.merge.MergeTaxon;
@@ -46,7 +44,6 @@ public class EvalCountryTaxon
                                                                                 LoadOptions.MERGE_POST1897_REGIONS);
     private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
     private final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
-    private final Emigration emigration = new LoadData().loadEmigration();
 
     private final double PROMILLE = 1000.0;
 
@@ -133,27 +130,6 @@ public class EvalCountryTaxon
                 extraDeaths(1905, 13_372);
                 extraDeaths(1914, 94_000);
             }
-        }
-        
-        /*
-         * Внешняя эмиграция за границы России
-         */
-        if (taxonName.equals("Империя"))
-        {
-            for (int year : Util.sort(emigration.keySet()))
-            {
-                EmigrationYear yd = emigration.get(year);
-                tmPopulation.cascadeAdjustProgressivePopulation(year, -yd.total);
-                tmVitalRates.cascadeAdjustProgressivePopulation(year, -yd.total);
-            }
-        }
-        else if (taxonName.equals("СССР-1991"))
-        {
-            // ### эмиграция
-        }
-        else if (taxonName.equals("РСФСР-1991"))
-        {
-            // пренебрежима
         }
         
         /* ===================== Построить структуру с результатом ===================== */
