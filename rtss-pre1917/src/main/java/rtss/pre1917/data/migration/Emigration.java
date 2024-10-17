@@ -1,12 +1,16 @@
 package rtss.pre1917.data.migration;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
 public class Emigration
@@ -16,50 +20,50 @@ public class Emigration
         // ###
         return null;
     }
-    
+
     public EmigrationYear get(int year)
     {
         // ###
         return null;
     }
-    
+
     /* ================================================================ */
-    
+
     /* количество эмигрантов для губернии и года */
-    private Map<String,Double> tname2value = new HashMap<>();
-    
+    private Map<String, Double> tname2amount = new HashMap<>();
+
     private String key(String tname, int year)
     {
         return year + " @ " + tname;
     }
-    
-    private void addValue(String tname, int year, double value)
+
+    private void addAmount(String tname, int year, double value)
     {
         String key = key(tname, year);
-        Double v = tname2value.get(key);
+        Double v = tname2amount.get(key);
         if (v == null)
             v = 0.0;
-        tname2value.put(key, v + value);
+        tname2amount.put(key, v + value);
     }
-    
+
     /* ================================================================ */
-    
+
     @SuppressWarnings("unused")
     private static final long serialVersionUID = 1L;
-    
-    private Map<Integer,EmigrationYear> y2yd = new HashMap<>();
-    
+
+    private Map<Integer, EmigrationYear> y2yd = new HashMap<>();
+
     public void setYearData(EmigrationYear yd) throws Exception
     {
         if (y2yd.containsKey(yd.year))
             throw new Exception("Duplicate year");
         y2yd.put(yd.year, yd);
-        
+
     }
-    
+
     private TerritoryDataSet tdsCensus;
-    private Map<String, Double> jews; 
-    
+    private Map<String, Double> jews;
+
     public void build() throws Exception
     {
         jews = new LoadData().loadJews();
@@ -74,8 +78,174 @@ public class Emigration
 
     private void build(EmigrationYear yd) throws Exception
     {
+        // ### Еврейская эмиграция
+
+        scatter(yd.finns * 0.16, union("Выборгская"), PopulationSelector.ALL, yd.year);
+        scatter(yd.lithuanians, union("Виленская", "Ковенская", tsBaltic()), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.poles, tsPolish(yd.year), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.armenians, union("Эриванская"), PopulationSelector.ALL, yd.year);
+        scatter(yd.ruthenians, union("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.russians, tsEuropeanRussian(), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.germans * 0.75, union("Саратовская", "Самарская"), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.germans * 0.25, tsBaltic(), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.others, union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)), PopulationSelector.NON_HEBREW, yd.year);
+
+        // ### validate by year
+    }
+
+    private static enum PopulationSelector
+    {
+        HEBREW, NON_HEBREW, ALL
+    }
+
+    private void scatter(double amount, Collection<String> tnames, PopulationSelector selector, int year)
+    {
+        double all_pop = pop_1897(tnames, selector);
+
+        for (String tname : tnames)
+        {
+            double pop = pop_1897(tname, selector);
+            addAmount(tname, year, amount * pop / all_pop);
+        }
+    }
+
+    private double pop_1897(Collection<String> tnames, PopulationSelector selector)
+    {
+        double v = 0;
+        for (String tname : tnames)
+            v += pop_1897(tname, selector);
+        return v;
+    }
+
+    private double pop_1897(String tname, PopulationSelector selector)
+    {
+        if (tname.equals("Выборгская"))
+            return 386_440;
         
-        Util.noop();
-        // ###
+        Territory t = tdsCensus.get(tname);
+        TerritoryYear ty = t.territoryYearOrNull(1897);
+
+        double pop = ty.population.total.both;
+
+        Double jp = jews.get(tname);
+        if (jp == null)
+            jp = 0.0;
+        jp /= 100;
+
+        switch (selector)
+        {
+        case HEBREW:
+            pop *= jp;
+            break;
+        case NON_HEBREW:
+            pop *= 1 - jp;
+            break;
+        case ALL:
+            break;
+        }
+
+        return pop;
+    }
+    
+    /* =================================================================================================== */
+
+    private Collection<String> tsBaltic()
+    {
+        return Set.of("Лифляндская", "Курляндская", "Эстляндская");
+    }
+
+    private Collection<String> tsPolish(int year) throws Exception
+    {
+        Set<String> v = Set.of("Варшавская с Варшавой",
+                               "Калишская",
+                               "Келецкая",
+                               "Ломжинская",
+                               "Люблинская",
+                               "Петроковская",
+                               "Плоцкая",
+                               "Радомская",
+                               "Сувалкская");
+
+        if (year <= 1913)
+        {
+            return union("Седлецкая", v);
+        }
+        else
+        {
+            return v;
+        }
+    }
+
+    private Collection<String> tsEuropeanRussian()
+    {
+        // без Сибири, Кавказа и Средней Азии, 
+        // в т.ч. без Кубанской области, Ставропольской и Черноморской губерний, Тобольской губ. и Якутской обл.,
+        // также без Холмской губ.
+        return Set.of("Архангельская",
+                      "Астраханская",
+                      "Витебская",
+                      "Владимирская",
+                      "Вологодская",
+                      "Волынская",
+                      "Воронежская",
+                      "Вятская",
+                      "Гродненская",
+                      "Екатеринославская",
+                      "Казанская",
+                      "Калужская",
+                      "Киевская",
+                      "Костромская",
+                      "Курская",
+                      "Минская",
+                      "Могилевская",
+                      "Московская с Москвой",
+                      "Нижегородская",
+                      "Новгородская",
+                      "Область войска Донского",
+                      "Олонецкая",
+                      "Оренбургская",
+                      "Орловская",
+                      "Пензенская",
+                      "Полтавская",
+                      "Псковская",
+                      "Рязанская",
+                      "Самарская",
+                      "Санкт-Петербургская с Санкт-Петербургом",
+                      "Саратовская",
+                      "Симбирская",
+                      "Смоленская",
+                      "Таврическая с Севастополем",
+                      "Тамбовская",
+                      "Тверская",
+                      "Тульская",
+                      "Уфимская",
+                      "Харьковская",
+                      "Херсонская с Одессой",
+                      "Черниговская",
+                      "Ярославская");
+    }
+
+    private Collection<String> union(Object... objects) throws Exception
+    {
+        Set<String> xs = new HashSet<>();
+
+        for (Object o : objects)
+        {
+            if (o instanceof String)
+            {
+                xs.add((String) o);
+            }
+            else if (o instanceof Set)
+            {
+                for (Object o2 : (Set<?>) o)
+                    xs.add((String) o2);
+            }
+            else
+            {
+                throw new IllegalArgumentException("Neither a string nor a set of strings");
+            }
+        }
+
+        return xs;
     }
 }
