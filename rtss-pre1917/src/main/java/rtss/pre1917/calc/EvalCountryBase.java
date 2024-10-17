@@ -63,8 +63,10 @@ public class EvalCountryBase
             useStabilized("Семиреченская обл.", 1912, 1914);
             useStabilized("Сыр-Дарьинская обл.", 1908);
             useStabilized("Ферганская обл.", 1912);
-            useStabilized("Карсская обл.", 1907, 1913);
             useStabilized("Тифлисская", 1903, 1914);
+
+            if (taxonName.equals("Империя"))
+                useStabilized("Карсская обл.", 1907, 1913);
 
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();

@@ -19,6 +19,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("Империя", 1913).calc(true).print();
+            new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
         }
         catch (Throwable ex)
         {
@@ -100,8 +101,8 @@ public class EvalCountryTaxon extends EvalCountryBase
             }
             else if (taxonName.equals("СССР-1991"))
             {
-                // ### потери 1905
-                // ### потери 1914
+                extraDeaths(1904, Math.round(25_589 * 0.926));
+                extraDeaths(1905, Math.round(25_363 * 0.926));
             }
             else if (taxonName.equals("РСФСР-1991"))
             {
