@@ -14,9 +14,22 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.util.Util;
 
-public abstract class ByRateBase extends EvalCountryBase
+public class ByIncreaseOfGrowthRate extends EvalCountryBase
 {
-    protected ByRateBase() throws Exception
+    public static void main(String[] args)
+    {
+        try
+        {
+            new ByIncreaseOfGrowthRate().eval();
+        }
+        catch (Throwable ex)
+        {
+            Util.err("** Exception: ");
+            ex.printStackTrace();
+        }
+    }
+
+    protected ByIncreaseOfGrowthRate() throws Exception
     {
         super("Империя", 1913);
     }
@@ -24,18 +37,22 @@ public abstract class ByRateBase extends EvalCountryBase
     private static class TerritoryResult implements Comparable<TerritoryResult>
     {
         public final String tname;
-        public final double rate;
+        public final double rate1;
+        public final double rate2;
+        public final double delta;
 
-        public TerritoryResult(String tname, double rate)
+        public TerritoryResult(String tname, double rate1, double rate2)
         {
             this.tname = tname;
-            this.rate = rate;
+            this.rate1 = rate1;
+            this.rate2 = rate2;
+            this.delta = rate2 - rate1;
         }
 
         @Override
         public int compareTo(TerritoryResult o)
         {
-            return (int) Math.signum(o.rate - this.rate);
+            return (int) Math.signum(o.delta - this.delta);
         }
     }
 
@@ -73,39 +90,47 @@ public abstract class ByRateBase extends EvalCountryBase
             if (Taxon.isComposite(tname) || tname.equals("Черноморская"))
                 continue;
 
-            double rate = 0;
-            int nyears = 0;
+            Territory t = tdsVitalRates.get(tname);
+            double r1 = rate(t, 1896, 1897, 1899, 1900);
+            double r2 = rate(t, 1911, 1912, 1913);
 
-            for (int year = 1896; year <= toYear; year++)
-            {
-                if (year == 1898 || year == 1905 || year == 1910)
-                    continue;
-
-                Territory t = tdsVitalRates.get(tname);
-                TerritoryYear ty = t.territoryYear(year);
-
-                long pop_vital = ty.progressive_population.total.both;
-                double cbr = (PROMILLE * denull(ty.births.total.both)) / pop_vital;
-                double cdr = (PROMILLE * denull(ty.deaths.total.both)) / pop_vital;
-                rate += rate(cbr, cdr);
-                nyears++;
-            }
-
-            results.add(new TerritoryResult(tname, rate / nyears));
+            results.add(new TerritoryResult(tname, r1, r2));
         }
 
         Collections.sort(results);
 
         for (TerritoryResult r : results)
         {
-            Util.out(String.format("\"%s\" %.1f", r.tname, r.rate));
+            Util.out(String.format("\"%s\" %.2f %.1f %.1f", r.tname, r.delta, r.rate1, r.rate2));
         }
+    }
+
+    private double rate(Territory t, int... years)
+    {
+        double average = 0;
+        int nyears = 0;
+
+        for (int year : years)
+        {
+            average += rate(t, year);
+            nyears++;
+        }
+
+        return average / nyears;
+    }
+
+    private double rate(Territory t, int year)
+    {
+        TerritoryYear ty = t.territoryYear(year);
+
+        long pop_vital = ty.progressive_population.total.both;
+        double cbr = (PROMILLE * denull(ty.births.total.both)) / pop_vital;
+        double cdr = (PROMILLE * denull(ty.deaths.total.both)) / pop_vital;
+        return cbr - cdr;
     }
 
     private long denull(Long v)
     {
         return v != null ? v : 0;
     }
-
-    abstract double rate(double cbr, double cdr);
 }
