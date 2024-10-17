@@ -70,7 +70,7 @@ public abstract class ByRateBase extends EvalCountryBase
         
         for (String tname : tdsVitalRates.keySet())
         {
-            if (Taxon.isComposite(tname))
+            if (Taxon.isComposite(tname) || tname.equals("Черноморская"))
                 continue;
             
             double rate = 0;
