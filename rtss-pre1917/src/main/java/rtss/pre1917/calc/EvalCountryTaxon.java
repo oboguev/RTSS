@@ -107,7 +107,7 @@ public class EvalCountryTaxon
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears);
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
 
-        /* ===================== Учёт военных потерь и эмиграции ===================== */
+        /* ===================== Учёт военных потерь ===================== */
 
         if (DoCountMilitaryDeaths)
         {
