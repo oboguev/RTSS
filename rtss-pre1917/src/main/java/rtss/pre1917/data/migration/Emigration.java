@@ -11,6 +11,7 @@ import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.merge.MergeCities;
 import rtss.util.Util;
 
 public class Emigration
@@ -78,7 +79,9 @@ public class Emigration
 
     private void build(EmigrationYear yd) throws Exception
     {
-        // ### Еврейская эмиграция
+        Set<String> xs = jews.keySet();
+        xs = MergeCities.leaveOnlyCombined(xs);
+        scatter(yd.hebrews, xs, PopulationSelector.HEBREW, yd.year);
 
         scatter(yd.finns * 0.16, union("Выборгская"), PopulationSelector.ALL, yd.year);
         scatter(yd.lithuanians, union("Виленская", "Ковенская", tsBaltic()), PopulationSelector.NON_HEBREW, yd.year);
@@ -90,7 +93,9 @@ public class Emigration
         scatter(yd.germans * 0.25, tsBaltic(), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.others, union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)), PopulationSelector.NON_HEBREW, yd.year);
 
-        // ### validate by year
+        // validate
+        
+        // ###
     }
 
     private static enum PopulationSelector
@@ -123,6 +128,9 @@ public class Emigration
             return 386_440;
         
         Territory t = tdsCensus.get(tname);
+        if (t == null && tname.equals("Батумская"))
+            return 0;
+
         TerritoryYear ty = t.territoryYearOrNull(1897);
 
         double pop = ty.population.total.both;
