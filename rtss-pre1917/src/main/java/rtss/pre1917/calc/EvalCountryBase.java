@@ -12,10 +12,7 @@ import rtss.pre1917.eval.EvalGrowthRate;
 public class EvalCountryBase
 {
     protected TerritoryDataSet tdsPopulation;
-    protected Territory tmPopulation;
-
     protected TerritoryDataSet tdsVitalRates;
-    protected Territory tmVitalRates;
 
     protected final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
     protected final TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY,
@@ -151,11 +148,5 @@ public class EvalCountryBase
 
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
-    }
-
-    protected void extraDeaths(int year, long deaths) throws Exception
-    {
-        tmPopulation.extraDeaths(year, deaths);
-        tmVitalRates.extraDeaths(year, deaths);
     }
 }

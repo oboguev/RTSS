@@ -4,6 +4,7 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.containers.TaxonYearData;
 import rtss.pre1917.calc.containers.TaxonYearlyPopulationData;
+import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
@@ -25,6 +26,9 @@ public class EvalCountryTaxon extends EvalCountryBase
             ex.printStackTrace();
         }
     }
+
+    private Territory tmPopulation;
+    private Territory tmVitalRates;
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
@@ -138,5 +142,12 @@ public class EvalCountryTaxon extends EvalCountryBase
         cd.put(toYear + 1, yd);
 
         return cd;
+    }
+
+
+    protected void extraDeaths(int year, long deaths) throws Exception
+    {
+        tmPopulation.extraDeaths(year, deaths);
+        tmVitalRates.extraDeaths(year, deaths);
     }
 }
