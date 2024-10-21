@@ -118,26 +118,46 @@ public class Emigration
     {
         scatter(yd.armenians, s2d("Эриванская"), PopulationSelector.ALL, yd.year);
         scatter(yd.finns * yd.vyborg / 100, s2d("Выборгская"), PopulationSelector.ALL, yd.year);
-        
-        scatter(yd.germans, 
-                s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"), 
+
+        scatter(yd.germans,
+                s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"),
                 PopulationSelector.NON_HEBREW, yd.year);
 
         Set<String> xs = MergeCities.leaveOnlyCombined(jews.keySet());
         scatter(yd.hebrews, s2d(xs), PopulationSelector.HEBREW, yd.year);
-        
+
         scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.lithuanians * 0.55, s2d("Виленская", "Ковенская"), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.lithuanians * 0.05, s2d("Курляндская", "Лифляндская"), PopulationSelector.NON_HEBREW, yd.year);
         
+        // --------------------------------------------------------------------------------------------
+
+        S2D sd = s2d("Варшавская с Варшавой", 6.4,
+                     "Калишская", 11.5,
+                     "Келецкая", 0.6,
+                     "Ломжинская", 27.4,
+                     "Люблинская", 2.4,
+                     "Петроковская", 3.0,
+                     "Плоцкая", 42.5,
+                     "Радомская", 1.9,
+                     "Сувалкская", 0.6 * 57.9);
+        
+        if (yd.year <= 1913)
+            sd.add("Седлецкая", 2.1);
+
+        scatter(yd.poles, sd, PopulationSelector.NON_HEBREW, yd.year);
+        
+        // --------------------------------------------------------------------------------------------
+
         if (yd.year <= 1902)
         {
             scatter(yd.russians, s2d("Виленская", "Минская"), PopulationSelector.NON_HEBREW, yd.year);
         }
         else
         {
-            scatter(yd.russians, 
-                    s2d("Виленская", "Могилевская", "Минская", "Волынская", "Киевская", "Подольская", "Полтавская", "Воронежская", "Саратовская", "Ставропольская", "Терская обл.", "Кубанская обл.", "Область войска Донского"), 
+            scatter(yd.russians,
+                    s2d("Виленская", "Могилевская", "Минская", "Волынская", "Киевская", "Подольская", "Полтавская", "Воронежская", "Саратовская",
+                        "Ставропольская", "Терская обл.", "Кубанская обл.", "Область войска Донского"),
                     PopulationSelector.NON_HEBREW, yd.year);
         }
 
@@ -146,11 +166,6 @@ public class Emigration
         scatter(yd.others + yd.greeks + yd.scandinavians,
                 s2d(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
                 PopulationSelector.NON_HEBREW, yd.year);
-
-        // ===========================
-        
-        scatter(yd.poles, tsPolish(yd.year), PopulationSelector.NON_HEBREW, yd.year);
-
     }
 
     private static enum PopulationSelector
@@ -208,10 +223,10 @@ public class Emigration
             if (md != null)
                 t = tdsCensus.get(md.combined);
         }
-        
+
         if (t == null && tname.equals("Батумская"))
             return 0;
-        
+
         if (t == null)
             throw new Exception("no pop_1897 data for " + tname);
 
@@ -227,7 +242,7 @@ public class Emigration
             if (md != null)
                 jp = jews.get(md.combined);
         }
-        
+
         if (jp == null)
             jp = 0.0;
         jp /= 100;
@@ -237,11 +252,11 @@ public class Emigration
         case HEBREW:
             pop *= jp;
             break;
-            
+
         case NON_HEBREW:
             pop *= 1 - jp;
             break;
-            
+
         case ALL:
             break;
         }
@@ -280,7 +295,7 @@ public class Emigration
                 throw new Exception("already contains " + s);
             put(s, d);
         }
-        
+
         public double weight(String s) throws Exception
         {
             if (!containsKey(s))
