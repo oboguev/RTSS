@@ -45,4 +45,17 @@ public class MergeDescriptor
         
         return null;
     }
+
+    public static MergeDescriptor findContaining(List<MergeDescriptor> mds, String what)
+    {
+        for (MergeDescriptor md : mds)
+        {
+            List<String> list = md.parentWithChildren();
+            if (list.contains(what))
+                return md;
+        }
+        
+        return null;
+        
+    }
 }

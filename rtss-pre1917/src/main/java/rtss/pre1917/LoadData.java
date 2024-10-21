@@ -971,7 +971,7 @@ public class LoadData
             yd.ruthenians = getEmigration(rc, nr, headers, "русины");
             yd.scandinavians = getEmigration(rc, nr, headers, "скандинавы");
             yd.others = getEmigration(rc, nr, headers, "другие");
-            yd.vyborg = getEmigration(rc, nr, headers, "% для Выборгской губернии");
+            yd.vyborg = getEmigrationDouble(rc, nr, headers, "% для Выборгской губернии");
 
             em.setYearData(yd);
         }

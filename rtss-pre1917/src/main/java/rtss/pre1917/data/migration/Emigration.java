@@ -116,21 +116,26 @@ public class Emigration
 
     private void build(EmigrationYear yd) throws Exception
     {
+        scatter(yd.armenians, s2d("Эриванская"), PopulationSelector.ALL, yd.year);
+        scatter(yd.finns * yd.vyborg / 100, s2d("Выборгская"), PopulationSelector.ALL, yd.year);
         
-        // ===========================
-        
-        scatter(yd.armenians, union("Эриванская"), PopulationSelector.ALL, yd.year);
-        scatter(yd.finns * yd.vyborg / 100, union("Выборгская"), PopulationSelector.ALL, yd.year);
-        scatter(yd.germans * 0.75, union("Саратовская", "Самарская"), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.germans * 0.25, tsBaltic(), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.germans, 
+                s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"), 
+                PopulationSelector.NON_HEBREW, yd.year);
 
         Set<String> xs = MergeCities.leaveOnlyCombined(jews.keySet());
-        scatter(yd.hebrews, xs, PopulationSelector.HEBREW, yd.year);
+        scatter(yd.hebrews, s2d(xs), PopulationSelector.HEBREW, yd.year);
+        
+        scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.lithuanians * 0.55, s2d("Виленская", "Ковенская"), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.lithuanians * 0.05, s2d("Курляндская", "Лифляндская"), PopulationSelector.NON_HEBREW, yd.year);
 
-        scatter(yd.lithuanians, union("Виленская", "Ковенская", tsBaltic()), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.ruthenians, s2d("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
+
+        // ===========================
+        
         scatter(yd.poles, tsPolish(yd.year), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.russians, tsEuropeanRussian(), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.ruthenians, union("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
 
         scatter(yd.others + yd.greeks + yd.scandinavians,
                 union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
@@ -142,7 +147,7 @@ public class Emigration
         HEBREW, NON_HEBREW, ALL
     }
 
-    private void scatter(double amount, Collection<String> tnames, PopulationSelector selector, int year)
+    private void scatter(double amount, Collection<String> tnames, PopulationSelector selector, int year) throws Exception
     {
         double all_pop = pop_1897(tnames, selector);
 
@@ -164,7 +169,7 @@ public class Emigration
         }
     }
 
-    private double pop_1897(Collection<String> tnames, PopulationSelector selector)
+    private double pop_1897(Collection<String> tnames, PopulationSelector selector) throws Exception
     {
         double v = 0;
         for (String tname : tnames)
@@ -180,20 +185,40 @@ public class Emigration
         return v;
     }
 
-    private double pop_1897(String tname, PopulationSelector selector)
+    private double pop_1897(String tname, PopulationSelector selector) throws Exception
     {
         if (tname.equals("Выборгская"))
             return 386_440;
 
         Territory t = tdsCensus.get(tname);
+        if (t == null)
+        {
+            MergeDescriptor md = MergeCities.findContaining(tname);
+            if (md != null)
+                t = tdsCensus.get(md.combined);
+        }
+        
         if (t == null && tname.equals("Батумская"))
             return 0;
+        
+        if (t == null)
+        {
+            throw new Exception("no pop1987 data for " + tname);
+        }
 
         TerritoryYear ty = t.territoryYearOrNull(1897);
 
         double pop = ty.population.total.both;
 
         Double jp = jews.get(tname);
+
+        if (jp == null)
+        {
+            MergeDescriptor md = MergeCities.findContaining(tname);
+            if (md != null)
+                jp = jews.get(md.combined);
+        }
+        
         if (jp == null)
             jp = 0.0;
         jp /= 100;
@@ -238,6 +263,8 @@ public class Emigration
 
     private static class S2D extends HashMap<String, Double>
     {
+        private static final long serialVersionUID = 1L;
+
         private void add(String s, Double d) throws Exception
         {
             if (containsKey(s))
@@ -296,6 +323,18 @@ public class Emigration
                     S2D xs = (S2D) o;
                     for (String tn : xs.keySet())
                         sd.add(tn, xs.get(tn));
+                }
+                else if (o instanceof Set)
+                {
+                    if (tname != null)
+                    {
+                        sd.add(tname, 1.0);
+                        tname = null;
+                    }
+
+                    Set<?> xs = (Set<?>) o;
+                    for (Object o2 : xs)
+                        sd.add((String) o2, 1.0);
                 }
                 else
                 {
