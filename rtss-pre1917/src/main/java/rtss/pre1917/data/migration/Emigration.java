@@ -8,6 +8,7 @@ import java.util.Set;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
@@ -96,6 +97,7 @@ public class Emigration
 
     private TerritoryDataSet tdsCensus;
     private Map<String, Double> jews;
+    private CensusCategories censusCategories;
 
     public void build() throws Exception
     {
@@ -103,6 +105,7 @@ public class Emigration
 
         jews = new LoadData().loadJews();
         tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        censusCategories = new LoadData().loadCensusCategories();
 
         for (int year : Util.sort(y2yd.keySet()))
         {

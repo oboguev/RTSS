@@ -73,7 +73,7 @@ public class LoadData
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
             // self.loadEmigration();
-            self.loadCategories();
+            self.loadCensusCategories();
             // self.loadJews();
             // self.loadInnerMigration();
             // self.loadFinland();
@@ -892,7 +892,7 @@ public class LoadData
         double v = asDouble(o);
         return Math.round(1000 * v);
     }
-    
+
     private double asPercent(Object o) throws Exception
     {
         double v = asDouble(o);
@@ -951,7 +951,7 @@ public class LoadData
         {
             currentFile = null;
         }
-        
+
         em.build();
 
         return em;
@@ -969,7 +969,7 @@ public class LoadData
 
             EmigrationYear yd = new EmigrationYear();
             yd.year = (int) (long) asLong(o);
-            
+
             yd.total = getEmigration(rc, nr, headers, "всего");
             yd.armenians = getEmigration(rc, nr, headers, "армяне");
             yd.finns = getEmigration(rc, nr, headers, "финны");
@@ -1054,7 +1054,7 @@ public class LoadData
 
             if (m.containsKey(gub))
                 throw new Exception("Duplicate territory " + gub);
-            
+
             if (amount < 0 || amount > 100)
                 throw new Exception("Incorrect value " + amount);
 
@@ -1083,13 +1083,13 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    private static CensusCategories censusCategories = null;  
-    
-    public CensusCategories loadCategories() throws Exception
+    private static CensusCategories censusCategories = null;
+
+    public CensusCategories loadCensusCategories() throws Exception
     {
         if (censusCategories != null)
             return censusCategories;
-        
+
         CensusCategories cats = new CensusCategories();
 
         currentFile = "census-1897/categories.xlsx";
@@ -1105,29 +1105,29 @@ public class LoadData
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
-                loadCategories(cats, rc, headers.get("губ"),
-                               headers.get("% русских"),
-                               headers.get("% католиков"),
-                               headers.get("% протестантов"),
-                               headers.get("% иудеев"));
+                loadCensusCategories(cats, rc, headers.get("губ"),
+                                     headers.get("% русских"),
+                                     headers.get("% католиков"),
+                                     headers.get("% протестантов"),
+                                     headers.get("% иудеев"));
 
                 for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
-                    replicateCategories(cats, md);
+                    replicateCensusCategories(cats, md);
             }
         }
         finally
         {
             currentFile = null;
         }
-        
+
         cats.seal();
         censusCategories = cats;
 
         return cats;
     }
 
-    private void loadCategories(CensusCategories cats, ExcelRC rc, int colGub, 
-            int colRussian, int colCatholic, int colProtestant,int colJuifs) throws Exception
+    private void loadCensusCategories(CensusCategories cats, ExcelRC rc, int colGub,
+            int colRussian, int colCatholic, int colProtestant, int colJuifs) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -1139,34 +1139,34 @@ public class LoadData
             String gub = o.toString();
             gub = TerritoryNames.canonic(gub);
             TerritoryNames.checkValidTerritoryName(gub);
-            
+
             CensusCategoryValues v = new CensusCategoryValues();
-            
+
             v.pct_russian = asPercent(rc.get(nr, colRussian));
             v.pct_catholic = asPercent(rc.get(nr, colCatholic));
             v.pct_protestants = asPercent(rc.get(nr, colProtestant));
             v.pct_juifs = asPercent(rc.get(nr, colJuifs));
-            
+
             cats.add(gub, v);
         }
 
         currentNR = null;
     }
 
-    private void replicateCategories(CensusCategories cats, MergeDescriptor md) throws Exception
+    private void replicateCensusCategories(CensusCategories cats, MergeDescriptor md) throws Exception
     {
         if (md.parent != null)
-            replicateCategories(cats, md.combined, md.parent);
+            replicateCensusCategories(cats, md.combined, md.parent);
     }
 
-    private void replicateCategories(CensusCategories cats, String g1, String g2) throws Exception
+    private void replicateCensusCategories(CensusCategories cats, String g1, String g2) throws Exception
     {
         if (cats.containsKey(g1))
             cats.add(g2, cats.get(g1));
         else if (cats.containsKey(g2))
             cats.add(g1, cats.get(g2));
     }
-    
+
     /* ================================================================================================= */
 
     private static InnerMigration cachedInnerMigration;
@@ -1181,7 +1181,7 @@ public class LoadData
             im.build();
             cachedInnerMigration = im;
         }
-        
+
         return cachedInnerMigration;
     }
 
