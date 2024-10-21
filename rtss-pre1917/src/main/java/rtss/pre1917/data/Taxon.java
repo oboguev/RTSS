@@ -1,5 +1,6 @@
 package rtss.pre1917.data;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -506,6 +507,17 @@ public class Taxon
         }
 
         return false;
+    }
+    
+    static public Set<String> eliminateComposite(Collection<String> names)
+    {
+        Set<String> xs = new HashSet<String>();
+        for (String name : names)
+        {
+            if (!isComposite(name))
+                xs.add(name);
+        }
+        return xs;
     }
 
     /*

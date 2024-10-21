@@ -2,6 +2,7 @@ package rtss.pre1917.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class CensusCategories  
 {
@@ -35,5 +36,10 @@ public class CensusCategories
     {
         if (readonly)
             throw new Exception("CensusCategories is readonly");
+    }
+    
+    public Set<String> keySet()
+    {
+        return tname2value.keySet(); 
     }
 }

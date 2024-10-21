@@ -9,6 +9,8 @@ import java.util.Set;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.CensusCategories;
+import rtss.pre1917.data.CensusCategoryValues;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
@@ -96,14 +98,12 @@ public class Emigration
     }
 
     private TerritoryDataSet tdsCensus;
-    private Map<String, Double> jews;
     private CensusCategories censusCategories;
 
     public void build() throws Exception
     {
         checkWritable();
 
-        jews = new LoadData().loadJews();
         tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
         censusCategories = new LoadData().loadCensusCategories();
 
@@ -127,7 +127,9 @@ public class Emigration
                 s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"),
                 PopulationSelector.NON_HEBREW, yd.year);
 
-        Set<String> xs = MergeCities.leaveOnlyCombined(jews.keySet());
+        Set<String> xs = censusCategories.keySet();
+        xs = Taxon.eliminateComposite(xs);
+        xs = MergeCities.leaveOnlyCombined(xs);
         scatter(yd.hebrews, s2d(xs), PopulationSelector.HEBREW, yd.year);
 
         scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.NON_HEBREW, yd.year);
@@ -220,28 +222,26 @@ public class Emigration
         TerritoryYear ty = t.territoryYearOrNull(1897);
 
         double pop = ty.population.total.both;
-
-        Double jp = jews.get(tname);
-
-        if (jp == null)
+        
+        CensusCategoryValues ccv = censusCategories.get(tname);
+        if (ccv == null)
         {
             MergeDescriptor md = MergeCities.findContaining(tname);
             if (md != null)
-                jp = jews.get(md.combined);
+                ccv = censusCategories.get(md.combined);
         }
-
-        if (jp == null)
-            jp = 0.0;
-        jp /= 100;
+        
+        if (ccv == null)
+            throw new Exception("No 1897 census category data for " + tname);
 
         switch (selector)
         {
         case HEBREW:
-            pop *= jp;
+            pop *= ccv.pct_juifs / 100;
             break;
 
         case NON_HEBREW:
-            pop *= 1 - jp;
+            pop *= 1 - ccv.pct_juifs / 100;
             break;
 
         case ALL:

@@ -72,8 +72,8 @@ public class LoadData
             // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
-            // self.loadEmigration();
-            self.loadCensusCategories();
+            self.loadEmigration();
+            // self.loadCensusCategories();
             // self.loadJews();
             // self.loadInnerMigration();
             // self.loadFinland();
