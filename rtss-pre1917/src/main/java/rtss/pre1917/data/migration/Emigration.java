@@ -129,17 +129,28 @@ public class Emigration
         scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.lithuanians * 0.55, s2d("Виленская", "Ковенская"), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.lithuanians * 0.05, s2d("Курляндская", "Лифляндская"), PopulationSelector.NON_HEBREW, yd.year);
+        
+        if (yd.year <= 1902)
+        {
+            scatter(yd.russians, s2d("Виленская", "Минская"), PopulationSelector.NON_HEBREW, yd.year);
+        }
+        else
+        {
+            scatter(yd.russians, 
+                    s2d("Виленская", "Могилевская", "Минская", "Волынская", "Киевская", "Подольская", "Полтавская", "Воронежская", "Саратовская", "Ставропольская", "Терская обл.", "Кубанская обл.", "Область войска Донского"), 
+                    PopulationSelector.NON_HEBREW, yd.year);
+        }
 
         scatter(yd.ruthenians, s2d("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
+
+        scatter(yd.others + yd.greeks + yd.scandinavians,
+                s2d(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
+                PopulationSelector.NON_HEBREW, yd.year);
 
         // ===========================
         
         scatter(yd.poles, tsPolish(yd.year), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.russians, tsEuropeanRussian(), PopulationSelector.NON_HEBREW, yd.year);
 
-        scatter(yd.others + yd.greeks + yd.scandinavians,
-                union(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
-                PopulationSelector.NON_HEBREW, yd.year);
     }
 
     private static enum PopulationSelector
@@ -202,9 +213,7 @@ public class Emigration
             return 0;
         
         if (t == null)
-        {
-            throw new Exception("no pop1987 data for " + tname);
-        }
+            throw new Exception("no pop_1897 data for " + tname);
 
         TerritoryYear ty = t.territoryYearOrNull(1897);
 
