@@ -116,6 +116,9 @@ public class Emigration
 
     private void build(EmigrationYear yd) throws Exception
     {
+        
+        // ===========================
+        
         scatter(yd.armenians, union("Эриванская"), PopulationSelector.ALL, yd.year);
         scatter(yd.finns * yd.vyborg / 100, union("Выборгская"), PopulationSelector.ALL, yd.year);
         scatter(yd.germans * 0.75, union("Саратовская", "Самарская"), PopulationSelector.NON_HEBREW, yd.year);
@@ -150,11 +153,30 @@ public class Emigration
         }
     }
 
+    private void scatter(double amount, S2D tnames, PopulationSelector selector, int year) throws Exception
+    {
+        double all_pop = pop_1897(tnames, selector);
+
+        for (String tname : tnames.keySet())
+        {
+            double pop = pop_1897(tname, selector) * tnames.weight(tname);
+            addAmount(tname, year, amount * pop / all_pop);
+        }
+    }
+
     private double pop_1897(Collection<String> tnames, PopulationSelector selector)
     {
         double v = 0;
         for (String tname : tnames)
             v += pop_1897(tname, selector);
+        return v;
+    }
+
+    private double pop_1897(S2D tnames, PopulationSelector selector) throws Exception
+    {
+        double v = 0;
+        for (String tname : tnames.keySet())
+            v += pop_1897(tname, selector) * tnames.weight(tname);
         return v;
     }
 
@@ -181,9 +203,11 @@ public class Emigration
         case HEBREW:
             pop *= jp;
             break;
+            
         case NON_HEBREW:
             pop *= 1 - jp;
             break;
+            
         case ALL:
             break;
         }
@@ -221,12 +245,19 @@ public class Emigration
             put(s, d);
         }
         
+        public double weight(String s) throws Exception
+        {
+            if (!containsKey(s))
+                throw new Exception("no value for " + s);
+            return get(s);
+        }
+
         public static S2D make(Object... objects) throws Exception
         {
             S2D sd = new S2D();
-            
+
             String tname = null;
-            
+
             for (Object o : objects)
             {
                 if (o == null)
@@ -259,8 +290,9 @@ public class Emigration
                     if (tname != null)
                     {
                         sd.add(tname, 1.0);
-                        tname = null;                    }
-                    
+                        tname = null;
+                    }
+
                     S2D xs = (S2D) o;
                     for (String tn : xs.keySet())
                         sd.add(tn, xs.get(tn));
@@ -270,7 +302,7 @@ public class Emigration
                     throw new IllegalArgumentException("unexpected type");
                 }
             }
-            
+
             if (tname != null)
                 sd.add(tname, 1.0);
 
