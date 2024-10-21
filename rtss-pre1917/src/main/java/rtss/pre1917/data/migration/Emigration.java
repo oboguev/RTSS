@@ -119,6 +119,7 @@ public class Emigration
         scatter(yd.armenians, s2d("Эриванская"), PopulationSelector.ALL, yd.year);
         scatter(yd.finns * yd.vyborg / 100, s2d("Выборгская"), PopulationSelector.ALL, yd.year);
 
+        // следует ли взвешивать губернии по численности населения или просто использовать соотношение 3-2-1-1-1-1 ?
         scatter(yd.germans,
                 s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"),
                 PopulationSelector.NON_HEBREW, yd.year);
@@ -151,10 +152,12 @@ public class Emigration
 
         if (yd.year <= 1902)
         {
+            // ### use PopulationSelector.RUSSIAN
             scatter(yd.russians, s2d("Виленская", "Минская"), PopulationSelector.NON_HEBREW, yd.year);
         }
         else
         {
+            // ### use PopulationSelector.RUSSIAN
             scatter(yd.russians,
                     s2d("Виленская", "Могилевская", "Минская", "Волынская", "Киевская", "Подольская", "Полтавская", "Воронежская", "Саратовская",
                         "Ставропольская", "Терская обл.", "Кубанская обл.", "Область войска Донского"),

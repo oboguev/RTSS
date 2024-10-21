@@ -1042,7 +1042,10 @@ public class LoadData
             double amount = asDouble(rc.get(nr, colAmount));
 
             if (m.containsKey(gub))
-                throw new Exception("Duplicate territory");
+                throw new Exception("Duplicate territory " + gub);
+            
+            if (amount < 0 || amount > 100)
+                throw new Exception("Incorrect value " + amount);
 
             m.put(gub, amount);
         }
