@@ -12,6 +12,8 @@ import java.util.Set;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import rtss.pre1917.data.CensusCategories;
+import rtss.pre1917.data.CensusCategoryValues;
 import rtss.pre1917.data.ColumnHeader;
 import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Territory;
@@ -70,7 +72,8 @@ public class LoadData
             // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
-            self.loadEmigration();
+            // self.loadEmigration();
+            self.loadCategories();
             // self.loadJews();
             // self.loadInnerMigration();
             // self.loadFinland();
@@ -889,6 +892,14 @@ public class LoadData
         double v = asDouble(o);
         return Math.round(1000 * v);
     }
+    
+    private double asPercent(Object o) throws Exception
+    {
+        double v = asDouble(o);
+        if (v < 0 || v > 100)
+            throw new Exception("percentage out of range");
+        return v;
+    }
 
     private TerritoryYear territoryYear(String gub, int year)
     {
@@ -1070,6 +1081,92 @@ public class LoadData
             m.put(g1, m.get(g2));
     }
 
+    /* ================================================================================================= */
+
+    private static CensusCategories censusCategories = null;  
+    
+    public CensusCategories loadCategories() throws Exception
+    {
+        if (censusCategories != null)
+            return censusCategories;
+        
+        CensusCategories cats = new CensusCategories();
+
+        currentFile = "census-1897/categories.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                loadCategories(cats, rc, headers.get("губ"),
+                               headers.get("% русских"),
+                               headers.get("% католиков"),
+                               headers.get("% протестантов"),
+                               headers.get("% иудеев"));
+
+                for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
+                    replicateCategories(cats, md);
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+        
+        cats.seal();
+        censusCategories = cats;
+
+        return cats;
+    }
+
+    private void loadCategories(CensusCategories cats, ExcelRC rc, int colGub, 
+            int colRussian, int colCatholic, int colProtestant,int colJuifs) throws Exception
+    {
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            Object o = rc.get(nr, colGub);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+            String gub = o.toString();
+            gub = TerritoryNames.canonic(gub);
+            TerritoryNames.checkValidTerritoryName(gub);
+            
+            CensusCategoryValues v = new CensusCategoryValues();
+            
+            v.pct_russian = asPercent(rc.get(nr, colRussian));
+            v.pct_catholic = asPercent(rc.get(nr, colCatholic));
+            v.pct_protestants = asPercent(rc.get(nr, colProtestant));
+            v.pct_juifs = asPercent(rc.get(nr, colJuifs));
+            
+            cats.add(gub, v);
+        }
+
+        currentNR = null;
+    }
+
+    private void replicateCategories(CensusCategories cats, MergeDescriptor md) throws Exception
+    {
+        if (md.parent != null)
+            replicateCategories(cats, md.combined, md.parent);
+    }
+
+    private void replicateCategories(CensusCategories cats, String g1, String g2) throws Exception
+    {
+        if (cats.containsKey(g1))
+            cats.add(g2, cats.get(g1));
+        else if (cats.containsKey(g2))
+            cats.add(g1, cats.get(g2));
+    }
+    
     /* ================================================================================================= */
 
     private static InnerMigration cachedInnerMigration;

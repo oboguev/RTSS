@@ -176,17 +176,6 @@ public class Emigration
         HEBREW, NON_HEBREW, ALL
     }
 
-    private void scatter(double amount, Collection<String> tnames, PopulationSelector selector, int year) throws Exception
-    {
-        double all_pop = pop_1897(tnames, selector);
-
-        for (String tname : tnames)
-        {
-            double pop = pop_1897(tname, selector);
-            addAmount(tname, year, amount * pop / all_pop);
-        }
-    }
-
     private void scatter(double amount, S2D tnames, PopulationSelector selector, int year) throws Exception
     {
         double all_pop = pop_1897(tnames, selector);
@@ -196,14 +185,6 @@ public class Emigration
             double pop = pop_1897(tname, selector) * tnames.weight(tname);
             addAmount(tname, year, amount * pop / all_pop);
         }
-    }
-
-    private double pop_1897(Collection<String> tnames, PopulationSelector selector) throws Exception
-    {
-        double v = 0;
-        for (String tname : tnames)
-            v += pop_1897(tname, selector);
-        return v;
     }
 
     private double pop_1897(S2D tnames, PopulationSelector selector) throws Exception
