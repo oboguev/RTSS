@@ -991,7 +991,7 @@ public class LoadData
     {
         Map<String, Double> m = new HashMap<>();
 
-        currentFile = "juifs.xlsx";
+        currentFile = "census-1897/juifs.xlsx";
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
