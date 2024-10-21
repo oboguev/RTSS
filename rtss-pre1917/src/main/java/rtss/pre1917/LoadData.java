@@ -971,6 +971,7 @@ public class LoadData
             yd.ruthenians = getEmigration(rc, nr, headers, "русины");
             yd.scandinavians = getEmigration(rc, nr, headers, "скандинавы");
             yd.others = getEmigration(rc, nr, headers, "другие");
+            yd.vyborg = getEmigration(rc, nr, headers, "% для Выборгской губернии");
 
             em.setYearData(yd);
         }
@@ -983,6 +984,13 @@ public class LoadData
         int col = headers.get(what);
         Object o = rc.get(nr, col);
         return Math.round(asDouble(o));
+    }
+
+    private double getEmigrationDouble(ExcelRC rc, int nr, Map<String, Integer> headers, String what) throws Exception
+    {
+        int col = headers.get(what);
+        Object o = rc.get(nr, col);
+        return asDouble(o);
     }
 
     /* ================================================================================================= */

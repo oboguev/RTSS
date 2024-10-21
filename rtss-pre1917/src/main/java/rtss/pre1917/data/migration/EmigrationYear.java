@@ -17,4 +17,6 @@ public class EmigrationYear
     public long ruthenians;
     public long scandinavians;
     public long others;
+    
+    public double vyborg;
 }

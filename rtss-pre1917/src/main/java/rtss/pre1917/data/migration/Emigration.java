@@ -31,7 +31,7 @@ public class Emigration
             v = 0.0;
 
             MergeDescriptor md = MergePost1897Regions.find(tname);
-            
+
             if (md != null)
             {
                 for (String xtn : md.parentWithChildren())
@@ -61,7 +61,7 @@ public class Emigration
     {
         return year + " @ " + tname;
     }
-    
+
     private void addAmount(String tname, int year, double value)
     {
         String key = key(tname, year);
@@ -117,7 +117,7 @@ public class Emigration
     private void build(EmigrationYear yd) throws Exception
     {
         scatter(yd.armenians, union("Эриванская"), PopulationSelector.ALL, yd.year);
-        scatter(yd.finns * 0.16, union("Выборгская"), PopulationSelector.ALL, yd.year);
+        scatter(yd.finns * yd.vyborg / 100, union("Выборгская"), PopulationSelector.ALL, yd.year);
         scatter(yd.germans * 0.75, union("Саратовская", "Самарская"), PopulationSelector.NON_HEBREW, yd.year);
         scatter(yd.germans * 0.25, tsBaltic(), PopulationSelector.NON_HEBREW, yd.year);
 
@@ -192,6 +192,10 @@ public class Emigration
     }
 
     /* =================================================================================================== */
+
+    private static class S2D extends HashMap<String, Double>
+    {
+    }
 
     private Collection<String> tsBaltic()
     {
@@ -303,7 +307,7 @@ public class Emigration
                 v += tname2amount.get(key);
         }
 
-        if (Math.abs(yd.total - 0.84 * yd.finns - v) > 5)
+        if (Math.abs(yd.total - yd.finns * (1 - yd.vyborg / 100) - v) > 5)
             throw new Exception("Emigration builder self-check failed for year " + yd.year);
     }
 }
