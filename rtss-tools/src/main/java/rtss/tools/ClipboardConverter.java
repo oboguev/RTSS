@@ -17,63 +17,79 @@ public class ClipboardConverter
                 Util.err("Clipboard is empty");
                 return;
             }
+            
+            s = convert_2(s);
 
-            if (s.startsWith("."))
-                s = "1" + s;
-
-            s = s.replace("\'", "");
-            s = s.replace(";", "");
-            s = s.replace("I", "");
-            s = s.replace("І", "");
-            s = s.replace(" 1\n", " 1");
-            s = s.replace(' ', '\t');
-            s = s.replace(". ", ".");
-            s = s.replace(" .", ".");
-            s = s.replace("i", "1");
-            s = s.replace("o", "0");
-            s = s.replace("о", "0");
-
-            s = cleanCharset(s);
-
-            s = preprocessLines(s);
-            s = s.replace('\n', ' ');
-            s = s.replace("\r", "");
-            s = Util.despace(s).trim();
-            s = fixCommasDots(s);
-            s = s.replace(' ', '\t');
-
-            // s = s.replace('.', '@');
-            // s = s.replace(',', '.');
-            // s = s.replace('@', ',');
-
-            String[] sa = s.split("\t");
-            StringBuilder sb = new StringBuilder();
-
-            add(sb, sa, 0);
-            add(sb, sa, 1);
-            add(sb, sa, 2);
-            sb.append("\t");
-            sb.append("\t");
-
-            add(sb, sa, 3);
-            add(sb, sa, 4);
-            add(sb, sa, 5);
-            sb.append("\t");
-            sb.append("\t");
-
-            add(sb, sa, 6);
-            add(sb, sa, 7);
-            add(sb, sa, 8);
-
-            Clipboard.put(sb.toString());
-
-            Util.out("Transformed: " + sb.toString());
+            Clipboard.put(s);
+            Util.out("Transformed: " + s);
         }
         catch (Exception ex)
         {
             Util.err("** Exception:");
             ex.printStackTrace();
         }
+    }
+    
+    @SuppressWarnings("unused")
+    private static String convert_2(String s) throws Exception
+    {
+        s = Util.despace(s);
+        s = s.replace(".", ",");
+        s = s.replace(" ", "\n");
+        return s;
+    }
+    
+    @SuppressWarnings("unused")
+    private static String convert_1(String s) throws Exception
+    {
+        if (s.startsWith("."))
+            s = "1" + s;
+
+        s = s.replace("\'", "");
+        s = s.replace(";", "");
+        s = s.replace("I", "");
+        s = s.replace("І", "");
+        s = s.replace(" 1\n", " 1");
+        s = s.replace(' ', '\t');
+        s = s.replace(". ", ".");
+        s = s.replace(" .", ".");
+        s = s.replace("i", "1");
+        s = s.replace("o", "0");
+        s = s.replace("о", "0");
+
+        s = cleanCharset(s);
+
+        s = preprocessLines(s);
+        s = s.replace('\n', ' ');
+        s = s.replace("\r", "");
+        s = Util.despace(s).trim();
+        s = fixCommasDots(s);
+        s = s.replace(' ', '\t');
+
+        // s = s.replace('.', '@');
+        // s = s.replace(',', '.');
+        // s = s.replace('@', ',');
+
+        String[] sa = s.split("\t");
+        StringBuilder sb = new StringBuilder();
+
+        add(sb, sa, 0);
+        add(sb, sa, 1);
+        add(sb, sa, 2);
+        sb.append("\t");
+        sb.append("\t");
+
+        add(sb, sa, 3);
+        add(sb, sa, 4);
+        add(sb, sa, 5);
+        sb.append("\t");
+        sb.append("\t");
+
+        add(sb, sa, 6);
+        add(sb, sa, 7);
+        add(sb, sa, 8);
+
+        return sb.toString();
     }
 
     private static void add(StringBuilder sb, String[] sa, int k)
