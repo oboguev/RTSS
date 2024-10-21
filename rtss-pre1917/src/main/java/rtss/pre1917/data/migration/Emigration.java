@@ -191,10 +191,91 @@ public class Emigration
         return pop;
     }
 
+    private void validate(EmigrationYear yd) throws Exception
+    {
+        double v = 0;
+
+        for (String key : tname2amount.keySet())
+        {
+            if (key.startsWith("" + yd.year + " @ "))
+                v += tname2amount.get(key);
+        }
+
+        if (Math.abs(yd.total - yd.finns * (1 - yd.vyborg / 100) - v) > 5)
+            throw new Exception("Emigration builder self-check failed for year " + yd.year);
+    }
+
     /* =================================================================================================== */
+
+    private S2D s2d(Object... objects) throws Exception
+    {
+        return S2D.make(objects);
+    }
 
     private static class S2D extends HashMap<String, Double>
     {
+        private void add(String s, Double d) throws Exception
+        {
+            if (containsKey(s))
+                throw new Exception("already contains " + s);
+            put(s, d);
+        }
+        
+        public static S2D make(Object... objects) throws Exception
+        {
+            S2D sd = new S2D();
+            
+            String tname = null;
+            
+            for (Object o : objects)
+            {
+                if (o == null)
+                {
+                    throw new IllegalArgumentException("null argument");
+                }
+                else if (o instanceof String)
+                {
+                    String s = (String) o;
+                    if (tname == null)
+                    {
+                        tname = s;
+                    }
+                    else
+                    {
+                        sd.add(tname, 1.0);
+                        tname = s;
+                    }
+                }
+                else if (o instanceof Number)
+                {
+                    if (tname == null)
+                        throw new IllegalArgumentException("number not preceded by string");
+                    Number n = (Number) o;
+                    sd.add(tname, n.doubleValue());
+                    tname = null;
+                }
+                else if (o instanceof S2D)
+                {
+                    if (tname != null)
+                    {
+                        sd.add(tname, 1.0);
+                        tname = null;                    }
+                    
+                    S2D xs = (S2D) o;
+                    for (String tn : xs.keySet())
+                        sd.add(tn, xs.get(tn));
+                }
+                else
+                {
+                    throw new IllegalArgumentException("unexpected type");
+                }
+            }
+            
+            if (tname != null)
+                sd.add(tname, 1.0);
+
+            return sd;
+        }
     }
 
     private Collection<String> tsBaltic()
@@ -295,19 +376,5 @@ public class Emigration
         }
 
         return xs;
-    }
-
-    private void validate(EmigrationYear yd) throws Exception
-    {
-        double v = 0;
-
-        for (String key : tname2amount.keySet())
-        {
-            if (key.startsWith("" + yd.year + " @ "))
-                v += tname2amount.get(key);
-        }
-
-        if (Math.abs(yd.total - yd.finns * (1 - yd.vyborg / 100) - v) > 5)
-            throw new Exception("Emigration builder self-check failed for year " + yd.year);
     }
 }
