@@ -132,10 +132,10 @@ public class Emigration
         xs = MergeCities.leaveOnlyCombined(xs);
         scatter(yd.hebrews, s2d(xs), PopulationSelector.HEBREW, yd.year);
 
-        scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.lithuanians * 0.55, s2d("Виленская", "Ковенская"), PopulationSelector.NON_HEBREW, yd.year);
-        scatter(yd.lithuanians * 0.05, s2d("Курляндская", "Лифляндская"), PopulationSelector.NON_HEBREW, yd.year);
-        
+        scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.ALL, yd.year);
+        scatter(yd.lithuanians * 0.55, s2d("Виленская", "Ковенская"), PopulationSelector.CATHOLIC, yd.year);
+        scatter(yd.lithuanians * 0.05, s2d("Курляндская", "Лифляндская"), PopulationSelector.PROTESTANT, yd.year);
+
         // --------------------------------------------------------------------------------------------
 
         S2D sd = s2d("Варшавская с Варшавой", 6.4,
@@ -147,26 +147,24 @@ public class Emigration
                      "Плоцкая", 42.5,
                      "Радомская", 1.9,
                      "Сувалкская", 0.6 * 57.9);
-        
+
         if (yd.year <= 1913)
             sd.add("Седлецкая", 2.1);
 
-        scatter(yd.poles, sd, PopulationSelector.NON_HEBREW, yd.year);
-        
+        scatter(yd.poles, sd, PopulationSelector.CATHOLIC, yd.year);
+
         // --------------------------------------------------------------------------------------------
 
         if (yd.year <= 1902)
         {
-            // ### use PopulationSelector.RUSSIAN
-            scatter(yd.russians, s2d("Виленская", "Минская"), PopulationSelector.NON_HEBREW, yd.year);
+            scatter(yd.russians, s2d("Виленская", "Минская"), PopulationSelector.RUSSIAN, yd.year);
         }
         else
         {
-            // ### use PopulationSelector.RUSSIAN
             scatter(yd.russians,
                     s2d("Виленская", "Могилевская", "Минская", "Волынская", "Киевская", "Подольская", "Полтавская", "Воронежская", "Саратовская",
                         "Ставропольская", "Терская обл.", "Кубанская обл.", "Область войска Донского"),
-                    PopulationSelector.NON_HEBREW, yd.year);
+                    PopulationSelector.RUSSIAN, yd.year);
         }
 
         scatter(yd.ruthenians, s2d("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
@@ -178,7 +176,7 @@ public class Emigration
 
     private static enum PopulationSelector
     {
-        HEBREW, NON_HEBREW, ALL
+        HEBREW, NON_HEBREW, CATHOLIC, PROTESTANT, RUSSIAN, ALL
     }
 
     private void scatter(double amount, S2D tnames, PopulationSelector selector, int year) throws Exception
@@ -222,7 +220,7 @@ public class Emigration
         TerritoryYear ty = t.territoryYearOrNull(1897);
 
         double pop = ty.population.total.both;
-        
+
         CensusCategoryValues ccv = censusCategories.get(tname);
         if (ccv == null)
         {
@@ -230,9 +228,10 @@ public class Emigration
             if (md != null)
                 ccv = censusCategories.get(md.combined);
         }
-        
+
         if (ccv == null)
             throw new Exception("No 1897 census category data for " + tname);
+
 
         switch (selector)
         {
@@ -242,6 +241,18 @@ public class Emigration
 
         case NON_HEBREW:
             pop *= 1 - ccv.pct_juifs / 100;
+            break;
+            
+        case CATHOLIC:
+            pop *= ccv.pct_catholic / 100;
+            break;
+
+        case PROTESTANT:
+            pop *= ccv.pct_protestants / 100;
+            break;
+        
+        case RUSSIAN:
+            pop *= ccv.pct_russian / 100;
             break;
 
         case ALL:
