@@ -3,6 +3,7 @@ package rtss.pre1917.merge;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import rtss.pre1917.data.TerritoryDataSet;
@@ -61,5 +62,24 @@ public class MergeCities
     public static MergeDescriptor findContaining(String what)
     {
         return MergeDescriptor.findContaining(MergeCitiesDescriptors, what);
+    }
+    
+    public static String combined2parent(String combined)
+    {
+        return MergeDescriptor.combined2parent(MergeCitiesDescriptors, combined);
+    }
+
+    public static String parent2combined(String combined)
+    {
+        return MergeDescriptor.parent2combined(MergeCitiesDescriptors, combined);
+    }
+    
+    public static void removeCities(Map<String, ?> m)
+    {
+        for (MergeDescriptor md : MergeCitiesDescriptors)
+        {
+            for (String city : md.children)
+                m.remove(city);
+        }
     }
 }

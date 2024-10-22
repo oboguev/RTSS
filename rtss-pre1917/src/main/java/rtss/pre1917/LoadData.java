@@ -1832,9 +1832,14 @@ public class LoadData
     }
 
     /* ================================================================================================= */
+    
+    private static Foreigners cachedForeigners = null; 
 
     public Foreigners loadForeigners() throws Exception
     {
+        if (cachedForeigners != null)
+            return cachedForeigners;
+
         Foreigners foreigners = new Foreigners();
 
         currentFile = "census-1897/foreigners.xlsx";
@@ -1852,14 +1857,15 @@ public class LoadData
                 Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
 
                 loadForeigners(foreigners, rc, headers.get("губ"), headers);
-
-                // ### replicate tnames (Московская с Москвой etc.)
             }
         }
         finally
         {
             currentFile = null;
         }
+
+        foreigners.build();
+        cachedForeigners = foreigners; 
 
         return foreigners;
     }

@@ -56,6 +56,27 @@ public class MergeDescriptor
         }
         
         return null;
+    }
+    
+    public static String combined2parent(List<MergeDescriptor> mds, String combined)
+    {
+        for (MergeDescriptor md : mds)
+        {
+            if (md.combined.equals(combined))
+                return md.parent;
+        }
         
+        return null;
+    }
+
+    public static String parent2combined(List<MergeDescriptor> mds, String parent)
+    {
+        for (MergeDescriptor md : mds)
+        {
+            if (md.parent.equals(parent))
+                return md.combined;
+        }
+        
+        return null;
     }
 }
