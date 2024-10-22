@@ -2,6 +2,7 @@ package rtss.pre1917.data.migration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /*
  * Годовые данные иммиграции в Россию: число иммигрантов по странам
@@ -36,6 +37,11 @@ public class ImmigrationYear
             v = 0L;
         
         return v;
+    }
+    
+    public Set<String> contries()
+    {
+        return country2amount.keySet();
     }
     
     public static class LumpImmigration

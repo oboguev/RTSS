@@ -11,6 +11,7 @@ import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.Foreigners;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.util.Util;
@@ -32,6 +33,13 @@ public class Immigration
         String key = key(tname, year);
 
         Double v = tname2amount.get(key);
+        
+        if (v == null)
+        {
+            String ptname = MergeCities.combined2parent(tname);
+            key = key(ptname, year);
+            v = tname2amount.get(key);
+        }
 
         if (v == null)
         {
@@ -44,7 +52,7 @@ public class Immigration
                 for (String xtn : md.parentWithChildren())
                     v += immigrants(xtn, year);
             }
-            else if (union("Холмская", "Сахалин", "Камчатская", "Батумская").contains(tname))
+            else if (union("Холмская", "Сахалин", "Камчатская", "Батумская", "Выборгская").contains(tname))
             {
                 // leave zero
             }
@@ -154,7 +162,19 @@ public class Immigration
 
     private void validate(ImmigrationYear yd) throws Exception
     {
-        // ###
+        long v1 = 0;
+        for (String country : yd.contries())
+            v1 += yd.get(country);
+        
+        double v2 = yd.lump.sum();
+        for (String key : tname2amount.keySet())
+        {
+            if (key.startsWith(yd.year + " @ "))
+                v2 += tname2amount.get(key);
+        }
+        
+        if (Math.abs(v1 - v2) > 3)
+            throw new Exception("Immigration build self-check failed");
     }
 
     private void scatter(ImmigrationYear yd, String country) throws Exception
