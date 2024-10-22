@@ -20,10 +20,16 @@ import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.util.Util;
 
+/*
+ * Эмиграция из России в иностранные государства
+ */
 public class Emigration
 {
     /* ================================== FETCH DATA ================================== */
 
+    /*
+     * Число эиигрантов уехавших за границу из губернии или области @tname в год @year 
+     */
     public long emigrants(String tname, int year) throws Exception
     {
         String key = key(tname, year);

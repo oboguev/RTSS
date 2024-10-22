@@ -3,6 +3,9 @@ package rtss.pre1917.data.migration;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+ * Годовые данные иммиграции в Россию: число иммигрантов по странам
+ */
 public class ImmigrationYear
 {
     public int year;

@@ -9,15 +9,22 @@ import java.util.Set;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.CensusCategories;
+import rtss.pre1917.data.Foreigners;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.util.Util;
 
+/*
+ * Иммиграция в Россию извне границ России
+ */
 public class Immigration
 {
     /* ================================== FETCH DATA ================================== */
 
+    /*
+     * Число иммигрантов извне границ России поселившихся в губернии или области @tname в год @year 
+     */
     public long immigrants(String tname, int year) throws Exception
     {
         String key = key(tname, year);
@@ -88,9 +95,10 @@ public class Immigration
         y2yd.put(yd.year, yd);
 
     }
-    
+
     private TerritoryDataSet tdsCensus;
     private CensusCategories censusCategories;
+    private Foreigners foreigners;
 
     public void build() throws Exception
     {
@@ -98,6 +106,7 @@ public class Immigration
 
         tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
         censusCategories = new LoadData().loadCensusCategories();
+        foreigners = new LoadData().loadForeigners();
 
         for (int year : Util.sort(y2yd.keySet()))
         {
@@ -108,12 +117,12 @@ public class Immigration
 
         sealed = true;
     }
-    
+
     private void build(ImmigrationYear yd) throws Exception
     {
         // ###
     }
-    
+
     private void validate(ImmigrationYear yd) throws Exception
     {
         // ###

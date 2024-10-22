@@ -1,5 +1,8 @@
 package rtss.pre1917.data.migration;
 
+/*
+ * Годовые данные эмиграции из России: число иммигрантов по народностям
+ */
 public class EmigrationYear
 {
     public int year;
@@ -18,5 +21,8 @@ public class EmigrationYear
     public long scandinavians;
     public long others;
     
+    /*
+     * % финских эмигрантов приходившихся на Выборгскую губернию
+     */
     public double vyborg;
 }
