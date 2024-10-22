@@ -92,10 +92,30 @@ public class LoadData
             Util.err("** Exception: ");
             ex.printStackTrace();
 
-            if (self.currentNR != null)
+            if (self.currentNR != null && self.currentWCOL != null)
             {
-                Util.out(String.format("File %s, col %c (%d), row %s", self.currentFile, 'A' + self.currentWCOL, self.currentWCOL + 1,
+                int c1 = 'A' + self.currentWCOL;
+                String excelColID = "";
+                
+                if (c1 <= 'Z')
+                {
+                    excelColID += (char) c1;
+                }
+                else
+                {
+                    c1 = self.currentWCOL / 26;
+                    int c2 = self.currentWCOL % 26;
+                    excelColID += (char) ('A' + c1 - 1);
+                    excelColID += (char) ('A' + c2);
+                }
+                
+                
+                Util.out(String.format("File %s, col %s (%d), row %s", self.currentFile, excelColID, self.currentWCOL + 1,
                                        self.currentNR + 1));
+            }
+            else if (self.currentNR != null)
+            {
+                Util.out(String.format("File %s, row %s", self.currentFile, self.currentNR + 1));
             }
         }
     }
@@ -1981,6 +2001,7 @@ public class LoadData
                     country = Util.stripTail(country, " лб");
                 
                 int col = headers.get(h);
+                currentWCOL = col;
                 o = rc.get(nr, col);
                 long amount = asLong(o); 
                 
