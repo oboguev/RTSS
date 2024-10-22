@@ -5,7 +5,12 @@ package rtss.pre1917.data.migration;
  */
 public class EmigrationYear
 {
-    public int year;
+    public final int year;
+    
+    public EmigrationYear(int year)
+    {
+        this.year = year;
+    }
     
     public long total;
     

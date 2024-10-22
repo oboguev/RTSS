@@ -8,9 +8,14 @@ import java.util.Map;
  */
 public class ImmigrationYear
 {
-    public int year;
+    public final int year;
 
     private Map<String,Long> country2amount = new HashMap<>();
+    
+    public ImmigrationYear(int year)
+    {
+        this.year = year;
+    }
     
     public void add(String country, long amount)
     {

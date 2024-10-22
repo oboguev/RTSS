@@ -25,6 +25,8 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.Foreigners.ByTerritory;
 import rtss.pre1917.data.migration.Emigration;
 import rtss.pre1917.data.migration.EmigrationYear;
+import rtss.pre1917.data.migration.Immigration;
+import rtss.pre1917.data.migration.ImmigrationYear;
 import rtss.pre1917.data.migration.InnerMigration;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.eval.EvalProgressive;
@@ -80,7 +82,8 @@ public class LoadData
             // self.loadJews();
             // self.loadInnerMigration();
             // self.loadFinland();
-            self.loadForeigners();
+            // self.loadForeigners();
+            self.loadImmigration();
 
             Util.out("** Done");
         }
@@ -688,7 +691,7 @@ public class LoadData
             }
             else
             {
-                year = (int) (long) asLong(o);
+                year = asInteger(o);
             }
 
             // what-value
@@ -861,6 +864,11 @@ public class LoadData
             throw new Exception("Invalid cell data type (for expected Double)");
         }
     }
+    
+    private Integer asInteger(Object o) throws Exception
+    {
+        return (int) (long) asLong(o);
+    }
 
     private Long asLong(Object o) throws Exception
     {
@@ -972,8 +980,9 @@ public class LoadData
             if (o == null || o.toString().trim().length() == 0 || o.toString().contains("-"))
                 continue;
 
-            EmigrationYear yd = new EmigrationYear();
-            yd.year = (int) (long) asLong(o);
+            int year = asInteger(o);
+            
+            EmigrationYear yd = new EmigrationYear(year);
 
             yd.total = getEmigration(rc, nr, headers, "всего");
             yd.armenians = getEmigration(rc, nr, headers, "армяне");
@@ -1276,7 +1285,7 @@ public class LoadData
             int year = -1;
             if (!syear.equals("всего"))
             {
-                year = (int) (long) asLong(o);
+                year = asInteger(o);
                 if (sheetName.startsWith("1896-1909 "))
                 {
                     if (!(year >= 1896 && year <= 1909))
@@ -1832,8 +1841,8 @@ public class LoadData
     }
 
     /* ================================================================================================= */
-    
-    private static Foreigners cachedForeigners = null; 
+
+    private static Foreigners cachedForeigners = null;
 
     public Foreigners loadForeigners() throws Exception
     {
@@ -1865,7 +1874,7 @@ public class LoadData
         }
 
         foreigners.build();
-        cachedForeigners = foreigners; 
+        cachedForeigners = foreigners;
 
         return foreigners;
     }
@@ -1899,12 +1908,86 @@ public class LoadData
             TerritoryNames.checkValidTerritoryName(gub);
             if (Taxon.isComposite(gub))
                 continue;
-            
+
             long m = asLong(rc.get(nr, colM));
             long f = asLong(rc.get(nr, colF));
-            
+
             ByTerritory byt = foreigners.forCountry(country);
             byt.put(gub, m + f);
+        }
+
+        currentNR = null;
+    }
+
+    /* ================================================================================================= */
+
+    private static Immigration cachedImmigration = null;
+
+    public Immigration loadImmigration() throws Exception
+    {
+        if (cachedImmigration != null)
+            return cachedImmigration;
+
+        Immigration immigration = new Immigration();
+
+        currentFile = "immigration.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+
+                loadImmigration(immigration, rc, headers.get("год"), headers);
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+
+        immigration.build();
+        cachedImmigration = immigration;
+
+        return immigration;
+    }
+
+    private void loadImmigration(Immigration immigration, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception
+    {
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            Object o = rc.get(nr, colYear);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+            int year = asInteger(o);
+            
+            ImmigrationYear yd = new ImmigrationYear(year); 
+            
+            for (String h : headers.keySet())
+            {
+                if (h.equals("год"))
+                    continue;
+                
+                String country = Util.despace(h);
+                if (country.endsWith(" лб"))
+                    country = Util.stripTail(country, " лб");
+                
+                int col = headers.get(h);
+                o = rc.get(nr, col);
+                long amount = asLong(o); 
+                
+                yd.add(country, amount);
+            }
+            
+            immigration.setYearData(yd);
         }
 
         currentNR = null;
