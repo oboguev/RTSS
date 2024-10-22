@@ -51,7 +51,7 @@ public class Emigration
             }
         }
 
-        return Math.round(v * 1.05);
+        return Math.round(v);
     }
 
     /* ================================== INNER DATA ================================== */
@@ -82,9 +82,6 @@ public class Emigration
     }
 
     /* ================================== CONSTRUCTION ================================== */
-
-    @SuppressWarnings("unused")
-    private static final long serialVersionUID = 1L;
 
     private Map<Integer, EmigrationYear> y2yd = new HashMap<>();
 
@@ -279,7 +276,7 @@ public class Emigration
             throw new Exception("Emigration builder self-check failed for year " + yd.year);
     }
 
-    /* =================================================================================================== */
+    /* ================================== UTIL ================================== */
 
     private S2D s2d(Object... objects) throws Exception
     {
