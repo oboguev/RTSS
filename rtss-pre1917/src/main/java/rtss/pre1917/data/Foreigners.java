@@ -2,6 +2,7 @@ package rtss.pre1917.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import rtss.pre1917.merge.MergeCities;
 
@@ -92,6 +93,11 @@ public class Foreigners
         return forCountry(countryName).total();
     }
 
+    public Set<String> territoriesForForeignContry(String countryName)
+    {
+        return forCountry(countryName).keySet();
+    }
+    
     /*
      * Число иностранцев подданства @countryName в губернии или области @tname
      */

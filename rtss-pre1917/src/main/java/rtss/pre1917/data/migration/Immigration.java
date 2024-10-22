@@ -23,7 +23,9 @@ public class Immigration
     /* ================================== FETCH DATA ================================== */
 
     /*
-     * Число иммигрантов извне границ России поселившихся в губернии или области @tname в год @year 
+     * Число иммигрантов извне границ России поселившихся в губернии или области @tname в год @year.
+     *  
+     * Части иммиграции не включены и должны прилагаться непосредственно к крупным таксонам.
      */
     public long immigrants(String tname, int year) throws Exception
     {
@@ -96,16 +98,16 @@ public class Immigration
 
     }
 
-    private TerritoryDataSet tdsCensus;
-    private CensusCategories censusCategories;
+    // private TerritoryDataSet tdsCensus;
+    // private CensusCategories censusCategories;
     private Foreigners foreigners;
 
     public void build() throws Exception
     {
         checkWritable();
 
-        tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
-        censusCategories = new LoadData().loadCensusCategories();
+        // tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        // censusCategories = new LoadData().loadCensusCategories();
         foreigners = new LoadData().loadForeigners();
 
         for (int year : Util.sort(y2yd.keySet()))
@@ -120,12 +122,57 @@ public class Immigration
 
     private void build(ImmigrationYear yd) throws Exception
     {
-        // ###
+        scatter(yd, "Австрия");
+        scatter(yd, "Бельгия");
+        scatter(yd, "Болгария");
+        scatter(yd, "Британия");
+        scatter(yd, "Германия");
+        scatter(yd, "Греция");
+        scatter(yd, "Италия");
+        scatter(yd, "Румыния");
+        scatter(yd, "Франция");
+        scatter(yd, "Швейцария");
+        
+        yd.lump.persia = yd.get("Персия");
+        yd.lump.turkey = yd.get("Турция");
+        
+        yd.lump.china = yd.get("Китай");
+        yd.lump.japan = yd.get("Япония");
+        yd.lump.khiva = yd.get("Хива");
+        
+        yd.lump.european = 0;
+        yd.lump.european += yd.get("Голландия");
+        yd.lump.european += yd.get("Дания");
+        yd.lump.european += yd.get("Испания");
+        yd.lump.european += yd.get("Португалия");
+        yd.lump.european += yd.get("Сербия");
+        yd.lump.european += yd.get("США");
+        yd.lump.european += yd.get("Черногория");
+        yd.lump.european += yd.get("Швеция и Норвегия");
+        yd.lump.european += yd.get("др страны");
     }
 
     private void validate(ImmigrationYear yd) throws Exception
     {
         // ###
+    }
+
+    private void scatter(ImmigrationYear yd, String country) throws Exception
+    {
+        scatter(yd, country, country);
+    }
+    
+    private void scatter(ImmigrationYear yd, String immigrationCountry, String foreignersCountry) throws Exception
+    {
+        double imm = yd.get(immigrationCountry);
+        double foreigners_total = foreigners.totalForForeignContry(foreignersCountry);
+        
+        for (String tname : foreigners.territoriesForForeignContry(foreignersCountry))
+        {
+            double foreigners_territory = foreigners.forForeignContryAndTerritory(foreignersCountry, tname);
+            double imm_territory = imm  * (foreigners_territory / foreigners_total); 
+            addAmount(tname, yd.year, imm_territory );
+        }
     }
 
     /* ================================== UTIL ================================== */
