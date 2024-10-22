@@ -13,6 +13,7 @@ import rtss.pre1917.data.CensusCategoryValues;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
@@ -200,6 +201,8 @@ public class Emigration
 
     private double pop_1897(String tname, PopulationSelector selector) throws Exception
     {
+        TerritoryNames.checkValidTerritoryName(tname);
+        
         if (tname.equals("Выборгская"))
             return 386_440;
 

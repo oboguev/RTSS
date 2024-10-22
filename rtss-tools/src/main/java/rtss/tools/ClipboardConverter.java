@@ -18,7 +18,7 @@ public class ClipboardConverter
                 return;
             }
             
-            s = convert_2(s);
+            s = convert_3(s);
 
             Clipboard.put(s);
             Util.out("Transformed: " + s);
@@ -30,6 +30,25 @@ public class ClipboardConverter
         }
     }
     
+    @SuppressWarnings("unused")
+    private static String convert_3(String s) throws Exception
+    {
+        s = s.replace(".", ",");
+        s = s.replace("-", ",");
+        s = s.replace("°", "0");
+        s = s.replace("о", "0");
+        s = s.replace("О", "0");
+        s = s.replace("і", "1");
+        s = s.replace("б", "6");
+
+        s = s.replace("■", "");
+        s = s.replace("•", "");
+        s = s.replace("І", "1");
+        s = s.replace("I", "1");
+        
+        return s;
+    }
+
     @SuppressWarnings("unused")
     private static String convert_2(String s) throws Exception
     {
