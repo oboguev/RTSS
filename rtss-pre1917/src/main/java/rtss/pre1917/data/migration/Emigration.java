@@ -41,13 +41,13 @@ public class Emigration
                 for (String xtn : md.parentWithChildren())
                     v += emigrants(xtn, year);
             }
-            else if (union("Холмская", "Сахалин", "Камчатская").contains(tname))
+            else if (union("Холмская", "Сахалин", "Камчатская", "Батумская").contains(tname))
             {
                 // leave zero
             }
             else
             {
-                throw new Exception(String.format("Нет данных об эмиграции из %s в %в году", tname, year));
+                throw new Exception(String.format("Нет данных об эмиграции из %s в %d году", tname, year));
             }
         }
 

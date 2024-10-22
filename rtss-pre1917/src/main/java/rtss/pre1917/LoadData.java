@@ -16,10 +16,13 @@ import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.CensusCategoryValues;
 import rtss.pre1917.data.ColumnHeader;
 import rtss.pre1917.data.DataSetType;
+import rtss.pre1917.data.Foreigners;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.Foreigners.ByTerritory;
 import rtss.pre1917.data.migration.Emigration;
 import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.data.migration.InnerMigration;
@@ -72,11 +75,13 @@ public class LoadData
             // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
-            self.loadEmigration();
+            // self.loadEmigration();
             // self.loadCensusCategories();
             // self.loadJews();
             // self.loadInnerMigration();
             // self.loadFinland();
+            self.loadForeigners();
+
             Util.out("** Done");
         }
         catch (Throwable ex)
@@ -1824,5 +1829,78 @@ public class LoadData
             TerritoryYear ty = t.territoryYearOrNull(year);
             ty.progressive_population.total.both = ty.population.total.both;
         }
+    }
+
+    /* ================================================================================================= */
+
+    public Foreigners loadForeigners() throws Exception
+    {
+        Foreigners foreigners = new Foreigners();
+
+        currentFile = "census-1897/foreigners.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+
+                loadForeigners(foreigners, rc, headers.get("губ"), headers);
+
+                // ### replicate tnames (Московская с Москвой etc.)
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+
+        return foreigners;
+    }
+
+    private void loadForeigners(Foreigners foreigners, ExcelRC rc, int colGub, Map<String, Integer> headers) throws Exception
+    {
+        for (String s : headers.keySet())
+        {
+            s = Util.despace(s);
+            if (s.endsWith(" муж"))
+            {
+                String country = Util.stripTail(s, " муж");
+                loadForeigners(foreigners, rc, colGub, country, headers.get(country + " муж"), headers.get(country + " жен"));
+            }
+        }
+    }
+
+    private void loadForeigners(Foreigners foreigners, ExcelRC rc, int colGub, String country, int colM, int colF) throws Exception
+    {
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            Object o = rc.get(nr, colGub);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+            String gub = o.toString();
+            if (gub.startsWith("v-"))
+                continue;
+            gub = TerritoryNames.canonic(gub);
+            TerritoryNames.checkValidTerritoryName(gub);
+            if (Taxon.isComposite(gub))
+                continue;
+            
+            long m = asLong(rc.get(nr, colM));
+            long f = asLong(rc.get(nr, colF));
+            
+            ByTerritory byt = foreigners.forCountry(country);
+            byt.put(gub, m + f);
+        }
+
+        currentNR = null;
     }
 }
