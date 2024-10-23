@@ -113,6 +113,8 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
 
         /* ===================== Построить структуру с результатом ===================== */
+        
+        showPopulationPercentageVitalRatesVsPopulation();
 
         TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName);
         TaxonYearData yd;
@@ -181,5 +183,30 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         tmPopulation.extraDeaths(year, deaths);
         tmVitalRates.extraDeaths(year, deaths);
+    }
+    
+    private void showPopulationPercentageVitalRatesVsPopulation() throws Exception
+    {
+        Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
+        Util.out(String.format("    в %d-%d годах %.1f населения", 1896, toYear, populationPercentageVitalRatesVsPopulation(1896, toYear)));
+        Util.out(String.format("    в %d году %.1f населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
+        Util.out(String.format("    в %d году  %.1f населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
+    }
+    
+    private double populationPercentageVitalRatesVsPopulation(int y1, int y2) throws Exception
+    {
+        long p1 = 0;
+        long p2 = 0;
+        
+        for (int year = y1; year <= y2; year++)
+        {
+            TerritoryYear ty = tmVitalRates.territoryYearOrNull(year);
+            p1 += ty.progressive_population.total.both;
+            
+            ty = tmPopulation.territoryYearOrNull(year);
+            p2 += ty.progressive_population.total.both;
+        }
+        
+        return (100.0 * p1) / p2;
     }
 }
