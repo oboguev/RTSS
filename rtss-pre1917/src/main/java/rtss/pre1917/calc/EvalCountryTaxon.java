@@ -111,6 +111,8 @@ public class EvalCountryTaxon extends EvalCountryBase
                 extraDeaths(1914, 94_000);
             }
         }
+        
+        // ### Черноморская? для населения? для vital rates?
 
         /* ===================== Построить структуру с результатом ===================== */
         

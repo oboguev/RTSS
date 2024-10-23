@@ -1,10 +1,7 @@
 package rtss.pre1917.data.migration;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Foreigners;
@@ -12,6 +9,8 @@ import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.util.Util;
+
+import static rtss.pre1917.data.migration.Scatter.union;
 
 /*
  * Иммиграция в Россию извне границ России
@@ -190,31 +189,5 @@ public class Immigration
             double imm_territory = imm  * (foreigners_territory / foreigners_total); 
             addAmount(tname, yd.year, imm_territory );
         }
-    }
-
-    /* ================================== UTIL ================================== */
-
-    private Collection<String> union(Object... objects) throws Exception
-    {
-        Set<String> xs = new HashSet<>();
-
-        for (Object o : objects)
-        {
-            if (o instanceof String)
-            {
-                xs.add((String) o);
-            }
-            else if (o instanceof Set)
-            {
-                for (Object o2 : (Set<?>) o)
-                    xs.add((String) o2);
-            }
-            else
-            {
-                throw new IllegalArgumentException("Neither a string nor a set of strings");
-            }
-        }
-
-        return xs;
     }
 }
