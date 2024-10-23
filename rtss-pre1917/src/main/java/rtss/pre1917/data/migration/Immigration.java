@@ -144,8 +144,8 @@ public class Immigration
         yd.lump.china = yd.get("Китай");
         yd.lump.japan = yd.get("Япония");
         yd.lump.khiva = yd.get("Хива");
-        
-        yd.lump.european = 0;
+
+        yd.lump.european = 0L;
         yd.lump.european += yd.get("Голландия");
         yd.lump.european += yd.get("Дания");
         yd.lump.european += yd.get("Испания");

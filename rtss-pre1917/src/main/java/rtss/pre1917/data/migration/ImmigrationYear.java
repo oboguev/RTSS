@@ -46,15 +46,15 @@ public class ImmigrationYear
     
     public static class LumpImmigration
     {
-        long european;
+        Long european;
         
-        long persia;
-        long turkey;
+        Long persia;
+        Long turkey;
         
         // asian
-        long china;
-        long japan;
-        long khiva;
+        Long china;
+        Long japan;
+        Long khiva;
         
         public long sum()
         {
