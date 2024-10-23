@@ -7,10 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rtss.pre1917.LoadData;
-import rtss.pre1917.LoadData.LoadOptions;
-import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.Foreigners;
-import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
