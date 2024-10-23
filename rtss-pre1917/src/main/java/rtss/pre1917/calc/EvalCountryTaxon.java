@@ -17,8 +17,8 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         try
         {
-            new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("Империя", 1913).calc(true).print();
+            new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
         }
         catch (Throwable ex)
@@ -96,18 +96,18 @@ public class EvalCountryTaxon extends EvalCountryBase
              */
             if (taxonName.equals("Империя"))
             {
-                extraDeaths(1904, 25_589);
-                extraDeaths(1905, 25_363);
+                japaneseWarDeaths();
+                // japaneseWarDeaths(1.0);
             }
             else if (taxonName.equals("СССР-1991"))
             {
-                extraDeaths(1904, Math.round(25_589 * 0.926));
-                extraDeaths(1905, Math.round(25_363 * 0.926));
+                japaneseWarDeaths();
+                // japaneseWarDeaths(0.926);
             }
             else if (taxonName.equals("РСФСР-1991"))
             {
-                extraDeaths(1904, 13_491);
-                extraDeaths(1905, 13_372);
+                japaneseWarDeaths();
+                // japaneseWarDeaths(0.527);
                 extraDeaths(1914, 94_000);
             }
         }
@@ -144,7 +144,38 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         return cd;
     }
-
+    
+    /*
+     * Число военных смертей для всей Империи в 1904 и 1905 гг.
+     */
+    private final double EmpireWarDeaths_1904 = 25_589;
+    private final double EmpireWarDeaths_1905 = 25_363;
+    private static Long EmpirePopulation1904 = null; 
+    
+    private void japaneseWarDeaths() throws Exception
+    {
+        TerritoryYear ty = tmPopulation.territoryYearOrNull(1904);
+        if (taxonName.equals("Империя"))
+        {
+            EmpirePopulation1904 = ty.progressive_population.total.both;
+            japaneseWarDeaths(1.0); 
+        }
+        else 
+        {
+            if (EmpirePopulation1904 == null)
+                throw new Exception("Не расчитано население Империи");
+            double fraction = (double) ty.progressive_population.total.both / EmpirePopulation1904;
+            Util.out(String.format("Доля военных смертей в войне 1904-1905 гг. для %s: %.1f%% (население: %,d из %,d)", 
+                                   taxonName, fraction * 100, ty.progressive_population.total.both, EmpirePopulation1904));
+            japaneseWarDeaths(fraction); 
+        }
+    }
+    
+    private void japaneseWarDeaths(double fraction) throws Exception
+    {
+        extraDeaths(1904, Math.round(EmpireWarDeaths_1904 * fraction));
+        extraDeaths(1905, Math.round(EmpireWarDeaths_1905 * fraction));
+    }
 
     protected void extraDeaths(int year, long deaths) throws Exception
     {
