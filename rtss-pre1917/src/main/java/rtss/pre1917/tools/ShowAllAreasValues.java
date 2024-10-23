@@ -1,5 +1,6 @@
 package rtss.pre1917.tools;
 
+import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
 import rtss.util.Util;
 
@@ -9,7 +10,8 @@ public class ShowAllAreasValues extends ShowAreaValues
     {
         try
         {
-            new ShowAllAreasValues().show_values_all();
+            // new ShowAllAreasValues().show_values_all();
+            new ShowAllAreasValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_all();
         }
         catch (Throwable ex)
         {
@@ -18,8 +20,14 @@ public class ShowAllAreasValues extends ShowAreaValues
         }
     }
 
+    private ShowAllAreasValues(LoadOptions... options) throws Exception
+    {
+        super(options);
+    }
+    
     private ShowAllAreasValues() throws Exception
     {
+        super(new LoadOptions[0]);
     }
 
     private void show_values_all() throws Exception

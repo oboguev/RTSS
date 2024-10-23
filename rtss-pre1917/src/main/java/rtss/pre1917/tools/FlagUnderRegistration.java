@@ -2,13 +2,19 @@ package rtss.pre1917.tools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
 
+/*
+ * Выявить территории с заниженной регистрацией рождений и смертей
+ * в начале периода сравнительно с концом периода.
+ */
 public class FlagUnderRegistration extends ShowAreaValues
 {
     public static void main(String[] args)
@@ -23,11 +29,24 @@ public class FlagUnderRegistration extends ShowAreaValues
             ex.printStackTrace();
         }
     }
+    
+    Set<String> skip = Set.of("Бакинская с Баку",
+                              "Дагестанская обл.",
+                              "Елисаветпольская",
+                              "Закаспийская обл.",
+                              "Карсская обл.",
+                              "Кутаисская с Батумской",
+                              "Семиреченская обл.",
+                              "Сыр-Дарьинская обл.",
+                              "Ферганская обл.",
+                              "Черноморская",
+                              "Самаркандская обл.");
 
     private static final double PROMILLE = 1000.0;
 
     protected FlagUnderRegistration() throws Exception
     {
+        super(LoadOptions.MERGE_POST1897_REGIONS);
     }
 
     private void flagUnderRegistration() throws Exception
@@ -36,7 +55,7 @@ public class FlagUnderRegistration extends ShowAreaValues
 
         for (String tname : Util.sort(tdsUGVI.keySet()))
         {
-            if (Taxon.isComposite(tname))
+            if (Taxon.isComposite(tname) || skip.contains(tname))
                 continue;
 
             try
@@ -53,7 +72,7 @@ public class FlagUnderRegistration extends ShowAreaValues
         {
             Util.out("");
             for (String tname : ignored)
-                Util.out("Ignored: " + tname);
+                Util.out("No data: " + tname);
         }
     }
 
