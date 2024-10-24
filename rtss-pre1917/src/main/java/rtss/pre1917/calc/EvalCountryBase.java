@@ -38,26 +38,32 @@ public class EvalCountryBase
 
     protected void corrections() throws Exception
     {
-        boolean match = false;
-
         if (taxonName.equals("русские губернии Европейской России и Кавказа, кроме Черноморской"))
             return;
 
         corrections_Kavkaz();
         corrections_CentralAsia();
 
+        /*
+         * Черноморская губерния: внутрироссийская миграция извне РСФСР (1,600) и иммиграция извне России (1,300).
+         */
         Long nAddChernomorskaya = null;
-
-        if (taxonName.equals("Империя") || taxonName.equals("СССР-1991") || taxonName.equals("РСФСР-1991"))
+        final long nAddChernomorskayaInner = 1_600;
+        final long nAddChernomorskayaForeign = 1_300;
+        
+        switch (taxonName)
         {
-            nAddChernomorskaya = (long) 1_300 + 1_600;
-            match = true;
-        }
-
-        if (taxonName.equals("Империя") || taxonName.equals("СССР-1991"))
-        {
-            nAddChernomorskaya = (long) 1_300;
-            match = true;
+        case "Империя":
+        case "СССР-1991":
+            nAddChernomorskaya = nAddChernomorskayaForeign;
+            break;
+            
+        case "РСФСР-1991":
+            nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner;
+            break;
+            
+        default:    
+            throw new Exception("Неверный таксон " + taxonName);
         }
 
         if (nAddChernomorskaya != null)
@@ -68,9 +74,6 @@ public class EvalCountryBase
                 tdsVitalRates.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
             }
         }
-
-        if (!match)
-            throw new Exception("Неверный таксон " + taxonName);
     }
 
     private void corrections_Kavkaz() throws Exception
