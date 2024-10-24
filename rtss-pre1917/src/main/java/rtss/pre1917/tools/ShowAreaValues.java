@@ -63,9 +63,16 @@ public class ShowAreaValues
     {
         Set<LoadOptions> xo = Set.of(options);
         
-        tdsUGVI = new LoadData().loadUGVI(unite(xo, LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.EVAL_PROGRESSIVE, LoadOptions.ADJUST_FEMALE_BIRTHS, LoadOptions.FILL_MISSING_BD));
+        tdsUGVI = new LoadData().loadUGVI(unite(xo, 
+                                                LoadOptions.DONT_VERIFY, 
+                                                LoadOptions.MERGE_CITIES, 
+                                                LoadOptions.EVAL_PROGRESSIVE, 
+                                                LoadOptions.ADJUST_FEMALE_BIRTHS, 
+                                                LoadOptions.FILL_MISSING_BD));
         tdsCSK = new LoadData().loadEzhegodnikRossii(unite(xo, LoadOptions.DONT_VERIFY));
-        tdsCensus1897 = new LoadData().loadCensus1897(unite(xo, LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES));
+        tdsCensus1897 = new LoadData().loadCensus1897(unite(xo, 
+                                                            LoadOptions.DONT_VERIFY, 
+                                                            LoadOptions.MERGE_CITIES));
         totalMigration = TotalMigration.getTotalMigration();
         evalGrowthRate = new  EvalGrowthRate(tdsCensus1897);
     }
