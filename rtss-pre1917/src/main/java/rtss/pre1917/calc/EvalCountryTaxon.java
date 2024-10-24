@@ -34,13 +34,15 @@ public class EvalCountryTaxon extends EvalCountryBase
     private static TaxonYearlyPopulationData typdRusEvro;
 
     private final static boolean DoCountMilitaryDeaths = Util.True;
+    
+    private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
     private EvalCountryTaxon(String taxonName, int toYear) throws Exception
     {
         super(taxonName, toYear);
 
-        if (typdRusEvro == null && !taxonName.equals("русские губернии Европейской России и Кавказа, кроме Черноморской"))
-            typdRusEvro = new EvalCountryTaxon("русские губернии Европейской России и Кавказа, кроме Черноморской", 1914).calc(false);
+        if (Util.False && typdRusEvro == null && !taxonName.equals(RusEvro))
+            typdRusEvro = new EvalCountryTaxon(RusEvro, 1914).calc(false);
     }
 
     private TaxonYearlyPopulationData calc(boolean verbose) throws Exception
@@ -91,25 +93,13 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         if (DoCountMilitaryDeaths)
         {
-            /*
-             * Военные потери
-             */
-            if (taxonName.equals("Империя"))
-            {
-                japaneseWarDeaths();
-                // japaneseWarDeaths(1.0);
-            }
-            else if (taxonName.equals("СССР-1991"))
-            {
-                japaneseWarDeaths();
-                // japaneseWarDeaths(0.926);
-            }
-            else if (taxonName.equals("РСФСР-1991"))
-            {
-                japaneseWarDeaths();
-                // japaneseWarDeaths(0.527);
+            // Империя: japaneseWarDeaths(1.0)
+            // СССР-1991: japaneseWarDeaths(0.926)
+            // РСФСР-1991: japaneseWarDeaths(0.527)
+            japaneseWarDeaths();
+
+            if (taxonName.equals("РСФСР-1991"))
                 extraDeaths(1914, 94_000);
-            }
         }
         
         /* ===================== Построить структуру с результатом ===================== */
