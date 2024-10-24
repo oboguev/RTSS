@@ -137,12 +137,13 @@ public class Immigration
         scatter(yd, "Франция");
         scatter(yd, "Швейцария");
         
+        addAmount("Сыр-Дарьинская обл.", yd.year, yd.get("Хива"));
+
         yd.lump.persia = yd.get("Персия");
         yd.lump.turkey = yd.get("Турция");
         
         yd.lump.china = yd.get("Китай");
         yd.lump.japan = yd.get("Япония");
-        yd.lump.khiva = yd.get("Хива");
 
         yd.lump.european = 0L;
         yd.lump.european += yd.get("Голландия");
@@ -187,7 +188,7 @@ public class Immigration
         {
             double foreigners_territory = foreigners.forForeignContryAndTerritory(foreignersCountry, tname);
             double imm_territory = imm  * (foreigners_territory / foreigners_total); 
-            addAmount(tname, yd.year, imm_territory );
+            addAmount(tname, yd.year, imm_territory);
         }
     }
 }

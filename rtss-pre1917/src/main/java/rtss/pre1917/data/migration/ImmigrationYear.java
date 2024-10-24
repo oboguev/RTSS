@@ -54,11 +54,10 @@ public class ImmigrationYear
         // asian
         Long china;
         Long japan;
-        Long khiva;
         
         public long sum()
         {
-            return european + persia + turkey + china + japan + khiva;
+            return european + persia + turkey + china + japan;
         }
     }
 }

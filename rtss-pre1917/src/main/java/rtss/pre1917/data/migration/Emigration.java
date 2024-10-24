@@ -129,7 +129,7 @@ public class Emigration
 
     private void build(EmigrationYear yd) throws Exception
     {
-        scatter(yd.armenians, s2d("Эриванская"), PopulationSelector.ALL, yd.year);
+        scatter(yd.armenians, s2d("Эриванская", "Карсская обл."), PopulationSelector.ALL, yd.year);
         scatter(yd.finns * yd.vyborg / 100, s2d("Выборгская"), PopulationSelector.ALL, yd.year);
 
         // следует ли взвешивать губернии по численности населения или просто использовать соотношение 3-2-1-1-1-1 ?
