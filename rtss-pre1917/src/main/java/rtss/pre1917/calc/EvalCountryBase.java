@@ -57,7 +57,8 @@ public class EvalCountryBase
         {
         case "Империя":
         case "СССР-1991":
-            nAddChernomorskaya = nAddChernomorskayaForeign;
+            // уже содержится в учёте турецкой иммиграции 
+            // nAddChernomorskaya = nAddChernomorskayaForeign;
             break;
             
         case "РСФСР-1991":
