@@ -82,4 +82,15 @@ public class MergeCities
                 m.remove(city);
         }
     }
+    
+    public static boolean isMergedCity(String tname)
+    {
+        for (MergeDescriptor md : MergeCitiesDescriptors)
+        {
+            if (md.children.contains(tname))
+                return true;
+        }
+        
+        return false;
+    }
 }

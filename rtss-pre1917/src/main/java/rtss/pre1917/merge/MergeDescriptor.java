@@ -73,7 +73,7 @@ public class MergeDescriptor
     {
         for (MergeDescriptor md : mds)
         {
-            if (md.parent.equals(parent))
+            if (md.parent != null && md.parent.equals(parent))
                 return md.combined;
         }
         

@@ -49,6 +49,10 @@ public class Immigration
                 for (String xtn : md.parentWithChildren())
                     v += immigrants(xtn, year);
             }
+            else if (MergeCities.isMergedCity(tname))
+            {
+                // leave zero
+            }
             else if (union("Холмская", "Сахалин", "Камчатская", "Батумская", "Выборгская").contains(tname))
             {
                 // leave zero

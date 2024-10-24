@@ -44,6 +44,16 @@ public class Emigration
 
         if (v == null)
         {
+            String pname = MergeCities.parent2combined(tname);
+            if (pname != null)
+            {
+                key = key(pname, year);
+                v = tname2amount.get(key);
+            }
+        }
+
+        if (v == null)
+        {
             v = 0.0;
 
             MergeDescriptor md = MergePost1897Regions.find(tname);
@@ -52,6 +62,10 @@ public class Emigration
             {
                 for (String xtn : md.parentWithChildren())
                     v += emigrants(xtn, year);
+            }
+            else if (MergeCities.isMergedCity(tname))
+            {
+                // leave zero
             }
             else if (union("Холмская", "Сахалин", "Камчатская", "Батумская").contains(tname))
             {
@@ -206,7 +220,7 @@ public class Emigration
     private double pop_1897(String tname, PopulationSelector selector) throws Exception
     {
         TerritoryNames.checkValidTerritoryName(tname);
-        
+
         if (tname.equals("Выборгская"))
             return 386_440;
 
@@ -239,7 +253,6 @@ public class Emigration
         if (ccv == null)
             throw new Exception("No 1897 census category data for " + tname);
 
-
         switch (selector)
         {
         case HEBREW:
@@ -249,7 +262,7 @@ public class Emigration
         case NON_HEBREW:
             pop *= 1 - ccv.pct_juifs / 100;
             break;
-            
+
         case CATHOLIC:
             pop *= ccv.pct_catholic / 100;
             break;
@@ -257,7 +270,7 @@ public class Emigration
         case PROTESTANT:
             pop *= ccv.pct_protestants / 100;
             break;
-        
+
         case RUSSIAN:
             pop *= ccv.pct_russian / 100;
             break;

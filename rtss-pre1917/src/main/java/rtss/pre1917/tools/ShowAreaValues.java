@@ -52,36 +52,54 @@ public class ShowAreaValues
             ex.printStackTrace();
         }
     }
-    
+
     protected final TerritoryDataSet tdsUGVI;
     protected final TerritoryDataSet tdsCSK;
     protected final TerritoryDataSet tdsCensus1897;
     protected final TotalMigration totalMigration;
     protected final EvalGrowthRate evalGrowthRate;
-    
+
+    private boolean onlyRaw = false;
+
+    protected ShowAreaValues(TerritoryDataSet tdsUGVI,
+            TerritoryDataSet tdsCSK,
+            TerritoryDataSet tdsCensus1897) throws Exception
+    {
+        this.tdsUGVI = tdsUGVI;
+        this.tdsCSK = tdsCSK;
+        this.tdsCensus1897 = tdsCensus1897;
+        totalMigration = TotalMigration.getTotalMigration();
+        evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
+    }
+
+    protected void setOnlyRaw()
+    {
+        onlyRaw = true;
+    }
+
     protected ShowAreaValues(LoadOptions... options) throws Exception
     {
         Set<LoadOptions> xo = Set.of(options);
-        
-        tdsUGVI = new LoadData().loadUGVI(unite(xo, 
-                                                LoadOptions.DONT_VERIFY, 
-                                                LoadOptions.MERGE_CITIES, 
-                                                LoadOptions.EVAL_PROGRESSIVE, 
-                                                LoadOptions.ADJUST_FEMALE_BIRTHS, 
+
+        tdsUGVI = new LoadData().loadUGVI(unite(xo,
+                                                LoadOptions.DONT_VERIFY,
+                                                LoadOptions.MERGE_CITIES,
+                                                LoadOptions.EVAL_PROGRESSIVE,
+                                                LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                 LoadOptions.FILL_MISSING_BD));
         tdsCSK = new LoadData().loadEzhegodnikRossii(unite(xo, LoadOptions.DONT_VERIFY));
-        tdsCensus1897 = new LoadData().loadCensus1897(unite(xo, 
-                                                            LoadOptions.DONT_VERIFY, 
+        tdsCensus1897 = new LoadData().loadCensus1897(unite(xo,
+                                                            LoadOptions.DONT_VERIFY,
                                                             LoadOptions.MERGE_CITIES));
         totalMigration = TotalMigration.getTotalMigration();
-        evalGrowthRate = new  EvalGrowthRate(tdsCensus1897);
+        evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
     }
-    
+
     protected ShowAreaValues() throws Exception
     {
         this(new LoadOptions[0]);
     }
-    
+
     private Set<LoadOptions> unite(Set<LoadOptions> xo, LoadOptions... options)
     {
         xo = new HashSet<>(xo);
@@ -152,12 +170,11 @@ public class ShowAreaValues
         Util.out("");
         Util.out("===================================== СКОРРЕКТИРОВАННЫЕ ЗНАЧЕНИЯ ===================================== ");
         Util.out("");
-        
+
         new AdjustTerritories(tdsUGVI).fixDagestan();
 
         show_values("Дагестанская обл.");
     }
-
 
     /* ============================================================================================== */
 
@@ -167,7 +184,7 @@ public class ShowAreaValues
         Util.out("");
         Util.out("============= КОМИБИНИРОВАННЫЕ ЗНАЧЕНИЯ С ГУБЕРНИЯМИ ОБЛАСТЯМИ СОЗДАННЫМИ ПОСЛЕ 1897 ГОДА =============");
         Util.out("");
-        
+
         show_values("Кутаисская с Батумской");
         show_values("Иркутская с Камчатской");
         show_values("Люблинская с Седлецкой и Холмской");
@@ -181,7 +198,7 @@ public class ShowAreaValues
         Util.out("");
         Util.out("============= НЕКОТОРЫЕ ЮЖНЫЕ ГУБЕРНИИ =============");
         Util.out("");
-        
+
         show_values("Воронежская");
         show_values("Полтавская");
         show_values("Харьковская");
@@ -189,7 +206,7 @@ public class ShowAreaValues
         show_values("Курская");
         show_values("Екатеринославская");
     }
-    
+
     /* ============================================================================================== */
 
     protected void show_values(String tname) throws Exception
@@ -205,7 +222,7 @@ public class ShowAreaValues
         }
 
         Territory tCSK = tdsCSK.get(tname);
-        Territory tEval = evalGrowthRate.evalTerritory(t);
+        Territory tEval = onlyRaw ? null : evalGrowthRate.evalTerritory(t);
 
         Util.out("");
         Util.out("************************************************************");
@@ -222,7 +239,7 @@ public class ShowAreaValues
             Util.out("год       ЦСК             УГВИ                 чр      чс    мигр      прогрессивный от 1897      по стабилиз. участку     чр      чс    учёт %");
             Util.out("==== =========== ========================================== =======  ========================  ========================================= =======");
         }
-        
+
         for (int year : t.years())
         {
             if (year >= 1896 && year <= 1914)
@@ -233,64 +250,64 @@ public class ShowAreaValues
 
                 Double cbrProgressive = rate(ty.births.total.both, ty.progressive_population.total.both);
                 Double cdrProgressive = rate(ty.deaths.total.both, ty.progressive_population.total.both);
-                
+
                 TerritoryYear tyEval = null;
                 Double cbrEval = null;
                 Double cdrEval = null;
                 Long popEval = null;
-                Long birthsEval = null; 
-                Long deathsEval = null; 
+                Long birthsEval = null;
+                Long deathsEval = null;
 
                 if (tEval != null)
                 {
                     tyEval = tEval.territoryYear(year);
                     popEval = tyEval.population.total.both;
-                    birthsEval = tyEval.births.total.both; 
-                    deathsEval = tyEval.deaths.total.both; 
+                    birthsEval = tyEval.births.total.both;
+                    deathsEval = tyEval.deaths.total.both;
                     cbrEval = rate(birthsEval, popEval);
                     cdrEval = rate(deathsEval, popEval);
                 }
-                
+
                 TerritoryYear tyCSK = null;
                 Long popCSK = null;
                 if (tCSK != null)
                     tyCSK = tCSK.territoryYearOrNull(year);
                 if (tyCSK != null)
                     popCSK = tyCSK.population.total.both;
-                
+
                 String stable = " ";
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
-                
+
                 long saldo = totalMigration.saldo(tname, year);
-                
-                String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", 
-                                       // год
-                                       year, 
-                                       // ЦСК
-                                       s_population(popCSK), 
-                                       // УГВИ
-                                       s_population(ty.population.total.both), 
-                                       s_rate(cbrUGVI), s_rate(cdrUGVI), s_ep(cbrUGVI, cdrUGVI),
-                                       s_bd(ty.births.total.both),
-                                       s_bd(ty.deaths.total.both),
-                                       // миграционное сальдо
-                                       s_saldo(saldo), 
-                                       // прогрессивный расчёт
-                                       s_population(ty.progressive_population.total.both), 
-                                       s_rate(cbrProgressive), s_rate(cdrProgressive), s_ep(cbrProgressive, cdrProgressive),
-                                       // по стаб. участку
-                                       s_population(popEval),
-                                       s_rate(cbrEval), s_rate(cdrEval), s_ep(cbrEval, cdrEval),
-                                       s_bd(birthsEval), s_bd(deathsEval),
-                                       stable,
-                                       s_pct(ty.births.total.both, birthsEval), s_pct(ty.deaths.total.both, deathsEval));
-                
+
+                String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
+                                         // год
+                                         year,
+                                         // ЦСК
+                                         s_population(popCSK),
+                                         // УГВИ
+                                         s_population(ty.population.total.both),
+                                         s_rate(cbrUGVI), s_rate(cdrUGVI), s_ep(cbrUGVI, cdrUGVI),
+                                         s_bd(ty.births.total.both),
+                                         s_bd(ty.deaths.total.both),
+                                         // миграционное сальдо
+                                         s_saldo(saldo),
+                                         // прогрессивный расчёт
+                                         s_population(ty.progressive_population.total.both),
+                                         s_rate(cbrProgressive), s_rate(cdrProgressive), s_ep(cbrProgressive, cdrProgressive),
+                                         // по стаб. участку
+                                         s_population(popEval),
+                                         s_rate(cbrEval), s_rate(cdrEval), s_ep(cbrEval, cdrEval),
+                                         s_bd(birthsEval), s_bd(deathsEval),
+                                         stable,
+                                         s_pct(ty.births.total.both, birthsEval), s_pct(ty.deaths.total.both, deathsEval));
+
                 Util.out(s.trim());
             }
         }
     }
-    
+
     private String s_pct(Long a, Long b)
     {
         String s = "";
@@ -298,7 +315,7 @@ public class ShowAreaValues
             s += Math.round((100.0 * a) / b);
         return pad(s, 3);
     }
-    
+
     private String s_population(Long v)
     {
         String s = "";
@@ -306,7 +323,7 @@ public class ShowAreaValues
             s = String.format("%,d", v);
         return pad(s, 11);
     }
-    
+
     private String s_saldo(Long v)
     {
         String s = "";
@@ -314,7 +331,7 @@ public class ShowAreaValues
             s = String.format("%,d", v);
         return pad(s, 7);
     }
-    
+
     private String s_bd(Long v)
     {
         String s = "";
@@ -322,7 +339,7 @@ public class ShowAreaValues
             s = String.format("%,d", v);
         return pad(s, 7);
     }
-    
+
     private String s_rate(Double rate)
     {
         String s = "";
@@ -346,7 +363,7 @@ public class ShowAreaValues
         else
             return (v * 1000.0) / pop;
     }
-    
+
     private String pad(String s, int length)
     {
         while (s.length() < length)
