@@ -2,6 +2,7 @@ package rtss.pre1917.calc;
 
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 
 public class AdjustTerritories
@@ -45,8 +46,14 @@ public class AdjustTerritories
      */
     public void fixSamarkand() throws Exception
     {
-        Territory t = tds.get("Самаркандская обл.");
-        Territory tCSK = tdsCSK.get("Самаркандская обл.");
+        final String tname = "Самаркандская обл.";
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tds.get(tname);
+        if (t == null)
+            return;
+        
+        Territory tCSK = tdsCSK.get(tname);
 
         for (int year = 1896; year <= 1901; year++)
         {
@@ -70,8 +77,14 @@ public class AdjustTerritories
      */
     public void fixUralskaia() throws Exception
     {
-        Territory t = tds.get("Уральская обл.");
-        Territory tCSK = tdsCSK.get("Уральская обл.");
+        final String tname = "Уральская обл.";
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tds.get(tname);
+        if (t == null)
+            return;
+
+        Territory tCSK = tdsCSK.get(tname);
 
         for (int year = 1904; year <= 1914; year++)
         {
@@ -98,7 +111,13 @@ public class AdjustTerritories
      */
     public void fixBakinskaiaWithBaku() throws Exception
     {
-        Territory t = tds.get("Бакинская с Баку");
+        final String tname = "Бакинская с Баку";
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tds.get(tname);
+        if (t == null)
+            return;
+        
         interpolate_population(t, 1903, 1914);
         
         for (int year = 1896; year <= 1914; year++)
