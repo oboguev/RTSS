@@ -48,12 +48,12 @@ public class ImmigrationYear
     {
         Long european;
         
-        Long persia;
-        Long turkey;
+        public Long persia;
+        public Long turkey;
         
         // asian
-        Long china;
-        Long japan;
+        public Long china;
+        public Long japan;
         
         public long sum()
         {

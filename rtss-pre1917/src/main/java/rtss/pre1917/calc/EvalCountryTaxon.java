@@ -6,6 +6,7 @@ import rtss.pre1917.calc.containers.TaxonYearData;
 import rtss.pre1917.calc.containers.TaxonYearlyPopulationData;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
@@ -49,7 +50,8 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         if (verbose)
         {
-            Util.out("***************************************************************************************************");
+            Util.out("");
+            Util.out("====================================================================================================================");
             Util.out("");
             Util.out("Расчёт для " + taxonName);
             Util.out("");
@@ -89,6 +91,49 @@ public class EvalCountryTaxon extends EvalCountryBase
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears);
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
 
+        /* ===================== Часть иммиграции не разбиваемая по губерниям ===================== */
+        
+        for (int year = 1896; year <= toYear; year++)
+        {
+            LumpImmigration lump = immigration.lumpImmigrationForYear(year);
+            final double TurkeyFactor = 2.33;
+            
+            switch (taxonName)
+            {
+            case "Империя":
+                immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
+                immigration(tmPopulation, year, lump.persia);
+                immigration(tmPopulation, year, lump.japan);
+                immigration(tmPopulation, year, lump.china);
+                break;
+
+            case "СССР-1911":
+                immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
+                immigration(tmPopulation, year, lump.persia);
+                immigration(tmPopulation, year, lump.japan);
+                immigration(tmPopulation, year, lump.china);
+                break;
+
+            case "РСФСР-1991":
+                immigration(tmPopulation, year, lump.japan);
+                immigration(tmPopulation, year, lump.china);
+                break;
+                
+            case "Кавказ":
+                immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
+                immigration(tmPopulation, year, lump.persia);
+                break;
+
+            case "Новороссия":
+            case "Малороссия":
+            case "привислинские губернии":
+            case "остзейские губернии":
+            case "Литва":
+            case "Средняя Азия":
+                break;
+            }
+        }
+        
         /* ===================== Учёт военных потерь ===================== */
 
         if (DoCountMilitaryDeaths)
@@ -173,6 +218,11 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         tmPopulation.extraDeaths(year, deaths);
         tmVitalRates.extraDeaths(year, deaths);
+    }
+    
+    private void immigration(Territory t, int year, long amount)
+    {
+        t.cascadeAdjustProgressivePopulation(year, amount);
     }
     
     private void showPopulationPercentageVitalRatesVsPopulation() throws Exception

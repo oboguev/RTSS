@@ -7,6 +7,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.Immigration;
 import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 
@@ -22,6 +23,7 @@ public class EvalCountryBase
                                                                                   LoadOptions.MERGE_POST1897_REGIONS);
     protected final TotalMigration totalMigration = TotalMigration.getTotalMigration();
     protected final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
+    protected final Immigration immigration = new LoadData().loadImmigration();
 
     protected final double PROMILLE = 1000.0;
 

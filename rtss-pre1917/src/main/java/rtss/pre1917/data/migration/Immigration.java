@@ -5,6 +5,7 @@ import java.util.Map;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Foreigners;
+import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
@@ -59,6 +60,11 @@ public class Immigration
         }
 
         return Math.round(v);
+    }
+    
+    public LumpImmigration lumpImmigrationForYear(int year)
+    {
+        return y2yd.get(year).lump;
     }
 
     /* ================================== INNER DATA ================================== */
