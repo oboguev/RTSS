@@ -70,6 +70,7 @@ public class FlagOutliers
     {
         int y1 = year;
         int y2 = year + 1;
+        int y3 = year + 2;
 
         if (Util.False)
         {
@@ -83,21 +84,25 @@ public class FlagOutliers
         Territory t = tds.get(tname);
         TerritoryYear ty1 = t.territoryYearOrNull(y1);
         TerritoryYear ty2 = t.territoryYearOrNull(y2);
+        TerritoryYear ty3 = t.territoryYearOrNull(y3);
         if (ty1 == null || ty2 == null)
             return false;
 
         Long v1 = null;
         Long v2 = null;
+        Long v3 = null;
 
         if (what.equals("births"))
         {
             v1 = ty1.births.total.both;
             v2 = ty2.births.total.both;
+            v3 = (ty3 == null) ? null : ty3.births.total.both;
         }
         else if (what.equals("deaths"))
         {
             v1 = ty1.deaths.total.both;
             v2 = ty2.deaths.total.both;
+            v3 = (ty3 == null) ? null : ty3.deaths.total.both;
         }
         else
         {
@@ -149,8 +154,12 @@ public class FlagOutliers
 
         if (delta > threshold)
         {
-            Util.out(String.format("Расхождение %s для %d -> %d %s: %,d -> %,d, delta = %,d (%.1f%%), suggested: %,d %,d",
-                                   what, y1, y2, tname, v1, v2, Math.abs(v1 - v2), delta * 100,
+            String sv3 = "unknown";
+            if (v3 != null)
+                sv3 = String.format("%,d", v3);
+            
+            Util.out(String.format("Расхождение %s для %d -> %d %s: %,d -> %,d -> %s, delta = %,d (%.1f%%), suggested: %,d %,d",
+                                   what, y1, y2, tname, v1, v2, sv3, Math.abs(v1 - v2), delta * 100,
                                    Math.round(suggested1), Math.round(suggested2)));
             
             if (ShowCompositeDivergences)
