@@ -66,7 +66,7 @@ public class EvalCountryBase
             break;
             
         default:    
-            throw new Exception("Неверный таксон " + taxonName);
+            break;
         }
 
         if (nAddChernomorskaya != null)

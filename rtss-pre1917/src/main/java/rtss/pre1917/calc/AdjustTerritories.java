@@ -28,7 +28,13 @@ public class AdjustTerritories
      */
     public void fixDagestan() throws Exception
     {
-        Territory t = tds.get("Дагестанская обл.");
+        final String tname = "Дагестанская обл.";
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tds.get(tname);
+        if (t == null)
+            return;
+        
         TerritoryYear ty1897 = t.territoryYearOrNull(1897);
         long delta = ty1897.progressive_population.total.both - ty1897.population.total.both;
 

@@ -39,6 +39,9 @@ public class FilterByTaxon
         for (int year = tds.minYear(); year <= tds.maxYear(); year++)
         {
             Taxon tx = Taxon.of(txname, year, tds);
+            if (tx == null)
+                throw new Exception("Неверный таксон: " + txname);
+            
             tx = tx.flatten(tds, year);
 
             for (String tname : tx.territories.keySet())
