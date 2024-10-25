@@ -51,7 +51,7 @@ public class FlagUnderRegistration extends ShowAreaValues
 
     private void flagUnderRegistration() throws Exception
     {
-        List<String> ignored = new ArrayList<>();
+        List<String> nodata = new ArrayList<>();
 
         for (String tname : Util.sort(tdsUGVI.keySet()))
         {
@@ -62,16 +62,16 @@ public class FlagUnderRegistration extends ShowAreaValues
             {
                 flagUnderRegistration(tname);
             }
-            catch (IgnoreException ex)
+            catch (NoDataException ex)
             {
-                ignored.add(tname);
+                nodata.add(tname);
             }
         }
 
-        if (ignored.size() != 0)
+        if (nodata.size() != 0)
         {
             Util.out("");
-            for (String tname : ignored)
+            for (String tname : nodata)
                 Util.out("No data: " + tname);
         }
     }
@@ -130,12 +130,12 @@ public class FlagUnderRegistration extends ShowAreaValues
     {
         TerritoryYear ty = t.territoryYearOrNull(year);
         if (ty == null)
-            throw new IgnoreException();
+            throw new NoDataException();
 
         Long pop = ty.progressive_population.total.both;
         Long births = ty.births.total.both;
         if (pop == null || births == null)
-            throw new IgnoreException();
+            throw new NoDataException();
 
         return (PROMILLE * births) / pop;
     }
@@ -144,17 +144,17 @@ public class FlagUnderRegistration extends ShowAreaValues
     {
         TerritoryYear ty = t.territoryYearOrNull(year);
         if (ty == null)
-            throw new IgnoreException();
+            throw new NoDataException();
 
         Long pop = ty.progressive_population.total.both;
         Long deaths = ty.deaths.total.both;
         if (pop == null || deaths == null)
-            throw new IgnoreException();
+            throw new NoDataException();
 
         return (PROMILLE * deaths) / pop;
     }
 
-    public static class IgnoreException extends Exception
+    public static class NoDataException extends Exception
     {
         private static final long serialVersionUID = 1L;
     }
