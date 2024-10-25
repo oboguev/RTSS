@@ -93,8 +93,8 @@ public class FlagUnderRegistration extends ShowAreaValues
 
         wa_cbr.reset();
         wa_cdr.reset();
-
-        StringBuilder sb = new StringBuilder();
+        
+        boolean printed = false;
 
         for (int year = 1896; year <= 1902; year++)
         {
@@ -107,25 +107,38 @@ public class FlagUnderRegistration extends ShowAreaValues
             wa_cdr.add(cdr, 1.0);
 
             double threshold = 0.95;
+            String s_cbr = null;
+            String s_cdr = null;
 
-            if (cbr < threshold * cbr_2)
-                flag = true;
+            if (cbr / cbr_2 < threshold)
+                s_cbr = String.format("%2.1f", 100.0 * cbr / cbr_2 );
 
-            if (cdr < threshold * cdr_2)
-                flag = true;
-
-            if (flag)
+            if (cdr / cdr_2 < threshold)
+                s_cdr = String.format("%2.1f", 100.0 * cdr / cdr_2 );
+            
+            if (s_cbr != null || s_cdr != null)
             {
-                if (sb.length() != 0)
-                    sb.append(" ");
-                sb.append("" + year);
+                if (! printed)
+                {
+                    Util.out(tname);
+                    printed = true;
+                }
+                
+                if (s_cbr == null)
+                    s_cbr = "";
 
+                if (s_cdr == null)
+                    s_cdr = "";
+                
+                while (s_cbr.length() < 4)
+                    s_cbr = " " + s_cbr;
+                
+                while (s_cdr.length() < 4)
+                    s_cdr = " " + s_cdr;
+                
+                Util.out(String.format("    %d %s %s", year, s_cbr, s_cdr));
             }
         }
-        
-        if (sb.length() != 0)
-            Util.out(tname + " " + sb);
-
     }
 
     private double cbr(Territory t, int year) throws Exception
