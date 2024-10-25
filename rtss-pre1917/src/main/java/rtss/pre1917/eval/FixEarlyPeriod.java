@@ -14,7 +14,7 @@ public class FixEarlyPeriod
 {
     private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
     private final double PROMILLE = 1000.0;
-    
+
     public FixEarlyPeriod() throws Exception
     {
     }
@@ -68,7 +68,7 @@ public class FixEarlyPeriod
     {
         double av_cbr = averageRate(t, byr1, byr2, BirthDeath.BIRTH);
         double av_cdr = averageRate(t, dyr1, dyr2, BirthDeath.DEATH);
-        
+
         /* ================================= seed data ================================= */
 
         TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
@@ -80,10 +80,10 @@ public class FixEarlyPeriod
         Territory xt = t.dup();
         TerritoryYear xty1896 = xt.territoryYearOrNull(1896);
         TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
-        
+
         adjust_births(xty1897, byl1, byl2, av_cbr, tyCensus.population.total.both);
         adjust_deaths(xty1897, dyl1, dyl2, av_cdr, tyCensus.population.total.both);
-        
+
         long in = xty1897.births.total.both - xty1897.deaths.total.both;
         in += totalMigration.saldo(t.name, 1897);
         long in1 = Math.round(in * 27.0 / 365.0);
@@ -104,6 +104,7 @@ public class FixEarlyPeriod
 
         for (int year = 1898; year <= 1916; year++)
         {
+            // ### xt or t? Also see EvalProgressive 
             TerritoryYear xty = xt.territoryYearOrNull(year);
             TerritoryYear ty = t.territoryYearOrNull(year);
             TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
@@ -119,7 +120,7 @@ public class FixEarlyPeriod
 
             ty_next.progressive_population.total.both = ty.progressive_population.total.both + in;
         }
-        
+
         return xt;
     }
 
@@ -150,9 +151,9 @@ public class FixEarlyPeriod
         for (int year = y1; year <= y2; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
-            if (ty == null || year == 1905)
+            if (ty == null || year == 1905 || movement(ty, bd).total.both == null)
                 continue;
-            
+
             long pop = ty.progressive_population.total.both;
             long mv = movement(ty, bd).total.both;
             list.add((PROMILLE * mv) / pop);
@@ -170,13 +171,14 @@ public class FixEarlyPeriod
         {
         case BIRTH:
             return ty.births;
+
         case DEATH:
             return ty.deaths;
+
         default:
             return null;
         }
     }
-
 
     private long null2zero(Long v)
     {
