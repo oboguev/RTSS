@@ -29,7 +29,7 @@ public class FlagUnderRegistration extends ShowAreaValues
             ex.printStackTrace();
         }
     }
-    
+
     Set<String> skip = Set.of("Бакинская с Баку",
                               "Дагестанская обл.",
                               "Елисаветпольская",
@@ -82,7 +82,7 @@ public class FlagUnderRegistration extends ShowAreaValues
         WeightedAverage wa_cbr = new WeightedAverage();
         WeightedAverage wa_cdr = new WeightedAverage();
 
-        for (int year = 1911; year <= 1913; year++)
+        for (int year = 1909; year <= 1913; year++)
         {
             wa_cbr.add(cbr(t, year), 1.0);
             wa_cdr.add(cdr(t, year), 1.0);
@@ -94,10 +94,12 @@ public class FlagUnderRegistration extends ShowAreaValues
         wa_cbr.reset();
         wa_cdr.reset();
 
-        boolean flag = false;
+        StringBuilder sb = new StringBuilder();
 
-        for (int year = 1896; year <= 1899; year++)
+        for (int year = 1896; year <= 1902; year++)
         {
+            boolean flag = false;
+
             double cbr = cbr(t, year);
             double cdr = cdr(t, year);
 
@@ -111,19 +113,19 @@ public class FlagUnderRegistration extends ShowAreaValues
 
             if (cdr < threshold * cdr_2)
                 flag = true;
+
+            if (flag)
+            {
+                if (sb.length() != 0)
+                    sb.append(" ");
+                sb.append("" + year);
+
+            }
         }
+        
+        if (sb.length() != 0)
+            Util.out(tname + " " + sb);
 
-        double cbr_1 = wa_cbr.doubleResult();
-        double cdr_1 = wa_cdr.doubleResult();
-
-        if (cbr_1 < cbr_2)
-            flag = true;
-
-        if (cdr_1 < cdr_2)
-            flag = true;
-
-        if (flag)
-            Util.out("Flagged: " + tname);
     }
 
     private double cbr(Territory t, int year) throws Exception
