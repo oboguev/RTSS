@@ -60,6 +60,9 @@ public class ShowAreaValues
     protected final EvalGrowthRate evalGrowthRate;
 
     private boolean onlyRaw = false;
+    
+    private final char NBSP = 0xA0;
+    private final String NBSP_S = "" + NBSP;
 
     protected ShowAreaValues(TerritoryDataSet tdsUGVI,
             TerritoryDataSet tdsCSK,
@@ -275,7 +278,7 @@ public class ShowAreaValues
                 if (tyCSK != null)
                     popCSK = tyCSK.population.total.both;
 
-                String stable = " ";
+                String stable = NBSP_S;
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
 
@@ -366,8 +369,12 @@ public class ShowAreaValues
 
     private String pad(String s, int length)
     {
+        while (s.length() < length && s.length() == 0)
+            s = NBSP_S;
+            
         while (s.length() < length)
             s = " " + s;
+        
         return s;
     }
 }
