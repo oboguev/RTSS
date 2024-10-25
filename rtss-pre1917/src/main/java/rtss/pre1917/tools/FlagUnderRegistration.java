@@ -100,8 +100,6 @@ public class FlagUnderRegistration extends ShowAreaValues
 
         for (int year = 1896; year <= 1904; year++)
         {
-            boolean flag = false;
-
             double cbr = cbr(t, year);
             double cdr = cdr(t, year);
 

@@ -60,11 +60,11 @@ public class ShowAreaValues
     protected final EvalGrowthRate evalGrowthRate;
 
     private boolean onlyRaw = false;
-    
+
     private final char NBSP = 0xA0;
     private final String NBSP_S = "" + NBSP;
 
-    protected ShowAreaValues(TerritoryDataSet tdsUGVI,
+    public ShowAreaValues(TerritoryDataSet tdsUGVI,
             TerritoryDataSet tdsCSK,
             TerritoryDataSet tdsCensus1897) throws Exception
     {
@@ -75,12 +75,12 @@ public class ShowAreaValues
         evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
     }
 
-    protected void setOnlyRaw()
+    public void setOnlyRaw()
     {
         onlyRaw = true;
     }
 
-    protected ShowAreaValues(LoadOptions... options) throws Exception
+    public ShowAreaValues(LoadOptions... options) throws Exception
     {
         Set<LoadOptions> xo = Set.of(options);
 
@@ -98,7 +98,7 @@ public class ShowAreaValues
         evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
     }
 
-    protected ShowAreaValues() throws Exception
+    public ShowAreaValues() throws Exception
     {
         this(new LoadOptions[0]);
     }
@@ -215,6 +215,7 @@ public class ShowAreaValues
     protected void show_values(String tname) throws Exception
     {
         Territory t = tdsUGVI.get(tname);
+
         if (t == null)
         {
             Util.out("************************************************************");
@@ -223,15 +224,30 @@ public class ShowAreaValues
             Util.out("");
             return;
         }
+        
+        show(t, null);
+    }
 
-        Territory tCSK = tdsCSK.get(tname);
+    public void show(Territory t, String prefix) throws Exception
+    {
+        Territory tCSK = tdsCSK.get(t.name);
         Territory tEval = onlyRaw ? null : evalGrowthRate.evalTerritory(t);
-
-        Util.out("");
-        Util.out("************************************************************");
-        Util.out("");
-        Util.out("Рождаемость и смертность для " + tname);
-        Util.out("");
+        
+        if (prefix == null)
+        {
+            Util.out("");
+            Util.out("************************************************************");
+            Util.out("");
+            Util.out("Рождаемость и смертность для " + t.name);
+            Util.out("");
+        }
+        else
+        {
+            Util.out("");
+            Util.out(prefix + "Рождаемость и смертность для " + t.name);
+            Util.out("");
+        }
+    
         if (tEval == null)
         {
             Util.out("год       ЦСК             УГВИ                 чр      чс    мигр      прогрессивный от 1897");
@@ -282,7 +298,7 @@ public class ShowAreaValues
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
 
-                long saldo = totalMigration.saldo(tname, year);
+                long saldo = totalMigration.saldo(t.name, year);
 
                 String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
                                          // год
@@ -371,10 +387,10 @@ public class ShowAreaValues
     {
         while (s.length() < length && s.length() == 0)
             s = NBSP_S;
-            
+
         while (s.length() < length)
             s = " " + s;
-        
+
         return s;
     }
 }
