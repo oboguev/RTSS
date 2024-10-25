@@ -138,4 +138,24 @@ public class ExcelRow
             throw new Exception("percentage out of range");
         return v;
     }
+    
+    public String asString(String column) throws Exception
+    {
+        Object o = getCellValue(column);
+
+        if (o == null)
+            return null;
+        else
+            return o.toString();
+    }
+
+    public String asDespacedString(String column) throws Exception
+    {
+        Object o = getCellValue(column);
+
+        if (o == null)
+            return null;
+        else
+            return Util.despace(o.toString()).trim(); 
+    }
 }

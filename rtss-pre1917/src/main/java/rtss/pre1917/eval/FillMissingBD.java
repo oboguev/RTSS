@@ -1,15 +1,20 @@
 package rtss.pre1917.eval;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import rtss.data.selectors.BirthDeath;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.ValueByGender;
 import rtss.util.Util;
+import rtss.util.excel.ExcelRow;
 import rtss.util.excel.ExcelSheet;
 import rtss.util.excel.ExcelWorkbook;
 
@@ -240,6 +245,103 @@ public class FillMissingBD
     {
         ExcelWorkbook wb = ExcelWorkbook.load("ugvi/PatchYearData.xlsx");
         ExcelSheet sheet = wb.getTheOnlySheet();
-        // ###
+        
+        for (ExcelRow row : sheet.getRows())
+        {
+            applyPatch(row, "чр", BirthDeath.BIRTH);
+            applyPatch(row, "чу", BirthDeath.DEATH);
+        }
+    }
+
+    private void applyPatch(ExcelRow row, String col, BirthDeath bd) throws Exception
+    {
+        String tname = row.asDespacedString("губ");
+        if (tname == null || tname.length() == 0)
+            return;
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        int year = row.asInteger("год");
+        
+        String sv = row.asDespacedString(col);
+        if (sv == null || sv.length() == 0)
+            return;
+        
+        if (sv.startsWith("A"))
+        {
+            applyPatch(tname, year, sv, bd);
+        }
+        else
+        {
+            long value = row.asLong(col);
+            applyPatch(tname, year, value, bd);
+        }
+    }
+    
+    private void applyPatch(String tname, int year, String formula, BirthDeath bd) throws Exception
+    {
+        if (formula.equals("A"))
+        {
+            applyPatch(tname, year, bd, year - 1, year + 1);
+        }
+        else if (formula.startsWith("A"))
+        {
+            String s = Util.stripStart(formula, "A ");
+            List<Integer> ylist = new ArrayList<>();
+            for (String sy : s.split(" "))
+                ylist.add(Integer.parseInt(sy));
+            Integer[] years = ylist.toArray(new Integer[0]);
+            applyPatch(tname, year, bd, years);
+        }
+        else
+        {
+            throw new Exception("Incorrect patch formula");
+        }
+    }
+
+    private void applyPatch(String tname, int year, BirthDeath bd, Integer... avyears) throws Exception
+    {
+        Territory t = tds.get(tname);
+        long sum = 0;
+        int count = 0;
+        
+        for (int ay : avyears)
+        {
+            TerritoryYear ty = t.territoryYear(ay);
+            count++;
+            
+            switch (bd)
+            {
+            case BIRTH:
+                sum += ty.births.total.both;
+                break;
+            
+            case DEATH:
+                sum += ty.deaths.total.both;
+                break;
+            }
+        }
+        
+        long value  = Math.round((1.0 * sum) / count);
+        
+        applyPatch(tname, year, value, bd);
+    }
+
+    private void applyPatch(String tname, int year, long value, BirthDeath bd) throws Exception
+    {
+        Territory t = tds.get(tname);
+        TerritoryYear ty = t.territoryYear(year);
+
+        switch (bd)
+        {
+        case BIRTH:
+            ty.births.leaveOnlyTotalBoth();
+            ty.births.total.both = value;
+            break;
+        
+        case DEATH:
+            ty.deaths.leaveOnlyTotalBoth();
+            ty.deaths.total.both = value;
+            break;
+        }
     }
 }
