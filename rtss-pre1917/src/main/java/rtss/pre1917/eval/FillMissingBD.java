@@ -10,6 +10,8 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.ValueByGender;
 import rtss.util.Util;
+import rtss.util.excel.ExcelSheet;
+import rtss.util.excel.ExcelWorkbook;
 
 /*
  * Заполнить пробелы в сведениях о числе рождений и смертей.
@@ -61,6 +63,8 @@ public class FillMissingBD
         // поэтому сведения о числе рождений и смертей в ней собираются с 1897 года. Установть для 1896 года в Черноморской губ.
         // число рождений и смертей как среднее за 1897-1900. 
         average("Черноморская", 1896, 1897, 1900);
+        
+        applyPatches();
 
         // исправить число рождений и смертей для губерний с иудеями
         fixJews();
@@ -228,5 +232,14 @@ public class FillMissingBD
             return v + Math.round(v * JudaicBirthDeathUnderaccouningRate * pct / 100.0);
         else
             return null;
+    }
+
+    /* =============================================================================================== */
+    
+    private void applyPatches() throws Exception
+    {
+        ExcelWorkbook wb = ExcelWorkbook.load("ugvi/PatchYearData.xlsx");
+        ExcelSheet sheet = wb.getTheOnlySheet();
+        // ###
     }
 }

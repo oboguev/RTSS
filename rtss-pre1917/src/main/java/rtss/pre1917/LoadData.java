@@ -14,7 +14,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.CensusCategoryValues;
-import rtss.pre1917.data.ExcelColumnHeader;
 import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Foreigners;
 import rtss.pre1917.data.Taxon;
@@ -36,6 +35,7 @@ import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
+import rtss.util.excel.ExcelColumnHeader;
 import rtss.util.excel.ExcelRC;
 
 public class LoadData

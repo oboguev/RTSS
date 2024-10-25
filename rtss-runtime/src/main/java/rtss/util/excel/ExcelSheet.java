@@ -1,20 +1,21 @@
 package rtss.util.excel;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ExcelSheet
 {
     public final String name;
     
-    private Set<String> columns = new HashSet<>();
-    private List<ExcelRow> rows = new ArrayList<>();
+    private final Map<String, Integer> headers;
+    private final List<ExcelRow> rows = new ArrayList<>();
     
-    public ExcelSheet(String name)
+    public ExcelSheet(String name, Map<String, Integer> headers)
     {
         this.name = name;
+        this.headers = headers;
     }
     
     public void addRow(ExcelRow row)
@@ -24,7 +25,7 @@ public class ExcelSheet
 
     public Set<String> getColumns()
     {
-        return columns;
+        return headers.keySet();
     }
     
     public List<ExcelRow> getRows()
