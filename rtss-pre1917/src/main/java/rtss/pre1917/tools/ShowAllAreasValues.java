@@ -4,8 +4,6 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.TerritoryDataSet;
-import rtss.pre1917.data.migration.TotalMigration;
-import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.util.Util;
 
 public class ShowAllAreasValues extends ShowAreaValues

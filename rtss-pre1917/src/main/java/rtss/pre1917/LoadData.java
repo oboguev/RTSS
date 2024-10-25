@@ -14,7 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.CensusCategoryValues;
-import rtss.pre1917.data.ColumnHeader;
+import rtss.pre1917.data.ExcelColumnHeader;
 import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Foreigners;
 import rtss.pre1917.data.Taxon;
@@ -58,7 +58,9 @@ public class LoadData
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
         ADJUST_FEMALE_BIRTHS, DONT_ADJUST_FEMALE_BIRTHS,
 
-        // заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
+        // - заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
+        // - приложить коррекции из ugvi/PatchYearData (только для УГВИ)
+        // - скорректировать на недоучёт регистрации рождений и смертей иудеев (только для УГВИ)
         FILL_MISSING_BD, DONT_FILL_MISSING_BD,
 
         // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
@@ -170,7 +172,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 validateHeaders(headers);
 
                 if (!headers.containsKey("губ"))
@@ -247,7 +249,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 validateHeaders(headers);
 
                 if (!headers.containsKey("губ"))
@@ -302,7 +304,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 validateHeaders(headers);
 
                 if (!headers.containsKey("губ"))
@@ -406,7 +408,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 validateHeaders(headers);
 
                 if (!headers.containsKey("губ"))
@@ -467,7 +469,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
 
                 if (!headers.containsKey("губ"))
                     throw new Exception("Нет колонки для губернии");
@@ -976,7 +978,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 loadEmigration(em, rc, headers.get("год"), headers);
             }
         }
@@ -1056,7 +1058,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 loadJews(m, rc, headers.get("губ"), headers.get("% иудеев"));
 
                 for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
@@ -1138,7 +1140,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 loadCensusCategories(cats, rc, headers.get("губ"),
                                      headers.get("% русских"),
                                      headers.get("% католиков"),
@@ -1233,7 +1235,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 loadInnerMigrationYearly(im, sname, rc, headers);
             }
         }
@@ -1650,7 +1652,7 @@ public class LoadData
                 if (sname != null && sname.trim().toLowerCase().startsWith("баланс-"))
                 {
                     ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                    Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                    Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                     loadInnerMigrationCoarse(im, rc, headers);
                 }
             }
@@ -1807,7 +1809,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
 
                 if (!headers.containsKey("губ"))
                     throw new Exception("Нет колонки для губернии");
@@ -1883,7 +1885,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
 
                 loadForeigners(foreigners, rc, headers.get("губ"), headers);
             }
@@ -1962,7 +1964,7 @@ public class LoadData
                     continue;
 
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
 
                 loadImmigration(immigration, rc, headers.get("год"), headers);
             }

@@ -15,22 +15,22 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import rtss.util.Util;
 import rtss.util.excel.ExcelRC;
 
-public class ColumnHeader
+public class ExcelColumnHeader
 {
     public String text;
     public int row;
     public int col;
     
-    public ColumnHeader(String text, int row, int col)
+    public ExcelColumnHeader(String text, int row, int col)
     {
         this.text= text;
         this.row = row;
         this.col = col;
     }
     
-    public static List<ColumnHeader> getHeaders(XSSFSheet sheet, ExcelRC rc) throws Exception
+    public static List<ExcelColumnHeader> getHeaders(XSSFSheet sheet, ExcelRC rc) throws Exception
     {
-        List<ColumnHeader> headers = new ArrayList<>();
+        List<ExcelColumnHeader> headers = new ArrayList<>();
         
         int nr1 = sheet.getFirstRowNum();
         int nr2 = sheet.getLastRowNum();
@@ -60,7 +60,7 @@ public class ColumnHeader
                                 if (text.length() == 0)
                                     continue;
                                 
-                                headers.add(new ColumnHeader(text, nr, nc));
+                                headers.add(new ExcelColumnHeader(text, nr, nc));
                             }
                         }
                     }
@@ -83,7 +83,7 @@ public class ColumnHeader
     {
         Map<String, Integer> m = new HashMap<>();
         
-        for (ColumnHeader h : getHeaders(sheet,  rc))
+        for (ExcelColumnHeader h : getHeaders(sheet,  rc))
         {
             if (h.row != 0)
                 throw new Exception("Column header not in the top row");
