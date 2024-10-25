@@ -82,8 +82,10 @@ public class FlagUnderRegistration extends ShowAreaValues
         WeightedAverage wa_cbr = new WeightedAverage();
         WeightedAverage wa_cdr = new WeightedAverage();
 
-        for (int year = 1909; year <= 1913; year++)
+        for (int year = 1907; year <= 1913; year++)
         {
+            if (year == 1910)
+                continue;
             wa_cbr.add(cbr(t, year), 1.0);
             wa_cdr.add(cdr(t, year), 1.0);
         }
@@ -96,7 +98,7 @@ public class FlagUnderRegistration extends ShowAreaValues
         
         boolean printed = false;
 
-        for (int year = 1896; year <= 1902; year++)
+        for (int year = 1896; year <= 1904; year++)
         {
             boolean flag = false;
 
