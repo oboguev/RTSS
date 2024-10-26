@@ -50,24 +50,41 @@ public class FixEarlyPeriod
     public Territory fix(Territory t, Territory tCensus, int byl1, int byl2, int byr1, int byr2,
             int dyl1, int dyl2, int dyr1, int dyr2) throws Exception
     {
+        final double rate_threshold = 0.01;
+        double prev_av_cbr = 0;
+        double prev_av_cdr = 0;
         Territory xt = t;
 
-        for (;;)
+        for (int pass = 0;; pass++)
         {
             xt = fix_pass(xt, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);
-            // ###
-            if (Util.True)
+
+            if (pass >= 1 &&
+                Math.abs(av_cbr - prev_av_cbr) < rate_threshold &&
+                Math.abs(av_cdr - prev_av_cdr) < rate_threshold)
+            {
                 break;
+            }
+            else if (pass > 100)
+            {
+                throw new Exception("FixEarlyPeriod failed to converge for " + t.name);
+            }
+
+            prev_av_cbr = av_cbr;
+            prev_av_cdr = av_cdr;
         }
 
         return xt;
     }
 
+    private double av_cbr;
+    private double av_cdr;
+
     private Territory fix_pass(Territory t, Territory tCensus, int byl1, int byl2, int byr1, int byr2,
             int dyl1, int dyl2, int dyr1, int dyr2) throws Exception
     {
-        double av_cbr = averageRate(t, byr1, byr2, BirthDeath.BIRTH);
-        double av_cdr = averageRate(t, dyr1, dyr2, BirthDeath.DEATH);
+        av_cbr = averageRate(t, byr1, byr2, BirthDeath.BIRTH);
+        av_cdr = averageRate(t, dyr1, dyr2, BirthDeath.DEATH);
 
         /* ================================= seed data ================================= */
 
