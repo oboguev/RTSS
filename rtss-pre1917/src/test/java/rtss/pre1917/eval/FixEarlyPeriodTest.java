@@ -56,10 +56,10 @@ public class FixEarlyPeriodTest
         Territory t = tdsUGVI.get(tname);
         Territory tCensus = tdsCensus1897.get(tname);
         
-        new ShowAreaValues().show(t, "BEFORE: ");
+        new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
         Territory xt = new FixEarlyPeriod().fix(t, tCensus, by, dy);        
 
-        new ShowAreaValues().show(xt, "AFTER: ");
+        new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
 }

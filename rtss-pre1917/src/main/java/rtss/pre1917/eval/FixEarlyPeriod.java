@@ -104,21 +104,21 @@ public class FixEarlyPeriod
 
         for (int year = 1898; year <= 1916; year++)
         {
-            // ### xt or t? Also see EvalProgressive 
             TerritoryYear xty = xt.territoryYearOrNull(year);
-            TerritoryYear ty = t.territoryYearOrNull(year);
-            TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
+            if (xty != null)
+            {
+                adjust_births(xty, byl1, byl2, av_cbr, xty.progressive_population.total.both);
+                adjust_deaths(xty, dyl1, dyl2, av_cdr, xty.progressive_population.total.both);
 
-            if (ty == null || ty_next == null || xty == null)
-                continue;
+                TerritoryYear xty_next = xt.territoryYearOrNull(year + 1);
+                if (xty_next != null)
+                {
+                    in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
+                    in += totalMigration.saldo(t.name, year);
 
-            adjust_births(xty, byl1, byl2, av_cbr, xty.progressive_population.total.both);
-            adjust_deaths(xty, dyl1, dyl2, av_cdr, xty.progressive_population.total.both);
-
-            in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
-            in += totalMigration.saldo(t.name, year);
-
-            ty_next.progressive_population.total.both = ty.progressive_population.total.both + in;
+                    xty_next.progressive_population.total.both = xty.progressive_population.total.both + in;
+                }
+            }
         }
 
         return xt;
