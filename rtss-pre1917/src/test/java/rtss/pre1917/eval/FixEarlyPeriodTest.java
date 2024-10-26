@@ -16,7 +16,7 @@ public class FixEarlyPeriodTest
     {
         try
         {
-            new FixEarlyPeriodTest().test("Приморская обл.", 1902, 1899);
+            new FixEarlyPeriodTest().test("Приморская обл.", 1896, 1898, 1899, 1903, 1896, 1898, 1899, 1903);
         }
         catch (Throwable ex)
         {
@@ -51,6 +51,7 @@ public class FixEarlyPeriodTest
         return xo;
     }
 
+    @SuppressWarnings("unused")
     private void test(String tname, int by, int dy) throws Exception
     {
         Territory t = tdsUGVI.get(tname);
@@ -59,6 +60,19 @@ public class FixEarlyPeriodTest
         new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
         Territory xt = new FixEarlyPeriod().fix(t, tCensus, by, dy);        
+
+        new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
+    }
+
+    @SuppressWarnings("unused")
+    private void test(String tname, int byl1, int byl2, int byr1, int byr2, int dyl1, int dyl2, int dyr1, int dyr2) throws Exception
+    {
+        Territory t = tdsUGVI.get(tname);
+        Territory tCensus = tdsCensus1897.get(tname);
+        
+        new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
+        
+        Territory xt = new FixEarlyPeriod().fix(t, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);        
 
         new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
