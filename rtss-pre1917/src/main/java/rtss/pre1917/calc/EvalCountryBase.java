@@ -10,6 +10,7 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.Immigration;
 import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
+import rtss.pre1917.eval.FixEarlyPeriod;
 
 public class EvalCountryBase
 {
@@ -45,6 +46,7 @@ public class EvalCountryBase
 
         corrections_Kavkaz();
         corrections_CentralAsia();
+        corrections_Siberia();
 
         /*
          * Черноморская губерния: внутрироссийская миграция извне РСФСР (1,600) и иммиграция извне России (1,300).
@@ -113,6 +115,12 @@ public class EvalCountryBase
         excludeFromVitalRates("Уральская обл.");
     }
 
+    private void corrections_Siberia() throws Exception
+    {
+        fixEarlyPeriod("Приморская обл.", 1896, 1898, 1899, 1903);
+        excludeFromVitalRates("Приморская обл.");
+    }
+    
     /* ================================================================================================ */
 
     /*
@@ -172,5 +180,19 @@ public class EvalCountryBase
 
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
+    }
+    
+    private void fixEarlyPeriod(String tname, int yl1, int yl2, int yr1, int yr2) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+
+        Territory tCensus = tdsCensus1897.get(tname);
+        
+        Territory xt = new FixEarlyPeriod().fix(t, tCensus, yl1, yl2, yr1, yr2);        
+        tdsPopulation.put(tname, xt);
+        tdsVitalRates.put(tname, xt.dup());
     }
 }
