@@ -67,13 +67,20 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     {
         public final String tname;
         public final long diff;
+        public final double pct;
 
-        public PopulationDifference(String tname, long diff)
+        public PopulationDifference(String tname, long diff, double pct)
         {
             this.tname = tname;
             this.diff = diff;
+            this.pct = pct;
         }
 
+        public PopulationDifference(String tname, long v1, long v2)
+        {
+            this(tname, v1 - v2, (100.0 * (v1 - v2)) / v2);
+        }
+        
         @Override
         public int compareTo(PopulationDifference o)
         {
@@ -98,7 +105,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             {
                 Territory t = tdsPopulation.get(tname);
                 TerritoryYear ty = t.territoryYearOrNull(toYear);
-                list.add(new PopulationDifference(tname, ty.population.total.both - ty.progressive_population.total.both));
+                list.add(new PopulationDifference(tname, ty.population.total.both, ty.progressive_population.total.both));
             }
         }
 
@@ -118,7 +125,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             {
                 TerritoryYear ty = tdsPopulation.get(tname).territoryYearOrNull(toYear);
                 TerritoryYear tyCSK = tdsCSK.get(tname).territoryYearOrNull(toYear);
-                list.add(new PopulationDifference(tname, tyCSK.population.total.both - ty.progressive_population.total.both));
+                list.add(new PopulationDifference(tname, tyCSK.population.total.both, ty.progressive_population.total.both));
             }
         }
 
@@ -136,6 +143,6 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         Collections.sort(list);
         
         for (PopulationDifference pd : list)
-            Util.out(String.format("    %s %,d", pd.tname, pd.diff));
+            Util.out(String.format("    \"%s\" %,d %.1f", pd.tname, pd.diff, pd.pct));
     }
 }
