@@ -110,6 +110,8 @@ public class EvalCountryBase
         new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
         new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
 
+        excludeFromVitalRates("Акмолинская обл.");
+        excludeFromVitalRates("Тургайская обл.");
         excludeFromVitalRates("Самаркандская обл.");
         excludeFromVitalRates("Семипалатинская обл.");
         excludeFromVitalRates("Уральская обл.");
