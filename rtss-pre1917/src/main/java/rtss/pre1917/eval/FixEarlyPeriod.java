@@ -8,7 +8,6 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.migration.TotalMigration;
-import rtss.util.Util;
 
 /*
  * Скорректировать рождаемость и смертность в указанном "левом" промежутке, сделав их значения такими же,
@@ -57,6 +56,11 @@ public class FixEarlyPeriod
         int dyr2 = 1916;
 
         return fix(t, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);
+    }
+
+    public Territory fix(Territory t, Territory tCensus, int yl1, int yl2, int yr1, int yr2) throws Exception
+    {
+        return fix(t, tCensus, yl1, yl2, yr1, yr2, yl1, yl2, yr1, yr2);
     }
 
     /*
