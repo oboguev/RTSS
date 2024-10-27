@@ -19,17 +19,18 @@ public class EvalCountryTaxon extends EvalCountryBase
         try
         {
             new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI();
-            // new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
+            new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
-            // new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
-            // new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
-            // new EvalCountryTaxon("Средняя Азия", 1913).calc(true).print();
-            // new EvalCountryTaxon("Кавказ", 1913).calc(true).print();
-            // new EvalCountryTaxon("Сибирь", 1913).calc(true).print();
-            // new EvalCountryTaxon("Белоруссия", 1913).calc(true).print();
-            // new EvalCountryTaxon("Литва", 1913).calc(true).print();
-            // new EvalCountryTaxon("Малороссия", 1913).calc(true).print();
-            // new EvalCountryTaxon("Новороссия", 1913).calc(true).print();
+
+            new EvalCountryTaxon("Сибирь", 1913).calc(true).print();
+            new EvalCountryTaxon("Новороссия", 1913).calc(true).print();
+            new EvalCountryTaxon("Малороссия", 1913).calc(true).print();
+            new EvalCountryTaxon("Белоруссия", 1913).calc(true).print();
+            new EvalCountryTaxon("Литва", 1913).calc(true).print();
+            new EvalCountryTaxon("Кавказ", 1913).calc(true).print();
+            new EvalCountryTaxon("Средняя Азия", 1913).calc(true).print();
+            new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
+            new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
         }
         catch (Throwable ex)
         {
