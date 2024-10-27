@@ -160,7 +160,10 @@ public class EvalCountryTaxon extends EvalCountryBase
         
         showPopulationPercentageVitalRatesVsPopulation();
 
-        TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName);
+        TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName, 
+                                                                     tdsPopulation,
+                                                                     tdsVitalRates,
+                                                                     tdsCSK);
         TaxonYearData yd;
 
         for (int year = 1896; year <= toYear; year++)

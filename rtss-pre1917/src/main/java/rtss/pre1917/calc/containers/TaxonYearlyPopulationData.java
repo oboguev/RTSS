@@ -3,19 +3,30 @@ package rtss.pre1917.calc.containers;
 import java.util.HashMap;
 import java.util.List;
 
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.util.Util;
 
-public class TaxonYearlyPopulationData extends HashMap<Integer,TaxonYearData> 
+public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 {
     private static final long serialVersionUID = 1L;
     private final String taxonName;
 
-    public TaxonYearlyPopulationData(String taxonName)
+    public final TerritoryDataSet tdsPopulation;
+    public final TerritoryDataSet tdsVitalRates;
+    public final TerritoryDataSet tdsCSK;
+
+    public TaxonYearlyPopulationData(String taxonName,
+            TerritoryDataSet tdsPopulation,
+            TerritoryDataSet tdsVitalRates,
+            TerritoryDataSet tdsCSK)
     {
         this.taxonName = taxonName;
+        this.tdsPopulation = tdsPopulation;
+        this.tdsVitalRates = tdsVitalRates;
+        this.tdsCSK = tdsCSK;
     }
-    
-    public void print()
+
+    public TaxonYearlyPopulationData print()
     {
         Util.out("Численность населения в границах " + taxonName);
         Util.out("рождаемость, смертность, естественный прирост, ест. + мех. изменение численности");
@@ -23,11 +34,11 @@ public class TaxonYearlyPopulationData extends HashMap<Integer,TaxonYearData>
 
         List<Integer> years = Util.sort(keySet());
         int lastPartialYear = years.get(years.size() - 1);
-        
+
         for (int year : years)
         {
             TaxonYearData yd = get(year);
-            
+
             if (year != lastPartialYear)
             {
                 double ngr = yd.cbr - yd.cdr;
@@ -40,5 +51,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer,TaxonYearData>
                 Util.out(String.format("%d %,d", year, yd.population));
             }
         }
+
+        return this;
     }
 }
