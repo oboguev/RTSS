@@ -19,17 +19,17 @@ public class EvalCountryTaxon extends EvalCountryBase
         try
         {
             new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI();
-            new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
+            // new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
-            new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
-            new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
-            new EvalCountryTaxon("Средняя Азия", 1913).calc(true).print();
-            new EvalCountryTaxon("Кавказ", 1913).calc(true).print();
-            new EvalCountryTaxon("Сибирь", 1913).calc(true).print();
-            new EvalCountryTaxon("Белоруссия", 1913).calc(true).print();
-            new EvalCountryTaxon("Литва", 1913).calc(true).print();
-            new EvalCountryTaxon("Малороссия", 1913).calc(true).print();
-            new EvalCountryTaxon("Новороссия", 1913).calc(true).print();
+            // new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
+            // new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
+            // new EvalCountryTaxon("Средняя Азия", 1913).calc(true).print();
+            // new EvalCountryTaxon("Кавказ", 1913).calc(true).print();
+            // new EvalCountryTaxon("Сибирь", 1913).calc(true).print();
+            // new EvalCountryTaxon("Белоруссия", 1913).calc(true).print();
+            // new EvalCountryTaxon("Литва", 1913).calc(true).print();
+            // new EvalCountryTaxon("Малороссия", 1913).calc(true).print();
+            // new EvalCountryTaxon("Новороссия", 1913).calc(true).print();
         }
         catch (Throwable ex)
         {
@@ -44,7 +44,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     private static TaxonYearlyPopulationData typdRusEvro;
 
     private final static boolean DoCountMilitaryDeaths = Util.False;
-    
+
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
     private EvalCountryTaxon(String taxonName, int toYear) throws Exception
@@ -101,12 +101,12 @@ public class EvalCountryTaxon extends EvalCountryBase
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
 
         /* ===================== Часть иммиграции не разбиваемая по губерниям ===================== */
-        
+
         for (int year = 1896; year <= toYear; year++)
         {
             LumpImmigration lump = immigration.lumpImmigrationForYear(year);
             final double TurkeyFactor = 2.33;
-            
+
             switch (taxonName)
             {
             case "Империя":
@@ -127,7 +127,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                 immigration(tmPopulation, year, lump.japan);
                 immigration(tmPopulation, year, lump.china);
                 break;
-                
+
             case "Кавказ":
                 immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
                 immigration(tmPopulation, year, lump.persia);
@@ -142,7 +142,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                 break;
             }
         }
-        
+
         /* ===================== Учёт военных потерь ===================== */
 
         if (DoCountMilitaryDeaths)
@@ -155,12 +155,12 @@ public class EvalCountryTaxon extends EvalCountryBase
             if (taxonName.equals("РСФСР-1991"))
                 extraDeaths(1914, 94_000);
         }
-        
+
         /* ===================== Построить структуру с результатом ===================== */
-        
+
         showPopulationPercentageVitalRatesVsPopulation();
 
-        TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName, 
+        TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName,
                                                                      tdsPopulation,
                                                                      tdsVitalRates,
                                                                      tdsCSK,
@@ -194,33 +194,33 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         return cd;
     }
-    
+
     /*
      * Число военных смертей для всей Империи в 1904 и 1905 гг.
      */
     private final double EmpireWarDeaths_1904 = 25_589;
     private final double EmpireWarDeaths_1905 = 25_363;
-    private static Long EmpirePopulation1904 = null; 
-    
+    private static Long EmpirePopulation1904 = null;
+
     private void japaneseWarDeaths() throws Exception
     {
         TerritoryYear ty = tmPopulation.territoryYearOrNull(1904);
         if (taxonName.equals("Империя"))
         {
             EmpirePopulation1904 = ty.progressive_population.total.both;
-            japaneseWarDeaths(1.0); 
+            japaneseWarDeaths(1.0);
         }
-        else 
+        else
         {
             if (EmpirePopulation1904 == null)
                 throw new Exception("Не расчитано население Империи");
             double fraction = (double) ty.progressive_population.total.both / EmpirePopulation1904;
-            Util.out(String.format("Доля военных смертей в войне 1904-1905 гг. для %s: %.1f%% (население: %,d из %,d)", 
+            Util.out(String.format("Доля военных смертей в войне 1904-1905 гг. для %s: %.1f%% (население: %,d из %,d)",
                                    taxonName, fraction * 100, ty.progressive_population.total.both, EmpirePopulation1904));
-            japaneseWarDeaths(fraction); 
+            japaneseWarDeaths(fraction);
         }
     }
-    
+
     private void japaneseWarDeaths(double fraction) throws Exception
     {
         extraDeaths(1904, Math.round(EmpireWarDeaths_1904 * fraction));
@@ -232,12 +232,12 @@ public class EvalCountryTaxon extends EvalCountryBase
         tmPopulation.extraDeaths(year, deaths);
         tmVitalRates.extraDeaths(year, deaths);
     }
-    
+
     private void immigration(Territory t, int year, long amount)
     {
         t.cascadeAdjustProgressivePopulation(year, amount);
     }
-    
+
     private void showPopulationPercentageVitalRatesVsPopulation() throws Exception
     {
         Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
@@ -245,21 +245,21 @@ public class EvalCountryTaxon extends EvalCountryBase
         Util.out(String.format("    в %d году %.1f населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
         Util.out(String.format("    в %d году %.1f населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
     }
-    
+
     private double populationPercentageVitalRatesVsPopulation(int y1, int y2) throws Exception
     {
         long p1 = 0;
         long p2 = 0;
-        
+
         for (int year = y1; year <= y2; year++)
         {
             TerritoryYear ty = tmVitalRates.territoryYearOrNull(year);
             p1 += ty.progressive_population.total.both;
-            
+
             ty = tmPopulation.territoryYearOrNull(year);
             p2 += ty.progressive_population.total.both;
         }
-        
+
         return (100.0 * p1) / p2;
     }
 }
