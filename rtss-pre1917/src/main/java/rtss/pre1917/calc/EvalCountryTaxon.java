@@ -43,7 +43,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
-    private final static boolean DoCountMilitaryDeaths = Util.True;
+    private final static boolean DoCountMilitaryDeaths = Util.False;
     
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
@@ -243,7 +243,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
         Util.out(String.format("    в %d-%d годах %.1f населения", 1896, toYear, populationPercentageVitalRatesVsPopulation(1896, toYear)));
         Util.out(String.format("    в %d году %.1f населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
-        Util.out(String.format("    в %d году  %.1f населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
+        Util.out(String.format("    в %d году %.1f населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
     }
     
     private double populationPercentageVitalRatesVsPopulation(int y1, int y2) throws Exception
