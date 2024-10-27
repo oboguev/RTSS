@@ -19,8 +19,8 @@ public class EvalCountryTaxon extends EvalCountryBase
         try
         {
             new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI();
-            // new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
-            new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
+            new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
+            // new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
             // new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
             // new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
             // new EvalCountryTaxon("Средняя Азия", 1913).calc(true).print();
@@ -43,7 +43,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
-    private final static boolean DoCountMilitaryDeaths = Util.False;
+    private final static boolean DoCountMilitaryDeaths = Util.True;
 
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
@@ -124,6 +124,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                 break;
 
             case "РСФСР-1991":
+            case "Сибирь":
                 immigration(tmPopulation, year, lump.japan);
                 immigration(tmPopulation, year, lump.china);
                 break;
