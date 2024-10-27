@@ -52,7 +52,7 @@ public class EvalCountryBase
         Long nAddChernomorskaya = null;
         final long nAddChernomorskayaInner = 1_600;
         final long nAddChernomorskayaForeign = 1_300;
-        
+
         switch (taxonName)
         {
         case "Империя":
@@ -60,12 +60,12 @@ public class EvalCountryBase
             // уже содержится в учёте турецкой иммиграции 
             // nAddChernomorskaya = nAddChernomorskayaForeign;
             break;
-            
+
         case "РСФСР-1991":
             nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner;
             break;
-            
-        default:    
+
+        default:
             break;
         }
 
@@ -89,8 +89,7 @@ public class EvalCountryBase
 
         useStabilized("Тифлисская", 1903, 1914);
 
-        if (taxonName.equals("Империя"))
-            useStabilized("Карсская обл.", 1907, 1913);
+        useStabilized("Карсская обл.", 1907, 1913);
 
         new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
 
@@ -163,7 +162,7 @@ public class EvalCountryBase
         if (t == null)
             return;
 
-        Territory tEval = evalGrowthRate.evalTerritory(t);
+        Territory tEval = evalGrowthRate.evalTerritory(t, y1, y2);
 
         for (int year : tEval.years())
         {
