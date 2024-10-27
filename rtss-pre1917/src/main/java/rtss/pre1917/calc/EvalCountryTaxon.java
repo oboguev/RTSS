@@ -18,7 +18,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         try
         {
-            new EvalCountryTaxon("Империя", 1913).calc(true).print();
+            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI();
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
             new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
@@ -163,7 +163,8 @@ public class EvalCountryTaxon extends EvalCountryBase
         TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName, 
                                                                      tdsPopulation,
                                                                      tdsVitalRates,
-                                                                     tdsCSK);
+                                                                     tdsCSK,
+                                                                     toYear);
         TaxonYearData yd;
 
         for (int year = 1896; year <= toYear; year++)
