@@ -89,9 +89,9 @@ public class EvalCountryBase
         /* не включать Дагестан в подсчёт рождаемости и смертности */
         excludeFromVitalRates("Дагестанская обл.");
 
-        useStabilized("Тифлисская", 1903, 1914);
-
         useStabilized("Карсская обл.", 1907, 1913);
+        useStabilized("Терская обл.", 1910, 1914);
+        useStabilized("Тифлисская", 1903, 1914);
 
         new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
 
