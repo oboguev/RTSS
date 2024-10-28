@@ -103,7 +103,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         double dr = r2 - r1;
         double pct = 100.0 * dr / r1;
 
-        Util.out(String.format("Изменение в %s на %.1f%%", which, pct));
+        Util.out(String.format("Изменение в %s на %.1f (%.1f%%)", which, dr, pct));
     }
 
     /* ======================================================================================= */

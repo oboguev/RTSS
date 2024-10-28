@@ -22,6 +22,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
 
+            new EvalCountryTaxon("Европейская часть РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("Сибирь", 1913).calc(true).print();
             new EvalCountryTaxon("Новороссия", 1913).calc(true).print();
             new EvalCountryTaxon("Малороссия", 1913).calc(true).print();
