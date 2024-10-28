@@ -35,8 +35,41 @@ public class ClipboardConverter
     {
         s = s.replace(" ", ",");
         s = s.replace(".", ",");
-        return s;
+        StringBuilder sb = new StringBuilder ();
+        for (String xs : s.split("\n"))
+        {
+            sb.append(convert_4a(xs) + "\n");
+        }
+        
+        return sb.toString();
     }
+    
+    private static String convert_4a(String s) throws Exception
+    {
+        int ccount = s.length() - s.replace(",", "").length();
+        
+        if (ccount == 3 || ccount == 5 || ccount == 7)
+        {
+            StringBuilder sb = new StringBuilder ();
+            int i = 0 ;
+            for (char c : s.toCharArray())
+            {
+                if (c == ',')
+                {
+                    i++;
+                    if ((i % 2) == 0)
+                        c = '\n';
+                }
+                sb.append(c);
+            }
+            return sb.toString();
+        }
+        else
+        {
+            return s;
+        }
+    }
+
 
     @SuppressWarnings("unused")
     private static String convert_3(String s) throws Exception
