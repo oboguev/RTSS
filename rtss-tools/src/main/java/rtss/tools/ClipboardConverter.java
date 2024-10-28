@@ -18,7 +18,7 @@ public class ClipboardConverter
                 return;
             }
             
-            s = convert_3(s);
+            s = convert_4(s);
 
             Clipboard.put(s);
             Util.out("Transformed: " + s);
@@ -30,6 +30,14 @@ public class ClipboardConverter
         }
     }
     
+    @SuppressWarnings("unused")
+    private static String convert_4(String s) throws Exception
+    {
+        s = s.replace(" ", ",");
+        s = s.replace(".", ",");
+        return s;
+    }
+
     @SuppressWarnings("unused")
     private static String convert_3(String s) throws Exception
     {
