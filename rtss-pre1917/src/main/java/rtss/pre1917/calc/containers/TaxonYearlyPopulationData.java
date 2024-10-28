@@ -9,6 +9,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
 
 public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
@@ -60,8 +61,52 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
 
+        Util.out("");
+        printRateChange("CBR");
+        printRateChange("CDR");
+        printRateChange("NGR");
+
         return this;
     }
+
+    private double rate(String which, int year)
+    {
+        TaxonYearData yd = get(year);
+        switch (which)
+        {
+        case "CBR":
+            return yd.cbr;
+        case "CDR":
+            return yd.cdr;
+        case "NGR":
+            return yd.cbr - yd.cdr;
+        default:
+            throw new RuntimeException("Invalid selector");
+        }
+    }
+
+    private void printRateChange(String which)
+    {
+        WeightedAverage wa1 = new WeightedAverage();
+        wa1.add(rate(which, 1896), 1.0);
+        wa1.add(rate(which, 1897), 1.0);
+        wa1.add(rate(which, 1899), 1.0);
+        wa1.add(rate(which, 1900), 1.0);
+
+        WeightedAverage wa2 = new WeightedAverage();
+        wa2.add(rate(which, 1911), 1.0);
+        wa2.add(rate(which, 1912), 1.0);
+        wa2.add(rate(which, 1913), 1.0);
+
+        double r1 = wa1.doubleResult();
+        double r2 = wa2.doubleResult();
+        double dr = r2 - r1;
+        double pct = 100.0 * dr / r1;
+
+        Util.out(String.format("Изменение в %s на %.1f%%", which, pct));
+    }
+
+    /* ======================================================================================= */
 
     public static class PopulationDifference implements Comparable<PopulationDifference>
     {
@@ -80,7 +125,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         {
             this(tname, v1 - v2, (100.0 * (v1 - v2)) / v2);
         }
-        
+
         @Override
         public int compareTo(PopulationDifference o)
         {
@@ -97,7 +142,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public TaxonYearlyPopulationData printDifferenceWithUGVI()
     {
         List<PopulationDifference> list = new ArrayList<>();
-        
+
         for (String tname : tdsPopulation.keySet())
 
         {
@@ -117,7 +162,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public TaxonYearlyPopulationData printDifferenceWithCSK()
     {
         List<PopulationDifference> list = new ArrayList<>();
-        
+
         for (String tname : tdsPopulation.keySet())
 
         {
@@ -130,18 +175,18 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         }
 
         print(list, "Превышение по ЦСК");
- 
+
         return this;
     }
-    
+
     private void print(List<PopulationDifference> list, String title)
     {
         Util.out("");
         Util.out(title + ":");
         Util.out("");
-        
+
         Collections.sort(list);
-        
+
         for (PopulationDifference pd : list)
             Util.out(String.format("    \"%s\" %,d %.1f", pd.tname, pd.diff, pd.pct));
     }
