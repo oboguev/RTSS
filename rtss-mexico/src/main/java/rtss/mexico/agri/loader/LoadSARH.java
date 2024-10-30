@@ -1,5 +1,8 @@
 package rtss.mexico.agri.loader;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -9,6 +12,9 @@ import rtss.mexico.agri.entities.Cultures;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelRC;
+import rtss.util.excel.ExcelRow;
+import rtss.util.excel.ExcelSheet;
+import rtss.util.excel.ExcelWorkbook;
 import rtss.util.excel.FindCells;
 import rtss.util.excel.RowCol;
 
@@ -19,7 +25,8 @@ public class LoadSARH
         try
         {
             Cultures c = load();
-            Util.unused(c);
+            Map<Integer, Long> m = loadPopulation(); 
+            Util.unused(c, m);
             Util.out("** Done");
         }
         catch (Exception ex)
@@ -28,6 +35,8 @@ public class LoadSARH
             ex.printStackTrace();
         }
     }
+
+    /* ================================= */
 
     private final Cultures cultures = new Cultures();
     private String currentFile = null;
@@ -146,7 +155,7 @@ public class LoadSARH
 
             if (rcAlcohol != null)
                 cy.alcohol = asDouble(rc, nr, rcAlcohol.col);
-            
+
             if (cy.isAllNull())
                 c.deleteYear(cy);
         }
@@ -163,5 +172,30 @@ public class LoadSARH
         }
 
         return rc.asDouble(nr, nc);
+    }
+
+    /* ================================= */
+
+    private static Map<Integer, Long> cachedLoadPopulation;
+
+    public static Map<Integer, Long> loadPopulation() throws Exception
+    {
+        if (cachedLoadPopulation != null)
+            return cachedLoadPopulation;
+
+        Map<Integer, Long> m = new HashMap<>();
+
+        ExcelWorkbook wb = ExcelWorkbook.load("agriculture/SARH-Consumos-aparentes/SARH-population.xlsx");
+        ExcelSheet sheet = wb.getTheOnlySheet();
+        for (ExcelRow row : sheet.getRows())
+        {
+            int year = row.asInteger("год");
+            long pop = row.asLong("население");
+            m.put(year, pop);
+        }
+
+        cachedLoadPopulation = m;
+
+        return m;
     }
 }
