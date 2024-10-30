@@ -53,4 +53,38 @@ public class CultureYear
                importAmount == null && exportAmount == null &&
                consumption == null && perCapita == null && alcohol == null;
     }
+
+    public String idYear()
+    {
+        if (comment != null)
+            return comment;
+        else
+            return String.format("%d", year);
+    }
+
+    public Double get(String what) throws Exception
+    {
+        switch (what)
+        {
+        case "площадь":
+            return this.surface;
+        case "урожай":
+        case "производство":
+            return this.production;
+        case "урожайность":
+            return this.yield;
+        case "экспорт":
+            return this.exportAmount;
+        case "импорт":
+            return this.importAmount;
+        case "национальное потребление":
+            return this.consumption;
+        case "душевое потребление":
+            return this.perCapita;
+        case "алкоголь":
+            return this.alcohol;
+        default:
+            throw new Exception("Incorrect selector");
+        }
+    }
 }

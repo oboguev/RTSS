@@ -57,4 +57,12 @@ public class Culture
         y2cy.remove(cy.year);
         averageCultureYears.remove(cy.comment);
     }
+    
+    public String id()
+    {
+        if (category != null)
+            return category + "/" + name;
+        else
+            return name;
+    }
 }
