@@ -1,6 +1,9 @@
 package rtss.mexico.agri.entities;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /*
@@ -9,6 +12,13 @@ import java.util.Map;
 public class Cultures 
 {
     private Map<String, Culture> m = new HashMap<>();
+    
+    public List<String> names()
+    {
+        List<String> list = new ArrayList<>(m.keySet());
+        Collections.sort(list);
+        return list;
+    }
     
     public boolean contains(String cname)
     {
@@ -20,5 +30,10 @@ public class Cultures
         if (m.containsKey(c.name))
             throw new Exception("Duplicate culture " + c.name);
         m.put(c.name, c);
+    }
+    
+    public Culture get(String cname) throws Exception
+    {
+        return m.get(cname);
     }
 }

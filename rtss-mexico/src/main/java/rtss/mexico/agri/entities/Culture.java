@@ -13,25 +13,25 @@ public class Culture
 {
     public final String name;
     public final String category;
-    
+
     private final Map<Integer, CultureYear> y2cy = new HashMap<>();
-    
-    public final Map<String , CultureYear> averageCultureYears = new HashMap<>();
+
+    public final Map<String, CultureYear> averageCultureYears = new HashMap<>();
 
     public Culture(String name, String category) throws Exception
     {
         this.name = name;
         this.category = category;
     }
-    
+
     public List<Integer> years()
     {
         return Util.sort(y2cy.keySet());
     }
-    
+
     public CultureYear cultureYear(int year)
     {
-        return y2cy.get(year); 
+        return y2cy.get(year);
     }
 
     public CultureYear makeCultureYear(int year) throws Exception
@@ -40,7 +40,7 @@ public class Culture
             throw new Exception("Duplicate year " + year + " for " + name);
         CultureYear cy = new CultureYear(this, year);
         y2cy.put(year, cy);
-        return cy; 
+        return cy;
     }
 
     public CultureYear makeAverageCultureYear(String comment) throws Exception
@@ -49,9 +49,9 @@ public class Culture
             throw new Exception("Duplicate average year " + comment + " for " + name);
         CultureYear cy = new CultureYear(this, comment);
         averageCultureYears.put(comment, cy);
-        return cy; 
+        return cy;
     }
-    
+
     public void deleteYear(CultureYear cy)
     {
         y2cy.remove(cy.year);
