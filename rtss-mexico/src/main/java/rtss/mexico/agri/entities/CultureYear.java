@@ -1,0 +1,47 @@
+package rtss.mexico.agri.entities;
+
+/*
+ * Годовые даные для чсельскохозяйственной культуры
+ */
+public class CultureYear
+{
+    public final Culture culture;
+    public final int year;
+
+    // уборочнная площадь, га
+    public Double surface;
+
+    // урожайность, кг/га
+    public Double yield;
+
+    // урожай, тонн
+    public Double production;
+
+    // импорт, тонн
+    public Double importAmount;
+
+    // экспорт, тонн
+    public Double exportAmount;
+
+    // национальное потребление, тонн
+    public Double consumption;
+
+    // душевой потребление за год, кг на душу (при численности населения по таблице SARH)
+    public Double perCapita;
+
+    // производство алкоголя, литров
+    public Double alcohol;
+
+    public CultureYear(Culture culture, int year)
+    {
+        this.culture = culture;
+        this.year = year;
+    }
+
+    public boolean isAllNull()
+    {
+        return surface == null && yield == null && production == null &&
+               importAmount == null && exportAmount == null &&
+               consumption == null && perCapita == null && alcohol == null;
+    }
+}
