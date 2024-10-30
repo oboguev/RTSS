@@ -7,6 +7,7 @@ public class CultureYear
 {
     public final Culture culture;
     public final int year;
+    public final String comment;
 
     // уборочнная площадь, га
     public Double surface;
@@ -36,6 +37,14 @@ public class CultureYear
     {
         this.culture = culture;
         this.year = year;
+        this.comment = null;
+    }
+
+    public CultureYear(Culture culture, String comment)
+    {
+        this.culture = culture;
+        this.year = -1;
+        this.comment = comment;
     }
 
     public boolean isAllNull()

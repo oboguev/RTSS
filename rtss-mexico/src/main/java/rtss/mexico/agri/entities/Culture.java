@@ -9,7 +9,7 @@ import rtss.util.Util;
 /*
  * Сельскохозяйственная культура
  */
-public class Culture implements Comparable<Culture>
+public class Culture
 {
     public final String name;
     public final String category;
@@ -43,8 +43,18 @@ public class Culture implements Comparable<Culture>
         return cy; 
     }
 
-    public int compareTo(Culture o)
+    public CultureYear makeAverageCultureYear(String comment) throws Exception
     {
-        return this.name.compareTo(o.name);
+        if (averageCultureYears.containsKey(comment))
+            throw new Exception("Duplicate average year " + comment + " for " + name);
+        CultureYear cy = new CultureYear(this, comment);
+        averageCultureYears.put(comment, cy);
+        return cy; 
+    }
+    
+    public void deleteYear(CultureYear cy)
+    {
+        y2cy.remove(cy.year);
+        averageCultureYears.remove(cy.comment);
     }
 }

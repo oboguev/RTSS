@@ -1,11 +1,24 @@
 package rtss.mexico.agri.entities;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * Набор даныных о сельскохозяйственных культурах
  */
-public class Cultures extends HashSet<Culture>
+public class Cultures 
 {
-    private static final long serialVersionUID = 1L;
+    private Map<String, Culture> m = new HashMap<>();
+    
+    public boolean contains(String cname)
+    {
+        return m.containsKey(cname);
+    }
+    
+    public void add(Culture c) throws Exception
+    {
+        if (m.containsKey(c.name))
+            throw new Exception("Duplicate culture " + c.name);
+        m.put(c.name, c);
+    }
 }

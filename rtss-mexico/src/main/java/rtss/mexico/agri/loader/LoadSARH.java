@@ -4,6 +4,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.mexico.agri.entities.Culture;
+import rtss.mexico.agri.entities.CultureYear;
 import rtss.mexico.agri.entities.Cultures;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -19,6 +20,7 @@ public class LoadSARH
         {
             Cultures c = load();
             Util.unused(c);
+            Util.out("** Done");
         }
         catch (Exception ex)
         {
@@ -38,18 +40,33 @@ public class LoadSARH
 
     private Cultures do_load() throws Exception
     {
-        loadFile("annual", "A");
-        loadFile("annual", "B-C");
-        loadFile("annual", "E-J");
-        loadFile("annual", "L-R");
-        loadFile("annual", "S-Z");
-        loadFile("perennial", "A-C");
-        loadFile("perennial", "D-L");
-        loadFile("perennial", "M-P");
-        loadFile("perennial", "T-V");
-        loadFile("semi-perennial", "A-P");
+        try
+        {
+            loadFile("annual", "A");
+            loadFile("annual", "B-C");
+            loadFile("annual", "E-J");
+            loadFile("annual", "L-R");
+            loadFile("annual", "S-Z");
+            loadFile("perennial", "A-C");
+            loadFile("perennial", "D-L");
+            loadFile("perennial", "M-P");
+            loadFile("perennial", "T-V");
+            loadFile("semi-perennial", "A-P");
 
-        return cultures;
+            return cultures;
+        }
+        catch (Exception ex)
+        {
+            if (currentNR == null)
+            {
+                throw ex;
+            }
+            else
+            {
+                String msg = String.format("row = %d", currentNR + 1);
+                throw new Exception(msg, ex);
+            }
+        }
     }
 
     private void loadFile(String category, String part) throws Exception
@@ -83,11 +100,10 @@ public class LoadSARH
     private void loadCulture(String category, String cname, ExcelRC rc) throws Exception
     {
         Util.out(String.format("%s/%s", category, cname));
-        
+
         Culture c = new Culture(cname, category);
-        if (cultures.contains(c.name))
-            throw new Exception("Duplicate culture");
-        
+        cultures.add(c);
+
         int colYear = 0;
         int colSurface = FindCells.findRequiredVerticalCells(rc, "площадь", "га").col;
         int colYield = FindCells.findRequiredVerticalCells(rc, "урожайность", "кг/га").col;
@@ -97,20 +113,55 @@ public class LoadSARH
         int colConsumption = FindCells.findRequiredVerticalCells(rc, "национальное", "тонн").col;
         int colPerCapita = FindCells.findRequiredVerticalCells(rc, "душевое", "кг на душу").col;
         RowCol rcAlcohol = FindCells.findVerticalCells(rc, "алкоголь", "литров");
-        
+
         for (int nr = 0; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             currentNR = nr;
-            
+
             String s = rc.asString(nr, colYear);
             if (s == null || s.length() == 0)
                 continue;
+
+            CultureYear cy;
+
+            if (s.startsWith("Promedio "))
+            {
+                cy = c.makeAverageCultureYear(s);
+            }
+            else
+            {
+                int year = rc.asInt(nr, colYear);
+                if (year < 1880 || year >= 2030)
+                    throw new Exception("Incorrect year " + s);
+                cy = c.makeCultureYear(year);
+            }
+
+            cy.surface = asDouble(rc, nr, colSurface);
+            cy.yield = asDouble(rc, nr, colYield);
+            cy.production = asDouble(rc, nr, colProduction);
+            cy.importAmount = asDouble(rc, nr, colImport);
+            cy.exportAmount = asDouble(rc, nr, colExport);
+            cy.consumption = asDouble(rc, nr, colConsumption);
+            cy.perCapita = asDouble(rc, nr, colPerCapita);
+
+            if (rcAlcohol != null)
+                cy.alcohol = asDouble(rc, nr, rcAlcohol.col);
             
-            // ###
+            if (cy.isAllNull())
+                c.deleteYear(cy);
         }
-            
-        Util.noop();
-        
-        // ###
+    }
+
+    private Double asDouble(ExcelRC rc, int nr, int nc) throws Exception
+    {
+        String s = rc.asString(nr, nc);
+        if (s != null)
+        {
+            if (Util.despace(s).trim().equals("-"))
+                return null;
+
+        }
+
+        return rc.asDouble(nr, nc);
     }
 }
