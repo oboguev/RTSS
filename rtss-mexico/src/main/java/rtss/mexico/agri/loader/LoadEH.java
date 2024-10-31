@@ -87,7 +87,6 @@ public class LoadEH
         String cname = extractCultureName(rc);
         Util.out(cname);
 
-        
         if (cname.equalsIgnoreCase("henequén") || cname.equalsIgnoreCase("cocotero (palmera de coco)"))
             return;
 
@@ -113,17 +112,17 @@ public class LoadEH
 
         RowCol rcImport = FindCells.findVerticalCells(rc, "Importa-", "ción", "t");
         RowCol rcExport = FindCells.findVerticalCells(rc, "Exporta-", "ción", "t");
-        
+
         RowCol rcConsumption = FindCells.findVerticalCells(rc, "Nacional", "t");
         if (rcConsumption == null)
             rcConsumption = FindCells.findVerticalCells(rc, "Consumo", "nacional", "aparente", "t");
         if (rcConsumption == null)
             rcConsumption = FindCells.findVerticalCells(rc, "Nacio-", "nal", "t");
-        
+
         RowCol rcPerCapita = FindCells.findVerticalCells(rc, "Per cápita", "kg");
         if (rcPerCapita == null)
             rcPerCapita = FindCells.findVerticalCells(rc, "Per", "cápita", "kg");
-        
+
         if (Util.False)
         {
             if (rcImport == null)
@@ -134,6 +133,54 @@ public class LoadEH
                 Util.out("No consumption for " + cname);
             if (rcPerCapita == null)
                 Util.out("No per capita for " + cname);
+        }
+
+        for (int nr = rcYear.row + 2; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            String s = rc.asString(nr, rcYear.col);
+            if (s == null)
+                continue;
+            s = Util.despace(s).trim();
+            if (s.equals(""))
+                continue;
+            if (s.startsWith("18") || s.startsWith("19") || s.startsWith("20"))
+            {
+                //####
+            }
+            else if (s.equals("Características de la producción de " + cname) ||
+                     s.equals("(Continúa)") ||
+                     s.equals("Año") ||
+                     s.startsWith("Características de la producc") ||
+                     s.startsWith("Nota: ") ||
+                     s.startsWith("SAGAR. Centro de Estadística Agropecuaria") ||
+                     s.startsWith("SARH, Dirección General de Economía Agrícola") ||
+                     s.startsWith("SARH. Dirección General de Economía Agrícola") ||
+                     s.startsWith("de Agricultura y Recursos Hidráulicos") ||
+                     s.startsWith("y Recursos Hidráulicos") ||
+                     s.startsWith("Secretaría de Agricultura y Recursos Hidráulicos") ||
+                     s.startsWith("de temporal y se cosechan") ||
+                     s.startsWith("Fuente: SAGAR. Centro de Estadística Agropecuaria") ||
+                     s.startsWith("www.siap.gob.mx") ||
+                     s.startsWith("Vol. ") ||
+                     s.startsWith("Para: ") ||
+                     s.startsWith("Para ") ||
+                     s.startsWith("Años seleccionados de") ||
+                     s.startsWith("de SAGAR") ||
+                     s.startsWith("Serie anual de "))
+            {
+                // ignore
+                continue;
+            }
+            else
+            {
+                throw new Exception("Unexpected cell content: " + s);
+            }
+            
+            if (s.endsWith(".0"))
+                s = Util.stripTail(s, ".0");
+
+            if (s.length() != 4)
+                Util.out("[" + s + "]");
         }
     }
 
