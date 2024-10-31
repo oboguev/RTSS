@@ -3,6 +3,8 @@ package rtss.mexico.agri.loader;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import rtss.mexico.agri.entities.Culture;
+import rtss.mexico.agri.entities.CultureYear;
 import rtss.mexico.agri.entities.Cultures;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -43,7 +45,7 @@ public class LoadEH
         try (XSSFWorkbook wb = Excel.loadWorkbook(fn9))
         {
             for (int tab = 9; tab <= 38; tab++)
-                loadTab(wb, "9." + tab);
+                loadTabCh9(wb, "9." + tab);
 
             return cultures;
         }
@@ -61,7 +63,7 @@ public class LoadEH
         }
     }
 
-    private void loadTab(XSSFWorkbook wb, String tab) throws Exception
+    private void loadTabCh9(XSSFWorkbook wb, String tab) throws Exception
     {
         for (int k = 0; k < wb.getNumberOfSheets(); k++)
         {
@@ -73,8 +75,8 @@ public class LoadEH
             if (sname.equals(tab))
             {
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                // Util.out(tab);
-                loadTab(rc);
+                Util.out(tab);
+                loadTabCh9(rc);
                 return;
             }
         }
@@ -82,13 +84,24 @@ public class LoadEH
         throw new Exception("Cannot find table sheet " + tab);
     }
 
-    private void loadTab(ExcelRC rc) throws Exception
+    private void loadTabCh9(ExcelRC rc) throws Exception
     {
         String cname = extractCultureName(rc);
-        Util.out(cname);
+        // Util.out(cname);
 
-        if (cname.equalsIgnoreCase("henequén") || cname.equalsIgnoreCase("cocotero (palmera de coco)"))
+        switch (cname.toLowerCase())
+        {
+        // non-edible
+        case "henequén":
             return;
+
+        // duplicates SARH data with no additions
+        case "cocotero (palmera de coco)":
+            return;
+        }
+        
+        Culture c = new Culture(cname, null);
+        cultures.add(c);
 
         RowCol rcYear = FindCells.findRequiredVerticalCells(rc, "Año", "");
 
@@ -143,45 +156,77 @@ public class LoadEH
             s = Util.despace(s).trim();
             if (s.equals(""))
                 continue;
-            if (s.startsWith("18") || s.startsWith("19") || s.startsWith("20"))
-            {
-                //####
-            }
-            else if (s.equals("Características de la producción de " + cname) ||
-                     s.equals("(Continúa)") ||
-                     s.equals("Año") ||
-                     s.startsWith("Características de la producc") ||
-                     s.startsWith("Nota: ") ||
-                     s.startsWith("SAGAR. Centro de Estadística Agropecuaria") ||
-                     s.startsWith("SARH, Dirección General de Economía Agrícola") ||
-                     s.startsWith("SARH. Dirección General de Economía Agrícola") ||
-                     s.startsWith("de Agricultura y Recursos Hidráulicos") ||
-                     s.startsWith("y Recursos Hidráulicos") ||
-                     s.startsWith("Secretaría de Agricultura y Recursos Hidráulicos") ||
-                     s.startsWith("de temporal y se cosechan") ||
-                     s.startsWith("Fuente: SAGAR. Centro de Estadística Agropecuaria") ||
-                     s.startsWith("www.siap.gob.mx") ||
-                     s.startsWith("Vol. ") ||
-                     s.startsWith("Para: ") ||
-                     s.startsWith("Para ") ||
-                     s.startsWith("Años seleccionados de") ||
-                     s.startsWith("de SAGAR") ||
-                     s.startsWith("Serie anual de "))
+
+            if (s.equals("Características de la producción de " + cname) ||
+                s.equals("(Continúa)") ||
+                s.equals("Año") ||
+                s.startsWith("Características de la produc") ||
+                s.startsWith("Nota: ") ||
+                s.startsWith("SAGAR. Centro de Estadística Agropecuaria") ||
+                s.startsWith("SARH, Dirección General de Economía Agrícola") ||
+                s.startsWith("SARH. Dirección General de Economía Agrícola") ||
+                s.startsWith("de Agricultura y Recursos Hidráulicos") ||
+                s.startsWith("y Recursos Hidráulicos") ||
+                s.startsWith("Secretaría de Agricultura y Recursos Hidráulicos") ||
+                s.startsWith("de temporal y se cosechan") ||
+                s.startsWith("Fuente: SAGAR. Centro de Estadística Agropecuaria") ||
+                s.startsWith("www.siap.gob.mx") ||
+                s.startsWith("Vol. ") ||
+                s.startsWith("Para: ") ||
+                s.startsWith("Para ") ||
+                s.startsWith("1880 a") ||
+                s.startsWith("Años seleccionados de") ||
+                s.startsWith("de SAGAR") ||
+                s.contains("SARH") ||
+                s.startsWith("Serie anual de "))
             {
                 // ignore
                 continue;
+            }
+            else if (s.startsWith("18") || s.startsWith("19") || s.startsWith("20"))
+            {
+                // proceed
             }
             else
             {
                 throw new Exception("Unexpected cell content: " + s);
             }
-            
+
+            if (s.contains("-"))
+                return;
+
             if (s.endsWith(".0"))
                 s = Util.stripTail(s, ".0");
 
             if (s.length() != 4)
-                Util.out("[" + s + "]");
+                throw new Exception("Unexpected year cell content: " + s);
+
+            int year = Integer.parseInt(s);
+            if (year < 1881 || year > 2030)
+                throw new Exception("Unexpected year cell content: " + s);
+            
+            CultureYear cy = c.makeCultureYear(year);
+            cy.surface = getValue(rc, nr, rcSurface);
+            cy.yield = getValue(rc, nr, rcYield);
+            cy.production = getValue(rc, nr, rcProduction);
+            cy.importAmount = getValue(rc, nr, rcImport);
+            cy.exportAmount = getValue(rc, nr, rcExport);
+            cy.consumption = getValue(rc, nr, rcConsumption);
+            cy.perCapita = getValue(rc, nr, rcPerCapita);
         }
+    }
+    
+    private Double getValue(ExcelRC rc, int nr, RowCol rowcol) throws Exception
+    {
+        if (rowcol == null)
+            return null;
+        String s = rc.asString(nr, rowcol.col);
+        if (s == null)
+            return null;
+        s = Util.despace(s).trim();
+        if (s.equals("") || s.equals("ND"))
+            return null;
+        return rc.asDouble(nr, rowcol.col);
     }
 
     private String extractCultureName(ExcelRC rc) throws Exception
