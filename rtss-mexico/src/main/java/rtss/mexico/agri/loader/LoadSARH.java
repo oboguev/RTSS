@@ -122,6 +122,7 @@ public class LoadSARH
         int colConsumption = FindCells.findRequiredVerticalCells(rc, "национальное", "тонн").col;
         int colPerCapita = FindCells.findRequiredVerticalCells(rc, "душевое", "кг на душу").col;
         RowCol rcAlcohol = FindCells.findVerticalCells(rc, "алкоголь", "литров");
+        RowCol rcCleaned = FindCells.findVerticalCells(rc, "очищенный", "тонн");
 
         for (int nr = 0; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -155,6 +156,12 @@ public class LoadSARH
 
             if (rcAlcohol != null)
                 cy.alcohol = asDouble(rc, nr, rcAlcohol.col);
+            
+            if (rcCleaned != null && cname.equalsIgnoreCase("arroz"))
+            {
+                cy.production_raw = cy.production;
+                cy.production = asDouble(rc, nr, rcCleaned.col);
+            }
 
             if (cy.isAllNull())
                 c.deleteYear(cy);

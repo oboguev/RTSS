@@ -8,6 +8,7 @@ public class CultureYear
     public final Culture culture;
     public final int year;
     public final String comment;
+    public Rice rice_kind;
 
     // уборочнная площадь, га
     public Double surface;
@@ -17,6 +18,7 @@ public class CultureYear
 
     // урожай, тонн
     public Double production;
+    public Double production_raw;
 
     // импорт, тонн
     public Double importAmount;

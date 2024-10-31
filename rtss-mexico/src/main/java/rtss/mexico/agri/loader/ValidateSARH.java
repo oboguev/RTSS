@@ -1,6 +1,8 @@
 package rtss.mexico.agri.loader;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
@@ -50,22 +52,22 @@ public class ValidateSARH
     private void validate(CultureYear cy) throws Exception
     {
         String tag = tag(cy);
-        
+
         if (cy.production != null && cy.consumption != null && Util.True)
         {
             double v = cy.production + denull(cy.importAmount) - denull(cy.exportAmount);
             double df = df(v, cy.consumption);
             if (df > 0.03)
             {
-                Util.out(String.format("%s расхождение баланса производства-потребления на %.1f%%, напечатано: %s, вычисляется: %s",
-                                       tag, df * 100.0, Util.f2s(cy.consumption), Util.f2s(v)));
+                warn(String.format("%s расхождение баланса производства-потребления на %.1f%%, напечатано: %s, вычисляется: %s",
+                                   tag, df * 100.0, Util.f2s(cy.consumption), Util.f2s(v)));
             }
         }
 
         if (cy.consumption != null && cy.perCapita != null && cy.year > 0 && Util.True)
         {
             double v = cy.perCapita * population.get(cy.year) / 1000.0;
-            
+
             double pc = 1000.0 * cy.consumption / population.get(cy.year);
             // round pc to 3 digits
             pc = Math.round(pc * 1000) / 1000.0;
@@ -74,10 +76,10 @@ public class ValidateSARH
             // ignore divergence in the last digit
             if (Math.abs(pc - cy.perCapita) < 0.0015)
                 df = 0;
-            
+
             if (df > 0.07)
             {
-                Util.out(String
+                warn(String
                         .format("%s расхождение национального и душевого потребления на %.1f%%, напечатано/вычисляется: (%s, %.0f) (%.3f, %.3f)",
                                 tag, df * 100.0,
                                 Util.f2s(cy.consumption), v,
@@ -113,7 +115,7 @@ public class ValidateSARH
         validateAverage(cy, y1, y2, "душевое потребление");
         validateAverage(cy, y1, y2, "алкоголь");
     }
-    
+
     private String tag(CultureYear cy) throws Exception
     {
         if (cy.comment != null && cy.comment.startsWith("Promedio "))
@@ -157,12 +159,14 @@ public class ValidateSARH
 
         v /= nyears;
         Double cv = cy.get(what);
+        boolean cv_null = false;
 
         if (cv == null)
         {
             cv = 0.0;
+            cv_null = true;
         }
-        
+
         String s_promedio;
         String s_calc;
 
@@ -178,14 +182,19 @@ public class ValidateSARH
         }
 
         double df = df(v, cv);
+
         if (s_promedio.equals(s_calc))
             df = 0;
-        if (df > 0.05 && Util.True)
+
+        if (!what.equals("душевое потребление") && Math.abs(v - cv) <= 2)
+            df = 0;
+
+        if (df > 0.05 && Util.True && !cv_null)
         {
-            Util.out(String.format("%s расхождение [%s] на %.1f%% напечатано/вычислено: %s %s",
-                                   tag, what,
-                                   df * 100.0,
-                                   s_promedio, s_calc));
+            warn(String.format("%s расхождение среднего для [%s] на %.1f%% напечатано/вычислено: %s %s",
+                               tag, what,
+                               df * 100.0,
+                               s_promedio, s_calc));
         }
     }
 
@@ -200,4 +209,25 @@ public class ValidateSARH
         double x2 = (Math.abs(v2) + Math.abs(v1)) / 2;
         return x1 / x2;
     }
+
+    private static Set<String> knownWarnings = null;
+
+    private void warn(String msg) throws Exception
+    {
+        if (knownWarnings == null)
+        {
+            knownWarnings = new HashSet<>();
+            String fs = Util.loadResource("agriculture/SARH-Consumos-aparentes/known-divergences.txt");
+            for (String s : fs.split("\n"))
+            {
+                if (s.equals("") || s.startsWith("#"))
+                    continue;
+                knownWarnings.add(Util.despace(s).trim());
+            }
+        }
+
+        if (!knownWarnings.contains(msg))
+            Util.out(msg);
+    }
+
 }
