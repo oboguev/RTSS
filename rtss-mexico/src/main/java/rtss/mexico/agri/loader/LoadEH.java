@@ -75,8 +75,7 @@ public class LoadEH
             if (sname.equals(tab))
             {
                 ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Util.out(tab);
-                loadTabCh9(rc);
+                loadTabCh9(tab, rc);
                 return;
             }
         }
@@ -84,22 +83,23 @@ public class LoadEH
         throw new Exception("Cannot find table sheet " + tab);
     }
 
-    private void loadTabCh9(ExcelRC rc) throws Exception
+    private void loadTabCh9(String tab, ExcelRC rc) throws Exception
     {
         String cname = extractCultureName(rc);
-        // Util.out(cname);
+        Util.out(String.format("%s [%s]", cname, tab));
 
         switch (cname.toLowerCase())
         {
         // non-edible
         case "henequén":
+        case "algodón (pluma)":
             return;
 
         // duplicates SARH data with no additions
         case "cocotero (palmera de coco)":
             return;
         }
-        
+
         Culture c = new Culture(cname, null);
         cultures.add(c);
 
@@ -205,6 +205,10 @@ public class LoadEH
             if (year < 1881 || year > 2030)
                 throw new Exception("Unexpected year cell content: " + s);
             
+            // unreliable data (civil war)
+            if (year >= 1909 && year <= 1924)
+                return;
+
             CultureYear cy = c.makeCultureYear(year);
             cy.surface = getValue(rc, nr, rcSurface);
             cy.yield = getValue(rc, nr, rcYield);
@@ -215,7 +219,7 @@ public class LoadEH
             cy.perCapita = getValue(rc, nr, rcPerCapita);
         }
     }
-    
+
     private Double getValue(ExcelRC rc, int nr, RowCol rowcol) throws Exception
     {
         if (rowcol == null)
@@ -226,7 +230,8 @@ public class LoadEH
         s = Util.despace(s).trim();
         if (s.equals("") || s.equals("ND"))
             return null;
-        return rc.asDouble(nr, rowcol.col);
+        s = s.replace(" ", "");
+        return Double.parseDouble(s);
     }
 
     private String extractCultureName(ExcelRC rc) throws Exception
