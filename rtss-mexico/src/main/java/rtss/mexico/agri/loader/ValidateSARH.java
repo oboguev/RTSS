@@ -49,18 +49,20 @@ public class ValidateSARH
 
     private void validate(CultureYear cy) throws Exception
     {
-        if (cy.production != null && cy.consumption != null && Util.False) // ###
+        String tag = tag(cy);
+        
+        if (cy.production != null && cy.consumption != null && Util.True)
         {
             double v = cy.production + denull(cy.importAmount) - denull(cy.exportAmount);
             double df = df(v, cy.consumption);
             if (df > 0.03)
             {
-                Util.out(String.format("Расхождение баланса производства-потребления для %s в %s на %.1f%%, напечатано: %s, вычисляется: %s",
-                                       cy.culture.id(), cy.idYear(), df * 100.0, Util.f2s(cy.consumption), Util.f2s(v)));
+                Util.out(String.format("%s расхождение баланса производства-потребления на %.1f%%, напечатано: %s, вычисляется: %s",
+                                       tag, df * 100.0, Util.f2s(cy.consumption), Util.f2s(v)));
             }
         }
 
-        if (cy.consumption != null && cy.perCapita != null && cy.year > 0 && Util.True) // ###
+        if (cy.consumption != null && cy.perCapita != null && cy.year > 0 && Util.True)
         {
             double v = cy.perCapita * population.get(cy.year) / 1000.0;
             
@@ -76,8 +78,8 @@ public class ValidateSARH
             if (df > 0.07)
             {
                 Util.out(String
-                        .format("Расхождение национального и душевого потребления для %s в %s на %.1f%%, напечатано/вычисляется: (%s, %.0f) (%.3f, %.3f)",
-                                cy.culture.id(), cy.idYear(), df * 100.0,
+                        .format("%s расхождение национального и душевого потребления на %.1f%%, напечатано/вычисляется: (%s, %.0f) (%.3f, %.3f)",
+                                tag, df * 100.0,
                                 Util.f2s(cy.consumption), v,
                                 cy.perCapita, pc));
             }
@@ -111,9 +113,29 @@ public class ValidateSARH
         validateAverage(cy, y1, y2, "душевое потребление");
         validateAverage(cy, y1, y2, "алкоголь");
     }
+    
+    private String tag(CultureYear cy) throws Exception
+    {
+        if (cy.comment != null && cy.comment.startsWith("Promedio "))
+        {
+            String spro = Util.stripStart(cy.comment, "Promedio ");
+            String[] sa = spro.split("/");
+            if (sa.length != 2)
+                throw new Exception("Incorrect promedio line");
+            int y1 = Integer.parseInt(sa[0]);
+            int y2 = Integer.parseInt(sa[1]) + 1900;
+            return String.format("%s %d-%d", cy.culture.id(), y1, y2);
+        }
+        else
+        {
+            return String.format("%s %d", cy.culture.id(), cy.year);
+        }
+    }
 
     private void validateAverage(CultureYear cy, int y1, int y2, String what) throws Exception
     {
+        String tag = tag(cy);
+
         double v = 0;
         int nyears = 0;
 
@@ -158,10 +180,10 @@ public class ValidateSARH
         double df = df(v, cv);
         if (s_promedio.equals(s_calc))
             df = 0;
-        if (df > 0.05 && Util.False) // ###
+        if (df > 0.05 && Util.True)
         {
-            Util.out(String.format("Расхождение для %s среднего %d-%d для [%s] на %.1f%% напечатано/вычислено: %s %s",
-                                   cy.culture.id(), y1, y2, what,
+            Util.out(String.format("%s расхождение [%s] на %.1f%% напечатано/вычислено: %s %s",
+                                   tag, what,
                                    df * 100.0,
                                    s_promedio, s_calc));
         }
