@@ -9,6 +9,9 @@ import rtss.mexico.agri.entities.Cultures;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelRC;
+import rtss.util.excel.ExcelRow;
+import rtss.util.excel.ExcelSheet;
+import rtss.util.excel.ExcelWorkbook;
 import rtss.util.excel.FindCells;
 import rtss.util.excel.RowCol;
 
@@ -41,11 +44,17 @@ public class LoadEH
     private Cultures do_load() throws Exception
     {
         final String fn9 = "agriculture/EH-2014/tables-ch-9.xlsx";
-
-        try (XSSFWorkbook wb = Excel.loadWorkbook(fn9))
+        final String fn17 = "agriculture/EH-2014/extracted-tables-ch-17.xlsx";
+        
+        try
         {
-            for (int tab = 9; tab <= 38; tab++)
-                loadTabCh9(wb, "9." + tab);
+            try (XSSFWorkbook wb = Excel.loadWorkbook(fn9))
+            {
+                for (int tab = 9; tab <= 38; tab++)
+                    loadTabCh9(wb, "9." + tab);
+            }
+            
+            loadImports(ExcelWorkbook.load(fn17).getTheOnlySheet());
 
             return cultures;
         }
@@ -261,5 +270,22 @@ public class LoadEH
             throw new Exception("Missing culture name");
 
         return cname;
+    }
+    
+    private void loadImports(ExcelSheet sheet) throws Exception
+    {
+        for (ExcelRow row : sheet.getRows())
+        {
+            int year = row.asInteger("год");
+            Double importMaiz = row.asDouble("Maíz");
+            Double importTrigo = row.asDouble("Trigo");
+            
+            CultureYear cy;
+            cy = cultures.get("maiz").cultureYear(year);
+            cy.importAmount = importMaiz;
+            
+            cy = cultures.get("trigo").cultureYear(year);
+            cy.importAmount = importTrigo;
+        }
     }
 }

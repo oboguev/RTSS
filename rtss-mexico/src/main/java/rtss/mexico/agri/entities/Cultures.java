@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rtss.mexico.agri.loader.LoadCultureDefinitions;
+
 /*
  * Набор даныных о сельскохозяйственных культурах
  */
@@ -20,9 +22,10 @@ public class Cultures
         return list;
     }
     
-    public boolean contains(String cname)
+    public boolean contains(String cname) throws Exception
     {
-        return m.containsKey(cname);
+        CultureDefinition cd = LoadCultureDefinitions.load().get(cname);
+        return m.containsKey(cd.name);
     }
     
     public void add(Culture c) throws Exception
@@ -34,6 +37,7 @@ public class Cultures
     
     public Culture get(String cname) throws Exception
     {
-        return m.get(cname);
+        CultureDefinition cd = LoadCultureDefinitions.load().get(cname);
+        return m.get(cd.name);
     }
 }
