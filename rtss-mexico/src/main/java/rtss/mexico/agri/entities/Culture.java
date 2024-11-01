@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rtss.mexico.agri.loader.LoadCultureDefinitions;
 import rtss.util.Util;
 
 /*
@@ -20,7 +21,8 @@ public class Culture
 
     public Culture(String name, String category) throws Exception
     {
-        this.name = name;
+        CultureDefinition cd = LoadCultureDefinitions.load().get(name);
+        this.name = cd.name;
         this.category = category;
     }
 

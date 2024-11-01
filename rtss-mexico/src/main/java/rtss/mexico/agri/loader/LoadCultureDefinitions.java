@@ -51,6 +51,22 @@ public class LoadCultureDefinitions
                     cd.aliases.add(s);
             }
             
+            String kcal = row.asString("ккал/кг");
+            if (kcal == null)
+                kcal = "";
+            kcal = Util.despace(kcal).trim();
+            switch (kcal)
+            {
+            case "":
+            case "-":
+            case "непищевой":
+                break;
+
+            default:
+                cd.kcal_kg = Double.parseDouble(kcal);
+                break;
+            }
+            
             cds.add(cd);
         }
         

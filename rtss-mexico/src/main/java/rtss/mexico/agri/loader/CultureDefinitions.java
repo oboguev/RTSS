@@ -12,6 +12,19 @@ public class CultureDefinitions
     private List<CultureDefinition> definitions = new ArrayList<>();
     private Map<String, CultureDefinition> lc2cd = new HashMap<>();
     
+    public CultureDefinition get(String cname)
+    {
+        return lc2cd.get(cname.toLowerCase());
+    }
+
+    public CultureDefinition getRequired(String cname) throws Exception
+    {
+        CultureDefinition cd = get(cname);
+        if (cd == null)
+            throw new Exception("Культура не определена: " + cname);
+        return cd;
+    }
+    
     public void add(CultureDefinition cd) throws Exception
     {
         map_name(cd.name, cd);
