@@ -9,7 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
 import rtss.mexico.agri.entities.Cultures;
-import rtss.mexico.agri.entities.Rice;
+import rtss.mexico.agri.entities.RiceKind;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelRC;
@@ -164,11 +164,11 @@ public class LoadSARH
                 {
                     cy.production_raw = cy.production;
                     cy.production = asDouble(rc, nr, rcCleaned.col);
-                    cy.rice_kind = Rice.WHITE;
+                    cy.rice_kind = RiceKind.WHITE;
                 }
                 else
                 {
-                    cy.rice_kind = Rice.RAW;
+                    cy.rice_kind = RiceKind.RAW;
                 }
             }
 

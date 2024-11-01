@@ -22,6 +22,8 @@ public class Culture
     public Culture(String name, String category) throws Exception
     {
         CultureDefinition cd = LoadCultureDefinitions.load().get(name);
+        if (cd == null)
+            throw new Exception("Неопределённая культура: " + name);
         this.name = cd.name;
         this.category = category;
     }

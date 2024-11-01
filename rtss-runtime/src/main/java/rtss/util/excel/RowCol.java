@@ -30,4 +30,9 @@ public class RowCol
         
         return excelColID;
     }
+    
+    public RowCol offset(int drow, int dcol)
+    {
+        return new RowCol(row + drow, col + dcol); 
+    }
 }

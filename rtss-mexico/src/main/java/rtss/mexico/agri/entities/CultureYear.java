@@ -8,7 +8,7 @@ public class CultureYear
     public final Culture culture;
     public final int year;
     public final String comment;
-    public Rice rice_kind;
+    public RiceKind rice_kind;
 
     // уборочнная площадь, га
     public Double surface;
@@ -88,5 +88,43 @@ public class CultureYear
         default:
             throw new Exception("Incorrect selector");
         }
+    }
+
+    public void copyValues(CultureYear cy) throws Exception
+    {
+        this.rice_kind = cy.rice_kind;
+        this.surface = cy.surface;
+        this.yield = cy.yield;
+        this.production = cy.production;
+        this.production_raw = cy.production_raw;
+        this.importAmount = cy.importAmount;
+        this.exportAmount = cy.exportAmount;
+        this.consumption = cy.consumption;
+        this.perCapita = cy.perCapita;
+        this.alcohol = cy.alcohol;
+    }
+
+    public void addValues(CultureYear cy) throws Exception
+    {
+        this.surface = add(this.surface, cy.surface);
+        this.production = add(this.production, cy.production);
+        this.production_raw = add(this.production_raw, cy.production_raw);
+        this.importAmount = add(this.importAmount, cy.importAmount);
+        this.exportAmount = add(this.exportAmount, cy.exportAmount);
+        this.consumption = add(this.consumption, cy.consumption);
+        this.alcohol = add(this.alcohol, cy.alcohol);
+
+        this.yield = null;
+        this.perCapita = null;
+    }
+
+    private Double add(Double v1, Double v2) throws Exception
+    {
+        if (v1 == null && v2 == null)
+            return null;
+        else if (v1 != null && v2 != null)
+            return v1 + v2;
+        else
+            throw new Exception("Unable to add year values for the culture");
     }
 }

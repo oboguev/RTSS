@@ -40,4 +40,9 @@ public class Cultures
         CultureDefinition cd = LoadCultureDefinitions.load().get(cname);
         return m.get(cd.name);
     }
+
+    public void remove(Culture c) throws Exception
+    {
+        m.remove(c.name);
+    }
 }

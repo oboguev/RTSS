@@ -1,6 +1,6 @@
 package rtss.mexico.agri.entities;
 
-public enum Rice
+public enum RiceKind
 {
     WHITE, RAW
 }
