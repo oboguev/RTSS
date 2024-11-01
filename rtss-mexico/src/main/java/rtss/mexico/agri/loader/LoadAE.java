@@ -5,7 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
-import rtss.mexico.agri.entities.Cultures;
+import rtss.mexico.agri.entities.CultureSet;
 import rtss.mexico.agri.entities.RiceKind;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -19,7 +19,7 @@ public class LoadAE
     {
         try
         {
-            Cultures c = load();
+            CultureSet c = load();
             Util.unused(c);
             Util.out("** Done");
         }
@@ -30,16 +30,16 @@ public class LoadAE
         }
     }
 
-    private final Cultures cultures = new Cultures();
+    private final CultureSet cultures = new CultureSet();
     private String currentFile = null;
     private Integer currentNR = null;
 
-    public static Cultures load() throws Exception
+    public static CultureSet load() throws Exception
     {
         return new LoadAE().do_load();
     }
 
-    private Cultures do_load() throws Exception
+    private CultureSet do_load() throws Exception
     {
         final String fnProduction = "agriculture/Anuario-Estadístico/production.xlsx";
 

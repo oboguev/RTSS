@@ -8,7 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
-import rtss.mexico.agri.entities.Cultures;
+import rtss.mexico.agri.entities.CultureSet;
 import rtss.mexico.agri.entities.RiceKind;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -25,7 +25,7 @@ public class LoadSARH
     {
         try
         {
-            Cultures c = load();
+            CultureSet c = load();
             Map<Integer, Long> m = loadPopulation(); 
             Util.unused(c, m);
             Util.out("** Done");
@@ -39,16 +39,16 @@ public class LoadSARH
 
     /* ================================= */
 
-    private final Cultures cultures = new Cultures();
+    private final CultureSet cultures = new CultureSet();
     private String currentFile = null;
     private Integer currentNR = null;
 
-    public static Cultures load() throws Exception
+    public static CultureSet load() throws Exception
     {
         return new LoadSARH().do_load();
     }
 
-    private Cultures do_load() throws Exception
+    private CultureSet do_load() throws Exception
     {
         try
         {

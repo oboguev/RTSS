@@ -6,7 +6,7 @@ import java.util.Set;
 
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
-import rtss.mexico.agri.entities.Cultures;
+import rtss.mexico.agri.entities.CultureSet;
 import rtss.util.Util;
 
 public class ValidateSARH
@@ -25,7 +25,7 @@ public class ValidateSARH
         }
     }
 
-    private Cultures cultures = LoadSARH.load();
+    private CultureSet cultures = LoadSARH.load();
     private Map<Integer, Long> population = LoadSARH.loadPopulation();
 
     private ValidateSARH() throws Exception

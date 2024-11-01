@@ -11,7 +11,7 @@ import rtss.mexico.agri.loader.LoadCultureDefinitions;
 /*
  * Набор даныных о сельскохозяйственных культурах
  */
-public class Cultures 
+public class CultureSet 
 {
     private Map<String, Culture> m = new HashMap<>();
     

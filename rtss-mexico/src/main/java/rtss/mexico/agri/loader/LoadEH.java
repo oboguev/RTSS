@@ -5,7 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
-import rtss.mexico.agri.entities.Cultures;
+import rtss.mexico.agri.entities.CultureSet;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelRC;
@@ -21,7 +21,7 @@ public class LoadEH
     {
         try
         {
-            Cultures c = load();
+            CultureSet c = load();
             Util.unused(c);
             Util.out("** Done");
         }
@@ -32,16 +32,16 @@ public class LoadEH
         }
     }
 
-    private final Cultures cultures = new Cultures();
+    private final CultureSet cultures = new CultureSet();
     private String currentFile = null;
     private Integer currentNR = null;
 
-    public static Cultures load() throws Exception
+    public static CultureSet load() throws Exception
     {
         return new LoadEH().do_load();
     }
 
-    private Cultures do_load() throws Exception
+    private CultureSet do_load() throws Exception
     {
         final String fn9 = "agriculture/EH-2014/tables-ch-9.xlsx";
         final String fn17 = "agriculture/EH-2014/extracted-tables-ch-17.xlsx";
