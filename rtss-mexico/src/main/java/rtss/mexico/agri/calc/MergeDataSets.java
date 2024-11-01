@@ -2,9 +2,10 @@ package rtss.mexico.agri.calc;
 
 public class MergeDataSets
 {
-    // ### слить 3 набора
+    // ### слить 3 набора (по 1982 год)
     // ### доля фуражного (с 1971) - ранее
     // ### слить плантаны
-    // ### вычислить consumption
-    // ### roll negative consumption values forward 
+    // ### вычислить consumption (if null)
+    // ### roll negative consumption values backwards
+    // ### с ... по 1996 искл. войну
 }
