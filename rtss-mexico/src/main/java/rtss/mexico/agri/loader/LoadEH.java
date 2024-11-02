@@ -5,6 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
+import rtss.mexico.agri.entities.RiceKind;
 import rtss.mexico.agri.entities.CultureSet;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -96,6 +97,7 @@ public class LoadEH
     {
         String cname = extractCultureName(rc);
         Util.out(String.format("%s [%s]", cname, tab));
+        RiceKind rice_kind = null;
 
         switch (cname.toLowerCase())
         {
@@ -107,6 +109,11 @@ public class LoadEH
         // duplicates SARH data with no additions
         case "cocotero (palmera de coco)":
             return;
+        
+        case "arroz palay":
+            cname = "arroz"; 
+            rice_kind = RiceKind.RAW;
+            break;
         }
 
         Culture c = new Culture(cname, null);
@@ -226,6 +233,18 @@ public class LoadEH
             cy.exportAmount = getValue(rc, nr, rcExport);
             cy.consumption = getValue(rc, nr, rcConsumption);
             cy.perCapita = getValue(rc, nr, rcPerCapita);
+            
+            if (rice_kind == RiceKind.RAW)
+            {
+                rice_kind = RiceKind.WHITE; 
+                cy.production_raw = cy.production;
+                cy.perCapita = null;
+                cy.production *= 0.66;
+            }
+            else if (rice_kind == RiceKind.WHITE || rice_kind == null)
+            {
+                cy.rice_kind = rice_kind;
+            }
         }
     }
 

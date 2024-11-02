@@ -17,6 +17,8 @@ public class MergeCultureSets
         cs.deleteYearRange(0, 1924);
         cs.deleteYearRange(1983, 9999);
         
+        // ### EH 1897-1908
+        
         
 
         // ### слить 3 набора (по 1982 год)
@@ -25,5 +27,6 @@ public class MergeCultureSets
         // ### вычислить consumption (if null)
         // ### roll negative consumption values backwards
         // ### с ... по 1996 искл. войну
+        // ### cana de azucar в EH - что с ней делать?
     }
 }
