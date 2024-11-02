@@ -1,0 +1,308 @@
+ Item Code, CPC Code, Item
+101,'01195,Canary seed
+1016,'02123,Goats
+1017,'21116,Meat of goat; fresh or chilled
+1018,'21156,Edible offal of goat; fresh; chilled or frozen
+1019,'21515,Goat fat; unrendered
+1020,'02292,Raw milk of goats
+1021,'22254,Cheese from milk of goats; fresh or processed
+1022,'22249.02,Butter of goat milk
+1025,'02954,Raw hides and skins of goats or kids
+103,'01199.02,Mixed grain
+1034,'02140,Swine / pigs
+1035,'21113.01,Meat of pig with the bone; fresh or chilled
+1036,'21153,Edible offal of pigs; fresh; chilled or frozen
+1037,'21511.01,Fat of pigs
+1043,'21521,Pig fat; rendered
+1057,'02151,Chickens
+1058,'21121,Meat of chickens; fresh or chilled
+1062,'0231,Hen eggs in shell; fresh
+1068,'02154,Ducks
+1069,'21122,Meat of ducks; fresh or chilled
+1072,'02153,Geese
+1073,'21123,Meat of geese; fresh or chilled
+1079,'02152,Turkeys
+108,'01199.90,Cereals n.e.c.
+1080,'21124,Meat of turkeys; fresh or chilled
+1083,'02194,Other birds
+1089,'21170.01,Meat of pigeons and other birds n.e.c.; fresh; chilled or frozen
+1091,'0232,Eggs from other birds in shell; fresh; n.e.c.
+1096,'02131,Horses
+1097,'21118.01,Horse meat; fresh or chilled
+1098,'21159.01,Edible offals of horses and other equines;  fresh; chilled or frozen
+1107,'02132,Asses
+1108,'21118.02,Meat of asses; fresh or chilled
+1110,'02133,Mules and hinnies
+1111,'21118.03,Meat of mules; fresh or chilled
+1126,'02121.01,Camels
+1127,'21117.01,Meat of camels; fresh or chilled
+1128,'21159.02,Edible offals of camels and other camelids; fresh; chilled or frozen
+1129,'21519.02,Fat of camels
+1130,'02293,Raw milk of camel
+1140,'02191,Rabbits and hares
+1141,'21114,Meat of rabbits and hares; fresh or chilled
+1150,'02192.01,Other rodents
+1151,'21119.01,Meat of other domestic rodents; fresh or chilled
+1157,'02121.02,Other camelids
+1158,'21117.02,Meat of other domestic camelids; fresh or chilled
+116,'01510,Potatoes
+1163,'21170.02,Game meat; fresh; chilled or frozen
+1166,'21170.92,Other meat n.e.c. (excluding mammals); fresh; chilled or frozen
+1176,'02920,Snails; fresh; chilled; frozen; dried; salted or in brine; except sea snails
+1181,'02196,Bees
+1182,'02910,Natural honey
+1183,'02960.01,Beeswax
+1185,'02944,Silk-worm cocoons suitable for reeling
+1186,'26110,Raw silk (not thrown)
+122,'01530,Sweet potatoes
+1225,'21523,Tallow
+1242,'21700.02,Margarine and shortening
+125,'01520.01,Cassava; fresh
+135,'01591,Yautia
+136,'01550,Taro
+137,'01540,Yams
+149,'01599.10,Edible roots and tubers with high starch or inulin content; n.e.c.; fresh
+15,'0111,Wheat
+156,'01802,Sugar cane
+157,'01801,Sugar beet
+161,'01809,Other sugar crops n.e.c.
+162,'2351f,Raw cane or beet sugar (centrifugal only)
+165,'23540,Molasses
+1714,'F1714,Crops; primary
+1717,'F1717,Cereals; primary
+1720,'F1720,Roots and Tubers; Total
+1723,'F1723,Sugar Crops Primary
+1726,'F1726,Pulses; Total
+1729,'F1729,Treenuts; Total
+1730,'F1730,Oilcrops Primary
+1732,'F1732,Oilcrops; Oil Equivalent
+1735,'F1735,Vegetables Primary
+1738,'F1738,Fruit Primary
+1745,'F1745,Cheese (All Kinds)
+1746,'F1746,Cattle and Buffaloes
+1749,'F1749,Sheep and Goats
+1753,'F1753,Fibre Crops Primary
+17530,'F17530,Fibre Crops; Fibre Equivalent
+1756,'F1756,Live Animals
+176,'01701,Beans; dry
+1765,'F1765,Meat; Total
+1777,'F1777,Hides and skins; primary
+1780,'F1780,Milk; Total
+1783,'F1783,Eggs Primary
+1804,'F1804,Citrus Fruit; Total
+1806,'F1806,Beef and Buffalo Meat; primary
+1807,'F1807,Sheep and Goat Meat
+1808,'F1808,Meat; Poultry
+1809,'F1809,Skim Milk & Buttermilk; Dry
+181,'01702,Broad beans and horse beans; dry
+1811,'F1811,Butter and Ghee
+1816,'F1816,Evaporated & Condensed Milk
+1841,'F1841,Oilcrops; Cake Equivalent
+187,'01705,Peas; dry
+191,'01703,Chick peas; dry
+195,'01706,Cow peas; dry
+197,'01707,Pigeon peas; dry
+201,'01704,Lentils; dry
+2029,'F2029,Poultry Birds
+203,'01708,Bambara beans; dry
+205,'01709.01,Vetches
+210,'01709.02,Lupins
+211,'01709.90,Other pulses n.e.c.
+216,'01377,Brazil nuts; in shell
+217,'01372,Cashew nuts; in shell
+220,'01373,Chestnuts; in shell
+221,'01371,Almonds; in shell
+222,'01376,Walnuts; in shell
+223,'01375,Pistachios; in shell
+224,'01379.02,Kola nuts
+225,'01374,Hazelnuts; in shell
+226,'01379.01,Areca nuts
+234,'01379.90,Other nuts (excluding wild edible nuts and groundnuts); in shell; n.e.c.
+236,'0141,Soya beans
+237,'2161,Soya bean oil
+242,'0142,Groundnuts; excluding shelled
+244,'2162,Groundnut oil
+249,'01460,Coconuts; in shell
+252,'2166,Coconut oil
+254,'01491.01,Oil palm fruit
+256,'01491.02,Palm kernels
+257,'2165,Palm oil
+258,'21691.14,Oil of palm kernel
+260,'01450,Olives
+261,'2167,Olive oil
+263,'01499.01,Karite nuts (sheanuts)
+265,'01447,Castor oil seeds
+267,'01445,Sunflower seed
+268,'21631.01,Sunflower-seed oil; crude
+27,'0113,Rice
+270,'01443,Rape or colza seed
+271,'21641.01,Rapeseed or canola oil; crude
+275,'01499.02,Tung nuts
+277,'01499.03,Jojoba seeds
+280,'01446,Safflower seed
+281,'21631.02,Safflower-seed oil; crude
+289,'01444,Sesame seed
+290,'21691.07,Oil of sesame seed
+292,'01442,Mustard seed
+296,'01448,Poppy seed
+299,'01449.01,Melonseed
+305,'01499.04,Tallowtree seeds
+310,'01499.05,Kapok fruit
+311,'01499.06,Kapokseed in shell
+328,'01921.01,Seed cotton; unginned
+329,'0143,Cotton seed
+331,'2168,Cottonseed oil
+333,'01441,Linseed
+334,'21691.12,Oil of linseed
+336,'01449.02,Hempseed
+339,'01449.90,Other oil seeds; n.e.c.
+358,'01212,Cabbages
+366,'01216,Artichokes
+367,'01211,Asparagus
+372,'01214,Lettuce and chicory
+373,'01215,Spinach
+378,'01219.01,Cassava leaves
+388,'01234,Tomatoes
+393,'01213,Cauliflowers and broccoli
+394,'01235,Pumpkins; squash and gourds
+397,'01232,Cucumbers and gherkins
+399,'01233,Eggplants (aubergines)
+401,'01231,Chillies and peppers; green (Capsicum spp. and Pimenta spp.)
+402,'01253.01,Onions and shallots; green
+403,'01253.02,Onions and shallots; dry (excluding dehydrated)
+406,'01252,Green garlic
+407,'01254,Leeks and other alliaceous vegetables
+414,'01241.90,Other beans; green
+417,'01242,Peas; green
+420,'01243,Broad beans and horse beans; green
+423,'01241.01,String beans
+426,'01251,Carrots and turnips
+430,'01239.01,Okra
+44,'0115,Barley
+446,'01290.01,Green corn (maize)
+449,'01270,Mushrooms and truffles
+459,'01691,Chicory roots
+461,'01356,Locust beans (carobs)
+463,'01290.90,Other vegetables; fresh n.e.c.
+486,'01312,Bananas
+489,'01313,Plantains and cooking bananas
+490,'01323,Oranges
+495,'01324,Tangerines; mandarins; clementines
+497,'01322,Lemons and limes
+507,'01321,Pomelos and grapefruits
+51,'24310.01,Beer of barley; malted
+512,'01329,Other citrus fruit; n.e.c.
+515,'01341,Apples
+521,'01342.01,Pears
+523,'01342.02,Quinces
+526,'01343,Apricots
+530,'01344.01,Sour cherries
+531,'01344.02,Cherries
+534,'01345,Peaches and nectarines
+536,'01346,Plums and sloes
+541,'01349.20,Other stone fruits
+542,'01349.10,Other pome fruits
+544,'01354,Strawberries
+547,'01353.01,Raspberries
+549,'01351.02,Gooseberries
+550,'01351.01,Currants
+552,'01355.01,Blueberries
+554,'01355.02,Cranberries
+558,'01355.90,Other berries and fruits of the genus vaccinium n.e.c.
+56,'0112,Maize (corn)
+560,'01330,Grapes
+564,'24212.02,Wine
+567,'01221,Watermelons
+568,'01229,Cantaloupes and other melons
+569,'01315,Figs
+571,'01316,Mangoes; guavas and mangosteens
+572,'01311,Avocados
+574,'01318,Pineapples
+577,'01314,Dates
+587,'01359.01,Persimmons
+591,'01359.02,Cashewapple
+592,'01352,Kiwi fruit
+60,'21691.02,Oil of maize
+600,'01317,Papayas
+603,'01319,Other tropical fruits; n.e.c.
+619,'01359.90,Other fruits; n.e.c.
+656,'01610,Coffee; green
+661,'01640,Cocoa beans
+667,'01620,Tea leaves
+671,'01630,Maté leaves
+675,'23913,Green tea (not fermented); black tea (fermented) and partly fermented tea; in immediate packings of a content not exceeding 3 kg
+677,'01659,Hop cones
+687,'01651,Pepper (Piper spp.); raw
+689,'01652,Chillies and peppers; dry (Capsicum spp.; Pimenta spp.); raw
+692,'01658,Vanilla; raw
+693,'01655,Cinnamon and cinnamon-tree flowers; raw
+698,'01656,Cloves (whole stems); raw
+702,'01653,Nutmeg; mace; cardamoms; raw
+71,'0116,Rye
+711,'01654,Anise; badian; coriander; cumin; caraway; fennel and juniper berries; raw
+720,'01657,Ginger; raw
+723,'01699,Other stimulant; spice and aromatic crops; n.e.c.
+748,'01930.01,Peppermint; spearmint
+75,'0117,Oats
+754,'01930.02,Pyrethrum; dried flowers
+767,'01921.02,Cotton lint; ginned
+771,'01929.01,Flax; raw or retted
+777,'01929.02,True hemp; raw or retted
+778,'01929.03,Kapok fibre; raw
+780,'01922.01,Jute; raw or retted
+782,'01922.02,Kenaf; and other textile bast fibres; raw or retted
+788,'01929.04,Ramie; raw or retted
+789,'01929.05,Sisal; raw
+79,'0118,Millet
+800,'01929.06,Agave fibres; raw; n.e.c.
+809,'01929.07,Abaca; manila hemp; raw
+813,'01929.08,Coir; raw
+821,'01929.90,Other fibre crops; raw; n.e.c.
+826,'01970,Unmanufactured tobacco
+83,'0114,Sorghum
+836,'01950.01,Natural rubber in primary forms
+839,'03211,Balata; gutta-percha; guayule; chicle and similar natural gums in primary forms or in plates; sheets or strip
+866,'02111,Cattle
+867,'21111.01,Meat of cattle with the bone; fresh or chilled
+868,'21151,Edible offal of cattle; fresh; chilled or frozen
+869,'21512,Cattle fat; unrendered
+882,'02211,Raw milk of cattle
+885,'22120,Cream; fresh
+886,'22241.01,Butter of cow milk
+887,'22241.02,Ghee from cow milk
+888,'22110.02,Skim milk of cows
+889,'22222.01,Whole milk; condensed
+89,'01192,Buckwheat
+890,'22130.03,Whey; condensed
+891,'22230.01,Yoghurt
+894,'22221.01,Whole milk; evaporated
+895,'22221.02,Skim milk; evaporated
+896,'22222.02,Skim milk; condensed
+897,'22211,Whole milk powder
+898,'22212,Skim milk and whey powder
+899,'22230.04,Buttermilk; dry
+900,'22130.02,Whey; dry
+901,'22251.01,Cheese from whole cow milk
+904,'22251.02,Cheese from skimmed cow milk
+919,'02951.01,Raw hides and skins of cattle
+92,'01194,Quinoa
+94,'01193,Fonio
+946,'02112,Buffalo
+947,'21112,Meat of buffalo; fresh or chilled
+948,'21152,Edible offal of buffalo; fresh; chilled or frozen
+949,'21513,Buffalo fat; unrendered
+951,'02212,Raw milk of buffalo
+952,'22242.01,Butter of buffalo milk
+953,'22242.02,Ghee from buffalo milk
+955,'22252,Cheese from milk of buffalo; fresh or processed
+957,'02951.03,Raw hides and skins of buffaloes
+97,'01191,Triticale
+976,'02122,Sheep
+977,'21115,Meat of sheep; fresh or chilled
+978,'21155,Edible offal of sheep; fresh; chilled or frozen
+979,'21514,Sheep fat; unrendered
+982,'02291,Raw milk of sheep
+983,'22249.01,Butter and ghee of sheep milk
+984,'22253,Cheese from milk of sheep; fresh or processed
+987,'02941,Shorn wool; greasy; including fleece-washed shorn wool
+995,'02953,Raw hides and skins of sheep or lambs

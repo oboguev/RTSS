@@ -1,0 +1,7 @@
+Flag,Description
+A,Official figure
+E,Estimated value
+F,Forecast value
+I,Imputed value
+M,Missing value (data cannot exist; not applicable)
+X,Figure from international organizations

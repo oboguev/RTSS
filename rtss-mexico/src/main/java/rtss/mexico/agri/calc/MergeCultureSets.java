@@ -1,6 +1,6 @@
 package rtss.mexico.agri.calc;
 
-public class MergeDataSets
+public class MergeCultureSets
 {
     // ### слить 3 набора (по 1982 год)
     // ### доля фуражного (с 1971) - ранее
