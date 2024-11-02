@@ -45,4 +45,18 @@ public class CultureSet
     {
         m.remove(c.name);
     }
+
+    public void deleteYearRange(int y1, int y2) throws Exception
+    {
+        for (Culture c : m.values())
+            c.deleteYearRange(y1, y2);
+    }
+    
+    public CultureSet dup() throws Exception
+    {
+        CultureSet cs = new CultureSet();
+        for (Culture c : m.values())
+            cs.m.put(c.name, c.dup());
+        return cs;
+    }
 }

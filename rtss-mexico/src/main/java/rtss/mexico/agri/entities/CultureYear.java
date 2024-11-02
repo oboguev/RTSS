@@ -49,6 +49,13 @@ public class CultureYear
         this.comment = comment;
     }
 
+    private CultureYear(Culture culture, int year, String comment)
+    {
+        this.culture = culture;
+        this.year = year;
+        this.comment = comment;
+    }
+    
     public boolean isAllNull()
     {
         return surface == null && yield == null && production == null &&
@@ -126,5 +133,23 @@ public class CultureYear
             return v1 + v2;
         else
             throw new Exception("Unable to add year values for the culture");
+    }
+    
+    public CultureYear dup(Culture culture)
+    {
+        CultureYear cy = new CultureYear(culture, this.year, this.comment);
+
+        cy.rice_kind = this.rice_kind;
+        cy.surface = this.surface;
+        cy.yield = this.yield;
+        cy.production = this.production;
+        cy.production_raw = this.production_raw;
+        cy.importAmount = this.importAmount;
+        cy.exportAmount = this.exportAmount;
+        cy.consumption = this.consumption;
+        cy.perCapita = this.perCapita;
+        cy.alcohol = this.alcohol;
+
+        return cy;
     }
 }

@@ -61,12 +61,29 @@ public class Culture
         y2cy.remove(cy.year);
         averageCultureYears.remove(cy.comment);
     }
-    
+
     public String id()
     {
         if (category != null)
             return category + "/" + name;
         else
             return name;
+    }
+
+    public void deleteYearRange(int y1, int y2) throws Exception
+    {
+        for (int year : years())
+        {
+            if (year >= y1 && year <= y2)
+                y2cy.remove(year);
+        }
+    }
+
+    public Culture dup() throws Exception
+    {
+        Culture c = new Culture(name, category);
+        for (int year : years())
+            y2cy.put(year, cultureYear(year).dup(c));
+        return c;
     }
 }
