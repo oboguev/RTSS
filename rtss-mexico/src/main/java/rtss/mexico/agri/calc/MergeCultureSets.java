@@ -3,6 +3,7 @@ package rtss.mexico.agri.calc;
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureSet;
 import rtss.mexico.agri.entities.CultureYear;
+import rtss.mexico.agri.entities.RiceKind;
 import rtss.mexico.agri.loader.LoadAE;
 import rtss.mexico.agri.loader.LoadEH;
 import rtss.mexico.agri.loader.LoadSARH;
@@ -35,6 +36,11 @@ public class MergeCultureSets
 
     public CultureSet merge() throws Exception
     {
+        checkRice(csSARH);
+        checkRice(csEH);
+        checkRice(csAE);
+        checkRice(csAEEarly);
+        
         // обрезать наборы по времени, 
         // устранить непищевые культуры и культуры без данных для указанных лет
         CultureSet cs = csSARH.dup();
@@ -96,6 +102,16 @@ public class MergeCultureSets
             cyDst.surface = cySrc.surface;
             cyDst.yield = cySrc.yield;
             cyDst.rice_kind = cySrc.rice_kind;
+        }
+    }
+    
+    private void checkRice(CultureSet cs) throws Exception
+    {
+        Culture c = cs.get("rice");
+        for (CultureYear cy : c.cultureYears())
+        {
+            if (cy.rice_kind != RiceKind.WHITE)
+                throw new Exception("Not a white rice");
         }
     }
 }

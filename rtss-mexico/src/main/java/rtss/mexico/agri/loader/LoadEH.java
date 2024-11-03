@@ -241,7 +241,7 @@ public class LoadEH
             
             if (rice_kind == RiceKind.RAW)
             {
-                rice_kind = RiceKind.WHITE; 
+                cy.rice_kind = RiceKind.WHITE; 
                 cy.production_raw = cy.production;
                 cy.perCapita = null;
                 cy.production *= ArgiConstants.RawRiceToWhiteRice;
