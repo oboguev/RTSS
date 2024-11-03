@@ -1,5 +1,9 @@
 package rtss.mexico.agri.calc;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import rtss.mexico.agri.entities.ArgiConstants;
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureDefinition;
@@ -120,9 +124,16 @@ public class Preprocess
         approximateEarlyImport("trigo", 12.0);
         approximateEarlyImport("maiz", 0.8);
         
+        /*
+         * Для некоторых лет в период 1925-1982 объём экспорта второстепенных культур изредка превосходит 
+         * объём производства культуры в текущий год, т.к. экспортируются остатки урожая предыдущего года. 
+         * Это вызывает отрицательную величину потребления культуры в данный год. Для лет с отрицательными 
+         * значениями эффективного потребления мы устанавливаем величину потребления в этот год равной нулю 
+         * и распределяем отрицательный баланс на предыдущие годы.
+         */
+        eliminateConsumptionNegatives();
+        
         Util.noop();
-
-        // ### roll negative consumption values backwards
     }
     
     private void approximateEarlyExport(String cname, double pct) throws Exception
@@ -162,5 +173,26 @@ public class Preprocess
     private double denull(Double d)
     {
         return d == null ? 0 : d;
+    }
+    
+    private void eliminateConsumptionNegatives() throws Exception
+    {
+        List<CultureYear> negatives = new ArrayList<>();
+        
+        for (Culture c : cs.cultures())
+        {
+            List<CultureYear> cys = c.cultureYears();
+            Collections.reverse(cys);
+            for (CultureYear cy : cys)
+            {
+                if (cy.consumption < 0)
+                {
+                    Util.out(String.format("Negative consumption %s %d", cy.culture.id(), cy.year));
+                    negatives.add(cy);
+                }
+            }
+        }
+        
+        Util.noop();
     }
 }
