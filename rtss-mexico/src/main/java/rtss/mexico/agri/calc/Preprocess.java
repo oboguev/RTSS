@@ -28,6 +28,12 @@ public class Preprocess
         this.cs = cs;
         
         /*
+         * Данные об экспорте и импорте ванили (Vainilla Beneficiada) за 1925-1982 гг. настолько искажены, 
+         * что мы решили исключить этот продукт из исчисляемого набора.
+         */
+        cs.remove(cs.get("Vainilla Beneficiada"));
+        
+        /*
          * Вычислить потребление (там, где оно ещё не вычислено)
          */
         for (Culture c : cs.cultures())
