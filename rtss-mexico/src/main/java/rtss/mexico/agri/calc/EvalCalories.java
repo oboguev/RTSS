@@ -48,14 +48,49 @@ public class EvalCalories
             if (cc.size() != 0)
                 y2cc.put(year, cc);
         }
-        
+
         /* ============================================================================ */
-        
+
         Util.out("Сырой расчёт без коррекции по наличным продуктам: ккал на человека в день:");
         Util.out("");
         for (int year : Util.sort(y2cc.keySet()))
         {
             Util.out(String.format("%d %.0f", year, y2cc.get(year).sum()));
         }
+
+        /* ============================================================================ */
+
+        Util.out("");
+        Util.out("Расчёт с поправкой на отсутствующие данные: ккал на человека в день:");
+        Util.out("");
+        for (int year : Util.sort(y2cc.keySet()))
+        {
+            CaloricContent cc = y2cc.get(year);
+            double cal = cc.sum();
+            double scale = calcScaleUp(y2cc, cc, year);
+            cal *= scale;
+            Util.out(String.format("%d %.0f (scale=%.2f)", year, cal, scale));
+        }
+
+    }
+
+    private double calcScaleUp(Map<Integer, CaloricContent> y2cc, CaloricContent cc, int ccyear) throws Exception
+    {
+        if (ccyear >= 1927)
+            return 1.0;
+        
+        double v = 0;
+        int nyears = 0;
+
+        for (int year = 1927; year <= 1932; year++)
+        {
+            CaloricContent xcc = y2cc.get(year);
+            double all = xcc.sum();
+            double select = xcc.sum(cc.keySet());
+            v += all / select;
+            nyears++;
+        }
+
+        return v / nyears;
     }
 }

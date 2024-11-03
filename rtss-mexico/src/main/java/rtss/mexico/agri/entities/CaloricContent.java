@@ -1,6 +1,7 @@
 package rtss.mexico.agri.entities;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import rtss.mexico.agri.calc.CaloriesIn;
 
@@ -37,12 +38,23 @@ public class CaloricContent extends HashMap<String, Double>
 
         return cc;
     }
-    
+
     public double sum()
     {
         double v = 0;
         for (String cname : keySet())
             v += get(cname);
+        return v;
+    }
+
+    public double sum(Set<String> cnames) throws Exception
+    {
+        double v = 0;
+        for (String cname : keySet())
+        {
+            if (cnames.contains(cname))
+                v += get(cname);
+        }
         return v;
     }
 }
