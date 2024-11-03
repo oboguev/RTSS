@@ -1,12 +1,9 @@
 package rtss.mexico.agri.calc;
 
 import rtss.mexico.agri.entities.Culture;
-import rtss.mexico.agri.entities.CultureDefinition;
 import rtss.mexico.agri.entities.CultureSet;
 import rtss.mexico.agri.entities.CultureYear;
-import rtss.mexico.agri.loader.CultureDefinitions;
 import rtss.mexico.agri.loader.LoadAE;
-import rtss.mexico.agri.loader.LoadCultureDefinitions;
 import rtss.mexico.agri.loader.LoadEH;
 import rtss.mexico.agri.loader.LoadSARH;
 import rtss.util.Util;
@@ -31,7 +28,6 @@ public class MergeCultureSets
     private CultureSet csAEEarly = LoadAE.loadEarly();
     private CultureSet csEH = LoadEH.load();
     private CultureSet csSARH = LoadSARH.load();
-    private CultureDefinitions cds = LoadCultureDefinitions.load();
 
     public MergeCultureSets() throws Exception
     {
@@ -77,18 +73,10 @@ public class MergeCultureSets
         cs.deleteYearRange(0, y1 - 1);
         cs.deleteYearRange(y2 + 1, Integer.MAX_VALUE);
 
-        // remove culture with no year data
+        // remove cultures with no year data
         for (Culture c : cs.cultures())
         {
             if (c.years().size() == 0)
-                cs.remove(c);
-        }
-
-        // remove cultures with no calories 
-        for (Culture c : cs.cultures())
-        {
-            CultureDefinition cd = cds.get(c.name);
-            if (cd.kcal_kg == null || cd.kcal_kg == 0)
                 cs.remove(c);
         }
     }
