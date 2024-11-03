@@ -9,13 +9,16 @@ import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureDefinition;
 import rtss.mexico.agri.entities.CultureSet;
 import rtss.mexico.agri.entities.CultureYear;
+import rtss.mexico.agri.entities.SoyaFodder;
 import rtss.mexico.agri.loader.CultureDefinitions;
 import rtss.mexico.agri.loader.LoadCultureDefinitions;
+import rtss.mexico.agri.loader.LoadSoyaFodder;
 import rtss.util.Util;
 
 public class Preprocess
 {
     private final CultureDefinitions cds = LoadCultureDefinitions.load();
+    private final SoyaFodder soyaFodder =LoadSoyaFodder.load(); 
     private final CultureSet cs;
 
     public Preprocess(CultureSet cs) throws Exception
@@ -242,6 +245,8 @@ public class Preprocess
 
     private void applyReduction(Culture c, Double... pcts) throws Exception
     {
+        boolean soya = cds.getRequired("soya").name.equals(c.name);
+
         double pct = 0;
 
         for (Double p : pcts)
@@ -250,10 +255,16 @@ public class Preprocess
                 pct += p;
         }
 
-        if (pct > 0)
+        if (pct > 0 || soya)
         {
             for (CultureYear cy : c.cultureYears())
-                cy.consumption *= (100.0 - pct) / 100.0;
+            {
+                double xpct = pct;
+                if (soya)
+                    xpct += soyaFodder.pct(cy.year);
+
+                cy.consumption *= (100.0 - xpct) / 100.0;
+            }
         }
     }
 }

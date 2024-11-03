@@ -77,20 +77,8 @@ public class EvalCalories
 
         if (Util.True)
         {
-            final int diff_year1 = 1961; 
-            final int diff_year2 = 1981; 
-            CaloricContent cc1 = y2cc.get(diff_year1);
-            CaloricContent cc2 = y2cc.get(diff_year2);
-            Util.out("");
-            Util.out(String.format("Разница между %d и %d :", diff_year1, diff_year2));
-            Util.out(String.format("Калории в %d: %.0f ", diff_year1, cc1.sum()));
-            Util.out(String.format("Калории в %d: %.0f ", diff_year2, cc2.sum()));
-            Util.out("");
-            CaloricContent ccd = CaloricContent.sub(cc2, cc1);
-            for (CaloricElement ce : ccd.sort())
-            {
-                Util.out(String.format("%s %.0f", ce.name, ce.calories));
-            }
+            showDiff(y2cc, 1961, 1981);
+            showDiff(y2cc, 1981, 1982);
         }
 
     }
@@ -99,7 +87,7 @@ public class EvalCalories
     {
         if (ccyear >= 1927)
             return 1.0;
-        
+
         double v = 0;
         int nyears = 0;
 
@@ -113,5 +101,24 @@ public class EvalCalories
         }
 
         return v / nyears;
+    }
+
+    private void showDiff(Map<Integer, CaloricContent> y2cc, int diff_year1, int diff_year2) throws Exception
+    {
+        Util.out("");
+        Util.out("***********************************************************************");
+        Util.out("");
+        CaloricContent cc1 = y2cc.get(diff_year1);
+        CaloricContent cc2 = y2cc.get(diff_year2);
+        Util.out("");
+        Util.out(String.format("Разница между %d и %d :", diff_year1, diff_year2));
+        Util.out(String.format("Калории в %d: %.0f ", diff_year1, cc1.sum()));
+        Util.out(String.format("Калории в %d: %.0f ", diff_year2, cc2.sum()));
+        Util.out("");
+        CaloricContent ccd = CaloricContent.sub(cc2, cc1);
+        for (CaloricElement ce : ccd.sort())
+        {
+            Util.out(String.format("%s %.0f", ce.name, ce.calories));
+        }
     }
 }
