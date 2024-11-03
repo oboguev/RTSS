@@ -37,4 +37,12 @@ public class CaloricContent extends HashMap<String, Double>
 
         return cc;
     }
+    
+    public double sum()
+    {
+        double v = 0;
+        for (String cname : keySet())
+            v += get(cname);
+        return v;
+    }
 }

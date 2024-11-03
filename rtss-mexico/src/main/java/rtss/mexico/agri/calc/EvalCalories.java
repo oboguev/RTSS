@@ -48,5 +48,12 @@ public class EvalCalories
             if (cc.size() != 0)
                 y2cc.put(year, cc);
         }
+        
+        Util.out("Сырой расчёт без коррекции по наличным продуктам: ккал на человека в день:");
+        Util.out("");
+        for (int year : Util.sort(y2cc.keySet()))
+        {
+            Util.out(String.format("%d %.0f", year, y2cc.get(year).sum()));
+        }
     }
 }
