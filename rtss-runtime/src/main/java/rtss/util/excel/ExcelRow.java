@@ -44,7 +44,7 @@ public class ExcelRow
     {
         Object o = getCellValue(column);
 
-        if (o == null)
+        if (isBlank(o))
         {
             return null;
         }
@@ -86,7 +86,7 @@ public class ExcelRow
     {
         Object o = getCellValue(column);
 
-        if (o == null)
+        if (isBlank(o))
         {
             return null;
         }
@@ -157,5 +157,14 @@ public class ExcelRow
             return null;
         else
             return Util.despace(o.toString()).trim(); 
+    }
+    
+    private boolean isBlank(Object o) throws Exception
+    {
+        if (o == null)
+            return true;
+        String s = o.toString();
+        s = Util.despace(s).trim();
+        return s.length() == 0;
     }
 }

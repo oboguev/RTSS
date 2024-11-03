@@ -11,4 +11,6 @@ public class CultureDefinition
     public Set<String> aliases = new HashSet<>();
     public String category;
     public Double kcal_kg;
+    public Double seed_pct;
+    public Double fodder_pct;
 }

@@ -67,6 +67,9 @@ public class LoadCultureDefinitions
                 break;
             }
             
+            cd.seed_pct = row.asDouble("seed%");
+            cd.fodder_pct = row.asDouble("fodder%");
+            
             cds.add(cd);
         }
         
