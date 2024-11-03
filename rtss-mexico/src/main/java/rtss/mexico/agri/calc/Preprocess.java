@@ -1,5 +1,6 @@
 package rtss.mexico.agri.calc;
 
+import rtss.mexico.agri.entities.ArgiConstants;
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureDefinition;
 import rtss.mexico.agri.entities.CultureSet;
@@ -81,12 +82,28 @@ public class Preprocess
          * В 1928-1938 гг. средний весовой выход сахара был 6.70% от урожая тростника (с годовыми колебаниями от 6.0 до 7.2%), 
          * а алкоголя 0.57% от урожая тростника (колебания от 0.40 до 0.77%). 
          * Мы прилагаем эти переводные коэфициенты для более ранних лет, в которые производство сахара и алкоголя 
-         * не отражено непосредственными сведениями, и имеются только сведения об урожает тростника.
+         * не отражено непосредственными сведениями, и имеются только сведения об урожае тростника.
          */
+        Culture cSugar = cs.get("sugar");
+        Culture cSugarCane = cs.get("sugar cane");
         
+        for (CultureYear cy: cSugarCane.cultureYears())
+        {
+            if (cy.alcohol != null)
+                break;
+            cy.alcohol = cy.production * ArgiConstants.SugarCaneToAlcohol;
+        }
+        
+        for (CultureYear cy: cSugarCane.cultureYears())
+        {
+            if (cSugar.cultureYear(cy.year) != null)
+                break;
+            CultureYear cySugar = cSugar.makeCultureYear(cy.year);
+            cySugar.consumption = cySugar.production = cy.production * ArgiConstants.SugarCaneToSugar;
+        }
+
         Util.noop();
 
-        // ### cana de azucar в EH - что с ней делать? sugar & alcohol
         // ### roll negative consumption values backwards
         // ### apply export import factor when not listed : prod -> consumption for 1927-1930   
     }
