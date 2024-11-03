@@ -15,18 +15,16 @@ import rtss.util.Util;
 
 public class Preprocess
 {
-    private CultureDefinitions cds = LoadCultureDefinitions.load();
+    private final CultureDefinitions cds = LoadCultureDefinitions.load();
+    private final CultureSet cs;
 
-    public Preprocess() throws Exception
-    {
-    }
-
-    private CultureSet cs;
-
-    public void preprocess(CultureSet cs) throws Exception
+    public Preprocess(CultureSet cs) throws Exception
     {
         this.cs = cs;
+    }
 
+    public void preprocess() throws Exception
+    {
         /*
          * Данные об экспорте и импорте ванили (Vainilla Beneficiada) за 1925-1982 гг. настолько искажены, 
          * что мы решили исключить этот продукт из исчисляемого набора.
@@ -130,6 +128,20 @@ public class Preprocess
         approximateEarlyImport("trigo", 12.0);
         approximateEarlyImport("maiz", 0.8);
 
+        /* ========================================================================================== */
+
+        /*
+         * Сорго практически не употребляется как пищевая культура 
+         */
+        cs.remove(cs.get("Sorgo Grano"));
+
+        /*
+         * Вычесть траты на семена, фураж и потери. 
+         */
+        applyReductions();
+
+        /* ========================================================================================== */
+
         /*
          * Для некоторых лет в период 1925-1982 объём экспорта второстепенных культур изредка превосходит 
          * объём производства культуры в текущий год, т.к. экспортируются остатки урожая предыдущего года. 
@@ -198,7 +210,7 @@ public class Preprocess
                 }
             }
         }
-        
+
         if (negatives.size() != 0)
         {
             for (CultureYear cy : negatives)
@@ -216,6 +228,32 @@ public class Preprocess
             pcy.consumption += cy.consumption;
             cy.consumption = 0.0;
             cy = pcy;
+        }
+    }
+
+    private void applyReductions() throws Exception
+    {
+        for (Culture c : cs.cultures())
+        {
+            CultureDefinition cd = cds.get(c.name);
+            applyReduction(c, cd.seed_pct, cd.fodder_pct, ArgiConstants.LossPercentage);
+        }
+    }
+
+    private void applyReduction(Culture c, Double... pcts) throws Exception
+    {
+        double pct = 0;
+
+        for (Double p : pcts)
+        {
+            if (p != null)
+                pct += p;
+        }
+
+        if (pct > 0)
+        {
+            for (CultureYear cy : c.cultureYears())
+                cy.consumption *= (100.0 - pct) / 100.0;
         }
     }
 }

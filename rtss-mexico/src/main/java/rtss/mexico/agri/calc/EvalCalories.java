@@ -38,7 +38,7 @@ public class EvalCalories
     private void eval() throws Exception
     {
         CultureSet cs = new MergeCultureSets().merge();
-        new Preprocess().preprocess(cs);
+        new Preprocess(cs).preprocess();
 
         Map<Integer, CaloricContent> y2cc = new HashMap<>();
 

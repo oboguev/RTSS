@@ -21,4 +21,9 @@ public class ArgiConstants
      * Калорий в литре чистого алкоголя.
      */
     public static final double CaloriesPerLiterOfAlcohol = 5600;
+    
+    /*
+     * Процент потерь.
+     */
+    public static final double LossPercentage = 5.0;
 }
