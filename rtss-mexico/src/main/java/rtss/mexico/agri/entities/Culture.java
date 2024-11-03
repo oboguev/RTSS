@@ -83,7 +83,39 @@ public class Culture
     {
         Culture c = new Culture(name, category);
         for (int year : years())
-            y2cy.put(year, cultureYear(year).dup(c));
+            c.y2cy.put(year, cultureYear(year).dup(c));
         return c;
+    }
+    
+    public CultureYear dupYear(CultureYear cy) throws Exception
+    {
+        if (y2cy.containsKey(cy.year))
+            throw new Exception("Already has this year");
+        CultureYear xcy = cy.dup(this);
+        y2cy.put(xcy.year, xcy);
+        return xcy;
+    }
+    
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder(name + " "); 
+        
+        List<Integer> years = years();
+        int ysize = years.size();
+        
+        if (ysize == 0)
+        {
+            sb.append(" no years");
+        }
+        else if (ysize == 1)
+        {
+            sb.append(String.format("%d", years.get(0)));             
+        }
+        else
+        {
+            sb.append(String.format("%d-%d", years.get(0), years.get(ysize - 1)));             
+        }
+        
+        return sb.toString();
     }
 }

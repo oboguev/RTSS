@@ -10,6 +10,9 @@ import rtss.mexico.agri.entities.RiceKind;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelRC;
+import rtss.util.excel.ExcelRow;
+import rtss.util.excel.ExcelSheet;
+import rtss.util.excel.ExcelWorkbook;
 import rtss.util.excel.FindCells;
 import rtss.util.excel.RowCol;
 
@@ -20,6 +23,7 @@ public class LoadAE
         try
         {
             CultureSet c = load();
+            c = loadEarly();
             Util.unused(c);
             Util.out("** Done");
         }
@@ -37,6 +41,11 @@ public class LoadAE
     public static CultureSet load() throws Exception
     {
         return new LoadAE().do_load();
+    }
+
+    public static CultureSet loadEarly() throws Exception
+    {
+        return new LoadAE().do_load_early();
     }
 
     private CultureSet do_load() throws Exception
@@ -101,7 +110,7 @@ public class LoadAE
         String s = rc.asString(rcSurface.row + 1, rcSurface.col);
         if (s == null || !s.equals("тыс. га"))
             throw new Exception("Unexpected worksheet layout");
-        
+
         double productionMultiplier = 1000.0;
         double surfaceMultiplier = 1000.0;
         RiceKind rice_kind = null;
@@ -135,7 +144,7 @@ public class LoadAE
             cy.surface = value(rc, nr, rcSurface.col, surfaceMultiplier);
             cy.rice_kind = rice_kind;
         }
-        
+
         // TODO: загрузить импорт экспорт 1983-1986
     }
 
@@ -156,35 +165,110 @@ public class LoadAE
         Culture c2 = cultures.get("плантаны другие");
 
         Culture c = new Culture("плантаны разные", null);
-        
+
         for (int year = 1880; year <= 2050; year++)
         {
             CultureYear cy1 = c1.cultureYear(year);
             CultureYear cy2 = c1.cultureYear(year);
-            
+
             if (cy1 == null && cy2 == null)
                 continue;
-            
+
             CultureYear cy = c.makeCultureYear(year);
-            
+
             if (cy1 != null && cy2 != null)
             {
-                cy.copyValues(cy1);   
-                cy.addValues(cy2);   
+                cy.copyValues(cy1);
+                cy.addValues(cy2);
             }
             else if (cy1 != null)
             {
-                cy.copyValues(cy1);   
-                
+                cy.copyValues(cy1);
+
             }
             else if (cy2 != null)
             {
-                cy.copyValues(cy2);   
+                cy.copyValues(cy2);
             }
         }
 
         cultures.remove(c1);
         cultures.remove(c2);
         cultures.add(c);
+    }
+
+    private CultureSet do_load_early() throws Exception
+    {
+        final String fnProduction = "agriculture/Anuario-Estadístico/production-early.xlsx";
+
+        try
+        {
+            currentFile = fnProduction;
+
+            ExcelWorkbook wb = ExcelWorkbook.load(fnProduction);
+            for (ExcelSheet sheet : wb.getSheets())
+            {
+                String sname = sheet.name;
+                if (sname == null)
+                    sname = "";
+                String lcname = sname.toLowerCase();
+                if (lcname.contains("note") || lcname.contains("template"))
+                    continue;
+                loadProductionEarly(sheet, Util.despace(sname).trim());
+            }
+
+            return cultures;
+        }
+        catch (Exception ex)
+        {
+            if (currentNR == null)
+            {
+                throw ex;
+            }
+            else
+            {
+                String msg = String.format("row = %d", currentNR + 1);
+                throw new Exception(msg, ex);
+            }
+        }
+    }
+
+    private void loadProductionEarly(ExcelSheet sheet, String cname) throws Exception
+    {
+        RiceKind rice_kind = null;
+
+        if (cname.equalsIgnoreCase("arroz palay"))
+        {
+            cname = "arroz";
+            rice_kind = RiceKind.RAW;
+        }
+        else if (cname.equalsIgnoreCase("arroz"))
+        {
+            rice_kind = RiceKind.WHITE;
+        }
+
+        Culture c = new Culture(cname, null);
+        cultures.add(c);
+
+        for (ExcelRow row : sheet.getRows())
+        {
+            int year = row.asInteger("год");
+            CultureYear cy = c.makeCultureYear(year);
+
+            cy.surface = row.asDouble("га");
+            cy.yield = row.asDouble("кг/га");
+            cy.production = row.asDouble("кг");
+            if (cy.production != null)
+                cy.production /= 1000.0;
+
+            cy.rice_kind = rice_kind;
+
+            if (cy.rice_kind == RiceKind.RAW)
+            {
+                cy.production_raw = cy.production;
+                cy.production  *= 0.66;
+                cy.rice_kind = RiceKind.WHITE;
+            }
+        }
     }
 }

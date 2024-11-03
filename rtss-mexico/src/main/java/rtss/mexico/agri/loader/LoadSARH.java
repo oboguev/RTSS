@@ -109,7 +109,7 @@ public class LoadSARH
 
     private void loadCulture(String category, String cname, ExcelRC rc) throws Exception
     {
-        Util.out(String.format("%s/%s", category, cname));
+        // Util.out(String.format("%s/%s", category, cname));
 
         Culture c = new Culture(cname, category);
         cultures.add(c);

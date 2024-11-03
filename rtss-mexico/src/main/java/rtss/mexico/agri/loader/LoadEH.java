@@ -96,7 +96,7 @@ public class LoadEH
     private void loadTabCh9(String tab, ExcelRC rc) throws Exception
     {
         String cname = extractCultureName(rc);
-        Util.out(String.format("%s [%s]", cname, tab));
+        // Util.out(String.format("%s [%s]", cname, tab));
         RiceKind rice_kind = null;
 
         switch (cname.toLowerCase())
