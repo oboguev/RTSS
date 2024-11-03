@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rtss.mexico.agri.entities.CaloricContent;
+import rtss.mexico.agri.entities.CaloricContent.CaloricElement;
 import rtss.mexico.agri.entities.CultureSet;
 import rtss.mexico.population.MexPopulationCombineEstimates;
 import rtss.util.Util;
@@ -70,6 +71,26 @@ public class EvalCalories
             double scale = calcScaleUp(y2cc, cc, year);
             cal *= scale;
             Util.out(String.format("%d %.0f (scale=%.2f)", year, cal, scale));
+        }
+
+        /* ============================================================================ */
+
+        if (Util.True)
+        {
+            final int diff_year1 = 1961; 
+            final int diff_year2 = 1981; 
+            CaloricContent cc1 = y2cc.get(diff_year1);
+            CaloricContent cc2 = y2cc.get(diff_year2);
+            Util.out("");
+            Util.out(String.format("Разница между %d и %d :", diff_year1, diff_year2));
+            Util.out(String.format("Калории в %d: %.0f ", diff_year1, cc1.sum()));
+            Util.out(String.format("Калории в %d: %.0f ", diff_year2, cc2.sum()));
+            Util.out("");
+            CaloricContent ccd = CaloricContent.sub(cc2, cc1);
+            for (CaloricElement ce : ccd.sort())
+            {
+                Util.out(String.format("%s %.0f", ce.name, ce.calories));
+            }
         }
 
     }
