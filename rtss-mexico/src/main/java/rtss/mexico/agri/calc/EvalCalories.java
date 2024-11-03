@@ -77,8 +77,9 @@ public class EvalCalories
 
         if (Util.True)
         {
-            showDiff(y2cc, 1961, 1981);
-            showDiff(y2cc, 1981, 1982);
+            // showDiff(y2cc, 1961, 1981);
+            // showDiff(y2cc, 1981, 1982);
+            showDiff(y2cc, 1979, 1981);
         }
 
     }
