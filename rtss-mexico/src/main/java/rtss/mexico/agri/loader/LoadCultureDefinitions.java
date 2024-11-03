@@ -37,11 +37,11 @@ public class LoadCultureDefinitions
         for (ExcelRow row : sheet.getRows())
         {
             CultureDefinition cd = new CultureDefinition();
-            cd.category = row.asString("категория");
-            cd.name = row.asString("ES");
-            cd.name_ru = row.asString("RU");
-            cd.name_en = row.asString("EN");
-            String aliases = row.asString("синонимы");
+            cd.category = row.asDespacedString("категория");
+            cd.name = row.asDespacedString("ES");
+            cd.name_ru = row.asDespacedString("RU");
+            cd.name_en = row.asDespacedString("EN");
+            String aliases = row.asDespacedString("синонимы");
             if (aliases == null)
                 aliases = "";
             for (String s : aliases.split(","))

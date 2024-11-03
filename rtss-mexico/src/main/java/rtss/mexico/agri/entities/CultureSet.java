@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import rtss.mexico.agri.loader.LoadCultureDefinitions;
+import rtss.util.Util;
 
 /*
  * Набор даныных о сельскохозяйственных культурах
@@ -46,6 +47,10 @@ public class CultureSet
     public Culture get(String cname) throws Exception
     {
         CultureDefinition cd = LoadCultureDefinitions.load().get(cname);
+        if (cd == null)
+        {
+            Util.err("Unknown culture: [" + cname + "]");
+        }
         return m.get(cd.name);
     }
 
@@ -84,6 +89,7 @@ public class CultureSet
         }
         catch (Exception ex)
         {
+            ex.printStackTrace();
             return "Not dispayable (exception)";
         }
         

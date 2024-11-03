@@ -114,6 +114,10 @@ public class LoadEH
             cname = "arroz"; 
             rice_kind = RiceKind.RAW;
             break;
+            
+        case "plátano":    
+            cname = "plátanos otros"; 
+            break;
         }
 
         Culture c = new Culture(cname, null);
@@ -245,6 +249,9 @@ public class LoadEH
             {
                 cy.rice_kind = rice_kind;
             }
+            
+            if (cy.isAllNull())
+                c.deleteYear(cy);
         }
     }
 

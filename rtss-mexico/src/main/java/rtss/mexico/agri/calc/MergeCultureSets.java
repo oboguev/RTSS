@@ -27,6 +27,7 @@ public class MergeCultureSets
         }
     }
 
+    private CultureSet csAE = LoadAE.load();
     private CultureSet csAEEarly = LoadAE.loadEarly();
     private CultureSet csEH = LoadEH.load();
     private CultureSet csSARH = LoadSARH.load();
@@ -61,6 +62,12 @@ public class MergeCultureSets
                 cDst.dupYear(cySrc);
             }
         }
+        
+        // для производства плантанов в 1925-1926 гг. мы используем сведения AE, отсутствующие в других наборах.
+        Culture c1 = csAE.get("Platano Diversas");
+        Culture c2 = cs.get("Platano Diversas");
+        for (int year = 1925; year <= 1926; year++)
+            c2.dupYear(c1.cultureYear(year));
         
         return cs;
     }

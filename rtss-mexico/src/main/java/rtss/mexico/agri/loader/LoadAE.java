@@ -143,6 +143,8 @@ public class LoadAE
             cy.production = value(rc, nr, rcProduction.col, productionMultiplier);
             cy.surface = value(rc, nr, rcSurface.col, surfaceMultiplier);
             cy.rice_kind = rice_kind;
+            if (cy.isAllNull())
+                c.deleteYear(cy);
         }
 
         // TODO: загрузить импорт экспорт 1983-1986
@@ -269,6 +271,9 @@ public class LoadAE
                 cy.production  *= 0.66;
                 cy.rice_kind = RiceKind.WHITE;
             }
+
+            if (cy.isAllNull())
+                c.deleteYear(cy);
         }
     }
 }
