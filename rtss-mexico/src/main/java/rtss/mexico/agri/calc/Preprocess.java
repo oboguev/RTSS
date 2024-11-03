@@ -118,12 +118,11 @@ public class Preprocess
         approximateEarlyExport("arroz", 8.0);
 
         approximateEarlyImport("trigo", 12.0);
-        approximateEarlyImport("maize", 0.8);
+        approximateEarlyImport("maiz", 0.8);
         
         Util.noop();
 
         // ### roll negative consumption values backwards
-        // ### apply export import factor when not listed : prod -> consumption for 1927-1930   
     }
     
     private void approximateEarlyExport(String cname, double pct) throws Exception

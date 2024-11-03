@@ -303,6 +303,10 @@ public class LoadEH
     {
         for (ExcelRow row : sheet.getRows())
         {
+            String s = row.asDespacedString("год");
+            if (s == null || s.length() == 0)
+                continue;
+            
             int year = row.asInteger("год");
             Double importMaiz = row.asDouble("Maíz");
             Double importTrigo = row.asDouble("Trigo");
