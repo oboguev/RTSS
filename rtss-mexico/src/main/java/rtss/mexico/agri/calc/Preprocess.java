@@ -16,23 +16,23 @@ import rtss.util.Util;
 public class Preprocess
 {
     private CultureDefinitions cds = LoadCultureDefinitions.load();
-    
+
     public Preprocess() throws Exception
     {
     }
-    
+
     private CultureSet cs;
 
     public void preprocess(CultureSet cs) throws Exception
     {
         this.cs = cs;
-        
+
         /*
          * Данные об экспорте и импорте ванили (Vainilla Beneficiada) за 1925-1982 гг. настолько искажены, 
          * что мы решили исключить этот продукт из исчисляемого набора.
          */
         cs.remove(cs.get("Vainilla Beneficiada"));
-        
+
         /*
          * Вычислить потребление (там, где оно ещё не вычислено)
          */
@@ -41,16 +41,17 @@ public class Preprocess
             for (CultureYear cy : c.cultureYears())
             {
                 if (cy.consumption == null)
-                    cy.consumption = cy.production + denull(cy.importAmount) - denull(cy.exportAmount); 
+                    cy.consumption = cy.production + denull(cy.importAmount) - denull(cy.exportAmount);
             }
         }
-        
+
         /* ========================================================================================== */
-        
+
         /*
-         * Согласно набору SARH, в 1971-1982 гг. в среднем 64% урожаев бараньего гороха (Garbanzo) шло на фуражные цели, 
-         * хотя эта величина сильно изменялась год от года между 38 и 88%. Мы предположим, что и в предшествующие годы 
-         * та же доля (64%) шла на фураж, оставляя на пищевое потребление 36% урожая бараньего гороха. 
+         * Согласно набору SARH, в 1971-1982 гг. в среднем 82% оставющихся после экспорта урожаев бараньего гороха (Garbanzo) 
+         * шло на фуражные цели, хотя эта величина сильно изменялась год от года между 55% и полным экспортом. 
+         * Мы предположим, что и в предшествующие годы та же доля (82%) остатков от экспорта шла на фураж, 
+         * оставляя на пищевое потребление 18% урожая бараньего гороха остающегося после экспорта. 
          */
         Culture c1 = cs.get("Garbanzo Grano");
         Culture c2 = cs.get("Garbanzo Para Consumo Humano");
@@ -59,17 +60,16 @@ public class Preprocess
             if (c2.cultureYear(year) != null)
                 break;
             CultureYear cy = c2.dupYear(c1.cultureYear(year));
-            double fodder = cy.production * 0.64;
-            cy.production -= fodder;
+            double fodder = cy.consumption * 0.82;
             cy.consumption -= fodder;
             cy.perCapita = null;
         }
-        
+
         // оставить только Garbanzo Para Consumo Humano
         cs.remove(c1);
-        
+
         /* ========================================================================================== */
-        
+
         // remove cultures with no year data
         for (Culture c : cs.cultures())
         {
@@ -100,15 +100,15 @@ public class Preprocess
          */
         Culture cSugar = cs.get("sugar");
         Culture cSugarCane = cs.get("sugar cane");
-        
-        for (CultureYear cy: cSugarCane.cultureYears())
+
+        for (CultureYear cy : cSugarCane.cultureYears())
         {
             if (cy.alcohol != null)
                 break;
             cy.alcohol = cy.production * ArgiConstants.SugarCaneToAlcohol;
         }
-        
-        for (CultureYear cy: cSugarCane.cultureYears())
+
+        for (CultureYear cy : cSugarCane.cultureYears())
         {
             if (cSugar.cultureYear(cy.year) != null)
                 break;
@@ -117,7 +117,7 @@ public class Preprocess
         }
 
         /* ========================================================================================== */
-        
+
         /*
          * Приближение данных о внешней тороговле для периода 1897-1908 гг. для лет и позиций,
          * по которым не имеется сведений 
@@ -129,7 +129,7 @@ public class Preprocess
 
         approximateEarlyImport("trigo", 12.0);
         approximateEarlyImport("maiz", 0.8);
-        
+
         /*
          * Для некоторых лет в период 1925-1982 объём экспорта второстепенных культур изредка превосходит 
          * объём производства культуры в текущий год, т.к. экспортируются остатки урожая предыдущего года. 
@@ -138,10 +138,10 @@ public class Preprocess
          * и распределяем отрицательный баланс на предыдущие годы.
          */
         eliminateConsumptionNegatives();
-        
+
         Util.noop();
     }
-    
+
     private void approximateEarlyExport(String cname, double pct) throws Exception
     {
         Culture c = cs.get(cname);
@@ -158,7 +158,7 @@ public class Preprocess
             cy.perCapita = null;
         }
     }
-    
+
     private void approximateEarlyImport(String cname, double pct) throws Exception
     {
         Culture c = cs.get(cname);
@@ -175,16 +175,16 @@ public class Preprocess
             cy.perCapita = null;
         }
     }
-    
+
     private double denull(Double d)
     {
         return d == null ? 0 : d;
     }
-    
+
     private void eliminateConsumptionNegatives() throws Exception
     {
         List<CultureYear> negatives = new ArrayList<>();
-        
+
         for (Culture c : cs.cultures())
         {
             List<CultureYear> cys = c.cultureYears();
@@ -193,12 +193,29 @@ public class Preprocess
             {
                 if (cy.consumption < 0)
                 {
-                    Util.out(String.format("Negative consumption %s %d", cy.culture.id(), cy.year));
+                    // Util.out(String.format("Negative consumption %s %d", cy.culture.id(), cy.year));
                     negatives.add(cy);
                 }
             }
         }
         
-        Util.noop();
+        if (negatives.size() != 0)
+        {
+            for (CultureYear cy : negatives)
+                eliminateConsumptionNegatives(cy);
+            // eliminateConsumptionNegatives();
+        }
+
+    }
+
+    private void eliminateConsumptionNegatives(CultureYear cy) throws Exception
+    {
+        while (cy.consumption < 0)
+        {
+            CultureYear pcy = cy.culture.cultureYear(cy.year - 1);
+            pcy.consumption += cy.consumption;
+            cy.consumption = 0.0;
+            cy = pcy;
+        }
     }
 }
