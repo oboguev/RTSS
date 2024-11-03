@@ -55,7 +55,7 @@ public class Preprocess
         
         /* ========================================================================================== */
         
-        // remove culture with no year data
+        // remove cultures with no year data
         for (Culture c : cs.cultures())
         {
             if (c.years().size() == 0)
@@ -63,17 +63,31 @@ public class Preprocess
         }
 
         // remove cultures with no calories (фуражные и стимуляторы -- кофе)
+        // кроме сахарного тростника
+        String sSugarCane = cds.get("sugar cane").name;
         for (Culture c : cs.cultures())
         {
             CultureDefinition cd = cds.get(c.name);
+            if (c.name.equals(sSugarCane))
+                continue;
             if (cd.kcal_kg == null || cd.kcal_kg == 0)
                 cs.remove(c);
         }
 
+        /* ========================================================================================== */
+
+        /*
+         * Сахарный тростник употреблялся для производства сахара и алкоголя. 
+         * В 1928-1938 гг. средний весовой выход сахара был 6.70% от урожая тростника (с годовыми колебаниями от 6.0 до 7.2%), 
+         * а алкоголя 0.57% от урожая тростника (колебания от 0.40 до 0.77%). 
+         * Мы прилагаем эти переводные коэфициенты для более ранних лет, в которые производство сахара и алкоголя 
+         * не отражено непосредственными сведениями, и имеются только сведения об урожает тростника.
+         */
+        
         Util.noop();
 
-        // ### roll negative consumption values backwards
         // ### cana de azucar в EH - что с ней делать? sugar & alcohol
+        // ### roll negative consumption values backwards
         // ### apply export import factor when not listed : prod -> consumption for 1927-1930   
     }
     

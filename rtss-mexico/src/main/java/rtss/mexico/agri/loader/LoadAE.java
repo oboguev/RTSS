@@ -3,6 +3,7 @@ package rtss.mexico.agri.loader;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import rtss.mexico.agri.entities.ArgiConstants;
 import rtss.mexico.agri.entities.Culture;
 import rtss.mexico.agri.entities.CultureYear;
 import rtss.mexico.agri.entities.CultureSet;
@@ -118,7 +119,7 @@ public class LoadAE
         if (cname.equals("рис сырец"))
         {
             cname = "рис";
-            productionMultiplier *= 0.66;
+            productionMultiplier *= ArgiConstants.RawRiceToWhiteRice;
             rice_kind = RiceKind.WHITE;
         }
 
@@ -268,7 +269,7 @@ public class LoadAE
             if (cy.rice_kind == RiceKind.RAW)
             {
                 cy.production_raw = cy.production;
-                cy.production  *= 0.66;
+                cy.production  *= ArgiConstants.RawRiceToWhiteRice;
                 cy.rice_kind = RiceKind.WHITE;
             }
 
