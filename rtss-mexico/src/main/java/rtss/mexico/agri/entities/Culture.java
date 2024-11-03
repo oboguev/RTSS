@@ -1,5 +1,6 @@
 package rtss.mexico.agri.entities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,14 @@ public class Culture
         return y2cy.get(year);
     }
 
+    public List<CultureYear> cultureYears()
+    {
+        List<CultureYear> list = new ArrayList<>();
+        for (int year : years())
+            list.add(cultureYear(year));
+        return list;
+    }
+    
     public CultureYear makeCultureYear(int year) throws Exception
     {
         if (y2cy.containsKey(year))
