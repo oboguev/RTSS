@@ -16,5 +16,9 @@ public class ArgiConstants
      * Переводной коэфициент для выхода алкоголя из сахарного тростника (литров на тонну).
      */
     public static final double SugarCaneToAlcohol = 0.57 * 0.01;
-
+    
+    /*
+     * Калорий в литре чистого алкоголя.
+     */
+    public static final double CaloriesPerLiterOfAlcohol = 5600;
 }
