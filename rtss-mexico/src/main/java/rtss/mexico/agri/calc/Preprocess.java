@@ -21,6 +21,8 @@ public class Preprocess
             }
         }
         
+        /* ========================================================================================== */
+        
         /*
          * Согласно набору SARH, в 1971-1982 гг. в среднем 64% урожаев бараньего гороха (Garbanzo) шло на фуражные цели, 
          * хотя эта величина сильно изменялась год от года между 38 и 88%. Мы предположим, что и в предшествующие годы 
@@ -32,8 +34,7 @@ public class Preprocess
         {
             if (c2.cultureYear(year) != null)
                 break;
-            CultureYear cy = c1.cultureYear(year);
-            cy = c2.dupYear(cy);
+            CultureYear cy = c2.dupYear(c1.cultureYear(year));
             double fodder = cy.production * 0.64;
             cy.production -= fodder;
             cy.consumption -= fodder;
@@ -44,10 +45,9 @@ public class Preprocess
         cs.remove(c1);
         Util.noop();
         
+        /* ========================================================================================== */
         
-        // ### доля фуражного (с 1971) - ранее
         // ### слить плантаны
-        // ### вычислить consumption (if null)
         // ### roll negative consumption values backwards
         // ### cana de azucar в EH - что с ней делать? sugar & alcohol
         // ### apply export import factor when not listed : prod -> consumption for 1927-1930   
