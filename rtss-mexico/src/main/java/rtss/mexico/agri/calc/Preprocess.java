@@ -16,9 +16,13 @@ public class Preprocess
     public Preprocess() throws Exception
     {
     }
+    
+    private CultureSet cs;
 
     public void preprocess(CultureSet cs) throws Exception
     {
+        this.cs = cs;
+        
         /*
          * Вычислить потребление (там, где оно ещё не вычислено)
          */
@@ -102,10 +106,58 @@ public class Preprocess
             cySugar.consumption = cySugar.production = cy.production * ArgiConstants.SugarCaneToSugar;
         }
 
+        /* ========================================================================================== */
+        
+        /*
+         * Приближение данных о внешней тороговле для периода 1897-1908 гг. для лет и позиций,
+         * по которым не имеется сведений 
+         */
+        approximateEarlyExport("jitomate", 45.0);
+        approximateEarlyExport("frijol", 2.5);
+        approximateEarlyExport("chile verde", 12.0);
+        approximateEarlyExport("arroz", 8.0);
+
+        approximateEarlyImport("trigo", 12.0);
+        approximateEarlyImport("maize", 0.8);
+        
         Util.noop();
 
         // ### roll negative consumption values backwards
         // ### apply export import factor when not listed : prod -> consumption for 1927-1930   
+    }
+    
+    private void approximateEarlyExport(String cname, double pct) throws Exception
+    {
+        Culture c = cs.get(cname);
+
+        for (CultureYear cy : c.cultureYears())
+        {
+            if (cy.year >= 1909)
+                break;
+            if (cy.exportAmount != null || cy.importAmount != null)
+                continue;
+            double amount = cy.production * pct / 100.0;
+            cy.exportAmount = amount;
+            cy.consumption -= amount;
+            cy.perCapita = null;
+        }
+    }
+    
+    private void approximateEarlyImport(String cname, double pct) throws Exception
+    {
+        Culture c = cs.get(cname);
+
+        for (CultureYear cy : c.cultureYears())
+        {
+            if (cy.year >= 1909)
+                break;
+            if (cy.exportAmount != null || cy.importAmount != null)
+                continue;
+            double amount = cy.production * pct / 100.0;
+            cy.importAmount = amount;
+            cy.consumption += amount;
+            cy.perCapita = null;
+        }
     }
     
     private double denull(Double d)
