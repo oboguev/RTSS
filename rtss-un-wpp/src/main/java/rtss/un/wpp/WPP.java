@@ -24,6 +24,7 @@ public class WPP implements AutoCloseable
     private int iyTitleRow;
     private int ixCountry;
     private int ixYear;
+    private int ixType;
     private Map<String, Integer> columnTitles;
 
     public WPP(String fpath, String sheetTitle) throws Exception
@@ -118,6 +119,7 @@ public class WPP implements AutoCloseable
                     }
 
                     ixYear = columnTitles.get("Year");
+                    ixType = columnTitles.get("Type");
                     ixCountry = 2;
 
                     return;
@@ -138,23 +140,38 @@ public class WPP implements AutoCloseable
         for (int nr = iyTitleRow + 1; nr < rc.size(); nr++)
         {
             List<Object> row = rc.get(nr);
+            
             Object oc = row.get(ixCountry);
             Object oy = row.get(ixYear);
-            if (oc == null || oy == null)
+            
+            if (ExcelRC.isBlank(oc)|| ExcelRC.isBlank(oy))
+                continue;
+            
+            String type = ExcelRC.asString(row.get(ixType));
+            if (type != null && type.equals("SDG region"))
                 continue;
 
             String xcountry = Util.despace(oc.toString()).trim();
+            
             if (xcountry.equals(country))
             {
-                int year = ExcelRC.asInt(oy);
-                if (m.containsKey(year))
-                    throw new Exception("Duplicate year data");
-
                 Map<String, Object> mm = new HashMap<>();
+
+                int year = ExcelRC.asInt(oy);
+                if (m.containsKey(year)) 
+                {
+                    mm = m.get(year);
+                    int xnr = (Integer) mm.get("_row");
+                    throw new Exception(String.format("Duplicate year data for %s in %d, row %d, previous row %d", 
+                                                      country, year, nr + 1, xnr + 1));
+                }
+
                 m.put(year, mm);
 
                 for (String title : columnTitles.keySet())
                     mm.put(title, row.get(columnTitles.get(title)));
+                
+                mm.put("_row", (Integer) nr);
             }
         }
 

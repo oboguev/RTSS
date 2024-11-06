@@ -46,6 +46,12 @@ public class ExcelRC extends ArrayList<List<Object>>
         s = Util.despace(s).trim();
         return s;
     }
+    
+    public static boolean isBlank(Object o) throws Exception
+    {
+        String so = asString(o);
+        return so == null || so.length() == 0; 
+    }
 
     /* =================================================================== */
 
