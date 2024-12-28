@@ -1,7 +1,7 @@
 package rtss.ww2losses.params;
 
 import rtss.data.selectors.Area;
-import rtss.ww2losses.Main;
+import rtss.ww2losses.old.Main_old_1;
 
 public class AreaParameters_USSR extends AreaParameters
 {
@@ -35,8 +35,8 @@ public class AreaParameters_USSR extends AreaParameters
         /* ================================================================================== */
 
         /* population at the beginning and end of the war (mid-1941 and mid-1945) */
-        ACTUAL_POPULATION_START = Main.forward_6mo(195_392, this, 1940);
-        ACTUAL_POPULATION_END = Main.backward_6mo(170_548, this, 1946);
+        ACTUAL_POPULATION_START = Main_old_1.forward_6mo(195_392, this, 1940);
+        ACTUAL_POPULATION_END = Main_old_1.backward_6mo(170_548, this, 1946);
         
         /* target excess deaths and birth shortage */
         ACTUAL_EXCESS_DEATHS = 22_720;

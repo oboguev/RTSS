@@ -1,4 +1,4 @@
-package rtss.ww2losses;
+package rtss.ww2losses.old;
 
 import rtss.ww2losses.params.AreaParameters;
 
