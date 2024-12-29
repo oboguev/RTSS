@@ -4,8 +4,11 @@ import rtss.data.population.PopulationByLocality;
 
 public class HalfYearEntry
 {
-    final int year;
-    final int halfyear;
+    public HalfYearEntry prev;
+    public HalfYearEntry next;
+    
+    final public int year;
+    final public int halfyear;
     final public PopulationByLocality p_nowar_with_births;
     final public PopulationByLocality p_nowar_without_births;
 

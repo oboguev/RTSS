@@ -9,8 +9,8 @@ public class HalfYearEntries<T> extends ArrayList<T>
 {
     private static final long serialVersionUID = 1L;
     
-    public static final int FirstHalfYear = 1;
-    public static final int SecondHalfYear = 2;
+    public static final int StartOfFirstHalfYear = 1;
+    public static final int StartOfSecondHalfYear = 2;
     
     private int base_year = 1941;
     
@@ -26,11 +26,11 @@ public class HalfYearEntries<T> extends ArrayList<T>
     
     private int index(int year, int half) throws Exception
     {
-        if (half != FirstHalfYear && half != SecondHalfYear)
+        if (half != StartOfFirstHalfYear && half != StartOfSecondHalfYear)
             throw new Exception("incorrect half-year index");
         
         half -= 1;
         
-        return (year - base_year) * 2 + (half - FirstHalfYear) - 1;
+        return (year - base_year) * 2 + (half - StartOfFirstHalfYear) - 1;
     }
 }

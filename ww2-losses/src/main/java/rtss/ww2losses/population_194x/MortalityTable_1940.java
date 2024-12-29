@@ -2,6 +2,7 @@ package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.InterpolateMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
@@ -14,23 +15,35 @@ import rtss.ww2losses.params.AreaParameters;
 /**
  * Вычислить таблицу смертности населения СССР или РСФСР для 1940 года.
  * 
- * К сожалению, АДХ не опубликовали вычисленные и использованные ими возрастные показатели смертности, в т.ч. для 1940 года.
- * Насколько можно судить, для взрослых возрастов они полагали их близкими по величине к госкомстатовскому расчёту для 1938-1939
- * гг.:
+ * К сожалению, для случая СССР, АДХ не опубликовали вычисленные и использованные ими возрастные показатели смертности, 
+ * в т.ч. для 1940 года. Насколько можно судить, для взрослых возрастов они полагали их близкими по величине к госкомстатовскому 
+ * расчёту для 1938-1939 гг.:
  * 
  * "Расчет возрастных чисел умерших проводился в несколько этапов путем передвижки населения 1939 г. с использованием
  * модифицированных таблиц смертности 1938-1939 гг., так, чтобы при данных числах живущих в каждом возрасте они давали
  * заданное общее число умерших... При модификации таблиц смертности 1938-1939 гг. мы воспользовались независимыми оценками
- * уровни младенческой смертности, рассчитанными нами по данным о младенческой смертности на территориях с хорошей
- * регистрацией." (АДХ-СССР, стр. 54-55).
+ * уровня младенческой смертности, рассчитанными нами по данным о младенческой смертности на территориях с хорошей
+ * регистрацией." (АДХ-СССР, стр. 54-55). Для 1940 г. этот уровень полагается равным 184.0 промилле (АДХ-СССР стр. 135).
  * 
- * Использование структуры населения для начала 1940 года продвинутой от переписи 1939 года по таблице ГКС-СССР-1938,
- * а также уровней рождаемости и смертности вычисленных АДХ для 1940 года даёт итоговую таблицу линейно составленную
- * на 92.9% из ГКС-СССР-1938 и на 7.1% из АДХ-РСФСР-1940.
+ * Для случая СССР:
  * 
- * Использование структуры населения для начала 1940 года по расчётам АДХ, а также уровней рождаемости и смертности
- * вычисленных АДХ для 1940 года даёт итоговую таблицу линейно составленную на 88.7% из ГКС-СССР-1938 и на 11.3% из
- * АДХ-РСФСР-1940.
+ * Использование структуры населения CCCР для начала 1940 года по расчётам АДХ, а также уровней рождаемости и смертности СССР
+ * вычисленных АДХ для 1940 года даёт итоговую таблицу смертности в возрастах 5 и более лет равную значениям таблицы ГКС-СССР-1938,
+ * а в возрастной группе 0-4 года линейно составленную на 61.3% из таблицы (АДХ-РСФСР-1940) и на 38.7% из таблицы (ГКС-СССР-1938,
+ * но с замещением смертности в возрасте 0 на значение вычисленное АДХ). Эта комбинация даёт смертность населения равную
+ * расчитанной АДХ для 1940 года, при расчитанных же АДХ структуре населения и рождаемости в 1940 году. 
+ * 
+ * Для случая РСФСР:
+
+ * Использование таблицы ГКС-СССР-1938 с поправкой младенческой смертности даёт для населения РСФСР-1940 по АДХ (при 
+ * рождаемости по АДХ же в 34.6) смертность 18.3 промилле, а применение таблицы АДХ-РСФСР-1940 -- смертность 25.6 промилле.
+ * Между тем, исчисленная АДХ величина смертности составляет 23.2. Таким образом, таблица ГКС-СССР-1938 оказывается
+ * излищне оптимистичной, а таблица АДХ-РСФСР-1940 наоборот черезчур пессимистичной.
+ * 
+ * Чтобы добиться соответствия уровню смертности 23.2, мы используем таблицу линейно составленную для всех возрастов 
+ * на 67.3% из таблицы (АДХ-РСФСР-1940) и на 32.7% из таблицы (ГКС-СССР-1938, но с замещением смертности в возрасте 0 на 
+ * значение вычисленное АДХ). Эта комбинация (при структуре населения РСФСР 1940 по АДХ) даёт значение смертности всего 
+ * населения равное 23.2.
  */
 public class MortalityTable_1940 extends UtilBase_194x
 {
@@ -38,20 +51,19 @@ public class MortalityTable_1940 extends UtilBase_194x
     private CombinedMortalityTable mt1;
     private CombinedMortalityTable mt2;
     
+    /* уровень младенческой смертности в СССР в 1940 году по АДХ (АДХ-СССР, стр. 135) */
+    private static final double ADH_USSR_infant_CDR_1940 = 184.0;
+    private static final boolean use_ADH_USSR_InfantMortalityRate = true;
+    
     public MortalityTable_1940(AreaParameters ap) throws Exception
     {
         this.ap = ap;
         
-        switch (ap.area)
+        mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
+        mt1.comment("ГКС-СССР-1938");
+        if (use_ADH_USSR_InfantMortalityRate)
         {
-        case USSR:
-        case RSFSR:
-            mt1 = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
-            mt1.comment("ГКС-СССР-1938");
-            break;
-            
-        default:
-            throw new IllegalArgumentException();
+            mt1 = PatchMortalityTable.patchInfantMortalityRate(mt1, ADH_USSR_infant_CDR_1940, "infant mortality patched to AHD");
         }
 
         mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
@@ -60,8 +72,18 @@ public class MortalityTable_1940 extends UtilBase_194x
 
     public CombinedMortalityTable evaluate() throws Exception
     {
-        // return InterpolateMortalityTable.forTargetRates(mt1, mt2, new USSR_Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);
-        return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4);
+
+        switch (ap.area)
+        {
+        case USSR:
+            return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4);
+
+        case RSFSR:
+            return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);
+            
+        default:
+            throw new IllegalArgumentException();
+        }
     }
 
     public void show_survival_rates_1941_1946() throws Exception
