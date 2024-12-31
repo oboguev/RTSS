@@ -18,7 +18,7 @@ public class Main
         try
         {
             new Main(Area.USSR).main();
-            new Main(Area.RSFSR).main();
+            // new Main(Area.RSFSR).main();
         }
         catch (Exception ex)
         {
