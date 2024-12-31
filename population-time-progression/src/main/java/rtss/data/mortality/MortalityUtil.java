@@ -175,6 +175,6 @@ public class MortalityUtil
                 return mx;
         }
         
-        throw new Exception("mx value is out of valid range");
+        throw new Exception("mx value is out of valid range: " + mx);
     }
 }

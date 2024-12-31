@@ -119,6 +119,21 @@ public class MortalityTableADH
         String path = String.format("mortality_tables/%s/%s-MortalityRates-ADH.xlsx", area.name(), area.name());
         Bin[] male_mortality_bins = MortalityRatesFromExcel.loadRates(path, Gender.MALE, year);
         Bin[] female_mortality_bins = MortalityRatesFromExcel.loadRates(path, Gender.FEMALE, year);
+        
+        /*
+         * Значения в файле (и таблице приложения 5 книги АДХ) приведены в формате "mx".
+         * Преобразовать в формат "qx".
+         */
+        if (Util.True)
+        {
+            male_mortality_bins = Bins.multiply(male_mortality_bins, 0.001);
+            male_mortality_bins = MortalityUtil.mx2qx(male_mortality_bins);
+            male_mortality_bins = Bins.multiply(male_mortality_bins, 1000.0);
+
+            female_mortality_bins = Bins.multiply(female_mortality_bins, 0.001);
+            female_mortality_bins = MortalityUtil.mx2qx(female_mortality_bins);
+            female_mortality_bins = Bins.multiply(female_mortality_bins, 1000.0);
+        }
 
         Population p = PopulationADH.getPopulation(area, year);
         Bin[] male_population_sum_bins = p.binSumByAge(Gender.MALE, male_mortality_bins);
@@ -270,7 +285,7 @@ public class MortalityTableADH
         double[] yyy = PCLM_Rizzi_2015.pclm(xbins, lambda, ppy);
         yyy = Util.splice(yyy, first.age_x1, ppy * (last.age_x2 + 1) - 1);
 
-        if (Util.False)
+        if (Util.True)
         {
             /*
              * Display yearly curve

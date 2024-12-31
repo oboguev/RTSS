@@ -35,6 +35,8 @@ public class TestMortalityRatesADH
         {
             if (year >= 1941 && year <= 1945)
                 continue;
+            
+            Util.out("Processing year " + year);
 
             CombinedMortalityTable cmt = MortalityTableADH.getMortalityTable(Area.RSFSR, year);
 
