@@ -39,6 +39,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     {
         Util.out("Численность населения в границах " + taxonName);
         Util.out("рождаемость, смертность, естественный прирост, ест. + мех. изменение численности");
+        Util.out("в нормировке на население на начало года");
         Util.out("");
 
         List<Integer> years = Util.sort(keySet());
@@ -65,6 +66,27 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         printRateChange("CBR");
         printRateChange("CDR");
         printRateChange("NGR");
+
+        Util.out("");
+        Util.out("То же в нормировке на среднегодовое население");
+        Util.out("");
+
+        for (int year : years)
+        {
+            TaxonYearData yd = get(year);
+
+            if (year != lastPartialYear)
+            {
+                double ngr_middle = yd.cbr_middle - yd.cdr_middle;
+                Util.out(String.format("%d %,d %.1f %.1f %.1f %,d",
+                                       year, yd.population, yd.cbr_middle, yd.cdr_middle, ngr_middle,
+                                       yd.population_increase));
+            }
+            else
+            {
+                Util.out(String.format("%d %,d", year, yd.population));
+            }
+        }
 
         return this;
     }

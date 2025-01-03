@@ -180,12 +180,21 @@ public class EvalCountryTaxon extends EvalCountryBase
             TerritoryYear ty = tmVitalRates.territoryYear(year);
             long pop_vital = ty.progressive_population.total.both;
 
+            TerritoryYear ty_next = tmVitalRates.territoryYear(year + 1);
+            long pop_vital_next = ty_next.progressive_population.total.both;
+            long pop_vital_middle = (pop_vital + pop_vital_next) / 2;
+
             double cbr = (PROMILLE * ty.births.total.both) / pop_vital;
             double cdr = (PROMILLE * ty.deaths.total.both) / pop_vital;
+
+            double cbr_middle = (PROMILLE * ty.births.total.both) / pop_vital_middle;
+            double cdr_middle = (PROMILLE * ty.deaths.total.both) / pop_vital_middle;
 
             yd.population = pop_total;
             yd.cbr = cbr;
             yd.cdr = cdr;
+            yd.cbr_middle = cbr_middle;
+            yd.cdr_middle = cdr_middle;
             yd.population_increase = pop_total_next - pop_total;
 
             cd.put(year, yd);
