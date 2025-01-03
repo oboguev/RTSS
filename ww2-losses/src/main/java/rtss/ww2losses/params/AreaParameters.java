@@ -8,14 +8,26 @@ public class AreaParameters
 {
     public /*final*/ Area area;
     public /*final*/ int NYears;
+    
+    /*
+     * Уровни рождаемости и смертности CBR_xxx и CDR_xxx нормированы на численность населения в начале календарного года.
+     * Уровни рождаемости и смертности CBR_xxx_MIDYEAR и CDR_xxx_MIDYEAR нормированы на среднегодовую численность населения.
+     * 
+     * Для краткосрочного исчисления будущего прироста от численности населения в текущей точки следует использовать CBR_xxx и CDR_xxx,
+     * т.к. они выражают градиенты dp/dt в текущей точке.
+     */
 
     /* birth and death rates in 1939 */
-    public /*final*/ double CBR_1939;
-    public /*final*/ double CDR_1939;
+    public double CBR_1939;
+    public double CDR_1939;
+    public double CBR_1939_MIDYEAR;
+    public double CDR_1939_MIDYEAR;
 
     /* birth and death rates in 1940 */
-    public /*final*/ double CBR_1940;
-    public /*final*/ double CDR_1940;
+    public double CBR_1940;
+    public double CDR_1940;
+    public double CBR_1940_MIDYEAR;
+    public double CDR_1940_MIDYEAR;
 
     /* 
      * прирост населения в 1940 году, с учётом миграции, 
@@ -24,8 +36,10 @@ public class AreaParameters
     public final /*final*/ Double growth_1940 = null;
 
     /* birth and death rates in 1946 */
-    public /*final*/ double CBR_1946;
-    public /*final*/ double CDR_1946;
+    public double CBR_1946;
+    public double CDR_1946;
+    public double CBR_1946_MIDYEAR;
+    public double CDR_1946_MIDYEAR;
 
     /* 
      * прирост населения в 1946 году, с учётом миграции, 
@@ -108,20 +122,20 @@ public class AreaParameters
          */
         if (area == Area.USSR)
         {
-            Rates r = Recalibrate.m2e(new Rates(CBR_1939, CDR_1939));
+            Rates r = Recalibrate.m2e(new Rates(CBR_1939_MIDYEAR, CDR_1939_MIDYEAR));
             CBR_1939 = r.cbr;
             CDR_1939 = r.cdr;
         }
         else
         {
-            CBR_1939 = Recalibrate.m2e(this.area, 1939, CBR_1939);
-            CDR_1939 = Recalibrate.m2e(this.area, 1939, CDR_1939);
+            CBR_1939 = Recalibrate.m2e(this.area, 1939, CBR_1939_MIDYEAR);
+            CDR_1939 = Recalibrate.m2e(this.area, 1939, CDR_1939_MIDYEAR);
         }
 
-        CBR_1940 = Recalibrate.m2e(this.area, 1940, CBR_1940);
-        CDR_1940 = Recalibrate.m2e(this.area, 1940, CDR_1940);
+        CBR_1940 = Recalibrate.m2e(this.area, 1940, CBR_1940_MIDYEAR);
+        CDR_1940 = Recalibrate.m2e(this.area, 1940, CDR_1940_MIDYEAR);
 
-        CBR_1946 = Recalibrate.m2e(this.area, 1946, CBR_1946);
-        CDR_1946 = Recalibrate.m2e(this.area, 1946, CDR_1946);
+        CBR_1946 = Recalibrate.m2e(this.area, 1946, CBR_1946_MIDYEAR);
+        CDR_1946 = Recalibrate.m2e(this.area, 1946, CDR_1946_MIDYEAR);
     }
 }

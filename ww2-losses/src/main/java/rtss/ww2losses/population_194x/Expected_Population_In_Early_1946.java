@@ -31,7 +31,7 @@ public class Expected_Population_In_Early_1946 extends UtilBase_194x
      * используя госкомстатовкую таблицу смертности для СССР 1938-1939 гг.
      * 
      * @cbr указывает рождаемость
-     * При значении CBR_1940 (36.1) число рождающихся добавляется в соответствии с уровнем рождаемости 1940 г.
+     * При значении CBR_1940 число рождающихся добавляется в соответствии с уровнем рождаемости 1940 г.
      * При значении 0 рождения не добавляются. 
      */
     public PopulationByLocality with_mt_USSR_1938(double cbr, boolean interpolate_mt_to1958, MutableDouble births) throws Exception
@@ -44,7 +44,7 @@ public class Expected_Population_In_Early_1946 extends UtilBase_194x
      * используя таблицу смертности соответствующую возрастным уровням расчитанным АДХ для РСФСР 1940 г. 
      * 
      * @cbr указывает рождаемость
-     * При значении CBR_1940 (36.1) число рождающихся добавляется в соответствии с уровнем рождаемости 1940 г.
+     * При значении CBR_1940 число рождающихся добавляется в соответствии с уровнем рождаемости 1940 г.
      * При значении 0 рождения не добавляются. 
      */
     public PopulationByLocality with_mt_RSFSR_1940(double cbr, boolean interpolate_mt_to1958, MutableDouble births) throws Exception
