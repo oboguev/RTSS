@@ -299,6 +299,16 @@ public class MortalityTableADH
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
         CurveVerifier.validate_means(yy, bins);
+        
+        if (Util.False && bins[0].widths_in_years == 1)
+        {
+            // the change is rare and tiny, such as 71.009 => 71.006
+            if (Math.abs(bins[0].avg - yy[0]) >= 0.001)
+            {
+                Util.err(String.format("PCLM Q0: %s %.3f => %.3f", debug_title, bins[0].avg, yy[0]));
+                Util.noop();
+            }
+        }
 
         return yy;
     }
