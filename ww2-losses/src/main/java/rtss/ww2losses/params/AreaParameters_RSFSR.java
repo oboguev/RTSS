@@ -4,7 +4,7 @@ import rtss.data.selectors.Area;
 
 public class AreaParameters_RSFSR extends AreaParameters
 {
-    public AreaParameters_RSFSR()
+    public AreaParameters_RSFSR() throws Exception
     {
         /* 4 years */
         super(Area.RSFSR, 4);
@@ -40,5 +40,7 @@ public class AreaParameters_RSFSR extends AreaParameters
         /* target excess deaths and birth shortage */
         ACTUAL_EXCESS_DEATHS = 9_789;
         ACTUAL_BIRTH_DEFICIT = 9_973;
+        
+        build();
     }
 }

@@ -5,7 +5,7 @@ import rtss.ww2losses.old.Main_old_1;
 
 public class AreaParameters_USSR extends AreaParameters
 {
-    public AreaParameters_USSR()
+    public AreaParameters_USSR() throws Exception
     {
         /* 4 years */
         super(Area.USSR, 4);
@@ -41,5 +41,7 @@ public class AreaParameters_USSR extends AreaParameters
         /* target excess deaths and birth shortage */
         ACTUAL_EXCESS_DEATHS = 22_720;
         ACTUAL_BIRTH_DEFICIT = 16_181;
+
+        build();
     }
 }

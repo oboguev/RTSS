@@ -12,6 +12,8 @@ import rtss.data.selectors.Locality;
  */
 public class Recalibrate
 {
+    private static double PROMILLE = 1000.0;
+    
     /*
      * Рождаемость и смертность в нормировке на население на начало года -> рождаемость в нормировке на среднегодовое население.
      * Миграция полагается нулевой.
@@ -20,7 +22,7 @@ public class Recalibrate
      */
     public static double cbr_e2m(double cbr, double cdr)
     {
-        double f = 1 + (cbr - cdr) / 2;
+        double f = 1 + (cbr - cdr) / (PROMILLE * 2);
         return cbr / f;
     }
 
@@ -33,7 +35,7 @@ public class Recalibrate
      */
     public static double cdr_e2m(double cbr, double cdr)
     {
-        double f = 1 + (cbr - cdr) / 2;
+        double f = 1 + (cbr - cdr) / (PROMILLE * 2);
         return cdr / f;
     }
 
@@ -45,7 +47,7 @@ public class Recalibrate
      */
     public static double cbr_m2e(double cbr, double cdr)
     {
-        double f = 1 - (cbr - cdr) / 2;
+        double f = 1 - (cbr - cdr) / (PROMILLE * 2);
         return cbr / f;
     }
 
@@ -58,7 +60,7 @@ public class Recalibrate
      */
     public static double cdr_m2e(double cbr, double cdr)
     {
-        double f = 1 - (cbr - cdr) / 2;
+        double f = 1 - (cbr - cdr) / (PROMILLE * 2);
         return cdr / f;
     }
     
@@ -88,5 +90,33 @@ public class Recalibrate
         double sp2 = p2.sum(Locality.TOTAL, Gender.BOTH, 0, PopulationByLocality.MAX_AGE);
         double spm = (sp1 + sp2) / 2;
         return rate * spm / sp1;
+    }
+
+    public static class Rates
+    {
+        public double cbr;
+        public double cdr;
+        
+        public Rates(double cbr, double cdr)
+        {
+            this.cbr = cbr;
+            this.cdr = cdr;
+        }
+    }
+    
+    public static Rates m2e(Rates rates)
+    {
+        Rates x = new Rates(0, 0);
+        x.cbr = cbr_m2e(rates.cbr, rates.cdr);
+        x.cdr = cdr_m2e(rates.cbr, rates.cdr);
+        return x;
+    }
+
+    public static Rates e2m(Rates rates)
+    {
+        Rates x = new Rates(0, 0);
+        x.cbr = cbr_e2m(rates.cbr, rates.cdr);
+        x.cdr = cdr_e2m(rates.cbr, rates.cdr);
+        return x;
     }
 }
