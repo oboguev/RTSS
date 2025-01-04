@@ -10,6 +10,7 @@ import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.HalfYearEntries;
+import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
 
 public class Main
 {
@@ -18,7 +19,7 @@ public class Main
         try
         {
             new Main(Area.USSR).main();
-            new Main(Area.RSFSR).main();
+            // new Main(Area.RSFSR).main();
         }
         catch (Exception ex)
         {
@@ -53,7 +54,7 @@ public class Main
     }
 
     /*
-     * Подготовить полугодовые точки  
+     * Подготовить полугодовые сегменты
      */
     private void evalHalves() throws Exception
     {
@@ -61,14 +62,28 @@ public class Main
         CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
 
         /* население на середину 1941 года */
+        Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
         PopulationForwardingContext fctx = new PopulationForwardingContext();
-        PopulationByLocality p = new Population_In_Middle_1941(ap).evaluate(fctx);
+        PopulationByLocality p = pm1941.evaluate(fctx);
         PopulationByLocality px = fctx.end(p);
 
+        HalfYearEntry curr, prev;
         int year = 1941;
-        int half = HalfYearEntries.StartOfSecondHalfYear;
-        HalfYearEntry prev = new HalfYearEntry(year, half, px, px);
-        halves.add(prev);
+
+        /* первое полугодие 1941 */
+        HalfYearSelector half = HalfYearSelector.FirstHalfYear;
+        prev = curr = new HalfYearEntry(year, half, pm1941.p_start_1941, pm1941.p_start_1941);
+        curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
+        curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
+        halves.add(curr);
+
+        /* второе полугодие 1941 */
+        half = HalfYearSelector.SecondHalfYear;
+        curr = new HalfYearEntry(year, half, px, px);
+        prev.next = curr;
+        curr.prev = prev;
+        prev = curr;
+        halves.add(curr);
 
         /* подготовиться к продвижке населения с учётом рождений после середины 1941 года */
         PopulationByLocality pwb = p.clone();
@@ -82,15 +97,15 @@ public class Main
         {
             ForwardPopulationT fw;
 
-            if (half == HalfYearEntries.StartOfFirstHalfYear)
+            if (half == HalfYearSelector.FirstHalfYear)
             {
                 if (year == 1946)
                     break;
-                half = HalfYearEntries.StartOfSecondHalfYear;
+                half = HalfYearSelector.SecondHalfYear;
             }
             else
             {
-                half = HalfYearEntries.StartOfFirstHalfYear;
+                half = HalfYearSelector.FirstHalfYear;
                 year++;
             }
 
@@ -98,18 +113,21 @@ public class Main
             // ###
             CombinedMortalityTable mt = mt1940;
 
-            /* продвижка на следующие полгода населения с учётом рождений */
-            fw = new ForwardPopulationT();
-            fw.setBirthRateTotal(ap.CBR_1940);
-            pwb = fw.forward(pwb, fctx, mt, 0.5);
-
             /* продвижка на следующие полгода населения без учёта рождений */
             fw = new ForwardPopulationT();
             fw.setBirthRateTotal(0);
             pxb = fw.forward(pxb, fctx_xb, mt, 0.5);
 
+            /* продвижка на следующие полгода населения с учётом рождений */
+            fw = new ForwardPopulationT();
+            fw.setBirthRateTotal(ap.CBR_1940);
+            pwb = fw.forward(pwb, fctx, mt, 0.5);
+
             /* сохранить результаты в полугодовой записи */
-            HalfYearEntry curr = new HalfYearEntry(year, half, fctx.end(pwb), fctx_xb.end(pxb));
+            curr = new HalfYearEntry(year, half, fctx.end(pwb), fctx_xb.end(pxb));
+            prev.expected_nonwar_births = fw.getObservedBirths();
+            prev.expected_nonwar_deaths = fw.getObservedDeaths();
+            
             curr.prev = prev;
             prev.next = curr;
             prev = curr;

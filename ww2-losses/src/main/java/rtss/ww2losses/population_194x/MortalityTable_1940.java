@@ -63,7 +63,7 @@ public class MortalityTable_1940 extends UtilBase_194x
         mt1.comment("ГКС-СССР-1938");
         if (use_ADH_USSR_InfantMortalityRate)
         {
-            mt1 = PatchMortalityTable.patchInfantMortalityRate(mt1, ADH_USSR_infant_CDR_1940, "infant mortality patched to AHD");
+            mt1 = PatchMortalityTable.patchInfantMortalityRate(mt1, ADH_USSR_infant_CDR_1940, "infant mortality patched to ADH");
         }
 
         mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
@@ -76,7 +76,8 @@ public class MortalityTable_1940 extends UtilBase_194x
         switch (ap.area)
         {
         case USSR:
-            return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4);
+            // return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4, ADH_USSR_infant_CDR_1940);
+            return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4, null);
 
         case RSFSR:
             return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);

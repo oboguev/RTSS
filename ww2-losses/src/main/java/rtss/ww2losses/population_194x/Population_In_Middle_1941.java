@@ -16,6 +16,10 @@ public class Population_In_Middle_1941 extends UtilBase_194x
 {
     private AreaParameters ap;
     
+    public PopulationByLocality p_start_1941;
+    public double observed_births_1941_1st_halfyear;
+    public double observed_deaths_1941_1st_halfyear;
+    
     public Population_In_Middle_1941(AreaParameters ap)
     {
         this.ap = ap;
@@ -40,6 +44,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         if (useADH)
         {
             p = PopulationADH.getPopulationByLocality(ap.area, 1941);
+            p_start_1941 = p.clone();
             p = fctx.begin(p);
         }
         else
@@ -52,13 +57,18 @@ public class Population_In_Middle_1941 extends UtilBase_194x
             fw.setBirthRateTotal(ap.CBR_1940);
             p = fw.forward(p, fctx, mt1940, 1.0);
             show_struct("начало 1941", p, fctx);
+            p_start_1941 = fctx.end(p);
         }
         
         /*
          * Продвижка с начала 1941 до середины 1941 года
          */
+        fw = new ForwardPopulationT();
         fw.setBirthRateTotal(ap.CBR_1940);
         p = fw.forward(p, fctx, mt1940, 0.5);
+        
+        observed_births_1941_1st_halfyear = fw.getObservedBirths();
+        observed_deaths_1941_1st_halfyear = fw.getObservedDeaths();
         
         /*
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ

@@ -20,8 +20,8 @@ public class PatchMortalityTable
             comment = "";
         cmt.comment(comment + addComment);
         
-        patchInfantMortalityRate(cmt, mt, factor, Locality.RURAL, addComment);
         patchInfantMortalityRate(cmt, mt, factor, Locality.TOTAL, addComment);
+        patchInfantMortalityRate(cmt, mt, factor, Locality.RURAL, addComment);
         patchInfantMortalityRate(cmt, mt, factor, Locality.URBAN, addComment);
 
         return cmt;
@@ -37,6 +37,10 @@ public class PatchMortalityTable
     private static void patchInfantMortalityRate(CombinedMortalityTable cmt, CombinedMortalityTable mt, double factor, Locality locality, Gender gender, String addComment) throws Exception
     {
         SingleMortalityTable smt = mt.getSingleTable(locality, gender);
+        
+        if (smt == null)
+            return;
+        
         double[] qx = smt.qx();
         qx[0] *= factor;
 

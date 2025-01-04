@@ -69,9 +69,10 @@ public class InterpolateMortalityTable
             final PopulationByLocality p,
             double cbr,
             double cdr,
-            int toAge) throws Exception
+            int toAge,
+            Double imr) throws Exception
     {
-        return forTargetRates(mt1, mt2, p, null, cbr, cdr, toAge);
+        return forTargetRates(mt1, mt2, p, null, cbr, cdr, toAge, imr);
     }
 
     public static CombinedMortalityTable forTargetRates(
@@ -81,20 +82,30 @@ public class InterpolateMortalityTable
             final PopulationForwardingContext fctx,
             double cbr,
             double cdr,
-            int toAge) throws Exception
+            int toAge,
+            Double imr) throws Exception
     {
         double w1 = 0;
         double w2 = 1;
+        int iterations = 0;
 
         CombinedMortalityTable xmt1 = mt1;
         CombinedMortalityTable xmt2 = CombinedMortalityTable.interpolate(mt1, mt2, toAge, w2);
+        
+        // xmt1 = patchInfantMortalityRate(xmt1, imr);
+        // xmt2 = patchInfantMortalityRate(xmt2, imr);
+
         double cdr1 = EvalMortalityRate.eval(xmt1, p, fctx, cbr);
         double cdr2 = EvalMortalityRate.eval(xmt2, p, fctx, cbr);
+
         if (cdr2 <= cdr1)
-            Util.err("Таблица для данного уровня смертности не составляема");
+            throw new Exception("Таблица для данного уровня смертности несоставима");
         
         for (;;)
         {
+            if (iterations++ > 1000)
+                throw new Exception("Таблица для данного уровня смертности несоставима за 1000 итераций");
+            
             if (Math.abs(cdr - cdr2) < 0.01)
                 return xmt2;
 
@@ -102,10 +113,11 @@ public class InterpolateMortalityTable
                 return xmt1;
             
             if (!(cdr >= cdr1 && cdr <= cdr2))
-                Util.err("Таблица для данного уровня смертности не составляема");
+                throw new Exception("Таблица для данного уровня смертности несоставима");
             
             double w = (w1 + w2) /2;
             CombinedMortalityTable xmtw = CombinedMortalityTable.interpolate(mt1, mt2, toAge, w);
+            xmtw = patchInfantMortalityRate(xmtw, imr);
             double cdrw = EvalMortalityRate.eval(xmtw, p, fctx, cbr);
             
             if (Math.abs(cdr - cdrw) < 0.01)
@@ -123,6 +135,19 @@ public class InterpolateMortalityTable
                 cdr1 = cdrw;
                 xmt1 = xmtw;
             }
+        }
+    }
+    
+    private static CombinedMortalityTable patchInfantMortalityRate(CombinedMortalityTable mt, Double imr) throws Exception
+    {
+        if (imr == null)
+        {
+            return mt;
+        }
+        else
+        {
+            CombinedMortalityTable xmt = PatchMortalityTable.patchInfantMortalityRate(mt, imr, "patched infant mortality");
+            return xmt;
         }
     }
 }

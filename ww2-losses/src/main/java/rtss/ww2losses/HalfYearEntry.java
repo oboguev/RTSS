@@ -1,26 +1,39 @@
 package rtss.ww2losses;
 
 import rtss.data.population.PopulationByLocality;
+import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
 
 public class HalfYearEntry
 {
+    /* предыдущий и следующий периоды */
     public HalfYearEntry prev;
     public HalfYearEntry next;
     
+    /* обозначение периода (год и полугодие) */
     final public int year;
-    final public int halfyear;
-    final public PopulationByLocality p_nowar_with_births;
-    final public PopulationByLocality p_nowar_without_births;
+    final public HalfYearSelector halfyear;
+    
+    /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
+    final public PopulationByLocality p_nonwar_with_births;
+
+    /* ожидаемое в условиях мира население на начало периода, без учёта рождений после середины 1941 */
+    final public PopulationByLocality p_nonwar_without_births;
+    
+    /* ожидаемое в условиях мира число смертей за период (от начала до конца периода) */
+    public double expected_nonwar_deaths;
+
+    /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
+    public double expected_nonwar_births;
 
     public HalfYearEntry(
             int year,
-            int halfyear,
-            PopulationByLocality p_nowar_with_births,
-            PopulationByLocality p_nowar_without_births)
+            HalfYearSelector halfyear,
+            PopulationByLocality p_nonwar_with_births,
+            PopulationByLocality p_nonwar_without_births)
     {
         this.year = year;
         this.halfyear = halfyear;
-        this.p_nowar_with_births = p_nowar_with_births;
-        this.p_nowar_without_births = p_nowar_without_births;
+        this.p_nonwar_with_births = p_nonwar_with_births;
+        this.p_nonwar_without_births = p_nonwar_without_births;
     }
 }

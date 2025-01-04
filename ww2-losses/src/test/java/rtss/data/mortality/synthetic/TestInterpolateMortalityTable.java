@@ -31,7 +31,8 @@ public class TestInterpolateMortalityTable
                     fctx,
                     ap.CBR_1940,
                     ap.CDR_1940,
-                    4);
+                    4,
+                    null);
             
             Util.unused(cmt);
         }

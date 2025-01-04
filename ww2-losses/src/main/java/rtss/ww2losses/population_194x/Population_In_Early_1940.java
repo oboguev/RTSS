@@ -104,7 +104,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
         CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
         mt2.comment("АДХ-РСФСР-1940");
 
-        cmt = InterpolateMortalityTable.forTargetRates(mt1, mt2, p, fctx, fw.getBirthRateTotal(), cdr, 4);
+        cmt = InterpolateMortalityTable.forTargetRates(mt1, mt2, p, fctx, fw.getBirthRateTotal(), cdr, 4, null);
 
         return fw.forward(p, fctx, cmt, yfraction);
     }
