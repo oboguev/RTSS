@@ -3,7 +3,6 @@ package rtss.data.population.forward;
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
-import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -13,11 +12,8 @@ import rtss.util.Util;
  * Продвижка населения по таблице смертности не имеющей отдельных частей
  * для городского и сельского населения, а только часть Total.  
  */
-public class ForwardPopulationT
+public class ForwardPopulationT extends ForwardPopulation 
 {
-    protected static final int MAX_AGE = Population.MAX_AGE;
-    protected final double MaleFemaleBirthRatio = 1.06;
-
     protected AgeSpecificFertilityRates ageSpecificFertilityRates;
     protected double BirthRateTotal;
     
@@ -37,7 +33,7 @@ public class ForwardPopulationT
     {
         return BirthRateTotal;
     }
-
+    
     /*
      * Продвижка населения во времени на целый год или на часть года.
      * Начальное население (@p) и таблица смертности (@mt) неизменны. 
@@ -97,6 +93,8 @@ public class ForwardPopulationT
                 double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
                 births = yfraction * sum * birthRate / 1000;
             }
+
+            observed_births += births;
             
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
@@ -128,6 +126,8 @@ public class ForwardPopulationT
             double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
             births = yfraction * sum  * birthRate / 1000;
         }
+        
+        observed_births += births;
         
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
@@ -198,6 +198,8 @@ public class ForwardPopulationT
             double moving = current * yfraction;
             double staying = current - moving;
             double deaths = moving * (1.0 - mi.px);
+            
+            observed_deaths += deaths;
 
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);

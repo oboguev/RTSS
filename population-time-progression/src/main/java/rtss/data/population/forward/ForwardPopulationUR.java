@@ -5,7 +5,6 @@ import java.util.Map;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
-import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -15,11 +14,8 @@ import rtss.util.Util;
  * Продвижка населения по таблице смертности имеющей отдельные части
  * для городского и сельского населения
  */
-public class ForwardPopulationUR
+public class ForwardPopulationUR extends ForwardPopulation
 {
-    protected static final int MAX_AGE = Population.MAX_AGE;
-    protected final double MaleFemaleBirthRatio = 1.06;
-
     protected double BirthRateRural;
     protected double BirthRateUrban;
 
@@ -134,6 +130,7 @@ public class ForwardPopulationUR
         {
             double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
             double births = sum * yfraction * birthRate / 1000;
+            observed_births += births;
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
@@ -154,6 +151,7 @@ public class ForwardPopulationUR
     {
         double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
         double births = sum  * yfraction * birthRate / 1000;
+        observed_births += births;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
@@ -223,6 +221,8 @@ public class ForwardPopulationUR
             double moving = current * yfraction;
             double staying = current - moving;
             double deaths = moving * (1.0 - mi.px);
+            
+            observed_deaths += deaths;
 
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
