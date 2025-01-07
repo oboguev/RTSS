@@ -1,12 +1,19 @@
 package rtss.ww2losses.population_194x;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.InterpolateMortalityTable;
+import rtss.data.mortality.synthetic.MatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -52,7 +59,8 @@ public class MortalityTable_1940 extends UtilBase_194x
     private CombinedMortalityTable mt2;
     
     /* уровень младенческой смертности в СССР в 1940 году по АДХ (АДХ-СССР, стр. 135) */
-    private static final double ADH_USSR_infant_CDR_1940 = 184.0;
+    private static final double PROMILLE = 1000.0;
+    private static final double ADH_USSR_infant_CDR_1940 = 184.0 / PROMILLE;
     private static final boolean use_ADH_USSR_InfantMortalityRate = true;
     
     public MortalityTable_1940(AreaParameters ap) throws Exception
@@ -63,7 +71,7 @@ public class MortalityTable_1940 extends UtilBase_194x
         mt1.comment("ГКС-СССР-1938");
         if (use_ADH_USSR_InfantMortalityRate)
         {
-            mt1 = PatchMortalityTable.patchInfantMortalityRate(mt1, ADH_USSR_infant_CDR_1940, "infant mortality patched to ADH");
+            mt1 = PatchMortalityTable.patchInfantMortalityRate(mt1, ADH_USSR_infant_CDR_1940 * PROMILLE, "infant mortality patched to ADH");
         }
 
         mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
@@ -72,20 +80,46 @@ public class MortalityTable_1940 extends UtilBase_194x
 
     public CombinedMortalityTable evaluate() throws Exception
     {
-
-        switch (ap.area)
+        PopulationByLocality p1940 = new Population_In_Early_1940(ap).evaluate();
+        
+        if (ap.area == Area.USSR)
         {
-        case USSR:
-            // return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4, ADH_USSR_infant_CDR_1940);
-            return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940, 4, null);
-
-        case RSFSR:
-            return InterpolateMortalityTable.forTargetRates(mt1, mt2, new Population_In_Early_1940(ap).evaluate(), ap.CBR_1940, ap.CDR_1940);
+            CombinedMortalityTable mt = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
+            mt.comment("ГКС-СССР-1938");
+            double[] qx = mt.getSingleTable(Locality.TOTAL, Gender.BOTH).qx();
             
-        default:
+            List<PatchInstruction> instructions = new ArrayList<>();
+            
+            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 0, ADH_USSR_infant_CDR_1940 / qx[0]);
+            instructions.add(instruction);
+
+            instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 1, 5, ADH_USSR_infant_CDR_1940  / qx[0], 1.0);
+            instructions.add(instruction);
+            
+            instruction = new PatchInstruction(PatchOpcode.Multiply, 5, Population.MAX_AGE, 1.0);
+            instructions.add(instruction);
+            
+            CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для СССР 1940");
+            return xmt;
+        }
+        else if (ap.area == Area.RSFSR)
+        {
+            CombinedMortalityTable mt = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
+            mt.comment("АДХ-РСФСР-1940");
+            List<PatchInstruction> instructions = new ArrayList<>();
+            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, 1.0);
+            instructions.add(instruction);
+
+            CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для РСФСР 1940");
+            return xmt;
+        }
+        else
+        {
             throw new IllegalArgumentException();
         }
     }
+    
+    /** ====================================================================================================================== **/
 
     public void show_survival_rates_1941_1946() throws Exception
     {
