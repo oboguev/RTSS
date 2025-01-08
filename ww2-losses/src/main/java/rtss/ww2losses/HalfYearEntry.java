@@ -36,4 +36,19 @@ public class HalfYearEntry
         this.p_nonwar_with_births = p_nonwar_with_births;
         this.p_nonwar_without_births = p_nonwar_without_births;
     }
+    
+    public String toString()
+    {
+        switch (halfyear)
+        {
+        case FirstHalfYear:
+            return year + ", первое полугодие";
+            
+        case SecondHalfYear:
+            return year + ", второе полугодие";
+            
+        default:
+            return "неопределённая дата";
+        }
+    }
 }

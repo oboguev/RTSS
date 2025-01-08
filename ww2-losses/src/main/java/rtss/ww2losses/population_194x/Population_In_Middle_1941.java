@@ -37,8 +37,13 @@ public class Population_In_Middle_1941 extends UtilBase_194x
      */
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
-        ForwardPopulationT fw = new ForwardPopulationT();
         CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
+        return evaluate(fctx, mt1940);
+    }
+    
+    public PopulationByLocality evaluate(PopulationForwardingContext fctx, CombinedMortalityTable mt1940) throws Exception
+    {
+        ForwardPopulationT fw = new ForwardPopulationT();
         PopulationByLocality p;
         
         if (useADH)

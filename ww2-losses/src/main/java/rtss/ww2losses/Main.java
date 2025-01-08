@@ -64,7 +64,7 @@ public class Main
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
         PopulationForwardingContext fctx = new PopulationForwardingContext();
-        PopulationByLocality p = pm1941.evaluate(fctx);
+        PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
         PopulationByLocality px = fctx.end(p);
 
         HalfYearEntry curr, prev;
