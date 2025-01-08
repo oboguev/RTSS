@@ -1,10 +1,20 @@
 package rtss.ww2losses;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
+import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
@@ -32,10 +42,24 @@ public class Main
     {
         this.area = area;
         this.ap = AreaParameters.forArea(area);
+        this.p1946_actual = PopulationADH.getPopulationByLocality(ap.area, 1946);
+        split_p1946();
     }
 
     private Area area;
     private AreaParameters ap;
+    private static int MAX_AGE = Population.MAX_AGE;
+    
+    /* фактическое население на начало 1946 года */
+    private PopulationByLocality p1946_actual;
+    
+    /* фактическое население на начало 1946 года рождённое до середины 1941*/
+    private PopulationByLocality p1946_actual_born_prewar;
+    
+    /* фактическое население на начало 1946 года рождённое после середины 1941*/
+    private PopulationByLocality p1946_actual_born_postwar;
+    
+    private static boolean AppyAntibiotics = Util.False;
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -49,6 +73,7 @@ public class Main
         Util.out("");
 
         evalHalves();
+        evalDeficit1946();
 
         Util.noop();
     }
@@ -95,7 +120,7 @@ public class Main
         /* продвигать с шагом по полгода до января 1946 */
         for (;;)
         {
-            ForwardPopulationT fw;
+            int current_year = year;
 
             if (half == HalfYearSelector.FirstHalfYear)
             {
@@ -110,10 +135,10 @@ public class Main
             }
 
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
-            // ###
-            CombinedMortalityTable mt = mt1940;
+            CombinedMortalityTable mt = year_mt(mt1940, current_year);
 
             /* продвижка на следующие полгода населения без учёта рождений */
+            ForwardPopulationT fw;
             fw = new ForwardPopulationT();
             fw.setBirthRateTotal(0);
             pxb = fw.forward(pxb, fctx_xb, mt, 0.5);
@@ -133,5 +158,80 @@ public class Main
             prev = curr;
             halves.add(curr);
         }
+    }
+    
+    /* 
+     * Определить таблицу смертности с учётом падения детской смертности из-за введения антибиотиков 
+     */
+    private CombinedMortalityTable year_mt(CombinedMortalityTable mt1940, int year) throws Exception
+    {
+        if (!AppyAntibiotics)
+            return mt1940;
+        
+        double scale0;
+        
+        switch(year)
+        {
+        case 1940:
+        case 1941:
+        case 1942:
+            return mt1940;
+            
+        case 1943:
+            scale0 = 0.76;
+            break;
+            
+        case 1944:
+            scale0 = 0.53;
+            break;
+            
+        case 1945:
+            scale0 = 0.45;
+            break;
+
+        default:
+            throw new IllegalArgumentException();
+        }
+        
+        PatchInstruction instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 0, 5, scale0, 1.0);
+        List<PatchInstruction> instructions = new ArrayList<>();
+        instructions.add(instruction);
+
+        CombinedMortalityTable xmt = PatchMortalityTable.patch(mt1940, instructions, "поправка антибиотиков для " + year);
+        
+        return xmt;
+    }
+    
+    private void evalDeficit1946() throws Exception
+    {
+        double v;
+        PopulationByLocality p1946_expected_with_births = halves.last().p_nonwar_with_births;        
+        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;        
+        
+        v = p1946_expected_with_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        v -= p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out("Общий дефицит населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+        
+        v = p1946_expected_without_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        v -= p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+        
+        // ###
+        Util.out("Дефицит рождённного после войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+    }
+
+    private void split_p1946() throws Exception
+    {
+        p1946_actual_born_postwar = p1946_actual.selectByAge(0, 4.5);
+        p1946_actual_born_prewar = p1946_actual.selectByAge(4.5, MAX_AGE + 1);
+        Util.noop();
+    }
+
+    private String f2k(double v)
+    {
+        String s = String.format("%,15.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
 }

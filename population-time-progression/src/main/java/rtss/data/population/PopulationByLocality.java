@@ -165,6 +165,29 @@ public class PopulationByLocality
         makeBoth(Locality.URBAN);
         recalcTotalLocalityFromUrbanRural();
     }
+    
+    /*
+     * Выборка [age1 ... age2].
+     * 
+     * Нецелое значение года означает, что население выбирается только от/до этой возрастной точки.
+     * Так age2 = 80.0 означает, что население с возраста 80.0 лет исключено. 
+     * Аналогично, age2 = 80.5 означает, что включена половина населения в возрасте 80 лет,
+     * а население начиная с возраста 81 года исключено целиком. 
+     */
+    public PopulationByLocality selectByAge(double age1, double age2) throws Exception
+    {
+        if (rural != null && urban != null)
+        {
+            Population x_urban = urban.selectByAge(age1, age2);
+            Population x_rural = rural.selectByAge(age1, age2);
+            return new PopulationByLocality(x_urban, x_rural);
+        }
+        else
+        {
+            Population x_total = total.selectByAge(age1, age2);
+            return new PopulationByLocality(x_total);
+        }
+    }
 
     /****************************************************************************************************/
 

@@ -242,6 +242,41 @@ public class Population
         }
     }
 
+    /*
+     * Выборка [age1 ... age2].
+     * 
+     * Нецелое значение года означает, что население выбирается только от/до этой возрастной точки.
+     * Так age2 = 80.0 означает, что население с возраста 80.0 лет исключено. 
+     * Аналогично, age2 = 80.5 означает, что включена половина населения в возрасте 80 лет,
+     * а население начиная с возраста 81 года исключено целиком. 
+     */
+    public Population selectByAge(double age1, double age2) throws Exception
+    {
+        Population p = new Population();
+
+        p.locality = locality;
+
+        if (male != null || female != null)
+        {
+            if (male != null)
+                p.male = male.selectByAge(age1, age2);
+
+            if (female != null)
+                p.female = female.selectByAge(age1, age2);
+
+            if (both != null)
+                p.makeBoth();
+        }
+        else if (both != null)
+        {
+            p.both = both.selectByAge(age1, age2);
+        }
+
+        p.validate();
+
+        return p;
+    }
+
     /****************************************************************************************************/
 
     public static Population load(String path) throws Exception
@@ -635,7 +670,7 @@ public class Population
         zero(Gender.FEMALE);
         zero(Gender.BOTH);
     }
-    
+
     public void zero(Gender gender) throws Exception
     {
         for (int age = 0; age <= MAX_AGE; age++)

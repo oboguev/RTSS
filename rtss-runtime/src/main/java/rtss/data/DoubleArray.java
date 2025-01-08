@@ -27,12 +27,12 @@ public class DoubleArray
         this.vc = a.vc;
         this.values = a.values.clone();
     }
-    
+
     public DoubleArray clone()
     {
         return new DoubleArray(this);
     }
-    
+
     public Double[] get() throws Exception
     {
         return values;
@@ -44,7 +44,7 @@ public class DoubleArray
             throw new Exception("Missing data for age " + age);
         return values[age];
     }
-    
+
     public boolean containsKey(int age)
     {
         return values[age] != null;
@@ -52,9 +52,9 @@ public class DoubleArray
 
     public void put(int age, double v) throws Exception
     {
-        set(age, v); 
+        set(age, v);
     }
-    
+
     public void set(int age, double v) throws Exception
     {
         values[age] = Util.validate(v);
@@ -88,34 +88,87 @@ public class DoubleArray
             throw new Exception("Missing data for age " + age);
             // v = -v;
         }
-        
+
         checkValueRange(v);
-        
+
         values[age] = v;
     }
-    
+
+    /*
+     * Выборка [age1 ... age2].
+     * 
+     * Нецелое значение года означает, что население выбирается только от/до этой возрастной точки.
+     * Так age2 = 80.0 означает, что население с возраста 80.0 лет исключено. 
+     * Аналогично, age2 = 80.5 означает, что включена половина населения в возрасте 80 лет,
+     * а население начиная с возраста 81 года исключено целиком. 
+     */
+    public DoubleArray selectByAge(double age1, double age2) throws Exception
+    {
+        DoubleArray selection = clone();
+
+        int age1_floor = (int) Math.round(Math.floor(age1));
+        int age2_floor = (int) Math.round(Math.floor(age2));
+
+        int age1_ceil = (int) Math.round(Math.ceil(age1));
+        int age2_ceil = (int) Math.round(Math.ceil(age2));
+
+        /*
+         * Обрезать нижний участок 
+         */
+        for (int age = 0; age < age1_floor; age++)
+        {
+            if (selection.values[age] != null)
+                selection.values[age] = 0.0;
+        }
+
+        if (age1_ceil != age1_floor)
+        {
+            double fraction = age1_ceil - age1;
+            if (selection.values[age1_floor] != null)
+                selection.values[age1_floor] *= fraction;
+        }
+
+        /*
+         * Обрезать верхний участок 
+         */
+        for (int age = age2_ceil; age < values.length; age++)
+        {
+            if (selection.values[age] != null)
+                selection.values[age] = 0.0;
+        }
+
+        if (age2_ceil != age2_floor)
+        {
+            double fraction = age2 - age2_floor;
+            if (selection.values[age2_floor] != null)
+                selection.values[age2_floor] *= fraction;
+        }
+
+        return selection;
+    }
+
     private void checkValueRange(double v) throws Exception
     {
         Util.validate(v);
-        
+
         switch (vc)
         {
         case POSITIVE:
             if (v <= 0)
                 throw new IllegalArgumentException("Value is negative or zero");
             break;
-            
+
         case NON_NEGATIVE:
             if (v < 0)
                 throw new IllegalArgumentException("Value is negative");
             break;
-            
+
         case NONE:
         default:
             break;
         }
     }
-    
+
     public double[] asUnboxedArray() throws Exception
     {
         double[] d = new double[values.length];

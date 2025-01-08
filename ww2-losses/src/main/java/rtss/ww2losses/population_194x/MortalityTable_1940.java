@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.mortality.synthetic.InterpolateMortalityTable;
 import rtss.data.mortality.synthetic.MatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;

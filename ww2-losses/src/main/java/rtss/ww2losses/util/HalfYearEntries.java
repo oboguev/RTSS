@@ -46,4 +46,9 @@ public class HalfYearEntries<T> extends ArrayList<T>
         
         return (year - base_year) * 2 + ix;
     }
+    
+    public T last()
+    {
+        return get(size() - 1);
+    }
 }
