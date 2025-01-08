@@ -165,7 +165,7 @@ public class PopulationByLocality
         makeBoth(Locality.URBAN);
         recalcTotalLocalityFromUrbanRural();
     }
-    
+
     /*
      * Выборка [age1 ... age2].
      * 
@@ -187,6 +187,34 @@ public class PopulationByLocality
             Population x_total = total.selectByAge(age1, age2);
             return new PopulationByLocality(x_total);
         }
+    }
+
+    /*
+     * Вернуть результат вычитания @this - @p
+     */
+    public PopulationByLocality sub(PopulationByLocality p) throws Exception
+    {
+        if ((rural != null) != (p.rural != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((urban != null) != (p.urban != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((total != null) != (p.total != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        PopulationByLocality res = new PopulationByLocality();
+
+        if (rural != null)
+            res.rural = rural.sub(p.rural);
+
+        if (urban != null)
+            res.urban = urban.sub(p.urban);
+
+        if (total != null)
+            res.total = total.sub(p.total);
+
+        return res;
     }
 
     /****************************************************************************************************/

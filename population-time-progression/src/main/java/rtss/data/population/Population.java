@@ -277,6 +277,37 @@ public class Population
         return p;
     }
 
+    /*
+     * Вернуть результат вычитания @this - @p
+     */
+    public Population sub(Population p) throws Exception
+    {
+        if (locality != p.locality)
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((male != null) != (p.male != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((female != null) != (p.female != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((both != null) != (p.both != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        Population res = newPopulation(locality);
+
+        if (male != null)
+            res.male = male.sub(p.male);
+
+        if (female != null)
+            res.female = female.sub(p.female);
+
+        if (both != null)
+            res.both = both.sub(p.both);
+
+        return res;
+    }
+
     /****************************************************************************************************/
 
     public static Population load(String path) throws Exception

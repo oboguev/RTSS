@@ -59,7 +59,7 @@ public class Main
     /* фактическое население на начало 1946 года рождённое после середины 1941*/
     private PopulationByLocality p1946_actual_born_postwar;
     
-    private static boolean AppyAntibiotics = Util.False;
+    private static boolean AppyAntibiotics = Util.True;
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -68,7 +68,8 @@ public class Main
 
     private void main() throws Exception
     {
-        Util.out("*************************************");
+        Util.out("");
+        Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.name());
         Util.out("");
 
@@ -206,7 +207,8 @@ public class Main
     {
         double v;
         PopulationByLocality p1946_expected_with_births = halves.last().p_nonwar_with_births;        
-        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;        
+        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        PopulationByLocality p1946_expected_newonly = p1946_expected_with_births.sub(p1946_expected_without_births);  
         
         v = p1946_expected_with_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
@@ -216,8 +218,9 @@ public class Main
         v -= p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
         
-        // ###
-        Util.out("Дефицит рождённного после войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+        v = p1946_expected_newonly.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        v -= p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
     }
 
     private void split_p1946() throws Exception

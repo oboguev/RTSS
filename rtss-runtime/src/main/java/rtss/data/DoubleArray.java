@@ -147,6 +147,28 @@ public class DoubleArray
         return selection;
     }
 
+    /*
+     * Вернуть результат вычитания @this - @p
+     */
+    public DoubleArray sub(DoubleArray p) throws Exception
+    {
+        if (vc != p.vc)
+            throw new IllegalArgumentException("массивы разнотипны");
+
+        if (maxage != p.maxage)
+            throw new IllegalArgumentException("массивы разнотипны");
+
+        DoubleArray res = clone();
+
+        for (int age = 0; age < values.length; age++)
+        {
+            if (res.values[age] != null || p.values[age] != null)
+                res.values[age] -= p.values[age];
+        }
+
+        return res;
+    }
+
     private void checkValueRange(double v) throws Exception
     {
         Util.validate(v);
