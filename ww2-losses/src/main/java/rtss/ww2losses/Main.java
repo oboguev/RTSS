@@ -9,6 +9,7 @@ import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.population.synthetic.PopulationADH;
@@ -43,6 +44,7 @@ public class Main
         this.area = area;
         this.ap = AreaParameters.forArea(area);
         this.p1946_actual = PopulationADH.getPopulationByLocality(ap.area, 1946);
+        adjustForTuva();
         split_p1946();
     }
 
@@ -59,7 +61,7 @@ public class Main
     /* фактическое население на начало 1946 года рождённое после середины 1941*/
     private PopulationByLocality p1946_actual_born_postwar;
     
-    private static boolean AppyAntibiotics = Util.True;
+    private static boolean AppyAntibiotics = Util.False;
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -70,7 +72,7 @@ public class Main
     {
         Util.out("");
         Util.out("**********************************************************************************");
-        Util.out("Вычисление для " + area.name());
+        Util.out("Вычисление для " + area.toString());
         Util.out("");
 
         evalHalves();
@@ -228,6 +230,15 @@ public class Main
         p1946_actual_born_postwar = p1946_actual.selectByAge(0, 4.5);
         p1946_actual_born_prewar = p1946_actual.selectByAge(4.5, MAX_AGE + 1);
         Util.noop();
+    }
+    
+    /* вычесть население Тувы из населения начала 1946 года */
+    private void adjustForTuva() throws Exception
+    {
+        final double tuva_pop = 100_000;
+        double pop = p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double scale = (pop - tuva_pop) / pop;
+        p1946_actual = RescalePopulation.scaleAllBy(p1946_actual, scale);
     }
 
     private String f2k(double v)
