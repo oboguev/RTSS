@@ -51,16 +51,16 @@ public class Main
     private Area area;
     private AreaParameters ap;
     private static int MAX_AGE = Population.MAX_AGE;
-    
+
     /* фактическое население на начало 1946 года */
     private PopulationByLocality p1946_actual;
-    
+
     /* фактическое население на начало 1946 года рождённое до середины 1941*/
     private PopulationByLocality p1946_actual_born_prewar;
-    
+
     /* фактическое население на начало 1946 года рождённое после середины 1941*/
     private PopulationByLocality p1946_actual_born_postwar;
-    
+
     private static boolean AppyAntibiotics = Util.True;
 
     /*
@@ -155,14 +155,14 @@ public class Main
             curr = new HalfYearEntry(year, half, fctx.end(pwb), fctx_xb.end(pxb));
             prev.expected_nonwar_births = fw.getObservedBirths();
             prev.expected_nonwar_deaths = fw.getObservedDeaths();
-            
+
             curr.prev = prev;
             prev.next = curr;
             prev = curr;
             halves.add(curr);
         }
     }
-    
+
     /* 
      * Определить таблицу смертности с учётом падения детской смертности из-за введения антибиотиков 
      */
@@ -170,24 +170,24 @@ public class Main
     {
         if (!AppyAntibiotics)
             return mt1940;
-        
+
         double scale0;
-        
-        switch(year)
+
+        switch (year)
         {
         case 1940:
         case 1941:
         case 1942:
             return mt1940;
-            
+
         case 1943:
             scale0 = 0.76;
             break;
-            
+
         case 1944:
             scale0 = 0.53;
             break;
-            
+
         case 1945:
             scale0 = 0.45;
             break;
@@ -195,37 +195,49 @@ public class Main
         default:
             throw new IllegalArgumentException();
         }
-        
+
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 0, 5, scale0, 1.0);
         List<PatchInstruction> instructions = new ArrayList<>();
         instructions.add(instruction);
 
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt1940, instructions, "поправка антибиотиков для " + year);
-        
+
         return xmt;
     }
-    
+
     private void evalDeficit1946() throws Exception
     {
         double v;
-        PopulationByLocality p1946_expected_with_births = halves.last().p_nonwar_with_births;        
+        PopulationByLocality p1946_expected_with_births = halves.last().p_nonwar_with_births;
         PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
-        PopulationByLocality p1946_expected_newonly = p1946_expected_with_births.sub(p1946_expected_without_births);  
-        
+        PopulationByLocality p1946_expected_newonly = p1946_expected_with_births.sub(p1946_expected_without_births);
+
         v = p1946_expected_with_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out("Общий дефицит населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
-        
+
         v = p1946_expected_without_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
-        
+
         v = p1946_expected_newonly.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
-        
+
         PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
         deficit = deficit.sub(emigration());
+
+        double deficit_total = deficit.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double deficit_m_conscripts = subcount(deficit, Gender.MALE, 19, 59);
+        double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 54);
+        double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
+
+        Util.out("");
+        Util.out("Сверхсмертность всего наличного на середину 1941 года населения: " + f2k(deficit_total / 1000.0));
+        Util.out("Сверхсмертность мужчин призывного возраста: " + f2k(deficit_m_conscripts / 1000.0));
+        Util.out("Сверхсмертность женщин фертильного возраста: " + f2k(deficit_f_fertile / 1000.0));
+        Util.out("Сверхсмертность остального наличного на середину 1941 года населения: " + f2k(deficit_other / 1000.0));
+
         Util.noop();
     }
 
@@ -233,44 +245,43 @@ public class Main
     {
         p1946_actual_born_postwar = p1946_actual.selectByAge(0, 4.5);
         p1946_actual_born_prewar = p1946_actual.selectByAge(4.5, MAX_AGE + 1);
-        Util.noop();
     }
-    
+
     private PopulationByLocality emigration() throws Exception
     {
         double emig = 0;
-        
+
         switch (area)
         {
         case USSR:
             emig = 850_000;
             break;
-        
+
         case RSFSR:
             emig = 70_000;
             break;
         }
-        
+
         PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
         for (int age = 0; age <= MAX_AGE; age++)
         {
             p.set(Locality.TOTAL, Gender.MALE, age, 0);
             p.set(Locality.TOTAL, Gender.FEMALE, age, 0);
         }
-        
+
         for (int age = 20; age <= 60; age++)
         {
             p.set(Locality.TOTAL, Gender.MALE, age, 0.8);
             p.set(Locality.TOTAL, Gender.FEMALE, age, 0.2);
         }
-        
+
         p.makeBoth(Locality.TOTAL);
-        
+
         p = RescalePopulation.scaleAllTo(p, emig);
-        
+
         return p;
     }
-    
+
     /* вычесть население Тувы из населения начала 1946 года */
     private void adjustForTuva() throws Exception
     {
@@ -279,7 +290,63 @@ public class Main
         double scale = (pop - tuva_pop) / pop;
         p1946_actual = RescalePopulation.scaleAllBy(p1946_actual, scale);
     }
-    
+
+    private double subcount(PopulationByLocality p, Gender gender, int age1, int age2) throws Exception
+    {
+        double sum_wv = 0;
+        double sum_weights = 0;
+
+        for (int age = age1; age <= age2; age++)
+        {
+            double weight = 4.5;
+
+            switch (Math.abs(age - age1))
+            {
+            case 0:
+                weight = 0.5;
+                break;
+
+            case 1:
+                weight = 1.5;
+                break;
+
+            case 2:
+                weight = 2.5;
+                break;
+            case 3:
+
+                weight = 3.5;
+                break;
+            }
+
+            switch (Math.abs(age2 - age))
+            {
+            case 0:
+                weight = 0.5;
+                break;
+
+            case 1:
+                weight = 1.5;
+                break;
+
+            case 2:
+                weight = 2.5;
+                break;
+            case 3:
+
+                weight = 3.5;
+                break;
+            }
+
+            double v = p.get(Locality.TOTAL, gender, age);
+            sum_weights += weight;
+            sum_wv += v * weight;
+        }
+
+        sum_weights /= (age2 - age1 + 1);
+        return sum_wv / sum_weights;
+    }
+
     /* ======================================================================================================= */
 
     private String f2k(double v)
