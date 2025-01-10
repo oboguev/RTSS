@@ -378,4 +378,13 @@ public class Excel
         List<List<Object>> sheet = readSheet(path, true, matchingSheetNames);
         return Excel.getColumn(sheet, headerRow, matchingColumnNames);
     }
+    
+    public static void stripTrailingNulls(List<List<Object>> rows)
+    {
+        for (List<Object> row : rows)
+        {
+            while (row.size() != 0 && row.get(row.size() - 1) == null)
+                row.remove(row.size() - 1);
+        }
+    }
 }

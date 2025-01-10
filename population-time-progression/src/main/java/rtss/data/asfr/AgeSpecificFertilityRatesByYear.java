@@ -53,7 +53,8 @@ public class AgeSpecificFertilityRatesByYear
         this.path = path;
 
         List<List<Object>> rows = Excel.readSheet(path, false, "Data");
-
+        Excel.stripTrailingNulls(rows);
+        
         nrow = 0;
         int years_row = -1;
         List<Integer> age_x1 = new ArrayList<>();

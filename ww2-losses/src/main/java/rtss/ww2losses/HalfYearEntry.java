@@ -19,17 +19,20 @@ public class HalfYearEntry
     /* ожидаемое в условиях мира население на начало периода, без учёта рождений после середины 1941 */
     final public PopulationByLocality p_nonwar_without_births;
     
-    /* ожидаемое в условиях мира число смертей за период (от начала до конца периода) */
+    /* 
+     * ожидаемое в условиях мира число смертей за период (от начала до конца периода) 
+     * в наличном на начало войны населении
+     */
     public double expected_nonwar_deaths;
 
-    /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
+    /*ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
     
     /* добавночное из-за войны количество смертей в этом полугодии (включает excess_deaths_fertile_f) */
-    public double excess_deaths = 0;
+    public double excess_war_deaths = 0;
 
     /* добавночное из-за войны количество смертей в этом полугодии среди женщин фертильного возраста */
-    public double excess_deaths_fertile_f = 0;
+    public double excess_war_deaths_fertile_f = 0;
 
     public HalfYearEntry(
             int year,

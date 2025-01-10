@@ -3,6 +3,7 @@ package rtss.ww2losses;
 import java.util.ArrayList;
 import java.util.List;
 
+import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
@@ -75,6 +76,8 @@ public class Main
      * (Федеральная служба государственной статистики, "Великая отечественная война : юбилейный статистический сборник", М. 2020, стр. 36)
      */
     private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
+    
+    private final AgeSpecificFertilityRatesByYear asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -90,6 +93,7 @@ public class Main
 
         evalHalves();
         evalDeficit1946();
+        evalBirths();
 
         Util.noop();
     }
@@ -153,21 +157,20 @@ public class Main
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
             CombinedMortalityTable mt = year_mt(mt1940, current_year);
 
-            /* продвижка на следующие полгода населения без учёта рождений */
-            ForwardPopulationT fw;
-            fw = new ForwardPopulationT();
-            fw.setBirthRateTotal(0);
-            pxb = fw.forward(pxb, fctx_xb, mt, 0.5);
-
             /* продвижка на следующие полгода населения с учётом рождений */
-            fw = new ForwardPopulationT();
-            fw.setBirthRateTotal(ap.CBR_1940);
-            pwb = fw.forward(pwb, fctx, mt, 0.5);
+            ForwardPopulationT fw1 = new ForwardPopulationT();
+            fw1.setBirthRateTotal(ap.CBR_1940);
+            pwb = fw1.forward(pwb, fctx, mt, 0.5);
+
+            /* продвижка на следующие полгода населения без учёта рождений */
+            ForwardPopulationT fw2 = new ForwardPopulationT();
+            fw2.setBirthRateTotal(0);
+            pxb = fw2.forward(pxb, fctx_xb, mt, 0.5);
 
             /* сохранить результаты в полугодовой записи */
             curr = new HalfYearEntry(year, half, fctx.end(pwb), fctx_xb.end(pxb));
-            prev.expected_nonwar_births = fw.getObservedBirths();
-            prev.expected_nonwar_deaths = fw.getObservedDeaths();
+            prev.expected_nonwar_births = fw1.getObservedBirths();
+            prev.expected_nonwar_deaths = fw2.getObservedDeaths();
 
             curr.prev = prev;
             prev.next = curr;
@@ -218,6 +221,8 @@ public class Main
         return xmt;
     }
 
+    /* ======================================================================================================= */
+
     private void evalDeficit1946() throws Exception
     {
         double v;
@@ -240,6 +245,9 @@ public class Main
         PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
         deficit = deficit.sub(emigration());
 
+        /*
+         * разбить сверхсмертность на категории 
+         */
         double deficit_total = deficit.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         double deficit_m_conscripts = subcount(deficit, Gender.MALE, 19, 59);
         double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 54);
@@ -250,6 +258,37 @@ public class Main
         Util.out("Сверхсмертность мужчин призывного возраста: " + f2k(deficit_m_conscripts / 1000.0));
         Util.out("Сверхсмертность женщин фертильного возраста: " + f2k(deficit_f_fertile / 1000.0));
         Util.out("Сверхсмертность остального наличного на середину 1941 года населения: " + f2k(deficit_other / 1000.0));
+
+        /*
+         * распределить объём сверхсмертности по полугодиям 
+         */
+        scatter("excess_war_deaths_fertile_f", occupation_intensity, deficit_f_fertile * 0.7);
+        scatter("excess_war_deaths_fertile_f", deficit_f_fertile * 0.3);
+
+        scatter("excess_war_deaths", occupation_intensity, deficit_f_fertile * 0.7);
+        scatter("excess_war_deaths", deficit_f_fertile * 0.3);
+
+        scatter("excess_war_deaths", occupation_intensity, deficit_other * 0.7);
+        scatter("excess_war_deaths", deficit_other * 0.3);
+
+        scatter("excess_war_deaths", rkka_loss_intensity, deficit_m_conscripts * 0.7);
+        scatter("excess_war_deaths", occupation_intensity, (deficit_m_conscripts * 0.3) * 0.7);
+        scatter("excess_war_deaths", (deficit_m_conscripts * 0.3) * 0.3);
+
+        /*
+         * проверка 
+         */
+        double sum = 0;
+        for (HalfYearEntry he : halves)
+            sum += he.excess_war_deaths;
+        if (Util.differ(deficit_total, sum))
+            throw new Exception("ошибка распределения deficit_total");
+
+        sum = 0;
+        for (HalfYearEntry he : halves)
+            sum += he.excess_war_deaths_fertile_f;
+        if (Util.differ(deficit_f_fertile, sum))
+            throw new Exception("ошибка распределения deficit_f_fertile");
 
         Util.noop();
     }
@@ -361,28 +400,51 @@ public class Main
     }
 
     /* ======================================================================================================= */
+    
+    private void evalBirths() throws Exception
+    {
+        double cumulative_excess_war_deaths_fertile_f = 0;
+        
+        for (HalfYearEntry he : halves)
+        {
+            if (he.next == null)
+                break;
+            
+            double f1 = he.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 50); 
+            double f2 = he.next.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 50);
+            double f = (f1 + f2) / 2;
+            f -= cumulative_excess_war_deaths_fertile_f;
+            f -= he.excess_war_deaths_fertile_f / 2;
+            cumulative_excess_war_deaths_fertile_f += he.excess_war_deaths_fertile_f; 
+            
+        }
+    }
+
+    /* ======================================================================================================= */
 
     /*
-     * Распределить по полугодиям по интенсивности
+     * Распределить величину по полугодиям по интенсивности
      */
     private void scatter(String field, double[] intensity, double amount) throws Exception
     {
-        if (halves.size() != intensity.length)
-            throw new Exception();
+        if (halves.size() != intensity.length + 1)
+            throw new IllegalArgumentException("длины не совпадают");
 
         double isum = 0;
         for (double v : intensity)
             isum += v;
-        
+
         int k = 0;
         for (HalfYearEntry he : halves)
         {
-            add(he, field, amount * intensity[k++] / isum);
+            if (he.year == 1946)
+                break;
+            scatter_add(he, field, amount * intensity[k++] / isum);
         }
     }
 
     /*
-     * Распределить по военным полугодиям равномерно
+     * Распределить величину по военным полугодиям равномерно
      */
     private void scatter(String field, double amount) throws Exception
     {
@@ -396,14 +458,18 @@ public class Main
             {
                 continue;
             }
+            else if (he.year == 1946)
+            {
+                continue;
+            }
             else
             {
-                add(he, field, amount / 8.0);
+                scatter_add(he, field, amount / 8.0);
             }
         }
     }
 
-    private void add(Object o, String field, double extra) throws Exception
+    private void scatter_add(Object o, String field, double extra) throws Exception
     {
         Double dv = FieldValue.getDouble(o, field);
         if (dv == null)
