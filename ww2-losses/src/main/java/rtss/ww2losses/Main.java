@@ -350,7 +350,10 @@ public class Main
 
         for (int age = age1; age <= age2; age++)
         {
-            double weight = 4.5;
+            /*
+             * Окно возрастающее с обеих концов с 0.5 (полгода expsure) до 4.0 (exposure на всё время войны)
+             */
+            double weight = 4.0;
 
             switch (Math.abs(age - age1))
             {
