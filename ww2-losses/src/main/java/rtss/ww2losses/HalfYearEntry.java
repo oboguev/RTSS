@@ -24,6 +24,12 @@ public class HalfYearEntry
 
     /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
+    
+    /* добавночное из-за войны количество смертей в этом полугодии (включает excess_deaths_fertile_f) */
+    public double excess_deaths = 0;
+
+    /* добавночное из-за войны количество смертей в этом полугодии среди женщин фертильного возраста */
+    public double excess_deaths_fertile_f = 0;
 
     public HalfYearEntry(
             int year,

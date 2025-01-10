@@ -16,6 +16,7 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.FieldValue;
 import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
@@ -62,6 +63,18 @@ public class Main
     private PopulationByLocality p1946_actual_born_postwar;
 
     private static boolean AppyAntibiotics = Util.True;
+
+    /* 
+     * интенсивность потерь РККА по полугодиям
+     * (Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга потерь", М. : Вече, 2010, стр. 236, 242, 245)
+     */
+    private static final double[] rkka_loss_intensity = { 0, 3_137_673, 1_518_213, 1_740_003, 918_618, 1_393_811, 915_019, 848_872, 800_817, 0 };
+
+    /* 
+     * интенсивность оккупации по полугодиям
+     * (Федеральная служба государственной статистики, "Великая отечественная война : юбилейный статистический сборник", М. 2020, стр. 36)
+     */
+    private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -348,6 +361,55 @@ public class Main
     }
 
     /* ======================================================================================================= */
+
+    /*
+     * Распределить по полугодиям по интенсивности
+     */
+    private void scatter(String field, double[] intensity, double amount) throws Exception
+    {
+        if (halves.size() != intensity.length)
+            throw new Exception();
+
+        double isum = 0;
+        for (double v : intensity)
+            isum += v;
+        
+        int k = 0;
+        for (HalfYearEntry he : halves)
+        {
+            add(he, field, amount * intensity[k++] / isum);
+        }
+    }
+
+    /*
+     * Распределить по военным полугодиям равномерно
+     */
+    private void scatter(String field, double amount) throws Exception
+    {
+        for (HalfYearEntry he : halves)
+        {
+            if (he.year == 1941 && he.halfyear == HalfYearSelector.FirstHalfYear)
+            {
+                continue;
+            }
+            else if (he.year == 1945 && he.halfyear == HalfYearSelector.SecondHalfYear)
+            {
+                continue;
+            }
+            else
+            {
+                add(he, field, amount / 8.0);
+            }
+        }
+    }
+
+    private void add(Object o, String field, double extra) throws Exception
+    {
+        Double dv = FieldValue.getDouble(o, field);
+        if (dv == null)
+            dv = 0.0;
+        FieldValue.setDouble(o, field, dv + extra);
+    }
 
     private String f2k(double v)
     {

@@ -5,7 +5,7 @@ import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.pre1917.util.FieldValue;
+import rtss.util.FieldValue;
 import rtss.util.Util;
 
 public class ShowData
