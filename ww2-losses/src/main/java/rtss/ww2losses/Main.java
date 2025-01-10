@@ -61,7 +61,7 @@ public class Main
     /* фактическое население на начало 1946 года рождённое после середины 1941*/
     private PopulationByLocality p1946_actual_born_postwar;
     
-    private static boolean AppyAntibiotics = Util.False;
+    private static boolean AppyAntibiotics = Util.True;
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
