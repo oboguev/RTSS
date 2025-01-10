@@ -76,7 +76,7 @@ public class Main
      * (Федеральная служба государственной статистики, "Великая отечественная война : юбилейный статистический сборник", М. 2020, стр. 36)
      */
     private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
-    
+
     private final AgeSpecificFertilityRatesByYear asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
 
     /*
@@ -250,7 +250,7 @@ public class Main
          */
         double deficit_total = deficit.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         double deficit_m_conscripts = subcount(deficit, Gender.MALE, 19, 59);
-        double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 54);
+        double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 58);
         double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
 
         Util.out("");
@@ -400,26 +400,63 @@ public class Main
     }
 
     /* ======================================================================================================= */
-    
+
     private void evalBirths() throws Exception
     {
         double cumulative_excess_war_deaths_fertile_f = 0;
-        
+
         for (HalfYearEntry he : halves)
         {
             if (he.next == null)
                 break;
-            
-            double f1 = he.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 50); 
-            double f2 = he.next.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 50);
+
+            /*
+             * число женщин фертильного возраста
+             */
+            double f1 = he.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
+            double f2 = he.next.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
             double f = (f1 + f2) / 2;
             f -= cumulative_excess_war_deaths_fertile_f;
             f -= he.excess_war_deaths_fertile_f / 2;
-            cumulative_excess_war_deaths_fertile_f += he.excess_war_deaths_fertile_f; 
-            
+            cumulative_excess_war_deaths_fertile_f += he.excess_war_deaths_fertile_f;
+
+            PopulationByLocality pf = he.p_nonwar_without_births.selectByAge(15, 54);
+            pf = RescalePopulation.scaleTotal(pf, 1.0, f);
+
+            /*
+             * число фактических рождений
+             */
+            if (he.year != 1941)
+                he.actual_births = 0.5 * asfrs.getForYear(he.year).births(pf);
+        }
+        
+        /*
+         * Для 1941 года (оба полугодия)
+         */
+        HalfYearEntry he1 = halves.get(0);
+        HalfYearEntry he2 = halves.get(1);
+        he1.actual_births = he1.expected_nonwar_births;
+        
+        PopulationByLocality pf = he2.p_nonwar_without_births.selectByAge(15, 54);
+        double year_births = asfrs.getForYear(1941).births(pf);
+        he2.actual_births = year_births - he1.actual_births; 
+        
+        Util.out("");
+        Util.out("Дефицит числа рождений, по полугодиям:");
+        for (HalfYearEntry he : halves)
+        {
+            double bd = he.expected_nonwar_births - he.actual_births;
+            Util.out(String.format("%s %s", he.toString(), f2k(bd / 1000.0)));
+        }
+
+        Util.out("");
+        Util.out("Фактическое число рождений, по полугодиям:");
+        for (HalfYearEntry he : halves)
+        {
+            Util.out(String.format("%s %s", he.toString(), f2k(he.actual_births / 1000.0)));
         }
     }
-
+    
     /* ======================================================================================================= */
 
     /*

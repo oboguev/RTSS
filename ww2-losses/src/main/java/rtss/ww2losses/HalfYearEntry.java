@@ -33,6 +33,9 @@ public class HalfYearEntry
 
     /* добавночное из-за войны количество смертей в этом полугодии среди женщин фертильного возраста */
     public double excess_war_deaths_fertile_f = 0;
+    
+    /* фактическое число состоявшихся рождений */
+    public double actual_births; 
 
     public HalfYearEntry(
             int year,
