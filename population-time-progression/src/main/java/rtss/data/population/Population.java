@@ -308,6 +308,47 @@ public class Population
         return res;
     }
 
+    /*
+     * Вернуть результат вычитания @this - @p
+     */
+    public Population add(Population p) throws Exception
+    {
+        if (locality != p.locality)
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((male != null) != (p.male != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((female != null) != (p.female != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((both != null) != (p.both != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        Population res = newPopulation(locality);
+
+        if (male != null)
+            res.male = male.add(p.male);
+
+        if (female != null)
+            res.female = female.add(p.female);
+
+        if (both != null)
+            res.both = both.add(p.both);
+
+        return res;
+    }
+
+    /*
+     * Вернуть результат (@this + @p) / 2
+     */
+    public Population avg(Population p) throws Exception
+    {
+        Population p2 = this.add(p);
+        p2 = RescalePopulation.scaleBy(p2, 0.5);
+        return p2;
+    }
+    
     /****************************************************************************************************/
 
     public static Population load(String path) throws Exception

@@ -217,6 +217,44 @@ public class PopulationByLocality
         return res;
     }
 
+    /*
+     * Вернуть результат вычитания @this + @p
+     */
+    public PopulationByLocality add(PopulationByLocality p) throws Exception
+    {
+        if ((rural != null) != (p.rural != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((urban != null) != (p.urban != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((total != null) != (p.total != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        PopulationByLocality res = new PopulationByLocality();
+
+        if (rural != null)
+            res.rural = rural.add(p.rural);
+
+        if (urban != null)
+            res.urban = urban.add(p.urban);
+
+        if (total != null)
+            res.total = total.add(p.total);
+
+        return res;
+    }
+
+    /*
+     * Вернуть результат (@this + @p) / 2
+     */
+    public PopulationByLocality avg(PopulationByLocality p) throws Exception
+    {
+        PopulationByLocality p2 = this.add(p);
+        p2 = RescalePopulation.scaleAllBy(p2, 0.5);
+        return p2;
+    }
+
     /****************************************************************************************************/
 
     public static PopulationByLocality census(Area area, int year) throws Exception
