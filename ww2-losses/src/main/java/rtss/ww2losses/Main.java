@@ -223,6 +223,10 @@ public class Main
         v = p1946_expected_newonly.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+        
+        PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        deficit = deficit.sub(emigration());
+        Util.noop();
     }
 
     private void split_p1946() throws Exception
@@ -230,6 +234,41 @@ public class Main
         p1946_actual_born_postwar = p1946_actual.selectByAge(0, 4.5);
         p1946_actual_born_prewar = p1946_actual.selectByAge(4.5, MAX_AGE + 1);
         Util.noop();
+    }
+    
+    private PopulationByLocality emigration() throws Exception
+    {
+        double emig = 0;
+        
+        switch (area)
+        {
+        case USSR:
+            emig = 850_000;
+            break;
+        
+        case RSFSR:
+            emig = 70_000;
+            break;
+        }
+        
+        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            p.set(Locality.TOTAL, Gender.MALE, age, 0);
+            p.set(Locality.TOTAL, Gender.FEMALE, age, 0);
+        }
+        
+        for (int age = 20; age <= 60; age++)
+        {
+            p.set(Locality.TOTAL, Gender.MALE, age, 0.8);
+            p.set(Locality.TOTAL, Gender.FEMALE, age, 0.2);
+        }
+        
+        p.makeBoth(Locality.TOTAL);
+        
+        p = RescalePopulation.scaleAllTo(p, emig);
+        
+        return p;
     }
     
     /* вычесть население Тувы из населения начала 1946 года */
@@ -240,6 +279,8 @@ public class Main
         double scale = (pop - tuva_pop) / pop;
         p1946_actual = RescalePopulation.scaleAllBy(p1946_actual, scale);
     }
+    
+    /* ======================================================================================================= */
 
     private String f2k(double v)
     {
