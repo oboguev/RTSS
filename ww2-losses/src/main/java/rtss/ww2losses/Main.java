@@ -22,6 +22,7 @@ import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
+import rtss.ww2losses.util.CalibrateASFR;
 import rtss.ww2losses.util.HalfYearEntries;
 import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
 
@@ -78,6 +79,7 @@ public class Main
     private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
 
     private final AgeSpecificFertilityRatesByYear asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
+    private double asfr_calibration;
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -90,7 +92,9 @@ public class Main
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
         Util.out("");
-
+        
+        asfr_calibration = CalibrateASFR.calibrate1940(ap, asfrs);
+        
         evalHalves();
         evalDeficit1946();
         evalBirths();
@@ -430,7 +434,7 @@ public class Main
              * число фактических рождений
              */
             if (he.year != 1941)
-                he.actual_births = 0.5 * asfrs.getForYear(he.year).births(pf);
+                he.actual_births = asfr_calibration * 0.5 * asfrs.getForYear(he.year).births(pf);
         }
         
         /*
@@ -441,13 +445,15 @@ public class Main
         he1.actual_births = he1.expected_nonwar_births;
         
         PopulationByLocality pf = he2.p_nonwar_without_births.selectByAge(15, 54);
-        double year_births = asfrs.getForYear(1941).births(pf);
+        double year_births = asfr_calibration * asfrs.getForYear(1941).births(pf);
         he2.actual_births = year_births - he1.actual_births; 
         
         Util.out("");
         Util.out("Дефицит числа рождений, по полугодиям:");
         for (HalfYearEntry he : halves)
         {
+            if (he.year == 1946)
+                break;
             double bd = he.expected_nonwar_births - he.actual_births;
             Util.out(String.format("%s %s", he.toString(), f2k(bd / 1000.0)));
         }
@@ -456,6 +462,8 @@ public class Main
         Util.out("Фактическое число рождений, по полугодиям:");
         for (HalfYearEntry he : halves)
         {
+            if (he.year == 1946)
+                break;
             Util.out(String.format("%s %s", he.toString(), f2k(he.actual_births / 1000.0)));
         }
     }
