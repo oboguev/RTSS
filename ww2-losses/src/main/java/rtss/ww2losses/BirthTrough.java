@@ -100,12 +100,16 @@ public class BirthTrough
         LocalDate d = LocalDate.parse("1959-01-15");
         int days = (int) Math.round(365 * np2age(np2));
         d = d.minusDays(days);
-        Util.out(String.format("Начало 4-летнего минимума рождений: %s - %s", d.toString(), d.minusYears(1).toString()));
-        d = d.minusDays(9 * 30);
-        Util.out(String.format("Начало 4-летнего минимума зачатий: %s - %s", d.toString(), d.minusYears(1).toString()));
-        Util.out(String.format("Середина промежутка зачатий: %s", d.minusDays(365 / 2).toString()));
+        Util.out(String.format("Начало 4-летнего минимума рождений: %s - %s, середина промежутка рождений: %s", 
+                               d.minusYears(1).toString(),
+                               d.toString(), 
+                               d.minusDays(365 / 2).toString()));
 
-        Util.noop();
+        d = d.minusDays(9 * 30);
+        Util.out(String.format("Начало 4-летнего минимума зачатий: %s - %s, середина промежутка зачатий: %s", 
+                               d.minusYears(1).toString(),
+                               d.toString(), 
+                               d.minusDays(365 / 2).toString()));
     }
 
     private double np2age(int np)
