@@ -78,7 +78,7 @@ public class Main
      */
     private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
 
-    private final AgeSpecificFertilityRatesByYear asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
+    private AgeSpecificFertilityRatesByYear asfrs;
     private double asfr_calibration;
 
     /*
@@ -93,6 +93,16 @@ public class Main
         Util.out("Вычисление для " + area.toString());
         Util.out("");
         
+        switch (area)
+        {
+        case USSR:
+            asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/USSR/USSR-ASFR.xlsx");
+            break;
+
+        case RSFSR:
+            asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
+            break;
+        }
         asfr_calibration = CalibrateASFR.calibrate1940(ap, asfrs);
         
         evalHalves();
@@ -411,6 +421,8 @@ public class Main
     private void evalBirths() throws Exception
     {
         double cumulative_excess_war_deaths_fertile_f = 0;
+        
+        Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
 
         for (HalfYearEntry he : halves)
         {
@@ -420,14 +432,14 @@ public class Main
             /*
              * число женщин фертильного возраста
              */
-            double f1 = he.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
-            double f2 = he.next.p_nonwar_without_births.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
-            double f = (f1 + f2) / 2;
+            PopulationByLocality pf = he.p_nonwar_without_births.avg(he.next.p_nonwar_without_births);
+            pf = pf.selectByAge(15, 54);
+
+            double f = pf.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
             f -= cumulative_excess_war_deaths_fertile_f;
             f -= he.excess_war_deaths_fertile_f / 2;
             cumulative_excess_war_deaths_fertile_f += he.excess_war_deaths_fertile_f;
 
-            PopulationByLocality pf = he.p_nonwar_without_births.selectByAge(15, 54);
             pf = RescalePopulation.scaleTotal(pf, 1.0, f);
 
             /*
