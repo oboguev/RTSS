@@ -450,22 +450,28 @@ public class Main
         
         Util.out("");
         Util.out("Дефицит числа рождений, по полугодиям:");
+        double all_bd = 0;
         for (HalfYearEntry he : halves)
         {
             if (he.year == 1946)
                 break;
             double bd = he.expected_nonwar_births - he.actual_births;
             Util.out(String.format("%s %s", he.toString(), f2k(bd / 1000.0)));
+            all_bd += bd;
         }
+        Util.out(String.format("всего %s", f2k(all_bd / 1000.0)));
 
         Util.out("");
         Util.out("Фактическое число рождений, по полугодиям:");
+        double all_actual_births = 0;
         for (HalfYearEntry he : halves)
         {
             if (he.year == 1946)
                 break;
             Util.out(String.format("%s %s", he.toString(), f2k(he.actual_births / 1000.0)));
+            all_actual_births += he.actual_births;
         }
+        Util.out(String.format("всего %s", f2k(all_actual_births / 1000.0)));
     }
     
     /* ======================================================================================================= */
