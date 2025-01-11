@@ -10,19 +10,38 @@ import rtss.util.Util;
 
 /**
  * Продвижка населения по таблице смертности не имеющей отдельных частей
- * для городского и сельского населения, а только часть Total.  
+ * для городского и сельского населения, а только часть Total.
  */
-public class ForwardPopulationT extends ForwardPopulation 
+public class ForwardPopulationT extends ForwardPopulation
 {
     protected AgeSpecificFertilityRates ageSpecificFertilityRates;
     protected double BirthRateTotal;
-    
+
+    /*
+     * В настоящее время мы не используем эту функцию практически.
+     *     
+     * Для целей передвижки требуются либо коэффициенты рождаемости нормированные на население начала года
+     * для временного отрезка [0, T] (а не на население середины года с отрезком [-T,-T]).
+     * 
+     * Либо (и лучше всего) мы можем сделать передвижку двухфазной:
+     *   - в первой фазе делается передвижка наличного населения по таблице смертности (без добавления рождений), 
+     *     из чего устанавливается среднее за период население (его половозростная структура)
+     *   - среднее население -- единствнный результат первой фазы, сугубо внутренней,      
+     *   - откуда определяется количество рождений на основе ASFR калиброванных относительно
+     *     среднего за период населения
+     *   - вторая фаза проводит передвижку с данным количеством рождений, 
+     *     результат этой фазы и является окончательным итогом  
+     */
     public ForwardPopulationT setBirthRateTotal(AgeSpecificFertilityRates ageSpecificFertilityRates)
     {
         this.ageSpecificFertilityRates = ageSpecificFertilityRates;
         return this;
     }
 
+    /*
+     * Для целей передвижки требуется уровень рождаемости нормированный на население начала года
+     * для временного отрезка [0, T] (а не на население середины года с отрезком [-T,-T]).    
+     */
     public ForwardPopulationT setBirthRateTotal(double BirthRateTotal)
     {
         this.BirthRateTotal = BirthRateTotal;
@@ -33,7 +52,7 @@ public class ForwardPopulationT extends ForwardPopulation
     {
         return BirthRateTotal;
     }
-    
+
     /*
      * Продвижка населения во времени на целый год или на часть года.
      * Начальное население (@p) и таблица смертности (@mt) неизменны. 
@@ -83,7 +102,7 @@ public class ForwardPopulationT extends ForwardPopulation
         else
         {
             double births;
-            
+
             if (ageSpecificFertilityRates != null)
             {
                 births = yfraction * ageSpecificFertilityRates.births(p);
@@ -95,7 +114,7 @@ public class ForwardPopulationT extends ForwardPopulation
             }
 
             observed_births += births;
-            
+
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
@@ -124,16 +143,16 @@ public class ForwardPopulationT extends ForwardPopulation
         else
         {
             double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
-            births = yfraction * sum  * birthRate / 1000;
+            births = yfraction * sum * birthRate / 1000;
         }
-        
+
         observed_births += births;
-        
+
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
         int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
-        ndays = Math.max(1,  ndays);
+        ndays = Math.max(1, ndays);
 
         add_births(fctx, locality, Gender.MALE, m_births, mt, ndays);
         add_births(fctx, locality, Gender.FEMALE, f_births, mt, ndays);
@@ -147,14 +166,14 @@ public class ForwardPopulationT extends ForwardPopulation
             final int ndays) throws Exception
     {
         fctx.addTotalBirths(locality, gender, total_births);
-        
+
         /*
          * распределить рождения равномерно по числу дней
          */
         double[] day_births = new double[ndays];
         for (int nd = 0; nd < ndays; nd++)
             day_births[nd] = total_births / ndays;
-        
+
         /*
          * подвергнуть рождения смертности
          * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности,
@@ -163,14 +182,14 @@ public class ForwardPopulationT extends ForwardPopulation
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
             day_births[nd] *= day_lx[nd] / day_lx[0];
-        
+
         /*
          * добавить результат в контекст
          */
         for (int nd = 0; nd < ndays; nd++)
             fctx.add(locality, gender, nd, day_births[nd]);
     }
-    
+
     public void forward(PopulationByLocality pto,
             final PopulationByLocality p,
             PopulationForwardingContext fctx,
@@ -198,7 +217,7 @@ public class ForwardPopulationT extends ForwardPopulation
             double moving = current * yfraction;
             double staying = current - moving;
             double deaths = moving * (1.0 - mi.px);
-            
+
             observed_deaths += deaths;
 
             pto.add(locality, gender, age, staying);
@@ -226,17 +245,17 @@ public class ForwardPopulationT extends ForwardPopulation
         int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
         if (ndays == 0)
             return;
-        
+
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
-        /* lx[nd] содержит число выживших на день жизни nd согласно таблице смертности */ 
+        /* lx[nd] содержит число выживших на день жизни nd согласно таблице смертности */
 
         double[] p = fctx.asArray(locality, gender);
         double[] p2 = new double[p.length];
-        
+
         for (int nd = 0; nd < p.length; nd++)
         {
             int nd2 = nd + ndays;
-            
+
             double v = p[nd];
 
             if (nd2 < p2.length)
@@ -252,7 +271,7 @@ public class ForwardPopulationT extends ForwardPopulation
                 pto.add(locality, gender, age, v);
             }
         }
-        
+
         fctx.fromArray(locality, gender, p2);
     }
 
