@@ -276,6 +276,12 @@ public class Util
         return sum(y) / y.length;
     }
     
+    // normalize array so the sum of its elements is 1.0
+    public static double[] normalize(final double[] y)
+    {
+        return multiply(y, 1.0 / sum(y));
+    }
+    
     // sign of the value
     public static int sign(double d)
     {
