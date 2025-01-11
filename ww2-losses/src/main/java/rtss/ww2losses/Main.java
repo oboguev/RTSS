@@ -78,6 +78,11 @@ public class Main
      */
     private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
 
+    /* 
+     * равномерная интенсивность по военным полугодиям
+     */
+    private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
     private AgeSpecificFertilityRatesByYear asfrs;
     private double asfr_calibration;
 
