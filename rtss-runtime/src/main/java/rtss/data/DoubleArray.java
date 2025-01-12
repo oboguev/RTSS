@@ -226,4 +226,78 @@ public class DoubleArray
         }
         return d;
     }
+    
+    public void fill(double v)
+    {
+        for (int age = 0; age <= maxage; age++)
+            values[age] = v;
+    }
+
+    /*
+     * Сдвинуть возрастное распределение на @years лет вверх
+     */
+    public DoubleArray moveUp(double years)
+    {
+        DoubleArray res = clone();
+
+        int yfloor = (int) Math.floor(years);
+        if (years < yfloor)
+            throw new RuntimeException("Rounding error");
+        
+        /* move up by a whole number of years */
+        if (yfloor != 0)
+        {
+            res.fill(0);
+
+            for (int y = 0; y <= maxage; y++)
+            {
+                int yto = y + yfloor;
+                if (yto <= maxage)
+                    res.values[yto] = values[y];
+            }
+        }
+        
+        /* move up by a partial year */
+        double dy = years - yfloor;
+        if (dy > 0)
+        {
+            // ### сдвинуть res на частичное dy вверх
+        }
+
+        return res;
+    }
+
+    /*
+     * Сдвинуть возрастное распределение на @years лет вниз
+     */
+    public DoubleArray moveDown(double years)
+    {
+        DoubleArray res = clone();
+
+        int yfloor = (int) Math.floor(years);
+        if (years < yfloor)
+            throw new RuntimeException("Rounding error");
+        
+        /* move down by a whole number of years */
+        if (yfloor != 0)
+        {
+            res.fill(0);
+
+            for (int y = 0; y <= maxage; y++)
+            {
+                int yto = y - yfloor;
+                if (yto >= 0)
+                    res.values[yto] = values[y];
+            }
+        }
+        
+        /* move down by a partial year */
+        double dy = years - yfloor;
+        if (dy > 0)
+        {
+            // ### сдвинуть res на частичное dy вниз
+        }
+
+        return res;
+    }
 }

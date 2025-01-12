@@ -255,6 +255,44 @@ public class PopulationByLocality
         return p2;
     }
 
+    /*
+     * Сдвинуть возрастное распределение на @years лет вверх
+     */
+    public PopulationByLocality moveUp(double years) throws Exception
+    {
+        PopulationByLocality res = new PopulationByLocality();
+
+        if (rural != null)
+            res.rural = rural.moveUp(years);
+
+        if (urban != null)
+            res.urban = urban.moveUp(years);
+
+        if (total != null)
+            res.total = total.moveUp(years);
+
+        return res;
+    }
+
+    /*
+     * Сдвинуть возрастное распределение на @years лет вниз
+     */
+    public PopulationByLocality moveDown(double years) throws Exception
+    {
+        PopulationByLocality res = new PopulationByLocality();
+
+        if (rural != null)
+            res.rural = rural.moveDown(years);
+
+        if (urban != null)
+            res.urban = urban.moveDown(years);
+
+        if (total != null)
+            res.total = total.moveDown(years);
+
+        return res;
+    }
+
     /****************************************************************************************************/
 
     public static PopulationByLocality census(Area area, int year) throws Exception

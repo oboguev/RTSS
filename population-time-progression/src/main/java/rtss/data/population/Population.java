@@ -349,6 +349,44 @@ public class Population
         return p2;
     }
     
+    /*
+     * Сдвинуть возрастное распределение на @years лет вверх
+     */
+    public Population moveUp(double years) throws Exception
+    {
+        Population res = newPopulation(locality);
+
+        if (male != null)
+            res.male = male.moveUp(years);
+
+        if (female != null)
+            res.female = female.moveUp(years);
+
+        if (both != null)
+            res.both = both.moveUp(years);
+
+        return res;
+    }
+
+    /*
+     * Сдвинуть возрастное распределение на @years лет вниз
+     */
+    public Population moveDown(double years) throws Exception
+    {
+        Population res = newPopulation(locality);
+
+        if (male != null)
+            res.male = male.moveDown(years);
+
+        if (female != null)
+            res.female = female.moveDown(years);
+
+        if (both != null)
+            res.both = both.moveDown(years);
+
+        return res;
+    }
+    
     /****************************************************************************************************/
 
     public static Population load(String path) throws Exception
