@@ -169,7 +169,7 @@ public class EvalMortalityRate
      * Диагностическая распечатка
      */
     
-    private static boolean do_diag = Util.True;
+    private static boolean do_diag = Util.False;
     
     private static void show_ur(CombinedMortalityTable mt, PopulationByLocality p, Gender gender) throws Exception
     {

@@ -8,6 +8,7 @@ import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
+import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.rates.Recalibrate;
@@ -136,9 +137,65 @@ public class TestValidate_193x
             mt = PatchMortalityTable.patch(mt, instructions, "младенческая смертность по АДХ");
         }
 
-        double xcdr = EvalMortalityRate.eval(mt, p, null, cbr);
+        double xcdr1 = EvalMortalityRate.eval(mt, p, null, cbr);
+        double xcdr2 = fwdOneLeap(p, mt, cbr);
+        double xcdr3 = fwdtwoLeaps(p, mt, cbr, 0.3, 0.9);
 
-        Util.out(String.format("%d [население: %s] смертность по передвижке с таблицей ГКС: %.1f, по АДХ: %.1f",
-                               year, which, xcdr, cdr));
+        // ### по двум передвижкам на 3 месяца и на 9 месяцев
+
+        Util.out(String.format("%d [население: %s] смертность по EvalMortalityRate с таблицей ГКС: %.1f, по АДХ: %.1f, по 1-шаговой передвижке: %.1f, по 2-шаговой передвижке: %.1f",
+                               year, which, xcdr1, cdr, xcdr2, xcdr3));
+    }
+    
+    private double fwdOneLeap(PopulationByLocality p, CombinedMortalityTable mt, double cbr) throws Exception
+    {
+        if (p.hasRuralUrban())
+        {
+            // нет отдельных значений для cbr-rural и cbr-urban
+            return 0;
+        }
+        else
+        {
+            ForwardPopulationT fw = new ForwardPopulationT();
+            fw.setBirthRateTotal(cbr);
+            PopulationForwardingContext fctx = new PopulationForwardingContext();
+            PopulationByLocality p2 = fctx.begin(p);
+            PopulationByLocality p3 = fw.forward(p2, fctx, mt, 1.0);
+            PopulationByLocality p4 = fctx.end(p3);
+            Util.unused(p4);
+            
+            double deaths = fw.getObservedDeaths();
+            double xcbr = 1000 * deaths / p.sum(Locality.TOTAL, Gender.BOTH, 0, Population.MAX_AGE);
+            return xcbr;
+        }
+    }
+
+    private double fwdtwoLeaps(PopulationByLocality p, CombinedMortalityTable mt, double cbr, double yf1, double yf2) throws Exception
+    {
+        if (p.hasRuralUrban())
+        {
+            // нет отдельных значений для cbr-rural и cbr-urban
+            return 0;
+        }
+        else
+        {
+            ForwardPopulationT fw = new ForwardPopulationT();
+            fw.setBirthRateTotal(cbr);
+            PopulationForwardingContext fctx = new PopulationForwardingContext();
+            PopulationByLocality p2 = fctx.begin(p);
+            PopulationByLocality p3 = fw.forward(p2, fctx, mt, yf1);
+            double deaths = fw.getObservedDeaths();
+            
+            fw = new ForwardPopulationT();
+            fw.setBirthRateTotal(cbr);
+            PopulationByLocality p4 = fw.forward(p3, fctx, mt, yf2);
+            deaths += fw.getObservedDeaths();
+
+            PopulationByLocality p5 = fctx.end(p4);
+            Util.unused(p5);
+            
+            double xcbr = 1000 * deaths / p.sum(Locality.TOTAL, Gender.BOTH, 0, Population.MAX_AGE);
+            return xcbr;
+        }
     }
 }
