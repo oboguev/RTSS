@@ -18,15 +18,15 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 /*
- * Сравнить смертность в 1939 году по передвижке с таблицей Госкомстата и по АДХ
+ * Сравнить смертность в 1937-1939 годах по передвижке с таблицей Госкомстата и по АДХ
  */
-public class Validate_1939
+public class Validate_193x
 {
     public static void main(String[] args)
     {
         try
         {
-            new Validate_1939().validate_1939();
+            new Validate_193x().validate_1939();
         }
         catch (Exception ex)
         {
@@ -35,7 +35,7 @@ public class Validate_1939
         }
     }
 
-    public Validate_1939() throws Exception
+    public Validate_193x() throws Exception
     {
     }
 
@@ -67,7 +67,9 @@ public class Validate_1939
     private void validate_1939() throws Exception
     {
         validate_193x(1937, "перепись 1937, исправленное", p1937);
+        validate_193x(1937, "перепись 1937, исправленное total-only", p1937.cloneTotalOnly());
         validate_193x(1937, "перепись 1937, неисправленное", p1937_original);
+        validate_193x(1937, "перепись 1937, неисправленное total-only", p1937_original.cloneTotalOnly());
         validate_193x(1939, "АДХ 1937", PopulationADH.getPopulationByLocality(Area.USSR, 1937));
         Util.out("");
 
@@ -75,7 +77,9 @@ public class Validate_1939
         Util.out("");
         
         validate_193x(1939, "перепись 1939, исправленное", p1939);
+        validate_193x(1939, "перепись 1939, исправленное total-only", p1939.cloneTotalOnly());
         validate_193x(1939, "перепись 1939, неисправленное", p1939_original);
+        validate_193x(1939, "перепись 1939, неисправленное total-only", p1939_original.cloneTotalOnly());
         validate_193x(1939, "АДХ 1939", PopulationADH.getPopulationByLocality(Area.USSR, "1939-границы-1938"));
     }
 
