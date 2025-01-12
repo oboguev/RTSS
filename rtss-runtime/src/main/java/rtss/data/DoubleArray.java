@@ -191,7 +191,6 @@ public class DoubleArray
         return res;
     }
 
-
     private void checkValueRange(double v) throws Exception
     {
         Util.validate(v);
@@ -226,7 +225,7 @@ public class DoubleArray
         }
         return d;
     }
-    
+
     public void fill(double v)
     {
         for (int age = 0; age <= maxage; age++)
@@ -243,7 +242,7 @@ public class DoubleArray
         int yfloor = (int) Math.floor(years);
         if (years < yfloor)
             throw new RuntimeException("Rounding error");
-        
+
         /* move up by a whole number of years */
         if (yfloor != 0)
         {
@@ -256,12 +255,18 @@ public class DoubleArray
                     res.values[yto] = values[y];
             }
         }
-        
+
         /* move up by a partial year */
         double dy = years - yfloor;
         if (dy > 0)
         {
-            // ### сдвинуть res на частичное dy вверх
+            Double[] xv = new Double[maxage + 1];
+
+            xv[0] = (1 - dy) * values[0];
+            for (int y = 1; y <= maxage; y++)
+                xv[y] = (1 - dy) * values[y] + dy * values[y - 1];
+            
+            res.values = xv;
         }
 
         return res;
@@ -277,7 +282,7 @@ public class DoubleArray
         int yfloor = (int) Math.floor(years);
         if (years < yfloor)
             throw new RuntimeException("Rounding error");
-        
+
         /* move down by a whole number of years */
         if (yfloor != 0)
         {
@@ -290,12 +295,18 @@ public class DoubleArray
                     res.values[yto] = values[y];
             }
         }
-        
+
         /* move down by a partial year */
         double dy = years - yfloor;
         if (dy > 0)
         {
-            // ### сдвинуть res на частичное dy вниз
+            Double[] xv = new Double[maxage + 1];
+
+            for (int y = 0; y < maxage; y++)
+                xv[y] = (1 - dy) * values[y] + dy * values[y + 1];
+            xv[maxage] = (1 - dy) * values[maxage];
+            
+            res.values = xv;
         }
 
         return res;
