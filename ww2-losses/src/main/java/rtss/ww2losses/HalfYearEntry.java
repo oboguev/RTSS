@@ -36,6 +36,9 @@ public class HalfYearEntry
     
     /* фактическое число состоявшихся рождений */
     public double actual_births; 
+    
+    /* кумулятивные потери населения (включая эмиграцию) накопленные на начало полугодия, половозрастная структура */
+    public PopulationByLocality accumulated_deficit;
 
     public HalfYearEntry(
             int year,

@@ -1,6 +1,8 @@
 package rtss.ww2losses;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
@@ -19,6 +21,7 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.FieldValue;
 import rtss.util.Util;
+import rtss.ww2losses.helpers.ShowForecast;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
@@ -97,7 +100,7 @@ public class Main
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
         Util.out("");
-        
+
         switch (area)
         {
         case USSR:
@@ -109,7 +112,7 @@ public class Main
             break;
         }
         asfr_calibration = CalibrateASFR.calibrate1940(ap, asfrs);
-        
+
         evalHalves();
         evalDeficit1946();
         evalBirths();
@@ -262,6 +265,12 @@ public class Main
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
         PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        
+        ShowForecast.show(ap, p1946_actual, halves, 3);
+        ShowForecast.show(ap, p1946_actual, halves, 4);
+
+        // ### backpropagateExistingDeficit(deficit);
+
         deficit = deficit.sub(emigration());
 
         /*
@@ -423,10 +432,102 @@ public class Main
 
     /* ======================================================================================================= */
 
+    /*
+     * Распределить дефицит населения от начала 1946 года
+     * на начало каждого предшествуюшего полугодия, c последовательным его уменьшением 
+     * соответствено полугодовым коэффициентам attrition, и с возрастным сдвигом
+     */
+    private void backpropagateExistingDeficit(PopulationByLocality deficit1946) throws Exception
+    {
+        /* полугодовой коэффициент распределения потерь для не-призывного населения */
+        double[] ac_generic = wsum(0.3, even_intensity, 0.7, occupation_intensity);
+        List<Double> acv_generic = atov(ac_generic);
+
+        /* полугодовой коэффициент распределения потерь для призывного населения */
+        double[] ac_conscripts = wsum(0.7, rkka_loss_intensity, 0.3, ac_generic);
+        List<Double> acv_conscripts = atov(ac_conscripts);
+
+        HalfYearEntry he = halves.last();
+        he.accumulated_deficit = deficit1946;
+
+        for (;;)
+        {
+            he = he.prev;
+            if (he.year == 1941)
+                break;
+
+            double a_generic = acv_generic.get(0) / sum(acv_generic);
+            double a_conscripts = acv_conscripts.get(0) / sum(acv_conscripts);
+            acv_generic.remove(0);
+            acv_conscripts.remove(0);
+
+            /*
+             * Вычислить потери в текущем полугодии
+             */
+            PopulationByLocality loss = he.next.accumulated_deficit.clone();
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
+                loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
+            }
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
+                if (age >= 18 && age <= 55)
+                    loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_conscripts);
+                else
+                    loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
+            }
+
+            /*
+             * Вычислить потери на начало полугодия
+             */
+            PopulationByLocality x = he.next.accumulated_deficit.sub(loss);
+            he.accumulated_deficit = x.moveDown(0.5);
+        }
+
+        Util.noop();
+    }
+
+    private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
+    {
+        ww1 = Util.normalize(ww1);
+        ww2 = Util.normalize(ww2);
+
+        ww1 = Util.multiply(ww1, w1);
+        ww2 = Util.multiply(ww2, w2);
+
+        double[] ww = Util.add(ww1, ww2);
+        ww = Util.normalize(ww);
+
+        return ww;
+    }
+
+    private List<Double> atov(double[] a)
+    {
+        List<Double> list = new ArrayList<>();
+        for (double d : a)
+            list.add(d);
+        list.remove(0);
+        list.remove(list.size() - 1);
+        Collections.reverse(list);
+        return list;
+    }
+
+    private double sum(List<Double> v)
+    {
+        double s = 0;
+        for (double d : v)
+            s += d;
+        return s;
+    }
+
+    /* ======================================================================================================= */
+
     private void evalBirths() throws Exception
     {
         double cumulative_excess_war_deaths_fertile_f = 0;
-        
+
         Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
 
         for (HalfYearEntry he : halves)
@@ -453,18 +554,18 @@ public class Main
             if (he.year != 1941)
                 he.actual_births = asfr_calibration * 0.5 * asfrs.getForYear(he.year).births(pf);
         }
-        
+
         /*
          * Для 1941 года (оба полугодия)
          */
         HalfYearEntry he1 = halves.get(0);
         HalfYearEntry he2 = halves.get(1);
         he1.actual_births = he1.expected_nonwar_births;
-        
+
         PopulationByLocality pf = he2.p_nonwar_without_births.selectByAge(15, 54);
         double year_births = asfr_calibration * asfrs.getForYear(1941).births(pf);
-        he2.actual_births = year_births - he1.actual_births; 
-        
+        he2.actual_births = year_births - he1.actual_births;
+
         Util.out("");
         Util.out("Дефицит числа рождений, по полугодиям:");
         double all_bd = 0;
@@ -490,7 +591,7 @@ public class Main
         }
         Util.out(String.format("всего %s", f2k(all_actual_births / 1000.0)));
     }
-    
+
     /* ======================================================================================================= */
 
     /*
