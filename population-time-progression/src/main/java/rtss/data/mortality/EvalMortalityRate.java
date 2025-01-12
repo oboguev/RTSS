@@ -48,6 +48,7 @@ public class EvalMortalityRate
             {
                 total_deaths += deaths(mt, p, Locality.URBAN, Gender.MALE, age);
                 total_deaths += deaths(mt, p, Locality.URBAN, Gender.FEMALE, age);
+                
                 total_deaths += deaths(mt, p, Locality.RURAL, Gender.MALE, age);
                 total_deaths += deaths(mt, p, Locality.RURAL, Gender.FEMALE, age);
             }
@@ -55,8 +56,9 @@ public class EvalMortalityRate
             if (fctx != null)
             {
                 total_deaths += deaths(mt, fctx, Locality.URBAN, Gender.MALE);
-                total_deaths += deaths(mt, fctx, Locality.RURAL, Gender.MALE);
                 total_deaths += deaths(mt, fctx, Locality.URBAN, Gender.FEMALE);
+                
+                total_deaths += deaths(mt, fctx, Locality.RURAL, Gender.MALE);
                 total_deaths += deaths(mt, fctx, Locality.RURAL, Gender.FEMALE);
             }
         }
@@ -76,7 +78,7 @@ public class EvalMortalityRate
             if (fctx != null)
             {
                 total_deaths += deaths(mt, fctx, Locality.TOTAL, Gender.MALE);
-                total_deaths += deaths(mt, fctx, Locality.TOTAL, Gender.MALE);
+                total_deaths += deaths(mt, fctx, Locality.TOTAL, Gender.FEMALE);
             }
         }
         
@@ -98,8 +100,8 @@ public class EvalMortalityRate
             Gender gender,
             int age) throws Exception
     {
-        double v = p.get(Locality.TOTAL, gender, age);
-        MortalityInfo mi = mt.get(Locality.TOTAL, gender, age);
+        double v = p.get(locality, gender, age);
+        MortalityInfo mi = mt.get(locality, gender, age);
         return mi.qx * v;
     }
 
@@ -206,7 +208,6 @@ public class EvalMortalityRate
         for (int age = 0; age <= MAX_AGE; age++)
         {
             total_deaths += deaths(mt, p, Locality.TOTAL, gender, age);
-            total_deaths += deaths(mt, p, Locality.TOTAL, gender, age);
         }
 
         Util.out(String.format("Deaths T-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
@@ -218,7 +219,6 @@ public class EvalMortalityRate
             return;
         
         double total_deaths = 0;
-        total_deaths += deaths(mt, fctx, Locality.TOTAL, gender);
         total_deaths += deaths(mt, fctx, Locality.TOTAL, gender);
 
         Util.out(String.format("Deaths T-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
