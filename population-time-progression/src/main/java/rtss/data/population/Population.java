@@ -30,6 +30,8 @@ public class Population
     double female_total = 0;
     double both_unknown = 0;
     double both_total = 0;
+    
+    private boolean sealed = false;
 
     private DoubleArray newDoubleArray()
     {
@@ -141,6 +143,8 @@ public class Population
 
     public void set(Gender gender, int age, double value) throws Exception
     {
+        checkWritable();
+
         DoubleArray m = forGender(gender);
         Util.validate(value);
         checkNonNegative(value);
@@ -149,6 +153,8 @@ public class Population
 
     public void add(Gender gender, int age, double value) throws Exception
     {
+        checkWritable();
+        
         DoubleArray m = forGender(gender);
 
         if (m.containsKey(age))
@@ -165,6 +171,8 @@ public class Population
 
     public void sub(Gender gender, int age, double value) throws Exception
     {
+        checkWritable();
+
         DoubleArray m = forGender(gender);
 
         if (m.containsKey(age))
@@ -209,6 +217,8 @@ public class Population
 
     public void resetUnknown() throws Exception
     {
+        checkWritable();
+
         male_unknown = 0;
         female_unknown = 0;
         both_unknown = 0;
@@ -216,6 +226,8 @@ public class Population
 
     public void recalcTotal() throws Exception
     {
+        checkWritable();
+
         male_total = 0;
         female_total = 0;
         both_total = 0;
@@ -963,5 +975,18 @@ public class Population
         }
 
         return sb.toString();
+    }
+
+    /*****************************************************************************************************/
+    
+    public void seal()
+    {
+        sealed = true;
+    }
+    
+    private void checkWritable() throws Exception
+    {
+        if (sealed)
+            throw new Exception("Table is sealed and cannot be modified");
     }
 }

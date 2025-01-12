@@ -61,12 +61,12 @@ public class TestSavePopulationADH
         if (Util.True)
         {
             File rootDir = new File("C:\\@@\\ADH-population-" + area);
-            File dir = new File(rootDir, "" + year);
+            String en_year = year.replace("-границы-", "-in-borders-of-");
+            File dir = new File(rootDir, "" + en_year);
             dir.mkdirs();
             String comment = String.format("Таблица построена дезагрегацией данных АДХ при помощи модуля %s", 
                                            PopulationADH.class.getCanonicalName());
             p.saveToFiles(dir.getAbsoluteFile().getCanonicalPath(), comment);
         }
-        
     }
 }

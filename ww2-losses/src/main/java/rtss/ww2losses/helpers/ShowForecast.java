@@ -18,6 +18,8 @@ public class ShowForecast
     {
         Util.out("");
         Util.out(String.format("%s, возраст %d (на начало 1941)", ap.area.toString(), age));
+        Util.out("                           M      F     M+F");
+        Util.out("                         =====  =====  =====");
         
         for (HalfYearEntry he : halves)
         {
