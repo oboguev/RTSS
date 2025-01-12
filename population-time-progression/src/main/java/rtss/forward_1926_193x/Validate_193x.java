@@ -86,7 +86,7 @@ public class Validate_193x
     private void validate_193x(int year, String which, PopulationByLocality p) throws Exception
     {
         /* в нормировке на начало года */
-        double cbr, cdr, ADH_USSR_infant_CDR;
+        double cbr, cdr, infant_CDR;
         Rates r;
 
         switch (year)
@@ -95,21 +95,21 @@ public class Validate_193x
             r = Recalibrate.m2e(new Rates(CBR_1937_MIDYEAR, CDR_1937_MIDYEAR));
             cbr = r.cbr;
             cdr = r.cdr;
-            ADH_USSR_infant_CDR = ADH_USSR_infant_CDR_1937;
+            infant_CDR = ADH_USSR_infant_CDR_1937;
             break;
 
         case 1938:
             r = Recalibrate.m2e(new Rates(CBR_1938_MIDYEAR, CDR_1938_MIDYEAR));
             cbr = r.cbr;
             cdr = r.cdr;
-            ADH_USSR_infant_CDR = ADH_USSR_infant_CDR_1938;
+            infant_CDR = ADH_USSR_infant_CDR_1938;
             break;
 
         case 1939:
             r = Recalibrate.m2e(new Rates(CBR_1939_MIDYEAR, CDR_1939_MIDYEAR));
             cbr = r.cbr;
             cdr = r.cdr;
-            ADH_USSR_infant_CDR = ADH_USSR_infant_CDR_1939;
+            infant_CDR = ADH_USSR_infant_CDR_1939;
             break;
 
         default:
@@ -126,10 +126,10 @@ public class Validate_193x
             List<PatchInstruction> instructions = new ArrayList<>();
             PatchInstruction instruction;
 
-            instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 0, ADH_USSR_infant_CDR / qx[0]);
+            instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 0, infant_CDR / qx[0]);
             instructions.add(instruction);
 
-            instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 1, 5, ADH_USSR_infant_CDR / qx[0], 1.0);
+            instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 1, 5, infant_CDR / qx[0], 1.0);
             instructions.add(instruction);
             mt = PatchMortalityTable.patch(mt, instructions, "младенческая смертность по АДХ");
         }

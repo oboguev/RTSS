@@ -4,6 +4,7 @@ import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /**
  * Вычислить годовой уровень смертности при данной таблице смертности,
@@ -38,6 +39,11 @@ public class EvalMortalityRate
 
         if (p.hasRuralUrban())
         {
+            show_ur(mt, p, Gender.MALE);
+            show_ur(mt, p, Gender.FEMALE);
+            show_ur(mt, fctx, Gender.MALE);
+            show_ur(mt, fctx, Gender.FEMALE);
+            
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 total_deaths += deaths(mt, p, Locality.URBAN, Gender.MALE, age);
@@ -56,6 +62,11 @@ public class EvalMortalityRate
         }
         else
         {
+            show_t(mt, p, Gender.MALE);
+            show_t(mt, p, Gender.FEMALE);
+            show_t(mt, fctx, Gender.MALE);
+            show_t(mt, fctx, Gender.FEMALE);
+
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 total_deaths += deaths(mt, p, Locality.TOTAL, Gender.MALE, age);
@@ -87,8 +98,8 @@ public class EvalMortalityRate
             Gender gender,
             int age) throws Exception
     {
-        double v = p.get(Locality.TOTAL, Gender.MALE, age);
-        MortalityInfo mi = mt.get(Locality.TOTAL, Gender.MALE, age);
+        double v = p.get(Locality.TOTAL, gender, age);
+        MortalityInfo mi = mt.get(Locality.TOTAL, gender, age);
         return mi.qx * v;
     }
 
@@ -148,5 +159,76 @@ public class EvalMortalityRate
         for (int nd = 0; nd < ndays; nd++)
             deaths += day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
         return deaths;
+    }
+    
+    /* ===================================================================================================== */
+    
+    /*
+     * Диагностическая распечатка
+     */
+    
+    private static boolean do_diag = Util.True;
+    
+    private static void show_ur(CombinedMortalityTable mt, PopulationByLocality p, Gender gender) throws Exception
+    {
+        if (!do_diag)
+            return;
+            
+        double total_deaths = 0;
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            total_deaths += deaths(mt, p, Locality.URBAN, gender, age);
+            total_deaths += deaths(mt, p, Locality.RURAL, gender, age);
+        }
+        
+        Util.out(String.format("Deaths UR-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
+    }
+    
+    
+    private static void show_ur(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender) throws Exception
+    {
+        if (!do_diag)
+            return;
+        
+        double total_deaths = 0;
+        total_deaths += deaths(mt, fctx, Locality.URBAN, gender);
+        total_deaths += deaths(mt, fctx, Locality.RURAL, gender);
+
+        Util.out(String.format("Deaths UR-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
+    }
+
+    private static void show_t(CombinedMortalityTable mt, PopulationByLocality p, Gender gender)  throws Exception
+    {
+        if (!do_diag)
+            return;
+        
+        double total_deaths = 0;
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            total_deaths += deaths(mt, p, Locality.TOTAL, gender, age);
+            total_deaths += deaths(mt, p, Locality.TOTAL, gender, age);
+        }
+
+        Util.out(String.format("Deaths T-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
+    }
+    
+    private static void show_t(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender)  throws Exception
+    {
+        if (!do_diag)
+            return;
+        
+        double total_deaths = 0;
+        total_deaths += deaths(mt, fctx, Locality.TOTAL, gender);
+        total_deaths += deaths(mt, fctx, Locality.TOTAL, gender);
+
+        Util.out(String.format("Deaths T-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
+    }
+
+    private static String f2s(double v)
+    {
+        String s = String.format("%,15.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
 }
