@@ -2,10 +2,8 @@ package rtss.data.population.synthetic;
 
 import java.io.File;
 
-import rtss.data.mortality.synthetic.MortalityTableADH;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Area;
-import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 /*

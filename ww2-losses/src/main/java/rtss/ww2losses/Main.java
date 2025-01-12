@@ -1,7 +1,6 @@
 package rtss.ww2losses;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -268,6 +267,8 @@ public class Main
         
         ShowForecast.show(ap, p1946_actual, halves, 3);
         ShowForecast.show(ap, p1946_actual, halves, 4);
+        
+        deficit.validate();
 
         // ### backpropagateExistingDeficit(deficit);
 
@@ -441,11 +442,11 @@ public class Main
     {
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
         double[] ac_generic = wsum(0.3, even_intensity, 0.7, occupation_intensity);
-        List<Double> acv_generic = atov(ac_generic);
+        List<Double> acv_generic = atov_reverse(ac_generic);
 
         /* полугодовой коэффициент распределения потерь для призывного населения */
         double[] ac_conscripts = wsum(0.7, rkka_loss_intensity, 0.3, ac_generic);
-        List<Double> acv_conscripts = atov(ac_conscripts);
+        List<Double> acv_conscripts = atov_reverse(ac_conscripts);
 
         HalfYearEntry he = halves.last();
         he.accumulated_deficit = deficit1946;
@@ -465,18 +466,20 @@ public class Main
              * Вычислить потери в текущем полугодии
              */
             PopulationByLocality loss = he.next.accumulated_deficit.clone();
+
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
                 loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
             }
+            
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
+                double v = loss.get(Locality.TOTAL, Gender.MALE, age);
                 if (age >= 18 && age <= 55)
-                    loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_conscripts);
+                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_conscripts);
                 else
-                    loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
+                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
             }
 
             /*
@@ -503,7 +506,11 @@ public class Main
         return ww;
     }
 
-    private List<Double> atov(double[] a)
+    /*
+     * Откинуть первые и последние коэффициенты (нули для 1-го полугодия 1941 и 1-го полугодия 1946 гг.),
+     * остаток отсортировать в обращённом порядке, для обратного отсчёта по полугодиям от 1946 к 1941 г.
+     */
+    private List<Double> atov_reverse(double[] a)
     {
         List<Double> list = new ArrayList<>();
         for (double d : a)

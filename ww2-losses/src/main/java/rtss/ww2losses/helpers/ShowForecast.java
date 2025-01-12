@@ -29,6 +29,8 @@ public class ShowForecast
     
     private static void show(String what, PopulationByLocality p, int age, boolean secondHalfyear) throws Exception
     {
+        String sage = "возраст " + age;
+        
         double f = p.get(Locality.TOTAL, Gender.FEMALE, age); 
         double m = p.get(Locality.TOTAL, Gender.MALE, age); 
         double b = p.get(Locality.TOTAL, Gender.BOTH, age);
@@ -42,9 +44,12 @@ public class ShowForecast
             f = (f + f2) / 2;
             m = (m + m2) / 2;
             b = (b + b2) / 2;
+            sage += ".5";
+            
+            return;
         }
         
-        Util.out(String.format("%-24s %5s  %5s  %5s", what, f2k(m/1000.0), f2k(f/1000.0), f2k(b/1000.0)));
+        Util.out(String.format("%-24s %5s  %5s  %5s  [%s]", what, f2k(m/1000.0), f2k(f/1000.0), f2k(b/1000.0), sage));
     }
 
     private static String f2k(double v)
