@@ -322,6 +322,18 @@ public class PopulationByLocality
 
         validate();
     }
+    
+    public void saveToFiles(String dirPath, String comment) throws Exception
+    {
+        if (rural != null)
+            rural.saveToFile(dirPath, comment);
+
+        if (urban != null)
+            urban.saveToFile(dirPath, comment);
+
+        if (total != null)
+            total.saveToFile(dirPath, comment);
+    }
 
     public void recalcTotalLocalityFromUrbanRural() throws Exception
     {

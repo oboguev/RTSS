@@ -1,5 +1,6 @@
 package rtss.data.population;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -348,7 +349,7 @@ public class Population
         p2 = RescalePopulation.scaleBy(p2, 0.5);
         return p2;
     }
-    
+
     /*
      * Сдвинуть возрастное распределение на @years лет вверх
      */
@@ -386,7 +387,7 @@ public class Population
 
         return res;
     }
-    
+
     /****************************************************************************************************/
 
     public static Population load(String path) throws Exception
@@ -570,6 +571,38 @@ public class Population
         }
 
         return res;
+    }
+
+    /****************************************************************************************************/
+
+    public void saveToFile(String dirPath, String comment) throws Exception
+    {
+        final String nl = Util.nl;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("# age, both genders, male, female" + nl);
+        if (comment != null && comment.length() != 0)
+            sb.append(nl + "# " + comment + nl);
+        sb.append(nl);
+        
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            sb.append(String.format("%-4d %-15s %-15s %-15s" + nl, age, f2s(both.get(age)), f2s(male.get(age)), f2s(female.get(age))));
+        }
+
+        File fp = new File(dirPath);
+        fp = new File(dirPath, locality.name().toLowerCase() + ".txt");
+        String fn = fp.getCanonicalFile().getAbsolutePath();
+        
+        Util.writeAsFile(fn, sb.toString());
+    }
+    
+    private String f2s(double v)
+    {
+        String s = String.format("%,15.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
 
     /****************************************************************************************************/

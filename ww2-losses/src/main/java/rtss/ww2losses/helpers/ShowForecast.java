@@ -21,20 +21,28 @@ public class ShowForecast
         
         for (HalfYearEntry he : halves)
         {
-            if (he.halfyear != HalfYearSelector.FirstHalfYear)
-                continue;
-            
-            show(he.toString(), he.p_nonwar_without_births, age + he.year - 1941);
+            show(he.toString(), he.p_nonwar_without_births, age + he.year - 1941, he.halfyear == HalfYearSelector.SecondHalfYear);
         }
         
-        show("1946, факт", p1946_actual, age + 1946 - 1941);
+        show("1946, фактическое", p1946_actual, age + 1946 - 1941, false);
     }
     
-    private static void show(String what, PopulationByLocality p, int age) throws Exception
+    private static void show(String what, PopulationByLocality p, int age, boolean secondHalfyear) throws Exception
     {
         double f = p.get(Locality.TOTAL, Gender.FEMALE, age); 
         double m = p.get(Locality.TOTAL, Gender.MALE, age); 
         double b = p.get(Locality.TOTAL, Gender.BOTH, age);
+        
+        if (secondHalfyear)
+        {
+            double f2 = p.get(Locality.TOTAL, Gender.FEMALE, age + 1); 
+            double m2 = p.get(Locality.TOTAL, Gender.MALE, age + 1); 
+            double b2 = p.get(Locality.TOTAL, Gender.BOTH, age + 1);
+            
+            f = (f + f2) / 2;
+            m = (m + m2) / 2;
+            b = (b + b2) / 2;
+        }
         
         Util.out(String.format("%-24s %5s  %5s  %5s", what, f2k(m/1000.0), f2k(f/1000.0), f2k(b/1000.0)));
     }
