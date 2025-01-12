@@ -1,4 +1,4 @@
-package rtss.forward_1926_193x;
+package rtss.data.population.forward;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,18 +15,20 @@ import rtss.data.rates.Recalibrate.Rates;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.forward_1926_193x.Adjust_1937;
+import rtss.forward_1926_193x.Adjust_1939;
 import rtss.util.Util;
 
 /*
  * Сравнить смертность в 1937-1939 годах по передвижке с таблицей Госкомстата и по АДХ
  */
-public class Validate_193x
+public class TestValidate_193x
 {
     public static void main(String[] args)
     {
         try
         {
-            new Validate_193x().validate_1939();
+            new TestValidate_193x().validate_1939();
         }
         catch (Exception ex)
         {
@@ -35,7 +37,7 @@ public class Validate_193x
         }
     }
 
-    public Validate_193x() throws Exception
+    public TestValidate_193x() throws Exception
     {
     }
 
