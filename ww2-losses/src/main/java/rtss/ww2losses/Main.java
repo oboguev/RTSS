@@ -21,6 +21,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.FieldValue;
 import rtss.util.Util;
 import rtss.ww2losses.helpers.ShowForecast;
+import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
@@ -268,11 +269,13 @@ public class Main
         ShowForecast.show(ap, p1946_actual, halves, 3);
         ShowForecast.show(ap, p1946_actual, halves, 4);
         
-        deficit.validate();
+        // deficit.validate();
 
         // ### backpropagateExistingDeficit(deficit);
 
         deficit = deficit.sub(emigration());
+        // validate(deficit);
+        WarHelpers.validateDeficit(deficit);
 
         /*
          * разбить сверхсмертность на категории 

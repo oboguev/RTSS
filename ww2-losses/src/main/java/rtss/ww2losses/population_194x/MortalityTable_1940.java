@@ -86,13 +86,18 @@ public class MortalityTable_1940 extends UtilBase_194x
             double[] qx = mt.getSingleTable(Locality.TOTAL, Gender.BOTH).qx();
             
             List<PatchInstruction> instructions = new ArrayList<>();
+            PatchInstruction instruction;
             
-            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 0, ADH_USSR_infant_CDR_1940 / qx[0]);
-            instructions.add(instruction);
+            if (use_ADH_USSR_InfantMortalityRate)
+            {
+                instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 0, ADH_USSR_infant_CDR_1940 / qx[0]);
+                instructions.add(instruction);
 
-            instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 1, 5, ADH_USSR_infant_CDR_1940  / qx[0], 1.0);
-            instructions.add(instruction);
+                instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 1, 5, ADH_USSR_infant_CDR_1940  / qx[0], 1.0);
+                instructions.add(instruction);
+            }
             
+            // рабочий дескриптор для MatchMortalityTable.match
             instruction = new PatchInstruction(PatchOpcode.Multiply, 5, Population.MAX_AGE, 1.0);
             instructions.add(instruction);
             
@@ -103,6 +108,8 @@ public class MortalityTable_1940 extends UtilBase_194x
         {
             CombinedMortalityTable mt = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
             mt.comment("АДХ-РСФСР-1940");
+            
+            // рабочий дескриптор для MatchMortalityTable.match
             List<PatchInstruction> instructions = new ArrayList<>();
             PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, 1.0);
             instructions.add(instruction);
