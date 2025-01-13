@@ -133,10 +133,23 @@ public class EvalMortalityRate extends Loggable
      */
     private double deaths_from_births(final double total_pop, final double cbr, final CombinedMortalityTable mt) throws Exception
     {
-        double all_births = total_pop * cbr / 1000; 
+        double all_births = total_pop * cbr / 1000;
+        
         double m_births = all_births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = all_births * 1.0 / (1 + MaleFemaleBirthRatio);
-        return deaths_from_births(Gender.MALE, m_births, mt) + deaths_from_births(Gender.FEMALE, f_births, mt);
+        
+        double m_deaths = deaths_from_births(Gender.MALE, m_births, mt);
+        double f_deaths = deaths_from_births(Gender.FEMALE, f_births, mt);
+        
+        if (debug)
+        {
+            log(String.format("TOTAL-MALE-BIRTHS = %s", f2s(m_births)));
+            log(String.format("TOTAL-FEMALE-BIRTHS = %s", f2s(f_births)));
+            log(String.format("TOTAL-MALE-DEATHS-FROM-BIRTHS = %s", f2s(m_deaths)));
+            log(String.format("TOTAL-FEMALE-DEATHS-FROM-BIRTHS = %s", f2s(f_deaths)));
+        }
+        
+        return m_deaths + f_deaths;
     }
 
     private double deaths_from_births(Gender gender, double births, final CombinedMortalityTable mt) throws Exception
@@ -173,14 +186,17 @@ public class EvalMortalityRate extends Loggable
     {
         if (debug)
         {
-            double total_deaths = 0;
+            double total_deaths_u = 0;
+            double total_deaths_r = 0;
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                total_deaths += deaths(mt, p, Locality.URBAN, gender, age);
-                total_deaths += deaths(mt, p, Locality.RURAL, gender, age);
+                total_deaths_u += deaths(mt, p, Locality.URBAN, gender, age);
+                total_deaths_r += deaths(mt, p, Locality.RURAL, gender, age);
             }
             
-            log(String.format("Deaths UR-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
+            log(String.format("Deaths P-U-%s [%s] => %s", gender.name(), p.toString(), f2s(total_deaths_u)));
+            log(String.format("Deaths P-R-%s [%s] => %s", gender.name(), p.toString(), f2s(total_deaths_r)));
+            log(String.format("Deaths P-UR-%s [%s] => %s", gender.name(), p.toString(), f2s(total_deaths_u + total_deaths_r)));
         }
     }
     
@@ -189,11 +205,12 @@ public class EvalMortalityRate extends Loggable
     {
         if (debug)
         {
-            double total_deaths = 0;
-            total_deaths += deaths(mt, fctx, Locality.URBAN, gender);
-            total_deaths += deaths(mt, fctx, Locality.RURAL, gender);
+            double total_deaths_u = deaths(mt, fctx, Locality.URBAN, gender);
+            double total_deaths_r = deaths(mt, fctx, Locality.RURAL, gender);
 
-            log(String.format("Deaths UR-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
+            log(String.format("Deaths FCTX-U-%s [%s] => %s", gender.name(), fctx.toString(), f2s(total_deaths_u)));
+            log(String.format("Deaths FCTX-R-%s [%s] => %s", gender.name(), fctx.toString(), f2s(total_deaths_r)));
+            log(String.format("Deaths FCTX-UR-%s [%s] => %s", gender.name(), fctx.toString(), f2s(total_deaths_u + total_deaths_r)));
         }
     }
 
@@ -203,11 +220,9 @@ public class EvalMortalityRate extends Loggable
         {
             double total_deaths = 0;
             for (int age = 0; age <= MAX_AGE; age++)
-            {
                 total_deaths += deaths(mt, p, Locality.TOTAL, gender, age);
-            }
 
-            log(String.format("Deaths T-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
+            log(String.format("Deaths P-T-%s [%s] => %s", gender.name(), p.toString(), f2s(total_deaths)));
         }
     }
     
@@ -215,10 +230,8 @@ public class EvalMortalityRate extends Loggable
     {
         if (debug)
         {
-            double total_deaths = 0;
-            total_deaths += deaths(mt, fctx, Locality.TOTAL, gender);
-
-            log(String.format("Deaths T-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
+            double total_deaths = deaths(mt, fctx, Locality.TOTAL, gender);
+            log(String.format("Deaths FCTX-T-%s [%s] => %s", gender.name(), fctx.toString(), f2s(total_deaths)));
         }
     }
 

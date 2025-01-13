@@ -29,6 +29,7 @@ public class TestValidate_193x
     {
         try
         {
+            new TestValidate_193x().test_1();
             new TestValidate_193x().validate_1939();
         }
         catch (Exception ex)
@@ -37,12 +38,12 @@ public class TestValidate_193x
             ex.printStackTrace();
         }
     }
-    
+
     // ### test: forward [8-100] by 1 year via EvalMortalityRate 
     // ### test: forward [0-100] by 1 year via EvalMortalityRate 
     // ### test: forward [8-100] by 1 year vs 0.3 + 0.7 
     // ### test: forward [0-100] by 1 year vs 0.3 + 0.7 
-    
+
     // ### deaths in P
     // ### decimate CTX + shift CTX
     // ### add new births to CTX
@@ -51,6 +52,8 @@ public class TestValidate_193x
     public TestValidate_193x() throws Exception
     {
     }
+
+    private static final int MAX_AGE = Population.MAX_AGE;
 
     private final boolean DoSmoothPopulation = Util.True;
 
@@ -88,7 +91,7 @@ public class TestValidate_193x
 
         validate_193x(1938, "АДХ 1938", PopulationADH.getPopulationByLocality(Area.USSR, 1938));
         Util.out("");
-        
+
         validate_193x(1939, "перепись 1939, исправленное", p1939);
         validate_193x(1939, "перепись 1939, исправленное total-only", p1939.cloneTotalOnly());
         validate_193x(1939, "перепись 1939, неисправленное", p1939_original);
@@ -153,10 +156,11 @@ public class TestValidate_193x
 
         // ### по двум передвижкам на 3 месяца и на 9 месяцев
 
-        Util.out(String.format("%d [население: %s] смертность по EvalMortalityRate с таблицей ГКС: %.1f, по АДХ: %.1f, по 1-шаговой передвижке: %.1f, по 2-шаговой передвижке: %.1f",
-                               year, which, xcdr1, cdr, xcdr2, xcdr3));
+        Util.out(String
+                .format("%d [население: %s] смертность по EvalMortalityRate с таблицей ГКС: %.1f, по АДХ: %.1f, по 1-шаговой передвижке: %.1f, по 2-шаговой передвижке: %.1f",
+                        year, which, xcdr1, cdr, xcdr2, xcdr3));
     }
-    
+
     private double fwdOneLeap(PopulationByLocality p, CombinedMortalityTable mt, double cbr) throws Exception
     {
         if (p.hasRuralUrban())
@@ -173,9 +177,9 @@ public class TestValidate_193x
             PopulationByLocality p3 = fw.forward(p2, fctx, mt, 1.0);
             PopulationByLocality p4 = fctx.end(p3);
             Util.unused(p4);
-            
+
             double deaths = fw.getObservedDeaths();
-            double xcbr = 1000 * deaths / p.sum(Locality.TOTAL, Gender.BOTH, 0, Population.MAX_AGE);
+            double xcbr = 1000 * deaths / p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
             return xcbr;
         }
     }
@@ -195,7 +199,7 @@ public class TestValidate_193x
             PopulationByLocality p2 = fctx.begin(p);
             PopulationByLocality p3 = fw.forward(p2, fctx, mt, yf1);
             double deaths = fw.getObservedDeaths();
-            
+
             fw = new ForwardPopulationT();
             fw.setBirthRateTotal(cbr);
             PopulationByLocality p4 = fw.forward(p3, fctx, mt, yf2);
@@ -203,9 +207,52 @@ public class TestValidate_193x
 
             PopulationByLocality p5 = fctx.end(p4);
             Util.unused(p5);
-            
-            double xcbr = 1000 * deaths / p.sum(Locality.TOTAL, Gender.BOTH, 0, Population.MAX_AGE);
+
+            double xcbr = 1000 * deaths / p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
             return xcbr;
         }
+    }
+
+    /* =========================================================================== */
+
+    private void test_1() throws Exception
+    {
+        double infant_CDR = ADH_USSR_infant_CDR_1939;
+        double cbr, cdr;
+        Rates r = Recalibrate.m2e(new Rates(CBR_1939_MIDYEAR, CDR_1939_MIDYEAR));
+        cbr = r.cbr;
+        cdr = r.cdr;
+
+        CombinedMortalityTable mt = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
+        mt.comment("ГКС-СССР-1938");
+
+        if (Util.False && use_ADH_USSR_InfantMortalityRate)
+        {
+            double[] qx = mt.getSingleTable(Locality.TOTAL, Gender.BOTH).qx();
+
+            List<PatchInstruction> instructions = new ArrayList<>();
+            PatchInstruction instruction;
+
+            instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 0, infant_CDR / qx[0]);
+            instructions.add(instruction);
+
+            instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 1, 5, infant_CDR / qx[0], 1.0);
+            instructions.add(instruction);
+            mt = PatchMortalityTable.patch(mt, instructions, "младенческая смертность по АДХ");
+        }
+
+        PopulationByLocality p = p1939;
+        // p = p.selectByAge(8, MAX_AGE);
+
+        EvalMortalityRate emr = new EvalMortalityRate();
+        emr.debug(true);
+        double xcdr1 = emr.eval(mt, p, null, cbr);
+        
+        PopulationByLocality ptotal = p.cloneTotalOnly();
+        emr = new EvalMortalityRate();
+        emr.debug(true);
+        double xcdr2 = emr.eval(mt, ptotal, null, cbr);
+        
+        Util.noop();
     }
 }
