@@ -80,6 +80,9 @@ public class TestValidate_193x
     private double CBR_1939_MIDYEAR = 40.0;
     private double CDR_1939_MIDYEAR = 20.1;
 
+    private final double CBR_Rural_1926 = 46.1;
+    private final double CBR_Urban_1926 = 34.4;
+
     private void validate_1939() throws Exception
     {
         validate_193x(1937, "перепись 1937, исправленное", p1937);
@@ -247,12 +250,21 @@ public class TestValidate_193x
         EvalMortalityRate emr = new EvalMortalityRate();
         emr.debug(true);
         double xcdr1 = emr.eval(mt, p, null, cbr);
-        
+
         PopulationByLocality ptotal = p.cloneTotalOnly();
         emr = new EvalMortalityRate();
         emr.debug(true);
         double xcdr2 = emr.eval(mt, ptotal, null, cbr);
-        
+
+        ForwardPopulationUR fwUR = new ForwardPopulationUR();
+        fwUR.debug(true);
+        fwUR.BirthRateRural = CBR_Rural_1926;
+        fwUR.BirthRateUrban = CBR_Urban_1926;
+        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationByLocality px = fctx.begin(p);
+        PopulationByLocality p2 = fwUR.forward(px, fctx, mt, 1.0);
+        PopulationByLocality pend = fctx.end(p2);
+
         Util.noop();
     }
 }

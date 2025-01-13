@@ -19,6 +19,11 @@ public class ForwardPopulationUR extends ForwardPopulation
     protected double BirthRateRural;
     protected double BirthRateUrban;
 
+    private double ur_male_births = 0; 
+    private double ur_female_births = 0; 
+    private double ur_male_deaths_from_births = 0; 
+    private double ur_female_deaths_from_births = 0; 
+
     /*
      * Оценить долю городского населения во всём населении (для указанного пола) 
      */
@@ -92,6 +97,14 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         /* проверить внутреннюю согласованность результата */
         pto.validate();
+        
+        if (debug)
+        {
+            log(String.format("Births TOTAL-MALE = %s", f2s(ur_male_births)));
+            log(String.format("Births TOTAL-FEMALE = %s", f2s(ur_female_births)));
+            log(String.format("Deaths from births TOTAL-MALE = %s", f2s(ur_male_deaths_from_births)));
+            log(String.format("Deaths from births TOTAL-FEMALE = %s", f2s(ur_female_deaths_from_births)));
+        }
 
         return pto;
     }
@@ -134,8 +147,20 @@ public class ForwardPopulationUR extends ForwardPopulation
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
+            if (debug)
+            {
+                log(String.format("Births %s-MALE = %s", locality.code(), f2s(m_births)));
+                log(String.format("Births %s-FEMALE = %s", locality.code(), f2s(f_births)));
+            }
+
             pto.add(locality, Gender.MALE, 0, m_births);
             pto.add(locality, Gender.FEMALE, 0, f_births);
+            
+            if (Util.True)
+            {
+                // TODO: подвергнуь смертности
+                throw new Exception("use fctx != null");
+            }
         }
 
         /* вычислить графу "оба пола" из отдельных граф для мужчин и женщин */
@@ -157,11 +182,11 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
         ndays = Math.max(1,  ndays);
-
+        
         add_births(fctx, locality, Gender.MALE, m_births, mt, ndays);
         add_births(fctx, locality, Gender.FEMALE, f_births, mt, ndays);
     }
-
+    
     private void add_births(PopulationForwardingContext fctx,
             final Locality locality,
             final Gender gender,
@@ -192,6 +217,28 @@ public class ForwardPopulationUR extends ForwardPopulation
          */
         for (int nd = 0; nd < ndays; nd++)
             fctx.add(locality, gender, nd, day_births[nd]);
+
+        double deaths_from_births = total_births - Util.sum(day_births);
+        // ### в статистику смертей
+        
+        switch (gender)
+        {
+        case MALE:
+            ur_male_births += total_births; 
+            ur_male_deaths_from_births += deaths_from_births; 
+            break;
+            
+        case FEMALE:
+            ur_female_births += total_births; 
+            ur_female_deaths_from_births += deaths_from_births; 
+            break;
+        }
+
+        if (debug)
+        {
+            log(String.format("Births %s-%s = %s", locality.code(), gender.name(), f2s(total_births)));
+            log(String.format("Deaths from births %s-%s = %s", locality.code(), gender.name(), f2s(deaths_from_births)));
+        }
     }
     
     public void forward(PopulationByLocality pto,
@@ -278,6 +325,8 @@ public class ForwardPopulationUR extends ForwardPopulation
         
         fctx.fromArray(locality, gender, p2);
     }
+    
+    /* ================================================================================================================== */
     
     /*
      * Перенести часть населения из сельского в городское для достижения указанного уровня урбанизации.
@@ -446,5 +495,13 @@ public class ForwardPopulationUR extends ForwardPopulation
         String s = String.format("%,10d (%7.2f%%)", Math.round(deficit), deficit_pct);
         sb.append(prefix);
         sb.append(s);
+    }
+
+    private String f2s(double v)
+    {
+        String s = String.format("%,15.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
 }

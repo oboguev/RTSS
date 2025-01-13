@@ -17,4 +17,22 @@ public enum Locality
     {
        return this.name;
     }
+    
+    public String code()
+    {
+        switch (this)
+        {
+        case URBAN:
+            return "U";
+            
+        case RURAL:
+            return "R";
+
+        case TOTAL:
+            return "T";
+
+        default:
+            return "X";
+        }
+    }
 }
