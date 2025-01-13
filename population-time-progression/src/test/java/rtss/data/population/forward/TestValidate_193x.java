@@ -42,6 +42,11 @@ public class TestValidate_193x
     // ### test: forward [0-100] by 1 year via EvalMortalityRate 
     // ### test: forward [8-100] by 1 year vs 0.3 + 0.7 
     // ### test: forward [0-100] by 1 year vs 0.3 + 0.7 
+    
+    // ### deaths in P
+    // ### decimate CTX + shift CTX
+    // ### add new births to CTX
+    // ### decimate births + shift new births in CTX
 
     public TestValidate_193x() throws Exception
     {
