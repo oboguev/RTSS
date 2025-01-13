@@ -24,6 +24,16 @@ public class ForwardPopulationUR extends ForwardPopulation
     private double ur_male_deaths_from_births = 0; 
     private double ur_female_deaths_from_births = 0; 
 
+    private double p_u_male_deaths = 0; 
+    private double p_r_male_deaths = 0; 
+    private double p_u_female_deaths = 0; 
+    private double p_r_female_deaths = 0; 
+    
+    private double fctx_u_male_deaths = 0; 
+    private double fctx_r_male_deaths = 0; 
+    private double fctx_u_female_deaths = 0; 
+    private double fctx_r_female_deaths = 0; 
+
     /*
      * Оценить долю городского населения во всём населении (для указанного пола) 
      */
@@ -100,10 +110,21 @@ public class ForwardPopulationUR extends ForwardPopulation
         
         if (debug)
         {
+            log(String.format("Deaths P-U-MALE [%s] => %s", p.toString(), f2s(p_u_male_deaths)));
+            log(String.format("Deaths P-R-MALE [%s] => %s", p.toString(), f2s(p_r_male_deaths )));
+            log(String.format("Deaths P-UR-MALE [%s] => %s", p.toString(), f2s(p_u_male_deaths + p_r_male_deaths )));
+
+            log(String.format("Deaths P-U-FEMALE [%s] => %s", p.toString(), f2s(p_u_female_deaths)));
+            log(String.format("Deaths P-R-FEMALE [%s] => %s", p.toString(), f2s(p_r_female_deaths )));
+            log(String.format("Deaths P-UR-FEMALE [%s] => %s", p.toString(), f2s(p_u_female_deaths + p_r_female_deaths )));
+            
             log(String.format("Births TOTAL-MALE = %s", f2s(ur_male_births)));
             log(String.format("Births TOTAL-FEMALE = %s", f2s(ur_female_births)));
             log(String.format("Deaths from births TOTAL-MALE = %s", f2s(ur_male_deaths_from_births)));
             log(String.format("Deaths from births TOTAL-FEMALE = %s", f2s(ur_female_deaths_from_births)));
+            
+            log(String.format("Observed births = %s", f2s(this.getObservedBirths())));
+            log(String.format("Observed deaths = %s", f2s(this.getObservedDeaths())));
         }
 
         return pto;
@@ -219,7 +240,7 @@ public class ForwardPopulationUR extends ForwardPopulation
             fctx.add(locality, gender, nd, day_births[nd]);
 
         double deaths_from_births = total_births - Util.sum(day_births);
-        // ### в статистику смертей
+        observed_deaths += deaths_from_births;
         
         switch (gender)
         {
@@ -232,6 +253,9 @@ public class ForwardPopulationUR extends ForwardPopulation
             ur_female_births += total_births; 
             ur_female_deaths_from_births += deaths_from_births; 
             break;
+            
+        case BOTH:
+            throw new IllegalArgumentException();
         }
 
         if (debug)
@@ -252,6 +276,8 @@ public class ForwardPopulationUR extends ForwardPopulation
     {
         /* рождений пока нет */
         pto.set(locality, gender, 0, 0);
+        
+        double sum_deaths = 0;
 
         /* Продвижка по таблице смертности.
          * 
@@ -270,11 +296,31 @@ public class ForwardPopulationUR extends ForwardPopulation
             double deaths = moving * (1.0 - mi.px);
             
             observed_deaths += deaths;
+            sum_deaths += deaths;
 
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
+        
+        switch (locality.name() + "-" + gender.name())
+        {
+        case "URBAN-MALE":
+            p_u_male_deaths += sum_deaths; 
+            break;
 
+        case "URBAN-FEMALE":
+            p_u_female_deaths += sum_deaths;
+            break;
+        
+        case "RURAL-MALE":
+            p_r_male_deaths += sum_deaths;
+            break;
+        
+        case "RURAL-FEMALE":
+            p_r_female_deaths += sum_deaths;
+            break;
+        }
+        
         /*
          * Продвижка контекста ранней детской смертности
          */
@@ -324,6 +370,8 @@ public class ForwardPopulationUR extends ForwardPopulation
         }
         
         fctx.fromArray(locality, gender, p2);
+        
+        // ### observed_deaths
     }
     
     /* ================================================================================================================== */
