@@ -19,20 +19,20 @@ public class ForwardPopulationUR extends ForwardPopulation
     protected double BirthRateRural;
     protected double BirthRateUrban;
 
-    private double ur_male_births = 0; 
-    private double ur_female_births = 0; 
-    private double ur_male_deaths_from_births = 0; 
-    private double ur_female_deaths_from_births = 0; 
+    private double ur_male_births = 0;
+    private double ur_female_births = 0;
+    private double ur_male_deaths_from_births = 0;
+    private double ur_female_deaths_from_births = 0;
 
-    private double p_u_male_deaths = 0; 
-    private double p_r_male_deaths = 0; 
-    private double p_u_female_deaths = 0; 
-    private double p_r_female_deaths = 0; 
-    
-    private double fctx_u_male_deaths = 0; 
-    private double fctx_r_male_deaths = 0; 
-    private double fctx_u_female_deaths = 0; 
-    private double fctx_r_female_deaths = 0; 
+    private double p_u_male_deaths = 0;
+    private double p_r_male_deaths = 0;
+    private double p_u_female_deaths = 0;
+    private double p_r_female_deaths = 0;
+
+    private double fctx_u_male_deaths = 0;
+    private double fctx_r_male_deaths = 0;
+    private double fctx_u_female_deaths = 0;
+    private double fctx_r_female_deaths = 0;
 
     /*
      * Оценить долю городского населения во всём населении (для указанного пола) 
@@ -107,22 +107,30 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         /* проверить внутреннюю согласованность результата */
         pto.validate();
-        
+
         if (debug)
         {
             log(String.format("Deaths P-U-MALE [%s] => %s", p.toString(), f2s(p_u_male_deaths)));
-            log(String.format("Deaths P-R-MALE [%s] => %s", p.toString(), f2s(p_r_male_deaths )));
-            log(String.format("Deaths P-UR-MALE [%s] => %s", p.toString(), f2s(p_u_male_deaths + p_r_male_deaths )));
+            log(String.format("Deaths P-R-MALE [%s] => %s", p.toString(), f2s(p_r_male_deaths)));
+            log(String.format("Deaths P-UR-MALE [%s] => %s", p.toString(), f2s(p_u_male_deaths + p_r_male_deaths)));
 
             log(String.format("Deaths P-U-FEMALE [%s] => %s", p.toString(), f2s(p_u_female_deaths)));
-            log(String.format("Deaths P-R-FEMALE [%s] => %s", p.toString(), f2s(p_r_female_deaths )));
-            log(String.format("Deaths P-UR-FEMALE [%s] => %s", p.toString(), f2s(p_u_female_deaths + p_r_female_deaths )));
-            
+            log(String.format("Deaths P-R-FEMALE [%s] => %s", p.toString(), f2s(p_r_female_deaths)));
+            log(String.format("Deaths P-UR-FEMALE [%s] => %s", p.toString(), f2s(p_u_female_deaths + p_r_female_deaths)));
+
+            log(String.format("Deaths FCTX-U-MALE [%s] => %s", p.toString(), f2s(fctx_u_male_deaths)));
+            log(String.format("Deaths FCTX-R-MALE [%s] => %s", p.toString(), f2s(fctx_r_male_deaths)));
+            log(String.format("Deaths FCTX-UR-MALE [%s] => %s", p.toString(), f2s(fctx_u_male_deaths + fctx_r_male_deaths)));
+
+            log(String.format("Deaths FCTX-U-FEMALE [%s] => %s", p.toString(), f2s(fctx_u_female_deaths)));
+            log(String.format("Deaths FCTX-R-FEMALE [%s] => %s", p.toString(), f2s(fctx_r_female_deaths)));
+            log(String.format("Deaths FCTX-UR-FEMALE [%s] => %s", p.toString(), f2s(fctx_u_female_deaths + fctx_r_female_deaths)));
+
             log(String.format("Births TOTAL-MALE = %s", f2s(ur_male_births)));
             log(String.format("Births TOTAL-FEMALE = %s", f2s(ur_female_births)));
             log(String.format("Deaths from births TOTAL-MALE = %s", f2s(ur_male_deaths_from_births)));
             log(String.format("Deaths from births TOTAL-FEMALE = %s", f2s(ur_female_deaths_from_births)));
-            
+
             log(String.format("Observed births = %s", f2s(this.getObservedBirths())));
             log(String.format("Observed deaths = %s", f2s(this.getObservedDeaths())));
         }
@@ -176,7 +184,7 @@ public class ForwardPopulationUR extends ForwardPopulation
 
             pto.add(locality, Gender.MALE, 0, m_births);
             pto.add(locality, Gender.FEMALE, 0, f_births);
-            
+
             if (Util.True)
             {
                 // TODO: подвергнуь смертности
@@ -196,18 +204,18 @@ public class ForwardPopulationUR extends ForwardPopulation
             final double yfraction) throws Exception
     {
         double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
-        double births = sum  * yfraction * birthRate / 1000;
+        double births = sum * yfraction * birthRate / 1000;
         observed_births += births;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
         int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
-        ndays = Math.max(1,  ndays);
-        
+        ndays = Math.max(1, ndays);
+
         add_births(fctx, locality, Gender.MALE, m_births, mt, ndays);
         add_births(fctx, locality, Gender.FEMALE, f_births, mt, ndays);
     }
-    
+
     private void add_births(PopulationForwardingContext fctx,
             final Locality locality,
             final Gender gender,
@@ -223,7 +231,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         double[] day_births = new double[ndays];
         for (int nd = 0; nd < ndays; nd++)
             day_births[nd] = total_births / ndays;
-        
+
         /*
          * подвергнуть рождения смертности
          * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности,
@@ -232,7 +240,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
             day_births[nd] *= day_lx[nd] / day_lx[0];
-        
+
         /*
          * добавить результат в контекст
          */
@@ -241,19 +249,19 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
-        
+
         switch (gender)
         {
         case MALE:
-            ur_male_births += total_births; 
-            ur_male_deaths_from_births += deaths_from_births; 
+            ur_male_births += total_births;
+            ur_male_deaths_from_births += deaths_from_births;
             break;
-            
+
         case FEMALE:
-            ur_female_births += total_births; 
-            ur_female_deaths_from_births += deaths_from_births; 
+            ur_female_births += total_births;
+            ur_female_deaths_from_births += deaths_from_births;
             break;
-            
+
         case BOTH:
             throw new IllegalArgumentException();
         }
@@ -264,7 +272,7 @@ public class ForwardPopulationUR extends ForwardPopulation
             log(String.format("Deaths from births %s-%s = %s", locality.code(), gender.name(), f2s(deaths_from_births)));
         }
     }
-    
+
     public void forward(PopulationByLocality pto,
             final PopulationByLocality p,
             PopulationForwardingContext fctx,
@@ -276,7 +284,7 @@ public class ForwardPopulationUR extends ForwardPopulation
     {
         /* рождений пока нет */
         pto.set(locality, gender, 0, 0);
-        
+
         double sum_deaths = 0;
 
         /* Продвижка по таблице смертности.
@@ -294,33 +302,33 @@ public class ForwardPopulationUR extends ForwardPopulation
             double moving = current * yfraction;
             double staying = current - moving;
             double deaths = moving * (1.0 - mi.px);
-            
+
             observed_deaths += deaths;
             sum_deaths += deaths;
 
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
-        
+
         switch (locality.name() + "-" + gender.name())
         {
         case "URBAN-MALE":
-            p_u_male_deaths += sum_deaths; 
+            p_u_male_deaths += sum_deaths;
             break;
 
         case "URBAN-FEMALE":
             p_u_female_deaths += sum_deaths;
             break;
-        
+
         case "RURAL-MALE":
             p_r_male_deaths += sum_deaths;
             break;
-        
+
         case "RURAL-FEMALE":
             p_r_female_deaths += sum_deaths;
             break;
         }
-        
+
         /*
          * Продвижка контекста ранней детской смертности
          */
@@ -342,23 +350,27 @@ public class ForwardPopulationUR extends ForwardPopulation
         int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
         if (ndays == 0)
             return;
-        
+
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
-        /* lx[nd] содержит число выживших на день жизни nd согласно таблице смертности */ 
+        /* lx[nd] содержит число выживших на день жизни nd согласно таблице смертности */
 
         double[] p = fctx.asArray(locality, gender);
         double[] p2 = new double[p.length];
-        
+
+        double sum_deaths = 0;
+
         for (int nd = 0; nd < p.length; nd++)
         {
             int nd2 = nd + ndays;
-            
+
             double v = p[nd];
+            double v_initial = v;
 
             if (nd2 < p2.length)
             {
                 v *= day_lx[nd2] / day_lx[nd];
                 p2[nd2] = v;
+                sum_deaths += v_initial - v;
             }
             else
             {
@@ -366,16 +378,36 @@ public class ForwardPopulationUR extends ForwardPopulation
                 nd2 = age * fctx.DAYS_PER_YEAR;
                 v *= day_lx[nd2] / day_lx[nd];
                 pto.add(locality, gender, age, v);
+                sum_deaths += v_initial - v;
             }
         }
-        
+
         fctx.fromArray(locality, gender, p2);
-        
-        // ### observed_deaths
+
+        switch (locality.name() + "-" + gender.name())
+        {
+        case "URBAN-MALE":
+            fctx_u_male_deaths += sum_deaths;
+            break;
+
+        case "URBAN-FEMALE":
+            fctx_u_female_deaths += sum_deaths;
+            break;
+
+        case "RURAL-MALE":
+            fctx_r_male_deaths += sum_deaths;
+            break;
+
+        case "RURAL-FEMALE":
+            fctx_r_female_deaths += sum_deaths;
+            break;
+        }
+
+        observed_deaths += sum_deaths;
     }
-    
+
     /* ================================================================================================================== */
-    
+
     /*
      * Перенести часть населения из сельского в городское для достижения указанного уровня урбанизации.
      * Мы вычисляем требуемое количество передвижения и переносим это население.
