@@ -4,22 +4,22 @@ import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
-import rtss.util.Util;
+import rtss.util.Loggable;
 
 /**
  * Вычислить годовой уровень смертности при данной таблице смертности,
  * данной возрастной структуре населения и данном уровне рождаемости
  */
-public class EvalMortalityRate
+public class EvalMortalityRate extends Loggable
 {
     private static final int MAX_AGE = CombinedMortalityTable.MAX_AGE;
 
-    public static double eval(final CombinedMortalityTable mt, final PopulationByLocality p, double cbr) throws Exception
+    public double eval(final CombinedMortalityTable mt, final PopulationByLocality p, double cbr) throws Exception
     {
         return eval(mt, p, null, cbr);
     }
 
-    public static double eval(
+    public double eval(
             final CombinedMortalityTable mt, 
             PopulationByLocality p, 
             PopulationForwardingContext fctx, 
@@ -93,7 +93,7 @@ public class EvalMortalityRate
     /*
      * Число смертей за год в части населения @p указанной (@locality, @gender и @age) за грядущий год. 
      */
-    private static double deaths(
+    private double deaths(
             final CombinedMortalityTable mt,
             final PopulationByLocality p,
             Locality locality,
@@ -108,7 +108,7 @@ public class EvalMortalityRate
     /*
      * Число смертей в части детского контекста указанной (@locality и @gender) за грядущий год.
      */
-    private static double deaths(
+    private double deaths(
             final CombinedMortalityTable mt,
             final PopulationForwardingContext fctx,
             Locality locality,
@@ -131,7 +131,7 @@ public class EvalMortalityRate
     /*
      * Число смертей от новых рождений за год
      */
-    private static double deaths_from_births(final double total_pop, final double cbr, final CombinedMortalityTable mt) throws Exception
+    private double deaths_from_births(final double total_pop, final double cbr, final CombinedMortalityTable mt) throws Exception
     {
         double all_births = total_pop * cbr / 1000; 
         double m_births = all_births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
@@ -139,7 +139,7 @@ public class EvalMortalityRate
         return deaths_from_births(Gender.MALE, m_births, mt) + deaths_from_births(Gender.FEMALE, f_births, mt);
     }
 
-    private static double deaths_from_births(Gender gender, double births, final CombinedMortalityTable mt) throws Exception
+    private double deaths_from_births(Gender gender, double births, final CombinedMortalityTable mt) throws Exception
     {
         double deaths = 0;
         
@@ -169,62 +169,60 @@ public class EvalMortalityRate
      * Диагностическая распечатка
      */
     
-    private static boolean do_diag = Util.False;
-    
-    private static void show_ur(CombinedMortalityTable mt, PopulationByLocality p, Gender gender) throws Exception
+    private void show_ur(CombinedMortalityTable mt, PopulationByLocality p, Gender gender) throws Exception
     {
-        if (!do_diag)
-            return;
+        if (debug)
+        {
+            double total_deaths = 0;
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                total_deaths += deaths(mt, p, Locality.URBAN, gender, age);
+                total_deaths += deaths(mt, p, Locality.RURAL, gender, age);
+            }
             
-        double total_deaths = 0;
-        for (int age = 0; age <= MAX_AGE; age++)
-        {
-            total_deaths += deaths(mt, p, Locality.URBAN, gender, age);
-            total_deaths += deaths(mt, p, Locality.RURAL, gender, age);
+            log(String.format("Deaths UR-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
         }
-        
-        Util.out(String.format("Deaths UR-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
     }
     
     
-    private static void show_ur(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender) throws Exception
+    private void show_ur(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender) throws Exception
     {
-        if (!do_diag)
-            return;
-        
-        double total_deaths = 0;
-        total_deaths += deaths(mt, fctx, Locality.URBAN, gender);
-        total_deaths += deaths(mt, fctx, Locality.RURAL, gender);
-
-        Util.out(String.format("Deaths UR-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
-    }
-
-    private static void show_t(CombinedMortalityTable mt, PopulationByLocality p, Gender gender)  throws Exception
-    {
-        if (!do_diag)
-            return;
-        
-        double total_deaths = 0;
-        for (int age = 0; age <= MAX_AGE; age++)
+        if (debug)
         {
-            total_deaths += deaths(mt, p, Locality.TOTAL, gender, age);
-        }
+            double total_deaths = 0;
+            total_deaths += deaths(mt, fctx, Locality.URBAN, gender);
+            total_deaths += deaths(mt, fctx, Locality.RURAL, gender);
 
-        Util.out(String.format("Deaths T-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
+            log(String.format("Deaths UR-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
+        }
+    }
+
+    private void show_t(CombinedMortalityTable mt, PopulationByLocality p, Gender gender)  throws Exception
+    {
+        if (debug)
+        {
+            double total_deaths = 0;
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                total_deaths += deaths(mt, p, Locality.TOTAL, gender, age);
+            }
+
+            log(String.format("Deaths T-P [%s] %s => %s", p.toString(), gender.name(), f2s(total_deaths)));
+        }
     }
     
-    private static void show_t(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender)  throws Exception
+    private void show_t(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender)  throws Exception
     {
-        if (!do_diag)
-            return;
-        
-        double total_deaths = 0;
-        total_deaths += deaths(mt, fctx, Locality.TOTAL, gender);
+        if (debug)
+        {
+            double total_deaths = 0;
+            total_deaths += deaths(mt, fctx, Locality.TOTAL, gender);
 
-        Util.out(String.format("Deaths T-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
+            log(String.format("Deaths T-FCTX [%s] %s => %s", fctx.toString(), gender.name(), f2s(total_deaths)));
+        }
     }
 
-    private static String f2s(double v)
+    private String f2s(double v)
     {
         String s = String.format("%,15.0f", v);
         while (s.startsWith(" "))

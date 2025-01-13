@@ -30,8 +30,8 @@ public class InterpolateMortalityTable
             double cbr,
             double cdr) throws Exception
     {
-        double cdr1 = EvalMortalityRate.eval(mt1, p, fctx, cbr);
-        double cdr2 = EvalMortalityRate.eval(mt2, p, fctx, cbr);
+        double cdr1 = new EvalMortalityRate().eval(mt1, p, fctx, cbr);
+        double cdr2 = new EvalMortalityRate().eval(mt2, p, fctx, cbr);
 
         double a = (cdr - cdr2) / (cdr1 - cdr2);
 
@@ -45,7 +45,7 @@ public class InterpolateMortalityTable
 
         CombinedMortalityTable mt = CombinedMortalityTable.interpolate(mt1, mt2, 1 - a);
 
-        double cdr_mt = EvalMortalityRate.eval(mt, p, fctx, cbr);
+        double cdr_mt = new EvalMortalityRate().eval(mt, p, fctx, cbr);
 
         if (Util.differ(cdr, cdr_mt, 0.005))
             throw new Exception("Error evaluating combined mortality table: verification mismatch");
@@ -95,8 +95,8 @@ public class InterpolateMortalityTable
         // xmt1 = patchInfantMortalityRate(xmt1, imr);
         // xmt2 = patchInfantMortalityRate(xmt2, imr);
 
-        double cdr1 = EvalMortalityRate.eval(xmt1, p, fctx, cbr);
-        double cdr2 = EvalMortalityRate.eval(xmt2, p, fctx, cbr);
+        double cdr1 = new EvalMortalityRate().eval(xmt1, p, fctx, cbr);
+        double cdr2 = new EvalMortalityRate().eval(xmt2, p, fctx, cbr);
 
         if (cdr2 <= cdr1)
             throw new Exception("Таблица для данного уровня смертности несоставима");
@@ -118,7 +118,7 @@ public class InterpolateMortalityTable
             double w = (w1 + w2) /2;
             CombinedMortalityTable xmtw = CombinedMortalityTable.interpolate(mt1, mt2, toAge, w);
             xmtw = patchInfantMortalityRate(xmtw, imr);
-            double cdrw = EvalMortalityRate.eval(xmtw, p, fctx, cbr);
+            double cdrw = new EvalMortalityRate().eval(xmtw, p, fctx, cbr);
             
             if (Math.abs(cdr - cdrw) < 0.01)
                 return xmtw;

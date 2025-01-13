@@ -1,8 +1,9 @@
 package rtss.data.population.forward;
 
 import rtss.data.population.Population;
+import rtss.util.Loggable;
 
-public class ForwardPopulation
+public class ForwardPopulation extends Loggable
 {
     protected static final int MAX_AGE = Population.MAX_AGE;
     protected final double MaleFemaleBirthRatio = 1.06;

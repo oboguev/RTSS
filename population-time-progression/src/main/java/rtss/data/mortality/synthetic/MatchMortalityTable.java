@@ -39,7 +39,7 @@ public class MatchMortalityTable
         instruction.scale = scale1;
         
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instructions, addComment);
-        double xcdr = EvalMortalityRate.eval(xmt, p, null, cbr);
+        double xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
         if (Math.abs(xcdr - cdr) < cdr_tolerance)
             return xmt;
         
@@ -52,7 +52,7 @@ public class MatchMortalityTable
             {
                 instruction.scale *= 2;
                 xmt = PatchMortalityTable.patch(mt, instructions, addComment);
-                xcdr = EvalMortalityRate.eval(xmt, p, null, cbr);
+                xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
                 if (xcdr > cdr)
                     break;
             }
@@ -67,7 +67,7 @@ public class MatchMortalityTable
             {
                 instruction.scale /= 2;
                 xmt = PatchMortalityTable.patch(mt, instructions, addComment);
-                xcdr = EvalMortalityRate.eval(xmt, p, null, cbr);
+                xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
                 if (xcdr < cdr)
                     break;
             }
@@ -93,7 +93,7 @@ public class MatchMortalityTable
 
             instruction.scale = scalex;
             xmt = PatchMortalityTable.patch(mt, instructions, addComment);
-            xcdr = EvalMortalityRate.eval(xmt, p, null, cbr);
+            xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
 
             if (Math.abs(xcdr - cdr) < cdr_tolerance)
                 return xmt;

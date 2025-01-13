@@ -37,6 +37,11 @@ public class TestValidate_193x
             ex.printStackTrace();
         }
     }
+    
+    // ### test: forward [8-100] by 1 year via EvalMortalityRate 
+    // ### test: forward [0-100] by 1 year via EvalMortalityRate 
+    // ### test: forward [8-100] by 1 year vs 0.3 + 0.7 
+    // ### test: forward [0-100] by 1 year vs 0.3 + 0.7 
 
     public TestValidate_193x() throws Exception
     {
@@ -137,7 +142,7 @@ public class TestValidate_193x
             mt = PatchMortalityTable.patch(mt, instructions, "младенческая смертность по АДХ");
         }
 
-        double xcdr1 = EvalMortalityRate.eval(mt, p, null, cbr);
+        double xcdr1 = new EvalMortalityRate().eval(mt, p, null, cbr);
         double xcdr2 = fwdOneLeap(p, mt, cbr);
         double xcdr3 = fwdtwoLeaps(p, mt, cbr, 0.3, 0.9);
 
