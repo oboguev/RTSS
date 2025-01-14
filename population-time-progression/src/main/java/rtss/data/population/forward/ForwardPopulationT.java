@@ -77,6 +77,13 @@ public class ForwardPopulationT extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
+        if (debug)
+        {
+            log(String.format("P = %s", p.toString()));
+            log(String.format("FCTX = %s", fctx.toString()));
+            log("");
+        }
+
         /* пустая структура для получения результатов */
         PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
 
@@ -90,15 +97,19 @@ public class ForwardPopulationT extends ForwardPopulation
 
         if (debug)
         {
-            log(String.format("Deaths P-TOTAL-MALE [%s] => %s", p.toString(), f2s(p_t_male_deaths)));
-            log(String.format("Deaths P-TOTAL-FEMALE [%s] => %s", p.toString(), f2s(p_t_female_deaths)));
-            log(String.format("Deaths FCTX-TOTAL-MALE [%s] => %s", p.toString(), f2s(fctx_t_male_deaths)));
-            log(String.format("Deaths FCTX-TOTAL-FEMALE [%s] => %s", p.toString(), f2s(fctx_t_female_deaths)));
+            log(String.format("Deaths P-TOTAL-MALE => %s", f2s(p_t_male_deaths)));
+            log(String.format("Deaths P-TOTAL-FEMALE => %s", f2s(p_t_female_deaths)));
+            log(String.format("Deaths FCTX-TOTAL-MALE => %s", f2s(fctx_t_male_deaths)));
+            log(String.format("Deaths FCTX-TOTAL-FEMALE => %s", f2s(fctx_t_female_deaths)));
+            log("");
 
             log(String.format("Births TOTAL-MALE = %s", f2s(t_male_births)));
             log(String.format("Births TOTAL-FEMALE = %s", f2s(t_female_births)));
+            log("");
+
             log(String.format("Deaths from births TOTAL-MALE = %s", f2s(t_male_deaths_from_births)));
             log(String.format("Deaths from births TOTAL-FEMALE = %s", f2s(t_female_deaths_from_births)));
+            log("");
 
             log(String.format("Observed births = %s", f2s(this.getObservedBirths())));
             log(String.format("Observed deaths = %s", f2s(this.getObservedDeaths())));

@@ -93,6 +93,13 @@ public class ForwardPopulationUR extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
+        if (debug)
+        {
+            log(String.format("P = %s", p.toString()));
+            log(String.format("FCTX = %s", fctx.toString()));
+            log("");
+        }
+
         /* пустая структура для получения результатов */
         PopulationByLocality pto = PopulationByLocality.newPopulationByLocality();
 
@@ -110,26 +117,34 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         if (debug)
         {
-            log(String.format("Deaths P-U-MALE [%s] => %s", p.toString(), f2s(p_u_male_deaths)));
-            log(String.format("Deaths P-R-MALE [%s] => %s", p.toString(), f2s(p_r_male_deaths)));
-            log(String.format("Deaths P-UR-MALE [%s] => %s", p.toString(), f2s(p_u_male_deaths + p_r_male_deaths)));
+            log("");
+            log(String.format("Deaths P-U-MALE => %s", f2s(p_u_male_deaths)));
+            log(String.format("Deaths P-R-MALE => %s", f2s(p_r_male_deaths)));
+            log(String.format("Deaths P-UR-MALE => %s", f2s(p_u_male_deaths + p_r_male_deaths)));
+            log("");
 
-            log(String.format("Deaths P-U-FEMALE [%s] => %s", p.toString(), f2s(p_u_female_deaths)));
-            log(String.format("Deaths P-R-FEMALE [%s] => %s", p.toString(), f2s(p_r_female_deaths)));
-            log(String.format("Deaths P-UR-FEMALE [%s] => %s", p.toString(), f2s(p_u_female_deaths + p_r_female_deaths)));
+            log(String.format("Deaths P-U-FEMALE => %s", f2s(p_u_female_deaths)));
+            log(String.format("Deaths P-R-FEMALE => %s", f2s(p_r_female_deaths)));
+            log(String.format("Deaths P-UR-FEMALE => %s", f2s(p_u_female_deaths + p_r_female_deaths)));
+            log("");
 
-            log(String.format("Deaths FCTX-U-MALE [%s] => %s", p.toString(), f2s(fctx_u_male_deaths)));
-            log(String.format("Deaths FCTX-R-MALE [%s] => %s", p.toString(), f2s(fctx_r_male_deaths)));
-            log(String.format("Deaths FCTX-UR-MALE [%s] => %s", p.toString(), f2s(fctx_u_male_deaths + fctx_r_male_deaths)));
+            log(String.format("Deaths FCTX-U-MALE => %s", f2s(fctx_u_male_deaths)));
+            log(String.format("Deaths FCTX-R-MALE => %s", f2s(fctx_r_male_deaths)));
+            log(String.format("Deaths FCTX-UR-MALE => %s", f2s(fctx_u_male_deaths + fctx_r_male_deaths)));
+            log("");
 
-            log(String.format("Deaths FCTX-U-FEMALE [%s] => %s", p.toString(), f2s(fctx_u_female_deaths)));
-            log(String.format("Deaths FCTX-R-FEMALE [%s] => %s", p.toString(), f2s(fctx_r_female_deaths)));
-            log(String.format("Deaths FCTX-UR-FEMALE [%s] => %s", p.toString(), f2s(fctx_u_female_deaths + fctx_r_female_deaths)));
+            log(String.format("Deaths FCTX-U-FEMALE => %s", f2s(fctx_u_female_deaths)));
+            log(String.format("Deaths FCTX-R-FEMALE => %s", f2s(fctx_r_female_deaths)));
+            log(String.format("Deaths FCTX-UR-FEMALE => %s", f2s(fctx_u_female_deaths + fctx_r_female_deaths)));
+            log("");
 
             log(String.format("Births TOTAL-MALE = %s", f2s(ur_male_births)));
             log(String.format("Births TOTAL-FEMALE = %s", f2s(ur_female_births)));
+            log("");
+
             log(String.format("Deaths from births TOTAL-MALE = %s", f2s(ur_male_deaths_from_births)));
             log(String.format("Deaths from births TOTAL-FEMALE = %s", f2s(ur_female_deaths_from_births)));
+            log("");
 
             log(String.format("Observed births = %s", f2s(this.getObservedBirths())));
             log(String.format("Observed deaths = %s", f2s(this.getObservedDeaths())));
