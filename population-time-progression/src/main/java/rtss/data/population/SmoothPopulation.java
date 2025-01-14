@@ -9,13 +9,13 @@ import rtss.util.Util;
 /**
  * Сгладить возрастное распределение для устранения 5-летней и 10-летней аккумуляции.
  * 
- * Пирамиды старых переписей выглядят ершисыми из-за склонности тогдашних респондентов при указании своего возраста 
- * округлять его до ближайшей цифры кратной 5 или 10 (Б. Ястремский, "Можно ли пользоваться непосредственными данными 
+ * Пирамиды старых переписей выглядят ершисыми из-за склонности тогдашних респондентов при указании своего возраста
+ * округлять его до ближайшей цифры кратной 5 или 10 (Б. Ястремский, "Можно ли пользоваться непосредственными данными
  * переписей о возрастном составе населения" // Вестник Статистики, 1920 №5-8, стр. 7-15 и №9-12 статья I-9).
  * 
- * Некоторые другие алгоритмы сглаживания, реализованные для проекта народонаселения ООН, см. в 
- *     https://timriffe.github.io/DemoTools/articles/smoothing_with_demotools.html
- *     https://timriffe.github.io/DemoTools/articles/Age-heaping_quality_with_Demotools.html
+ * Некоторые другие алгоритмы сглаживания, реализованные для проекта народонаселения ООН, см. в
+ * https://timriffe.github.io/DemoTools/articles/smoothing_with_demotools.html
+ * https://timriffe.github.io/DemoTools/articles/Age-heaping_quality_with_Demotools.html
  * 
  * Мы не применяем полиномиального сглаживания, т.к. оно имеет тенеденцию чрезмерно заглаживать действительные провалы
  * и поэтому плохо годится для историко-демографических исследований социальных катаклизмов.
@@ -105,9 +105,17 @@ public class SmoothPopulation
 
         if (iswhole(d0))
             d = whole(d, d0);
-        
+
         if (Util.differ(Util.sum(d), Util.sum(d0)))
             throw new Exception("Error in smoothig");
+
+        /* make sure ages 0-2 are left intact */
+        if (Util.differ(d[0], d0[0]) ||
+            Util.differ(d[1], d0[1]) ||
+            Util.differ(d[2], d0[2]))
+        {
+            throw new Exception("Error in smoothig: ages 0-2 changed");
+        }
 
         return d;
     }
@@ -115,6 +123,10 @@ public class SmoothPopulation
     private static void ave(double[] d, int k)
     {
         if (k == 0 || k + 1 >= d.length)
+            return;
+
+        /* leave ages 0-2 intact */
+        if (k - 1 <= 2)
             return;
 
         double av = (d[k - 1] + d[k + 1]) / 2;
@@ -162,22 +174,23 @@ public class SmoothPopulation
         int sign = Util.sign(excess);
         if (sign == 0)
             return;
-        
+
         double[] diff = Util.sub(d, d0);
         List<IndexValue> list = new ArrayList<>();
         for (int k = 0; k < diff.length; k++)
         {
             if (Util.sign(diff[k]) != sign)
                 diff[k] = 0;
-            else {
+            else
+            {
                 diff[k] = Math.abs(diff[k]);
                 list.add(new IndexValue(k, diff[k]));
             }
         }
-        
+
         Collections.sort(list);
         Collections.reverse(list);
-        
+
         int i = -1;
         while (excess * sign > 0)
         {
@@ -188,17 +201,18 @@ public class SmoothPopulation
             excess -= sign;
         }
     }
-    
+
     private static class IndexValue implements Comparable<IndexValue>
     {
         int index;
         double value;
+
         IndexValue(int index, double value)
         {
             this.index = index;
             this.value = value;
         }
-        
+
         @Override
         public int compareTo(IndexValue o)
         {
