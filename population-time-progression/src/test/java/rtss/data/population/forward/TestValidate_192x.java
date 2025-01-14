@@ -76,11 +76,11 @@ public class TestValidate_192x
         // ЦСУ СССР, "Естественное движение населения Союза ССР в 1926 г.", т. 1, вып. 2, М. 1929, стр. 39
         // CDR для территории СССР = 20.3
 
-        Util.out(String.format("CDR eval по переписи, %.1f", xcdr1));
-        Util.out(String.format("CDR передвижкой-UR по переписи, %.1f", xcdr2_ur));
-        Util.out(String.format("CDR передвижкой-T по переписи, %.1f", xcdr2_t));
-        Util.out(String.format("CDR eval по АДХ-1926, %.1f", xcdr3_1926));
-        Util.out(String.format("CDR eval по АДХ-1927, %.1f", xcdr3_1927));
+        Util.out(String.format("CDR eval населения по переписи, %.1f", xcdr1));
+        Util.out(String.format("CDR передвижкой-UR населения по переписи, %.1f", xcdr2_ur));
+        Util.out(String.format("CDR передвижкой-T населения по переписи, %.1f", xcdr2_t));
+        Util.out(String.format("CDR eval населения по АДХ-1926, %.1f", xcdr3_1926));
+        Util.out(String.format("CDR eval населения по АДХ-1927, %.1f", xcdr3_1927));
 
         Util.unused(pend_t, pend_ur);
     }
