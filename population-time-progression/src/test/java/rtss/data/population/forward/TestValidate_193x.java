@@ -82,6 +82,7 @@ public class TestValidate_193x
 
     private final double CBR_Rural_1926 = 46.1;
     private final double CBR_Urban_1926 = 34.4;
+    private final double CBR_Total_1926 = 44.0;
 
     private void validate_1939() throws Exception
     {
@@ -247,23 +248,31 @@ public class TestValidate_193x
         PopulationByLocality p = p1939;
         // p = p.selectByAge(8, MAX_AGE);
 
-        EvalMortalityRate emr = new EvalMortalityRate();
-        emr.debug(true);
-        double xcdr1 = emr.eval(mt, p, null, cbr);
+        EvalMortalityRate emr_ur = new EvalMortalityRate();
+        emr_ur.debug(true);
+        double xcdr1_ur = emr_ur.eval(mt, p, null, CBR_Total_1926);
 
         PopulationByLocality ptotal = p.cloneTotalOnly();
-        emr = new EvalMortalityRate();
-        emr.debug(true);
-        double xcdr2 = emr.eval(mt, ptotal, null, cbr);
+        EvalMortalityRate emr_t = new EvalMortalityRate();
+        emr_t.debug(true);
+        double xcdr2_t = emr_t.eval(mt, ptotal, null, CBR_Total_1926);
 
         ForwardPopulationUR fwUR = new ForwardPopulationUR();
         fwUR.debug(true);
         fwUR.BirthRateRural = CBR_Rural_1926;
         fwUR.BirthRateUrban = CBR_Urban_1926;
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
-        PopulationByLocality px = fctx.begin(p);
-        PopulationByLocality p2 = fwUR.forward(px, fctx, mt, 1.0);
-        PopulationByLocality pend = fctx.end(p2);
+        PopulationForwardingContext fctx_ur = new PopulationForwardingContext();
+        PopulationByLocality px_ur = fctx_ur.begin(p);
+        PopulationByLocality p2_ur = fwUR.forward(px_ur, fctx_ur, mt, 1.0);
+        PopulationByLocality pend_ur = fctx_ur.end(p2_ur);
+
+        ForwardPopulationT fwT = new ForwardPopulationT();
+        fwT.debug(true);
+        fwT.BirthRateTotal = CBR_Total_1926;
+        PopulationForwardingContext fctx_t = new PopulationForwardingContext();
+        PopulationByLocality px_t = fctx_t.begin(ptotal);
+        PopulationByLocality p2_t = fwT.forward(px_t, fctx_t, mt, 1.0);
+        PopulationByLocality pend_t = fctx_t.end(p2_t);
 
         Util.noop();
     }

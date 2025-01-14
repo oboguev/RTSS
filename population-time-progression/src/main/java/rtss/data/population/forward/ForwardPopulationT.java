@@ -250,7 +250,7 @@ public class ForwardPopulationT extends ForwardPopulation
         if (debug)
         {
             log(String.format("Births TOTAL-%s = %s", gender.name(), f2s(total_births)));
-            log(String.format("Deaths from births TOTAL-%s = %s", gender.name(), f2s(deaths_from_births)));
+            // log(String.format("Deaths from births TOTAL-%s = %s", gender.name(), f2s(deaths_from_births)));
         }
     }
 

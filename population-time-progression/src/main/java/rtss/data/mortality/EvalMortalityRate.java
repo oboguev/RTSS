@@ -86,6 +86,11 @@ public class EvalMortalityRate extends Loggable
         {
             total_deaths += deaths_from_births(total_pop, cbr, mt);
         }
+        
+        if (debug)
+        {
+            log(String.format("Observed deaths = %s", f2s(total_deaths)));
+        }
 
         return 1000 * total_deaths / total_pop;
     }
@@ -147,6 +152,7 @@ public class EvalMortalityRate extends Loggable
             log(String.format("Births TOTAL-FEMALE = %s", f2s(f_births)));
             log(String.format("Deaths from births TOTAL-MALE = %s", f2s(m_deaths)));
             log(String.format("Deaths from births TOTAL-FEMALE = %s", f2s(f_deaths)));
+            log(String.format("Observed births = %s", f2s(all_births)));
         }
         
         return m_deaths + f_deaths;
