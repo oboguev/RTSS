@@ -68,16 +68,20 @@ public class TestValidate_192x
 
         double xcdr3_1926 = new EvalMortalityRate().eval(mt1926, PopulationADH.getPopulationByLocality(Area.USSR, 1926), null, BirthRateTotal);
         double xcdr3_1927 = new EvalMortalityRate().eval(mt1926, PopulationADH.getPopulationByLocality(Area.USSR, 1927), null, BirthRateTotal);
-        
+
         // По АДХ 
         // CBR: 1926 = 45.6, 1927 = 46.3  
         // CDR: 1926 = 25.5, 1927 = 26.5  
+
+        // ЦСУ СССР, "Естественное движение населения Союза ССР в 1926 г.", т. 1, вып. 2, М. 1929, стр. 39
+        // CDR для территории СССР = 20.3
+
         Util.out(String.format("CDR eval по переписи, %.1f", xcdr1));
         Util.out(String.format("CDR передвижкой-UR по переписи, %.1f", xcdr2_ur));
         Util.out(String.format("CDR передвижкой-T по переписи, %.1f", xcdr2_t));
         Util.out(String.format("CDR eval по АДХ-1926, %.1f", xcdr3_1926));
         Util.out(String.format("CDR eval по АДХ-1927, %.1f", xcdr3_1927));
-        
+
         Util.unused(pend_t, pend_ur);
     }
 }
