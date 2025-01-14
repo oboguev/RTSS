@@ -148,8 +148,6 @@ public class TestValidate_193x
         double xcdr2 = fwdOneLeap(p, mt, cbr);
         double xcdr3 = fwdtwoLeaps(p, mt, cbr, 0.3, 0.7);
 
-        // ### по двум передвижкам на 3 месяца и на 9 месяцев
-
         Util.out(String
                 .format("%d [население: %s] смертность по EvalMortalityRate с таблицей ГКС: %.1f, по АДХ: %.1f, по 1-шаговой передвижке: %.1f, по 2-шаговой передвижке: %.1f",
                         year, which, xcdr1, cdr, xcdr2, xcdr3));
