@@ -156,7 +156,7 @@ public class TestValidate_193x
 
         double xcdr1 = new EvalMortalityRate().eval(mt, p, null, cbr);
         double xcdr2 = fwdOneLeap(p, mt, cbr);
-        double xcdr3 = fwdtwoLeaps(p, mt, cbr, 0.3, 0.9);
+        double xcdr3 = fwdtwoLeaps(p, mt, cbr, 0.3, 0.7);
 
         // ### по двум передвижкам на 3 месяца и на 9 месяцев
 

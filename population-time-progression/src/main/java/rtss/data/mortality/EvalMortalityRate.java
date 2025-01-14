@@ -133,6 +133,7 @@ public class EvalMortalityRate extends Loggable
         for (int nd = 0; nd < p.length; nd++)
         {
             sum_deaths += p[nd] * (1 - lx[nd + fctx.DAYS_PER_YEAR] / lx[nd]);
+            // ###
         }
 
         return sum_deaths;
