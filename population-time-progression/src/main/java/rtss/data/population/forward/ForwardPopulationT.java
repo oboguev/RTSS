@@ -17,6 +17,17 @@ public class ForwardPopulationT extends ForwardPopulation
     protected AgeSpecificFertilityRates ageSpecificFertilityRates;
     protected double BirthRateTotal;
 
+    private double t_male_births = 0;
+    private double t_female_births = 0;
+    private double t_male_deaths_from_births = 0;
+    private double t_female_deaths_from_births = 0;
+
+    private double p_t_male_deaths = 0;
+    private double p_t_female_deaths = 0;
+
+    private double fctx_t_male_deaths = 0;
+    private double fctx_t_female_deaths = 0;
+    
     /*
      * В настоящее время мы не используем эту функцию практически.
      *     
@@ -32,7 +43,7 @@ public class ForwardPopulationT extends ForwardPopulation
      *   - вторая фаза проводит передвижку с данным количеством рождений, 
      *     результат этой фазы и является окончательным итогом  
      */
-    public ForwardPopulationT setBirthRateTotal(AgeSpecificFertilityRates ageSpecificFertilityRates)
+    private ForwardPopulationT setBirthRateTotal(AgeSpecificFertilityRates ageSpecificFertilityRates)
     {
         this.ageSpecificFertilityRates = ageSpecificFertilityRates;
         return this;
@@ -77,6 +88,22 @@ public class ForwardPopulationT extends ForwardPopulation
         /* проверить внутреннюю согласованность результата */
         pto.validate();
 
+        if (debug)
+        {
+            log(String.format("Deaths P-TOTAL-MALE [%s] => %s", p.toString(), f2s(p_t_male_deaths)));
+            log(String.format("Deaths P-TOTAL-FEMALE [%s] => %s", p.toString(), f2s(p_t_female_deaths)));
+            log(String.format("Deaths FCTX-TOTAL-MALE [%s] => %s", p.toString(), f2s(fctx_t_male_deaths)));
+            log(String.format("Deaths FCTX-TOTAL-FEMALE [%s] => %s", p.toString(), f2s(fctx_t_female_deaths)));
+
+            log(String.format("Births TOTAL-MALE = %s", f2s(t_male_births)));
+            log(String.format("Births TOTAL-FEMALE = %s", f2s(t_female_births)));
+            log(String.format("Deaths from births TOTAL-MALE = %s", f2s(t_male_deaths_from_births)));
+            log(String.format("Deaths from births TOTAL-FEMALE = %s", f2s(t_female_deaths_from_births)));
+
+            log(String.format("Observed births = %s", f2s(this.getObservedBirths())));
+            log(String.format("Observed deaths = %s", f2s(this.getObservedDeaths())));
+        }
+
         return pto;
     }
 
@@ -117,9 +144,21 @@ public class ForwardPopulationT extends ForwardPopulation
 
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
+            
+            if (debug)
+            {
+                log(String.format("Births TOTAL-MALE = %s", f2s(m_births)));
+                log(String.format("Births TOTAL-FEMALE = %s", f2s(f_births)));
+            }
 
             pto.add(locality, Gender.MALE, 0, m_births);
             pto.add(locality, Gender.FEMALE, 0, f_births);
+
+            if (Util.True)
+            {
+                // TODO: подвергнуь смертности
+                throw new Exception("use fctx != null");
+            }
         }
 
         /* вычислить графу "оба пола" из отдельных граф для мужчин и женщин */
@@ -188,6 +227,31 @@ public class ForwardPopulationT extends ForwardPopulation
          */
         for (int nd = 0; nd < ndays; nd++)
             fctx.add(locality, gender, nd, day_births[nd]);
+        
+        double deaths_from_births = total_births - Util.sum(day_births);
+        observed_deaths += deaths_from_births;
+        
+        switch (gender)
+        {
+        case MALE:
+            t_male_births += total_births;
+            t_male_deaths_from_births += deaths_from_births;
+            break;
+
+        case FEMALE:
+            t_female_births += total_births;
+            t_female_deaths_from_births += deaths_from_births;
+            break;
+
+        case BOTH:
+            throw new IllegalArgumentException();
+        }
+
+        if (debug)
+        {
+            log(String.format("Births TOTAL-%s = %s", gender.name(), f2s(total_births)));
+            log(String.format("Deaths from births TOTAL-%s = %s", gender.name(), f2s(deaths_from_births)));
+        }
     }
 
     public void forward(PopulationByLocality pto,
@@ -201,6 +265,8 @@ public class ForwardPopulationT extends ForwardPopulation
     {
         /* рождений пока нет */
         pto.set(locality, gender, 0, 0);
+        
+        double sum_deaths = 0;
 
         /* Продвижка по таблице смертности.
          * 
@@ -219,9 +285,21 @@ public class ForwardPopulationT extends ForwardPopulation
             double deaths = moving * (1.0 - mi.px);
 
             observed_deaths += deaths;
+            sum_deaths += deaths;
 
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
+        }
+        
+        switch (gender.name())
+        {
+        case "MALE":
+            p_t_male_deaths += sum_deaths;
+            break;
+
+        case "FEMALE":
+            p_t_female_deaths += sum_deaths;
+            break;
         }
 
         /*
@@ -251,17 +329,21 @@ public class ForwardPopulationT extends ForwardPopulation
 
         double[] p = fctx.asArray(locality, gender);
         double[] p2 = new double[p.length];
+        
+        double sum_deaths = 0;
 
         for (int nd = 0; nd < p.length; nd++)
         {
             int nd2 = nd + ndays;
 
             double v = p[nd];
+            double v_initial = v;
 
             if (nd2 < p2.length)
             {
                 v *= day_lx[nd2] / day_lx[nd];
                 p2[nd2] = v;
+                sum_deaths += v_initial - v;
             }
             else
             {
@@ -269,10 +351,25 @@ public class ForwardPopulationT extends ForwardPopulation
                 nd2 = age * fctx.DAYS_PER_YEAR;
                 v *= day_lx[nd2] / day_lx[nd];
                 pto.add(locality, gender, age, v);
+                sum_deaths += v_initial - v;
             }
         }
 
         fctx.fromArray(locality, gender, p2);
+        
+        switch (gender.name())
+        {
+        case "MALE":
+            fctx_t_male_deaths += sum_deaths;
+            break;
+
+        case "FEMALE":
+            fctx_t_female_deaths += sum_deaths;
+            break;
+        }
+
+        observed_deaths += sum_deaths;
+        
     }
 
     /*****************************************************************************************/
@@ -344,5 +441,14 @@ public class ForwardPopulationT extends ForwardPopulation
         String s = String.format("%,10d (%7.2f%%)", Math.round(deficit), deficit_pct);
         sb.append(prefix);
         sb.append(s);
+    }
+
+
+    private String f2s(double v)
+    {
+        String s = String.format("%,15.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
 }

@@ -172,7 +172,9 @@ public class ForwardPopulationUR extends ForwardPopulation
         {
             double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
             double births = sum * yfraction * birthRate / 1000;
+            
             observed_births += births;
+            
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
