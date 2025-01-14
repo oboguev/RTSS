@@ -161,6 +161,8 @@ public class ForwardPopulationUR extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
+        PopulationForwardingContext fctx_initial = (fctx != null) ? fctx.clone() : null;
+
         /* продвижка мужского и женского населений по смертности из @p в @pto */
         forward(pto, p, fctx, locality, Gender.MALE, mt, yfraction);
         forward(pto, p, fctx, locality, Gender.FEMALE, mt, yfraction);
@@ -181,7 +183,7 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         if (fctx != null)
         {
-            add_births(fctx, p, locality, mt, birthRate, yfraction);
+            add_births(fctx_initial, fctx, p, locality, mt, birthRate, yfraction);
         }
         else
         {
@@ -213,14 +215,15 @@ public class ForwardPopulationUR extends ForwardPopulation
         pto.makeBoth(locality);
     }
 
-    private void add_births(PopulationForwardingContext fctx,
+    private void add_births(PopulationForwardingContext fctx_initial ,
+            PopulationForwardingContext fctx,
             final PopulationByLocality p,
             final Locality locality,
             final CombinedMortalityTable mt,
             final double birthRate,
             final double yfraction) throws Exception
     {
-        double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
+        double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx_initial.sumAllAges(locality, Gender.BOTH);
         double births = sum * yfraction * birthRate / 1000;
         observed_births += births;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);

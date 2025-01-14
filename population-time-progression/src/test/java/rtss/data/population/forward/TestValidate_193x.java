@@ -248,15 +248,18 @@ public class TestValidate_193x
         PopulationByLocality p = p1939;
         // p = p.selectByAge(8, MAX_AGE);
 
+        Util.out("EMR-UR");
         EvalMortalityRate emr_ur = new EvalMortalityRate();
         emr_ur.debug(true);
         double xcdr1_ur = emr_ur.eval(mt, p, null, CBR_Total_1926);
-
+        
+        Util.out("EMR-T");
         PopulationByLocality ptotal = p.cloneTotalOnly();
         EvalMortalityRate emr_t = new EvalMortalityRate();
         emr_t.debug(true);
         double xcdr2_t = emr_t.eval(mt, ptotal, null, CBR_Total_1926);
 
+        Util.out("FW-UR");
         ForwardPopulationUR fwUR = new ForwardPopulationUR();
         fwUR.debug(true);
         fwUR.BirthRateRural = CBR_Rural_1926;
@@ -266,6 +269,7 @@ public class TestValidate_193x
         PopulationByLocality p2_ur = fwUR.forward(px_ur, fctx_ur, mt, 1.0);
         PopulationByLocality pend_ur = fctx_ur.end(p2_ur);
 
+        Util.out("FW-T");
         ForwardPopulationT fwT = new ForwardPopulationT();
         fwT.debug(true);
         fwT.BirthRateTotal = CBR_Total_1926;

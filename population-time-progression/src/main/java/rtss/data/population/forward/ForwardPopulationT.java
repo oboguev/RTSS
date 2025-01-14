@@ -27,7 +27,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
     private double fctx_t_male_deaths = 0;
     private double fctx_t_female_deaths = 0;
-    
+
     /*
      * В настоящее время мы не используем эту функцию практически.
      *     
@@ -126,6 +126,8 @@ public class ForwardPopulationT extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
+        PopulationForwardingContext fctx_initial = (fctx != null) ? fctx.clone() : null;
+
         /* продвижка мужского и женского населений по смертности из @p в @pto */
         forward(pto, p, fctx, locality, Gender.MALE, mt, yfraction);
         forward(pto, p, fctx, locality, Gender.FEMALE, mt, yfraction);
@@ -135,7 +137,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
         if (fctx != null)
         {
-            add_births(fctx, p, locality, mt, ageSpecificFertilityRates, birthRate, yfraction);
+            add_births(fctx_initial, fctx, p, locality, mt, ageSpecificFertilityRates, birthRate, yfraction);
         }
         else
         {
@@ -155,7 +157,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
-            
+
             if (debug)
             {
                 log(String.format("Births TOTAL-MALE = %s", f2s(m_births)));
@@ -176,7 +178,8 @@ public class ForwardPopulationT extends ForwardPopulation
         pto.makeBoth(locality);
     }
 
-    private void add_births(PopulationForwardingContext fctx,
+    private void add_births(PopulationForwardingContext fctx_initial,
+            PopulationForwardingContext fctx,
             final PopulationByLocality p,
             final Locality locality,
             final CombinedMortalityTable mt,
@@ -192,7 +195,7 @@ public class ForwardPopulationT extends ForwardPopulation
         }
         else
         {
-            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx.sumAllAges(locality, Gender.BOTH);
+            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx_initial.sumAllAges(locality, Gender.BOTH);
             births = yfraction * sum * birthRate / 1000;
         }
 
@@ -238,10 +241,10 @@ public class ForwardPopulationT extends ForwardPopulation
          */
         for (int nd = 0; nd < ndays; nd++)
             fctx.add(locality, gender, nd, day_births[nd]);
-        
+
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
-        
+
         switch (gender)
         {
         case MALE:
@@ -276,7 +279,7 @@ public class ForwardPopulationT extends ForwardPopulation
     {
         /* рождений пока нет */
         pto.set(locality, gender, 0, 0);
-        
+
         double sum_deaths = 0;
 
         /* Продвижка по таблице смертности.
@@ -301,7 +304,7 @@ public class ForwardPopulationT extends ForwardPopulation
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
-        
+
         switch (gender.name())
         {
         case "MALE":
@@ -340,7 +343,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
         double[] p = fctx.asArray(locality, gender);
         double[] p2 = new double[p.length];
-        
+
         double sum_deaths = 0;
 
         for (int nd = 0; nd < p.length; nd++)
@@ -367,7 +370,7 @@ public class ForwardPopulationT extends ForwardPopulation
         }
 
         fctx.fromArray(locality, gender, p2);
-        
+
         switch (gender.name())
         {
         case "MALE":
@@ -380,7 +383,7 @@ public class ForwardPopulationT extends ForwardPopulation
         }
 
         observed_deaths += sum_deaths;
-        
+
     }
 
     /*****************************************************************************************/
@@ -453,7 +456,6 @@ public class ForwardPopulationT extends ForwardPopulation
         sb.append(prefix);
         sb.append(s);
     }
-
 
     private String f2s(double v)
     {
