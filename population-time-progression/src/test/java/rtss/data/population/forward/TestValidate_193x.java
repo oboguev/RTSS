@@ -80,9 +80,9 @@ public class TestValidate_193x
     private double CBR_1939_MIDYEAR = 40.0;
     private double CDR_1939_MIDYEAR = 20.1;
 
-    private final double CBR_Rural_1926 = 46.1;
-    private final double CBR_Urban_1926 = 34.4;
     private final double CBR_Total_1926 = 44.0;
+    private final double CBR_Rural_1926 = 46.1;
+    private double CBR_Urban_1926 = 34.4;
 
     private void validate_1939() throws Exception
     {
@@ -247,6 +247,10 @@ public class TestValidate_193x
 
         PopulationByLocality p = p1939;
         // p = p.selectByAge(8, MAX_AGE);
+        
+        final double ruralPopulation = p.sum(Locality.RURAL, Gender.BOTH, 0, MAX_AGE);
+        final double urbanPopulation = p.sum(Locality.URBAN, Gender.BOTH, 0, MAX_AGE);
+        CBR_Urban_1926 = (CBR_Total_1926 * (ruralPopulation + urbanPopulation) - CBR_Rural_1926 * ruralPopulation) / urbanPopulation;
 
         Util.out("EMR-UR");
         EvalMortalityRate emr_ur = new EvalMortalityRate();
@@ -260,23 +264,36 @@ public class TestValidate_193x
         double xcdr2_t = emr_t.eval(mt, ptotal, null, CBR_Total_1926);
 
         Util.out("FW-UR");
-        ForwardPopulationUR fwUR = new ForwardPopulationUR();
-        fwUR.debug(true);
-        fwUR.BirthRateRural = CBR_Rural_1926;
-        fwUR.BirthRateUrban = CBR_Urban_1926;
+        ForwardPopulationUR fw_ur = new ForwardPopulationUR();
+        fw_ur.debug(true);
+        fw_ur.BirthRateRural = CBR_Rural_1926;
+        fw_ur.BirthRateUrban = CBR_Urban_1926;
         PopulationForwardingContext fctx_ur = new PopulationForwardingContext();
         PopulationByLocality px_ur = fctx_ur.begin(p);
-        PopulationByLocality p2_ur = fwUR.forward(px_ur, fctx_ur, mt, 1.0);
+        PopulationByLocality p2_ur = fw_ur.forward(px_ur, fctx_ur, mt, 1.0);
         PopulationByLocality pend_ur = fctx_ur.end(p2_ur);
 
         Util.out("FW-T");
-        ForwardPopulationT fwT = new ForwardPopulationT();
-        fwT.debug(true);
-        fwT.BirthRateTotal = CBR_Total_1926;
+        ForwardPopulationT fw_t = new ForwardPopulationT();
+        fw_t.debug(true);
+        fw_t.BirthRateTotal = CBR_Total_1926;
         PopulationForwardingContext fctx_t = new PopulationForwardingContext();
         PopulationByLocality px_t = fctx_t.begin(ptotal);
-        PopulationByLocality p2_t = fwT.forward(px_t, fctx_t, mt, 1.0);
+        PopulationByLocality p2_t = fw_t.forward(px_t, fctx_t, mt, 1.0);
         PopulationByLocality pend_t = fctx_t.end(p2_t);
+        
+        StringBuilder log = new StringBuilder();
+        log.append("============ EMR-T" + Util.nl + Util.nl);
+        log.append(emr_t.log + Util.nl);
+        
+        log.append("============= FW-T" + Util.nl + Util.nl);
+        log.append(fw_t.log + Util.nl);
+        
+        log.append("============= EMR-UR" + Util.nl + Util.nl);
+        log.append(emr_ur.log + Util.nl);
+        
+        log.append("============= FW-UR" + Util.nl + Util.nl);
+        log.append(fw_ur.log + Util.nl);
 
         Util.noop();
     }
