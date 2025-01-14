@@ -29,6 +29,10 @@ public class TestSavePopulationADH
     private void main_USSR() throws Exception
     {
         Area area = Area.USSR;
+        main(area, 1926);
+        main(area, 1927);
+        main(area, 1937);
+        main(area, 1938);
         main(area, "1939-границы-1938");
         main(area, "1939-границы-1946");
         main(area, 1940);
@@ -60,7 +64,7 @@ public class TestSavePopulationADH
         
         if (Util.True)
         {
-            File rootDir = new File("C:\\@@\\ADH-population-" + area);
+            File rootDir = new File("P:\\@@\\ADH-population-" + area);
             String en_year = year.replace("-границы-", "-in-borders-of-");
             File dir = new File(rootDir, "" + en_year);
             dir.mkdirs();

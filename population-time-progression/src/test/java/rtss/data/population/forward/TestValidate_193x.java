@@ -209,6 +209,7 @@ public class TestValidate_193x
 
     /* =========================================================================== */
 
+    @SuppressWarnings("unused")
     private void test_1() throws Exception
     {
         double infant_CDR = ADH_USSR_infant_CDR_1939;
