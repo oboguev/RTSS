@@ -13,7 +13,7 @@ import rtss.data.selectors.Locality;
 public class Recalibrate
 {
     private static double PROMILLE = 1000.0;
-    
+
     /*
      * Рождаемость и смертность в нормировке на население в начале года -> рождаемость в нормировке на среднегодовое население.
      * Миграция полагается нулевой.
@@ -63,7 +63,7 @@ public class Recalibrate
         double f = 1 - (cbr - cdr) / (PROMILLE * 2);
         return cdr / f;
     }
-    
+
     /*
      * Преобразовать рождаемость или смертность для указанной территории (СССР или РСФСР) в указанный год
      * из нормировки на население в начале года -> в нормировку на среднегодовое население.
@@ -96,14 +96,30 @@ public class Recalibrate
     {
         public double cbr;
         public double cdr;
+
+        public Rates()
+        {
+        }
         
+        public Rates cbr(double cbr)
+        {
+            this.cbr = cbr;
+            return this;
+        }
+
+        public Rates cdr(double cdr)
+        {
+            this.cdr = cdr;
+            return this;
+        }
+
         public Rates(double cbr, double cdr)
         {
             this.cbr = cbr;
             this.cdr = cdr;
         }
     }
-    
+
     /*
      * Рождаемость и смертность в нормировке на среднегодовое население -> рождаемость и смертность в нормировке на население начала года.   
      * Миграция полагается нулевой.   
