@@ -29,7 +29,7 @@ public class TestValidate_193x
     {
         try
         {
-            new TestValidate_193x().test_1();
+            // new TestValidate_193x().test_1();
             new TestValidate_193x().validate_1939();
         }
         catch (Exception ex)
@@ -38,16 +38,6 @@ public class TestValidate_193x
             ex.printStackTrace();
         }
     }
-
-    // ### test: forward [8-100] by 1 year via EvalMortalityRate 
-    // ### test: forward [0-100] by 1 year via EvalMortalityRate 
-    // ### test: forward [8-100] by 1 year vs 0.3 + 0.7 
-    // ### test: forward [0-100] by 1 year vs 0.3 + 0.7 
-
-    // ### deaths in P
-    // ### decimate CTX + shift CTX
-    // ### add new births to CTX
-    // ### decimate births + shift new births in CTX
 
     public TestValidate_193x() throws Exception
     {
