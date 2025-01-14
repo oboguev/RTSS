@@ -321,7 +321,7 @@ public class ForwardPopulationUR extends ForwardPopulation
 
             double moving = current * yfraction;
             double staying = current - moving;
-            double deaths = moving * (1.0 - mi.px);
+            double deaths = moving * mi.qx;
 
             observed_deaths += deaths;
             sum_deaths += deaths;

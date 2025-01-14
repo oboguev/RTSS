@@ -5,6 +5,7 @@ import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Loggable;
+import rtss.util.Util;
 
 /**
  * Вычислить годовой уровень смертности при данной таблице смертности,
