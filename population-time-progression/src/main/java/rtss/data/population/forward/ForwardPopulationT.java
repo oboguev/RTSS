@@ -357,7 +357,6 @@ public class ForwardPopulationT extends ForwardPopulation
             {
                 v *= day_lx[nd2] / day_lx[nd];
                 p2[nd2] = v;
-                sum_deaths += v_initial - v;
             }
             else
             {
@@ -365,10 +364,9 @@ public class ForwardPopulationT extends ForwardPopulation
                 nd2 = age * fctx.DAYS_PER_YEAR;
                 v *= day_lx[nd2] / day_lx[nd];
                 pto.add(locality, gender, age, v);
-                sum_deaths += v_initial - v;
             }
             
-            // ###
+            sum_deaths += v_initial - v;
         }
 
         fctx.fromArray(locality, gender, p2);

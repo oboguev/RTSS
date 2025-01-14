@@ -5,6 +5,7 @@ import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Loggable;
+import rtss.util.Util;
 
 /**
  * Вычислить годовой уровень смертности при данной таблице смертности,
@@ -20,9 +21,9 @@ public class EvalMortalityRate extends Loggable
     }
 
     public double eval(
-            final CombinedMortalityTable mt, 
-            PopulationByLocality p, 
-            PopulationForwardingContext fctx, 
+            final CombinedMortalityTable mt,
+            PopulationByLocality p,
+            PopulationForwardingContext fctx,
             double cbr) throws Exception
     {
         if (fctx == null)
@@ -30,14 +31,14 @@ public class EvalMortalityRate extends Loggable
             fctx = new PopulationForwardingContext();
             p = fctx.begin(p);
         }
-        
+
         if (debug)
         {
             log(String.format("P = %s", p.toString()));
             log(String.format("FCTX = %s", fctx.toString()));
             log("");
         }
-        
+
         double total_pop = p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         if (fctx != null)
             total_pop += fctx.sumAllAges(Locality.TOTAL, Gender.BOTH);
@@ -50,12 +51,12 @@ public class EvalMortalityRate extends Loggable
             show_ur(mt, p, Gender.FEMALE);
             show_ur(mt, fctx, Gender.MALE);
             show_ur(mt, fctx, Gender.FEMALE);
-            
+
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 total_deaths += deaths(mt, p, Locality.URBAN, Gender.MALE, age);
                 total_deaths += deaths(mt, p, Locality.URBAN, Gender.FEMALE, age);
-                
+
                 total_deaths += deaths(mt, p, Locality.RURAL, Gender.MALE, age);
                 total_deaths += deaths(mt, p, Locality.RURAL, Gender.FEMALE, age);
             }
@@ -64,7 +65,7 @@ public class EvalMortalityRate extends Loggable
             {
                 total_deaths += deaths(mt, fctx, Locality.URBAN, Gender.MALE);
                 total_deaths += deaths(mt, fctx, Locality.URBAN, Gender.FEMALE);
-                
+
                 total_deaths += deaths(mt, fctx, Locality.RURAL, Gender.MALE);
                 total_deaths += deaths(mt, fctx, Locality.RURAL, Gender.FEMALE);
             }
@@ -88,12 +89,12 @@ public class EvalMortalityRate extends Loggable
                 total_deaths += deaths(mt, fctx, Locality.TOTAL, Gender.FEMALE);
             }
         }
-        
+
         if (cbr > 0)
         {
             total_deaths += deaths_from_births(total_pop, cbr, mt);
         }
-        
+
         if (debug)
         {
             log(String.format("Observed deaths = %s", f2s(total_deaths)));
@@ -132,28 +133,36 @@ public class EvalMortalityRate extends Loggable
         double sum_deaths = 0;
         for (int nd = 0; nd < p.length; nd++)
         {
-            sum_deaths += p[nd] * (1 - lx[nd + fctx.DAYS_PER_YEAR] / lx[nd]);
-            // ###
+            int nd2 = nd + fctx.DAYS_PER_YEAR;
+
+            /* для точного совпадения с алгоритмом передвижки в ForwardPopulation */
+            if (nd2 >= p.length)
+            {
+                int age = fctx.day2age(nd2);
+                nd2 = age * fctx.DAYS_PER_YEAR;
+            }
+
+            sum_deaths += p[nd] * (1 - lx[nd2] / lx[nd]);
         }
 
         return sum_deaths;
     }
-    
+
     private static final double MaleFemaleBirthRatio = 1.06;
-    
+
     /*
      * Число смертей от новых рождений за год
      */
     private double deaths_from_births(final double total_pop, final double cbr, final CombinedMortalityTable mt) throws Exception
     {
         double all_births = total_pop * cbr / 1000;
-        
+
         double m_births = all_births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = all_births * 1.0 / (1 + MaleFemaleBirthRatio);
-        
+
         double m_deaths = deaths_from_births(Gender.MALE, m_births, mt);
         double f_deaths = deaths_from_births(Gender.FEMALE, f_births, mt);
-        
+
         if (debug)
         {
             log("");
@@ -165,14 +174,14 @@ public class EvalMortalityRate extends Loggable
             log("");
             log(String.format("Observed births = %s", f2s(all_births)));
         }
-        
+
         return m_deaths + f_deaths;
     }
 
     private double deaths_from_births(Gender gender, double births, final CombinedMortalityTable mt) throws Exception
     {
         double deaths = 0;
-        
+
         /*
          * распределить рождения по числу дней
          */
@@ -192,13 +201,13 @@ public class EvalMortalityRate extends Loggable
             deaths += day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
         return deaths;
     }
-    
+
     /* ===================================================================================================== */
-    
+
     /*
      * Диагностическая распечатка
      */
-    
+
     private void show_ur(CombinedMortalityTable mt, PopulationByLocality p, Gender gender) throws Exception
     {
         if (debug)
@@ -210,14 +219,13 @@ public class EvalMortalityRate extends Loggable
                 total_deaths_u += deaths(mt, p, Locality.URBAN, gender, age);
                 total_deaths_r += deaths(mt, p, Locality.RURAL, gender, age);
             }
-            
+
             log(String.format("Deaths P-U-%s => %s", gender.name(), f2s(total_deaths_u)));
             log(String.format("Deaths P-R-%s => %s", gender.name(), f2s(total_deaths_r)));
             log(String.format("Deaths P-UR-%s => %s", gender.name(), f2s(total_deaths_u + total_deaths_r)));
         }
     }
-    
-    
+
     private void show_ur(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender) throws Exception
     {
         if (debug)
@@ -231,7 +239,7 @@ public class EvalMortalityRate extends Loggable
         }
     }
 
-    private void show_t(CombinedMortalityTable mt, PopulationByLocality p, Gender gender)  throws Exception
+    private void show_t(CombinedMortalityTable mt, PopulationByLocality p, Gender gender) throws Exception
     {
         if (debug)
         {
@@ -242,8 +250,8 @@ public class EvalMortalityRate extends Loggable
             log(String.format("Deaths P-T-%s => %s", gender.name(), f2s(total_deaths)));
         }
     }
-    
-    private void show_t(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender)  throws Exception
+
+    private void show_t(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender) throws Exception
     {
         if (debug)
         {
