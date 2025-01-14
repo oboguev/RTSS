@@ -59,21 +59,21 @@ public class Expected_Population_In_Early_1946 extends UtilBase_194x
         
         fctx.clearTotalBirths();
         
-        /* продвижка до начала 1942 года */
+        /* передвижка до начала 1942 года */
         p = forward(p, fctx, mt, cbr, 0.5);
         
-        /* продвижка до начала 1943 года */
+        /* передвижка до начала 1943 года */
         p = forward(p, fctx, mt, cbr, 1.0);
         
-        /* продвижка до начала 1944 года */
+        /* передвижка до начала 1944 года */
         CombinedMortalityTable xmt = tableForYear(mt, 1943, interpolate_mt_to1958);
         p = forward(p, fctx, xmt, cbr, 1.0);
         
-        /* продвижка до начала 1945 года */
+        /* передвижка до начала 1945 года */
         xmt = tableForYear(mt, 1944, interpolate_mt_to1958);
         p = forward(p, fctx, xmt, cbr, 1.0);
         
-        /* продвижка до начала 1946 года */
+        /* передвижка до начала 1946 года */
         xmt = tableForYear(mt, 1945, interpolate_mt_to1958);
         p = forward(p, fctx, xmt, cbr, 1.0);
         

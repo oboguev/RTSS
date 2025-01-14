@@ -33,7 +33,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
     }
     
     /*
-     * Оставляет контекст незакрытым, позволяя дальнейшую продвижку
+     * Оставляет контекст незакрытым, позволяя дальнейшую передвижку
      */
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
@@ -57,7 +57,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
             p = new Population_In_Early_1940(ap).evaluate(fctx);
             
             /*
-             * Продвижка с начала 1940 до начала 1941 года
+             * Передвижка с начала 1940 до начала 1941 года
              */
             fw.setBirthRateTotal(ap.CBR_1940);
             p = fw.forward(p, fctx, mt1940, 1.0);
@@ -66,7 +66,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         }
         
         /*
-         * Продвижка с начала 1941 до середины 1941 года
+         * Передвижка с начала 1941 до середины 1941 года
          */
         fw = new ForwardPopulationT();
         fw.setBirthRateTotal(ap.CBR_1940);

@@ -9,7 +9,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 /**
- * Продвижка населения по таблице смертности не имеющей отдельных частей
+ * Передвижка населения по таблице смертности не имеющей отдельных частей
  * для городского и сельского населения, а только часть Total.
  */
 public class ForwardPopulationT extends ForwardPopulation
@@ -65,11 +65,11 @@ public class ForwardPopulationT extends ForwardPopulation
     }
 
     /*
-     * Продвижка населения во времени на целый год или на часть года.
+     * Передвижка населения во времени на целый год или на часть года.
      * Начальное население (@p) и таблица смертности (@mt) неизменны. 
      * Результат возвращается как новая структура.
-     * При продвижке на целый год @yfraction = 1.0.
-     * При продвижке на часть года @yfraction < 1.0.
+     * При передвижке на целый год @yfraction = 1.0.
+     * При передвижке на часть года @yfraction < 1.0.
      */
     public PopulationByLocality forward(final PopulationByLocality p,
             PopulationForwardingContext fctx,
@@ -87,7 +87,7 @@ public class ForwardPopulationT extends ForwardPopulation
         /* пустая структура для получения результатов */
         PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
 
-        /* продвижка сельского и городского населений, сохранить результат в @pto */
+        /* передвижка сельского и городского населений, сохранить результат в @pto */
         if (p.hasRuralUrban())
             throw new IllegalArgumentException();
         forward(pto, p, fctx, Locality.TOTAL, mt, yfraction);
@@ -128,7 +128,7 @@ public class ForwardPopulationT extends ForwardPopulation
     {
         PopulationForwardingContext fctx_initial = (fctx != null) ? fctx.clone() : null;
 
-        /* продвижка мужского и женского населений по смертности из @p в @pto */
+        /* передвижка мужского и женского населений по смертности из @p в @pto */
         forward(pto, p, fctx, locality, Gender.MALE, mt, yfraction);
         forward(pto, p, fctx, locality, Gender.FEMALE, mt, yfraction);
 
@@ -282,7 +282,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
         double sum_deaths = 0;
 
-        /* Продвижка по таблице смертности.
+        /* Передвижка по таблице смертности.
          * 
          * Для каждого года возраста мы берём часть населения этого возраста
          * указываемую @yfraction и переносим её в следующий год с приложением смертности.
@@ -317,7 +317,7 @@ public class ForwardPopulationT extends ForwardPopulation
         }
 
         /*
-         * Продвижка контекста ранней детской смертности
+         * Передвижка контекста ранней детской смертности
          */
         if (fctx != null)
         {

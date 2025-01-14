@@ -58,7 +58,7 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
                                                         urban_female_fraction_1936);
 
         /*
-         * Продвижка населения для целых лет с декабря 1926 по декабрь 1936 
+         * Передвижка населения для целых лет с декабря 1926 по декабрь 1936 
          */
         CombinedMortalityTable mt = mt1926;
         PopulationByLocality p = p1926;
@@ -88,7 +88,7 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
         }
 
         /*
-         * Продвижка населения для части года (с 17 декабря 1926 по 6 января 1937)
+         * Передвижка населения для части года (с 17 декабря 1926 по 6 января 1937)
          */
         Date d1936 = df.parse("1936-12-17");
         Date d1937 = df.parse("1937-01-06");

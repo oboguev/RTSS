@@ -152,10 +152,10 @@ public class Main
         prev = curr;
         halves.add(curr);
 
-        /* подготовиться к продвижке населения с учётом рождений после середины 1941 года */
+        /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
         PopulationByLocality pwb = p.clone();
 
-        /* подготовиться к продвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
+        /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
         PopulationByLocality pxb = p.clone();
         PopulationForwardingContext fctx_xb = fctx.clone();
 
@@ -179,12 +179,12 @@ public class Main
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
             CombinedMortalityTable mt = year_mt(mt1940, current_year);
 
-            /* продвижка на следующие полгода населения с учётом рождений */
+            /* передвижка на следующие полгода населения с учётом рождений */
             ForwardPopulationT fw1 = new ForwardPopulationT();
             fw1.setBirthRateTotal(ap.CBR_1940);
             pwb = fw1.forward(pwb, fctx, mt, 0.5);
 
-            /* продвижка на следующие полгода населения без учёта рождений */
+            /* передвижка на следующие полгода населения без учёта рождений */
             ForwardPopulationT fw2 = new ForwardPopulationT();
             fw2.setBirthRateTotal(0);
             pxb = fw2.forward(pxb, fctx_xb, mt, 0.5);

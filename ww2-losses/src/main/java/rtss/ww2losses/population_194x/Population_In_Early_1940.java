@@ -31,7 +31,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
     }
 
     /*
-     * Оставляет контекст незакрытым, позволяя дальнейшую продвижку
+     * Оставляет контекст незакрытым, позволяя дальнейшую передвижку
      */
     public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
     {
@@ -60,7 +60,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
             show_struct("начало 1939 в границах 1946", p, fctx);
 
             /*
-             * Продвижка с начала 1939 до начала 1940 года
+             * Передвижка с начала 1939 до начала 1940 года
              */
             ForwardPopulationT fw = new ForwardPopulationT();
             p = fctx.begin(p);

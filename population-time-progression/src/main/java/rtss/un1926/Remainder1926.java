@@ -67,7 +67,7 @@ public class Remainder1926
             if (year == 1941)
                 break;
 
-            /* продвижка */
+            /* передвижка */
             if (fctx == null)
             {
                 fctx = new PopulationForwardingContext();
