@@ -43,6 +43,7 @@ public class ForwardPopulationT extends ForwardPopulation
      *   - вторая фаза проводит передвижку с данным количеством рождений, 
      *     результат этой фазы и является окончательным итогом  
      */
+    @SuppressWarnings("unused")
     private ForwardPopulationT setBirthRateTotal(AgeSpecificFertilityRates ageSpecificFertilityRates)
     {
         this.ageSpecificFertilityRates = ageSpecificFertilityRates;

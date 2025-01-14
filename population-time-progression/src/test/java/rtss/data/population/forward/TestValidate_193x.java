@@ -296,5 +296,8 @@ public class TestValidate_193x
         log.append(fw_ur.log + Util.nl);
 
         Util.noop();
+        
+        Util.unused(pend_ur, pend_t);
+        Util.unused(cbr, cdr, xcdr1_ur, xcdr2_t);
     }
 }
