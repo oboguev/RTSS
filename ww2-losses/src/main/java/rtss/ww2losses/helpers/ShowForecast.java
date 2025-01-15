@@ -37,7 +37,7 @@ public class ShowForecast
         double m = p.get(Locality.TOTAL, Gender.MALE, age); 
         double b = p.get(Locality.TOTAL, Gender.BOTH, age);
         
-        if (secondHalfyear)
+        if (secondHalfyear && Util.False)
         {
             double f2 = p.get(Locality.TOTAL, Gender.FEMALE, age + 1); 
             double m2 = p.get(Locality.TOTAL, Gender.MALE, age + 1); 
