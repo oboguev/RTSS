@@ -509,4 +509,15 @@ public class Bins
             text = text.replace(",", "");
         return text;
     }
+
+    public static Bin[] fromValues(double[] a) throws Exception
+    {
+        List<Bin> list = new ArrayList<>();
+
+        int age = 0;
+        for (double v : a)
+            list.add(new Bin(age, age, v));
+        
+        return Bins.bins(list);
+    }
 }

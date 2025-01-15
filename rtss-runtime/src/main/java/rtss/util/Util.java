@@ -279,7 +279,13 @@ public class Util
     // normalize array so the sum of its elements is 1.0
     public static double[] normalize(final double[] y)
     {
-        return multiply(y, 1.0 / sum(y));
+        return normalize(y, 1.0);
+    }
+
+    // normalize array so the sum of its elements is @sum
+    public static double[] normalize(final double[] y, double sum)
+    {
+        return multiply(y, sum / sum(y));
     }
     
     // sign of the value

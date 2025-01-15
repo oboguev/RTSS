@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rtss.data.ValueConstraint;
+import rtss.data.bin.Bin;
+import rtss.data.bin.Bins;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
@@ -41,13 +44,13 @@ import rtss.util.Util;
  * 
  * Использование:
  * 
- *     PopulationByLocality p = ...
- *     PopulationForwardingContext fctx = new PopulationForwardingContext();
- *     PopulationByLocality pto = fctx.begin(p);
- *     ....
- *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
- *     ....
- *     ptoEnd = fctx.end(pto);
+ * PopulationByLocality p = ...
+ * PopulationForwardingContext fctx = new PopulationForwardingContext();
+ * PopulationByLocality pto = fctx.begin(p);
+ * ....
+ * pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
+ * ....
+ * ptoEnd = fctx.end(pto);
  * 
  * fctx.begin переносит младшие возрастные группы в контекст, обнуляя их в возвращаеммом @pto.
  * 
@@ -59,7 +62,7 @@ public class PopulationForwardingContext
 {
     public final int DAYS_PER_YEAR = 365;
 
-    public final int NYEARS = 5;  /* years 0-4 */
+    public final int NYEARS = 5; /* years 0-4 */
     public final int MAX_YEAR = NYEARS - 1;
 
     public final int NDAYS = NYEARS * DAYS_PER_YEAR;
@@ -67,7 +70,7 @@ public class PopulationForwardingContext
 
     private boolean began = false;
     private boolean hasRuralUrban;
-    private LocalityGenderToDoubleArray m = new LocalityGenderToDoubleArray(MAX_DAY,  ValueConstraint.NON_NEGATIVE);
+    private LocalityGenderToDoubleArray m = new LocalityGenderToDoubleArray(MAX_DAY, ValueConstraint.NON_NEGATIVE);
 
     /*
      * Total number of births during forwarding
@@ -129,7 +132,7 @@ public class PopulationForwardingContext
     {
         if (!began)
             return 0;
-        
+
         if (locality == Locality.TOTAL && hasRuralUrban)
             return sum(Locality.URBAN, gender, nd1, nd2) + sum(Locality.RURAL, gender, nd1, nd2);
 
@@ -164,7 +167,7 @@ public class PopulationForwardingContext
     {
         if (!began)
             throw new IllegalArgumentException();
-        
+
         if (hasRuralUrban && locality == Locality.TOTAL)
             throw new IllegalArgumentException();
         if (!hasRuralUrban && locality != Locality.TOTAL)
@@ -249,7 +252,7 @@ public class PopulationForwardingContext
     {
         if (began)
             throw new IllegalArgumentException();
-        
+
         m.clear();
 
         PopulationByLocality pto = p.clone();
@@ -271,10 +274,10 @@ public class PopulationForwardingContext
                 begin_basic(pto, Locality.RURAL);
                 begin_basic(pto, Locality.URBAN);
             }
-            
+
             begin_complete(pto, Locality.RURAL);
             begin_complete(pto, Locality.URBAN);
-            
+
             pto.recalcTotalForEveryLocality();
             pto.recalcTotalLocalityFromUrbanRural();
         }
@@ -290,13 +293,23 @@ public class PopulationForwardingContext
                 m.clear();
                 begin_basic(pto, Locality.TOTAL);
             }
-            
+
             begin_complete(pto, Locality.TOTAL);
-            
+
             pto.recalcTotalForEveryLocality();
         }
 
         pto.validate();
+
+        if (hasRuralUrban)
+        {
+            validate_begin(p, pto, Locality.RURAL);
+            validate_begin(p, pto, Locality.URBAN);
+        }
+        else
+        {
+            validate_begin(p, pto, Locality.TOTAL);
+        }
 
         return pto;
     }
@@ -312,9 +325,30 @@ public class PopulationForwardingContext
 
     private void begin_spline(PopulationByLocality p, Locality locality, Gender gender) throws Exception
     {
-        throw new Exception("not implemented");
+        final int ExtraTrailingYearsForSpline = 3;
+        double[] v_years = p.forLocality(locality).asArray(gender);
+        v_years = Util.splice(v_years, 0, MAX_YEAR + ExtraTrailingYearsForSpline);
+        Bin[] bins = Bins.fromValues(v_years);
+        for (int age = 0; age < bins.length; age++)
+        {
+            Bin bin = bins[age];
+            bin.age_x1 = age * DAYS_PER_YEAR;
+            bin.age_x2 = bin.age_x1 + (DAYS_PER_YEAR - 1);
+            bin.widths_in_years = DAYS_PER_YEAR;
+        }
+        bins = Bins.sum2avg(bins);
+
+        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, "PopulationForwardingContext.begin");
+
+        for (int age = 0; age < NYEARS; age++)
+        {
+            double[] vv = Util.splice(v_days, firstDayForAge(age), lastDayForAge(age));
+            Util.normalize(vv, v_years[age]);
+            for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
+                set(locality, gender, nd, vv[nd - firstDayForAge(age)]);
+        }
     }
-    
+
     /*
      * Простое перемещение
      */
@@ -351,6 +385,26 @@ public class PopulationForwardingContext
             p.set(locality, gender, age, 0);
     }
 
+    private void validate_begin(PopulationByLocality p, PopulationByLocality pto, Locality locality) throws Exception
+    {
+        validate_begin(p, pto, locality, Gender.MALE);
+        validate_begin(p, pto, locality, Gender.FEMALE);
+    }
+
+    private void validate_begin(PopulationByLocality p, PopulationByLocality pto, Locality locality, Gender gender) throws Exception
+    {
+        for (int age = 0; age < NYEARS; age++)
+        {
+            double p_sum = p.sum(locality, gender, age, age);
+            double pto_sum = pto.sum(locality, gender, age, age);
+            double moved = p_sum - pto_sum;
+
+            double ctx_sum = sumAge(locality, gender, age);
+            if (Math.abs(moved - ctx_sum) > 0.01)
+                throw new Exception("ctx.begin validation failed");
+        }
+    }
+
     /*
      * Переместить детские ряды из контекста в структуру населения.
      * 
@@ -363,7 +417,7 @@ public class PopulationForwardingContext
     {
         if (!began)
             throw new IllegalArgumentException();
-        
+
         PopulationByLocality pto = p.clone();
 
         if (pto.hasRuralUrban())
@@ -405,7 +459,7 @@ public class PopulationForwardingContext
     {
         totalBirths.clear();
     }
-    
+
     public double getTotalBirths(Locality locality, Gender gender) throws Exception
     {
         if (!began)
@@ -413,7 +467,7 @@ public class PopulationForwardingContext
 
         if (hasRuralUrban && locality == Locality.TOTAL)
         {
-            return getTotalBirths(Locality.RURAL, gender) + getTotalBirths(Locality.URBAN, gender); 
+            return getTotalBirths(Locality.RURAL, gender) + getTotalBirths(Locality.URBAN, gender);
         }
 
         switch (gender)
@@ -443,7 +497,7 @@ public class PopulationForwardingContext
         default:
             throw new IllegalArgumentException();
         }
-        
+
         totalBirths.put(key(locality, gender), births);
     }
 
@@ -457,7 +511,7 @@ public class PopulationForwardingContext
         default:
             throw new IllegalArgumentException();
         }
-        
+
         String key = key(locality, gender);
         Double v = totalBirths.get(key);
         if (v == null)
@@ -469,7 +523,7 @@ public class PopulationForwardingContext
     {
         if (!began)
             throw new IllegalArgumentException();
-        
+
         if (hasRuralUrban && locality == Locality.TOTAL)
             throw new IllegalArgumentException();
         if (!hasRuralUrban && locality != Locality.TOTAL)
