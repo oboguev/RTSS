@@ -20,6 +20,7 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.FieldValue;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.helpers.ShowForecast;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
@@ -133,6 +134,12 @@ public class Main
         PopulationForwardingContext fctx = new PopulationForwardingContext();
         PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
         PopulationByLocality px = fctx.end(p);
+        if (Util.True)
+        {
+            new PopulationChart("Население на середину 1941 года")
+                    .show("перепись", px.forLocality(Locality.TOTAL))
+                    .display();
+        }
 
         HalfYearEntry curr, prev;
         int year = 1941;
@@ -265,10 +272,10 @@ public class Main
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
         PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
-        
+
         ShowForecast.show(ap, p1946_actual, halves, 3);
         ShowForecast.show(ap, p1946_actual, halves, 4);
-        
+
         // deficit.validate();
 
         // ### backpropagateExistingDeficit(deficit);
@@ -475,7 +482,7 @@ public class Main
                 double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
                 loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
             }
-            
+
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 double v = loss.get(Locality.TOTAL, Gender.MALE, age);
