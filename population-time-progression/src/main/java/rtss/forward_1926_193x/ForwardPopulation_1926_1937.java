@@ -29,6 +29,12 @@ public class ForwardPopulation_1926_1937 extends ForwardPopulation_1926
     public ForwardPopulation_1926_1937() throws Exception
     {
     }
+    
+    public ForwardPopulation_1926_1937 useADH1926Rates() throws Exception
+    {
+        use_ADH1926_rates(); 
+        return this;
+    }
 
     public void forward(boolean interpolateMortalityTable, boolean useADHInfantMortalityRate) throws Exception
     {
