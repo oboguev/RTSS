@@ -259,14 +259,21 @@ public class PopulationForwardingContext
 
         if (hasRuralUrban)
         {
-            begin(pto, Locality.RURAL);
-            begin(pto, Locality.URBAN);
+            begin_basic(pto, Locality.RURAL);
+            begin_basic(pto, Locality.URBAN);
+            
+            begin_complete(pto, Locality.RURAL);
+            begin_complete(pto, Locality.URBAN);
+            
             pto.recalcTotalForEveryLocality();
             pto.recalcTotalLocalityFromUrbanRural();
         }
         else
         {
-            begin(pto, Locality.TOTAL);
+            begin_basic(pto, Locality.TOTAL);
+            
+            begin_complete(pto, Locality.TOTAL);
+            
             pto.recalcTotalForEveryLocality();
         }
 
@@ -275,23 +282,40 @@ public class PopulationForwardingContext
         return pto;
     }
 
-    private void begin(PopulationByLocality p, Locality locality) throws Exception
+    /*
+     * Простое перемещение
+     */
+    private void begin_basic(PopulationByLocality p, Locality locality) throws Exception
     {
-        begin(p, locality, Gender.MALE);
-        begin(p, locality, Gender.FEMALE);
-        p.makeBoth(locality);
+        begin_basic(p, locality, Gender.MALE);
+        begin_basic(p, locality, Gender.FEMALE);
     }
 
-    private void begin(PopulationByLocality p, Locality locality, Gender gender) throws Exception
+    private void begin_basic(PopulationByLocality p, Locality locality, Gender gender) throws Exception
     {
         for (int age = 0; age < NYEARS; age++)
         {
             double v = p.get(locality, gender, age);
-            p.set(locality, gender, age, 0);
 
             for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
                 set(locality, gender, nd, v / DAYS_PER_YEAR);
         }
+    }
+
+    /*
+     * Перемещение завершено
+     */
+    private void begin_complete(PopulationByLocality p, Locality locality) throws Exception
+    {
+        begin_complete(p, locality, Gender.MALE);
+        begin_complete(p, locality, Gender.FEMALE);
+        p.makeBoth(locality);
+    }
+
+    private void begin_complete(PopulationByLocality p, Locality locality, Gender gender) throws Exception
+    {
+        for (int age = 0; age < NYEARS; age++)
+            p.set(locality, gender, age, 0);
     }
 
     /*
