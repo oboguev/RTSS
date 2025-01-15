@@ -259,8 +259,18 @@ public class PopulationForwardingContext
 
         if (hasRuralUrban)
         {
-            begin_basic(pto, Locality.RURAL);
-            begin_basic(pto, Locality.URBAN);
+            try
+            {
+                begin_spline(pto, Locality.RURAL);
+                begin_spline(pto, Locality.URBAN);
+            }
+            catch (Exception ex)
+            {
+                Util.err("PopulationForwardingContext.begin: using basic method");
+                m.clear();
+                begin_basic(pto, Locality.RURAL);
+                begin_basic(pto, Locality.URBAN);
+            }
             
             begin_complete(pto, Locality.RURAL);
             begin_complete(pto, Locality.URBAN);
@@ -270,7 +280,16 @@ public class PopulationForwardingContext
         }
         else
         {
-            begin_basic(pto, Locality.TOTAL);
+            try
+            {
+                begin_spline(pto, Locality.TOTAL);
+            }
+            catch (Exception ex)
+            {
+                Util.err("PopulationForwardingContext.begin: using basic method");
+                m.clear();
+                begin_basic(pto, Locality.TOTAL);
+            }
             
             begin_complete(pto, Locality.TOTAL);
             
@@ -282,6 +301,20 @@ public class PopulationForwardingContext
         return pto;
     }
 
+    /*
+     * Перемещение сплайном
+     */
+    private void begin_spline(PopulationByLocality p, Locality locality) throws Exception
+    {
+        begin_spline(p, locality, Gender.MALE);
+        begin_spline(p, locality, Gender.FEMALE);
+    }
+
+    private void begin_spline(PopulationByLocality p, Locality locality, Gender gender) throws Exception
+    {
+        throw new Exception("not implemented");
+    }
+    
     /*
      * Простое перемещение
      */
