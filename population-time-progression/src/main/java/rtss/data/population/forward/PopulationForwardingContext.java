@@ -343,7 +343,7 @@ public class PopulationForwardingContext
         for (int age = 0; age < NYEARS; age++)
         {
             double[] vv = Util.splice(v_days, firstDayForAge(age), lastDayForAge(age));
-            Util.normalize(vv, v_years[age]);
+            vv = Util.normalize(vv, v_years[age]);
             for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
                 set(locality, gender, nd, vv[nd - firstDayForAge(age)]);
         }
