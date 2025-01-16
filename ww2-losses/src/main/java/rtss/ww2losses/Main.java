@@ -112,9 +112,13 @@ public class Main
             asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
             break;
         }
-        asfr_calibration = CalibrateASFR.calibrate1940(ap, asfrs);
 
-        evalHalves();
+        asfr_calibration = CalibrateASFR.calibrate1940(ap, asfrs);
+        
+        /* таблица смертности для 1940 года */
+        CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
+
+        evalHalves_new(mt1940);
         evalDeficit1946();
         evalBirths();
 
@@ -124,11 +128,141 @@ public class Main
     /*
      * Подготовить полугодовые сегменты
      */
-    private void evalHalves() throws Exception
+    private void evalHalves_new(CombinedMortalityTable mt1940) throws Exception
     {
-        /* таблица смертности для 1940 года */
-        CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
+        createHalves();
+        
+        /* население на середину 1941 года */
+        Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
+        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
+        PopulationByLocality px = fctx.end(p);
 
+        /* первое полугодие 1941 */
+        HalfYearEntry curr = halves.get(1941, HalfYearSelector.FirstHalfYear);
+        curr.p_nonwar_with_births = pm1941.p_start_1941;
+        curr.p_nonwar_without_births = pm1941.p_start_1941;
+        curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
+        curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
+        
+        /* второе полугодие 1941 */
+        curr = halves.get(1941, HalfYearSelector.SecondHalfYear);
+        curr.p_nonwar_with_births = px;
+        curr.p_nonwar_without_births = px;
+        
+        /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
+        PopulationByLocality pwb = p.clone();
+
+        /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
+        PopulationByLocality pxb = p.clone();
+        PopulationForwardingContext fctx_xb = fctx.clone();
+
+        /* годовой шаг для вторых половин года (1942-1945) */
+        for (int year = 1942 ; year <= 1945; year++)
+        {
+            curr = halves.get(year, HalfYearSelector.SecondHalfYear);
+            HalfYearEntry prev = curr.prev;
+            
+            /* сохранить для последующей полугодовой передвижки */
+            curr.fw_p_wb = pwb.clone();
+            curr.fw_fctx_wb = fctx.clone();
+
+            curr.fw_p_xb = pxb.clone();
+            curr.fw_fctx_xb = fctx_xb.clone();            
+            
+            /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
+            CombinedMortalityTable mt = year_mt(mt1940, year - 1);
+            
+            /* передвижка на следующий год населения с учётом рождений */
+            ForwardPopulationT fw1 = new ForwardPopulationT();
+            fw1.setBirthRateTotal(ap.CBR_1940);
+            pwb = fw1.forward(pwb, fctx, mt, 1.0);
+
+            /* передвижка на следующий год населения без учёта рождений */
+            ForwardPopulationT fw2 = new ForwardPopulationT();
+            fw2.setBirthRateTotal(0);
+            pxb = fw2.forward(pxb, fctx_xb, mt, 1.0);
+            
+            curr.p_nonwar_with_births = fctx.end(pwb);
+            curr.p_nonwar_without_births = fctx_xb.end(pxb);            
+
+            prev.expected_nonwar_births = fw1.getObservedBirths();
+            prev.expected_nonwar_deaths = fw2.getObservedDeaths();
+        }
+        
+        /* годовой шаг для первых половин года (1942-1946) */
+        for (int year = 1942 ; year <= 1946; year++)
+        {
+            curr = halves.get(year, HalfYearSelector.FirstHalfYear);
+            HalfYearEntry prev = curr.prev;
+
+            /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
+            CombinedMortalityTable mt = year_mt(mt1940, year - 1);
+            
+            /* передвижка на следующий год населения с учётом рождений */
+            pwb = prev.fw_p_wb;
+            fctx = prev.fw_fctx_wb;
+            ForwardPopulationT fw1 = new ForwardPopulationT();
+            fw1.setBirthRateTotal(ap.CBR_1940);
+            pwb = fw1.forward(pwb, fctx, mt, 1.0);
+
+            /* передвижка на следующий год населения без учёта рождений */
+            pxb = prev.fw_p_xb;
+            fctx_xb = prev.fw_fctx_xb;            
+            ForwardPopulationT fw2 = new ForwardPopulationT();
+            fw2.setBirthRateTotal(0);
+            pxb = fw2.forward(pxb, fctx_xb, mt, 1.0);
+
+            curr.p_nonwar_with_births = fctx.end(pwb);
+            curr.p_nonwar_without_births = fctx_xb.end(pxb);
+
+            curr.expected_nonwar_births = prev.expected_nonwar_births - fw1.getObservedBirths();
+            curr.expected_nonwar_deaths = prev.expected_nonwar_deaths - fw2.getObservedDeaths();
+
+            prev.expected_nonwar_births = fw1.getObservedBirths();
+            prev.expected_nonwar_deaths = fw2.getObservedDeaths();
+        }
+
+        Util.noop();
+        
+        // ###
+    }
+
+    private void createHalves()
+    {
+        HalfYearEntry curr, prev = null;
+        int year = 1941;
+        HalfYearSelector half = HalfYearSelector.FirstHalfYear;
+        
+        for (;;)
+        {
+            curr = new HalfYearEntry(year, half, null, null);
+            halves.add(curr);
+            curr.prev = prev;
+            if (prev != null)
+                prev.next = curr;
+            prev = curr;
+            
+            if (half == HalfYearSelector.FirstHalfYear)
+            {
+                if (year == 1946)
+                    break;
+                half = HalfYearSelector.SecondHalfYear;
+            }
+            else
+            {
+                half = HalfYearSelector.FirstHalfYear;
+                year++;
+            }
+        }
+    }
+
+    /*
+     * Подготовить полугодовые сегменты
+     */
+    @SuppressWarnings("unused")
+    private void evalHalves_old(CombinedMortalityTable mt1940) throws Exception
+    {
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
         PopulationForwardingContext fctx = new PopulationForwardingContext();
@@ -272,6 +406,13 @@ public class Main
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
         PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        
+        if (Util.True)
+        {
+            new PopulationChart("Дефицит " + ap.area)
+                    .show("дефицит", deficit.forLocality(Locality.TOTAL))
+                    .display();
+        }
 
         ShowForecast.show(ap, p1946_actual, halves, 3);
         ShowForecast.show(ap, p1946_actual, halves, 4);

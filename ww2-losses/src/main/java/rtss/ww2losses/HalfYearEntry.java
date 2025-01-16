@@ -15,10 +15,10 @@ public class HalfYearEntry
     final public HalfYearSelector halfyear;
     
     /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
-    final public PopulationByLocality p_nonwar_with_births;
+    public PopulationByLocality p_nonwar_with_births;
 
     /* ожидаемое в условиях мира население на начало периода, без учёта рождений после середины 1941 */
-    final public PopulationByLocality p_nonwar_without_births;
+    public PopulationByLocality p_nonwar_without_births;
     
     /* 
      * ожидаемое в условиях мира число смертей за период (от начала до конца периода) 
@@ -42,8 +42,10 @@ public class HalfYearEntry
     public PopulationByLocality accumulated_deficit;
     
     /* временные данные для передвижки */
-    PopulationByLocality fw_p;
-    PopulationForwardingContext fw_fctx;
+    PopulationByLocality fw_p_wb;
+    PopulationForwardingContext fw_fctx_wb;
+    PopulationByLocality fw_p_xb;
+    PopulationForwardingContext fw_fctx_xb;
 
     public HalfYearEntry(
             int year,
