@@ -29,7 +29,7 @@ public class ShowPopulationChart
         Population p1926_census = PopulationByLocality.census(Area.USSR, 1926).smooth(DoSmoothPopulation).forLocality(Locality.TOTAL);
         Population p1927_adh = PopulationADH.getPopulationByLocality(Area.USSR, 1927).forLocality(Locality.TOTAL);
         p1927_adh = RescalePopulation.scaleTo(p1927_adh, p1926_census.sum(Gender.BOTH, 0, Population.MAX_AGE));
-
+        
         new PopulationChart("Население на момент переписи 1926 года")
                 .show("перепись", p1926_census)
                 .show("АДХ", p1927_adh)

@@ -38,6 +38,16 @@ public class PopulationChart extends ApplicationFrame
         this.xLabel = "Age";
         this.yLabel = "Population";
     }
+    
+    public static void display(String title, Population p, String name) throws Exception
+    {
+        new PopulationChart(title).show(name, p).display();
+    }
+
+    public static void display(String title, Population p1, String name1, Population p2, String name2) throws Exception
+    {
+        new PopulationChart(title).show(name1, p1).show(name2, p2).display();
+    }
 
     private XYSeriesCollection dataset = new XYSeriesCollection();
     private String xLabel;
