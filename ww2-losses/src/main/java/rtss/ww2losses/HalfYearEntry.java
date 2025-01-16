@@ -1,6 +1,7 @@
 package rtss.ww2losses;
 
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
 
 public class HalfYearEntry
@@ -39,6 +40,10 @@ public class HalfYearEntry
     
     /* кумулятивные потери населения (включая эмиграцию) накопленные на начало полугодия, половозрастная структура */
     public PopulationByLocality accumulated_deficit;
+    
+    /* временные данные для передвижки */
+    PopulationByLocality fw_p;
+    PopulationForwardingContext fw_fctx;
 
     public HalfYearEntry(
             int year,
