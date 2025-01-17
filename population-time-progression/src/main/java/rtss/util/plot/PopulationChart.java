@@ -20,6 +20,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import rtss.data.DoubleArray;
 import rtss.data.population.Population;
+import rtss.data.population.RescalePopulation;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 
@@ -38,7 +39,7 @@ public class PopulationChart extends ApplicationFrame
         this.xLabel = "Age";
         this.yLabel = "Population";
     }
-    
+
     public static void display(String title, Population p, String name) throws Exception
     {
         new PopulationChart(title).show(name, p).display();
@@ -49,12 +50,30 @@ public class PopulationChart extends ApplicationFrame
         new PopulationChart(title).show(name1, p1).show(name2, p2).display();
     }
 
+    public static void displayToScale(String title, Population pScale, String nameScale, Population p1, String name1) throws Exception
+    {
+        new PopulationChart(title).scale(nameScale, pScale).show(name1, p1).display();
+    }
+
+    private Population pScale = null;
+
     private XYSeriesCollection dataset = new XYSeriesCollection();
     private String xLabel;
     private String yLabel;
 
+    public PopulationChart scale(String name, Population p) throws Exception
+    {
+        pScale = null;
+        show(name, p);
+        pScale = p;
+        return this;
+    }
+
     public PopulationChart show(String name, Population p) throws Exception
     {
+        if (pScale != null)
+            p = RescalePopulation.scaleAllTo(p, pScale.sum(Gender.BOTH, 0, Population.MAX_AGE));
+
         double[] m_y = p.asArray(Gender.MALE);
         m_y = Util.multiply(m_y, -1);
         double[] m_x = years(m_y);

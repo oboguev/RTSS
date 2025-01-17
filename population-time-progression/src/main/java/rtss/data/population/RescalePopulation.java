@@ -91,6 +91,12 @@ public class RescalePopulation
         return new PopulationByLocality(total, urban, rural);
     }
 
+    public static Population scaleAllTo(Population p, double target) throws Exception
+    {
+        double scale = target / p.sum(Gender.BOTH, 0, MAX_AGE);
+        return scaleBy(p, scale);
+    }
+
     public static Population scaleBy(Population p, double scale) throws Exception
     {
         if (p == null)
