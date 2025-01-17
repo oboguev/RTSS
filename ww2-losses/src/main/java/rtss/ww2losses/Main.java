@@ -123,6 +123,8 @@ public class Main
 
         // ### compare halves1.last().p_nonwar_without_births vs halves2.last().p_nonwar_without_births
         // ### and also 1942.2 1943.2 1944.2 1945.2
+        
+        // ### сравнение дефицитов
 
         if (Util.True)
         {
