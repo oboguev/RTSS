@@ -93,7 +93,7 @@ public class Main
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
      */
-    private HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
+    HalfYearEntries<HalfYearEntry> halves;
 
     private void main() throws Exception
     {
@@ -118,7 +118,13 @@ public class Main
         /* таблица смертности для 1940 года */
         CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
 
-        evalHalves_alt(mt1940);
+        HalfYearEntries<HalfYearEntry> halves1 = evalHalves_alt(mt1940);
+        HalfYearEntries<HalfYearEntry> halves2 = evalHalves_old(mt1940);
+        
+        // ### compare halves1.last().p_nonwar_without_births vs halves2.last().p_nonwar_without_births
+        // ### and also 1942.2 1943.2 1944.2 1945.2    
+        
+        halves = halves2;
         evalDeficit1946();
         evalBirths();
 
@@ -128,9 +134,9 @@ public class Main
     /*
      * Подготовить полугодовые сегменты
      */
-    private void evalHalves_alt(CombinedMortalityTable mt1940) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_alt(CombinedMortalityTable mt1940) throws Exception
     {
-        createHalves();
+        HalfYearEntries<HalfYearEntry> halves = createHalves();
         
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
@@ -233,10 +239,14 @@ public class Main
             prev.expected_nonwar_births = fw1.getObservedBirths();
             prev.expected_nonwar_deaths = fw2.getObservedDeaths();
         }
+        
+        return halves;
     }
 
-    private void createHalves()
+    private HalfYearEntries<HalfYearEntry> createHalves()
     {
+        HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
+
         HalfYearEntry curr, prev = null;
         int year = 1941;
         HalfYearSelector half = HalfYearSelector.FirstHalfYear;
@@ -262,14 +272,18 @@ public class Main
                 year++;
             }
         }
+        
+        return halves;
     }
 
     /*
      * Подготовить полугодовые сегменты
      */
     @SuppressWarnings("unused")
-    private void evalHalves_old(CombinedMortalityTable mt1940) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_old(CombinedMortalityTable mt1940) throws Exception
     {
+        HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
+        
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
         PopulationForwardingContext fctx = new PopulationForwardingContext();
@@ -347,6 +361,8 @@ public class Main
             prev = curr;
             halves.add(curr);
         }
+        
+        return halves;
     }
 
     /* 
