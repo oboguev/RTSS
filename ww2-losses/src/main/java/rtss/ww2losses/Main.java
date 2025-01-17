@@ -130,7 +130,7 @@ public class Main
         {
             new PopulationChart("Сравнение вариантов")
                     .show("1", halves1.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
-                    .show("2", halves1.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
+                    .show("2", halves2.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .display();
 
             new PopulationChart("Вариант 1")
@@ -138,7 +138,7 @@ public class Main
                     .display();
 
             new PopulationChart("Вариант 2")
-                    .show("2", halves1.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
+                    .show("2", halves2.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .display();
 
             Util.noop();
