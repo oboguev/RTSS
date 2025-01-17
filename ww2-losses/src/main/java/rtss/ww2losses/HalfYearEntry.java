@@ -59,6 +59,17 @@ public class HalfYearEntry
         this.p_nonwar_without_births = p_nonwar_without_births;
     }
     
+    public void save_fw(
+            PopulationByLocality pwb, PopulationForwardingContext fctx, 
+            PopulationByLocality pxb, PopulationForwardingContext fctx_xb)
+    {
+        this.fw_p_wb = pwb.clone();
+        this.fw_fctx_wb = fctx.clone();
+
+        this.fw_p_xb = pxb.clone();
+        this.fw_fctx_xb = fctx_xb.clone();            
+    }
+    
     public String toString()
     {
         switch (halfyear)
