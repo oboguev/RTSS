@@ -118,8 +118,8 @@ public class Main
         /* таблица смертности для 1940 года */
         CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
 
-        HalfYearEntries<HalfYearEntry> halves1 = evalHalves_alt(mt1940);
-        HalfYearEntries<HalfYearEntry> halves2 = evalHalves_old(mt1940);
+        HalfYearEntries<HalfYearEntry> halves1 = evalHalves_step_1yr(mt1940);
+        HalfYearEntries<HalfYearEntry> halves2 = evalHalves_step_6mo(mt1940);
 
         // ### compare halves1.last().p_nonwar_without_births vs halves2.last().p_nonwar_without_births
         // ### and also 1942.2 1943.2 1944.2 1945.2
@@ -128,17 +128,21 @@ public class Main
 
         if (Util.True)
         {
-            new PopulationChart("Сравнение вариантов")
-                    .show("1", halves1.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
-                    .show("2", halves2.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
+            /*
+             * Сравение для ожидаемого населения
+             */
+            String point = "1946.1";
+            new PopulationChart("Сравнение вариантов ожидаемого населения на " + point)
+                    .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
+                    .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .display();
 
-            new PopulationChart("Вариант 1")
-                    .show("1", halves1.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
+            new PopulationChart("Вариант 1 ожидаемого населения на " + point)
+                    .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .display();
 
-            new PopulationChart("Вариант 2")
-                    .show("2", halves2.last().p_nonwar_without_births.forLocality(Locality.TOTAL))
+            new PopulationChart("Вариант 2 ожидаемого населения на " + point)
+                    .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .display();
 
             Util.noop();
@@ -150,11 +154,15 @@ public class Main
 
         Util.noop();
     }
+    
+    /* ================================================================================== */
 
     /*
-     * Подготовить полугодовые сегменты
+     * Подготовить полугодовые сегменты.
+     * Основная передвижка с шагом год.
+     * Вторичная передвижка (для промежуточных точек и до 1946) с шагом полгода. 
      */
-    private HalfYearEntries<HalfYearEntry> evalHalves_alt(CombinedMortalityTable mt1940) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_step_1yr(CombinedMortalityTable mt1940) throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = createHalves();
 
@@ -296,11 +304,14 @@ public class Main
         return halves;
     }
 
+    /* ================================================================================== */
+
     /*
-     * Подготовить полугодовые сегменты
+     * Подготовить полугодовые сегменты.
+     * Передвижка с шагом полгода.
      */
     @SuppressWarnings("unused")
-    private HalfYearEntries<HalfYearEntry> evalHalves_old(CombinedMortalityTable mt1940) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(CombinedMortalityTable mt1940) throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
 
