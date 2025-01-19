@@ -235,7 +235,27 @@ public class PopulationForwardingContext
             double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
             /* значения после MAX_YEAR + 1 не слишком важны */
             yearly_lx = Util.splice(yearly_lx, 0, MAX_YEAR + 5);
+
+            /*
+             * Провести дневную кривую так что
+             *       daily_lx[0]         = yearly_lx[0]
+             *       daily_lx[365]       = yearly_lx[1]
+             *       daily_lx[365 * 2]   = yearly_lx[2]
+             *       etc.
+             */
             daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
+
+            /*
+             * Базовая проверка правильности
+             */
+            if (Util.differ(daily_lx[0], yearly_lx[0]) ||
+                Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
+                Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
+                Util.differ(daily_lx[365 * 3], yearly_lx[3]))
+            {
+                throw new Exception("Ошибка в построении daily_lx");
+            }
+
             m_lx.put(key, daily_lx);
         }
 
