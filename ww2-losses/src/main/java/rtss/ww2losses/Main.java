@@ -37,7 +37,7 @@ public class Main
         try
         {
             new Main(Area.USSR).main();
-            new Main(Area.RSFSR).main();
+            // new Main(Area.RSFSR).main();
         }
         catch (Exception ex)
         {
@@ -121,15 +121,10 @@ public class Main
         HalfYearEntries<HalfYearEntry> halves1 = evalHalves_step_1yr(mt1940);
         HalfYearEntries<HalfYearEntry> halves2 = evalHalves_step_6mo(mt1940);
 
-        // ### compare halves1.last().p_nonwar_without_births vs halves2.last().p_nonwar_without_births
-        // ### and also 1942.2 1943.2 1944.2 1945.2
-        
-        // ### сравнение дефицитов
-
-        if (Util.True)
+        if (Util.False)
         {
             /*
-             * Сравение для ожидаемого населения
+             * Сравнение для ожидаемого населения
              */
             String point = "1946.1";
             new PopulationChart("Сравнение вариантов ожидаемого населения на " + point)
@@ -148,7 +143,28 @@ public class Main
             Util.noop();
         }
 
-        halves = halves2;
+        if (Util.True)
+        {
+            /*
+             * Сравнение для дефицитов
+             */
+            new PopulationChart("Сравнение вариантов дефицита населения на 1946.1")
+                    .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
+                    .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
+                    .display();
+
+            new PopulationChart("Вариант 1 дефицита населения на 1946.1")
+                    .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
+                    .display();
+
+            new PopulationChart("Вариант 2 дефицита населения на 1946.1")
+                    .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
+                    .display();
+
+            Util.noop();
+        }
+
+        halves = halves1;
         evalDeficit1946();
         evalBirths();
 
@@ -241,19 +257,19 @@ public class Main
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
             CombinedMortalityTable mt = year_mt(mt1940, year - 1);
 
-            /* передвижка на следующий год населения с учётом рождений */
+            /* передвижка на следующие полгода населения с учётом рождений */
             pwb = prev.fw_p_wb;
             fctx = prev.fw_fctx_wb;
             ForwardPopulationT fw1 = new ForwardPopulationT();
             fw1.setBirthRateTotal(ap.CBR_1940);
-            pwb = fw1.forward(pwb, fctx, mt, 1.0);
+            pwb = fw1.forward(pwb, fctx, mt, 0.5);
 
-            /* передвижка на следующий год населения без учёта рождений */
+            /* передвижка на следующие полгода населения без учёта рождений */
             pxb = prev.fw_p_xb;
             fctx_xb = prev.fw_fctx_xb;
             ForwardPopulationT fw2 = new ForwardPopulationT();
             fw2.setBirthRateTotal(0);
-            pxb = fw2.forward(pxb, fctx_xb, mt, 1.0);
+            pxb = fw2.forward(pxb, fctx_xb, mt, 0.5);
 
             curr.save_fw(pwb, fctx, pxb, fctx_xb);
 
@@ -575,6 +591,19 @@ public class Main
             throw new Exception("ошибка распределения deficit_f_fertile");
 
         Util.noop();
+    }
+    
+    /*
+     * Вычислить половозрастную структуру дефицита населения на 1946.1 для графического изображения.
+     * Возвращаемый дефицит охватывает только наличное на начало войны население, без учёта рождений
+     * во время войны.  
+     */
+    private PopulationByLocality eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    {
+        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        // deficit = deficit.sub(emigration());
+        return deficit;
     }
 
     private void split_p1946() throws Exception
