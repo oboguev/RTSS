@@ -44,7 +44,7 @@ public class ForwardPopulationT extends ForwardPopulation
      *     среднего за период населения
      *     
      *   - вторая фаза проводит передвижку с данным количеством рождений, 
-     *     результат этой фазы и является окончательным итогом  
+     *     результат этой фазы и становится окончательным итогом  
      */
     @SuppressWarnings("unused")
     private ForwardPopulationT setBirthRateTotal(AgeSpecificFertilityRates ageSpecificFertilityRates)
@@ -387,7 +387,6 @@ public class ForwardPopulationT extends ForwardPopulation
         }
 
         observed_deaths += sum_deaths;
-
     }
 
     /*****************************************************************************************/
