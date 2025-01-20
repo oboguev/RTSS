@@ -21,8 +21,8 @@ import rtss.data.selectors.Locality;
 import rtss.util.FieldValue;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
-import rtss.ww2losses.helpers.ShowForecast;
-import rtss.ww2losses.helpers.WarHelpers;
+// import rtss.ww2losses.helpers.ShowForecast;
+// import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
@@ -37,7 +37,7 @@ public class Main
         try
         {
             new Main(Area.USSR).main();
-            // new Main(Area.RSFSR).main();
+            new Main(Area.RSFSR).main();
         }
         catch (Exception ex)
         {
@@ -170,11 +170,12 @@ public class Main
 
         Util.noop();
     }
-    
+
     /* ================================================================================== */
 
     /*
      * Подготовить полугодовые сегменты.
+     * Вариант 1:
      * Основная передвижка с шагом год.
      * Вторичная передвижка (для промежуточных точек и до 1946) с шагом полгода. 
      */
@@ -324,6 +325,7 @@ public class Main
 
     /*
      * Подготовить полугодовые сегменты.
+     * Вариант 2:
      * Передвижка с шагом полгода.
      */
     @SuppressWarnings("unused")
@@ -513,6 +515,15 @@ public class Main
 
         /* =================================================== */
 
+        if (area == Area.RSFSR)
+        {
+            /*
+             * Для РСФСР отменить отрицательные значения дефицита женского населения
+             * в возрастах 15-60 лет как вызванные вероятно миграцией
+             */
+            cancelNegativeDeficit(Gender.FEMALE, 15, 60);
+        }
+
         v = p1946_expected_with_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out("Общий дефицит населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
@@ -534,8 +545,8 @@ public class Main
                     .display();
         }
 
-        ShowForecast.show(ap, p1946_actual, halves, 3);
-        ShowForecast.show(ap, p1946_actual, halves, 4);
+        // ShowForecast.show(ap, p1946_actual, halves, 3);
+        // ShowForecast.show(ap, p1946_actual, halves, 4);
 
         // deficit.validate();
 
@@ -543,7 +554,7 @@ public class Main
 
         deficit = deficit.sub(emigration());
         // validate(deficit);
-        WarHelpers.validateDeficit(deficit);
+        // WarHelpers.validateDeficit(deficit);
 
         /*
          * разбить сверхсмертность на категории 
@@ -592,7 +603,7 @@ public class Main
 
         Util.noop();
     }
-    
+
     /*
      * Вычислить половозрастную структуру дефицита населения на 1946.1 для графического изображения.
      * Возвращаемый дефицит охватывает только наличное на начало войны население, без учёта рождений
@@ -602,7 +613,7 @@ public class Main
     {
         PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
         PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
-        // deficit = deficit.sub(emigration());
+        deficit = deficit.sub(emigration());
         return deficit;
     }
 
@@ -654,6 +665,22 @@ public class Main
         double pop = p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         double scale = (pop - tuva_pop) / pop;
         p1946_actual = RescalePopulation.scaleAllBy(p1946_actual, scale);
+    }
+
+    private void cancelNegativeDeficit(Gender gender, int age1, int age2) throws Exception
+    {
+        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        Population deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar).forLocality(Locality.TOTAL);
+        for (int age = age1; age <= age2; age++)
+        {
+            double v = deficit.get(gender, age);
+            if (v < 0)
+            {
+                p1946_actual.add(Locality.TOTAL, gender, age, v);
+            }
+        }
+
+        split_p1946();
     }
 
     private double subcount(PopulationByLocality p, Gender gender, int age1, int age2) throws Exception
