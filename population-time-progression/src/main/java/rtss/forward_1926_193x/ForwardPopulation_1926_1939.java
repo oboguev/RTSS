@@ -29,17 +29,22 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
     public ForwardPopulation_1926_1939() throws Exception
     {
     }
-    
+
     public ForwardPopulation_1926_1939 useADH1926Rates() throws Exception
     {
-        use_ADH1926_rates(); 
+        use_ADH1926_rates();
         return this;
     }
 
     public void forward(boolean useADHInfantMortalityRate) throws Exception
     {
+        forward(true, useADHInfantMortalityRate);
+    }
+
+    public void forward(boolean interpolateMortalityTable, boolean useADHInfantMortalityRate) throws Exception
+    {
         tuneInfantMortalityRate(useADHInfantMortalityRate);
-        
+
         /*
          * Вычислить рождаемость городского и сельского населения в 1926 году 
          */
@@ -78,7 +83,8 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
         {
             year++;
 
-            mt = interpolateMortalityTable(year);
+            if (interpolateMortalityTable)
+                mt = interpolateMortalityTable(year);
             p = forward(p, fctx, mt, yfraction);
 
             /*
