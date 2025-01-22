@@ -60,7 +60,7 @@ public class Main
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
      */
-    private static boolean AppyAntibiotics = Util.False;
+    private static boolean AppyAntibiotics = Util.True;
 
     /*
      * Распечатывать диагностический вывод
