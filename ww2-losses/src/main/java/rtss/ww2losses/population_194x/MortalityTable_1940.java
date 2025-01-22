@@ -77,6 +77,11 @@ public class MortalityTable_1940 extends UtilBase_194x
 
     public CombinedMortalityTable evaluate() throws Exception
     {
+        return evaluate(false);
+    }
+
+    public CombinedMortalityTable evaluate(boolean print) throws Exception
+    {
         PopulationByLocality p1940 = new Population_In_Early_1940(ap).evaluate();
         
         if (ap.area == Area.USSR)
@@ -102,6 +107,8 @@ public class MortalityTable_1940 extends UtilBase_194x
             instructions.add(instruction);
             
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для СССР 1940");
+            Util.out(String.format("Для таблицы смертности РСФСР 1940 года все коэффциенты в возрастах 5-100 увеличены на %.4f", instruction.scale));
+
             return xmt;
         }
         else if (ap.area == Area.RSFSR)
@@ -115,6 +122,8 @@ public class MortalityTable_1940 extends UtilBase_194x
             instructions.add(instruction);
 
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для РСФСР 1940");
+            Util.out(String.format("Для таблицы смертности РСФСР 1940 года все коэффциенты увеличены на %.4f", instruction.scale));
+
             return xmt;
         }
         else

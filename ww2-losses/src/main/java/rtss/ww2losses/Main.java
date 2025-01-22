@@ -21,8 +21,8 @@ import rtss.data.selectors.Locality;
 import rtss.util.FieldValue;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
-// import rtss.ww2losses.helpers.ShowForecast;
-// import rtss.ww2losses.helpers.WarHelpers;
+import rtss.ww2losses.helpers.ShowForecast;
+import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
@@ -55,6 +55,17 @@ public class Main
         split_p1946();
     }
 
+    /*
+     * Корректировать младенческую и раннедетскую смертность в таблицах смертности
+     * 1943-1945 гг. с учётом эффекта антибиотиков 
+     */
+    private static boolean AppyAntibiotics = Util.True;
+
+    /*
+     * Распечатывать диагностический вывод
+     */
+    private static boolean PrintDiagnostics = Util.False;
+
     private Area area;
     private AreaParameters ap;
     private static int MAX_AGE = Population.MAX_AGE;
@@ -67,8 +78,6 @@ public class Main
 
     /* фактическое население на начало 1946 года рождённое после середины 1941*/
     private PopulationByLocality p1946_actual_born_postwar;
-
-    private static boolean AppyAntibiotics = Util.True;
 
     /* 
      * интенсивность потерь РККА по полугодиям
@@ -132,18 +141,21 @@ public class Main
                     .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .display();
 
-            new PopulationChart("Вариант 1 ожидаемого населения на " + point)
-                    .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
-                    .display();
+            if (Util.False)
+            {
+                new PopulationChart("Вариант 1 ожидаемого населения на " + point)
+                        .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
+                        .display();
 
-            new PopulationChart("Вариант 2 ожидаемого населения на " + point)
-                    .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
-                    .display();
+                new PopulationChart("Вариант 2 ожидаемого населения на " + point)
+                        .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
+                        .display();
 
+            }
             Util.noop();
         }
 
-        if (Util.True)
+        if (Util.False)
         {
             /*
              * Сравнение для дефицитов
@@ -153,18 +165,21 @@ public class Main
                     .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
                     .display();
 
-            new PopulationChart("Вариант 1 дефицита населения на 1946.1")
-                    .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
-                    .display();
+            if (Util.False)
+            {
+                new PopulationChart("Вариант 1 дефицита населения на 1946.1")
+                        .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
+                        .display();
 
-            new PopulationChart("Вариант 2 дефицита населения на 1946.1")
-                    .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
-                    .display();
+                new PopulationChart("Вариант 2 дефицита населения на 1946.1")
+                        .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
+                        .display();
+            }
 
             Util.noop();
         }
 
-        halves = halves1;
+        halves = halves2;
         evalDeficit1946();
         evalBirths();
 
@@ -545,8 +560,11 @@ public class Main
                     .display();
         }
 
-        // ShowForecast.show(ap, p1946_actual, halves, 3);
-        // ShowForecast.show(ap, p1946_actual, halves, 4);
+        if (PrintDiagnostics)
+        {
+            ShowForecast.show(ap, p1946_actual, halves, 3);
+            ShowForecast.show(ap, p1946_actual, halves, 4);
+        }
 
         // deficit.validate();
 
@@ -554,7 +572,9 @@ public class Main
 
         deficit = deficit.sub(emigration());
         // validate(deficit);
-        // WarHelpers.validateDeficit(deficit);
+
+        if (PrintDiagnostics)
+            WarHelpers.validateDeficit(deficit);
 
         /*
          * разбить сверхсмертность на категории 
