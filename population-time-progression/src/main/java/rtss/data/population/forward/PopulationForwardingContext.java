@@ -9,6 +9,7 @@ import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -63,7 +64,7 @@ import rtss.util.Util;
  */
 public class PopulationForwardingContext
 {
-    private static final int DEFAULT_NYEARS = 5; /* years 0-4 */
+    public static final int DEFAULT_NYEARS = 5; /* years 0-4 */
 
     public final int DAYS_PER_YEAR = 365;
 
@@ -253,7 +254,7 @@ public class PopulationForwardingContext
         {
             double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
             /* значения после MAX_YEAR + 1 не слишком важны */
-            yearly_lx = Util.splice(yearly_lx, 0, MAX_YEAR + 5);
+            yearly_lx = Util.splice(yearly_lx, 0, Math.min(MAX_YEAR + 5, Population.MAX_AGE));
 
             /*
              * Провести дневную кривую так что
@@ -366,7 +367,7 @@ public class PopulationForwardingContext
     {
         final int ExtraTrailingYearsForSpline = 3;
         double[] v_years = p.forLocality(locality).asArray(gender);
-        v_years = Util.splice(v_years, 0, MAX_YEAR + ExtraTrailingYearsForSpline);
+        v_years = Util.splice(v_years, 0, Math.min(MAX_YEAR + ExtraTrailingYearsForSpline, Population.MAX_AGE));
         Bin[] bins = Bins.fromValues(v_years);
         for (int age = 0; age < bins.length; age++)
         {
