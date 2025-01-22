@@ -143,18 +143,18 @@ public class Main
              * Сравнение для ожидаемого населения
              */
             String point = "1946.1";
-            new PopulationChart("Сравнение вариантов ожидаемого населения на " + point)
+            new PopulationChart("Сравнение вариантов ожидаемого населения " + area.toString() + " на " + point)
                     .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                     .display();
 
             if (Util.False)
             {
-                new PopulationChart("Вариант 1 ожидаемого населения на " + point)
+                new PopulationChart("Вариант 1 ожидаемого населения " + area.toString() + " на " + point)
                         .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                         .display();
 
-                new PopulationChart("Вариант 2 ожидаемого населения на " + point)
+                new PopulationChart("Вариант 2 ожидаемого населения " + area.toString() + " на " + point)
                         .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
                         .display();
 
@@ -166,18 +166,18 @@ public class Main
             /*
              * Сравнение для дефицитов
              */
-            new PopulationChart("Сравнение вариантов дефицита населения на 1946.1")
+            new PopulationChart("Сравнение вариантов дефицита населения " + area.toString() + " на 1946.1")
                     .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
                     .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
                     .display();
 
-            if (Util.True)
+            if (Util.False)
             {
-                new PopulationChart("Вариант 1 дефицита населения на 1946.1")
+                new PopulationChart("Вариант 1 дефицита населения " + area.toString() + " на 1946.1")
                         .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
                         .display();
 
-                new PopulationChart("Вариант 2 дефицита населения на 1946.1")
+                new PopulationChart("Вариант 2 дефицита населения " + area.toString() + " на 1946.1")
                         .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
                         .display();
             }
