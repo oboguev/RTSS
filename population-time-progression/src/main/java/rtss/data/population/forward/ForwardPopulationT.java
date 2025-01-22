@@ -391,7 +391,7 @@ public class ForwardPopulationT extends ForwardPopulation
         observed_deaths += sum_deaths;
     }
 
-    private double survivalRate(PopulationForwardingContext fctx, double[] day_lx, int nd, int nd2)
+    private double survivalRate(PopulationForwardingContext fctx, double[] day_lx, int nd, int nd2) throws Exception
     {
         if (nd2 < day_lx.length)
         {
@@ -399,16 +399,12 @@ public class ForwardPopulationT extends ForwardPopulation
         }
         else
         {
+            if (nd2 / fctx.DAYS_PER_YEAR  < Population.MAX_AGE)
+                throw new Exception("unexpected nd2");
+            
             /* использовать коэффициент смертности последнего года */
-            try
-            {
-                int extra = 100;
-                return day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            int extra = 10;
+            return day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
         }
     }
 
