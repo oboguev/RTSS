@@ -1176,6 +1176,99 @@
         </tbody>
       </table>
     </blockquote>
+    Удельные процентные коэффициенты распределения потерь по полугодиям
+    определяются отсюда как <br>
+    <blockquote>
+      <table style="border-collapse: collapse;" width="395" height="289"
+        cellspacing="2" cellpadding="2" border="1">
+        <colgroup><col style="width:50pt" width="67" span="2"> <col
+            style="mso-width-source:userset;mso-width-alt:2842;width:63pt"
+            width="84"> <col
+            style="mso-width-source:userset;mso-width-alt:3045;width:68pt"
+            width="90"> </colgroup><tbody>
+          <tr style="height:14.4pt" height="19">
+            <td colspan="2" class="xl66"
+              style="height:14.4pt;width:100pt" width="134" height="19"
+              bgcolor="#ccccff" align="center"><b><br>
+              </b></td>
+            <td colspan="2" class="xl66" style="width:131pt" width="174"
+              bgcolor="#ccccff" align="center"><b>группы населения</b></td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" bgcolor="#ccccff"
+              align="center"><b>год</b></td>
+            <td bgcolor="#ccccff" align="center"><b>полугодие</b></td>
+            <td bgcolor="#ccccff" align="center"><b>непризывные</b></td>
+            <td bgcolor="#ccccff" align="center"><b>призывные</b></td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center">1941</td>
+            <td align="center">первое</td>
+            <td align="right">0</td>
+            <td align="right">0</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center"><br>
+            </td>
+            <td align="center">второе</td>
+            <td class="xl65" align="right">11.6</td>
+            <td class="xl65" align="right">23.0</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center">1942</td>
+            <td align="center">первое</td>
+            <td class="xl65" align="right">18.8</td>
+            <td class="xl65" align="right">15.1</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center"><br>
+            </td>
+            <td align="center">второе</td>
+            <td class="xl65" align="right">20.0</td>
+            <td class="xl65" align="right">16.8</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center">1943</td>
+            <td align="center">первое</td>
+            <td class="xl65" align="right">17.1</td>
+            <td class="xl65" align="right">10.8</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center"><br>
+            </td>
+            <td align="center">второе</td>
+            <td class="xl65" align="right">13.7</td>
+            <td class="xl65" align="right">12.8</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center">1944</td>
+            <td align="center">первое</td>
+            <td class="xl65" align="right">10.3</td>
+            <td class="xl65" align="right">8.8</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center"><br>
+            </td>
+            <td align="center">второе</td>
+            <td class="xl65" align="right">4.8</td>
+            <td class="xl65" align="right">6.7</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center">1945</td>
+            <td align="center">первое</td>
+            <td class="xl65" align="right">3.8</td>
+            <td class="xl65" align="right">6.1</td>
+          </tr>
+          <tr style="height:14.4pt" height="19">
+            <td style="height:14.4pt" height="19" align="center"><br>
+            </td>
+            <td align="center">второе</td>
+            <td class="xl65" align="right">0</td>
+            <td class="xl65" align="right">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </blockquote>
     Оцениваемое фактическое число смертей в каждом полугодии для <i>наличного
 
 
@@ -1190,8 +1283,45 @@
     варианте населения без рождений) плюс распределённое на полугодие
     число добавочных смертей.<br>
     <br>
-    Для получения фактического числа смертей <i>всего </i>населения
-    нам потребуется вычислить и прибавить число смертей среди рождённых
+    Добавочное число смертей <i>наличного </i>на начало войны
+    населения для каждого полугодия мы определяем отправляясь от
+    половозрастной структуры сверхсмертности на конец 1945 года,
+    итеративно совершая обратные шаги во времени по полугодиям. На
+    каждом шаге мы:<br>
+    <blockquote>
+      <ul>
+        <li>Вычисляем число добавочных смертей в полугодии как<br>
+          <br>
+          (удельный коэффициент распределения смертей призывных
+          возрастов) × (число мужчин в возрастах 15-99 в структуре
+          остатка сверхсмертности) +<br>
+          (удельный коэффициент распределения смертей непризывных
+          возрастов) × (число всех остальных групп в структуре остатка
+          сверхсмертности)<br>
+        </li>
+      </ul>
+    </blockquote>
+    <blockquote>
+      <ul>
+        <li>Затем мы вычитаем величины первой и второй строк из
+          структуры остатка сверхсмертности и сдвигаем её по возрасту
+          вниз на полгода.<br>
+          <br>
+        </li>
+        <li>Итерации продолжаются до первого полугодия 1945 года, в
+          котором структура остатка сверхсмертности исчерпывается.</li>
+      </ul>
+    </blockquote>
+    <p>Эта итерация, кроме того, даёт для каждого полугодия накопленную
+      половозрастную структуру сверхсмертности, что позволяет
+      (прибавлением её к ожидаемой половозрастной структуре в условиях
+      мира) определить фактическую половозрастную структуру населения
+      для данного полугодия. В последнюю необходимо внести также
+      поправку на эмиграцию.###<br>
+    </p>
+    Для получения фактического числа смертей <i>всего </i>(а не только
+    <i>наличного </i>на начало войны населения) населения нам
+    потребуется вычислить и прибавить число смертей среди рождённых
     после начала войны.<br>
     Обратимся предварительно к исчислению рождений.<br>
     <br>

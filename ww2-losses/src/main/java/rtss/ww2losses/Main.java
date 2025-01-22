@@ -353,7 +353,7 @@ public class Main
         PopulationForwardingContext fctx = new PopulationForwardingContext();
         PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
         PopulationByLocality px = fctx.end(p);
-        if (Util.True)
+        if (Util.False)
         {
             new PopulationChart("Население на середину 1941 года")
                     .show("перепись", px.forLocality(Locality.TOTAL))
@@ -553,7 +553,7 @@ public class Main
 
         PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
 
-        if (Util.True)
+        if (Util.False)
         {
             new PopulationChart("Дефицит " + ap.area)
                     .show("дефицит", deficit.forLocality(Locality.TOTAL))
@@ -568,7 +568,7 @@ public class Main
 
         // deficit.validate();
 
-        // ### backpropagateExistingDeficit(deficit);
+        backpropagateExistingDeficit(deficit);
 
         deficit = deficit.sub(emigration());
         // validate(deficit);
