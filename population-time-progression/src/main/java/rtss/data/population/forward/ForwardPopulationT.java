@@ -360,14 +360,14 @@ public class ForwardPopulationT extends ForwardPopulation
 
             if (nd2 < p2.length)
             {
-                v *= day_lx[nd2] / day_lx[nd];
+                v *= survivalRate(fctx, day_lx, nd, nd2);
                 p2[nd2] = v;
             }
             else
             {
                 int age = fctx.day2age(nd2);
                 nd2 = age * fctx.DAYS_PER_YEAR;
-                v *= day_lx[nd2] / day_lx[nd];
+                v *= survivalRate(fctx, day_lx, nd, nd2);
                 if (age <= Population.MAX_AGE)
                     pto.add(locality, gender, age, v);
             }
@@ -389,6 +389,27 @@ public class ForwardPopulationT extends ForwardPopulation
         }
 
         observed_deaths += sum_deaths;
+    }
+
+    private double survivalRate(PopulationForwardingContext fctx, double[] day_lx, int nd, int nd2)
+    {
+        if (nd2 < day_lx.length)
+        {
+            return day_lx[nd2] / day_lx[nd];
+        }
+        else
+        {
+            /* использовать коэффициент смертности последнего года */
+            try
+            {
+                int extra = 100;
+                return day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 
     /*****************************************************************************************/

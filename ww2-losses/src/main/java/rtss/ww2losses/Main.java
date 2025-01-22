@@ -66,6 +66,12 @@ public class Main
      * Распечатывать диагностический вывод
      */
     private static boolean PrintDiagnostics = Util.True;
+    
+    /*
+     * Размер контекста отслеживания: только дети или все возраста
+     */
+    // private static int PopulationForwardingContextSize = PopulationForwardingContext.DEFAULT_NYEARS;
+    private static int PopulationForwardingContextSize = PopulationForwardingContext.ALL_AGES;
 
     private Area area;
     private AreaParameters ap;
@@ -203,7 +209,7 @@ public class Main
 
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContextSize);
         PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
 
         /* первое полугодие 1941 */
@@ -353,7 +359,7 @@ public class Main
 
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContextSize);
         PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
         PopulationByLocality px = fctx.end(p);
         if (Util.False)
