@@ -311,4 +311,14 @@ public class DoubleArray
 
         return res;
     }
+
+    public void setValueConstraint(ValueConstraint vc)
+    {
+        this.vc = vc;
+    }
+
+    public ValueConstraint valueConstraint()
+    {
+        return vc;
+    }
 }

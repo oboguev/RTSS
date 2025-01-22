@@ -1,5 +1,6 @@
 package rtss.data.population;
 
+import rtss.data.ValueConstraint;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -322,7 +323,7 @@ public class PopulationByLocality
 
         validate();
     }
-    
+
     public void saveToFiles(String dirPath, String comment) throws Exception
     {
         if (rural != null)
@@ -571,5 +572,17 @@ public class PopulationByLocality
         default:
             throw new IllegalArgumentException();
         }
+    }
+
+    public void setValueConstraint(ValueConstraint vc)
+    {
+        if (rural != null)
+            rural.setValueConstraint(vc);
+
+        if (urban != null)
+            urban.setValueConstraint(vc);
+
+        if (total != null)
+            total.setValueConstraint(vc);
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rtss.data.ValueConstraint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
@@ -582,7 +583,7 @@ public class Main
                 WarHelpers.validateDeficit(deficit);
         }
 
-        // ### backpropagateExistingDeficit(deficit);
+        backpropagateExistingDeficit(deficit);
 
         // validate(deficit);
 
@@ -824,6 +825,7 @@ public class Main
              * Вычислить потери в текущем полугодии
              */
             PopulationByLocality loss = he.next.accumulated_deficit.clone();
+            loss.setValueConstraint(ValueConstraint.NONE);
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
@@ -843,6 +845,7 @@ public class Main
             /*
              * Вычислить потери на начало полугодия
              */
+            he.next.accumulated_deficit.setValueConstraint(ValueConstraint.NONE);
             PopulationByLocality x = he.next.accumulated_deficit.sub(loss);
             he.accumulated_deficit = x.moveDown(0.5);
         }

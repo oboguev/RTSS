@@ -48,6 +48,13 @@ public class Population
     private Population()
     {
     }
+    
+    public void setValueConstraint(ValueConstraint vc)
+    {
+        male.setValueConstraint(vc);
+        female.setValueConstraint(vc);
+        both.setValueConstraint(vc);
+    }
 
     public Population(Locality locality, double[] m, double m_unknown, double[] f, double f_unknown) throws Exception
     {
@@ -147,7 +154,7 @@ public class Population
 
         DoubleArray m = forGender(gender);
         Util.validate(value);
-        checkNonNegative(value);
+        checkValueConstraint(value, m);
         m.put(age, value);
     }
 
@@ -159,12 +166,12 @@ public class Population
 
         if (m.containsKey(age))
         {
-            checkNonNegative(m.get(age) + value);
+            checkValueConstraint(m.get(age) + value, m);
             m.put(age, Util.validate(m.get(age) + value));
         }
         else
         {
-            checkNonNegative(value);
+            checkValueConstraint(value, m);
             m.put(age, Util.validate(value));
         }
     }
@@ -177,7 +184,7 @@ public class Population
 
         if (m.containsKey(age))
         {
-            checkNonNegative(m.get(age) - value);
+            checkValueConstraint(m.get(age) - value, m);
             m.put(age, Util.validate(m.get(age) - value));
         }
         else
@@ -188,11 +195,30 @@ public class Population
         }
     }
 
-    private void checkNonNegative(double v) throws Exception
+    private void checkValueConstraint(double v, DoubleArray m) throws Exception
+    {
+        checkValueConstraint(v, m.valueConstraint());
+    }
+
+    private void checkValueConstraint(double v, ValueConstraint vc) throws Exception
     {
         Util.checkValid(v);
-        if (v < 0)
-            throw new Exception("Negative population");
+        
+        switch (vc)
+        {
+        case NONE:
+            break;
+        
+        case NON_NEGATIVE:
+            if (v < 0)
+                throw new Exception("Negative population");
+            break;
+
+        case POSITIVE:
+            if (v <= 0)
+                throw new Exception("Negative or zero population");
+            break;
+        }
     }
 
     private DoubleArray forGender(Gender gender)
