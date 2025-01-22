@@ -38,8 +38,8 @@ public class HalfYearEntry
     /* фактическое число состоявшихся рождений */
     public double actual_births; 
     
-    /* кумулятивные потери населения (включая эмиграцию) накопленные на начало полугодия, половозрастная структура */
-    public PopulationByLocality accumulated_deficit;
+    /* кумулятивные потери населения по сверхсмертности накопленные на начало полугодия, половозрастная структура */
+    public PopulationByLocality accumulated_excess_deaths;
     
     /* временные данные для передвижки */
     PopulationByLocality fw_p_wb;

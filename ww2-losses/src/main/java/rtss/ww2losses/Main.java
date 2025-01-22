@@ -60,7 +60,7 @@ public class Main
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
      */
-    private static boolean AppyAntibiotics = Util.True;
+    private static boolean AppyAntibiotics = Util.False;
 
     /*
      * Распечатывать диагностический вывод
@@ -177,7 +177,12 @@ public class Main
             }
         }
 
-        halves = halves2;
+        /*
+         * Вариант 1 предподчительнее, т.к. избегает избыточного "переплёскивания" населения из года
+         * в год. При 9 полугодовых продвижках (вариант 2) часть населения переплеснётся по возрасту на 9 лет, 
+         * а не на 4.5.  
+         */
+        halves = halves1;
         evalDeficit1946();
         evalBirths();
 
@@ -583,7 +588,7 @@ public class Main
                 WarHelpers.validateDeficit(deficit);
         }
 
-        backpropagateExistingDeficit(deficit);
+        // ### backpropagateExistingDeficit(deficit);
 
         // validate(deficit);
 
@@ -808,7 +813,7 @@ public class Main
         List<Double> acv_conscripts = atov_reverse(ac_conscripts);
 
         HalfYearEntry he = halves.last();
-        he.accumulated_deficit = deficit1946;
+        he.accumulated_excess_deaths = deficit1946;
 
         for (;;)
         {
@@ -824,7 +829,7 @@ public class Main
             /*
              * Вычислить потери в текущем полугодии
              */
-            PopulationByLocality loss = he.next.accumulated_deficit.clone();
+            PopulationByLocality loss = he.next.accumulated_excess_deaths.clone();
             loss.setValueConstraint(ValueConstraint.NONE);
 
             for (int age = 0; age <= MAX_AGE; age++)
@@ -836,7 +841,7 @@ public class Main
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 double v = loss.get(Locality.TOTAL, Gender.MALE, age);
-                if (age >= 18 && age <= 55)
+                if (age >= 19 && age <= 55)
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_conscripts);
                 else
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
@@ -845,9 +850,21 @@ public class Main
             /*
              * Вычислить потери на начало полугодия
              */
-            he.next.accumulated_deficit.setValueConstraint(ValueConstraint.NONE);
-            PopulationByLocality x = he.next.accumulated_deficit.sub(loss);
-            he.accumulated_deficit = x.moveDown(0.5);
+            he.next.accumulated_excess_deaths.setValueConstraint(ValueConstraint.NONE);
+            PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss);
+            he.accumulated_excess_deaths = x.moveDown(0.5);
+            
+            if (Util.True)
+            {
+                verify_same(x.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE), he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE));
+                verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE), he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
+                Util.noop();
+            }
+            
+            if (he.prev.year == 1941)
+            {
+                Util.noop();
+            }
         }
 
         Util.noop();
@@ -868,7 +885,7 @@ public class Main
     }
 
     /*
-     * Откинуть первые и последние коэффициенты (нули для 1-го полугодия 1941 и 1-го полугодия 1946 гг.),
+     * Откинуть последние коэффициенты (нули для 1-го полугодия 1941),
      * остаток отсортировать в обращённом порядке, для обратного отсчёта по полугодиям от 1946 к 1941 г.
      */
     private List<Double> atov_reverse(double[] a)
@@ -876,9 +893,9 @@ public class Main
         List<Double> list = new ArrayList<>();
         for (double d : a)
             list.add(d);
-        list.remove(0);
-        list.remove(list.size() - 1);
         Collections.reverse(list);
+        // list.remove(0);
+        list.remove(list.size() - 1);
         return list;
     }
 
@@ -1023,5 +1040,29 @@ public class Main
         while (s.startsWith(" "))
             s = s.substring(1);
         return s;
+    }
+    
+    private void verify_same(double a, double b) throws Exception
+    {
+        if (Util.differ(a, b))
+            throw new Exception("Verification check failed: not same");
+    }
+
+    private void verify(boolean b) throws Exception
+    {
+        if (!b)
+            throw new Exception("Verification check failed");
+    }
+
+    private void verify_same(double a, double b, String msg) throws Exception
+    {
+        if (Util.differ(a, b))
+            throw new Exception("Verification check failed: not same: " + msg);
+    }
+
+    private void verify(boolean b, String msg) throws Exception
+    {
+        if (!b)
+            throw new Exception("Verification check failed: " + msg);
     }
 }
