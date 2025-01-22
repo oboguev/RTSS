@@ -1042,24 +1042,28 @@ public class Main
         return s;
     }
     
+    @SuppressWarnings("unused")
     private void verify_same(double a, double b) throws Exception
     {
         if (Util.differ(a, b))
             throw new Exception("Verification check failed: not same");
     }
 
+    @SuppressWarnings("unused")
     private void verify(boolean b) throws Exception
     {
         if (!b)
             throw new Exception("Verification check failed");
     }
 
+    @SuppressWarnings("unused")
     private void verify_same(double a, double b, String msg) throws Exception
     {
         if (Util.differ(a, b))
             throw new Exception("Verification check failed: not same: " + msg);
     }
 
+    @SuppressWarnings("unused")
     private void verify(boolean b, String msg) throws Exception
     {
         if (!b)

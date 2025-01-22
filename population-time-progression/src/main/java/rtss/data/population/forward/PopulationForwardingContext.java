@@ -44,38 +44,57 @@ import rtss.util.Util;
  * 
  * Использование:
  * 
- * PopulationByLocality p = ...
- * PopulationForwardingContext fctx = new PopulationForwardingContext();
- * PopulationByLocality pto = fctx.begin(p);
- * ....
- * pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
- * ....
- * ptoEnd = fctx.end(pto);
+ *     PopulationByLocality p = ...
+ *     PopulationForwardingContext fctx = new PopulationForwardingContext();
+ *     PopulationByLocality pto = fctx.begin(p);
+ *     ....
+ *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
+ *     ....
+ *     ptoEnd = fctx.end(pto);
  * 
  * fctx.begin переносит младшие возрастные группы в контекст, обнуляя их в возвращаеммом @pto.
  * 
  * fctx.end переносит население из контекста обратно в структуру PopulationByLocality. Контекст и @pto передаваемое
  * аргуметном для fctx.end при этом не изменяются, что позволяет сделать снимок населения в настоящий момент и
  * затем продолжить передвижку.
+ * 
+ * Чтобы создать контекст охватывающий все года, следует использовать 
+ *      PopulationForwardingContext fctx = new PopulationForwardingContext(Population.MAX_AGE + 1);
  */
 public class PopulationForwardingContext
 {
+    private static final int DEFAULT_NYEARS = 5; /* years 0-4 */
+
     public final int DAYS_PER_YEAR = 365;
 
-    public final int NYEARS = 5; /* years 0-4 */
-    public final int MAX_YEAR = NYEARS - 1;
+    public int NYEARS;
+    public int MAX_YEAR;
 
-    public final int NDAYS = NYEARS * DAYS_PER_YEAR;
-    public final int MAX_DAY = NDAYS - 1;
+    public int NDAYS;
+    public int MAX_DAY;
 
     private boolean began = false;
     private boolean hasRuralUrban;
-    private LocalityGenderToDoubleArray m = new LocalityGenderToDoubleArray(MAX_DAY, ValueConstraint.NON_NEGATIVE);
+    private LocalityGenderToDoubleArray m;
 
     /*
      * Total number of births during forwarding
      */
     private Map<String, Double> totalBirths = new HashMap<>();
+    
+    public PopulationForwardingContext()
+    {
+        this(DEFAULT_NYEARS);
+    }
+
+    public PopulationForwardingContext(int NYEARS)
+    {
+        this.NYEARS = NYEARS;
+        this.MAX_YEAR = NYEARS - 1;
+        this.NDAYS = NYEARS * DAYS_PER_YEAR;
+        this.MAX_DAY = NDAYS - 1;
+        this.m = new LocalityGenderToDoubleArray(MAX_DAY, ValueConstraint.NON_NEGATIVE);
+    }
 
     /* =============================================================================================== */
 
