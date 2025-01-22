@@ -103,7 +103,7 @@ public class PopulationForwardingContext
 
     public PopulationForwardingContext clone()
     {
-        PopulationForwardingContext cx = new PopulationForwardingContext();
+        PopulationForwardingContext cx = new PopulationForwardingContext(NYEARS);
         cx.began = began;
         cx.hasRuralUrban = hasRuralUrban;
         cx.m = new LocalityGenderToDoubleArray(m);
