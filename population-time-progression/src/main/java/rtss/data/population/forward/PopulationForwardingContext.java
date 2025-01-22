@@ -248,7 +248,7 @@ public class PopulationForwardingContext
      */
     public double[] get_daily_lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
     {
-        String key = String.format("%s-%s-%s", mt.tableId(), locality.name(), gender.name());
+        String key = String.format("%s-%s-%s-%d", mt.tableId(), locality.name(), gender.name(), NDAYS);
         double[] daily_lx = m_lx.get(key);
 
         if (daily_lx == null)

@@ -3,6 +3,7 @@ package rtss.data.population.forward;
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -367,9 +368,10 @@ public class ForwardPopulationT extends ForwardPopulation
                 int age = fctx.day2age(nd2);
                 nd2 = age * fctx.DAYS_PER_YEAR;
                 v *= day_lx[nd2] / day_lx[nd];
-                pto.add(locality, gender, age, v);
+                if (age <= Population.MAX_AGE)
+                    pto.add(locality, gender, age, v);
             }
-            
+
             sum_deaths += v_initial - v;
         }
 

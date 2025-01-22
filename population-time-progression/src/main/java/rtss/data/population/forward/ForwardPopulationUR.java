@@ -5,6 +5,7 @@ import java.util.Map;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -189,9 +190,9 @@ public class ForwardPopulationUR extends ForwardPopulation
         {
             double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
             double births = sum * yfraction * birthRate / 1000;
-            
+
             observed_births += births;
-            
+
             double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
             double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
@@ -215,7 +216,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         pto.makeBoth(locality);
     }
 
-    private void add_births(PopulationForwardingContext fctx_initial ,
+    private void add_births(PopulationForwardingContext fctx_initial,
             PopulationForwardingContext fctx,
             final PopulationByLocality p,
             final Locality locality,
@@ -390,16 +391,17 @@ public class ForwardPopulationUR extends ForwardPopulation
             {
                 v *= day_lx[nd2] / day_lx[nd];
                 p2[nd2] = v;
-                sum_deaths += v_initial - v;
             }
             else
             {
                 int age = fctx.day2age(nd2);
                 nd2 = age * fctx.DAYS_PER_YEAR;
                 v *= day_lx[nd2] / day_lx[nd];
-                pto.add(locality, gender, age, v);
-                sum_deaths += v_initial - v;
+                if (age <= Population.MAX_AGE)
+                    pto.add(locality, gender, age, v);
             }
+
+            sum_deaths += v_initial - v;
         }
 
         fctx.fromArray(locality, gender, p2);
