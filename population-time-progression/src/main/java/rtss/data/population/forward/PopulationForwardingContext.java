@@ -59,7 +59,8 @@ import rtss.util.Util;
  * аргуметном для fctx.end при этом не изменяются, что позволяет сделать снимок населения в настоящий момент и
  * затем продолжить передвижку.
  * 
- * Чтобы создать контекст охватывающий все года, следует использовать 
+ * Чтобы создать контекст охватывающий все возрасты, следует использовать
+ *  
  *      PopulationForwardingContext fctx = new PopulationForwardingContext(Population.MAX_AGE + 1);
  */
 public class PopulationForwardingContext
