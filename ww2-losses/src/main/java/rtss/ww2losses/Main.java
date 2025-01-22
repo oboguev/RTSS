@@ -64,7 +64,7 @@ public class Main
     /*
      * Распечатывать диагностический вывод
      */
-    private static boolean PrintDiagnostics = Util.False;
+    private static boolean PrintDiagnostics = Util.True;
 
     private Area area;
     private AreaParameters ap;
@@ -152,7 +152,6 @@ public class Main
                         .display();
 
             }
-            Util.noop();
         }
 
         if (Util.False)
@@ -165,7 +164,7 @@ public class Main
                     .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
                     .display();
 
-            if (Util.False)
+            if (Util.True)
             {
                 new PopulationChart("Вариант 1 дефицита населения на 1946.1")
                         .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
@@ -175,8 +174,6 @@ public class Main
                         .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
                         .display();
             }
-
-            Util.noop();
         }
 
         halves = halves2;
@@ -530,13 +527,26 @@ public class Main
 
         /* =================================================== */
 
+        PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+
+        if (Util.False)
+        {
+            new PopulationChart("Дефицит " + ap.area)
+                    .show("дефицит", deficit.forLocality(Locality.TOTAL))
+                    .display();
+        }
+
         if (area == Area.RSFSR)
         {
+            if (PrintDiagnostics)
+                WarHelpers.validateDeficit(deficit, "До эмиграции и отмены отрицательных женских значений:");
+
             /*
              * Для РСФСР отменить отрицательные значения дефицита женского населения
              * в возрастах 15-60 лет как вызванные вероятно миграцией
              */
             cancelNegativeDeficit(Gender.FEMALE, 15, 60);
+            deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
         }
 
         v = p1946_expected_with_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
@@ -551,15 +561,6 @@ public class Main
         v -= p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
-        PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
-
-        if (Util.False)
-        {
-            new PopulationChart("Дефицит " + ap.area)
-                    .show("дефицит", deficit.forLocality(Locality.TOTAL))
-                    .display();
-        }
-
         if (PrintDiagnostics)
         {
             ShowForecast.show(ap, p1946_actual, halves, 3);
@@ -568,13 +569,22 @@ public class Main
 
         // deficit.validate();
 
-        backpropagateExistingDeficit(deficit);
-
+        /* оставить только сверхсмертность */
         deficit = deficit.sub(emigration());
-        // validate(deficit);
-
+        if (area == Area.RSFSR)
+            deficit = cancelNegativeDeficit(deficit, Gender.FEMALE, 15, 60);
+        
         if (PrintDiagnostics)
-            WarHelpers.validateDeficit(deficit);
+        {
+            if (area == Area.RSFSR)
+                WarHelpers.validateDeficit(deficit, "После эмиграции и отмены отрицательных женских значений:");
+            else
+                WarHelpers.validateDeficit(deficit);
+        }
+
+        // ### backpropagateExistingDeficit(deficit);
+
+        // validate(deficit);
 
         /*
          * разбить сверхсмертность на категории 
@@ -701,6 +711,23 @@ public class Main
         }
 
         split_p1946();
+    }
+
+    private PopulationByLocality cancelNegativeDeficit(PopulationByLocality deficit, Gender gender, int age1, int age2) throws Exception
+    {
+        for (int age = age1; age <= age2; age++)
+        {
+            double v = deficit.get(Locality.TOTAL, gender, age);
+            if (v < 0)
+            {
+                p1946_actual.add(Locality.TOTAL, gender, age, v);
+                deficit.set(Locality.TOTAL, gender, age, 0);
+            }
+        }
+
+        split_p1946();
+        
+        return deficit;
     }
 
     private double subcount(PopulationByLocality p, Gender gender, int age1, int age2) throws Exception
