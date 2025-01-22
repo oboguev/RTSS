@@ -61,11 +61,12 @@ import rtss.util.Util;
  * 
  * Чтобы создать контекст охватывающий все возрасты, следует использовать
  *  
- *      PopulationForwardingContext fctx = new PopulationForwardingContext(Population.MAX_AGE + 1);
+ *      PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
  */
 public class PopulationForwardingContext
 {
-    public static final int DEFAULT_NYEARS = 5; /* years 0-4 */
+    public static final int DEFAULT_NYEARS = 5;                    /* years 0-4 */
+    public static final int ALL_AGES = Population.MAX_AGE + 1;     /* years 0-MAX_AGE */
 
     public final int DAYS_PER_YEAR = 365;
 
