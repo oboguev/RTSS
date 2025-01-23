@@ -600,4 +600,47 @@ public class PopulationByLocality
         if (total != null)
             total.setValueConstraint(vc);
     }
+
+    public String dump() throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        if (total != null)
+        {
+            sb.append("TOTAL:");
+            sb.append(Util.nl);
+            sb.append(total.dump());
+            sb.append("");
+        }
+ 
+        if (urban != null)
+        {
+            sb.append("URBAN:");
+            sb.append(Util.nl);
+            sb.append(urban.dump());
+            sb.append("");
+        }
+
+        if (rural != null)
+        {
+            sb.append("RURAL:");
+            sb.append(Util.nl);
+            sb.append(rural.dump());
+            sb.append("");
+        }
+        
+        return sb.toString();
+    }
+
+    public void validateBMF() throws Exception
+    {
+        if (total != null)
+            total.validateBMF();
+ 
+        if (urban != null)
+            urban.validateBMF();
+
+        if (rural != null)
+            rural.validateBMF();
+    }
 }

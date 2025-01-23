@@ -1040,4 +1040,34 @@ public class Population
         if (sealed)
             throw new Exception("Table is sealed and cannot be modified");
     }
+
+    /*****************************************************************************************************/
+    
+    public String dump() throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+ 
+        sb.append(String.format("AGE B M F"));
+        sb.append(Util.nl);
+        
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            sb.append(String.format("%-3d %f %f %f", age, both(age), male(age), female(age)));
+            sb.append(Util.nl);
+        }
+ 
+        return sb.toString();
+    }
+    
+    public void validateBMF() throws Exception
+    {
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            double m = male(age);
+            double f = female(age);
+            double b = both(age);
+            if (Math.abs(m + f - b) > 0.001)
+                throw new Exception("BMF mismatch");
+        }
+    }
 }

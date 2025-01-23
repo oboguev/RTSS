@@ -16,11 +16,11 @@ public class PrintHalves
         Util.out("");
         Util.out("Данные по полугодиям");
         Util.out("");
-        Util.out("    со.н = ожидаемое число смертей в наличном на начало войны населении в условиях мира");
-        Util.out("    сд.н = добавочное число смертей в наличном на начало войны населении из-за войны");
-        Util.out("    ро   = ожидаемое число рождений в условиях мира");
+        Util.out("    нал.ос  = ожидаемое число смертей в наличном на начало войны населении в условиях мира");
+        Util.out("    над.дс  = добавочное число смертей в наличном на начало войны населении из-за войны");
+        Util.out("    мир.ор  = ожидаемое число рождений в условиях мира");
         Util.out("");
-        Util.out("полугодие со.н сд.н ро");
+        Util.out("полугодие нал.ос нал.дс мир.ор");
         Util.out("");
 
         for (HalfYearEntry he : halves)
@@ -37,12 +37,16 @@ public class PrintHalves
             if (he.next.accumulated_excess_deaths != null)
                 d2 = he.next.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
             
+            double d2_minus_d1 = Math.round(d2 - d1);
+            
             Util.out(String.format("%s %5s %5s %5s", 
                                    he.toString(),
                                    f2k(he.expected_nonwar_deaths / 1000.0),
-                                   f2k((d2 - d1) / 1000.0),
+                                   f2k(d2_minus_d1 / 1000.0),
                                    f2k(he.expected_nonwar_births / 1000.0)
                                    ));
+            
+            Util.noop();
         }
     }
 

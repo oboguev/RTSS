@@ -741,6 +741,8 @@ public class Main
 
     private PopulationByLocality cancelNegativeDeficit(PopulationByLocality deficit, Gender gender, int age1, int age2) throws Exception
     {
+        deficit.setValueConstraint(ValueConstraint.NONE);
+
         for (int age = age1; age <= age2; age++)
         {
             double v = deficit.get(Locality.TOTAL, gender, age);
@@ -751,6 +753,7 @@ public class Main
             }
         }
 
+        deficit.forLocality(Locality.TOTAL).makeBoth();
         p1946_actual.forLocality(Locality.TOTAL).makeBoth();
         split_p1946();
 
@@ -825,6 +828,8 @@ public class Main
      */
     private void backpropagateExcessMortality(PopulationByLocality deficit1946) throws Exception
     {
+        deficit1946.validateBMF();
+        
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
         double[] ac_generic = wsum(0.3, even_intensity, 0.7, occupation_intensity);
         List<Double> acv_generic = atov_reverse(ac_generic);
@@ -879,12 +884,15 @@ public class Main
             }
             
             loss.makeBoth(Locality.TOTAL);
+            loss.validateBMF();
 
             /*
              * Вычислить потери на начало года
              */
             PopulationByLocality x = he.next.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
             he.accumulated_excess_deaths = x.moveDown(1.0);
+            he.accumulated_excess_deaths.validateBMF();
+            x.validateBMF();
 
             if (Util.True)
             {
@@ -935,12 +943,23 @@ public class Main
             }
             
             loss.makeBoth(Locality.TOTAL);
+            loss.validateBMF();
 
             /*
              * Вычислить потери на начало полугодия
              */
             PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
+            he.next.accumulated_excess_deaths.validateBMF();
+            loss.validateBMF();
+            x.validateBMF();
+            // ###
+            if (he.year == 1941)
+            {
+                Util.noop();
+            }
+            // ###
             he.accumulated_excess_deaths = x.moveDown(0.5);
+            he.accumulated_excess_deaths.validateBMF();
 
             if (Util.True)
             {
@@ -952,7 +971,8 @@ public class Main
             
             if (he.year == 1941)
             {
-                if (he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE) > 10)
+                double xsum = he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+                if (Math.abs(xsum) > 10)
                     throw new Exception("обратный отсчёт потерь не обнулился");
                 break;
             }
