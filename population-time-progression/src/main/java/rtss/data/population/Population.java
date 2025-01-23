@@ -321,7 +321,12 @@ public class Population
      */
     public Population sub(Population p) throws Exception
     {
-        if (locality != p.locality)
+        return sub(p, null);
+    }
+    
+    public Population sub(Population p, ValueConstraint rvc) throws Exception
+    {
+        if (locality != p.locality && rvc == null)
             throw new IllegalArgumentException("населения разнотипны");
 
         if ((male != null) != (p.male != null))
@@ -334,15 +339,17 @@ public class Population
             throw new IllegalArgumentException("населения разнотипны");
 
         Population res = newPopulation(locality);
+        if (rvc != null)
+            res.setValueConstraint(rvc);
 
         if (male != null)
-            res.male = male.sub(p.male);
+            res.male = male.sub(p.male, rvc);
 
         if (female != null)
-            res.female = female.sub(p.female);
+            res.female = female.sub(p.female, rvc);
 
         if (both != null)
-            res.both = both.sub(p.both);
+            res.both = both.sub(p.both, rvc);
 
         return res;
     }
@@ -352,7 +359,12 @@ public class Population
      */
     public Population add(Population p) throws Exception
     {
-        if (locality != p.locality)
+        return add(p, null);
+    }
+    
+    public Population add(Population p, ValueConstraint rvc) throws Exception
+    {
+        if (locality != p.locality && rvc == null)
             throw new IllegalArgumentException("населения разнотипны");
 
         if ((male != null) != (p.male != null))
@@ -365,15 +377,17 @@ public class Population
             throw new IllegalArgumentException("населения разнотипны");
 
         Population res = newPopulation(locality);
+        if (rvc != null)
+            res.setValueConstraint(rvc);
 
         if (male != null)
-            res.male = male.add(p.male);
+            res.male = male.add(p.male, rvc);
 
         if (female != null)
-            res.female = female.add(p.female);
+            res.female = female.add(p.female, rvc);
 
         if (both != null)
-            res.both = both.add(p.both);
+            res.both = both.add(p.both, rvc);
 
         return res;
     }

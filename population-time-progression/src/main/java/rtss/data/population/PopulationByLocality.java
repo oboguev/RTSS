@@ -195,6 +195,11 @@ public class PopulationByLocality
      */
     public PopulationByLocality sub(PopulationByLocality p) throws Exception
     {
+        return sub(p, null);
+    }
+    
+    public PopulationByLocality sub(PopulationByLocality p, ValueConstraint rvc) throws Exception
+    {
         if ((rural != null) != (p.rural != null))
             throw new IllegalArgumentException("населения разнотипны");
 
@@ -207,13 +212,13 @@ public class PopulationByLocality
         PopulationByLocality res = new PopulationByLocality();
 
         if (rural != null)
-            res.rural = rural.sub(p.rural);
+            res.rural = rural.sub(p.rural, rvc);
 
         if (urban != null)
-            res.urban = urban.sub(p.urban);
+            res.urban = urban.sub(p.urban, rvc);
 
         if (total != null)
-            res.total = total.sub(p.total);
+            res.total = total.sub(p.total, rvc);
 
         return res;
     }
@@ -223,6 +228,11 @@ public class PopulationByLocality
      */
     public PopulationByLocality add(PopulationByLocality p) throws Exception
     {
+        return add(p, null);
+    }
+    
+    public PopulationByLocality add(PopulationByLocality p, ValueConstraint rvc) throws Exception
+    {
         if ((rural != null) != (p.rural != null))
             throw new IllegalArgumentException("населения разнотипны");
 
@@ -235,13 +245,13 @@ public class PopulationByLocality
         PopulationByLocality res = new PopulationByLocality();
 
         if (rural != null)
-            res.rural = rural.add(p.rural);
+            res.rural = rural.add(p.rural, rvc);
 
         if (urban != null)
-            res.urban = urban.add(p.urban);
+            res.urban = urban.add(p.urban, rvc);
 
         if (total != null)
-            res.total = total.add(p.total);
+            res.total = total.add(p.total, rvc);
 
         return res;
     }
@@ -251,7 +261,12 @@ public class PopulationByLocality
      */
     public PopulationByLocality avg(PopulationByLocality p) throws Exception
     {
-        PopulationByLocality p2 = this.add(p);
+        return avg(p, null);
+    }
+    
+    public PopulationByLocality avg(PopulationByLocality p, ValueConstraint rvc) throws Exception
+    {
+        PopulationByLocality p2 = this.add(p, rvc);
         p2 = RescalePopulation.scaleAllBy(p2, 0.5);
         return p2;
     }

@@ -856,8 +856,7 @@ public class Main
             /*
              * Вычислить потери на начало полугодия
              */
-            he.next.accumulated_excess_deaths.setValueConstraint(ValueConstraint.NONE);
-            PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss);
+            PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
             he.accumulated_excess_deaths = x.moveDown(0.5);
             
             if (Util.True)
