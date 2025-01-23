@@ -34,7 +34,12 @@ import rtss.util.Util;
  *    Однако передвижка на полгода даст (50, 50).
  *    Затем следующая передвижка ещё на полгода даст (25, 25+25 = 50, 25).
  *    Т.е. приведёт к размытию распределения из-за утраты информации о датах рождения.
- *    
+ * 
+ * ***************************************************************************************
+ *
+ * Когда часть населения уже в возрасте MAX_AGE должна (выжив) перейти в более старший возраст
+ * MAX_AGE + 1, она остаётся в MAX_AGE.
+ *   
  */
 public class ForwardPopulationUR extends ForwardPopulation
 {
@@ -418,8 +423,7 @@ public class ForwardPopulationUR extends ForwardPopulation
                 int age = fctx.day2age(nd2);
                 nd2 = age * fctx.DAYS_PER_YEAR;
                 v *= survivalRate(fctx, day_lx, nd, nd2);
-                if (age <= Population.MAX_AGE)
-                    pto.add(locality, gender, age, v);
+                pto.add(locality, gender, Math.min(age, MAX_AGE), v);
             }
 
             sum_deaths += v_initial - v;

@@ -2,6 +2,7 @@ package rtss.data.population.forward;
 
 import rtss.data.population.Population;
 import rtss.util.Loggable;
+import rtss.util.Util;
 
 public class ForwardPopulation extends Loggable
 {
