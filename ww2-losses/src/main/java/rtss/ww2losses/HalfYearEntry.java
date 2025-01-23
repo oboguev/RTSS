@@ -29,17 +29,25 @@ public class HalfYearEntry
     /*ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
     
-    /* добавночное из-за войны количество смертей в этом полугодии (включает excess_deaths_fertile_f) */
+    /* кумулятивные потери населения по сверхсмертности накопленные на начало периода, половозрастная структура */
+    public PopulationByLocality accumulated_excess_deaths;
+    
+    /*
+     * добавочное из-за войны количество смертей в этом полугодии (включает excess_deaths_fertile_f),
+     * вычисляется независимо от accumulated_excess_deaths; разностное исчисление по accumulated_excess_deaths
+     * даёт более точную величину  
+     */
     public double excess_war_deaths = 0;
 
-    /* добавночное из-за войны количество смертей в этом полугодии среди женщин фертильного возраста */
+    /* 
+     * добавочное из-за войны количество смертей в этом полугодии среди женщин фертильного возраста,
+     * вычисляется независимо от accumulated_excess_deaths; разностное исчисление по accumulated_excess_deaths 
+     * даёт более точную величину  
+     */
     public double excess_war_deaths_fertile_f = 0;
     
     /* фактическое число состоявшихся рождений */
     public double actual_births; 
-    
-    /* кумулятивные потери населения по сверхсмертности накопленные на начало полугодия, половозрастная структура */
-    public PopulationByLocality accumulated_excess_deaths;
     
     /* временные данные для передвижки */
     PopulationByLocality fw_p_wb;

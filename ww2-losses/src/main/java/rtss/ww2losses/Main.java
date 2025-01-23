@@ -962,8 +962,6 @@ public class Main
             acv_conscripts.remove(0);
             acv_conscripts.remove(0);
         }
-
-        Util.noop();
     }
 
     private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
