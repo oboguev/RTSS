@@ -45,13 +45,13 @@ import rtss.util.Util;
  * 
  * Использование:
  * 
- *     PopulationByLocality p = ...
- *     PopulationForwardingContext fctx = new PopulationForwardingContext();
- *     PopulationByLocality pto = fctx.begin(p);
- *     ....
- *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
- *     ....
- *     ptoEnd = fctx.end(pto);
+ * PopulationByLocality p = ...
+ * PopulationForwardingContext fctx = new PopulationForwardingContext();
+ * PopulationByLocality pto = fctx.begin(p);
+ * ....
+ * pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
+ * ....
+ * ptoEnd = fctx.end(pto);
  * 
  * fctx.begin переносит младшие возрастные группы в контекст, обнуляя их в возвращаеммом @pto.
  * 
@@ -64,13 +64,13 @@ import rtss.util.Util;
  * все возрасты позволяет отслеживать возраст по дням, а не годам, и избегать проблем "расплытия" структуры населения
  * при не-годовых передвижках. См. более подробное разъяснение в заголовках файлов ForwardPopulationT/ForwardPopulationUR.
  * Чтобы создать контекст охватывающий все возрасты (0 ... MAX_AGE), следует использовать
- *  
- *      PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+ * 
+ * PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
  */
 public class PopulationForwardingContext
 {
-    public static final int DEFAULT_NYEARS = 5;                    /* years 0-4 */
-    public static final int ALL_AGES = Population.MAX_AGE + 1;     /* years 0-MAX_AGE */
+    public static final int DEFAULT_NYEARS = 5; /* years 0-4 */
+    public static final int ALL_AGES = Population.MAX_AGE + 1; /* years 0-MAX_AGE */
 
     public final int DAYS_PER_YEAR = 365;
 
@@ -88,7 +88,7 @@ public class PopulationForwardingContext
      * Total number of births during forwarding
      */
     private Map<String, Double> totalBirths = new HashMap<>();
-    
+
     public PopulationForwardingContext()
     {
         this(DEFAULT_NYEARS);
@@ -296,6 +296,9 @@ public class PopulationForwardingContext
      */
     public PopulationByLocality begin(final PopulationByLocality p) throws Exception
     {
+        // TODO: сделать аргументом (таблица смертности в год, для которого указана структура населения)
+        CombinedMortalityTable mt = null;
+        
         if (began)
             throw new IllegalArgumentException();
 
@@ -317,8 +320,8 @@ public class PopulationForwardingContext
             {
                 Util.err("PopulationForwardingContext.begin: using basic method");
                 m.clear();
-                begin_basic(pto, Locality.RURAL);
-                begin_basic(pto, Locality.URBAN);
+                begin_basic(pto, Locality.RURAL, mt);
+                begin_basic(pto, Locality.URBAN, mt);
             }
 
             begin_complete(pto, Locality.RURAL);
@@ -337,7 +340,7 @@ public class PopulationForwardingContext
             {
                 Util.err("PopulationForwardingContext.begin: using basic method");
                 m.clear();
-                begin_basic(pto, Locality.TOTAL);
+                begin_basic(pto, Locality.TOTAL, mt);
             }
 
             begin_complete(pto, Locality.TOTAL);
@@ -371,9 +374,13 @@ public class PopulationForwardingContext
 
     private void begin_spline(PopulationByLocality p, Locality locality, Gender gender) throws Exception
     {
+        /*
+         * Извлечь распределение по годам
+         */
         final int ExtraTrailingYearsForSpline = 3;
         double[] v_years = p.forLocality(locality).asArray(gender);
         v_years = Util.splice(v_years, 0, Math.min(MAX_YEAR + ExtraTrailingYearsForSpline, Population.MAX_AGE));
+
         Bin[] bins = Bins.fromValues(v_years);
         for (int age = 0; age < bins.length; age++)
         {
@@ -384,6 +391,9 @@ public class PopulationForwardingContext
         }
         bins = Bins.sum2avg(bins);
 
+        /*
+         * Построить распределение по дням
+         */
         double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, "PopulationForwardingContext.begin");
 
         for (int age = 0; age < NYEARS; age++)
@@ -398,20 +408,44 @@ public class PopulationForwardingContext
     /*
      * Простое перемещение
      */
-    private void begin_basic(PopulationByLocality p, Locality locality) throws Exception
+    private void begin_basic(PopulationByLocality p, Locality locality, CombinedMortalityTable mt) throws Exception
     {
-        begin_basic(p, locality, Gender.MALE);
-        begin_basic(p, locality, Gender.FEMALE);
+        if (mt == null)
+            Util.err("PopulationForwardingContext.begin: mt == null, вынос в контекст приближённый");
+        
+        begin_basic(p, locality, Gender.MALE, mt);
+        begin_basic(p, locality, Gender.FEMALE, mt);
     }
 
-    private void begin_basic(PopulationByLocality p, Locality locality, Gender gender) throws Exception
+    private void begin_basic(PopulationByLocality p, Locality locality, Gender gender, CombinedMortalityTable mt) throws Exception
     {
         for (int age = 0; age < NYEARS; age++)
         {
             double v = p.get(locality, gender, age);
+            
+            int nd1 = firstDayForAge(age); 
+            int nd2 = lastDayForAge(age);
 
-            for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
-                set(locality, gender, nd, v / DAYS_PER_YEAR);
+            if (mt == null)
+            {
+                for (int nd = nd1; nd <= nd2; nd++)
+                    set(locality, gender, nd, v / DAYS_PER_YEAR);
+            }
+            else
+            {
+                double[] dlx = get_daily_lx(mt, locality, gender);
+                int offset = 0;
+                
+                // если у кривой недостаёт знчений для последнего года
+                while (nd2 - offset >= dlx.length)
+                    offset++;
+                
+                dlx = Util.splice(dlx, nd1 - offset, nd2 - offset);
+                dlx = Util.normalize(dlx);
+
+                for (int nd = nd1; nd <= nd2; nd++)
+                    set(locality, gender, nd, v * dlx[nd - nd1]);
+            }
         }
     }
 
