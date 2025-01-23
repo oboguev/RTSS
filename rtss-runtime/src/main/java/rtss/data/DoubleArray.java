@@ -157,15 +157,15 @@ public class DoubleArray
     
     public DoubleArray sub(DoubleArray p, ValueConstraint rvc) throws Exception
     {
-        if (vc != p.vc && rvc != null)
+        if (vc != p.vc && rvc == null)
             throw new IllegalArgumentException("массивы разнотипны");
 
         if (maxage != p.maxage)
             throw new IllegalArgumentException("массивы разнотипны");
 
         DoubleArray res = clone();
-        if (vc != null)
-            res.vc = vc;
+        if (rvc != null)
+            res.vc = rvc;
 
         for (int age = 0; age < values.length; age++)
         {
@@ -186,15 +186,15 @@ public class DoubleArray
     
     public DoubleArray add(DoubleArray p, ValueConstraint rvc) throws Exception
     {
-        if (vc != p.vc && rvc != null)
+        if (vc != p.vc && rvc == null)
             throw new IllegalArgumentException("массивы разнотипны");
 
         if (maxage != p.maxage)
             throw new IllegalArgumentException("массивы разнотипны");
 
         DoubleArray res = clone();
-        if (vc != null)
-            res.vc = vc;
+        if (rvc != null)
+            res.vc = rvc;
 
         for (int age = 0; age < values.length; age++)
         {

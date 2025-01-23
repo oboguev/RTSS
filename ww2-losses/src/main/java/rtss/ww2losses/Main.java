@@ -585,8 +585,6 @@ public class Main
             ShowForecast.show(ap, p1946_actual, halves, 4);
         }
 
-        // deficit.validate();
-
         /* оставить только сверхсмертность */
         deficit = deficit.sub(emigration());
         if (area == Area.RSFSR)
@@ -600,9 +598,7 @@ public class Main
                 WarHelpers.validateDeficit(deficit);
         }
 
-        // ### backpropagateExistingDeficit(deficit);
-
-        // validate(deficit);
+        backpropagateExcessMortality(deficit);
 
         /*
          * разбить сверхсмертность на категории 
@@ -735,7 +731,7 @@ public class Main
                 p1946_actual.add(Locality.TOTAL, gender, age, v);
             }
         }
-        
+
         p1946_actual.forLocality(Locality.TOTAL).makeBoth();
         split_p1946();
     }
@@ -820,11 +816,11 @@ public class Main
     /* ======================================================================================================= */
 
     /*
-     * Распределить дефицит населения от начала 1946 года
-     * на начало каждого предшествуюшего полугодия, c последовательным его уменьшением 
+     * Распределить сверхсмертность населения от начала 1946 года
+     * на начало каждого предшествуюшего полугодия, c последовательным её уменьшением 
      * соответствено полугодовым коэффициентам attrition, и с возрастным сдвигом
      */
-    private void backpropagateExistingDeficit(PopulationByLocality deficit1946) throws Exception
+    private void backpropagateExcessMortality(PopulationByLocality deficit1946) throws Exception
     {
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
         double[] ac_generic = wsum(0.3, even_intensity, 0.7, occupation_intensity);
@@ -837,21 +833,31 @@ public class Main
         HalfYearEntry he = halves.last();
         he.accumulated_excess_deaths = deficit1946;
 
+        /*
+         * Первая стадия -- годовой шаг назад к началу 1945, 1944, 1943 и 1942 гг.
+         */
         for (;;)
         {
-            he = he.prev;
+            he = he.prev.prev;
             if (he.year == 1941)
                 break;
 
-            double a_generic = acv_generic.get(0) / sum(acv_generic);
-            double a_conscripts = acv_conscripts.get(0) / sum(acv_conscripts);
+            /*
+             * Суммарный вес коэффициентов для двух полугодий
+             */
+            double a_generic = (acv_generic.get(0) + acv_generic.get(1)) / sum(acv_generic);
+            double a_conscripts = (acv_conscripts.get(0) + acv_conscripts.get(1)) / sum(acv_conscripts);
+
             acv_generic.remove(0);
+            acv_generic.remove(0);
+
+            acv_conscripts.remove(0);
             acv_conscripts.remove(0);
 
             /*
              * Вычислить потери в текущем полугодии
              */
-            PopulationByLocality loss = he.next.accumulated_excess_deaths.clone();
+            PopulationByLocality loss = he.next.next.accumulated_excess_deaths.clone();
             loss.setValueConstraint(ValueConstraint.NONE);
 
             for (int age = 0; age <= MAX_AGE; age++)
@@ -863,17 +869,19 @@ public class Main
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 double v = loss.get(Locality.TOTAL, Gender.MALE, age);
-                if (age >= 19 && age <= 55)
+                if (age >= 19 + 1 && age <= 55 + 1)
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_conscripts);
                 else
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
             }
+            
+            loss.makeBoth(Locality.TOTAL);
 
             /*
              * Вычислить потери на начало полугодия
              */
-            PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
-            he.accumulated_excess_deaths = x.moveDown(0.5);
+            PopulationByLocality x = he.next.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
+            he.accumulated_excess_deaths = x.moveDown(1.0);
 
             if (Util.True)
             {
@@ -888,6 +896,26 @@ public class Main
             {
                 Util.noop();
             }
+        }
+        
+        /*
+         * Вторая стадия -- полугодовые шаги к началам вторых полугодий
+         * 
+         *     1946.1 -> 1945.2
+         *     1945.1 -> 1944.2
+         *     1944.1 -> 1943.2
+         *     1943.1 -> 1942.2
+         *     1942.1 -> 1941.2 (нуль)
+         */
+        acv_generic = atov_reverse(ac_generic);
+        acv_conscripts = atov_reverse(ac_conscripts);
+        he = halves.last().prev;
+        
+        for (;;)
+        {
+            // ### серединные полугодия
+            he = he.prev.prev;
+            break;
         }
 
         Util.noop();

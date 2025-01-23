@@ -35,7 +35,14 @@ public class Population
 
     private DoubleArray newDoubleArray()
     {
-        return new DoubleArray(MAX_AGE, ValueConstraint.NON_NEGATIVE);
+        return newDoubleArray(null);
+    }
+
+    private DoubleArray newDoubleArray(ValueConstraint vc)
+    {
+        if (vc == null)
+            vc = ValueConstraint.NON_NEGATIVE;
+        return new DoubleArray(MAX_AGE, vc);
     }
 
     static public Population newPopulation(Locality locality)
@@ -734,7 +741,11 @@ public class Population
 
     public void makeBoth() throws Exception
     {
-        both = newDoubleArray();
+        ValueConstraint vc = null;
+        if (both != null)
+            vc = both.valueConstraint();
+        
+        both = newDoubleArray(vc);
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
