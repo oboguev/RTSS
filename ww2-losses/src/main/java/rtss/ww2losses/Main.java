@@ -22,6 +22,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.FieldValue;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
+import rtss.ww2losses.helpers.PrintHalves;
 import rtss.ww2losses.helpers.ShowForecast;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
@@ -109,7 +110,7 @@ public class Main
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
      */
-    HalfYearEntries<HalfYearEntry> halves;
+    private HalfYearEntries<HalfYearEntry> halves;
 
     private void main() throws Exception
     {
@@ -191,6 +192,8 @@ public class Main
         halves = halves1;
         evalDeficit1946();
         evalBirths();
+        
+        PrintHalves.print(halves);
 
         Util.noop();
     }
