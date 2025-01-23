@@ -855,7 +855,7 @@ public class Main
             acv_conscripts.remove(0);
 
             /*
-             * Вычислить потери в текущем полугодии
+             * Вычислить потери в текущем году
              */
             PopulationByLocality loss = he.next.next.accumulated_excess_deaths.clone();
             loss.setValueConstraint(ValueConstraint.NONE);
@@ -878,7 +878,7 @@ public class Main
             loss.makeBoth(Locality.TOTAL);
 
             /*
-             * Вычислить потери на начало полугодия
+             * Вычислить потери на начало года
              */
             PopulationByLocality x = he.next.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
             he.accumulated_excess_deaths = x.moveDown(1.0);
@@ -889,12 +889,6 @@ public class Main
                             he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE));
                 verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE),
                             he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
-                Util.noop();
-            }
-
-            if (he.prev.year == 1941)
-            {
-                Util.noop();
             }
         }
         
@@ -913,9 +907,60 @@ public class Main
         
         for (;;)
         {
-            // ### серединные полугодия
+            double a_generic = acv_generic.get(0) / sum(acv_generic);
+            double a_conscripts = acv_conscripts.get(0) / sum(acv_conscripts);
+
+            /*
+             * Вычислить потери в текущем полугодии
+             */
+            PopulationByLocality loss = he.next.accumulated_excess_deaths.clone();
+            loss.setValueConstraint(ValueConstraint.NONE);
+
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
+                loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
+            }
+
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                double v = loss.get(Locality.TOTAL, Gender.MALE, age);
+                if (age >= 19 + 1 && age <= 55 + 1)
+                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_conscripts);
+                else
+                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
+            }
+            
+            loss.makeBoth(Locality.TOTAL);
+
+            /*
+             * Вычислить потери на начало полугодия
+             */
+            PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
+            he.accumulated_excess_deaths = x.moveDown(0.5);
+
+            if (Util.True)
+            {
+                verify_same(x.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE),
+                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE));
+                verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE),
+                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
+            }
+            
+            if (he.year == 1941)
+            {
+                if (he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE) > 10)
+                    throw new Exception("обратный отсчёт потерь не обнулился");
+                break;
+            }
+
             he = he.prev.prev;
-            break;
+
+            acv_generic.remove(0);
+            acv_generic.remove(0);
+
+            acv_conscripts.remove(0);
+            acv_conscripts.remove(0);
         }
 
         Util.noop();
