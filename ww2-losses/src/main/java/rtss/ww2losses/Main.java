@@ -66,7 +66,7 @@ public class Main
      * Распечатывать диагностический вывод
      */
     private static boolean PrintDiagnostics = Util.True;
-    
+
     /*
      * Размер контекста отслеживания: только дети или все возраста
      */
@@ -563,15 +563,21 @@ public class Main
 
         v = p1946_expected_with_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v_total = v;
         Util.out("Общий дефицит населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
         v = p1946_expected_without_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v_prewar = v;
         Util.out("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
         v = p1946_expected_newonly.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v_postwar = v;
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+
+        if (Util.differ(v_total, v_prewar + v_postwar))
+            Util.err("Расхождение категорий дефицита");
 
         if (PrintDiagnostics)
         {
@@ -585,7 +591,7 @@ public class Main
         deficit = deficit.sub(emigration());
         if (area == Area.RSFSR)
             deficit = cancelNegativeDeficit(deficit, Gender.FEMALE, 15, 60);
-        
+
         if (PrintDiagnostics)
         {
             if (area == Area.RSFSR)
@@ -663,6 +669,13 @@ public class Main
     {
         p1946_actual_born_postwar = p1946_actual.selectByAge(0, 4.5);
         p1946_actual_born_prewar = p1946_actual.selectByAge(4.5, MAX_AGE + 1);
+
+        double v_total = p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v_prewar = p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v_postwar = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+
+        if (Util.differ(v_total, v_prewar + v_postwar))
+            Util.err("Ошибка расщепления");
     }
 
     private PopulationByLocality emigration() throws Exception
@@ -713,6 +726,7 @@ public class Main
     {
         PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
         Population deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar).forLocality(Locality.TOTAL);
+
         for (int age = age1; age <= age2; age++)
         {
             double v = deficit.get(gender, age);
@@ -721,7 +735,8 @@ public class Main
                 p1946_actual.add(Locality.TOTAL, gender, age, v);
             }
         }
-
+        
+        p1946_actual.forLocality(Locality.TOTAL).makeBoth();
         split_p1946();
     }
 
@@ -737,8 +752,9 @@ public class Main
             }
         }
 
+        p1946_actual.forLocality(Locality.TOTAL).makeBoth();
         split_p1946();
-        
+
         return deficit;
     }
 
@@ -858,14 +874,16 @@ public class Main
              */
             PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
             he.accumulated_excess_deaths = x.moveDown(0.5);
-            
+
             if (Util.True)
             {
-                verify_same(x.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE), he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE));
-                verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE), he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
+                verify_same(x.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE),
+                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE));
+                verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE),
+                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
                 Util.noop();
             }
-            
+
             if (he.prev.year == 1941)
             {
                 Util.noop();
@@ -1046,7 +1064,7 @@ public class Main
             s = s.substring(1);
         return s;
     }
-    
+
     @SuppressWarnings("unused")
     private void verify_same(double a, double b) throws Exception
     {
