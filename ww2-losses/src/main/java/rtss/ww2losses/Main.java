@@ -534,7 +534,7 @@ public class Main
 
         double v = p1941_mid.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         v -= p1946_expected_without_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        if (Util.differ(v_sum, v, 0.0002))
+        if (Util.differ(v_sum, v, 0.0001))
             Util.err("Несовпадение числа смертей");
 
         /* =================================================== */
