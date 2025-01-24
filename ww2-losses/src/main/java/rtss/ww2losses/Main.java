@@ -952,12 +952,7 @@ public class Main
             he.next.accumulated_excess_deaths.validateBMF();
             loss.validateBMF();
             x.validateBMF();
-            // ###
-            if (he.year == 1941)
-            {
-                Util.noop();
-            }
-            // ###
+
             he.accumulated_excess_deaths = x.moveDown(0.5);
             he.accumulated_excess_deaths.validateBMF();
 
@@ -1027,6 +1022,34 @@ public class Main
     /* ======================================================================================================= */
 
     private void evalBirths() throws Exception
+    {
+        Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
+        
+        for (HalfYearEntry he : halves)
+        {
+            if (he.next == null)
+                break;
+            
+            /* взрослое население в начале периода */
+            PopulationByLocality p1 = he.p_nonwar_without_births;
+            if (he.accumulated_excess_deaths != null)
+                p1 = p1.sub(he.accumulated_excess_deaths, ValueConstraint.NONE);
+            p1.setValueConstraint(ValueConstraint.NONE);
+
+            /* взрослое население в конце периода */
+            PopulationByLocality p2 = he.next.p_nonwar_without_births;
+            if (he.next.accumulated_excess_deaths != null)
+                p2 = p2.sub(he.next.accumulated_excess_deaths, ValueConstraint.NONE);
+            p2.setValueConstraint(ValueConstraint.NONE);
+            
+            /* среднее взрослое население за период */
+            PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
+
+            he.actual_births = asfr_calibration * 0.5 * asfrs.getForYear(he.year).births(pavg);
+        }
+    }
+    
+    private void evalBirths_000() throws Exception
     {
         double cumulative_excess_war_deaths_fertile_f = 0;
 

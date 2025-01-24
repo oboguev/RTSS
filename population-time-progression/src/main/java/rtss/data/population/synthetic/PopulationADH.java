@@ -67,7 +67,9 @@ public class PopulationADH
             f = Util.multiply(f, 1000);
             round(f);
 
-            p = new Population(Locality.TOTAL, m, m_unknown.doubleValue(), f, f_unknown.doubleValue());
+            p = new Population(Locality.TOTAL, 
+                               m, m_unknown.doubleValue(), null, 
+                               f, f_unknown.doubleValue(), null);
         }
 
         if (UseCache)

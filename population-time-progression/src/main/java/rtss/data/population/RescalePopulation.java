@@ -1,5 +1,6 @@
 package rtss.data.population;
 
+import rtss.data.ValueConstraint;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -111,7 +112,9 @@ public class RescalePopulation
         double m_unknown = scale * p.getUnknown(Gender.MALE);
         double f_unknown = scale * p.getUnknown(Gender.FEMALE);
 
-        return new Population(p.locality, m, m_unknown, f, f_unknown);
+        return new Population(p.locality, 
+                              m, m_unknown, p.male.valueConstraint(), 
+                              f, f_unknown, p.female.valueConstraint());
     }
 
     static Population scaleTo(Population p, double new_amount) throws Exception

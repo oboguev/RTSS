@@ -30,7 +30,7 @@ public class Population
     double female_total = 0;
     double both_unknown = 0;
     double both_total = 0;
-    
+
     private boolean sealed = false;
 
     private DoubleArray newDoubleArray()
@@ -55,7 +55,7 @@ public class Population
     private Population()
     {
     }
-    
+
     public void setValueConstraint(ValueConstraint vc)
     {
         male.setValueConstraint(vc);
@@ -63,12 +63,29 @@ public class Population
         both.setValueConstraint(vc);
     }
 
-    public Population(Locality locality, double[] m, double m_unknown, double[] f, double f_unknown) throws Exception
+    public Population(Locality locality,
+            double[] m, double m_unknown, ValueConstraint mvc,
+            double[] f, double f_unknown, ValueConstraint fvc) throws Exception
     {
         this.locality = locality;
 
         if (m.length != MAX_AGE + 1 || f.length != m.length)
             throw new IllegalArgumentException();
+
+        if (mvc != null)
+            male.setValueConstraint(mvc);
+
+        if (fvc != null)
+            female.setValueConstraint(fvc);
+        
+        if (mvc != null || fvc != null)
+        {
+            if ((mvc == null) != (fvc == null))
+                throw new Exception("Mismatching constraints");
+            if (!mvc.equals(fvc))
+                throw new Exception("Mismatching constraints");
+            both.setValueConstraint(mvc);
+        }
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
@@ -79,10 +96,11 @@ public class Population
         male_unknown = m_unknown;
         female_unknown = f_unknown;
 
+        ValueConstraint bvc = both.valueConstraint();
         both = null;
         recalcTotal();
 
-        makeBoth();
+        makeBoth(bvc);
 
         validate();
     }
@@ -168,7 +186,7 @@ public class Population
     public void add(Gender gender, int age, double value) throws Exception
     {
         checkWritable();
-        
+
         DoubleArray m = forGender(gender);
 
         if (m.containsKey(age))
@@ -210,12 +228,12 @@ public class Population
     private void checkValueConstraint(double v, ValueConstraint vc) throws Exception
     {
         Util.checkValid(v);
-        
+
         switch (vc)
         {
         case NONE:
             break;
-        
+
         case NON_NEGATIVE:
             if (v < 0)
                 throw new Exception("Negative population");
@@ -330,7 +348,7 @@ public class Population
     {
         return sub(p, null);
     }
-    
+
     public Population sub(Population p, ValueConstraint rvc) throws Exception
     {
         if (locality != p.locality && rvc == null)
@@ -368,7 +386,7 @@ public class Population
     {
         return add(p, null);
     }
-    
+
     public Population add(Population p, ValueConstraint rvc) throws Exception
     {
         if (locality != p.locality && rvc == null)
@@ -643,7 +661,7 @@ public class Population
         if (comment != null && comment.length() != 0)
             sb.append(nl + "# " + comment + nl);
         sb.append(nl);
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             sb.append(String.format("%-4d %-15s %-15s %-15s" + nl, age, f2s(both.get(age)), f2s(male.get(age)), f2s(female.get(age))));
@@ -652,10 +670,10 @@ public class Population
         File fp = new File(dirPath);
         fp = new File(dirPath, locality.name().toLowerCase() + ".txt");
         String fn = fp.getCanonicalFile().getAbsolutePath();
-        
+
         Util.writeAsFile(fn, sb.toString());
     }
-    
+
     private String f2s(double v)
     {
         String s = String.format("%,15.0f", v);
@@ -684,9 +702,13 @@ public class Population
             Util.checkValid(m);
             Util.checkValid(f);
             Util.checkValid(b);
-
-            if (m < 0 || f < 0 || b < 0)
-                negative();
+            
+            male.valueConstraint().validate(m);
+            female.valueConstraint().validate(f);
+            both.valueConstraint().validate(b);
+            
+            // if (m < 0 || f < 0 || b < 0)
+            //     negative();
 
             if (Util.differ(m + f, b))
                 mismatch();
@@ -741,10 +763,14 @@ public class Population
 
     public void makeBoth() throws Exception
     {
-        ValueConstraint vc = null;
-        if (both != null)
+        makeBoth(null);
+    }
+    
+    public void makeBoth(ValueConstraint vc) throws Exception
+    {
+        if (vc == null && both != null)
             vc = both.valueConstraint();
-        
+
         both = newDoubleArray(vc);
 
         for (int age = 0; age <= MAX_AGE; age++)
@@ -1029,12 +1055,12 @@ public class Population
     }
 
     /*****************************************************************************************************/
-    
+
     public void seal()
     {
         sealed = true;
     }
-    
+
     private void checkWritable() throws Exception
     {
         if (sealed)
@@ -1042,23 +1068,23 @@ public class Population
     }
 
     /*****************************************************************************************************/
-    
+
     public String dump() throws Exception
     {
         StringBuilder sb = new StringBuilder();
- 
+
         sb.append(String.format("AGE B M F"));
         sb.append(Util.nl);
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             sb.append(String.format("%-3d %f %f %f", age, both(age), male(age), female(age)));
             sb.append(Util.nl);
         }
- 
+
         return sb.toString();
     }
-    
+
     public void validateBMF() throws Exception
     {
         for (int age = 0; age <= MAX_AGE; age++)

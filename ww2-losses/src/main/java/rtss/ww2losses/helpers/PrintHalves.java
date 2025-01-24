@@ -19,8 +19,9 @@ public class PrintHalves
         Util.out("    нал.ос  = ожидаемое число смертей в наличном на начало войны населении в условиях мира");
         Util.out("    над.дс  = добавочное число смертей в наличном на начало войны населении из-за войны");
         Util.out("    мир.ор  = ожидаемое число рождений в условиях мира");
+        Util.out("    фр      = фактическое число рождений");
         Util.out("");
-        Util.out("полугодие нал.ос нал.дс мир.ор");
+        Util.out("полугодие нал.ос нал.дс мир.ор фр");
         Util.out("");
 
         for (HalfYearEntry he : halves)
@@ -39,11 +40,12 @@ public class PrintHalves
             
             double d2_minus_d1 = Math.round(d2 - d1);
             
-            Util.out(String.format("%s %5s %5s %5s", 
+            Util.out(String.format("%s %6s %6s %6s %6s", 
                                    he.toString(),
                                    f2k(he.expected_nonwar_deaths / 1000.0),
                                    f2k(d2_minus_d1 / 1000.0),
-                                   f2k(he.expected_nonwar_births / 1000.0)
+                                   f2k(he.expected_nonwar_births / 1000.0),
+                                   f2k(he.actual_births / 1000.0)
                                    ));
             
             Util.noop();
