@@ -160,6 +160,16 @@ public class PopulationByLocality
         forLocality(locality).makeBoth();
     }
 
+    public void makeBoth() throws Exception
+    {
+        if (rural != null)
+            rural.makeBoth();
+        if (urban != null)
+            urban.makeBoth();
+        if (total != null)
+            total.makeBoth();
+    }
+
     public void recalcFromUrbanRuralBasic() throws Exception
     {
         makeBoth(Locality.RURAL);
@@ -168,7 +178,7 @@ public class PopulationByLocality
     }
 
     /*
-     * Выборка [age1 ... age2].
+     * Выборка [age1 ... age2] или [ageday1 ... ageday2] .
      * 
      * Нецелое значение года означает, что население выбирается только от/до этой возрастной точки.
      * Так age2 = 80.0 означает, что население с возраста 80.0 лет исключено. 
@@ -190,6 +200,20 @@ public class PopulationByLocality
         }
     }
 
+    public PopulationByLocality selectByAge(int ageday1, int ageday2) throws Exception
+    {
+        if (rural != null && urban != null)
+        {
+            Population x_urban = urban.selectByAge(ageday1, ageday2);
+            Population x_rural = rural.selectByAge(ageday1, ageday2);
+            return new PopulationByLocality(x_urban, x_rural);
+        }
+        else
+        {
+            Population x_total = total.selectByAge(ageday1, ageday2);
+            return new PopulationByLocality(x_total);
+        }
+    }
     /*
      * Вернуть результат вычитания @this - @p
      */

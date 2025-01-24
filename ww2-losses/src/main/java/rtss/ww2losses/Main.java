@@ -676,12 +676,10 @@ public class Main
 
     private void split_p1946() throws Exception
     {
-        final int DAYS_PER_YEAR = 365;
-        int nd_4_5 = (int) Math.round(4.5 * DAYS_PER_YEAR); 
-        int nd_maxage_plus_1 = (int) Math.round((MAX_AGE + 1) * DAYS_PER_YEAR); 
+        int nd_4_5 = age2day(4.5); 
 
         p1946_actual_born_postwar = p1946_actual.selectByAge(0, nd_4_5);
-        p1946_actual_born_prewar = p1946_actual.selectByAge(nd_4_5 + 1, nd_maxage_plus_1);
+        p1946_actual_born_prewar = p1946_actual.selectByAge(nd_4_5 + 1, age2day(MAX_AGE + 1));
         
         PopulationByLocality p = p1946_actual.sub(p1946_actual_born_postwar, ValueConstraint.NONE);
         p = p.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
@@ -692,6 +690,12 @@ public class Main
 
         if (Util.differ(v_total, v_prewar + v_postwar))
             Util.err("Ошибка расщепления");
+    }
+    
+    private int age2day(double age)
+    {
+        final int DAYS_PER_YEAR = 365;
+        return (int) Math.round(age * DAYS_PER_YEAR); 
     }
 
     private PopulationByLocality emigration() throws Exception
@@ -722,7 +726,7 @@ public class Main
             p.set(Locality.TOTAL, Gender.FEMALE, age, 0.2);
         }
 
-        p.makeBoth(Locality.TOTAL);
+        p.makeBoth();
 
         p = RescalePopulation.scaleAllTo(p, emig);
 
@@ -752,7 +756,8 @@ public class Main
             }
         }
 
-        p1946_actual.forLocality(Locality.TOTAL).makeBoth();
+        p1946_actual.makeBoth();
+        p1946_actual.recalcTotalForEveryLocality();
         split_p1946();
     }
 
@@ -770,8 +775,12 @@ public class Main
             }
         }
 
-        deficit.forLocality(Locality.TOTAL).makeBoth();
-        p1946_actual.forLocality(Locality.TOTAL).makeBoth();
+        deficit.makeBoth();
+        deficit.recalcTotalForEveryLocality();
+
+        p1946_actual.makeBoth();
+        p1946_actual.recalcTotalForEveryLocality();
+        
         split_p1946();
 
         return deficit;
@@ -900,7 +909,7 @@ public class Main
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
             }
 
-            loss.makeBoth(Locality.TOTAL);
+            loss.makeBoth();
             loss.validateBMF();
 
             /*
@@ -959,7 +968,7 @@ public class Main
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
             }
 
-            loss.makeBoth(Locality.TOTAL);
+            loss.makeBoth();
             loss.validateBMF();
 
             /*
