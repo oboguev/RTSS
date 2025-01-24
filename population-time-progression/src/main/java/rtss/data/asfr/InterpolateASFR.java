@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import rtss.data.bin.Bin;
+import rtss.data.bin.Bins;
+import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
+import rtss.math.interpolate.TargetPrecision;
+import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
 
 /*
@@ -76,7 +80,7 @@ public class InterpolateASFR
         return asfrtp;
     }
     
-    private static double[] yearly2timepoints(double[] yearly, int ppy, int ppinterval)
+    private static double[] yearly2timepoints(double[] yearly, int ppy, int ppinterval) throws Exception
     {
         double[] points = yearly2points(yearly, ppy * ppinterval);
         double[] timepoints = new double[ppy * yearly.length];
@@ -112,10 +116,49 @@ public class InterpolateASFR
     
     /* ======================================================================================= */
     
-    private static double[] yearly2points(double[] yearly, int ppy)
+    private static double[] yearly2points(double[] yearly, int ppy) throws Exception
     {
-        // ####@@@@@ see InterpolatePopulationAsMeanPreservingCurve
-        return null;
+        Bin[] bins = Bins.fromValues(yearly);
+        
+        TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
+        MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
+                .checkPositive(false);
+
+        if (Util.False)
+        {
+            /*
+             * Helps to avoid the last segment of the curve dive down too much
+             */
+            options = options.placeLastBinKnotAtRightmostPoint();
+        }
+        
+        // double[] xxx = Bins.ppy_x(bins, ppy);
+        options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
+        double[] yyy = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+
+        if (!Util.isNonNegative(yyy))
+            throw new Exception("Error calculating curve (negative value)");
+
+        double[] yy = Bins.ppy2yearly(yyy, ppy);
+
+        if (!Util.isNonNegative(yy))
+            throw new Exception("Error calculating curve (negative value)");
+
+        validate_means(yy, bins);
+        
+        return yyy;
     }
     
+    /*
+     * Verify that the curve preserves mean values as indicated by the bins
+     */
+    static void validate_means(double[] yy, Bin... bins) throws Exception
+    {
+        for (Bin bin : bins)
+        {
+            double[] y = Util.splice(yy, bin.age_x1, bin.age_x2);
+            if (Util.differ(Util.average(y), bin.avg, 0.001))
+                throw new Exception("Curve does not preserve mean values of the bins");
+        }
+    }
 }

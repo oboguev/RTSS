@@ -104,7 +104,7 @@ public class Main
      */
     private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 
-    private AgeSpecificFertilityRatesByYear asfrs;
+    private AgeSpecificFertilityRatesByYear yearly_asfrs;
     private double asfr_calibration;
 
     /*
@@ -122,15 +122,15 @@ public class Main
         switch (area)
         {
         case USSR:
-            asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/USSR/USSR-ASFR.xlsx");
+            yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/USSR/USSR-ASFR.xlsx");
             break;
 
         case RSFSR:
-            asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
+            yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
             break;
         }
 
-        asfr_calibration = CalibrateASFR.calibrate1940(ap, asfrs);
+        asfr_calibration = CalibrateASFR.calibrate1940(ap, yearly_asfrs);
 
         /* таблица смертности для 1940 года */
         CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
@@ -1050,7 +1050,7 @@ public class Main
             he.p_actual_without_births_end = p2;
             he.p_actual_without_births_avg = pavg;
 
-            he.actual_births = asfr_calibration * 0.5 * asfrs.getForYear(he.year).births(pavg);
+            he.actual_births = asfr_calibration * 0.5 * yearly_asfrs.getForYear(he.year).births(pavg);
         }
 
         /*

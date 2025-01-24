@@ -93,7 +93,7 @@ public class Bins
             x[k++] = bin.avg;
         return x;
     }
-    
+
     public static Bin[] multiply(Bin[] bins, double f) throws Exception
     {
         Bin[] xbins = Bins.clone(bins);
@@ -222,7 +222,7 @@ public class Bins
 
         return null;
     }
-    
+
     /*
      * sum of values in all bins
      */
@@ -233,7 +233,7 @@ public class Bins
             sum += bin.avg * bin.widths_in_years;
         return sum;
     }
-    
+
     /*
      * convert bin set with values (@avg) actually meaning a sum for the bin,
      * into the bin set with values (@avg) meaning a mean for the bin 
@@ -246,7 +246,7 @@ public class Bins
             r[k] = new Bin(bins[k]);
             r[k].avg /= r[k].widths_in_years;
         }
-        
+
         return bins(r);
     }
 
@@ -262,7 +262,7 @@ public class Bins
             r[k] = new Bin(bins[k]);
             r[k].avg *= r[k].widths_in_years;
         }
-        
+
         return bins(r);
     }
 
@@ -356,31 +356,31 @@ public class Bins
 
         return avg;
     }
-    
+
     /*
      * Extract a subrange [start ... end] 
      */
     public static Bin[] subset(Bin start, Bin end) throws Exception
     {
-       List<Bin> list = new ArrayList<>();
-       
-       for (Bin bin = start;; bin = bin.next)
-       {
-           if (bin == null || end == null)
-               throw new IllegalArgumentException("end bin is not reachable from the start bin");
-           list.add(new Bin(bin));
-           if (bin == end)
-               break;
-       }
-       
-       return Bins.bins(list);
+        List<Bin> list = new ArrayList<>();
+
+        for (Bin bin = start;; bin = bin.next)
+        {
+            if (bin == null || end == null)
+                throw new IllegalArgumentException("end bin is not reachable from the start bin");
+            list.add(new Bin(bin));
+            if (bin == end)
+                break;
+        }
+
+        return Bins.bins(list);
     }
-    
+
     public static XY<double[]> cumulativePoints(Bin[] bins)
     {
         double[] x = new double[bins.length + 1];
         double[] y = new double[bins.length + 1];
-        
+
         x[0] = bins[0].age_x1;
         y[0] = 0;
         int k = 1;
@@ -390,7 +390,7 @@ public class Bins
             y[k] = y[k - 1] + bin.avg * bin.widths_in_years;
             k++;
         }
-        
+
         return XY.of(x, y);
     }
 
@@ -516,8 +516,11 @@ public class Bins
 
         int age = 0;
         for (double v : a)
+        {
             list.add(new Bin(age, age, v));
-        
+            age++;
+        }
+
         return Bins.bins(list);
     }
 }

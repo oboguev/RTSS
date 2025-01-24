@@ -1,6 +1,5 @@
 package rtss.data.population;
 
-import rtss.data.ValueConstraint;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
