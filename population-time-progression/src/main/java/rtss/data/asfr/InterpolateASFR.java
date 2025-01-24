@@ -25,7 +25,8 @@ public class InterpolateASFR
      * 
      * Например, если ppy = 4, то для 1940 года создаются точки 1940.0, 1940.1, 1940.2 и 1940.3.
      */
-    static public AgeSpecificFertilityRatesByTimepoint interpolate(AgeSpecificFertilityRatesByYear asfry, int year1, int year2, int ppy) throws Exception
+    static public AgeSpecificFertilityRatesByTimepoint interpolate(AgeSpecificFertilityRatesByYear asfry, int year1, int year2, int ppy)
+            throws Exception
     {
         final int default_ppinterval = 20;
         return interpolate(asfry, year1, year2, ppy, default_ppinterval);
@@ -34,22 +35,23 @@ public class InterpolateASFR
     /*
      * @ppinterval указывает, сколько точек интерполяции создавать внутри одного диапазона для усреднения их значений. 
      */
-    static public AgeSpecificFertilityRatesByTimepoint interpolate(AgeSpecificFertilityRatesByYear asfry, int year1, int year2, int ppy, int ppinterval) throws Exception
+    static public AgeSpecificFertilityRatesByTimepoint interpolate(AgeSpecificFertilityRatesByYear asfry, int year1, int year2, int ppy,
+            int ppinterval) throws Exception
     {
         Map<String, List<Bin>> tp2bins = new HashMap<>();
-        
+
         for (String ageGroup : asfry.ageGroups())
         {
             int age_x1 = ag_x1(ageGroup);
             int age_x2 = ag_x2(ageGroup);
-            
+
             double[] yearly = asfry.ageGroupValues(ageGroup, year1, year2);
             nonzero(yearly);
             double[] points = yearly2timepoints(yearly, ppy, ppinterval);
-            
+
             if (points.length != ppy * (year2 - year1 + 1))
                 throw new Exception("ошибка вычисления");
-            
+
             int pk = 0;
             for (int year = year1; year <= year2; year++)
             {
@@ -59,17 +61,17 @@ public class InterpolateASFR
                     List<Bin> binlist = tp2bins.get(tp);
                     if (binlist == null)
                     {
-                        binlist = new ArrayList<Bin>(); 
+                        binlist = new ArrayList<Bin>();
                         tp2bins.put(tp, binlist);
                     }
-                    
+
                     double v = points[pk++];
                     binlist.add(new Bin(age_x1, age_x2, v));
                 }
             }
         }
-        
-        AgeSpecificFertilityRatesByTimepoint asfrtp = new AgeSpecificFertilityRatesByTimepoint(); 
+
+        AgeSpecificFertilityRatesByTimepoint asfrtp = new AgeSpecificFertilityRatesByTimepoint();
 
         for (String tp : tp2bins.keySet())
         {
@@ -77,24 +79,36 @@ public class InterpolateASFR
             AgeSpecificFertilityRates asfr = new AgeSpecificFertilityRates(binlist);
             asfrtp.setForTimepoint(tp, asfr);
         }
-        
+
         return asfrtp;
     }
-    
+
     private static double[] yearly2timepoints(double[] yearly, int ppy, int ppinterval) throws Exception
     {
         double[] points = yearly2points(yearly, ppy * ppinterval);
         double[] timepoints = new double[ppy * yearly.length];
-        
+
         for (int k = 0; k < timepoints.length; k++)
         {
             double[] x = Util.splice(points, k * ppinterval, k * ppinterval + ppinterval - 1);
             timepoints[k] = Util.average(x);
         }
 
+        for (int k = 0; k < yearly.length; k++)
+        {
+            if (yearly[k] < 1e-4)
+            {
+                for (int j = k * ppy; j <= k * ppy + ppy - 1; j++)
+                    timepoints[j] = 0;
+            }
+        }
+        
+        if (!Util.isNonNegative(timepoints))
+            throw new Exception("Error calculating curve (negative value)");
+
         return timepoints;
     }
-    
+
     /* ======================================================================================= */
 
     private static int ag_x1(String ageGroup) throws Exception
@@ -114,7 +128,7 @@ public class InterpolateASFR
             throw new IllegalArgumentException();
         return Integer.parseInt(sa[index]);
     }
-    
+
     /*
      * заменить нулевые значения очень низкими,
      * чтобы избежать деления на ноль в построителе сплайна
@@ -124,16 +138,16 @@ public class InterpolateASFR
         for (int k = 0; k < y.length; k++)
         {
             if (y[k] >= 0 && y[k] < 0.0000000001)
-                y[k] =  0.0000000001;
+                y[k] = 0.0000000001;
         }
     }
-    
+
     /* ======================================================================================= */
-    
+
     private static double[] yearly2points(double[] yearly, int ppy) throws Exception
     {
         Bin[] bins = Bins.fromValues(yearly);
-        
+
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);
@@ -145,7 +159,7 @@ public class InterpolateASFR
              */
             options = options.placeLastBinKnotAtRightmostPoint();
         }
-        
+
         // double[] xxx = Bins.ppy_x(bins, ppy);
         options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
         double[] yyy = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
@@ -156,21 +170,21 @@ public class InterpolateASFR
          */
         if (Util.False && !Util.isNonNegative(yyy))
             throw new Exception("Error calculating curve (negative value)");
-        
+
         double yyy_min = Util.min(yyy);
         if (yyy_min < -2.0)
             throw new Exception("Error calculating curve (negative value)");
-        
+
         double[] yy = Bins.ppy2yearly(yyy, ppy);
 
         if (!Util.isNonNegative(yy))
             throw new Exception("Error calculating curve (negative value)");
 
         validate_means(yy, bins);
-        
+
         return yyy;
     }
-    
+
     /*
      * Verify that the curve preserves mean values as indicated by the bins
      */
