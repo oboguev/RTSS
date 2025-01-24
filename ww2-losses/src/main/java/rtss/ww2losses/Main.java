@@ -676,8 +676,15 @@ public class Main
 
     private void split_p1946() throws Exception
     {
-        p1946_actual_born_postwar = p1946_actual.selectByAge(0, 4.5);
-        p1946_actual_born_prewar = p1946_actual.selectByAge(4.5, MAX_AGE + 1);
+        final int DAYS_PER_YEAR = 365;
+        int nd_4_5 = (int) Math.round(4.5 * DAYS_PER_YEAR); 
+        int nd_maxage_plus_1 = (int) Math.round((MAX_AGE + 1) * DAYS_PER_YEAR); 
+
+        p1946_actual_born_postwar = p1946_actual.selectByAge(0, nd_4_5);
+        p1946_actual_born_prewar = p1946_actual.selectByAge(nd_4_5 + 1, nd_maxage_plus_1);
+        
+        PopulationByLocality p = p1946_actual.sub(p1946_actual_born_postwar, ValueConstraint.NONE);
+        p = p.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
 
         double v_total = p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         double v_prewar = p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);

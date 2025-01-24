@@ -8,6 +8,7 @@ import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -77,7 +78,7 @@ public class Population
 
         if (fvc != null)
             female.setValueConstraint(fvc);
-        
+
         if (mvc != null || fvc != null)
         {
             if ((mvc == null) != (fvc == null))
@@ -307,33 +308,74 @@ public class Population
     }
 
     /*
-     * Выборка [age1 ... age2].
+     * Выборка [age1 ... age2] или [ageday1 ... ageday2].
      * 
      * Нецелое значение года означает, что население выбирается только от/до этой возрастной точки.
      * Так age2 = 80.0 означает, что население с возраста 80.0 лет исключено. 
      * Аналогично, age2 = 80.5 означает, что включена половина населения в возрасте 80 лет,
      * а население начиная с возраста 81 года исключено целиком. 
      */
+    private final int DAYS_PER_YEAR = 365;
+
     public Population selectByAge(double age1, double age2) throws Exception
+    {
+        int ageday1 = (int) Math.round(age1 * DAYS_PER_YEAR);
+        int ageday2 = (int) Math.round(age2 * DAYS_PER_YEAR);
+        return selectByAge(ageday1, ageday2);
+    }
+    
+    public Population selectByAge(int ageday1, int ageday2) throws Exception
     {
         Population p = new Population();
 
         p.locality = locality;
 
-        if (male != null || female != null)
+        if (Util.True && male != null && female != null)
         {
-            if (male != null)
-                p.male = male.selectByAge(age1, age2);
+            /* try to use spline */
+            p = this.clone();
+            PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+            PopulationByLocality pl = new PopulationByLocality(p, null, null);
+            pl = fctx.begin(pl);
 
-            if (female != null)
-                p.female = female.selectByAge(age1, age2);
+            for (int nd = 0; nd <= fctx.MAX_DAY; nd++)
+            {
+                if (nd >= ageday1 && nd <= ageday2)
+                {
+                    // leave alone
+                }
+                else
+                {
+                    // outside of selected range: zero
+                    fctx.set(Locality.TOTAL, Gender.MALE, nd, 0);
+                    fctx.set(Locality.TOTAL, Gender.FEMALE, nd, 0);
+                }
+            }
 
-            if (both != null)
-                p.makeBoth();
+            pl = fctx.end(pl);
+            p = pl.forLocality(Locality.TOTAL);
         }
-        else if (both != null)
+        else
         {
-            p.both = both.selectByAge(age1, age2);
+            /* basic method */
+            double age1 = (double) ageday1 / DAYS_PER_YEAR;
+            double age2 = (double) ageday2 / DAYS_PER_YEAR;
+
+            if (male != null || female != null)
+            {
+                if (male != null)
+                    p.male = male.selectByAge(age1, age2);
+
+                if (female != null)
+                    p.female = female.selectByAge(age1, age2);
+
+                if (both != null)
+                    p.makeBoth();
+            }
+            else if (both != null)
+            {
+                p.both = both.selectByAge(age1, age2);
+            }
         }
 
         p.validate();
@@ -702,11 +744,11 @@ public class Population
             Util.checkValid(m);
             Util.checkValid(f);
             Util.checkValid(b);
-            
+
             male.valueConstraint().validate(m);
             female.valueConstraint().validate(f);
             both.valueConstraint().validate(b);
-            
+
             // if (m < 0 || f < 0 || b < 0)
             //     negative();
 
@@ -765,7 +807,7 @@ public class Population
     {
         makeBoth(null);
     }
-    
+
     public void makeBoth(ValueConstraint vc) throws Exception
     {
         if (vc == null && both != null)
