@@ -365,9 +365,10 @@ public class Main
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContextSize);
         PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
         PopulationByLocality px = fctx.end(p);
+
         if (Util.False)
         {
-            new PopulationChart("Население на середину 1941 года")
+            new PopulationChart("Население " +  area + " на середину 1941 года")
                     .show("перепись", px.forLocality(Locality.TOTAL))
                     .display();
         }
