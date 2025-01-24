@@ -55,6 +55,9 @@ public class ForwardPopulationT extends ForwardPopulation
     private double fctx_t_male_deaths = 0;
     private double fctx_t_female_deaths = 0;
 
+    private double[] daily_birth_count_m = null;
+    private double[] daily_birth_count_f = null;
+
     /*
      * В настоящее время мы не используем эту функцию практически.
      *     
@@ -93,6 +96,24 @@ public class ForwardPopulationT extends ForwardPopulation
     public double getBirthRateTotal()
     {
         return BirthRateTotal;
+    }
+
+    /* требуемая длина массивов setBirthCount */
+    public int birthDays(double yfraction)
+    {
+        int ndays = (int) Math.round(yfraction * DAYS_PER_YEAR);
+        ndays = Math.max(1, ndays);
+        return ndays;
+    }
+
+    /* 
+     * Ручная установка числа рождений на каждый день,
+     * имеет приоритет над setBirthRateTotal. 
+     */
+    public void setBirthCount(double[] daily_birth_count_m, double[] daily_birth_count_f)
+    {
+        this.daily_birth_count_m = daily_birth_count_m;
+        this.daily_birth_count_f = daily_birth_count_f;
     }
 
     /*
@@ -157,6 +178,14 @@ public class ForwardPopulationT extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
+        if (daily_birth_count_m != null || daily_birth_count_f != null)
+        {
+            if ((daily_birth_count_m != null) != (daily_birth_count_f != null))
+                throw new Exception("неверный массив дневного числа рождений");
+            if (daily_birth_count_m.length != daily_birth_count_f.length || daily_birth_count_m.length != birthDays(yfraction))
+                throw new Exception("неверный массив дневного числа рождений");
+        }
+
         PopulationForwardingContext fctx_initial = (fctx != null) ? fctx.clone() : null;
 
         /* передвижка мужского и женского населений по смертности из @p в @pto */
@@ -166,28 +195,42 @@ public class ForwardPopulationT extends ForwardPopulation
         /* добавить рождения */
         double birthRate = BirthRateTotal;
 
-        if (fctx != null)
+        if (fctx != null && daily_birth_count_m != null)
+        {
+            add_births(fctx, locality, Gender.MALE, daily_birth_count_m, mt); 
+            add_births(fctx, locality, Gender.FEMALE, daily_birth_count_f, mt); 
+        }
+        else if (fctx != null)
         {
             add_births(fctx_initial, fctx, p, locality, mt, ageSpecificFertilityRates, birthRate, yfraction);
         }
         else
         {
-            double births;
-
-            if (ageSpecificFertilityRates != null)
+            double births, m_births, f_births;
+            
+            if (daily_birth_count_m != null)
             {
-                births = yfraction * ageSpecificFertilityRates.births(p);
+                m_births = Util.sum(daily_birth_count_m);
+                f_births = Util.sum(daily_birth_count_f);
+                births = m_births + f_births;
             }
             else
             {
-                double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
-                births = yfraction * sum * birthRate / 1000;
+                if (ageSpecificFertilityRates != null)
+                {
+                    births = yfraction * ageSpecificFertilityRates.births(p);
+                }
+                else
+                {
+                    double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
+                    births = yfraction * sum * birthRate / 1000;
+                }
+
+                m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
+                f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
             }
 
             observed_births += births;
-
-            double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
-            double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
             if (debug)
             {
@@ -257,6 +300,60 @@ public class ForwardPopulationT extends ForwardPopulation
         double[] day_births = new double[ndays];
         for (int nd = 0; nd < ndays; nd++)
             day_births[nd] = total_births / ndays;
+
+        /*
+         * подвергнуть рождения смертности
+         * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности,
+         * таким образом day_lx[nd] / day_lx[0] представляет долю выживших к этому дню со дня рождения 
+         */
+        double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
+        for (int nd = 0; nd < ndays; nd++)
+            day_births[nd] *= day_lx[nd] / day_lx[0];
+
+        /*
+         * добавить результат в контекст
+         */
+        for (int nd = 0; nd < ndays; nd++)
+            fctx.add(locality, gender, nd, day_births[nd]);
+
+        double deaths_from_births = total_births - Util.sum(day_births);
+        observed_deaths += deaths_from_births;
+
+        switch (gender)
+        {
+        case MALE:
+            t_male_births += total_births;
+            t_male_deaths_from_births += deaths_from_births;
+            break;
+
+        case FEMALE:
+            t_female_births += total_births;
+            t_female_deaths_from_births += deaths_from_births;
+            break;
+
+        case BOTH:
+            throw new IllegalArgumentException();
+        }
+
+        if (debug)
+        {
+            log(String.format("Births TOTAL-%s = %s", gender.name(), f2s(total_births)));
+            // log(String.format("Deaths from births TOTAL-%s = %s", gender.name(), f2s(deaths_from_births)));
+        }
+    }
+    
+    private void add_births(PopulationForwardingContext fctx,
+            final Locality locality,
+            final Gender gender,
+            double[] daily_birth_count,
+            final CombinedMortalityTable mt) throws Exception
+    {
+        int ndays = daily_birth_count.length;
+        double total_births = Util.sum(daily_birth_count);
+
+        fctx.addTotalBirths(locality, gender, total_births);
+        
+        double[] day_births = Util.reverse(daily_birth_count);
 
         /*
          * подвергнуть рождения смертности

@@ -158,7 +158,7 @@ public class Util
 
     public static String f2s(double f) throws Exception
     {
-        String s =  new BigDecimal(Double.valueOf(f).toString()).toPlainString(); 
+        String s = new BigDecimal(Double.valueOf(f).toString()).toPlainString();
 
         if (s.contains("."))
         {
@@ -184,7 +184,7 @@ public class Util
             return true;
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
-    
+
     public static boolean isValid(double v)
     {
         return Double.isFinite(v);
@@ -195,7 +195,7 @@ public class Util
         if (!isValid(v))
             throw new ArithmeticException("Not a valid number");
     }
-    
+
     public static void checkNonNegative(double v) throws Exception
     {
         if (v < 0)
@@ -214,7 +214,7 @@ public class Util
             throw new ArithmeticException("Not a valid number");
         return v;
     }
-    
+
     // min of array values
     public static double min(final double[] y)
     {
@@ -258,7 +258,7 @@ public class Util
             v[k] = a[k] + b[k];
         return v;
     }
-    
+
     // per-element array substraction
     public static double[] sub(final double[] a, final double[] b) throws Exception
     {
@@ -269,13 +269,13 @@ public class Util
             v[k] = a[k] - b[k];
         return v;
     }
-    
+
     // average value over array
     public static double average(final double[] y)
     {
         return sum(y) / y.length;
     }
-    
+
     // normalize array so the sum of its elements is 1.0
     public static double[] normalize(final double[] y)
     {
@@ -287,7 +287,7 @@ public class Util
     {
         return multiply(y, sum / sum(y));
     }
-    
+
     // sign of the value
     public static int sign(double d)
     {
@@ -298,13 +298,13 @@ public class Util
         else
             return 0;
     }
-    
+
     // check if @x is with range [x1...x2], where x1 and x2 can be inversed 
     public static boolean within(double x, double x1, double x2)
     {
-       double xx1 = Math.min(x1, x2); 
-       double xx2 = Math.max(x1, x2);
-       return x >= xx1 && x <= xx2;
+        double xx1 = Math.min(x1, x2);
+        double xx2 = Math.max(x1, x2);
+        return x >= xx1 && x <= xx2;
     }
 
     // return a new array with values representing y[] * f
@@ -351,13 +351,25 @@ public class Util
         else
             return splice(y, 0, y.length - 1);
     }
-    
+
+    // clone array of doubles in reverse order
+    public static double[] reverse(final double[] y)
+    {
+        if (y.length == 0)
+            return new double[0];
+
+        double[] d = new double[y.length];
+        for (int k = 0; k < y.length; k++)
+            d[k] = y[y.length - 1 - k];
+        return d;
+    }
+
     // concatenate arrays a and d
-    public static double[] concat(double[]a, double[] b)
+    public static double[] concat(double[] a, double[] b)
     {
         double[] r = new double[a.length + b.length];
         int ix = 0;
-        
+
         for (int k = 0; k < a.length; k++)
             r[ix++] = a[k];
 
@@ -406,7 +418,7 @@ public class Util
 
         return true;
     }
-    
+
     public static void print(String title, final double[] y, int start_year)
     {
         Util.out(title);
@@ -476,7 +488,7 @@ public class Util
 
         return sb.toString();
     }
-    
+
     public static <T extends Comparable<T>> List<T> sort(Collection<T> coll)
     {
         List<T> list = new ArrayList<T>();
@@ -484,7 +496,7 @@ public class Util
         Collections.sort(list);
         return list;
     }
-    
+
     /*
      * Return stack frame string.
      * depth = 0 => for the place of the call
@@ -511,7 +523,7 @@ public class Util
 
         return "";
     }
-    
+
     public static void sleep(long ms)
     {
         try
@@ -523,7 +535,7 @@ public class Util
             noop();
         }
     }
-    
+
     public static void unused(Object... o)
     {
     }
