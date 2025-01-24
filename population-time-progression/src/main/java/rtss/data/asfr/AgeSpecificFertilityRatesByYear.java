@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.selectors.Area;
+import rtss.util.Util;
 import rtss.util.excel.Excel;
 
 /*
@@ -56,21 +57,21 @@ public class AgeSpecificFertilityRatesByYear
             return asfr.ageGroups();
         return null;
     }
-    
+
     /*
      * значения плодовитости для возрастной группы @ageGroup в годы [year1 ... year2]
      */
     public double[] ageGroupValues(String ageGroup, int year1, int year2) throws Exception
     {
-       List<Double> list = new ArrayList<>();
+        List<Double> list = new ArrayList<>();
 
-       for (int year = year1; year <= year2; year++)
-       {
-           AgeSpecificFertilityRates asfr = getForYear(year);
-           list.add(asfr.forAgeGroup(ageGroup));
-       }
-       
-       return ArrayUtils.toPrimitive(list.toArray(new Double[0]));
+        for (int year = year1; year <= year2; year++)
+        {
+            AgeSpecificFertilityRates asfr = getForYear(year);
+            list.add(asfr.forAgeGroup(ageGroup));
+        }
+
+        return ArrayUtils.toPrimitive(list.toArray(new Double[0]));
     }
 
     /* ============================================================================================== */
@@ -242,5 +243,59 @@ public class AgeSpecificFertilityRatesByYear
             throw new Exception(msg);
         else
             throw new Exception(msg, t);
+    }
+
+    /* ============================================================================================== */
+
+    @Override
+    public String toString()
+    {
+        try
+        {
+            return toString(1);
+        }
+        catch (Exception ex)
+        {
+            return "unable to display";
+        }
+    }
+
+    public String toString(int passes) throws Exception
+    {
+        if (m.size() == 0)
+            return "";
+
+        StringBuilder sb = new StringBuilder();
+
+        // header
+        sb.append("year");
+        for (String s : ageGroups())
+            sb.append("," + s);
+        sb.append(Util.nl);
+
+        // year-lines
+        for (int year : Util.sort(m.keySet()))
+        {
+            if (passes == 1)
+            {
+                dump(sb, year, "" + year);
+            }
+            else
+            {
+                for (int pass = 0; pass < passes; pass++)
+                    dump(sb, year, year + "." + pass);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private void dump(StringBuilder sb, int year, String ytitle) throws Exception
+    {
+        sb.append(ytitle);
+        AgeSpecificFertilityRates asfr = getForYear(year);
+        for (String ag : asfr.ageGroups())
+            sb.append(String.format(",%.1f", asfr.forAgeGroup(ag)));
+        sb.append(Util.nl);
     }
 }
