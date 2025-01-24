@@ -152,7 +152,11 @@ public class InterpolateASFR
 
         if (Util.False && !Util.isNonNegative(yyy))
             throw new Exception("Error calculating curve (negative value)");
-
+        
+        double yyy_min = Util.min(yyy);
+        if (yyy_min < -2.0)
+            throw new Exception("Error calculating curve (negative value)");
+        
         double[] yy = Bins.ppy2yearly(yyy, ppy);
 
         if (!Util.isNonNegative(yy))
