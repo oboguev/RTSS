@@ -63,7 +63,7 @@ public class MeanPreservingIterativeSpline
 
         // use weighted control points for the spline
         // final double[] cp_x = Bins.midpoint_x(bins);
-        final double[] cp_x = weigted_control_points_x(bins, ppy, options);
+        final double[] cp_x = weighted_control_points_x(bins, ppy, options);
         double[] cp_y = Bins.midpoint_y(bins);
 
         for (int pass = 0;; pass++)
@@ -170,7 +170,7 @@ public class MeanPreservingIterativeSpline
         }
     }
 
-    private double[] weigted_control_points_x(Bin[] bins, int ppy, Options options)
+    private double[] weighted_control_points_x(Bin[] bins, int ppy, Options options) throws Exception
     {
         double minOffset = 1.0 / ppy;
         double[] cp_x = new double[bins.length];
@@ -182,20 +182,21 @@ public class MeanPreservingIterativeSpline
             x = min(x, bin.age_x2 + 1 - minOffset);
             cp_x[bin.index] = x;
         }
+        
         return cp_x;
     }
 
-    private double eval_cp_x(Bin bin, Options options)
+    private double eval_cp_x(Bin bin, Options options) throws Exception
     {
         Bin prev = bin.prev;
         Bin next = bin.next;
         
         if (next == null && options.placeLastBinKnotAtRightmostPoint)
-            return bin.age_x2 + 1;
+            return validate(bin.age_x2 + 1);
 
         // endpoint
         if (prev == null || next == null)
-            return bin.mid_x;
+            return validate(bin.mid_x);
 
         double a = prev.avg;
         double b = bin.avg;
@@ -213,7 +214,7 @@ public class MeanPreservingIterativeSpline
             double wc = c / b;
 
             double x = (xa * wa + xb * wb + xc * wc) / (wa + wb + wc);
-            return x;
+            return validate(x);
         }
         else if (bin.avg < prev.avg && bin.avg < next.avg)
         {
@@ -223,24 +224,31 @@ public class MeanPreservingIterativeSpline
             double wc = b / c;
 
             double x = (xa * wa + xb * wb + xc * wc) / (wa + wb + wc);
-            return x;
+            return validate(x);
         }
         else if (same(a, b) && same(b, c))
         {
-            return bin.mid_x;
+            return validate(bin.mid_x);
         }
         else if (same(a, b))
         {
-            return bin.age_x1;
+            return validate(bin.age_x1);
         }
         else if (same(b, c))
         {
-            return bin.age_x2 + 1;
+            return validate(bin.age_x2 + 1);
         }
         else
         {
-            return bin.mid_x;
+            return validate(bin.mid_x);
         }
+    }
+    
+    private double validate(double v) throws Exception
+    {
+        if (!Util.isValid(v))
+            throw new Exception("invalid value while calculating spline");
+        return v;
     }
 
     private boolean same(double a, double b)

@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import rtss.data.ValueConstraint;
+import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
+import rtss.data.asfr.InterpolateASFR;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
@@ -38,7 +40,7 @@ public class Main
     {
         try
         {
-            new Main(Area.USSR).main();
+            // new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
         }
         catch (Exception ex)
@@ -105,6 +107,7 @@ public class Main
     private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 
     private AgeSpecificFertilityRatesByYear yearly_asfrs;
+    private AgeSpecificFertilityRatesByTimepoint halfyearly_asfrs;
     private double asfr_calibration;
 
     /*
@@ -123,10 +126,12 @@ public class Main
         {
         case USSR:
             yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/USSR/USSR-ASFR.xlsx");
+            halfyearly_asfrs = InterpolateASFR.interpolate(yearly_asfrs, 1920, 1959, 2);
             break;
 
         case RSFSR:
             yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
+            halfyearly_asfrs = InterpolateASFR.interpolate(yearly_asfrs, 1920, 1959, 2);
             break;
         }
 
@@ -192,7 +197,7 @@ public class Main
         halves = halves1;
         evalDeficit1946();
         evalBirths();
-        
+
         PrintHalves.print(halves);
 
         Util.noop();
@@ -368,7 +373,7 @@ public class Main
 
         if (Util.False)
         {
-            new PopulationChart("Население " +  area + " на середину 1941 года")
+            new PopulationChart("Население " + area + " на середину 1941 года")
                     .show("перепись", px.forLocality(Locality.TOTAL))
                     .display();
         }
@@ -830,7 +835,7 @@ public class Main
     private void backpropagateExcessMortality(PopulationByLocality deficit1946) throws Exception
     {
         deficit1946.validateBMF();
-        
+
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
         double[] ac_generic = wsum(0.3, even_intensity, 0.7, occupation_intensity);
         List<Double> acv_generic = atov_reverse(ac_generic);
@@ -883,7 +888,7 @@ public class Main
                 else
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
             }
-            
+
             loss.makeBoth(Locality.TOTAL);
             loss.validateBMF();
 
@@ -903,7 +908,7 @@ public class Main
                             he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
             }
         }
-        
+
         /*
          * Вторая стадия -- полугодовые шаги к началам вторых полугодий
          * 
@@ -916,7 +921,7 @@ public class Main
         acv_generic = atov_reverse(ac_generic);
         acv_conscripts = atov_reverse(ac_conscripts);
         he = halves.last().prev;
-        
+
         for (;;)
         {
             double a_generic = acv_generic.get(0) / sum(acv_generic);
@@ -942,7 +947,7 @@ public class Main
                 else
                     loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
             }
-            
+
             loss.makeBoth(Locality.TOTAL);
             loss.validateBMF();
 
@@ -964,7 +969,7 @@ public class Main
                 verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE),
                             he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
             }
-            
+
             if (he.year == 1941)
             {
                 double xsum = he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
@@ -1025,12 +1030,12 @@ public class Main
     private void evalBirths() throws Exception
     {
         Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
-        
+
         for (HalfYearEntry he : halves)
         {
             if (he.next == null)
                 break;
-            
+
             /* взрослое население в начале периода */
             PopulationByLocality p1 = he.p_nonwar_without_births;
             if (he.accumulated_excess_deaths != null)
@@ -1042,15 +1047,33 @@ public class Main
             if (he.next.accumulated_excess_deaths != null)
                 p2 = p2.sub(he.next.accumulated_excess_deaths, ValueConstraint.NONE);
             p2.setValueConstraint(ValueConstraint.NONE);
-            
+
             /* среднее взрослое население за период */
             PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
-            
+
             he.p_actual_without_births_start = p1;
             he.p_actual_without_births_end = p2;
             he.p_actual_without_births_avg = pavg;
 
-            he.actual_births = asfr_calibration * 0.5 * yearly_asfrs.getForYear(he.year).births(pavg);
+            if (Util.False)
+            {
+                he.actual_births = asfr_calibration * 0.5 * yearly_asfrs.getForYear(he.year).births(pavg);
+            }
+            else
+            {
+                String timepoint = null;
+                switch (he.halfyear)
+                {
+                case FirstHalfYear:
+                    timepoint = he.year + ".0";
+                    break;
+                case SecondHalfYear:
+                    timepoint = he.year + ".1";
+                    break;
+                }
+
+                he.actual_births = asfr_calibration * 0.5 * halfyearly_asfrs.getForTimepoint(timepoint).births(pavg);
+            }
         }
 
         /*
