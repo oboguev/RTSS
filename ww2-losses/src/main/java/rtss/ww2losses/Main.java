@@ -1106,7 +1106,10 @@ public class Main
         PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
         p.zero();
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
-        // ###
+        
+        // ### продвижка по полугодиям
+        // ### от середины 1941 с p = empty
+        // ### и добавдением числа рождений за полугодие согласно he.actual_births 
     }
     
     /* ======================================================================================================= */
