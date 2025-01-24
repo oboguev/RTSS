@@ -1047,6 +1047,18 @@ public class Main
 
             he.actual_births = asfr_calibration * 0.5 * asfrs.getForYear(he.year).births(pavg);
         }
+
+        /*
+         * Для 1941 года (оба полугодия)
+         */
+        if (Util.False)
+        {
+            HalfYearEntry he1 = halves.get(0);
+            HalfYearEntry he2 = halves.get(1);
+            double delta = he1.actual_births - he1.expected_nonwar_births;
+            he1.actual_births = he1.expected_nonwar_births;
+            he2.actual_births += delta;
+        }
     }
     
     private void evalBirths_000() throws Exception
