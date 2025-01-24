@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import rtss.data.bin.Bin;
+import rtss.util.Util;
 
 /*
- * ВременнАя интерполяция коэффциентов плодовитости из годового в суб-годовой диапазон 
+ * ВременнАя интерполяция возрастных коэффциентов плодовитости из годового в суб-годовое разрешение
+ * по временной (хронологической. не возрастной) шкале. 
  */
 public class InterpolateASFR
 {
@@ -76,8 +78,16 @@ public class InterpolateASFR
     
     private static double[] yearly2timepoints(double[] yearly, int ppy, int ppinterval)
     {
-        // ####@@@@@
-        return null;
+        double[] points = yearly2points(yearly, ppy * ppinterval);
+        double[] timepoints = new double[ppy * yearly.length];
+        
+        for (int k = 0; k < timepoints.length; k++)
+        {
+            double[] x = Util.splice(points, k * ppinterval, k * ppinterval + ppinterval - 1);
+            timepoints[k] = Util.average(x);
+        }
+
+        return timepoints;
     }
     
     /* ======================================================================================= */
@@ -102,7 +112,7 @@ public class InterpolateASFR
     
     /* ======================================================================================= */
     
-    private static double[] yearly2points(double[] yearly, int npoints)
+    private static double[] yearly2points(double[] yearly, int ppy)
     {
         // ####@@@@@ see InterpolatePopulationAsMeanPreservingCurve
         return null;
