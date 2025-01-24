@@ -643,4 +643,16 @@ public class PopulationByLocality
         if (rural != null)
             rural.validateBMF();
     }
+    
+    public void zero() throws Exception
+    {
+        if (total != null)
+            total.zero();
+ 
+        if (urban != null)
+            urban.zero();
+
+        if (rural != null)
+            rural.zero();
+    }
 }
