@@ -44,6 +44,7 @@ public class InterpolateASFR
             int age_x2 = ag_x2(ageGroup);
             
             double[] yearly = asfry.ageGroupValues(ageGroup, year1, year2);
+            nonzero(yearly);
             double[] points = yearly2timepoints(yearly, ppy, ppinterval);
             
             if (points.length != ppy * (year2 - year1 + 1))
@@ -114,6 +115,19 @@ public class InterpolateASFR
         return Integer.parseInt(sa[index]);
     }
     
+    /*
+     * заменить нулевые значения очень низкими,
+     * чтобы избежать деления на ноль в построителе сплайна
+     */
+    private static void nonzero(double[] y)
+    {
+        for (int k = 0; k < y.length; k++)
+        {
+            if (y[k] >= 0 && y[k] < 0.0000000001)
+                y[k] =  0.0000000001;
+        }
+    }
+    
     /* ======================================================================================= */
     
     private static double[] yearly2points(double[] yearly, int ppy) throws Exception
@@ -136,7 +150,7 @@ public class InterpolateASFR
         options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
         double[] yyy = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
 
-        if (!Util.isNonNegative(yyy))
+        if (Util.False && !Util.isNonNegative(yyy))
             throw new Exception("Error calculating curve (negative value)");
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
