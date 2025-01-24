@@ -207,11 +207,49 @@ public class Util
         checkValid(v);
         checkNonNegative(v);
     }
-
+    
     public static double validate(double v) throws Exception
     {
         if (!isValid(v))
             throw new ArithmeticException("Not a valid number");
+        return v;
+    }
+
+    public static void checkValid(double[] v) throws Exception
+    {
+        for (double vv : v)
+        {
+            if (!isValid(vv))
+                throw new ArithmeticException("Not a valid number");
+        }
+    }
+
+    public static void checkNonNegative(double[] v) throws Exception
+    {
+        for (double vv : v)
+        {
+            if (vv < 0)
+                throw new ArithmeticException("Unexpected negative number");
+        }
+    }
+
+    public static void checkValidNonNegative(double[] v) throws Exception
+    {
+        for (double vv : v)
+        {
+            checkValid(vv);
+            checkNonNegative(vv);
+        }
+    }
+    
+    public static double[] validate(double[] v) throws Exception
+    {
+        for (double vv : v)
+        {
+            if (!isValid(vv))
+                throw new ArithmeticException("Not a valid number");
+        }
+
         return v;
     }
 

@@ -1,6 +1,7 @@
 package rtss.ww2losses.helpers;
 
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.forward.ForwardPopulation;
 import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -55,5 +56,48 @@ public class WarHelpers
             Util.err(String.format("Доля отрицательных значений в общем дефиците %s %.2f%%", gender.name(), 100 * negsum / sum));
             Util.err("");
         }
+    }
+
+    /*
+     * Распределить число рождений @nb2 на число дней @ndays.
+     * Интенсивность рождений до интервала = @nb1; интенсивность рождений до интервала = @nb3.
+     */
+    public static double[] births(int ndays, double nb1, double nb2, double nb3) throws Exception
+    {
+        double[] births = new double[ndays];
+        
+        double a = (nb3 - nb1) / (ndays + 1);
+        double b = nb3 - a * ndays;
+        
+        for (int k = 0; k < ndays; k++)
+            births[k] = a * k  + b;
+        
+        births = Util.normalize(births, nb2);
+        
+        Util.checkValidNonNegative(births);
+        
+        return births;
+    }
+
+    private static final double MaleFemaleBirthRatio = ForwardPopulation.MaleFemaleBirthRatio;
+
+    public static double[] male_births(double[] births) throws Exception
+    {
+        double factor = MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
+        
+        double[] v = new double[births.length];
+        for (int k = 0; k < births.length; k++)
+            v[k] = factor * births[k];
+        return v;
+    }
+
+    public static double[] female_births(double[] births) throws Exception
+    {
+        double factor = 1.0 / (1 + MaleFemaleBirthRatio);
+
+        double[] v = new double[births.length];
+        for (int k = 0; k < births.length; k++)
+            v[k] = factor * births[k];
+        return v;
     }
 }

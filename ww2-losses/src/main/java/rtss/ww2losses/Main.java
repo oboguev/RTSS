@@ -83,10 +83,10 @@ public class Main
     /* фактическое население на начало 1946 года */
     private PopulationByLocality p1946_actual;
 
-    /* фактическое население на начало 1946 года рождённое до середины 1941*/
+    /* фактическое население на начало 1946 года рождённое до середины 1941 */
     private PopulationByLocality p1946_actual_born_prewar;
 
-    /* фактическое население на начало 1946 года рождённое после середины 1941*/
+    /* фактическое население на начало 1946 года рождённое после середины 1941 */
     private PopulationByLocality p1946_actual_born_postwar;
 
     /* 
@@ -109,6 +109,7 @@ public class Main
     private AgeSpecificFertilityRatesByYear yearly_asfrs;
     private AgeSpecificFertilityRatesByTimepoint halfyearly_asfrs;
     private double asfr_calibration;
+    private CombinedMortalityTable mt1940;
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -138,10 +139,10 @@ public class Main
         asfr_calibration = CalibrateASFR.calibrate1940(ap, yearly_asfrs);
 
         /* таблица смертности для 1940 года */
-        CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
+        mt1940 = new MortalityTable_1940(ap).evaluate();
 
-        HalfYearEntries<HalfYearEntry> halves1 = evalHalves_step_1yr(mt1940);
-        HalfYearEntries<HalfYearEntry> halves2 = evalHalves_step_6mo(mt1940);
+        HalfYearEntries<HalfYearEntry> halves1 = evalHalves_step_1yr();
+        HalfYearEntries<HalfYearEntry> halves2 = evalHalves_step_6mo();
 
         if (Util.False)
         {
@@ -215,7 +216,7 @@ public class Main
      * Основная передвижка с шагом год.
      * Вторичная передвижка (для промежуточных точек и до 1946) с шагом полгода. 
      */
-    private HalfYearEntries<HalfYearEntry> evalHalves_step_1yr(CombinedMortalityTable mt1940) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_step_1yr() throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = createHalves();
 
@@ -365,7 +366,7 @@ public class Main
      * Передвижка с шагом полгода.
      */
     @SuppressWarnings("unused")
-    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(CombinedMortalityTable mt1940) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo() throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
 
@@ -676,11 +677,11 @@ public class Main
 
     private void split_p1946() throws Exception
     {
-        int nd_4_5 = age2day(4.5); 
+        int nd_4_5 = age2day(4.5);
 
         p1946_actual_born_postwar = p1946_actual.selectByAge(0, nd_4_5);
         p1946_actual_born_prewar = p1946_actual.selectByAge(nd_4_5 + 1, age2day(MAX_AGE + 1));
-        
+
         PopulationByLocality p = p1946_actual.sub(p1946_actual_born_postwar, ValueConstraint.NONE);
         p = p.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
 
@@ -691,11 +692,11 @@ public class Main
         if (Util.differ(v_total, v_prewar + v_postwar))
             Util.err("Ошибка расщепления");
     }
-    
+
     private int age2day(double age)
     {
         final int DAYS_PER_YEAR = 365;
-        return (int) Math.round(age * DAYS_PER_YEAR); 
+        return (int) Math.round(age * DAYS_PER_YEAR);
     }
 
     private PopulationByLocality emigration() throws Exception
@@ -780,7 +781,7 @@ public class Main
 
         p1946_actual.makeBoth();
         p1946_actual.recalcTotalForEveryLocality();
-        
+
         split_p1946();
 
         return deficit;
@@ -1129,12 +1130,43 @@ public class Main
         PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
         p.zero();
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+        fctx.begin(p);
         
-        // ###  !!! отрицательные значения полугодовой плодовитости в группе 50-54
+        HalfYearEntry he = halves.get(1);
+        for (;;)
+        {
+            if (he.year == 1946)
+                break;
+            
+            ForwardPopulationT fw = new ForwardPopulationT();
+            int ndays = fw.birthDays(0.5);
+            
+            // добавить фактические рождения
+            double nb1 = he.prev.actual_births;
+            double nb2 = he.actual_births;
+            double nb3 = (he.next != null) ? he.next.actual_births : nb2;
+            double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            double[] m_births =  WarHelpers.male_births(births);
+            double[] f_births =  WarHelpers.female_births(births);
+            fw.setBirthCount(m_births, f_births);
+            
+            CombinedMortalityTable mt = year_mt(mt1940, he.year);
+            p = fw.forward(p, fctx, mt, 0.5);
+            
+            // число смертей от рождений
+            he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
+            
+            he = he.next;
+        }
+        
+        double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
+        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE); 
+        
+        Util.out(String.format("Сверхсмертность рождённых во время войны, сумма к началу 1946 года, тыс. чел.: %s", f2k((v1 - v2) / 1000.0)));
     }
-    
+
     /* ======================================================================================================= */
-    
+
     /*
      * Распределить величину по полугодиям по интенсивности
      */

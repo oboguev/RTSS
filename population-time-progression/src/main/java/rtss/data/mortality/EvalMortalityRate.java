@@ -1,6 +1,7 @@
 package rtss.data.mortality;
 
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.forward.ForwardPopulation;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -156,7 +157,7 @@ public class EvalMortalityRate extends Loggable
         return sum_deaths;
     }
 
-    private static final double MaleFemaleBirthRatio = 1.06;
+    private static final double MaleFemaleBirthRatio = ForwardPopulation.MaleFemaleBirthRatio;
 
     /*
      * Число смертей от новых рождений за год

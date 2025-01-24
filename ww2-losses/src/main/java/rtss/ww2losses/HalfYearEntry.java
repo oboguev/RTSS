@@ -40,9 +40,9 @@ public class HalfYearEntry
     public PopulationByLocality p_actual_without_births_avg;
     
     /*
-     * добавочное из-за войны количество смертей в этом полугодии (включает excess_deaths_fertile_f),
-     * вычисляется независимо от accumulated_excess_deaths; разностное исчисление по accumulated_excess_deaths
-     * даёт более точную величину  
+     * добавочное из-за войны количество смертей в этом полугодии в наличном на начало войны населении 
+     * (включает excess_deaths_fertile_f), вычисляется независимо от accumulated_excess_deaths; 
+     * разностное исчисление по accumulated_excess_deaths даёт более точную величину  
      */
     public double excess_war_deaths = 0;
 
@@ -56,6 +56,12 @@ public class HalfYearEntry
     /* фактическое число состоявшихся рождений */
     public double actual_births; 
     
+    /* 
+     * число смертей в данном полугодии от фактического рождений во время войны
+     * ожидаемое при смертности мирного времени
+     */
+    public double actual_warborn_deaths_baseline; 
+
     /* временные данные для передвижки */
     PopulationByLocality fw_p_wb;
     PopulationForwardingContext fw_fctx_wb;

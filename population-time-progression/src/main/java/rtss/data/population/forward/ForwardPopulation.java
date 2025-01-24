@@ -6,7 +6,7 @@ import rtss.util.Loggable;
 public class ForwardPopulation extends Loggable
 {
     protected static final int MAX_AGE = Population.MAX_AGE;
-    protected final double MaleFemaleBirthRatio = 1.06;
+    public final static double MaleFemaleBirthRatio = 1.06;
     
     protected static final int DAYS_PER_YEAR = 365;
 

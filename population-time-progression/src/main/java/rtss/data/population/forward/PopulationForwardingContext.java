@@ -298,7 +298,7 @@ public class PopulationForwardingContext
     {
         // TODO: сделать аргументом (таблица смертности в год, для которого указана структура населения)
         CombinedMortalityTable mt = null;
-        
+
         if (began)
             throw new IllegalArgumentException();
 
@@ -399,7 +399,12 @@ public class PopulationForwardingContext
         for (int age = 0; age < NYEARS; age++)
         {
             double[] vv = Util.splice(v_days, firstDayForAge(age), lastDayForAge(age));
-            vv = Util.normalize(vv, v_years[age]);
+
+            if (v_years[age] != 0)
+                vv = Util.normalize(vv, v_years[age]);
+            else
+                vv = Util.multiply(vv, 0);
+
             for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
                 set(locality, gender, nd, vv[nd - firstDayForAge(age)]);
         }
@@ -412,7 +417,7 @@ public class PopulationForwardingContext
     {
         if (mt == null)
             Util.err("PopulationForwardingContext.begin: mt == null, вынос в контекст приближённый");
-        
+
         begin_basic(p, locality, Gender.MALE, mt);
         begin_basic(p, locality, Gender.FEMALE, mt);
     }
@@ -422,8 +427,8 @@ public class PopulationForwardingContext
         for (int age = 0; age < NYEARS; age++)
         {
             double v = p.get(locality, gender, age);
-            
-            int nd1 = firstDayForAge(age); 
+
+            int nd1 = firstDayForAge(age);
             int nd2 = lastDayForAge(age);
 
             if (mt == null)
@@ -435,11 +440,11 @@ public class PopulationForwardingContext
             {
                 double[] dlx = get_daily_lx(mt, locality, gender);
                 int offset = 0;
-                
+
                 // если у кривой недостаёт знчений для последнего года
                 while (nd2 - offset >= dlx.length)
                     offset++;
-                
+
                 dlx = Util.splice(dlx, nd1 - offset, nd2 - offset);
                 dlx = Util.normalize(dlx);
 
