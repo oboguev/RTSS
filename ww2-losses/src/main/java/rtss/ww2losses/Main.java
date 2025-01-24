@@ -1114,7 +1114,7 @@ public class Main
         p.zero();
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
         
-        // ###  
+        // ###  !!! отрицательные значения полугодовой плодовитости в группе 50-54
     }
     
     /* ======================================================================================================= */
