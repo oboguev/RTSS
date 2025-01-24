@@ -35,6 +35,29 @@ public class AgeSpecificFertilityRates
     }
     
     /*
+     * список возрастных корзин
+     */
+    public List<String> ageGroups()
+    {
+        List<String> list = new ArrayList<>();
+        for (Bin bin : bins)
+            list.add(String.format("%d-%d", bin.age_x1, bin.age_x2));
+        return list;
+    }
+    
+    public double forAgeGroup(String ageGroup) throws Exception
+    {
+        for (Bin bin : bins)
+        {
+            String ag = String.format("%d-%d", bin.age_x1, bin.age_x2);
+            if (ag.equals(ageGroup))
+                return bin.avg;
+        }
+
+        throw new Exception("ASFR does not have age group " + ageGroup);
+    }
+
+    /*
      * Годовое количество рождений в данном населении
      */
     public double births(PopulationByLocality p) throws Exception

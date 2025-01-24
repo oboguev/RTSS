@@ -5,11 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.selectors.Area;
 import rtss.util.excel.Excel;
 
+/*
+ * Содержит ASFR индексированные по годам
+ */
 public class AgeSpecificFertilityRatesByYear
 {
     private Map<Integer, AgeSpecificFertilityRates> m = new HashMap<>();
@@ -42,6 +47,32 @@ public class AgeSpecificFertilityRatesByYear
         return new AgeSpecificFertilityRatesByYear(path);
     }
 
+    /*
+     * список возрастных корзин
+     */
+    public List<String> ageGroups()
+    {
+        for (AgeSpecificFertilityRates asfr : m.values())
+            return asfr.ageGroups();
+        return null;
+    }
+    
+    /*
+     * значения плодовитости для возрастной группы @ageGroup в годы [year1 ... year2]
+     */
+    public double[] ageGroupValues(String ageGroup, int year1, int year2) throws Exception
+    {
+       List<Double> list = new ArrayList<>();
+
+       for (int year = year1; year <= year2; year++)
+       {
+           AgeSpecificFertilityRates asfr = getForYear(year);
+           list.add(asfr.forAgeGroup(ageGroup));
+       }
+       
+       return ArrayUtils.toPrimitive(list.toArray(new Double[0]));
+    }
+
     /* ============================================================================================== */
 
     private int ncol;
@@ -54,7 +85,7 @@ public class AgeSpecificFertilityRatesByYear
 
         List<List<Object>> rows = Excel.readSheet(path, false, "Data");
         Excel.stripTrailingNulls(rows);
-        
+
         nrow = 0;
         int years_row = -1;
         List<Integer> age_x1 = new ArrayList<>();
@@ -114,21 +145,21 @@ public class AgeSpecificFertilityRatesByYear
             String msg = String.format("Invalid row in resource file %s, row=%d, incorrect length", path, nrow + 1);
             throw new Exception(msg);
         }
-        
+
         int year = asInteger(row, 0);
         List<Bin> list = new ArrayList<Bin>();
-        
+
         for (int k = 0; k < age_x1.size(); k++)
             list.add(new Bin(age_x1.get(k), age_x2.get(k), asDouble(row, k + 1)));
-        
+
         Bin[] bins = Bins.bins(list);
-        
+
         if (m.containsKey(year))
         {
             String msg = String.format("Invalid row in resource file %s, row=%d, duplicate year", path, nrow + 1);
             throw new Exception(msg);
         }
-        
+
         m.put(year, new AgeSpecificFertilityRates(bins));
     }
 
@@ -137,7 +168,7 @@ public class AgeSpecificFertilityRatesByYear
         ncol = nc;
         Object o = row.get(nc);
         double d = 0;
-        
+
         if (o instanceof Double)
         {
             d = (Double) o;
@@ -158,11 +189,11 @@ public class AgeSpecificFertilityRatesByYear
         {
             invalidCell();
         }
-        
+
         long xl = Math.round(d);
         if (xl < Integer.MIN_VALUE || xl > Integer.MAX_VALUE)
             invalidCell();
-        
+
         if (Math.abs(xl - d) > 0.0001)
             invalidCell();
 
@@ -174,7 +205,7 @@ public class AgeSpecificFertilityRatesByYear
         ncol = nc;
         Object o = row.get(nc);
         double d = 0;
-        
+
         if (o instanceof Double)
         {
             d = (Double) o;
@@ -195,7 +226,7 @@ public class AgeSpecificFertilityRatesByYear
         {
             invalidCell();
         }
-        
+
         return d;
     }
 
