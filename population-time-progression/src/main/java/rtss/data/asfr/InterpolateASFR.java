@@ -150,6 +150,10 @@ public class InterpolateASFR
         options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
         double[] yyy = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
 
+        /*
+         * Позволить умеренно отрицательные значения в части промежуточных точек,
+         * если они перевешиваются на интервале положительными значениями.
+         */
         if (Util.False && !Util.isNonNegative(yyy))
             throw new Exception("Error calculating curve (negative value)");
         
