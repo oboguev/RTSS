@@ -71,7 +71,8 @@ public class AgeSpecificFertilityRatesByTimepoint
 
     private void dump(StringBuilder sb, String tp) throws Exception
     {
-        sb.append(tp);
+        final String quote = "\""; 
+        sb.append(quote + tp + quote);
         AgeSpecificFertilityRates asfr = getForTimepoint(tp);
         for (String ag : asfr.ageGroups())
             sb.append(String.format(",%.1f", asfr.forAgeGroup(ag)));

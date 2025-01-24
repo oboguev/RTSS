@@ -292,7 +292,8 @@ public class AgeSpecificFertilityRatesByYear
 
     private void dump(StringBuilder sb, int year, String ytitle) throws Exception
     {
-        sb.append(ytitle);
+        final String quote = "\""; 
+        sb.append(quote + ytitle + quote);
         AgeSpecificFertilityRates asfr = getForYear(year);
         for (String ag : asfr.ageGroups())
             sb.append(String.format(",%.1f", asfr.forAgeGroup(ag)));
