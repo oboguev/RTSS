@@ -1,6 +1,8 @@
 package rtss.ww2losses.helpers;
 
+import rtss.data.ValueConstraint;
 import rtss.data.population.Population;
+import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -16,39 +18,53 @@ public class PrintHalves
         Util.out("");
         Util.out("Данные по полугодиям");
         Util.out("");
-        Util.out("    нал.ос  = ожидаемое число смертей в наличном на начало войны населении в условиях мира");
-        Util.out("    над.дс  = добавочное число смертей в наличном на начало войны населении из-за войны");
-        Util.out("    мир.ор  = ожидаемое число рождений в условиях мира");
-        Util.out("    фр      = фактическое число рождений");
+        Util.out("    нал.ос    = ожидаемое число смертей в наличном на начало войны населении в условиях мира");
+        Util.out("    над.дс    = добавочное число смертей в наличном на начало войны населении из-за войны");
+        Util.out("    мир.ор    = ожидаемое число рождений в условиях мира");
+        Util.out("    фр        = фактическое число рождений");
+        Util.out("    ферт.оч   = ожидаемая численность женщин фертильного возраста 15-54");
+        Util.out("    ферт.ч    = фактическая численность женщин фертильного возраста 15-54");
+        Util.out("    ферт.нис  = накопленное число избыточных смертей женщин фертильного возраста 15-54");
         Util.out("");
-        Util.out("полугодие нал.ос нал.дс мир.ор фр");
+        Util.out("полугодие нал.ос нал.дс мир.ор фр ферт.оч ферт.ч ферт.нис");
         Util.out("");
 
         for (HalfYearEntry he : halves)
         {
             if (he.year == 1946)
                 break;
-            
+
             double d1 = 0;
             double d2 = 0;
-            
+
             if (he.accumulated_excess_deaths != null)
                 d1 = he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-            
+
             if (he.next.accumulated_excess_deaths != null)
                 d2 = he.next.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-            
+
             double d2_minus_d1 = Math.round(d2 - d1);
+
+            double fert_actual = he.p_actual_without_births_avg.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
+            double fert_loss = 0;
+            if (he.accumulated_excess_deaths != null)
+                fert_loss = he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
             
-            Util.out(String.format("%s %6s %6s %6s %6s", 
+            PopulationByLocality p1 = he.p_nonwar_without_births;
+            PopulationByLocality p2 = he.next.p_nonwar_without_births;
+            PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
+            double fert_expected = pavg.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
+            
+
+            Util.out(String.format("%s %6s %6s %6s %6s %6s %6s %6s",
                                    he.toString(),
                                    f2k(he.expected_nonwar_deaths / 1000.0),
                                    f2k(d2_minus_d1 / 1000.0),
                                    f2k(he.expected_nonwar_births / 1000.0),
-                                   f2k(he.actual_births / 1000.0)
-                                   ));
-            
-            Util.noop();
+                                   f2k(he.actual_births / 1000.0),
+                                   f2k(fert_expected / 1000.0),
+                                   f2k(fert_actual / 1000.0),
+                                   f2k(fert_loss / 1000.0)));
         }
     }
 

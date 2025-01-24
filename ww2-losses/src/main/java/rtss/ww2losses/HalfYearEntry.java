@@ -32,6 +32,13 @@ public class HalfYearEntry
     /* кумулятивные потери населения по сверхсмертности накопленные на начало периода, половозрастная структура */
     public PopulationByLocality accumulated_excess_deaths;
     
+    /* 
+     * фактическое население (без учёта рождений после середины 1941 года) на начало, конец и середину периода
+     */
+    public PopulationByLocality p_actual_without_births_start;
+    public PopulationByLocality p_actual_without_births_end;
+    public PopulationByLocality p_actual_without_births_avg;
+    
     /*
      * добавочное из-за войны количество смертей в этом полугодии (включает excess_deaths_fertile_f),
      * вычисляется независимо от accumulated_excess_deaths; разностное исчисление по accumulated_excess_deaths

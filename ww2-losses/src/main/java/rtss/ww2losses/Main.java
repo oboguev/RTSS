@@ -1044,6 +1044,10 @@ public class Main
             
             /* среднее взрослое население за период */
             PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
+            
+            he.p_actual_without_births_start = p1;
+            he.p_actual_without_births_end = p2;
+            he.p_actual_without_births_avg = pavg;
 
             he.actual_births = asfr_calibration * 0.5 * asfrs.getForYear(he.year).births(pavg);
         }
@@ -1059,74 +1063,6 @@ public class Main
             he1.actual_births = he1.expected_nonwar_births;
             he2.actual_births += delta;
         }
-    }
-    
-    private void evalBirths_000() throws Exception
-    {
-        double cumulative_excess_war_deaths_fertile_f = 0;
-
-        Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
-
-        for (HalfYearEntry he : halves)
-        {
-            if (he.next == null)
-                break;
-
-            /*
-             * число женщин фертильного возраста
-             */
-            PopulationByLocality pf = he.p_nonwar_without_births.avg(he.next.p_nonwar_without_births);
-            pf = pf.selectByAge(15, 54);
-
-            double f = pf.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
-            f -= cumulative_excess_war_deaths_fertile_f;
-            f -= he.excess_war_deaths_fertile_f / 2;
-            cumulative_excess_war_deaths_fertile_f += he.excess_war_deaths_fertile_f;
-
-            pf = RescalePopulation.scaleTotal(pf, 1.0, f);
-
-            /*
-             * число фактических рождений
-             */
-            if (he.year != 1941)
-                he.actual_births = asfr_calibration * 0.5 * asfrs.getForYear(he.year).births(pf);
-        }
-
-        /*
-         * Для 1941 года (оба полугодия)
-         */
-        HalfYearEntry he1 = halves.get(0);
-        HalfYearEntry he2 = halves.get(1);
-        he1.actual_births = he1.expected_nonwar_births;
-
-        PopulationByLocality pf = he2.p_nonwar_without_births.selectByAge(15, 54);
-        double year_births = asfr_calibration * asfrs.getForYear(1941).births(pf);
-        he2.actual_births = year_births - he1.actual_births;
-
-        Util.out("");
-        Util.out("Дефицит числа рождений, по полугодиям:");
-        double all_bd = 0;
-        for (HalfYearEntry he : halves)
-        {
-            if (he.year == 1946)
-                break;
-            double bd = he.expected_nonwar_births - he.actual_births;
-            Util.out(String.format("%s %s", he.toString(), f2k(bd / 1000.0)));
-            all_bd += bd;
-        }
-        Util.out(String.format("всего %s", f2k(all_bd / 1000.0)));
-
-        Util.out("");
-        Util.out("Фактическое число рождений, по полугодиям:");
-        double all_actual_births = 0;
-        for (HalfYearEntry he : halves)
-        {
-            if (he.year == 1946)
-                break;
-            Util.out(String.format("%s %s", he.toString(), f2k(he.actual_births / 1000.0)));
-            all_actual_births += he.actual_births;
-        }
-        Util.out(String.format("всего %s", f2k(all_actual_births / 1000.0)));
     }
 
     /* ======================================================================================================= */
