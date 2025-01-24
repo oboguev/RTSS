@@ -190,13 +190,17 @@ public class Main
         }
 
         /*
-         * Вариант 1 предподчительнее, т.к. избегает избыточного "переплёскивания" населения из года
-         * в год. При 9 полугодовых продвижках (вариант 2) часть населения переплеснётся по возрасту на 9 лет, 
-         * а не на 4.5.  
+         * Если размер контекста (PopulationForwardingContextSize) несколько начальных лет возраста (DEFAULT_NYEARS), 
+         * то вариант 1 предподчительнее, т.к. избегает избыточного "переплёскивания" населения из года в год. 
+         * При 9 полугодовых продвижках (вариант 2) часть населения переплеснётся по возрасту на 9 лет, а не на 4.5,
+         * как это объяснено в заголовке к классу ForwardPopulationT.
+         * 
+         * Если же размер контекста охватывает все возрасты (ALL_AGES), то оба варианта дают одинаковый результат.  
          */
         halves = halves1;
         evalDeficit1946();
-        evalBirths();
+        evalNewBirths();
+        evalNewBirthsDeaths();
 
         PrintHalves.print(halves);
 
@@ -1027,7 +1031,10 @@ public class Main
 
     /* ======================================================================================================= */
 
-    private void evalBirths() throws Exception
+    /*
+     * Вычислить число рождений в военное время
+     */
+    private void evalNewBirths() throws Exception
     {
         Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
 
@@ -1091,6 +1098,19 @@ public class Main
 
     /* ======================================================================================================= */
 
+    /*
+     * Вычислить число смертей от рождений в военное время
+     */
+    public void evalNewBirthsDeaths() throws Exception
+    {
+        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        p.zero();
+        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+        // ###
+    }
+    
+    /* ======================================================================================================= */
+    
     /*
      * Распределить величину по полугодиям по интенсивности
      */
