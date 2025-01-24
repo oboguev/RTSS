@@ -12,7 +12,7 @@ public class AgeSpecificFertilityRatesByTimepoint
 {
     private Map<String, AgeSpecificFertilityRates> m = new HashMap<>();
 
-    public void setForYear(String timepoint, AgeSpecificFertilityRates asfr)
+    public void setForTimepoint(String timepoint, AgeSpecificFertilityRates asfr)
     {
         if (m.containsKey(timepoint))
             throw new IllegalArgumentException();

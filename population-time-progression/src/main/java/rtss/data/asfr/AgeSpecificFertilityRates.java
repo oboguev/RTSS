@@ -22,6 +22,11 @@ public class AgeSpecificFertilityRates
     {
         this.bins = Bins.clone(bins); 
     }
+
+    public AgeSpecificFertilityRates(List<Bin> bins) throws Exception
+    {
+        this.bins = Bins.clone(Bins.bins(bins)); 
+    }
     
     public double forAge(int age)
     {
