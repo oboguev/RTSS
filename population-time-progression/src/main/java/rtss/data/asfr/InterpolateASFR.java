@@ -80,12 +80,8 @@ public class InterpolateASFR
         return null;
     }
     
-    private static double[] yearly2points(double[] yearly, int npoints)
-    {
-        // ####@@@@@ see InterpolatePopulationAsMeanPreservingCurve
-        return null;
-    }
-    
+    /* ======================================================================================= */
+
     private static int ag_x1(String ageGroup) throws Exception
     {
         return ag_x(ageGroup, 0);
@@ -103,4 +99,13 @@ public class InterpolateASFR
             throw new IllegalArgumentException();
         return Integer.parseInt(sa[index]);
     }
+    
+    /* ======================================================================================= */
+    
+    private static double[] yearly2points(double[] yearly, int npoints)
+    {
+        // ####@@@@@ see InterpolatePopulationAsMeanPreservingCurve
+        return null;
+    }
+    
 }

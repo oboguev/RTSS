@@ -41,7 +41,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (Util.True)
         {
             /*
-             * Helps to avoid the last segment of the curve dive down to much
+             * Helps to avoid the last segment of the curve dive down too much
              */
             options = options.placeLastBinKnotAtRightmostPoint();
         }
