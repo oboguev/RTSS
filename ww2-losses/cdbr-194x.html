@@ -1594,10 +1594,11 @@
     <br>
     Для получения чисел рождения по полугодиям нам желательны коэфциенты
     плодовитости также по полугодиям. Чтобы получить их, мы
-    интерполируем годовые коэффициенты плодовитости.<br>
+    интерполируем годовые коэффициенты плодовитости с помощью сплайна
+    сохраняющего среднее полугодовых величин ранвным годовому значению.<br>
     <br>
-    Для СССР возрастные коэффициенты плодовитости в полугодовом
-    разрешении предстают как:<br>
+    Для СССР интерполированные возрастные коэффициенты плодовитости в
+    полугодовом разрешении предстают как:<br>
     <blockquote>
       <table style="border-collapse: collapse;" width="764"
         cellspacing="2" cellpadding="2" border="1">
@@ -1624,7 +1625,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1938.0</td>
+              align="center">1938.1</td>
             <td class="xl67" align="right">43.0</td>
             <td class="xl67" align="right">211.0</td>
             <td class="xl67" align="right">228.7</td>
@@ -1636,7 +1637,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1938.1</td>
+              align="center">1938.2</td>
             <td class="xl67" align="right">46.2</td>
             <td class="xl67" align="right">210.6</td>
             <td class="xl67" align="right">229.2</td>
@@ -1648,7 +1649,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1939.0</td>
+              align="center">1939.1</td>
             <td class="xl67" align="right">49.3</td>
             <td class="xl67" align="right">218.7</td>
             <td class="xl67" align="right">239.6</td>
@@ -1660,7 +1661,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1939.1</td>
+              align="center">1939.2</td>
             <td class="xl67" align="right">45.6</td>
             <td class="xl67" align="right">216.9</td>
             <td class="xl67" align="right">235.5</td>
@@ -1672,7 +1673,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1940.0</td>
+              align="center">1940.1</td>
             <td class="xl67" align="right">34.9</td>
             <td class="xl67" align="right">201.6</td>
             <td class="xl67" align="right">213.0</td>
@@ -1684,7 +1685,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1940.1</td>
+              align="center">1940.2</td>
             <td class="xl67" align="right">32.0</td>
             <td class="xl67" align="right">190.6</td>
             <td class="xl67" align="right">207.3</td>
@@ -1696,7 +1697,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1941.0</td>
+              align="center">1941.1</td>
             <td class="xl67" align="right">33.5</td>
             <td class="xl67" align="right">184.7</td>
             <td class="xl67" align="right">213.7</td>
@@ -1708,7 +1709,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1941.1</td>
+              align="center">1941.2</td>
             <td class="xl67" align="right">32.5</td>
             <td class="xl67" align="right">170.3</td>
             <td class="xl67" align="right">204.2</td>
@@ -1720,7 +1721,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1942.0</td>
+              align="center">1942.1</td>
             <td class="xl67" align="right">26.5</td>
             <td class="xl67" align="right">143.3</td>
             <td class="xl67" align="right">158.6</td>
@@ -1732,7 +1733,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1942.1</td>
+              align="center">1942.2</td>
             <td class="xl67" align="right">20.7</td>
             <td class="xl67" align="right">114.9</td>
             <td class="xl67" align="right">120.3</td>
@@ -1744,7 +1745,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1943.0</td>
+              align="center">1943.1</td>
             <td class="xl67" align="right">15.6</td>
             <td class="xl67" align="right">87.6</td>
             <td class="xl67" align="right">90.6</td>
@@ -1756,7 +1757,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1943.1</td>
+              align="center">1943.2</td>
             <td class="xl67" align="right">13.2</td>
             <td class="xl67" align="right">80.6</td>
             <td class="xl67" align="right">80.0</td>
@@ -1768,7 +1769,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1944.0</td>
+              align="center">1944.1</td>
             <td class="xl67" align="right">12.3</td>
             <td class="xl67" align="right">83.7</td>
             <td class="xl67" align="right">85.3</td>
@@ -1780,7 +1781,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1944.1</td>
+              align="center">1944.2</td>
             <td class="xl67" align="right">12.1</td>
             <td class="xl67" align="right">80.1</td>
             <td class="xl67" align="right">89.5</td>
@@ -1792,7 +1793,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1945.0</td>
+              align="center">1945.1</td>
             <td class="xl67" align="right">12.1</td>
             <td class="xl67" align="right">68.8</td>
             <td class="xl67" align="right">95.3</td>
@@ -1804,7 +1805,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1945.1</td>
+              align="center">1945.2</td>
             <td class="xl67" align="right">13.3</td>
             <td class="xl67" align="right">90.3</td>
             <td class="xl67" align="right">109.5</td>
@@ -1816,7 +1817,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1946.0</td>
+              align="center">1946.1</td>
             <td class="xl67" align="right">16.6</td>
             <td class="xl67" align="right">136.3</td>
             <td class="xl67" align="right">137.1</td>
@@ -1828,7 +1829,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1946.1</td>
+              align="center">1946.2</td>
             <td class="xl67" align="right">18.5</td>
             <td class="xl67" align="right">149.5</td>
             <td class="xl67" align="right">163.7</td>
@@ -1866,7 +1867,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1938.0</td>
+              align="center">1938.1</td>
             <td class="xl67" align="right">40.2</td>
             <td class="xl67" align="right">228.3</td>
             <td class="xl67" align="right">298.4</td>
@@ -1878,7 +1879,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1938.1</td>
+              align="center">1938.2</td>
             <td class="xl67" align="right">42.2</td>
             <td class="xl67" align="right">228.0</td>
             <td class="xl67" align="right">300.9</td>
@@ -1890,7 +1891,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1939.0</td>
+              align="center">1939.1</td>
             <td class="xl67" align="right">40.2</td>
             <td class="xl67" align="right">222.4</td>
             <td class="xl67" align="right">273.9</td>
@@ -1902,7 +1903,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1939.1</td>
+              align="center">1939.2</td>
             <td class="xl67" align="right">36.6</td>
             <td class="xl67" align="right">212.8</td>
             <td class="xl67" align="right">254.4</td>
@@ -1914,7 +1915,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1940.0</td>
+              align="center">1940.1</td>
             <td class="xl67" align="right">30.7</td>
             <td class="xl67" align="right">196.8</td>
             <td class="xl67" align="right">242.1</td>
@@ -1926,7 +1927,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1940.1</td>
+              align="center">1940.2</td>
             <td class="xl67" align="right">31.4</td>
             <td class="xl67" align="right">183.4</td>
             <td class="xl67" align="right">233.5</td>
@@ -1938,7 +1939,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1941.0</td>
+              align="center">1941.1</td>
             <td class="xl67" align="right">39.1</td>
             <td class="xl67" align="right">173.2</td>
             <td class="xl67" align="right">228.6</td>
@@ -1950,7 +1951,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1941.1</td>
+              align="center">1941.2</td>
             <td class="xl67" align="right">35.6</td>
             <td class="xl67" align="right">155.4</td>
             <td class="xl67" align="right">205.7</td>
@@ -1962,7 +1963,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1942.0</td>
+              align="center">1942.1</td>
             <td class="xl67" align="right">23.5</td>
             <td class="xl67" align="right">127.3</td>
             <td class="xl67" align="right">151.3</td>
@@ -1974,7 +1975,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1942.1</td>
+              align="center">1942.2</td>
             <td class="xl67" align="right">17.7</td>
             <td class="xl67" align="right">98.5</td>
             <td class="xl67" align="right">108.8</td>
@@ -1986,7 +1987,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1943.0</td>
+              align="center">1943.1</td>
             <td class="xl67" align="right">16.6</td>
             <td class="xl67" align="right">69.5</td>
             <td class="xl67" align="right">78.8</td>
@@ -1998,7 +1999,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1943.1</td>
+              align="center">1943.2</td>
             <td class="xl67" align="right">14.6</td>
             <td class="xl67" align="right">62.1</td>
             <td class="xl67" align="right">69.9</td>
@@ -2010,7 +2011,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1944.0</td>
+              align="center">1944.1</td>
             <td class="xl67" align="right">11.5</td>
             <td class="xl67" align="right">78.6</td>
             <td class="xl67" align="right">69.6</td>
@@ -2022,7 +2023,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1944.1</td>
+              align="center">1944.2</td>
             <td class="xl67" align="right">10.5</td>
             <td class="xl67" align="right">85.5</td>
             <td class="xl67" align="right">72.0</td>
@@ -2034,7 +2035,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1945.0</td>
+              align="center">1945.1</td>
             <td class="xl67" align="right">10.8</td>
             <td class="xl67" align="right">82.4</td>
             <td class="xl67" align="right">81.6</td>
@@ -2046,7 +2047,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1945.1</td>
+              align="center">1945.2</td>
             <td class="xl67" align="right">12.0</td>
             <td class="xl67" align="right">92.7</td>
             <td class="xl67" align="right">100.1</td>
@@ -2058,7 +2059,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1946.0</td>
+              align="center">1946.1</td>
             <td class="xl67" align="right">15.4</td>
             <td class="xl67" align="right">126.9</td>
             <td class="xl67" align="right">132.7</td>
@@ -2070,7 +2071,7 @@
           </tr>
           <tr style="height:13.8pt" height="18">
             <td class="xl65" style="height:13.8pt" height="18"
-              align="center">1946.1</td>
+              align="center">1946.2</td>
             <td class="xl67" align="right">16.4</td>
             <td class="xl67" align="right">142.0</td>
             <td class="xl67" align="right">154.9</td>
@@ -2083,19 +2084,23 @@
         </tbody>
       </table>
     </blockquote>
-    Определив количество рождений для каждого из полугодий военного
-    времени как произведение коэффициентов плодовитости на исчисленную
-    ранее велчичину женских фертильных возрастных групп в этом полугодии
-    (см. итог числа рождений в таблицах ниже), мы делаем затем
-    передвижку родившихся с момента их рождения и по начало 1946 по
-    мирным таблицам смертности с учётом введения антибиотиков.<br>
+    Для каждого из полугодий военного времени мы определяем число
+    рождений как свёртку коэффициентов плодовитости с исчисленной ранее
+    возрастной структурой женских фертильных возрастных групп в этом
+    полугодии. Полученный итог приводится в таблицах ниже.<br>
     <br>
-    Разница с фактической численностью населения возрастов 0-4.5 лет на
-    начало 1946 года (по реконструкции АДХ) указывает сверхсмертность
-    рождённых в военные годы из-за повышения младенческой и раннедетской
-    смертности во время войны. Для СССР сверхсмертность рождённых во
-    время войны до начала 1946 года по нашему расчёту составила 2,494
-    тыс. чел, для РСФСР 612 тыс. чел.<br>
+    Мы затем делаем передвижку родившихся с момента их рождения и по
+    начало 1946 по мирным таблицам смертности с учётом введения
+    антибиотиков. Полученная величина указывает, какое число родившихся
+    в военные полугодия дожило бы до начала 1946 года, если бы уровень
+    младенческой и детской смертности имел мирные величины.<br>
+    <br>
+    Разница этого итога с фактической численностью населения возрастов
+    0-4.5 лет на начало 1946 года (по реконструкции АДХ) указывает
+    сверхсмертность рождённых в военные годы из-за повышения
+    младенческой и раннедетской смертности во время войны. Для СССР
+    сверхсмертность рождённых во время войны до начала 1946 года по
+    нашему расчёту составила 2,494 тыс. чел, для РСФСР 612 тыс. чел.<br>
     <br>
     Полученнная нами величина сверхсмертности рождённых в годы войны
     (2.5 млн. чел. для СССР) выше исчисленной АДХ (1.3. млн. чел. для
@@ -2104,8 +2109,8 @@
     в качестве базовой линии смертность с учётом введения антибиотиков,
     т.е. более низкую. (Пересчёт с установкой AppyAntibiotics = False
     даёт сверхсмертность среди родившихся во время войны накопленную к
-    началу 1946 года в 1,455 чел, т.е. величину близкую к полученной
-    АДХ).<br>
+    началу 1946 года в 1,455 чел, т.е. величину близкую к полученным АДХ
+    и Бирабеном).<br>
     <br>
     ### <br>
     <br>
@@ -2114,11 +2119,10 @@
     <br>
     <hr width="100%" size="2"><br>
     <ul>
-      <li>расчитать число рождений</li>
-      <li>расчитать число детских смертей</li>
       <li>распределить детские смерти по полугодиям</li>
       <li>суммарное число избыточных детских смертей</li>
-      <li>суммарная величина недорода<br>
+      <li>суммарная величина недорода</li>
+      <li>модуль<br>
       </li>
     </ul>
     <br>

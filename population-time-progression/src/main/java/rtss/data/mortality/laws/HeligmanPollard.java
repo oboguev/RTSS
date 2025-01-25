@@ -9,7 +9,22 @@ import rtss.data.bin.Bins;
  * Calculate the curve for Heligman-Pollard mortality law.
  * 
  * L. Heligman, J. H. Pollard, "Age Pattern of Mortality" // Journal of the Institute of Actuaries (1886-1994), 
- * June 1980, Vol. 107, No. 1, pp. 49-80 
+ * June 1980, Vol. 107, No. 1, pp. 49-80
+ * 
+ * Реализация подгонки с использованием серевра R: класс HeligmanPollard_R 
+ * 
+ * TODO: сделать реализацию на Java:
+ * 
+ *     org.apache.commons.math3.fitting
+ *     org.apache.commons.math3.fitting.leastsquares.*;
+ * 
+ *     https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/index.html?org/apache/commons/math3/fitting/package-summary.html
+ *     https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/fitting/leastsquares/package-frame.html
+ * 
+ *     LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+ *     LeastSquaresProblem problem = // ... define your problem
+ *     LeastSquaresOptimizer.Optimum optimum = optimizer.optimize(problem);
+ * 
  */
 public class HeligmanPollard
 {
@@ -30,7 +45,7 @@ public class HeligmanPollard
     }
 
     /*
-     * qp iss (qx/px) = (qx / (1-qx))
+     * qp is (qx/px) = (qx / (1-qx))
      */
     private double qp(double x)
     {
