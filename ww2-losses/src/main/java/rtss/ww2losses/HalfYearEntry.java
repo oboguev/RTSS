@@ -96,13 +96,18 @@ public class HalfYearEntry
         switch (halfyear)
         {
         case FirstHalfYear:
-            return year + ", первое полугодие";
+            return nbsp(year + ", первое полугодие");
             
         case SecondHalfYear:
-            return year + ", второе полугодие";
+            return nbsp(year + ", второе полугодие");
             
         default:
-            return "неопределённая дата";
+            return nbsp("неопределённая дата");
         }
+    }
+    
+    private String nbsp(String s)
+    {
+        return s.replace(' ', (char) 0xA0);
     }
 }
