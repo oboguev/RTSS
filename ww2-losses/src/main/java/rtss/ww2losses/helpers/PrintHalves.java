@@ -39,6 +39,10 @@ public class PrintHalves
         Util.out("");
         Util.out("полугодие нал.ос нал.дс мир.ор фр фср.мир фср ферт.оч ферт.фч ферт.нис чн.нач чн.кон чн.ср чс р с");
         Util.out("");
+        
+        HalfYearEntry he0 = halves.get(0);
+        HalfYearEntry he1 = halves.get(1);
+        HalfYearEntry he_last = halves.last();
 
         for (HalfYearEntry he : halves)
         {
@@ -71,6 +75,11 @@ public class PrintHalves
             // population
             double pn1 = he.p_actual_without_births_start.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
             double pn2 = he.p_actual_without_births_end.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+            
+            if (he != he0)
+            {
+                // ###pn1 += accrue(he1);
+            }
             
             // ### accrue actual_births - actual_warborn_deaths начиная с he(1) т.е. 1942.вт
             
@@ -109,13 +118,16 @@ public class PrintHalves
         Util.out("");
     }
     
-    private double accrue(HalfYearEntry he_from, HalfYearEntry he_to, String field, boolean nullable) throws Exception
+    private double accrue(HalfYearEntry he_from, HalfYearEntry he_to, String field, boolean include_to, boolean nullable) throws Exception
     {
         double vsum = 0;
         
         HalfYearEntry he = he_from;
         for (;;)
         {
+            if (he == he_to && !include_to)
+                break;
+            
             Double v = FieldValue.getDouble(he, field);
             if (nullable && v == null)
                 v = 0.0;
