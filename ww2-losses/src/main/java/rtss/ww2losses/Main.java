@@ -1189,7 +1189,7 @@ public class Main
             double m = (m1 + m2) / 2;
             double diff = fitNewBirthsDeaths(m);
             
-            if (Math.abs(diff) < 500)
+            if (Math.abs(diff) < 200)
             {
                 Util.out(String.format("Множитель детской смертности военного времени: %.2f", m));
                 break;
@@ -1234,7 +1234,7 @@ public class Main
             
             CombinedMortalityTable mt = year_mt(mt1940, he.year);
             List<PatchInstruction> instructions = new ArrayList<>();
-            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 5, multiplier);
+            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier);
             instructions.add(instruction);
             mt = PatchMortalityTable.patch(mt, instructions, "множитель смертности " + multiplier);
             

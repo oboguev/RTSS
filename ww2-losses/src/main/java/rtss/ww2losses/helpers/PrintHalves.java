@@ -58,7 +58,7 @@ public class PrintHalves
             PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
             double fert_expected = pavg.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);            
 
-            Util.out(String.format("%s %6s %6s %6s %6s %6s %6s %6s %6s",
+            Util.out(String.format("%s %6s %6s %6s %6s %6s %6s %6s %6s %6s",
                                    he.toString(),
                                    f2k(he.expected_nonwar_deaths / 1000.0),
                                    f2k(d2_minus_d1 / 1000.0),
