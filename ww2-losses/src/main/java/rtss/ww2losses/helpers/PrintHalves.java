@@ -78,10 +78,12 @@ public class PrintHalves
             
             if (he != he0)
             {
-                // ###pn1 += accrue(he1);
+                pn1 += accrue(he1, he, false, "actual_births", false);
+                pn2 += accrue(he1, he, true, "actual_births", false);
+                
+                pn1 -= accrue(he1, he, false, "actual_warborn_deaths", false);
+                pn2 -= accrue(he1, he, true, "actual_warborn_deaths", false);
             }
-            
-            // ### accrue actual_births - actual_warborn_deaths начиная с he(1) т.е. 1942.вт
             
             double pn_avg = (pn1 + pn2) / 2; 
 
@@ -118,12 +120,16 @@ public class PrintHalves
         Util.out("");
     }
     
-    private double accrue(HalfYearEntry he_from, HalfYearEntry he_to, String field, boolean include_to, boolean nullable) throws Exception
+    private static double accrue(HalfYearEntry he_from, HalfYearEntry he_to, boolean include_to, String field, boolean nullable) throws Exception
     {
         double vsum = 0;
+
+        int ix_from = he_from.year * 10 + he_from.halfyear.seq(0);
+        int ix_to = he_to.year * 10 + he_to.halfyear.seq(0);
+        if (ix_from > ix_to)
+            return vsum;
         
-        HalfYearEntry he = he_from;
-        for (;;)
+        for (HalfYearEntry he = he_from;;)
         {
             if (he == he_to && !include_to)
                 break;
@@ -135,6 +141,8 @@ public class PrintHalves
 
             if (he == he_to)
                 break;
+            
+            he = he.next;
         }
         
         return vsum;

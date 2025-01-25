@@ -205,6 +205,9 @@ public class Main
         fitNewBirthsDeaths();
 
         PrintHalves.print(halves);
+        
+        // ### проверка базовая cbr/cdr
+        // ### рекомбинация
 
         Util.noop();
     }

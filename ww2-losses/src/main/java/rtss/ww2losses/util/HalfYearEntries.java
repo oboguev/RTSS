@@ -35,6 +35,41 @@ public class HalfYearEntries<T> extends ArrayList<T>
             else
                 throw new IllegalArgumentException("invalid selector value: " + s);
         }
+        
+        public int seq(int base) throws Exception
+        {
+            if (base == 0)
+            {
+                switch (this)
+                {
+                case FirstHalfYear:
+                    return 0;
+                case SecondHalfYear:
+                    return 1;
+                default:
+                    throw new IllegalArgumentException();
+                }
+                
+            }
+            else if (base == 1)
+            {
+                
+                switch (this)
+                {
+                case FirstHalfYear:
+                    return 1;
+                case SecondHalfYear:
+                    return 2;
+                default:
+                    throw new IllegalArgumentException();
+                }
+            }
+            else
+            {
+                throw new IllegalArgumentException();
+            }
+        }
+
     }
 
     private int base_year = 1941;
