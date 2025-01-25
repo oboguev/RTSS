@@ -106,8 +106,11 @@ public class HalfYearEntry
         }
     }
     
+    // заменить пробелы на неразбивающий пробел, 
+    // для удобства импорта таблицы в Excel 
     private String nbsp(String s)
     {
-        return s.replace(' ', (char) 0xA0);
+        final char nbsp = (char) 0xA0;
+        return s.replace(' ', nbsp);
     }
 }
