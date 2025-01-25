@@ -24,11 +24,12 @@ public class PrintHalves
         Util.out("    мир.ор    = ожидаемое число рождений в условиях мира  (за полугодие)");
         Util.out("    фр        = фактическое число рождений  (за полугодие)");
         Util.out("    фcр.мир   = число смертей (в данном полугодии) от фактических рождений во время войны, ожидаемое при смертности мирного времени");
+        Util.out("    фcр       = фактическое число смертей (в данном полугодии) от фактических рождений во время войны, при фактической военной смертности");
         Util.out("    ферт.оч   = ожидаемая численность женщин фертильного возраста 15-54 (в среднем за полугодие)");
         Util.out("    ферт.фч   = фактическая численность женщин фертильного возраста 15-54 (в среднем за полугодие)");
         Util.out("    ферт.нис  = накопленное число избыточных смертей женщин фертильного возраста 15-54 (на начало полугодия)");
         Util.out("");
-        Util.out("полугодие нал.ос нал.дс мир.ор фр фср.мир ферт.оч ферт.фч ферт.нис");
+        Util.out("полугодие нал.ос нал.дс мир.ор фр фср.мир фср ферт.оч ферт.фч ферт.нис");
         Util.out("");
 
         for (HalfYearEntry he : halves)
@@ -57,13 +58,14 @@ public class PrintHalves
             PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
             double fert_expected = pavg.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);            
 
-            Util.out(String.format("%s %6s %6s %6s %6s %6s %6s %6s",
+            Util.out(String.format("%s %6s %6s %6s %6s %6s %6s %6s %6s",
                                    he.toString(),
                                    f2k(he.expected_nonwar_deaths / 1000.0),
                                    f2k(d2_minus_d1 / 1000.0),
                                    f2k(he.expected_nonwar_births / 1000.0),
                                    f2k(he.actual_births / 1000.0),
                                    f2k(he.actual_warborn_deaths_baseline / 1000.0),
+                                   f2k(he.actual_warborn_deaths / 1000.0),
                                    f2k(fert_expected / 1000.0),
                                    f2k(fert_actual / 1000.0),
                                    f2k(fert_loss / 1000.0)));

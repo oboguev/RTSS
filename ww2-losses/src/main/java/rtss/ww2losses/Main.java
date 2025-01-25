@@ -202,6 +202,7 @@ public class Main
         evalDeficit1946();
         evalNewBirths();
         evalNewBirthsDeaths();
+        fitNewBirthsDeaths();
 
         PrintHalves.print(halves);
 
@@ -1120,7 +1121,7 @@ public class Main
      * ожидаемый остаток фактически рождённых в 1941.вт.пол. - 1945.вт.пол. к началу 1946 при детской смертности 
      * мирных условий, и дефицит остатка на начало 1946 года из-за возросшей в военное время детской смертности. 
      */
-    public void evalNewBirthsDeaths() throws Exception
+    private void evalNewBirthsDeaths() throws Exception
     {
         /*
          * передвижка новрождаемого населения по полугодиям
@@ -1164,6 +1165,86 @@ public class Main
         
         Util.out(String.format("Сверхсмертность рождённых во время войны, сумма к началу 1946 года, тыс. чел.: %s", f2k((v1 - v2) / 1000.0)));
     }
+
+    /* ======================================================================================================= */
+
+    /*
+     * Итеративно повторять передвижку рождений военного времени до начала 1946 года с со-пропорциональным повышением 
+     * всех коэффициентов смертности детских лет на одну и ту же величину (общий множитель), однако сохраняя разницу 
+     * между таблицами разных лет связанную с введением антибиотиков. 
+     * 
+     * Мы итеративно повторяем передвижку до тех пор, пока не найдётся множитель дающий остаток рождённых в годы войны 
+     * на начало 1946 года равный их численности по реконструкции АДХ (обратным отсчётом от переписи 1959 года, 
+     * для РСФСР с учётом межреспубликанской миграции). 
+     * 
+     * Такая передвижка даст приближение к фактическому распределению смертей рождённых в годы войны.
+     */
+    private void fitNewBirthsDeaths() throws Exception
+    {
+        double m1 = 1.0;
+        double m2 = 2.5;
+        
+        for (;;)
+        {
+            double m = (m1 + m2) / 2;
+            double diff = fitNewBirthsDeaths(m);
+            
+            if (Math.abs(diff) < 500)
+                break;
+            
+            if (diff > 0)
+                m1 = m;
+            else
+                m2 = m;
+        }
+    }
+    
+    private double fitNewBirthsDeaths(double multiplier) throws Exception
+    {
+        /*
+         * передвижка новрождаемого населения по полугодиям
+         * от середины 1941 с p = empty
+         * и добавлением числа рождений за полугодие согласно he.actual_births
+         */
+        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        p.zero();
+        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+        fctx.begin(p);
+        
+        HalfYearEntry he = halves.get(1);
+        for (;;)
+        {
+            if (he.year == 1946)
+                break;
+            
+            ForwardPopulationT fw = new ForwardPopulationT();
+            int ndays = fw.birthDays(0.5);
+            
+            // добавить фактические рождения
+            double nb1 = he.prev.actual_births;
+            double nb2 = he.actual_births;
+            double nb3 = (he.next != null) ? he.next.actual_births : nb2;
+            double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            double[] m_births =  WarHelpers.male_births(births);
+            double[] f_births =  WarHelpers.female_births(births);
+            fw.setBirthCount(m_births, f_births);
+            
+            CombinedMortalityTable mt = year_mt(mt1940, he.year);
+            // ### multiply
+            p = fw.forward(p, fctx, mt, 0.5);
+            
+            // число смертей от рождений
+            he.actual_warborn_deaths = fw.getObservedDeaths();
+            
+            he = he.next;
+        }
+        
+        double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
+        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE); 
+        
+        return v1 - v2;
+    }
+    
 
     /* ======================================================================================================= */
 

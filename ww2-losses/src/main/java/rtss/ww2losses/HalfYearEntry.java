@@ -61,6 +61,12 @@ public class HalfYearEntry
      * ожидаемое при смертности мирного времени
      */
     public double actual_warborn_deaths_baseline; 
+    
+    /* 
+     * фактическое число смертей в данном полугодии от фактического рождений во время войны,
+     * при фактической смертности военного времени
+     */
+    public double actual_warborn_deaths;
 
     /* временные данные для передвижки */
     PopulationByLocality fw_p_wb;
