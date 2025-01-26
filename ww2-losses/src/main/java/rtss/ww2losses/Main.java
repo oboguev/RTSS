@@ -205,7 +205,7 @@ public class Main
         fitNewBirthsDeaths();
 
         PrintHalves.print(halves);
-        
+
         // ### проверка базовая cbr/cdr
         // ### рекомбинация
 
@@ -1137,37 +1137,37 @@ public class Main
         p.zero();
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
         fctx.begin(p);
-        
+
         HalfYearEntry he = halves.get(1);
         for (;;)
         {
             if (he.year == 1946)
                 break;
-            
+
             ForwardPopulationT fw = new ForwardPopulationT();
             int ndays = fw.birthDays(0.5);
-            
+
             // добавить фактические рождения
             double nb1 = he.prev.actual_births;
             double nb2 = he.actual_births;
             double nb3 = (he.next != null) ? he.next.actual_births : nb2;
             double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
-            double[] m_births =  WarHelpers.male_births(births);
-            double[] f_births =  WarHelpers.female_births(births);
+            double[] m_births = WarHelpers.male_births(births);
+            double[] f_births = WarHelpers.female_births(births);
             fw.setBirthCount(m_births, f_births);
-            
+
             CombinedMortalityTable mt = peace_year_mt(mt1940, he.year);
             p = fw.forward(p, fctx, mt, 0.5);
-            
+
             // число смертей от рождений
             he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
-            
+
             he = he.next;
         }
-        
+
         double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
-        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE); 
-        
+        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+
         Util.out(String.format("Сверхсмертность рождённых во время войны, сумма к началу 1946 года, тыс. чел.: %s", f2k((v1 - v2) / 1000.0)));
     }
 
@@ -1188,25 +1188,25 @@ public class Main
     {
         double m1 = 0.5;
         double m2 = 2.5;
-        
+
         for (;;)
         {
             double m = (m1 + m2) / 2;
             double diff = fitNewBirthsDeaths(m);
-            
+
             if (Math.abs(diff) < 200)
             {
                 Util.out(String.format("Множитель детской смертности военного времени: %.2f", m));
                 break;
             }
-            
+
             if (diff > 0)
                 m1 = m;
             else
                 m2 = m;
         }
     }
-    
+
     private double fitNewBirthsDeaths(double multiplier) throws Exception
     {
         /*
@@ -1218,45 +1218,84 @@ public class Main
         p.zero();
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
         fctx.begin(p);
-        
+
         HalfYearEntry he = halves.get(1);
         for (;;)
         {
             if (he.year == 1946)
                 break;
-            
+
             ForwardPopulationT fw = new ForwardPopulationT();
             int ndays = fw.birthDays(0.5);
-            
+
             // добавить фактические рождения
             double nb1 = he.prev.actual_births;
             double nb2 = he.actual_births;
             double nb3 = (he.next != null) ? he.next.actual_births : nb2;
             double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
-            double[] m_births =  WarHelpers.male_births(births);
-            double[] f_births =  WarHelpers.female_births(births);
+            double[] m_births = WarHelpers.male_births(births);
+            double[] f_births = WarHelpers.female_births(births);
             fw.setBirthCount(m_births, f_births);
-            
-            CombinedMortalityTable mt = peace_year_mt(mt1940, he.year); // ###
+
             List<PatchInstruction> instructions = new ArrayList<>();
-            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier);
+            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier * imr_fy_multiplier(he));
             instructions.add(instruction);
-            mt = PatchMortalityTable.patch(mt, instructions, "множитель смертности " + multiplier);
-            
+            CombinedMortalityTable mt = PatchMortalityTable.patch(mt1940, instructions, "множитель смертности " + multiplier);
+
             p = fw.forward(p, fctx, mt, 0.5);
-            
+
             // число смертей от рождений
             he.actual_warborn_deaths = fw.getObservedDeaths();
-            
+
             he = he.next;
         }
-        
+
         double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
-        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE); 
-        
+        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+
         return v1 - v2;
     }
-    
+
+    private double imr_fy_multiplier(HalfYearEntry he) throws Exception
+    {
+        String yh = he.year + "." + he.halfyear.seq(1);
+
+        switch (yh)
+        {
+        case "1941.1":
+            return 1.00;
+
+        case "1941.2":
+            return 1.27;
+
+        case "1942.1":
+            return 2.25;
+
+        case "1942.2":
+            return 2.30;
+
+        case "1943.1":
+            return 1.20;
+
+        case "1943.2":
+            return 1.08;
+
+        case "1944.1":
+            return 0.72;
+
+        case "1944.2":
+            return 0.54;
+
+        case "1945.1":
+            return 0.40;
+
+        case "1945.2":
+            return 0.40;
+            
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
 
     /* ======================================================================================================= */
 
