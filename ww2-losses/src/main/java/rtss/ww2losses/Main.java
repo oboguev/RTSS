@@ -509,17 +509,19 @@ public class Main
         {
         case 1940:
         case 1941:
-        case 1942:
             return 1.0;
 
+        case 1942:
+            return 0.90;
+
         case 1943:
-            return 0.76;
+            return 0.70;
 
         case 1944:
-            return 0.53;
+            return 0.45;
 
         case 1945:
-            return 0.45;
+            return 0.40;
 
         default:
             throw new IllegalArgumentException();
