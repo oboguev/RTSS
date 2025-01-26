@@ -606,7 +606,11 @@ public class Main
         }
 
         /* оставить только сверхсмертность */
-        deficit = deficit.sub(emigration());
+        PopulationByLocality emigration = emigration();
+        v = emigration.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Util.out("Эмиграция, тыс. чел.: " + f2k(v / 1000.0));
+        deficit = deficit.sub(emigration);
+
         if (area == Area.RSFSR)
             deficit = cancelNegativeDeficit(deficit, Gender.FEMALE, 15, 60);
 
@@ -618,13 +622,15 @@ public class Main
                 WarHelpers.validateDeficit(deficit);
         }
         
-        if (Util.True)
+        if (Util.False)
         {
+            /* график сверхсмертности */
             PopulationChart.display("Cверхсмертность населения " + area + " накопленная с середины 1941 по конец 1945 года", 
                                     deficit.forLocality(Locality.TOTAL), 
                                     "1");
         }
 
+        /* вычислить накопленную сверхсмертность для промежуточных полугодовых точек */
         backpropagateExcessMortality(deficit);
 
         /*
