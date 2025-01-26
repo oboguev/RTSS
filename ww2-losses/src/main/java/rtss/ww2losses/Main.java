@@ -260,7 +260,7 @@ public class Main
             HalfYearEntry prev2 = curr.prev.prev;
 
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
-            CombinedMortalityTable mt = cross_year_mt(mt1940, year - 1);
+            CombinedMortalityTable mt = peace_cross_year_mt(mt1940, year - 1);
 
             /* передвижка на следующий год населения с учётом рождений */
             ForwardPopulationT fw1 = new ForwardPopulationT();
@@ -297,7 +297,7 @@ public class Main
             HalfYearEntry prev = curr.prev;
 
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
-            CombinedMortalityTable mt = year_mt(mt1940, year - 1);
+            CombinedMortalityTable mt = peace_year_mt(mt1940, year - 1);
 
             /* передвижка на следующие полгода населения с учётом рождений */
             pwb = prev.fw_p_wb;
@@ -430,7 +430,7 @@ public class Main
             }
 
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
-            CombinedMortalityTable mt = year_mt(mt1940, current_year);
+            CombinedMortalityTable mt = peace_year_mt(mt1940, current_year);
 
             /* передвижка на следующие полгода населения с учётом рождений */
             ForwardPopulationT fw1 = new ForwardPopulationT();
@@ -460,12 +460,12 @@ public class Main
      * Определить таблицу смертности для года @year 
      * с учётом падения детской смертности из-за введения антибиотиков 
      */
-    private CombinedMortalityTable year_mt(CombinedMortalityTable mt1940, int year) throws Exception
+    private CombinedMortalityTable peace_year_mt(CombinedMortalityTable mt1940, int year) throws Exception
     {
         if (!AppyAntibiotics)
             return mt1940;
 
-        double scale0 = imr_scale(year);
+        double scale0 = peace_imr_scale(year);
         if (!Util.differ(scale0, 1.0))
             return mt1940;
 
@@ -482,12 +482,12 @@ public class Main
      * Определить таблицу смертности для года из двух полугодий (2-е полугодие year, 1-е полугодие year + 1) 
      * с учётом падения детской смертности из-за введения антибиотиков 
      */
-    private CombinedMortalityTable cross_year_mt(CombinedMortalityTable mt1940, int year) throws Exception
+    private CombinedMortalityTable peace_cross_year_mt(CombinedMortalityTable mt1940, int year) throws Exception
     {
         if (!AppyAntibiotics)
             return mt1940;
 
-        double scale0 = (imr_scale(year) + imr_scale(year + 1)) / 2;
+        double scale0 = (peace_imr_scale(year) + peace_imr_scale(year + 1)) / 2;
         if (!Util.differ(scale0, 1.0))
             return mt1940;
 
@@ -503,7 +503,7 @@ public class Main
     /*
      * Младенческая смертность относительно 1940 года
      */
-    private double imr_scale(int year) throws Exception
+    private double peace_imr_scale(int year) throws Exception
     {
         switch (year)
         {
@@ -1154,7 +1154,7 @@ public class Main
             double[] f_births =  WarHelpers.female_births(births);
             fw.setBirthCount(m_births, f_births);
             
-            CombinedMortalityTable mt = year_mt(mt1940, he.year);
+            CombinedMortalityTable mt = peace_year_mt(mt1940, he.year);
             p = fw.forward(p, fctx, mt, 0.5);
             
             // число смертей от рождений
@@ -1235,7 +1235,7 @@ public class Main
             double[] f_births =  WarHelpers.female_births(births);
             fw.setBirthCount(m_births, f_births);
             
-            CombinedMortalityTable mt = year_mt(mt1940, he.year);
+            CombinedMortalityTable mt = peace_year_mt(mt1940, he.year);
             List<PatchInstruction> instructions = new ArrayList<>();
             PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier);
             instructions.add(instruction);

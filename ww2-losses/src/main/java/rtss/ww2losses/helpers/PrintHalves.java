@@ -23,7 +23,7 @@ public class PrintHalves
         Util.out("    нал.ос    = ожидаемое число смертей в наличном на начало войны населении в условиях мира (за полугодие),");
         Util.out("                для первой половины 1941 фактическое число смертей во всём населении");
         Util.out("    нал.дс    = добавочное число смертей в наличном на начало войны населении из-за войны (за полугодие)");
-        Util.out("    мир.ор    = ожидаемое число рождений в условиях мира  (за полугодие)");
+        Util.out("    мир.ор    = ожидаемое число рождений в условиях мира (за полугодие)");
         Util.out("    фр        = фактическое число рождений  (за полугодие)");
         Util.out("    фcр.мир   = число смертей (в данном полугодии) от фактических рождений во время войны, ожидаемое при смертности мирного времени");
         Util.out("    фcр       = фактическое число смертей (в данном полугодии) от фактических рождений во время войны, при фактической военной смертности");
@@ -42,7 +42,6 @@ public class PrintHalves
         
         HalfYearEntry he0 = halves.get(0);
         HalfYearEntry he1 = halves.get(1);
-        HalfYearEntry he_last = halves.last();
 
         for (HalfYearEntry he : halves)
         {
@@ -70,25 +69,25 @@ public class PrintHalves
             PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
             double fert_expected = pavg.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
 
-            double total_deaths = d2_minus_d1 + he.expected_nonwar_deaths + he.actual_warborn_deaths;
+            he.extra.total_deaths = d2_minus_d1 + he.expected_nonwar_deaths + he.actual_warborn_deaths;
             
             // population
-            double pn1 = he.p_actual_without_births_start.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-            double pn2 = he.p_actual_without_births_end.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+            he.extra.pn1 = he.p_actual_without_births_start.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+            he.extra.pn2 = he.p_actual_without_births_end.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
             
             if (he != he0)
             {
-                pn1 += accrue(he1, he, false, "actual_births", false);
-                pn2 += accrue(he1, he, true, "actual_births", false);
+                he.extra.pn1 += accrue(he1, he, false, "actual_births", false);
+                he.extra.pn2 += accrue(he1, he, true, "actual_births", false);
                 
-                pn1 -= accrue(he1, he, false, "actual_warborn_deaths", false);
-                pn2 -= accrue(he1, he, true, "actual_warborn_deaths", false);
+                he.extra.pn1 -= accrue(he1, he, false, "actual_warborn_deaths", false);
+                he.extra.pn2 -= accrue(he1, he, true, "actual_warborn_deaths", false);
             }
             
-            double pn_avg = (pn1 + pn2) / 2; 
+            he.extra.pn_avg = (he.extra.pn1 + he.extra.pn2) / 2; 
 
-            double cbr = 2 * PROMILLE * he.actual_births / pn_avg;
-            double cdr = 2 * PROMILLE * total_deaths / pn_avg;
+            he.extra.cbr = 2 * PROMILLE * he.actual_births / he.extra.pn_avg;
+            he.extra.cdr = 2 * PROMILLE * he.extra.total_deaths / he.extra.pn_avg;
 
             Util.out(String.format("%s %6s %6s %6s %6s %6s %6s %6s %6s %6s %7s %7s %7s %6s %.1f %.1f",
                                    he.toString(),
@@ -104,13 +103,13 @@ public class PrintHalves
                                    f2k(fert_actual / 1000.0),
                                    f2k(fert_loss / 1000.0),
                                    // ---
-                                   f2k(pn1 / 1000.0),
-                                   f2k(pn2 / 1000.0),
-                                   f2k(pn_avg / 1000.0),
+                                   f2k(he.extra.pn1 / 1000.0),
+                                   f2k(he.extra.pn2 / 1000.0),
+                                   f2k(he.extra.pn_avg / 1000.0),
                                    // ---
-                                   f2k(total_deaths / 1000.0),
-                                   cbr,
-                                   cdr));
+                                   f2k(he.extra.total_deaths / 1000.0),
+                                   he.extra.cbr,
+                                   he.extra.cdr));
         }
 
         Util.out("");

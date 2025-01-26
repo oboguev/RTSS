@@ -76,6 +76,28 @@ public class HalfYearEntry
     PopulationForwardingContext fw_fctx_wb;
     PopulationByLocality fw_p_xb;
     PopulationForwardingContext fw_fctx_xb;
+    
+    /* вычисляется PrinyHalves */
+    public HalfYearExtra extra = new HalfYearExtra();
+    
+    public static class HalfYearExtra
+    {
+        /* общая численность населения в начале полугодия */
+        public double pn1;
+
+        /* общая численность населения в конце полугодия  */
+        public double pn2;
+
+        /* средняя численность населения за полугодие */
+        public double pn_avg;
+
+        /* общее число смертей всех категорий за полугодие */
+        public double total_deaths;
+        
+        /* рождаемость и смертность (для текущего полугода, но в калибровке на год времени) */
+        public double cbr;
+        public double cdr;
+    }
 
     public HalfYearEntry(
             int year,
