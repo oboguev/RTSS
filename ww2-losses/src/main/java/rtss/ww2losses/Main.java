@@ -1186,7 +1186,7 @@ public class Main
      */
     private void fitNewBirthsDeaths() throws Exception
     {
-        double m1 = 1.0;
+        double m1 = 0.5;
         double m2 = 2.5;
         
         for (;;)
@@ -1237,7 +1237,7 @@ public class Main
             double[] f_births =  WarHelpers.female_births(births);
             fw.setBirthCount(m_births, f_births);
             
-            CombinedMortalityTable mt = peace_year_mt(mt1940, he.year);
+            CombinedMortalityTable mt = peace_year_mt(mt1940, he.year); // ###
             List<PatchInstruction> instructions = new ArrayList<>();
             PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier);
             instructions.add(instruction);
