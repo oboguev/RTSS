@@ -646,9 +646,9 @@ public class Main
         scatter("excess_war_deaths", occupation_intensity, deficit_other * 0.7);
         scatter("excess_war_deaths", deficit_other * 0.3);
 
-        scatter("excess_war_deaths", rkka_loss_intensity, deficit_m_conscripts * 0.7);
-        scatter("excess_war_deaths", occupation_intensity, (deficit_m_conscripts * 0.3) * 0.7);
-        scatter("excess_war_deaths", (deficit_m_conscripts * 0.3) * 0.3);
+        scatter("excess_war_deaths", rkka_loss_intensity, deficit_m_conscripts * 0.9);
+        scatter("excess_war_deaths", occupation_intensity, (deficit_m_conscripts * 0.1) * 0.7);
+        scatter("excess_war_deaths", (deficit_m_conscripts * 0.1) * 0.3);
 
         /*
          * проверка 
@@ -868,7 +868,7 @@ public class Main
         List<Double> acv_generic = atov_reverse(ac_generic);
 
         /* полугодовой коэффициент распределения потерь для призывного населения */
-        double[] ac_conscripts = wsum(0.7, rkka_loss_intensity, 0.3, ac_generic);
+        double[] ac_conscripts = wsum(0.9, rkka_loss_intensity, 0.1, ac_generic);
         List<Double> acv_conscripts = atov_reverse(ac_conscripts);
 
         HalfYearEntry he = halves.last();
