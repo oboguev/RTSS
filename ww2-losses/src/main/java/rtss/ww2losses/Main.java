@@ -617,6 +617,13 @@ public class Main
             else
                 WarHelpers.validateDeficit(deficit);
         }
+        
+        if (Util.True)
+        {
+            PopulationChart.display("Cверхсмертность населения " + area + " накопленная с середины 1941 по конец 1945 года", 
+                                    deficit.forLocality(Locality.TOTAL), 
+                                    "1");
+        }
 
         backpropagateExcessMortality(deficit);
 
