@@ -1175,4 +1175,13 @@ public class Population
                 throw new Exception("BMF mismatch");
         }
     }
+
+    /*****************************************************************************************************/
+    
+    public PopulationContext toContext() throws Exception
+    {
+        PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
+        fctx.begin(this.clone());
+        return fctx;
+    }
 }

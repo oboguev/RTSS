@@ -1,6 +1,7 @@
 package rtss.data.population;
 
 import rtss.data.ValueConstraint;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -703,5 +704,12 @@ public class PopulationByLocality
 
         if (rural != null)
             rural.zero();
+    }
+
+    public PopulationContext toContext() throws Exception
+    {
+        PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
+        fctx.begin(this.clone());
+        return fctx;
     }
 }

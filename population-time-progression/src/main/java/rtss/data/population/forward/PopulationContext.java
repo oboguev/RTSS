@@ -697,4 +697,32 @@ public class PopulationContext
             s = s.substring(1);
         return s;
     }
+
+    /* =============================================================================================== */
+    
+    public Population toPopulation() throws Exception
+    {
+        return toPopulationByLocality().forLocality(Locality.TOTAL);
+    }
+
+    public PopulationByLocality toPopulationByLocality() throws Exception
+    {
+        if (!began)
+            throw new Exception("context is idle");
+        
+        PopulationByLocality p = null;
+
+        if (this.hasRuralUrban)
+        {
+            p = PopulationByLocality.newPopulationByLocality();
+        }
+        else
+        {
+            p = PopulationByLocality.newPopulationTotalOnly();
+        }
+        
+        p.zero();
+        p = this.end(p);
+        return p;
+    }
 }
