@@ -1003,7 +1003,7 @@ public class Population
     {
         try
         {
-            return toString("");
+            return toString("") + Util.nl + Util.nl + dump();
         }
         catch (Throwable ex)
         {
@@ -1016,6 +1016,22 @@ public class Population
         double m = sum(Gender.MALE, 0, MAX_AGE);
         double f = sum(Gender.FEMALE, 0, MAX_AGE);
         return String.format("%smf:%s %sm:%s %sf:%s", prefix, f2k(m + f), prefix, f2k(m), prefix, f2k(f));
+    }
+
+    public String dump() throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(String.format("AGE B M F"));
+        sb.append(Util.nl);
+
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            sb.append(String.format("%-3d %f %f %f", age, both(age), male(age), female(age)));
+            sb.append(Util.nl);
+        }
+
+        return sb.toString();
     }
 
     private String f2k(double v)
@@ -1134,24 +1150,6 @@ public class Population
     {
         if (sealed)
             throw new Exception("Table is sealed and cannot be modified");
-    }
-
-    /*****************************************************************************************************/
-
-    public String dump() throws Exception
-    {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(String.format("AGE B M F"));
-        sb.append(Util.nl);
-
-        for (int age = 0; age <= MAX_AGE; age++)
-        {
-            sb.append(String.format("%-3d %f %f %f", age, both(age), male(age), female(age)));
-            sb.append(Util.nl);
-        }
-
-        return sb.toString();
     }
 
     public void validateBMF() throws Exception
