@@ -736,14 +736,14 @@ public class Main
         Population p = Population.newTotalPopulation();
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            p.set(Gender.MALE, age, 0);
-            p.set(Gender.FEMALE, age, 0);
+            p.setYearValue(Gender.MALE, age, 0);
+            p.setYearValue(Gender.FEMALE, age, 0);
         }
 
         for (int age = 20; age <= 60; age++)
         {
-            p.set(Gender.MALE, age, 0.8);
-            p.set(Gender.FEMALE, age, 0.2);
+            p.setYearValue(Gender.MALE, age, 0.8);
+            p.setYearValue(Gender.FEMALE, age, 0.2);
         }
 
         p.makeBoth();
@@ -769,10 +769,10 @@ public class Main
 
         for (int age = age1; age <= age2; age++)
         {
-            double v = deficit.get(gender, age);
+            double v = deficit.getYearValue(gender, age);
             if (v < 0)
             {
-                p1946_actual.add(gender, age, v);
+                p1946_actual.addYearValue(gender, age, v);
             }
         }
 
@@ -787,11 +787,11 @@ public class Main
 
         for (int age = age1; age <= age2; age++)
         {
-            double v = deficit.get(gender, age);
+            double v = deficit.getYearValue(gender, age);
             if (v < 0)
             {
-                p1946_actual.add(gender, age, v);
-                deficit.set(gender, age, 0);
+                p1946_actual.addYearValue(gender, age, v);
+                deficit.setYearValue(gender, age, 0);
             }
         }
 
@@ -856,7 +856,7 @@ public class Main
                 break;
             }
 
-            double v = p.get(gender, age);
+            double v = p.getYearValue(gender, age);
             sum_weights += weight;
             sum_wv += v * weight;
         }
@@ -931,7 +931,7 @@ public class Main
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Gender.FEMALE, age);
+                double v = loss.getYearValue(Gender.FEMALE, age);
                 double deaths = v * a_generic;
 
                 if (age >= 15 + 1 && age <= 54 + 1)
@@ -943,12 +943,12 @@ public class Main
                     total_other_excess_deaths += deaths;
                 }
 
-                loss.set(Gender.FEMALE, age, deaths);
+                loss.setYearValue(Gender.FEMALE, age, deaths);
             }
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Gender.MALE, age);
+                double v = loss.getYearValue(Gender.MALE, age);
                 double deaths;
 
                 if (age >= 19 + 1 && age <= 55 + 1)
@@ -962,7 +962,7 @@ public class Main
                     total_other_excess_deaths += deaths;
                 }
 
-                loss.set(Gender.MALE, age, deaths);
+                loss.setYearValue(Gender.MALE, age, deaths);
             }
 
             loss.makeBoth();
@@ -1015,29 +1015,29 @@ public class Main
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Gender.FEMALE, age);
+                double v = loss.getYearValue(Gender.FEMALE, age);
 
                 if (age >= 15 + 1 && age <= 54 + 1)
                 {
-                    loss.set(Gender.FEMALE, age, v * a_generic);
+                    loss.setYearValue(Gender.FEMALE, age, v * a_generic);
                 }
                 else
                 {
-                    loss.set(Gender.FEMALE, age, v * a_generic);
+                    loss.setYearValue(Gender.FEMALE, age, v * a_generic);
                 }
             }
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Gender.MALE, age);
+                double v = loss.getYearValue(Gender.MALE, age);
 
                 if (age >= 19 + 1 && age <= 55 + 1)
                 {
-                    loss.set(Gender.MALE, age, v * a_conscripts);
+                    loss.setYearValue(Gender.MALE, age, v * a_conscripts);
                 }
                 else
                 {
-                    loss.set(Gender.MALE, age, v * a_generic);
+                    loss.setYearValue(Gender.MALE, age, v * a_generic);
                 }
             }
 
@@ -1094,7 +1094,7 @@ public class Main
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            double v = loss.get(Gender.FEMALE, age);
+            double v = loss.getYearValue(Gender.FEMALE, age);
 
             // ### возраста ...
             if (age >= 15 + 1 && age <= 54 + 1)
@@ -1109,7 +1109,7 @@ public class Main
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            double v = loss.get(Gender.MALE, age);
+            double v = loss.getYearValue(Gender.MALE, age);
 
             if (age >= 19 + 1 && age <= 55 + 1)
             {

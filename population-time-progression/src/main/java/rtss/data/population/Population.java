@@ -167,6 +167,11 @@ public class Population
         return both(age);
     }
 
+    public double getYearValue(Gender gender, int age) throws Exception
+    {
+        return get(gender, age);
+    }
+
     public double get(Gender gender, int age) throws Exception
     {
         DoubleArray m = forGender(gender);
@@ -206,6 +211,11 @@ public class Population
         return sum(Gender.BOTH, 0, MAX_AGE);
     }
 
+    public void setYearValue(Gender gender, int age, double value) throws Exception
+    {
+        set(gender, age, value);
+    }
+
     public void set(Gender gender, int age, double value) throws Exception
     {
         checkWritable();
@@ -214,6 +224,11 @@ public class Population
         Util.validate(value);
         checkValueConstraint(value, m);
         m.put(age, value);
+    }
+
+    public void addYearValue(Gender gender, int age, double value) throws Exception
+    {
+        add(gender, age, value);
     }
 
     public void add(Gender gender, int age, double value) throws Exception
