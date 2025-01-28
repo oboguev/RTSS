@@ -131,21 +131,21 @@ public class PopulationContext
         return valueConstraint;
     }
 
-    public double get(Locality locality, Gender gender, int day) throws Exception
+    public double getDay(Locality locality, Gender gender, int day) throws Exception
     {
         checkAccess(locality, gender, day);
         Double d = m.get(locality, gender, day);
         return d != null ? d : 0;
     }
 
-    public void set(Locality locality, Gender gender, int day, double v) throws Exception
+    public void setDay(Locality locality, Gender gender, int day, double v) throws Exception
     {
         checkAccess(locality, gender, day);
         checkNonNegative(v);
         m.put(locality, gender, day, v);
     }
 
-    public double add(Locality locality, Gender gender, int day, double v) throws Exception
+    public double addDay(Locality locality, Gender gender, int day, double v) throws Exception
     {
         checkAccess(locality, gender, day);
         Double d = m.get(locality, gender, day);
@@ -157,7 +157,7 @@ public class PopulationContext
         return v;
     }
 
-    public double sub(Locality locality, Gender gender, int day, double v) throws Exception
+    public double subDay(Locality locality, Gender gender, int day, double v) throws Exception
     {
         checkAccess(locality, gender, day);
         Double d = m.get(locality, gender, day);
@@ -169,26 +169,26 @@ public class PopulationContext
         return v;
     }
 
-    public double sum(Locality locality, Gender gender, int nd1, int nd2) throws Exception
+    public double sumDays(Locality locality, Gender gender, int nd1, int nd2) throws Exception
     {
         if (!began)
             return 0;
 
         if (locality == Locality.TOTAL && hasRuralUrban)
-            return sum(Locality.URBAN, gender, nd1, nd2) + sum(Locality.RURAL, gender, nd1, nd2);
+            return sumDays(Locality.URBAN, gender, nd1, nd2) + sumDays(Locality.RURAL, gender, nd1, nd2);
 
         if (gender == Gender.BOTH)
-            return sum(locality, Gender.MALE, nd1, nd2) + sum(locality, Gender.FEMALE, nd1, nd2);
+            return sumDays(locality, Gender.MALE, nd1, nd2) + sumDays(locality, Gender.FEMALE, nd1, nd2);
 
         double sum = 0;
         for (int nd = nd1; nd <= nd2; nd++)
-            sum += get(locality, gender, nd);
+            sum += getDay(locality, gender, nd);
         return sum;
     }
 
     public double sumAge(Locality locality, Gender gender, int age) throws Exception
     {
-        return sum(locality, gender, firstDayForAge(age), lastDayForAge(age));
+        return sumDays(locality, gender, firstDayForAge(age), lastDayForAge(age));
     }
 
     public double sumAges(Locality locality, Gender gender, int age1, int age2) throws Exception
@@ -238,20 +238,20 @@ public class PopulationContext
     {
         double[] v = new double[NDAYS];
         for (int nd = 0; nd < NDAYS; nd++)
-            v[nd] = get(locality, gender, nd);
+            v[nd] = getDay(locality, gender, nd);
         return v;
     }
 
     public void fromArray(Locality locality, Gender gender, double[] v) throws Exception
     {
         for (int nd = 0; nd < v.length; nd++)
-            set(locality, gender, nd, v[nd]);
+            setDay(locality, gender, nd, v[nd]);
     }
 
     public void zero(Locality locality, Gender gender) throws Exception
     {
         for (int nd = 0; nd < NDAYS; nd++)
-            set(locality, gender, nd, 0);
+            setDay(locality, gender, nd, 0);
     }
 
     public int day2age(int nd)
@@ -435,7 +435,7 @@ public class PopulationContext
                 vv = Util.multiply(vv, 0);
 
             for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
-                set(locality, gender, nd, vv[nd - firstDayForAge(age)]);
+                setDay(locality, gender, nd, vv[nd - firstDayForAge(age)]);
         }
     }
 
@@ -463,7 +463,7 @@ public class PopulationContext
             if (mt == null)
             {
                 for (int nd = nd1; nd <= nd2; nd++)
-                    set(locality, gender, nd, v / DAYS_PER_YEAR);
+                    setDay(locality, gender, nd, v / DAYS_PER_YEAR);
             }
             else
             {
@@ -478,7 +478,7 @@ public class PopulationContext
                 dlx = Util.normalize(dlx);
 
                 for (int nd = nd1; nd <= nd2; nd++)
-                    set(locality, gender, nd, v * dlx[nd - nd1]);
+                    setDay(locality, gender, nd, v * dlx[nd - nd1]);
             }
         }
     }
@@ -572,7 +572,7 @@ public class PopulationContext
     {
         for (int age = 0; age < NYEARS; age++)
         {
-            double v = sum(locality, gender, firstDayForAge(age), lastDayForAge(age));
+            double v = sumDays(locality, gender, firstDayForAge(age), lastDayForAge(age));
             p.add(locality, gender, age, v);
             p.add(locality, Gender.BOTH, age, v);
         }

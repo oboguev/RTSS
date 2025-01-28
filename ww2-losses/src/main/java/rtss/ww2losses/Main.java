@@ -1282,7 +1282,7 @@ public class Main
             he = he.next;
         }
 
-        double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
+        double v1 = fctx.sumDays(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
         double v2 = p1946_actual_born_postwar.sum(0, MAX_AGE);
 
         outk("Сверхсмертность рождённых во время войны, сумма к началу 1946 года, тыс. чел.", v1 - v2);
@@ -1367,7 +1367,7 @@ public class Main
             he = he.next;
         }
 
-        double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
+        double v1 = fctx.sumDays(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
         double v2 = p1946_actual_born_postwar.sum(0, MAX_AGE);
 
         return v1 - v2;

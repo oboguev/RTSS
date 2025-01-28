@@ -71,8 +71,8 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         if (fctx != null)
         {
-            urban += fctx.sum(Locality.URBAN, gender, 0, fctx.MAX_DAY);
-            total += fctx.sum(Locality.TOTAL, gender, 0, fctx.MAX_DAY);
+            urban += fctx.sumDays(Locality.URBAN, gender, 0, fctx.MAX_DAY);
+            total += fctx.sumDays(Locality.TOTAL, gender, 0, fctx.MAX_DAY);
         }
 
         return urban / total;
@@ -292,7 +292,7 @@ public class ForwardPopulationUR extends ForwardPopulation
          * добавить результат в контекст
          */
         for (int nd = 0; nd < ndays; nd++)
-            fctx.add(locality, gender, nd, day_births[nd]);
+            fctx.addDay(locality, gender, nd, day_births[nd]);
 
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
@@ -528,10 +528,10 @@ public class ForwardPopulationUR extends ForwardPopulation
             {
                 for (int nd = fctx.firstDayForAge(age); nd <= fctx.lastDayForAge(age); nd++)
                 {
-                    double r2 = fctx.get(Locality.RURAL, gender, nd);
+                    double r2 = fctx.getDay(Locality.RURAL, gender, nd);
                     move = r2 * factor;
-                    fctx.sub(Locality.RURAL, gender, nd, move);
-                    fctx.add(Locality.URBAN, gender, nd, move);
+                    fctx.subDay(Locality.RURAL, gender, nd, move);
+                    fctx.addDay(Locality.URBAN, gender, nd, move);
                 }
             }
         }

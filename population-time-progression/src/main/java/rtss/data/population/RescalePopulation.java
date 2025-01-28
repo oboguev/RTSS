@@ -50,8 +50,8 @@ public class RescalePopulation
         {
             for (int nd = 0; nd <= fctx.MAX_DAY; nd++)
             {
-                v = fctx.get(locality, gender, nd);
-                fctx.set(locality, gender, nd, v * scale);
+                v = fctx.getDay(locality, gender, nd);
+                fctx.setDay(locality, gender, nd, v * scale);
             }
         }
     }

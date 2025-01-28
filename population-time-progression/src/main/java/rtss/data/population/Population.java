@@ -379,8 +379,8 @@ public class Population
                 else
                 {
                     // outside of selected range: zero
-                    fctx.set(Locality.TOTAL, Gender.MALE, nd, 0);
-                    fctx.set(Locality.TOTAL, Gender.FEMALE, nd, 0);
+                    fctx.setDay(Locality.TOTAL, Gender.MALE, nd, 0);
+                    fctx.setDay(Locality.TOTAL, Gender.FEMALE, nd, 0);
                 }
             }
 

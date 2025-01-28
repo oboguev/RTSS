@@ -252,7 +252,7 @@ public class MortalityTable_1940 extends UtilBase_194x
         
         PopulationContext fctx = new PopulationContext();
         double sum0 = 1.0;
-        fctx.set(Locality.TOTAL, gender, 0, sum0);
+        fctx.setDay(Locality.TOTAL, gender, 0, sum0);
 
         // forward to early 1942
         ForwardPopulationT fw = new ForwardPopulationT();

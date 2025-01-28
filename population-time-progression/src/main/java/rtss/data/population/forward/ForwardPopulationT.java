@@ -325,7 +325,7 @@ public class ForwardPopulationT extends ForwardPopulation
          * добавить результат в контекст
          */
         for (int nd = 0; nd < ndays; nd++)
-            fctx.add(locality, gender, nd, day_births[nd]);
+            fctx.addDay(locality, gender, nd, day_births[nd]);
 
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
@@ -379,7 +379,7 @@ public class ForwardPopulationT extends ForwardPopulation
          * добавить результат в контекст
          */
         for (int nd = 0; nd < ndays; nd++)
-            fctx.add(locality, gender, nd, day_births[nd]);
+            fctx.addDay(locality, gender, nd, day_births[nd]);
 
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
