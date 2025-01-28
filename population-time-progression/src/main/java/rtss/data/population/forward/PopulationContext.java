@@ -45,13 +45,13 @@ import rtss.util.Util;
  * 
  * Использование:
  * 
- *     PopulationByLocality p = ...
- *     PopulationContext fctx = new PopulationContext();
- *     PopulationByLocality pto = fctx.begin(p);
- *     ....
- *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
- *     ....
- *     ptoEnd = fctx.end(pto);
+ * PopulationByLocality p = ...
+ * PopulationContext fctx = new PopulationContext();
+ * PopulationByLocality pto = fctx.begin(p);
+ * ....
+ * pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
+ * ....
+ * ptoEnd = fctx.end(pto);
  * 
  * fctx.begin переносит младшие возрастные группы в контекст, обнуляя их в возвращаеммом @pto.
  * 
@@ -86,7 +86,7 @@ public class PopulationContext
     private boolean began = false;
     private boolean hasRuralUrban;
     private LocalityGenderToDoubleArray m;
-    private ValueConstraint valueConstraint; 
+    private ValueConstraint valueConstraint;
 
     /*
      * Total number of births during forwarding
@@ -119,7 +119,7 @@ public class PopulationContext
         cx.totalBirths = new HashMap<>(totalBirths);
         return cx;
     }
-    
+
     public void setValueConstraint(ValueConstraint valueConstraint)
     {
         this.valueConstraint = valueConstraint;
@@ -384,9 +384,9 @@ public class PopulationContext
         {
             validate_begin(p, pto, Locality.TOTAL);
         }
-        
+
         if (NYEARS == ALL_AGES && pto.sum() != 0)
-                throw new Exception("внутренняя ошибка");
+            throw new Exception("внутренняя ошибка");
 
         return pto;
     }
@@ -552,7 +552,10 @@ public class PopulationContext
         }
 
         pto.recalcTotalForEveryLocality();
-        pto.recalcTotalLocalityFromUrbanRural();
+        
+        if (pto.hasRuralUrban())
+            pto.recalcTotalLocalityFromUrbanRural();
+        
         pto.validate();
 
         return pto;
@@ -700,7 +703,7 @@ public class PopulationContext
     }
 
     /* =============================================================================================== */
-    
+
     public Population toPopulation() throws Exception
     {
         return toPopulationByLocality().forLocality(Locality.TOTAL);
@@ -710,7 +713,7 @@ public class PopulationContext
     {
         if (!began)
             throw new Exception("context is idle");
-        
+
         PopulationByLocality p = null;
 
         if (this.hasRuralUrban)
@@ -724,12 +727,12 @@ public class PopulationContext
 
         if (this.valueConstraint != null)
             p.setValueConstraint(this.valueConstraint);
-        
+
         p.zero();
         p = this.end(p);
         return p;
     }
-    
+
     public void validate() throws Exception
     {
         // currently no-op
