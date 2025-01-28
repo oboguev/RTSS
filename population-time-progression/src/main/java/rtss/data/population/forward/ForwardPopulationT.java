@@ -181,7 +181,7 @@ public class ForwardPopulationT extends ForwardPopulation
         return pto;
     }
 
-    public void forward(PopulationByLocality pto,
+    private void forward(PopulationByLocality pto,
             final PopulationByLocality p,
             PopulationForwardingContext fctx,
             final Locality locality,
@@ -407,7 +407,7 @@ public class ForwardPopulationT extends ForwardPopulation
         }
     }
 
-    public void forward(PopulationByLocality pto,
+    private void forward(PopulationByLocality pto,
             final PopulationByLocality p,
             PopulationForwardingContext fctx,
             final Locality locality,
