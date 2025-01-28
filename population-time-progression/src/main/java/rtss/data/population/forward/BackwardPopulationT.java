@@ -10,16 +10,12 @@ import rtss.data.selectors.Locality;
  * Обратная во времени передвижка населения по таблице смертности не имеющей отдельных частей
  * для городского и сельского населения, а только часть Total.
  * 
- * Верхние ряды заполняются нулями, т.е. отсутствующие данные для самых старших возрастов 
- * умерших в период передвижки (в возрасте MAX_AGE и прилегающих, если передвижка делается
- * более чем на год) не восстанавливаются.
- * 
  * Все данные о численности населения должны находиться в PopulationForwardingContext с размером ALL_AGES:
  * 
  *     PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
  *     PopulationByLocality pto = fctx.begin(p);    // pto - пустой
  *     ....
- *     pto = forward(pto, fctx, mt, yfraction)      <== повторяемое сколько требуется
+ *     pto = backward(pto, fctx, mt, yfraction)      <== повторяемое сколько требуется
  *     ....
  *     ptoEnd = fctx.end(pto);
  * 
@@ -114,6 +110,8 @@ public class BackwardPopulationT extends ForwardPopulation
             fctx_t_female_deaths += sum_deaths;
             break;
         }
+        
+        // ### восстановить число умерших
 
         observed_deaths += sum_deaths;
     }
