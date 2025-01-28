@@ -7,7 +7,7 @@ import java.util.Map;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -76,7 +76,7 @@ public class ForwardPopulation_1926_1939 extends ForwardPopulation_1926
         int year = 1926;
         double yfraction = 1.0;
 
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationContext fctx = new PopulationContext();
         p = fctx.begin(p);
 
         for (;;)

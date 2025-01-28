@@ -5,7 +5,7 @@ import rtss.data.mortality.synthetic.InterpolateMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.forward_1926_193x.Adjust_1939;
 import rtss.ww2losses.params.AreaParameters;
@@ -25,7 +25,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
 
     public PopulationByLocality evaluate() throws Exception
     {
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationContext fctx = new PopulationContext();
         PopulationByLocality p = evaluate(fctx);
         return fctx.end(p);
     }
@@ -33,7 +33,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
     /*
      * Оставляет контекст незакрытым, позволяя дальнейшую передвижку
      */
-    public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
+    public PopulationByLocality evaluate(PopulationContext fctx) throws Exception
     {
         if (useADH)
         {
@@ -82,7 +82,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
     private PopulationByLocality forward(
             ForwardPopulationT fw,
             PopulationByLocality p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             double yfraction,
             double cdr)
             throws Exception

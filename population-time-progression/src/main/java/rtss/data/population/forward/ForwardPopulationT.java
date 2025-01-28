@@ -17,11 +17,11 @@ import rtss.util.Util;
  * 
  * При передвижке на несколько сегментов с длительностью не кратной году следует
  * 
- * 1. Использовать PopulationForwardingContext с размером PopulationForwardingContext.ALL_AGES.
+ * 1. Использовать PopulationContext с размером PopulationContext.ALL_AGES.
  * В этом случае все данные о населении загружаются в контекст и отслеживаются по возрасту
  * отчитываемому в днях, а не в годах.
  * 
- * 2. При использовании PopulationForwardingContext с детским размером (напр. 5 лет) и последовательной
+ * 2. При использовании PopulationContext с детским размером (напр. 5 лет) и последовательной
  * передвижке по полугодиям или иным отрезкам короче года, следует сначала передвинуть на отрезки равные
  * году, а затем от этих реперных годовых точек отсчитывать передвижку до точек внутри года.
  * 
@@ -124,7 +124,7 @@ public class ForwardPopulationT extends ForwardPopulation
      * При передвижке на часть года @yfraction < 1.0.
      */
     public Population forward(final Population p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final CombinedMortalityTable mt,
             final double yfraction)
             throws Exception
@@ -135,7 +135,7 @@ public class ForwardPopulationT extends ForwardPopulation
     }
     
     public PopulationByLocality forward(final PopulationByLocality p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final CombinedMortalityTable mt,
             final double yfraction)
             throws Exception
@@ -183,7 +183,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
     private void forward(PopulationByLocality pto,
             final PopulationByLocality p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final Locality locality,
             final CombinedMortalityTable mt,
             final double yfraction)
@@ -197,7 +197,7 @@ public class ForwardPopulationT extends ForwardPopulation
                 throw new Exception("неверный массив дневного числа рождений");
         }
 
-        PopulationForwardingContext fctx_initial = (fctx != null) ? fctx.clone() : null;
+        PopulationContext fctx_initial = (fctx != null) ? fctx.clone() : null;
 
         /* передвижка мужского и женского населений по смертности из @p в @pto */
         forward(pto, p, fctx, locality, Gender.MALE, mt, yfraction);
@@ -263,8 +263,8 @@ public class ForwardPopulationT extends ForwardPopulation
         pto.makeBoth(locality);
     }
 
-    private void add_births(PopulationForwardingContext fctx_initial,
-            PopulationForwardingContext fctx,
+    private void add_births(PopulationContext fctx_initial,
+            PopulationContext fctx,
             final PopulationByLocality p,
             final Locality locality,
             final CombinedMortalityTable mt,
@@ -296,7 +296,7 @@ public class ForwardPopulationT extends ForwardPopulation
         add_births(fctx, locality, Gender.FEMALE, f_births, mt, ndays);
     }
 
-    private void add_births(PopulationForwardingContext fctx,
+    private void add_births(PopulationContext fctx,
             final Locality locality,
             final Gender gender,
             double total_births,
@@ -353,7 +353,7 @@ public class ForwardPopulationT extends ForwardPopulation
         }
     }
     
-    private void add_births(PopulationForwardingContext fctx,
+    private void add_births(PopulationContext fctx,
             final Locality locality,
             final Gender gender,
             double[] daily_birth_count,
@@ -409,7 +409,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
     private void forward(PopulationByLocality pto,
             final PopulationByLocality p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final Locality locality,
             final Gender gender,
             final CombinedMortalityTable mt,
@@ -466,7 +466,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
     private void forward_context(
             PopulationByLocality pto,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final Locality locality,
             final Gender gender,
             final CombinedMortalityTable mt,
@@ -524,7 +524,7 @@ public class ForwardPopulationT extends ForwardPopulation
         observed_deaths += sum_deaths;
     }
 
-    private double survivalRate(PopulationForwardingContext fctx, double[] day_lx, int nd, int nd2) throws Exception
+    private double survivalRate(PopulationContext fctx, double[] day_lx, int nd, int nd2) throws Exception
     {
         if (nd2 < day_lx.length)
         {

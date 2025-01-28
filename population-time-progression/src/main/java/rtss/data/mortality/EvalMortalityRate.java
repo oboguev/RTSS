@@ -2,7 +2,7 @@ package rtss.data.mortality;
 
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulation;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Loggable;
@@ -32,12 +32,12 @@ public class EvalMortalityRate extends Loggable
     public double eval(
             final CombinedMortalityTable mt,
             PopulationByLocality p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             double cbr) throws Exception
     {
         if (fctx == null)
         {
-            fctx = new PopulationForwardingContext();
+            fctx = new PopulationContext();
             p = fctx.begin(p);
         }
 
@@ -132,7 +132,7 @@ public class EvalMortalityRate extends Loggable
      */
     private double deaths(
             final CombinedMortalityTable mt,
-            final PopulationForwardingContext fctx,
+            final PopulationContext fctx,
             Locality locality,
             Gender gender) throws Exception
     {
@@ -194,7 +194,7 @@ public class EvalMortalityRate extends Loggable
         /*
          * распределить рождения по числу дней
          */
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationContext fctx = new PopulationContext();
         int ndays = fctx.DAYS_PER_YEAR;
         double[] day_births = new double[ndays];
         for (int nd = 0; nd < ndays; nd++)
@@ -235,7 +235,7 @@ public class EvalMortalityRate extends Loggable
         }
     }
 
-    private void show_ur(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender) throws Exception
+    private void show_ur(CombinedMortalityTable mt, PopulationContext fctx, Gender gender) throws Exception
     {
         if (debug)
         {
@@ -260,7 +260,7 @@ public class EvalMortalityRate extends Loggable
         }
     }
 
-    private void show_t(CombinedMortalityTable mt, PopulationForwardingContext fctx, Gender gender) throws Exception
+    private void show_t(CombinedMortalityTable mt, PopulationContext fctx, Gender gender) throws Exception
     {
         if (debug)
         {

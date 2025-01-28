@@ -11,9 +11,9 @@ import rtss.util.Util;
  * Обратная во времени передвижка населения по таблице смертности не имеющей отдельных частей
  * для городского и сельского населения, а только часть Total.
  * 
- * Все данные о численности населения должны находиться в PopulationForwardingContext с размером ALL_AGES:
+ * Все данные о численности населения должны находиться в PopulationContext с размером ALL_AGES:
  * 
- *     PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+ *     PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
  *     PopulationByLocality pto = fctx.begin(p); // pto - пустой
  *     ....
  *     pto = backward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
@@ -42,7 +42,7 @@ public class BackwardPopulationT extends ForwardPopulation
      * При передвижке на часть года @yfraction < 1.0.
      */
     public Population backward(final Population p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final CombinedMortalityTable mt,
             final double yfraction)
             throws Exception
@@ -53,13 +53,13 @@ public class BackwardPopulationT extends ForwardPopulation
     }
 
     public PopulationByLocality backward(final PopulationByLocality p,
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final CombinedMortalityTable mt,
             final double yfraction)
             throws Exception
     {
         if (fctx == null || fctx.MAX_YEAR != MAX_AGE || p.sum() != 0)
-            throw new IllegalArgumentException("население не перегружено целиком в PopulationForwardingContext, используйте PopulationForwardingContext.ALL_AGES");
+            throw new IllegalArgumentException("население не перегружено целиком в PopulationContext, используйте PopulationContext.ALL_AGES");
 
         if (yfraction > 1)
             throw new IllegalArgumentException("передвижка на более чем год");
@@ -77,7 +77,7 @@ public class BackwardPopulationT extends ForwardPopulation
     }
 
     public void backward(
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final Locality locality,
             final CombinedMortalityTable mt,
             final double yfraction)
@@ -89,7 +89,7 @@ public class BackwardPopulationT extends ForwardPopulation
     }
 
     private void backward(
-            PopulationForwardingContext fctx,
+            PopulationContext fctx,
             final Locality locality,
             final Gender gender,
             final CombinedMortalityTable mt,

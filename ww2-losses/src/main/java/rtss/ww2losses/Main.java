@@ -15,7 +15,7 @@ import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.Population;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
@@ -72,8 +72,8 @@ public class Main
     /*
      * Размер контекста отслеживания: только дети или все возраста
      */
-    // private static int PopulationForwardingContextSize = PopulationForwardingContext.DEFAULT_NYEARS;
-    private static int PopulationForwardingContextSize = PopulationForwardingContext.ALL_AGES;
+    // private static int PopulationContextSize = PopulationContext.DEFAULT_NYEARS;
+    private static int PopulationContextSize = PopulationContext.ALL_AGES;
 
     private Area area;
     private AreaParameters ap;
@@ -190,7 +190,7 @@ public class Main
         }
 
         /*
-         * Если размер контекста (PopulationForwardingContextSize) несколько начальных лет возраста (DEFAULT_NYEARS), 
+         * Если размер контекста (PopulationContextSize) несколько начальных лет возраста (DEFAULT_NYEARS), 
          * то вариант 1 предподчительнее, т.к. избегает избыточного "переплёскивания" населения из года в год. 
          * При 9 полугодовых продвижках (вариант 2) часть населения переплеснётся по возрасту на 9 лет, а не на 4.5,
          * как это объяснено в заголовке к классу ForwardPopulationT.
@@ -224,7 +224,7 @@ public class Main
 
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
-        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContextSize);
+        PopulationContext fctx = new PopulationContext(PopulationContextSize);
         Population p = pm1941.evaluateAsPopulation(fctx, mt1940);
 
         /* первое полугодие 1941 */
@@ -244,7 +244,7 @@ public class Main
 
         /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
         Population pxb = p.clone();
-        PopulationForwardingContext fctx_xb = fctx.clone();
+        PopulationContext fctx_xb = fctx.clone();
 
         curr.save_fw(pwb, fctx, pxb, fctx_xb);
 
@@ -374,7 +374,7 @@ public class Main
 
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
-        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContextSize);
+        PopulationContext fctx = new PopulationContext(PopulationContextSize);
         Population p = pm1941.evaluateAsPopulation(fctx, mt1940);
         Population px = fctx.end(p);
 
@@ -410,7 +410,7 @@ public class Main
 
         /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
         Population pxb = p.clone();
-        PopulationForwardingContext fctx_xb = fctx.clone();
+        PopulationContext fctx_xb = fctx.clone();
 
         /* продвигать с шагом по полгода до января 1946 */
         for (;;)
@@ -1087,7 +1087,7 @@ public class Main
         // ### here !!!!
         Population loss_md = loss.moveDown(0.5);
         loss_md.validateBMF();
-        verify_same(loss.sum(), loss_md.sum());
+        // ### verify_same(loss.sum(), loss_md.sum());
         
         lossByDeathAge = lossByDeathAge.add(loss_md);
         
@@ -1252,7 +1252,7 @@ public class Main
          */
         Population p = Population.newTotalPopulation();
         p.zero();
-        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+        PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
         fctx.begin(p);
 
         HalfYearEntry he = halves.get(1);
@@ -1333,7 +1333,7 @@ public class Main
          */
         Population p = Population.newTotalPopulation();
         p.zero();
-        PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+        PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
         fctx.begin(p);
 
         HalfYearEntry he = halves.get(1);

@@ -1,7 +1,7 @@
 package rtss.ww2losses;
 
 import rtss.data.population.Population;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
 
 public class HalfYearEntry
@@ -73,9 +73,9 @@ public class HalfYearEntry
 
     /* временные данные для передвижки */
     Population fw_p_wb;
-    PopulationForwardingContext fw_fctx_wb;
+    PopulationContext fw_fctx_wb;
     Population fw_p_xb;
-    PopulationForwardingContext fw_fctx_xb;
+    PopulationContext fw_fctx_xb;
     
     /* вычисляется PrinyHalves */
     public HalfYearExtra extra = new HalfYearExtra();
@@ -112,8 +112,8 @@ public class HalfYearEntry
     }
     
     public void save_fw(
-            Population pwb, PopulationForwardingContext fctx, 
-            Population pxb, PopulationForwardingContext fctx_xb)
+            Population pwb, PopulationContext fctx, 
+            Population pxb, PopulationContext fctx_xb)
     {
         this.fw_p_wb = pwb.clone();
         this.fw_fctx_wb = fctx.clone();

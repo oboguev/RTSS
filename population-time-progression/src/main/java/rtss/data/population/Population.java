@@ -8,7 +8,7 @@ import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -354,7 +354,7 @@ public class Population
         {
             /* try to use spline */
             p = this.clone();
-            PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+            PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
             PopulationByLocality pl = new PopulationByLocality(p, null, null);
             pl = fctx.begin(pl);
 

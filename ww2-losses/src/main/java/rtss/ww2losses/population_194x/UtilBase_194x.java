@@ -1,7 +1,7 @@
 package rtss.ww2losses.population_194x;
 
 import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -14,7 +14,7 @@ public class UtilBase_194x
      */
     public static final boolean useADH = true;
     
-    protected void show_struct(String what, PopulationByLocality p, PopulationForwardingContext fctx) throws Exception
+    protected void show_struct(String what, PopulationByLocality p, PopulationContext fctx) throws Exception
     {
         if (Util.False)
         {

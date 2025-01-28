@@ -11,7 +11,7 @@ import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -211,7 +211,7 @@ public class MortalityTable_1940 extends UtilBase_194x
             p.set(Locality.TOTAL, gender, age, 1);
         
         double sum0 = p.sum(Locality.TOTAL, gender, 0, PopulationByLocality.MAX_AGE);
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationContext fctx = new PopulationContext();
         p = fctx.begin(p);
 
         // to early 1942
@@ -250,7 +250,7 @@ public class MortalityTable_1940 extends UtilBase_194x
             p.set(Locality.TOTAL, Gender.BOTH, age, 0);
         }
         
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationContext fctx = new PopulationContext();
         double sum0 = 1.0;
         fctx.set(Locality.TOTAL, gender, 0, sum0);
 

@@ -5,7 +5,7 @@ import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Locality;
@@ -29,7 +29,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
 
     public PopulationByLocality evaluate() throws Exception
     {
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationContext fctx = new PopulationContext();
         PopulationByLocality p = evaluate(fctx);
         return fctx.end(p);
     }
@@ -42,18 +42,18 @@ public class Population_In_Middle_1941 extends UtilBase_194x
     /*
      * Оставляет контекст незакрытым, позволяя дальнейшую передвижку
      */
-    public PopulationByLocality evaluate(PopulationForwardingContext fctx) throws Exception
+    public PopulationByLocality evaluate(PopulationContext fctx) throws Exception
     {
         CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
         return evaluate(fctx, mt1940);
     }
     
-    public Population evaluateAsPopulation(PopulationForwardingContext fctx) throws Exception
+    public Population evaluateAsPopulation(PopulationContext fctx) throws Exception
     {
         return evaluate(fctx).forLocality(Locality.TOTAL);
     }
 
-    public PopulationByLocality evaluate(PopulationForwardingContext fctx, CombinedMortalityTable mt1940) throws Exception
+    public PopulationByLocality evaluate(PopulationContext fctx, CombinedMortalityTable mt1940) throws Exception
     {
         ForwardPopulationT fw = new ForwardPopulationT();
         PopulationByLocality p;
@@ -111,7 +111,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         return p;
     }
 
-    public Population evaluateAsPopulation(PopulationForwardingContext fctx, CombinedMortalityTable mt1940) throws Exception
+    public Population evaluateAsPopulation(PopulationContext fctx, CombinedMortalityTable mt1940) throws Exception
     {
         return evaluate(fctx, mt1940).forLocality(Locality.TOTAL);
     }

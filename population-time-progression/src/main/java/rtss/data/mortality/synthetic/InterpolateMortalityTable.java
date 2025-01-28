@@ -3,7 +3,7 @@ package rtss.data.mortality.synthetic;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.util.Util;
 
 public class InterpolateMortalityTable
@@ -26,7 +26,7 @@ public class InterpolateMortalityTable
             final CombinedMortalityTable mt1,
             final CombinedMortalityTable mt2,
             final PopulationByLocality p,
-            final PopulationForwardingContext fctx,
+            final PopulationContext fctx,
             double cbr,
             double cdr) throws Exception
     {
@@ -79,7 +79,7 @@ public class InterpolateMortalityTable
             final CombinedMortalityTable mt1,
             final CombinedMortalityTable mt2,
             final PopulationByLocality p,
-            final PopulationForwardingContext fctx,
+            final PopulationContext fctx,
             double cbr,
             double cdr,
             int toAge,

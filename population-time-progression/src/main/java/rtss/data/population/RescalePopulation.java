@@ -1,6 +1,6 @@
 package rtss.data.population;
 
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -27,7 +27,7 @@ public class RescalePopulation
      * Результат помещается в @pto и в @fctx.
      * Для @pto затем нужно применить makeBoth().
      */
-    public static void scaleTotal(PopulationByLocality pto, PopulationByLocality p, PopulationForwardingContext fctx, Gender gender, double target) throws Exception
+    public static void scaleTotal(PopulationByLocality pto, PopulationByLocality p, PopulationContext fctx, Gender gender, double target) throws Exception
     {
         if (p.hasRuralUrban() || pto.hasRuralUrban())
             throw new IllegalArgumentException();
@@ -61,7 +61,7 @@ public class RescalePopulation
         return scaleTotal(p, null, males, females);
     }
 
-    public static PopulationByLocality scaleTotal(PopulationByLocality p, PopulationForwardingContext fctx, double males, double females) throws Exception
+    public static PopulationByLocality scaleTotal(PopulationByLocality p, PopulationContext fctx, double males, double females) throws Exception
     {
         if (p.hasRuralUrban())
             throw new IllegalArgumentException();

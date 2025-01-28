@@ -5,7 +5,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
@@ -54,7 +54,7 @@ public class Expected_Population_In_Early_1946 extends UtilBase_194x
 
     public PopulationByLocality with_mt(CombinedMortalityTable mt, double cbr, boolean interpolate_mt_to1958, MutableDouble births) throws Exception
     {
-        PopulationForwardingContext fctx = new PopulationForwardingContext();
+        PopulationContext fctx = new PopulationContext();
         PopulationByLocality p = new Population_In_Middle_1941(ap).evaluate(fctx);
         
         fctx.clearTotalBirths();
@@ -85,7 +85,7 @@ public class Expected_Population_In_Early_1946 extends UtilBase_194x
         return p;
     }
 
-    private PopulationByLocality forward(PopulationByLocality p, PopulationForwardingContext fctx, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
+    private PopulationByLocality forward(PopulationByLocality p, PopulationContext fctx, CombinedMortalityTable mt, double cbr, double yfraction) throws Exception
     {
         ForwardPopulationT fw = new ForwardPopulationT().setBirthRateTotal(cbr);
         return fw.forward(p, fctx, mt, yfraction);

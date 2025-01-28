@@ -6,7 +6,7 @@ import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.ForwardPopulationUR;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -57,7 +57,7 @@ public class Remainder1926
 
         PopulationByLocality p = initPopulation(area);
         PopulationByLocality prem = p;
-        PopulationForwardingContext fctx = null;
+        PopulationContext fctx = null;
 
         for (int year = 1927; year <= 1941; year++)
         {
@@ -70,7 +70,7 @@ public class Remainder1926
             /* передвижка */
             if (fctx == null)
             {
-                fctx = new PopulationForwardingContext();
+                fctx = new PopulationContext();
                 p = fctx.begin(p);
             }
 

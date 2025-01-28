@@ -2,7 +2,7 @@ package rtss.data.mortality.synthetic;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.PopulationForwardingContext;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
@@ -21,7 +21,7 @@ public class TestInterpolateMortalityTable
             mt2.comment("АДХ-РСФСР-1940");
             
             AreaParameters ap = AreaParameters.forArea(Area.USSR);
-            PopulationForwardingContext fctx = new PopulationForwardingContext();
+            PopulationContext fctx = new PopulationContext();
             PopulationByLocality p1940 = new Population_In_Early_1940(ap).evaluate(fctx);
 
             CombinedMortalityTable cmt = InterpolateMortalityTable.forTargetRates(

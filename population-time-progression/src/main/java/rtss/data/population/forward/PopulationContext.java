@@ -18,7 +18,7 @@ import rtss.util.Util;
 
 /**
  * 
- * Структура PopulationForwardingContext применяется для детального учёта населения самых младших возрастов при передвижке,
+ * Структура PopulationContext применяется для детального учёта населения самых младших возрастов при передвижке,
  * чтобы точнее учесть рождения и ранюю детскую смертность.
  * 
  * Смертность в ранних возрастах изменяется резко с возрастом, различаясь в начале, на протяжении и в конце года.
@@ -30,7 +30,7 @@ import rtss.util.Util;
  * Структуры Population и PopulationByLocality индексируют население только по годам возраста и не дают возможности
  * учёта с более детальным временны́м разрешением.
  * 
- * Структура PopulationForwardingContext, в противоположность, хранит численность населения с возрастом индексированным
+ * Структура PopulationContext, в противоположность, хранит численность населения с возрастом индексированным
  * в днях (а не годах) с даты рождения до текущего момента.
  * 
  * Индексация производится по (Locality, Gender, ndays), где ndays – число дней прошедших со дня рождения до текущего момента.
@@ -38,7 +38,7 @@ import rtss.util.Util;
  * Хранимые числа населения уже подвергнуты влиянию смертности (и соответствующей числовой децимации) и представляют
  * числа доживших до настоящего момента.
  * 
- * Численность населения хранится в PopulationForwardingContext только для младших NYEARS лет, т.е. возрастов [0 ... NYEARS-1] лет
+ * Численность населения хранится в PopulationContext только для младших NYEARS лет, т.е. возрастов [0 ... NYEARS-1] лет
  * или [0 ... MAX_DAY] дней со дня рождения.
  * 
  * Хранятся данные только для Gender.MALE и Gender.FEMALE, но не для Gender.BOTH.
@@ -46,7 +46,7 @@ import rtss.util.Util;
  * Использование:
  * 
  *     PopulationByLocality p = ...
- *     PopulationForwardingContext fctx = new PopulationForwardingContext();
+ *     PopulationContext fctx = new PopulationContext();
  *     PopulationByLocality pto = fctx.begin(p);
  *     ....
  *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
@@ -59,15 +59,15 @@ import rtss.util.Util;
  * аргуметном для fctx.end при этом не изменяются, что позволяет сделать снимок населения в настоящий момент и
  * затем продолжить передвижку.
  * 
- * PopulationForwardingContext также может быть использован для отслеживания всех (а не только детских) возрастов
+ * PopulationContext также может быть использован для отслеживания всех (а не только детских) возрастов
  * при передвижке. Это полезно при последовательных продвижениях на интервалы не кратные году. Контекст вбирающий
  * все возрасты позволяет отслеживать возраст по дням, а не годам, и избегать проблем "расплытия" структуры населения
  * при не-годовых передвижках. См. более подробное разъяснение в заголовках файлов ForwardPopulationT/ForwardPopulationUR.
  * Чтобы создать контекст охватывающий все возрасты (0 ... MAX_AGE), следует использовать
  * 
- * PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
+ * PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
  */
-public class PopulationForwardingContext
+public class PopulationContext
 {
     public static final int DEFAULT_NYEARS = 5; /* years 0-4 */
     public static final int ALL_AGES = Population.MAX_AGE + 1; /* years 0-MAX_AGE */
@@ -89,12 +89,12 @@ public class PopulationForwardingContext
      */
     private Map<String, Double> totalBirths = new HashMap<>();
 
-    public PopulationForwardingContext()
+    public PopulationContext()
     {
         this(DEFAULT_NYEARS);
     }
 
-    public PopulationForwardingContext(int NYEARS)
+    public PopulationContext(int NYEARS)
     {
         this.NYEARS = NYEARS;
         this.MAX_YEAR = NYEARS - 1;
@@ -105,9 +105,9 @@ public class PopulationForwardingContext
 
     /* =============================================================================================== */
 
-    public PopulationForwardingContext clone()
+    public PopulationContext clone()
     {
-        PopulationForwardingContext cx = new PopulationForwardingContext(NYEARS);
+        PopulationContext cx = new PopulationContext(NYEARS);
         cx.began = began;
         cx.hasRuralUrban = hasRuralUrban;
         cx.m = new LocalityGenderToDoubleArray(m);
@@ -325,7 +325,7 @@ public class PopulationForwardingContext
             }
             catch (Exception ex)
             {
-                Util.err("PopulationForwardingContext.begin: using basic method");
+                Util.err("PopulationContext.begin: using basic method");
                 m.clear();
                 begin_basic(pto, Locality.RURAL, mt);
                 begin_basic(pto, Locality.URBAN, mt);
@@ -345,7 +345,7 @@ public class PopulationForwardingContext
             }
             catch (Exception ex)
             {
-                Util.err("PopulationForwardingContext.begin: using basic method");
+                Util.err("PopulationContext.begin: using basic method");
                 m.clear();
                 begin_basic(pto, Locality.TOTAL, mt);
             }
@@ -401,7 +401,7 @@ public class PopulationForwardingContext
         /*
          * Построить распределение по дням
          */
-        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, "PopulationForwardingContext.begin");
+        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, "PopulationContext.begin");
 
         for (int age = 0; age < NYEARS; age++)
         {
@@ -423,7 +423,7 @@ public class PopulationForwardingContext
     private void begin_basic(PopulationByLocality p, Locality locality, CombinedMortalityTable mt) throws Exception
     {
         if (mt == null)
-            Util.err("PopulationForwardingContext.begin: mt == null, вынос в контекст приближённый");
+            Util.err("PopulationContext.begin: mt == null, вынос в контекст приближённый");
 
         begin_basic(p, locality, Gender.MALE, mt);
         begin_basic(p, locality, Gender.FEMALE, mt);

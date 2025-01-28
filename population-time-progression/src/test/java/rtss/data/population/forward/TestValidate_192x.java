@@ -50,7 +50,7 @@ public class TestValidate_192x
         fw_ur.debug(true);
         fw_ur.BirthRateRural = BirthRateRural;
         fw_ur.BirthRateUrban = BirthRateUrban;
-        PopulationForwardingContext fctx_ur = new PopulationForwardingContext();
+        PopulationContext fctx_ur = new PopulationContext();
         PopulationByLocality px_ur = fctx_ur.begin(p1926);
         PopulationByLocality p2_ur = fw_ur.forward(px_ur, fctx_ur, mt1926, 1.0);
         PopulationByLocality pend_ur = fctx_ur.end(p2_ur);
@@ -60,7 +60,7 @@ public class TestValidate_192x
         ForwardPopulationT fw_t = new ForwardPopulationT();
         fw_t.debug(true);
         fw_t.BirthRateTotal = BirthRateTotal;
-        PopulationForwardingContext fctx_t = new PopulationForwardingContext();
+        PopulationContext fctx_t = new PopulationContext();
         PopulationByLocality px_t = fctx_t.begin(p1926_total);
         PopulationByLocality p2_t = fw_t.forward(px_t, fctx_t, mt1926, 1.0);
         PopulationByLocality pend_t = fctx_t.end(p2_t);
