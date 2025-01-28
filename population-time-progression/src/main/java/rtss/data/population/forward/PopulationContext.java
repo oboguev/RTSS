@@ -749,6 +749,23 @@ public class PopulationContext
         // currently no-op
     }
 
+    private void checkConforming(PopulationContext cx, ValueConstraint vc) throws Exception
+    {
+        if (cx.hasRuralUrban != this.hasRuralUrban)
+            throw new Exception("разнородные контексты");
+
+        if (vc == null)
+        {
+            if ((this.valueConstraint != null) != (cx.valueConstraint != null))
+                throw new Exception("разнородные контексты");
+            if (this.valueConstraint != null && cx.valueConstraint != null && !this.valueConstraint.equals(cx.valueConstraint))
+                throw new Exception("разнородные контексты");
+        }
+        
+        if (this.MAX_DAY != cx.MAX_DAY)
+            throw new Exception("разнородные контексты");
+    }
+
     /* =============================================================================================== */
 
     /*
@@ -768,6 +785,8 @@ public class PopulationContext
     {
         // no-op
     }
+    
+    /* ---------------------------------------------------------------------------- */
 
     public double sum(Gender gender, int age1, int age2) throws Exception
     {
@@ -799,29 +818,14 @@ public class PopulationContext
         return sumDays(locality, gender, firstDayForAge(age1), lastDayForAge(age2));
     }
 
+    /* ---------------------------------------------------------------------------- */
+
     public PopulationContext sub(PopulationContext p) throws Exception
     {
         ValueConstraint vc = null;
         return sub(p, vc);
     }
     
-    private void checkConforming(PopulationContext cx, ValueConstraint vc) throws Exception
-    {
-        if (cx.hasRuralUrban != this.hasRuralUrban)
-            throw new Exception("разнородные контексты");
-
-        if (vc == null)
-        {
-            if ((this.valueConstraint != null) != (cx.valueConstraint != null))
-                throw new Exception("разнородные контексты");
-            if (this.valueConstraint != null && cx.valueConstraint != null && !this.valueConstraint.equals(cx.valueConstraint))
-                throw new Exception("разнородные контексты");
-        }
-        
-        if (this.MAX_DAY != cx.MAX_DAY)
-            throw new Exception("разнородные контексты");
-    }
-
     public PopulationContext sub(PopulationContext cx, ValueConstraint vc) throws Exception
     {
         checkConforming(cx, vc);
@@ -858,6 +862,54 @@ public class PopulationContext
         
         for (int nd = 0; nd < v.length; nd++)
             v[nd] -= vx[nd];
+
+        this.fromArray(locality, gender, v);
+    }
+
+    /* ---------------------------------------------------------------------------- */
+
+    public PopulationContext add(PopulationContext p) throws Exception
+    {
+        ValueConstraint vc = null;
+        return add(p, vc);
+    }
+    
+    public PopulationContext add(PopulationContext cx, ValueConstraint vc) throws Exception
+    {
+        checkConforming(cx, vc);
+
+        PopulationContext c = clone();
+        if (vc != null)
+            c.setValueConstraint(vc);
+        
+        if (hasRuralUrban)
+        {
+            c.add_inner(cx, Locality.URBAN);
+            c.add_inner(cx, Locality.RURAL);
+        }
+        else
+        {
+            c.add_inner(cx, Locality.TOTAL);
+        }
+
+        return c;
+    }
+    
+    private void add_inner(PopulationContext cx, Locality locality) throws Exception
+    {
+        add_inner(cx, locality, Gender.MALE);
+        add_inner(cx, locality, Gender.FEMALE);
+    }
+
+    private void add_inner(PopulationContext cx, Locality locality, Gender gender) throws Exception
+    {
+        double[] v = this.asArray(locality, gender);
+        double[] vx = cx.asArray(locality, gender);
+        if (v.length != vx.length)
+            throw new IllegalArgumentException("разнородные контексты");
+        
+        for (int nd = 0; nd < v.length; nd++)
+            v[nd] += vx[nd];
 
         this.fromArray(locality, gender, v);
     }
