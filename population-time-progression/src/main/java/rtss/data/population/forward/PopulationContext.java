@@ -965,4 +965,47 @@ public class PopulationContext
 
         return c;
     }
+
+    /* ---------------------------------------------------------------------------- */
+
+    /*
+     * Выборка [age1 ... age2] или [ageday1 ... ageday2] .
+     * 
+     * Нецелое значение года означает, что население выбирается только от/до этой возрастной точки.
+     * Так age2 = 80.0 означает, что население с возраста 80.0 лет исключено. 
+     * Аналогично, age2 = 80.5 означает, что включена половина населения в возрасте 80 лет,
+     * а население начиная с возраста 81 года исключено целиком. 
+     */
+    public PopulationContext selectByAgeYears(double age1, double age2) throws Exception
+    {
+        int ageday1 = (int) Math.round(age1 * DAYS_PER_YEAR);
+        int ageday2 = (int) Math.round(age2 * DAYS_PER_YEAR);
+        return selectByAgeDays(ageday1, ageday2);
+    }
+
+    public PopulationContext selectByAgeDays(int ageday1, int ageday2) throws Exception
+    {
+        PopulationContext c = clone();
+
+        for (LocalityGender lg : lgs())
+        {
+            double[] v = c.asArray(lg.locality, lg.gender);
+            
+            for (int nd = 0; nd < v.length; nd++)
+            {
+                if (nd >= ageday1 && nd <= ageday2)
+                {
+                    // leave alone
+                }
+                else
+                {
+                    v[nd] = 0;
+                }
+            }
+
+            c.fromArray(lg.locality, lg.gender, v);
+        }
+
+        return c;
+    }
 }
