@@ -49,13 +49,13 @@ import rtss.util.Util;
  * 
  * Использование:
  * 
- * PopulationByLocality p = ...
- * PopulationContext fctx = new PopulationContext();
- * PopulationByLocality pto = fctx.begin(p);
- * ....
- * pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
- * ....
- * ptoEnd = fctx.end(pto);
+ *     PopulationByLocality p = ...
+ *     PopulationContext fctx = new PopulationContext();
+ *     PopulationByLocality pto = fctx.begin(p);
+ *     ....
+ *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
+ *     ....
+ *     ptoEnd = fctx.end(pto);
  * 
  * fctx.begin переносит младшие возрастные группы в контекст, обнуляя их в возвращаеммом @pto.
  * 
@@ -72,7 +72,11 @@ import rtss.util.Util;
  * при не-годовых передвижках. См. более подробное разъяснение в заголовках файлов ForwardPopulationT/ForwardPopulationUR.
  * Чтобы создать контекст охватывающий все возрасты (0 ... MAX_AGE), следует использовать
  * 
- * PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
+ *     PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
+ *     
+ * PopulationContext в этом случае используется как альтернативная содержащая всё население, альтернативная
+ * Population и PopulationByLocality, имеющая более высокое (дневное, а не годовое) разрешение по возрасту. 
+ *     
  */
 public class PopulationContext
 {
@@ -990,7 +994,7 @@ public class PopulationContext
         for (LocalityGender lg : lgs())
         {
             double[] v = c.asArray(lg.locality, lg.gender);
-            
+
             for (int nd = 0; nd < v.length; nd++)
             {
                 if (nd >= ageday1 && nd <= ageday2)

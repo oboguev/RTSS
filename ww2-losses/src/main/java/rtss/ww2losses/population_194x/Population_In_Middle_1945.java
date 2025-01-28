@@ -24,10 +24,10 @@ public class Population_In_Middle_1945 extends UtilBase_194x
         this.ap = ap;
     }
 
-    public PopulationByLocality evaluate(CombinedMortalityTable mt1945) throws Exception
+    public PopulationByLocality evaluate(CombinedMortalityTable mt1945_2nd_halfyear) throws Exception
     {
         PopulationContext fctx = new PopulationContext();
-        PopulationByLocality p = evaluate(fctx, mt1945);
+        PopulationByLocality p = evaluate(fctx, mt1945_2nd_halfyear);
         return fctx.end(p);
     }
 
@@ -39,7 +39,7 @@ public class Population_In_Middle_1945 extends UtilBase_194x
     /*
      * Оставляет контекст незакрытым, позволяя дальнейшую передвижку
      */
-    public PopulationByLocality evaluate(PopulationContext fctx, CombinedMortalityTable mt1945) throws Exception
+    public PopulationByLocality evaluate(PopulationContext fctx, CombinedMortalityTable mt1945_2nd_halfyear) throws Exception
     {
         PopulationByLocality p;
 
@@ -51,7 +51,7 @@ public class Population_In_Middle_1945 extends UtilBase_194x
          * Передвижка с начала 1941 до середины 1941 года
          */
         BackwardPopulationT bw = new BackwardPopulationT();
-        p = bw.backward(p, fctx, mt1945, 0.5);
+        p = bw.backward(p, fctx, mt1945_2nd_halfyear, 0.5);
         observed_deaths_1945_2nd_halfyear = bw.getObservedDeaths();
 
         p.validate();
@@ -59,8 +59,8 @@ public class Population_In_Middle_1945 extends UtilBase_194x
         return p;
     }
 
-    public Population evaluateAsPopulation(PopulationContext fctx, CombinedMortalityTable mt1945) throws Exception
+    public Population evaluateAsPopulation(PopulationContext fctx, CombinedMortalityTable mt1945_2nd_halfyear) throws Exception
     {
-        return evaluate(fctx, mt1945).forLocality(Locality.TOTAL);
+        return evaluate(fctx, mt1945_2nd_halfyear).forLocality(Locality.TOTAL);
     }
 }
