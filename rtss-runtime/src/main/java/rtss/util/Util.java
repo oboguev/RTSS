@@ -185,6 +185,16 @@ public class Util
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
 
+    public static boolean same(double a, double b)
+    {
+        return !differ(a, b);
+    }
+
+    public static boolean same(double a, double b, double diff)
+    {
+        return !differ(a, b, diff);
+    }
+
     public static boolean isValid(double v)
     {
         return Double.isFinite(v);
@@ -207,7 +217,7 @@ public class Util
         checkValid(v);
         checkNonNegative(v);
     }
-    
+
     public static double validate(double v) throws Exception
     {
         if (!isValid(v))
@@ -241,7 +251,7 @@ public class Util
             checkNonNegative(vv);
         }
     }
-    
+
     public static double[] validate(double[] v) throws Exception
     {
         for (double vv : v)
@@ -283,6 +293,14 @@ public class Util
         double sum = 0;
         for (int k = 0; k < y.length; k++)
             sum += y[k];
+        return sum;
+    }
+
+    public static double sum(Collection<Double> y)
+    {
+        double sum = 0;
+        for (Double v : y)
+            sum += v;
         return sum;
     }
 
@@ -560,6 +578,12 @@ public class Util
         }
 
         return "";
+    }
+
+    public static void assertion(boolean b) throws Exception
+    {
+        if (!b)
+            throw new Exception("unexpected: assertion failed");
     }
 
     public static void sleep(long ms)

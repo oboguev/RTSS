@@ -390,8 +390,8 @@ public class Main
 
         /* первое полугодие 1941 */
         HalfYearSelector half = HalfYearSelector.FirstHalfYear;
-        prev = curr = new HalfYearEntry(year, half, 
-                                        pm1941.p_start_1941.forLocality(Locality.TOTAL), 
+        prev = curr = new HalfYearEntry(year, half,
+                                        pm1941.p_start_1941.forLocality(Locality.TOTAL),
                                         pm1941.p_start_1941.forLocality(Locality.TOTAL));
         curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
         curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
@@ -621,12 +621,12 @@ public class Main
             else
                 WarHelpers.validateDeficit(deficit);
         }
-        
+
         if (Util.False)
         {
             /* график сверхсмертности */
-            PopulationChart.display("Cверхсмертность населения " + area + " накопленная с середины 1941 по конец 1945 года", 
-                                    deficit, 
+            PopulationChart.display("Cверхсмертность населения " + area + " накопленная с середины 1941 по конец 1945 года",
+                                    deficit,
                                     "1");
         }
 
@@ -876,11 +876,13 @@ public class Main
     private void backpropagateExcessMortality(Population deficit1946) throws Exception
     {
         /*
-         * Распределение избыточных смертей наличного на середину 1941 года населения
-         * по возрасту во время смерти. 
+         * Распределение избыточных смертей в наличном на середину 1941 года населении
+         * по возрасту во время смерти (для избыточных смертей произошедших до конца 1945 года). 
          */
-        Population lossByAgeAtDeath = Population.newTotalPopulation(); // ### 
-        
+        Population lossByDeathAge = Population.newTotalPopulation();
+        lossByDeathAge.setValueConstraint(ValueConstraint.NONE);
+        lossByDeathAge.zero();
+
         deficit1946.validateBMF();
 
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
@@ -890,16 +892,19 @@ public class Main
         /* полугодовой коэффициент распределения потерь для призывного населения */
         double[] ac_conscripts = wsum(0.9, rkka_loss_intensity, 0.1, ac_generic);
         List<Double> acv_conscripts = atov_reverse(ac_conscripts);
+        
+        Util.assertion(Util.same(1.0, Util.sum(acv_generic)));
+        Util.assertion(Util.same(1.0, Util.sum(acv_conscripts)));
 
         HalfYearEntry he = halves.last();
         he.accumulated_excess_deaths = deficit1946;
-        
+
         double total_conscript_excess_deaths = 0;
         double total_fertile_woman_excess_deaths = 0;
         double total_other_excess_deaths = 0;
-
+        
         /*
-         * Первая стадия -- годовой шаг назад к началу 1945, 1944, 1943 и 1942 гг.
+         * Первая стадия -- годовой шаг назад от начала 1946 к началу 1945, 1944, 1943 и 1942 гг.
          */
         for (;;)
         {
@@ -928,37 +933,42 @@ public class Main
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 double v = loss.get(Gender.FEMALE, age);
-                
+                double deaths = v * a_generic;
+
                 if (age >= 15 + 1 && age <= 54 + 1)
                 {
-                    total_fertile_woman_excess_deaths += v * a_generic;
-                    loss.set(Gender.FEMALE, age, v * a_generic);
+                    total_fertile_woman_excess_deaths += deaths;
                 }
                 else
                 {
-                    total_other_excess_deaths += v * a_generic;
-                    loss.set(Gender.FEMALE, age, v * a_generic);
+                    total_other_excess_deaths += deaths;
                 }
+
+                loss.set(Gender.FEMALE, age, deaths);
             }
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 double v = loss.get(Gender.MALE, age);
-                
+                double deaths;
+
                 if (age >= 19 + 1 && age <= 55 + 1)
                 {
-                    total_conscript_excess_deaths += v * a_conscripts;
-                    loss.set(Gender.MALE, age, v * a_conscripts);
+                    deaths = v * a_conscripts;
+                    total_conscript_excess_deaths += deaths;
                 }
                 else
                 {
-                    total_other_excess_deaths += v * a_generic;
-                    loss.set(Gender.MALE, age, v * a_generic);
+                    deaths = v * a_generic;
+                    total_other_excess_deaths += deaths;
                 }
+
+                loss.set(Gender.MALE, age, deaths);
             }
 
             loss.makeBoth();
             loss.validateBMF();
+            lossByDeathAge = lossByDeathAge.add(loss.moveDown(1.0));
 
             /*
              * Вычислить потери на начало года
@@ -1017,7 +1027,7 @@ public class Main
             for (int age = 0; age <= MAX_AGE; age++)
             {
                 double v = loss.get(Gender.MALE, age);
-                
+
                 if (age >= 19 + 1 && age <= 55 + 1)
                 {
                     loss.set(Gender.MALE, age, v * a_conscripts);
@@ -1064,17 +1074,18 @@ public class Main
             acv_conscripts.remove(0);
             acv_conscripts.remove(0);
         }
-        
+
         /*
          * добавить разбивку потерь за вторую половину 1941 года
          */
         he = halves.get(1942, HalfYearSelector.FirstHalfYear);
         Population loss = he.accumulated_excess_deaths;
+        lossByDeathAge = lossByDeathAge.add(loss.moveDown(0.5));
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
             double v = loss.get(Gender.FEMALE, age);
-            
+
             // ### возраста ...
             if (age >= 15 + 1 && age <= 54 + 1)
             {
@@ -1089,7 +1100,7 @@ public class Main
         for (int age = 0; age <= MAX_AGE; age++)
         {
             double v = loss.get(Gender.MALE, age);
-            
+
             if (age >= 19 + 1 && age <= 55 + 1)
             {
                 total_conscript_excess_deaths += v;
@@ -1100,10 +1111,16 @@ public class Main
             }
         }
         
+        Util.noop();
+
+        // ### продумать года
+        // ### расхождение между суммами deficit1946 и lossByDeathAge 
+        // ### печатать нарезку lossByDeathAge
+
         Util.out("Категории сверхсмертности наличного на середину 1941 года населения по обратной разбивке:");
-        Util.out("  Число избыточных смертей мужчин призывного возраста (19-55 лет), тыс. чел.: " + f2k(total_conscript_excess_deaths / 1000.0));
-        Util.out("  Число избыточных смертей женщин фертильного возраста (15-54 лет), тыс. чел.: " + f2k(total_fertile_woman_excess_deaths  / 1000.0));
-        Util.out("  Число избыточных смертей других групп, тыс. чел.: " + f2k(total_other_excess_deaths / 1000.0));
+        Util.out("    Число избыточных смертей мужчин призывного возраста (19-55 лет), тыс. чел.: " + f2k(total_conscript_excess_deaths / 1000.0));
+        Util.out("    Число избыточных смертей женщин фертильного возраста (15-54 лет), тыс. чел.: " + f2k(total_fertile_woman_excess_deaths / 1000.0));
+        Util.out("    Число избыточных смертей других групп, тыс. чел.: " + f2k(total_other_excess_deaths / 1000.0));
     }
 
     private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
@@ -1381,7 +1398,7 @@ public class Main
 
         case "1945.2":
             return 0.40;
-            
+
         default:
             throw new IllegalArgumentException();
         }
