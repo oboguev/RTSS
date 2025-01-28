@@ -584,17 +584,17 @@ public class Main
         v = p1946_expected_with_births.sum();
         v -= p1946_actual.sum();
         double v_total = v;
-        Util.out("Общий дефицит населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+        outk("Общий дефицит населения к январю 1946, тыс. чел.", v);
 
         v = p1946_expected_without_births.sum();
         v -= p1946_actual_born_prewar.sum();
         double v_prewar = v;
-        Util.out("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+        outk("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.", v);
 
         v = p1946_expected_newonly.sum();
         v -= p1946_actual_born_postwar.sum();
         double v_postwar = v;
-        Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
+        outk("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.", v);
 
         if (Util.differ(v_total, v_prewar + v_postwar))
             Util.err("Расхождение категорий дефицита");
@@ -607,8 +607,7 @@ public class Main
 
         /* оставить только сверхсмертность */
         Population emigration = emigration();
-        v = emigration.sum();
-        Util.out("Эмиграция, тыс. чел.: " + f2k(v / 1000.0));
+        outk("Эмиграция, тыс. чел.", emigration.sum());
         deficit = deficit.sub(emigration);
 
         if (area == Area.RSFSR)
@@ -641,12 +640,12 @@ public class Main
         double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 58);
         double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
 
-        Util.out("");
-        Util.out("Сверхсмертность всего наличного на середину 1941 года населения: " + f2k(deficit_total / 1000.0));
-        Util.out("Разбивка на категории по временному окну:");
-        Util.out("    Сверхсмертность мужчин призывного возраста: " + f2k(deficit_m_conscripts / 1000.0));
-        Util.out("    Сверхсмертность женщин фертильного возраста: " + f2k(deficit_f_fertile / 1000.0));
-        Util.out("    Сверхсмертность остального наличного на середину 1941 года населения: " + f2k(deficit_other / 1000.0));
+        out("");
+        outk("Сверхсмертность всего наличного на середину 1941 года населения", deficit_total);
+        out("Разбивка на категории по временному окну:");
+        outk("    Сверхсмертность мужчин призывного возраста", deficit_m_conscripts);
+        outk("    Сверхсмертность женщин фертильного возраста", deficit_f_fertile);
+        outk("    Сверхсмертность остального наличного на середину 1941 года населения", deficit_other);
 
         /*
          * распределить объём сверхсмертности по полугодиям 
@@ -1117,10 +1116,10 @@ public class Main
         // ### расхождение между суммами deficit1946 и lossByDeathAge 
         // ### печатать нарезку lossByDeathAge
 
-        Util.out("Категории сверхсмертности наличного на середину 1941 года населения по обратной разбивке:");
-        Util.out("    Число избыточных смертей мужчин призывного возраста (19-55 лет), тыс. чел.: " + f2k(total_conscript_excess_deaths / 1000.0));
-        Util.out("    Число избыточных смертей женщин фертильного возраста (15-54 лет), тыс. чел.: " + f2k(total_fertile_woman_excess_deaths / 1000.0));
-        Util.out("    Число избыточных смертей других групп, тыс. чел.: " + f2k(total_other_excess_deaths / 1000.0));
+        out("Категории сверхсмертности наличного на середину 1941 года населения по обратной разбивке:");
+        outk("    Число избыточных смертей мужчин призывного возраста (19-55 лет), тыс. чел.", total_conscript_excess_deaths);
+        outk("    Число избыточных смертей женщин фертильного возраста (15-54 лет), тыс. чел.", total_fertile_woman_excess_deaths);
+        outk("    Число избыточных смертей других групп, тыс. чел.", total_other_excess_deaths);
     }
 
     private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
@@ -1275,7 +1274,7 @@ public class Main
         double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
         double v2 = p1946_actual_born_postwar.sum(0, MAX_AGE);
 
-        Util.out(String.format("Сверхсмертность рождённых во время войны, сумма к началу 1946 года, тыс. чел.: %s", f2k((v1 - v2) / 1000.0)));
+        outk("Сверхсмертность рождённых во время войны, сумма к началу 1946 года, тыс. чел.", v1 - v2);
     }
 
     /* ======================================================================================================= */
@@ -1461,6 +1460,16 @@ public class Main
         FieldValue.setDouble(o, field, dv + extra);
     }
 
+    private void outk(String what, double v)
+    {
+        Util.out(what + ": " + f2k(v / 1000.0));
+    }
+    
+    private void out(String what)
+    {
+        Util.out(what);
+    }
+    
     private String f2k(double v)
     {
         String s = String.format("%,15.0f", v);
