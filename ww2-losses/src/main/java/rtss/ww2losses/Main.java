@@ -982,6 +982,10 @@ public class Main
             {
                 verify_same(x.sum(Gender.MALE), he.accumulated_excess_deaths.sum(Gender.MALE));
                 verify_same(x.sum(Gender.FEMALE), he.accumulated_excess_deaths.sum(Gender.FEMALE));
+                
+                double loss1 = he.next.next.accumulated_excess_deaths.sub(he.accumulated_excess_deaths, ValueConstraint.NONE).sum();
+                double loss2 = loss.sum();
+                verify_same(loss1, loss2);
             }
         }
 
@@ -1079,7 +1083,14 @@ public class Main
          */
         he = halves.get(1942, HalfYearSelector.FirstHalfYear);
         Population loss = he.accumulated_excess_deaths;
-        lossByDeathAge = lossByDeathAge.add(loss.moveDown(0.5));
+
+        // ### here !!!!
+        Population loss_md = loss.moveDown(0.5);
+        loss_md.validateBMF();
+        verify_same(loss.sum(), loss_md.sum());
+        
+        lossByDeathAge = lossByDeathAge.add(loss_md);
+        
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
