@@ -913,4 +913,39 @@ public class PopulationContext
 
         this.fromArray(locality, gender, v);
     }
+
+    /* ---------------------------------------------------------------------------- */
+
+    public PopulationContext scaleAllBy(double scale) throws Exception
+    {
+        PopulationContext c = clone();
+
+        if (hasRuralUrban)
+        {
+            c.scale_inner(Locality.URBAN, scale);
+            c.scale_inner(Locality.RURAL, scale);
+        }
+        else
+        {
+            c.scale_inner(Locality.TOTAL, scale);
+        }
+
+        return c;
+    }
+
+    private void scale_inner(Locality locality, double scale) throws Exception
+    {
+        scale_inner(locality, Gender.MALE, scale);
+        scale_inner(locality, Gender.FEMALE, scale);
+    }
+
+    private void scale_inner(Locality locality, Gender gender, double scale) throws Exception
+    {
+        double[] v = this.asArray(locality, gender);
+        
+        for (int nd = 0; nd < v.length; nd++)
+            v[nd] *= scale;
+
+        this.fromArray(locality, gender, v);
+    }
 }

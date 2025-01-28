@@ -8,7 +8,7 @@ import rtss.util.Util;
 public class RescalePopulation
 {
     private static final int MAX_AGE = PopulationByLocality.MAX_AGE;
-    
+
     /*
      * Перемасштабировать население указанного пола @gender для точного совпадения с численностью задаваемой @target.
      * Для населений не имеющих сельско-городской разбивки.
@@ -19,7 +19,7 @@ public class RescalePopulation
     {
         scaleTotal(pto, p, null, gender, target);
     }
-    
+
     /*
      * Перемасштабировать население указанного пола @gender для точного совпадения с численностью задаваемой @target.
      * Для населений не имеющих сельско-городской разбивки.
@@ -27,25 +27,26 @@ public class RescalePopulation
      * Результат помещается в @pto и в @fctx.
      * Для @pto затем нужно применить makeBoth().
      */
-    public static void scaleTotal(PopulationByLocality pto, PopulationByLocality p, PopulationContext fctx, Gender gender, double target) throws Exception
+    public static void scaleTotal(PopulationByLocality pto, PopulationByLocality p, PopulationContext fctx, Gender gender, double target)
+            throws Exception
     {
         if (p.hasRuralUrban() || pto.hasRuralUrban())
             throw new IllegalArgumentException();
-        
+
         final Locality locality = Locality.TOTAL;
-        
+
         double v = p.sum(locality, gender, 0, MAX_AGE);
         if (fctx != null)
             v += fctx.sumAllAges(locality, gender);
 
         final double scale = target / v;
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             v = p.get(locality, gender, age);
             pto.set(locality, gender, age, v * scale);
         }
-        
+
         if (fctx != null)
         {
             for (int nd = 0; nd <= fctx.MAX_DAY; nd++)
@@ -55,7 +56,7 @@ public class RescalePopulation
             }
         }
     }
-    
+
     public static PopulationByLocality scaleTotal(PopulationByLocality p, double males, double females) throws Exception
     {
         return scaleTotal(p, null, males, females);
@@ -71,7 +72,7 @@ public class RescalePopulation
         pto.makeBoth(Locality.TOTAL);
         return pto;
     }
-    
+
     /*
      * Перемасштабировать городское, сельское и суммарное население пропорционально имеющемуся таким образом,
      * чтобы общее население равнялось @target
@@ -81,13 +82,13 @@ public class RescalePopulation
         double scale = target / p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
         return scaleAllBy(p, scale);
     }
-    
+
     public static PopulationByLocality scaleAllBy(PopulationByLocality p, double scale) throws Exception
     {
         Population rural = scaleBy(p.forLocality(Locality.RURAL), scale);
         Population urban = scaleBy(p.forLocality(Locality.URBAN), scale);
         Population total = scaleBy(p.forLocality(Locality.TOTAL), scale);
-        
+
         return new PopulationByLocality(total, urban, rural);
     }
 
@@ -104,15 +105,15 @@ public class RescalePopulation
 
         double[] m = p.asArray(Gender.MALE);
         m = Util.multiply(m, scale);
-        
+
         double[] f = p.asArray(Gender.FEMALE);
         f = Util.multiply(f, scale);
-        
+
         double m_unknown = scale * p.getUnknown(Gender.MALE);
         double f_unknown = scale * p.getUnknown(Gender.FEMALE);
 
-        return new Population(p.locality, 
-                              m, m_unknown, p.male.valueConstraint(), 
+        return new Population(p.locality,
+                              m, m_unknown, p.male.valueConstraint(),
                               f, f_unknown, p.female.valueConstraint());
     }
 
@@ -120,8 +121,22 @@ public class RescalePopulation
     {
         if (p == null)
             return null;
-        
+
         double old_amount = p.sum(Gender.BOTH, 0, MAX_AGE) + p.getUnknown(Gender.BOTH);
         return scaleBy(p, new_amount / old_amount);
+    }
+
+    public static PopulationContext scaleAllTo(PopulationContext p, double target) throws Exception
+    {
+        // ###
+        return null;
+    }
+
+    public static PopulationContext scaleAllBy(PopulationContext p, double scale) throws Exception
+    {
+        if (p == null)
+            return null;
+        else
+            return p.scaleAllBy(scale);
     }
 }
