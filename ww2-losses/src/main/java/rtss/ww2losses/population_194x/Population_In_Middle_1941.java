@@ -1,12 +1,14 @@
 package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
@@ -32,6 +34,11 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         return fctx.end(p);
     }
     
+    public Population evaluateAsPopulation() throws Exception
+    {
+        return evaluate().forLocality(Locality.TOTAL);
+    }
+
     /*
      * Оставляет контекст незакрытым, позволяя дальнейшую передвижку
      */
@@ -41,6 +48,11 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         return evaluate(fctx, mt1940);
     }
     
+    public Population evaluateAsPopulation(PopulationForwardingContext fctx) throws Exception
+    {
+        return evaluate(fctx).forLocality(Locality.TOTAL);
+    }
+
     public PopulationByLocality evaluate(PopulationForwardingContext fctx, CombinedMortalityTable mt1940) throws Exception
     {
         ForwardPopulationT fw = new ForwardPopulationT();
@@ -97,5 +109,10 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         p.validate();
 
         return p;
+    }
+
+    public Population evaluateAsPopulation(PopulationForwardingContext fctx, CombinedMortalityTable mt1940) throws Exception
+    {
+        return evaluate(fctx, mt1940).forLocality(Locality.TOTAL);
     }
 }

@@ -13,7 +13,6 @@ import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.Population;
-import rtss.data.population.PopulationByLocality;
 import rtss.data.population.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationForwardingContext;
@@ -54,7 +53,7 @@ public class Main
     {
         this.area = area;
         this.ap = AreaParameters.forArea(area);
-        this.p1946_actual = PopulationADH.getPopulationByLocality(ap.area, 1946);
+        this.p1946_actual = PopulationADH.getPopulation(ap.area, 1946);
         adjustForTuva();
         split_p1946();
     }
@@ -81,13 +80,13 @@ public class Main
     private static int MAX_AGE = Population.MAX_AGE;
 
     /* фактическое население на начало 1946 года */
-    private PopulationByLocality p1946_actual;
+    private Population p1946_actual;
 
     /* фактическое население на начало 1946 года рождённое до середины 1941 */
-    private PopulationByLocality p1946_actual_born_prewar;
+    private Population p1946_actual_born_prewar;
 
     /* фактическое население на начало 1946 года рождённое после середины 1941 */
-    private PopulationByLocality p1946_actual_born_postwar;
+    private Population p1946_actual_born_postwar;
 
     /* 
      * интенсивность потерь РККА по полугодиям
@@ -151,18 +150,18 @@ public class Main
              */
             String point = "1946.1";
             new PopulationChart("Сравнение вариантов ожидаемого населения " + area.toString() + " на " + point)
-                    .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
-                    .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
+                    .show("1", halves1.get(point).p_nonwar_without_births)
+                    .show("2", halves2.get(point).p_nonwar_without_births)
                     .display();
 
             if (Util.False)
             {
                 new PopulationChart("Вариант 1 ожидаемого населения " + area.toString() + " на " + point)
-                        .show("1", halves1.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
+                        .show("1", halves1.get(point).p_nonwar_without_births)
                         .display();
 
                 new PopulationChart("Вариант 2 ожидаемого населения " + area.toString() + " на " + point)
-                        .show("2", halves2.get(point).p_nonwar_without_births.forLocality(Locality.TOTAL))
+                        .show("2", halves2.get(point).p_nonwar_without_births)
                         .display();
 
             }
@@ -174,18 +173,18 @@ public class Main
              * Сравнение для дефицитов
              */
             new PopulationChart("Сравнение вариантов дефицита населения " + area.toString() + " на 1946.1")
-                    .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
-                    .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
+                    .show("1", eval_deficit_1946(halves1))
+                    .show("2", eval_deficit_1946(halves2))
                     .display();
 
             if (Util.False)
             {
                 new PopulationChart("Вариант 1 дефицита населения " + area.toString() + " на 1946.1")
-                        .show("1", eval_deficit_1946(halves1).forLocality(Locality.TOTAL))
+                        .show("1", eval_deficit_1946(halves1))
                         .display();
 
                 new PopulationChart("Вариант 2 дефицита населения " + area.toString() + " на 1946.1")
-                        .show("2", eval_deficit_1946(halves2).forLocality(Locality.TOTAL))
+                        .show("2", eval_deficit_1946(halves2))
                         .display();
             }
         }
@@ -206,8 +205,7 @@ public class Main
 
         PrintHalves.print(halves);
 
-        // ### проверка базовая cbr/cdr
-        // ### рекомбинация
+        // ### проверка базовая cbr/cdr + рекомбинация по годам
 
         Util.noop();
     }
@@ -227,12 +225,12 @@ public class Main
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContextSize);
-        PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
+        Population p = pm1941.evaluateAsPopulation(fctx, mt1940);
 
         /* первое полугодие 1941 */
         HalfYearEntry curr = halves.get(1941, HalfYearSelector.FirstHalfYear);
-        curr.p_nonwar_with_births = pm1941.p_start_1941;
-        curr.p_nonwar_without_births = pm1941.p_start_1941;
+        curr.p_nonwar_with_births = pm1941.p_start_1941.forLocality(Locality.TOTAL);
+        curr.p_nonwar_without_births = pm1941.p_start_1941.forLocality(Locality.TOTAL);
         curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
         curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
 
@@ -242,10 +240,10 @@ public class Main
         curr.p_nonwar_without_births = fctx.end(p);
 
         /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
-        PopulationByLocality pwb = p.clone();
+        Population pwb = p.clone();
 
         /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
-        PopulationByLocality pxb = p.clone();
+        Population pxb = p.clone();
         PopulationForwardingContext fctx_xb = fctx.clone();
 
         curr.save_fw(pwb, fctx, pxb, fctx_xb);
@@ -377,13 +375,13 @@ public class Main
         /* население на середину 1941 года */
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContextSize);
-        PopulationByLocality p = pm1941.evaluate(fctx, mt1940);
-        PopulationByLocality px = fctx.end(p);
+        Population p = pm1941.evaluateAsPopulation(fctx, mt1940);
+        Population px = fctx.end(p);
 
         if (Util.False)
         {
             new PopulationChart("Население " + area + " на середину 1941 года")
-                    .show("перепись", px.forLocality(Locality.TOTAL))
+                    .show("перепись", px)
                     .display();
         }
 
@@ -392,7 +390,9 @@ public class Main
 
         /* первое полугодие 1941 */
         HalfYearSelector half = HalfYearSelector.FirstHalfYear;
-        prev = curr = new HalfYearEntry(year, half, pm1941.p_start_1941, pm1941.p_start_1941);
+        prev = curr = new HalfYearEntry(year, half, 
+                                        pm1941.p_start_1941.forLocality(Locality.TOTAL), 
+                                        pm1941.p_start_1941.forLocality(Locality.TOTAL));
         curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
         curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
         halves.add(curr);
@@ -406,10 +406,10 @@ public class Main
         halves.add(curr);
 
         /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
-        PopulationByLocality pwb = p.clone();
+        Population pwb = p.clone();
 
         /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
-        PopulationByLocality pxb = p.clone();
+        Population pxb = p.clone();
         PopulationForwardingContext fctx_xb = fctx.clone();
 
         /* продвигать с шагом по полгода до января 1946 */
@@ -532,10 +532,10 @@ public class Main
 
     private void evalDeficit1946() throws Exception
     {
-        PopulationByLocality p1946_expected_with_births = halves.last().p_nonwar_with_births;
-        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
-        PopulationByLocality p1946_expected_newonly = p1946_expected_with_births.sub(p1946_expected_without_births);
-        PopulationByLocality p1941_mid = halves.get(1941, HalfYearSelector.SecondHalfYear).p_nonwar_without_births;
+        Population p1946_expected_with_births = halves.last().p_nonwar_with_births;
+        Population p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        Population p1946_expected_newonly = p1946_expected_with_births.sub(p1946_expected_without_births);
+        Population p1941_mid = halves.get(1941, HalfYearSelector.SecondHalfYear).p_nonwar_without_births;
 
         /*
          * проверить, что сумма expected_nonwar_deaths примерно равна разнице численностей
@@ -552,19 +552,19 @@ public class Main
             v_sum += curr.expected_nonwar_deaths;
         }
 
-        double v = p1941_mid.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        v -= p1946_expected_without_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v = p1941_mid.sum();
+        v -= p1946_expected_without_births.sum();
         if (Util.differ(v_sum, v, 0.0001))
             Util.err("Несовпадение числа смертей");
 
         /* =================================================== */
 
-        PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        Population deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
 
         if (Util.False)
         {
             new PopulationChart("Дефицит " + ap.area)
-                    .show("дефицит", deficit.forLocality(Locality.TOTAL))
+                    .show("дефицит", deficit)
                     .display();
         }
 
@@ -581,18 +581,18 @@ public class Main
             deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
         }
 
-        v = p1946_expected_with_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        v -= p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        v = p1946_expected_with_births.sum();
+        v -= p1946_actual.sum();
         double v_total = v;
         Util.out("Общий дефицит населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
-        v = p1946_expected_without_births.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        v -= p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        v = p1946_expected_without_births.sum();
+        v -= p1946_actual_born_prewar.sum();
         double v_prewar = v;
         Util.out("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
-        v = p1946_expected_newonly.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        v -= p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        v = p1946_expected_newonly.sum();
+        v -= p1946_actual_born_postwar.sum();
         double v_postwar = v;
         Util.out("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.: " + f2k(v / 1000.0));
 
@@ -606,8 +606,8 @@ public class Main
         }
 
         /* оставить только сверхсмертность */
-        PopulationByLocality emigration = emigration();
-        v = emigration.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        Population emigration = emigration();
+        v = emigration.sum();
         Util.out("Эмиграция, тыс. чел.: " + f2k(v / 1000.0));
         deficit = deficit.sub(emigration);
 
@@ -626,7 +626,7 @@ public class Main
         {
             /* график сверхсмертности */
             PopulationChart.display("Cверхсмертность населения " + area + " накопленная с середины 1941 по конец 1945 года", 
-                                    deficit.forLocality(Locality.TOTAL), 
+                                    deficit, 
                                     "1");
         }
 
@@ -636,16 +636,17 @@ public class Main
         /*
          * разбить сверхсмертность на категории 
          */
-        double deficit_total = deficit.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double deficit_total = deficit.sum();
         double deficit_m_conscripts = subcount(deficit, Gender.MALE, 19, 59);
         double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 58);
         double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
 
         Util.out("");
         Util.out("Сверхсмертность всего наличного на середину 1941 года населения: " + f2k(deficit_total / 1000.0));
-        Util.out("Сверхсмертность мужчин призывного возраста: " + f2k(deficit_m_conscripts / 1000.0));
-        Util.out("Сверхсмертность женщин фертильного возраста: " + f2k(deficit_f_fertile / 1000.0));
-        Util.out("Сверхсмертность остального наличного на середину 1941 года населения: " + f2k(deficit_other / 1000.0));
+        Util.out("Разбивка на категории по временному окну:");
+        Util.out("    Сверхсмертность мужчин призывного возраста: " + f2k(deficit_m_conscripts / 1000.0));
+        Util.out("    Сверхсмертность женщин фертильного возраста: " + f2k(deficit_f_fertile / 1000.0));
+        Util.out("    Сверхсмертность остального наличного на середину 1941 года населения: " + f2k(deficit_other / 1000.0));
 
         /*
          * распределить объём сверхсмертности по полугодиям 
@@ -686,10 +687,10 @@ public class Main
      * Возвращаемый дефицит охватывает только наличное на начало войны население, без учёта рождений
      * во время войны.  
      */
-    private PopulationByLocality eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    private Population eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
-        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
-        PopulationByLocality deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        Population p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        Population deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
         deficit = deficit.sub(emigration());
         return deficit;
     }
@@ -701,12 +702,12 @@ public class Main
         p1946_actual_born_postwar = p1946_actual.selectByAge(0, nd_4_5);
         p1946_actual_born_prewar = p1946_actual.selectByAge(nd_4_5 + 1, age2day(MAX_AGE + 1));
 
-        PopulationByLocality p = p1946_actual.sub(p1946_actual_born_postwar, ValueConstraint.NONE);
+        Population p = p1946_actual.sub(p1946_actual_born_postwar, ValueConstraint.NONE);
         p = p.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
 
-        double v_total = p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        double v_prewar = p1946_actual_born_prewar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-        double v_postwar = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v_total = p1946_actual.sum();
+        double v_prewar = p1946_actual_born_prewar.sum();
+        double v_postwar = p1946_actual_born_postwar.sum();
 
         if (Util.differ(v_total, v_prewar + v_postwar))
             Util.err("Ошибка расщепления");
@@ -718,7 +719,7 @@ public class Main
         return (int) Math.round(age * DAYS_PER_YEAR);
     }
 
-    private PopulationByLocality emigration() throws Exception
+    private Population emigration() throws Exception
     {
         double emig = 0;
 
@@ -733,17 +734,17 @@ public class Main
             break;
         }
 
-        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        Population p = Population.newTotalPopulation();
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            p.set(Locality.TOTAL, Gender.MALE, age, 0);
-            p.set(Locality.TOTAL, Gender.FEMALE, age, 0);
+            p.set(Gender.MALE, age, 0);
+            p.set(Gender.FEMALE, age, 0);
         }
 
         for (int age = 20; age <= 60; age++)
         {
-            p.set(Locality.TOTAL, Gender.MALE, age, 0.8);
-            p.set(Locality.TOTAL, Gender.FEMALE, age, 0.2);
+            p.set(Gender.MALE, age, 0.8);
+            p.set(Gender.FEMALE, age, 0.2);
         }
 
         p.makeBoth();
@@ -757,56 +758,56 @@ public class Main
     private void adjustForTuva() throws Exception
     {
         final double tuva_pop = 100_000;
-        double pop = p1946_actual.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double pop = p1946_actual.sum();
         double scale = (pop - tuva_pop) / pop;
-        p1946_actual = RescalePopulation.scaleAllBy(p1946_actual, scale);
+        p1946_actual = RescalePopulation.scaleBy(p1946_actual, scale);
     }
 
     private void cancelNegativeDeficit(Gender gender, int age1, int age2) throws Exception
     {
-        PopulationByLocality p1946_expected_without_births = halves.last().p_nonwar_without_births;
-        Population deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar).forLocality(Locality.TOTAL);
+        Population p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        Population deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
 
         for (int age = age1; age <= age2; age++)
         {
             double v = deficit.get(gender, age);
             if (v < 0)
             {
-                p1946_actual.add(Locality.TOTAL, gender, age, v);
+                p1946_actual.add(gender, age, v);
             }
         }
 
         p1946_actual.makeBoth();
-        p1946_actual.recalcTotalForEveryLocality();
+        p1946_actual.recalcTotal();
         split_p1946();
     }
 
-    private PopulationByLocality cancelNegativeDeficit(PopulationByLocality deficit, Gender gender, int age1, int age2) throws Exception
+    private Population cancelNegativeDeficit(Population deficit, Gender gender, int age1, int age2) throws Exception
     {
         deficit.setValueConstraint(ValueConstraint.NONE);
 
         for (int age = age1; age <= age2; age++)
         {
-            double v = deficit.get(Locality.TOTAL, gender, age);
+            double v = deficit.get(gender, age);
             if (v < 0)
             {
-                p1946_actual.add(Locality.TOTAL, gender, age, v);
-                deficit.set(Locality.TOTAL, gender, age, 0);
+                p1946_actual.add(gender, age, v);
+                deficit.set(gender, age, 0);
             }
         }
 
         deficit.makeBoth();
-        deficit.recalcTotalForEveryLocality();
+        deficit.recalcTotal();
 
         p1946_actual.makeBoth();
-        p1946_actual.recalcTotalForEveryLocality();
+        p1946_actual.recalcTotal();
 
         split_p1946();
 
         return deficit;
     }
 
-    private double subcount(PopulationByLocality p, Gender gender, int age1, int age2) throws Exception
+    private double subcount(Population p, Gender gender, int age1, int age2) throws Exception
     {
         double sum_wv = 0;
         double sum_weights = 0;
@@ -856,7 +857,7 @@ public class Main
                 break;
             }
 
-            double v = p.get(Locality.TOTAL, gender, age);
+            double v = p.get(gender, age);
             sum_weights += weight;
             sum_wv += v * weight;
         }
@@ -872,8 +873,14 @@ public class Main
      * на начало каждого предшествуюшего полугодия, c последовательным её уменьшением 
      * соответствено полугодовым коэффициентам attrition, и с возрастным сдвигом
      */
-    private void backpropagateExcessMortality(PopulationByLocality deficit1946) throws Exception
+    private void backpropagateExcessMortality(Population deficit1946) throws Exception
     {
+        /*
+         * Распределение избыточных смертей наличного на середину 1941 года населения
+         * по возрасту во время смерти. 
+         */
+        Population lossByAgeAtDeath = Population.newTotalPopulation(); // ### 
+        
         deficit1946.validateBMF();
 
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
@@ -886,6 +893,10 @@ public class Main
 
         HalfYearEntry he = halves.last();
         he.accumulated_excess_deaths = deficit1946;
+        
+        double total_conscript_excess_deaths = 0;
+        double total_fertile_woman_excess_deaths = 0;
+        double total_other_excess_deaths = 0;
 
         /*
          * Первая стадия -- годовой шаг назад к началу 1945, 1944, 1943 и 1942 гг.
@@ -911,22 +922,39 @@ public class Main
             /*
              * Вычислить потери в текущем году
              */
-            PopulationByLocality loss = he.next.next.accumulated_excess_deaths.clone();
+            Population loss = he.next.next.accumulated_excess_deaths.clone();
             loss.setValueConstraint(ValueConstraint.NONE);
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
-                loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
+                double v = loss.get(Gender.FEMALE, age);
+                
+                if (age >= 15 + 1 && age <= 54 + 1)
+                {
+                    total_fertile_woman_excess_deaths += v * a_generic;
+                    loss.set(Gender.FEMALE, age, v * a_generic);
+                }
+                else
+                {
+                    total_other_excess_deaths += v * a_generic;
+                    loss.set(Gender.FEMALE, age, v * a_generic);
+                }
             }
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Locality.TOTAL, Gender.MALE, age);
+                double v = loss.get(Gender.MALE, age);
+                
                 if (age >= 19 + 1 && age <= 55 + 1)
-                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_conscripts);
+                {
+                    total_conscript_excess_deaths += v * a_conscripts;
+                    loss.set(Gender.MALE, age, v * a_conscripts);
+                }
                 else
-                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
+                {
+                    total_other_excess_deaths += v * a_generic;
+                    loss.set(Gender.MALE, age, v * a_generic);
+                }
             }
 
             loss.makeBoth();
@@ -935,17 +963,16 @@ public class Main
             /*
              * Вычислить потери на начало года
              */
-            PopulationByLocality x = he.next.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
+            Population x = he.next.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
+            x.validateBMF();
+
             he.accumulated_excess_deaths = x.moveDown(1.0);
             he.accumulated_excess_deaths.validateBMF();
-            x.validateBMF();
 
             if (Util.True)
             {
-                verify_same(x.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE),
-                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE));
-                verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE),
-                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
+                verify_same(x.sum(Gender.MALE), he.accumulated_excess_deaths.sum(Gender.MALE));
+                verify_same(x.sum(Gender.FEMALE), he.accumulated_excess_deaths.sum(Gender.FEMALE));
             }
         }
 
@@ -970,22 +997,35 @@ public class Main
             /*
              * Вычислить потери в текущем полугодии
              */
-            PopulationByLocality loss = he.next.accumulated_excess_deaths.clone();
+            Population loss = he.next.accumulated_excess_deaths.clone();
             loss.setValueConstraint(ValueConstraint.NONE);
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Locality.TOTAL, Gender.FEMALE, age);
-                loss.set(Locality.TOTAL, Gender.FEMALE, age, v * a_generic);
+                double v = loss.get(Gender.FEMALE, age);
+
+                if (age >= 15 + 1 && age <= 54 + 1)
+                {
+                    loss.set(Gender.FEMALE, age, v * a_generic);
+                }
+                else
+                {
+                    loss.set(Gender.FEMALE, age, v * a_generic);
+                }
             }
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
-                double v = loss.get(Locality.TOTAL, Gender.MALE, age);
+                double v = loss.get(Gender.MALE, age);
+                
                 if (age >= 19 + 1 && age <= 55 + 1)
-                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_conscripts);
+                {
+                    loss.set(Gender.MALE, age, v * a_conscripts);
+                }
                 else
-                    loss.set(Locality.TOTAL, Gender.MALE, age, v * a_generic);
+                {
+                    loss.set(Gender.MALE, age, v * a_generic);
+                }
             }
 
             loss.makeBoth();
@@ -994,7 +1034,7 @@ public class Main
             /*
              * Вычислить потери на начало полугодия
              */
-            PopulationByLocality x = he.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
+            Population x = he.next.accumulated_excess_deaths.sub(loss, ValueConstraint.NONE);
             he.next.accumulated_excess_deaths.validateBMF();
             loss.validateBMF();
             x.validateBMF();
@@ -1004,15 +1044,13 @@ public class Main
 
             if (Util.True)
             {
-                verify_same(x.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE),
-                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.MALE, 0, MAX_AGE));
-                verify_same(x.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE),
-                            he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 0, MAX_AGE));
+                verify_same(x.sum(Gender.MALE), he.accumulated_excess_deaths.sum(Gender.MALE));
+                verify_same(x.sum(Gender.FEMALE), he.accumulated_excess_deaths.sum(Gender.FEMALE));
             }
 
             if (he.year == 1941)
             {
-                double xsum = he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+                double xsum = he.accumulated_excess_deaths.sum();
                 if (Math.abs(xsum) > 10)
                     throw new Exception("обратный отсчёт потерь не обнулился");
                 break;
@@ -1026,6 +1064,46 @@ public class Main
             acv_conscripts.remove(0);
             acv_conscripts.remove(0);
         }
+        
+        /*
+         * добавить разбивку потерь за вторую половину 1941 года
+         */
+        he = halves.get(1942, HalfYearSelector.FirstHalfYear);
+        Population loss = he.accumulated_excess_deaths;
+
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            double v = loss.get(Gender.FEMALE, age);
+            
+            // ### возраста ...
+            if (age >= 15 + 1 && age <= 54 + 1)
+            {
+                total_fertile_woman_excess_deaths += v;
+            }
+            else
+            {
+                total_other_excess_deaths += v;
+            }
+        }
+
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            double v = loss.get(Gender.MALE, age);
+            
+            if (age >= 19 + 1 && age <= 55 + 1)
+            {
+                total_conscript_excess_deaths += v;
+            }
+            else
+            {
+                total_other_excess_deaths += v;
+            }
+        }
+        
+        Util.out("Категории сверхсмертности наличного на середину 1941 года населения по обратной разбивке:");
+        Util.out("  Число избыточных смертей мужчин призывного возраста (19-55 лет), тыс. чел.: " + f2k(total_conscript_excess_deaths / 1000.0));
+        Util.out("  Число избыточных смертей женщин фертильного возраста (15-54 лет), тыс. чел.: " + f2k(total_fertile_woman_excess_deaths  / 1000.0));
+        Util.out("  Число избыточных смертей других групп, тыс. чел.: " + f2k(total_other_excess_deaths / 1000.0));
     }
 
     private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
@@ -1043,7 +1121,7 @@ public class Main
     }
 
     /*
-     * Откинуть последние коэффициенты (нули для 1-го полугодия 1941),
+     * Откинуть коэффициенты (нули) для 1-го полугодия 1941,
      * остаток отсортировать в обращённом порядке, для обратного отсчёта по полугодиям от 1946 к 1941 г.
      */
     private List<Double> atov_reverse(double[] a)
@@ -1051,9 +1129,8 @@ public class Main
         List<Double> list = new ArrayList<>();
         for (double d : a)
             list.add(d);
+        list.remove(0); // убрать нулевой весовой коэффициент за первое полугодие 1941 года 
         Collections.reverse(list);
-        // list.remove(0);
-        list.remove(list.size() - 1);
         return list;
     }
 
@@ -1080,19 +1157,19 @@ public class Main
                 break;
 
             /* взрослое население в начале периода */
-            PopulationByLocality p1 = he.p_nonwar_without_births;
+            Population p1 = he.p_nonwar_without_births;
             if (he.accumulated_excess_deaths != null)
                 p1 = p1.sub(he.accumulated_excess_deaths, ValueConstraint.NONE);
             p1.setValueConstraint(ValueConstraint.NONE);
 
             /* взрослое население в конце периода */
-            PopulationByLocality p2 = he.next.p_nonwar_without_births;
+            Population p2 = he.next.p_nonwar_without_births;
             if (he.next.accumulated_excess_deaths != null)
                 p2 = p2.sub(he.next.accumulated_excess_deaths, ValueConstraint.NONE);
             p2.setValueConstraint(ValueConstraint.NONE);
 
             /* среднее взрослое население за период */
-            PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
+            Population pavg = p1.avg(p2, ValueConstraint.NONE);
 
             he.p_actual_without_births_start = p1;
             he.p_actual_without_births_end = p2;
@@ -1146,7 +1223,7 @@ public class Main
          * от середины 1941 с p = empty
          * и добавлением числа рождений за полугодие согласно he.actual_births
          */
-        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        Population p = Population.newTotalPopulation();
         p.zero();
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
         fctx.begin(p);
@@ -1179,7 +1256,7 @@ public class Main
         }
 
         double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
-        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v2 = p1946_actual_born_postwar.sum(0, MAX_AGE);
 
         Util.out(String.format("Сверхсмертность рождённых во время войны, сумма к началу 1946 года, тыс. чел.: %s", f2k((v1 - v2) / 1000.0)));
     }
@@ -1227,7 +1304,7 @@ public class Main
          * от середины 1941 с p = empty
          * и добавлением числа рождений за полугодие согласно he.actual_births
          */
-        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        Population p = Population.newTotalPopulation();
         p.zero();
         PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
         fctx.begin(p);
@@ -1264,7 +1341,7 @@ public class Main
         }
 
         double v1 = fctx.sum(Locality.TOTAL, Gender.BOTH, 0, fctx.MAX_DAY);
-        double v2 = p1946_actual_born_postwar.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        double v2 = p1946_actual_born_postwar.sum(0, MAX_AGE);
 
         return v1 - v2;
     }

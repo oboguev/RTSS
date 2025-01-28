@@ -105,6 +105,31 @@ public class PopulationByLocality
         return forLocality(locality).sum(gender, age1, age2);
     }
 
+    public double sum(Gender gender, int age1, int age2) throws Exception
+    {
+        return sum(Locality.TOTAL, gender, age1, age2);
+    }
+    
+    public double sum(int age1, int age2) throws Exception
+    {
+        return sum(Locality.TOTAL, Gender.BOTH, age1, age2);
+    }
+    
+    public double sum(Locality locality) throws Exception
+    {
+        return sum(locality, Gender.BOTH, 0, MAX_AGE);
+    }
+
+    public double sum(Gender gender) throws Exception
+    {
+        return sum(Locality.TOTAL, gender, 0, MAX_AGE);
+    }
+
+    public double sum() throws Exception
+    {
+        return sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+    }
+
     public void set(Locality locality, Gender gender, int age, double value) throws Exception
     {
         forLocality(locality).set(gender, age, value);

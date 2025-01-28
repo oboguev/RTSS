@@ -123,6 +123,17 @@ public class ForwardPopulationT extends ForwardPopulation
      * При передвижке на целый год @yfraction = 1.0.
      * При передвижке на часть года @yfraction < 1.0.
      */
+    public Population forward(final Population p,
+            PopulationForwardingContext fctx,
+            final CombinedMortalityTable mt,
+            final double yfraction)
+            throws Exception
+    {
+        PopulationByLocality xp = new PopulationByLocality(p);
+        PopulationByLocality xp2 = forward(xp, fctx, mt, yfraction); 
+        return xp2.forLocality(Locality.TOTAL);
+    }
+    
     public PopulationByLocality forward(final PopulationByLocality p,
             PopulationForwardingContext fctx,
             final CombinedMortalityTable mt,

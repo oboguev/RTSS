@@ -1,6 +1,6 @@
 package rtss.ww2losses;
 
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.Population;
 import rtss.data.population.forward.PopulationForwardingContext;
 import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
 
@@ -15,10 +15,10 @@ public class HalfYearEntry
     final public HalfYearSelector halfyear;
     
     /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
-    public PopulationByLocality p_nonwar_with_births;
+    public Population p_nonwar_with_births;
 
     /* ожидаемое в условиях мира население на начало периода, без учёта рождений после середины 1941 */
-    public PopulationByLocality p_nonwar_without_births;
+    public Population p_nonwar_without_births;
     
     /* 
      * ожидаемое в условиях мира число смертей за период (от начала до конца периода) 
@@ -33,14 +33,14 @@ public class HalfYearEntry
      * кумулятивные потери населения по сверхсмертности накопленные на начало периода, половозрастная структура,
      * для населения наличного на начало войны 
      */
-    public PopulationByLocality accumulated_excess_deaths;
+    public Population accumulated_excess_deaths;
     
     /* 
      * фактическое население (без учёта рождений после середины 1941 года) на начало, конец и середину периода
      */
-    public PopulationByLocality p_actual_without_births_start;
-    public PopulationByLocality p_actual_without_births_end;
-    public PopulationByLocality p_actual_without_births_avg;
+    public Population p_actual_without_births_start;
+    public Population p_actual_without_births_end;
+    public Population p_actual_without_births_avg;
     
     /*
      * добавочное из-за войны количество смертей в этом полугодии в наличном на начало войны населении 
@@ -72,9 +72,9 @@ public class HalfYearEntry
     public double actual_warborn_deaths;
 
     /* временные данные для передвижки */
-    PopulationByLocality fw_p_wb;
+    Population fw_p_wb;
     PopulationForwardingContext fw_fctx_wb;
-    PopulationByLocality fw_p_xb;
+    Population fw_p_xb;
     PopulationForwardingContext fw_fctx_xb;
     
     /* вычисляется PrinyHalves */
@@ -102,8 +102,8 @@ public class HalfYearEntry
     public HalfYearEntry(
             int year,
             HalfYearSelector halfyear,
-            PopulationByLocality p_nonwar_with_births,
-            PopulationByLocality p_nonwar_without_births)
+            Population p_nonwar_with_births,
+            Population p_nonwar_without_births)
     {
         this.year = year;
         this.halfyear = halfyear;
@@ -112,8 +112,8 @@ public class HalfYearEntry
     }
     
     public void save_fw(
-            PopulationByLocality pwb, PopulationForwardingContext fctx, 
-            PopulationByLocality pxb, PopulationForwardingContext fctx_xb)
+            Population pwb, PopulationForwardingContext fctx, 
+            Population pxb, PopulationForwardingContext fctx_xb)
     {
         this.fw_p_wb = pwb.clone();
         this.fw_fctx_wb = fctx.clone();

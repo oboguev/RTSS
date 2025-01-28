@@ -2,9 +2,7 @@ package rtss.ww2losses.helpers;
 
 import rtss.data.ValueConstraint;
 import rtss.data.population.Population;
-import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 import rtss.util.FieldValue;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntry;
@@ -52,28 +50,28 @@ public class PrintHalves
             double d2 = 0;
 
             if (he.accumulated_excess_deaths != null)
-                d1 = he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+                d1 = he.accumulated_excess_deaths.sum(Gender.BOTH, 0, MAX_AGE);
 
             if (he.next.accumulated_excess_deaths != null)
-                d2 = he.next.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+                d2 = he.next.accumulated_excess_deaths.sum(Gender.BOTH, 0, MAX_AGE);
 
             double d2_minus_d1 = Math.round(d2 - d1);
 
-            double fert_actual = he.p_actual_without_births_avg.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
+            double fert_actual = he.p_actual_without_births_avg.sum(Gender.FEMALE, 15, 54);
             double fert_loss = 0;
             if (he.accumulated_excess_deaths != null)
-                fert_loss = he.accumulated_excess_deaths.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
+                fert_loss = he.accumulated_excess_deaths.sum(Gender.FEMALE, 15, 54);
 
-            PopulationByLocality p1 = he.p_nonwar_without_births;
-            PopulationByLocality p2 = he.next.p_nonwar_without_births;
-            PopulationByLocality pavg = p1.avg(p2, ValueConstraint.NONE);
-            double fert_expected = pavg.sum(Locality.TOTAL, Gender.FEMALE, 15, 54);
+            Population p1 = he.p_nonwar_without_births;
+            Population p2 = he.next.p_nonwar_without_births;
+            Population pavg = p1.avg(p2, ValueConstraint.NONE);
+            double fert_expected = pavg.sum(Gender.FEMALE, 15, 54);
 
             he.extra.total_deaths = d2_minus_d1 + he.expected_nonwar_deaths + he.actual_warborn_deaths;
             
             // population
-            he.extra.pn1 = he.p_actual_without_births_start.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-            he.extra.pn2 = he.p_actual_without_births_end.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+            he.extra.pn1 = he.p_actual_without_births_start.sum(Gender.BOTH, 0, MAX_AGE);
+            he.extra.pn2 = he.p_actual_without_births_end.sum(Gender.BOTH, 0, MAX_AGE);
             
             if (he != he0)
             {

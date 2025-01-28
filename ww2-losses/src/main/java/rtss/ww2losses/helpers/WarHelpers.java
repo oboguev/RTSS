@@ -1,20 +1,19 @@
 package rtss.ww2losses.helpers;
 
-import rtss.data.population.PopulationByLocality;
-import rtss.data.population.forward.ForwardPopulation;
 import rtss.data.population.Population;
+import rtss.data.population.forward.ForwardPopulation;
 import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 public class WarHelpers
 {
-    public static void validateDeficit(PopulationByLocality deficit) throws Exception
+    public static void validateDeficit(Population deficit) throws Exception
     {
-        validateDeficit(deficit, null);
+        String noNotice = null;
+        validateDeficit(deficit, noNotice);
     }
 
-    public static void validateDeficit(PopulationByLocality deficit, String notice) throws Exception
+    public static void validateDeficit(Population deficit, String notice) throws Exception
     {
         if (notice != null)
         {
@@ -23,9 +22,8 @@ public class WarHelpers
             Util.err("");
         }
 
-        Population p = deficit.forLocality(Locality.TOTAL);
-        validateDeficit(p, Gender.MALE);
-        validateDeficit(p, Gender.FEMALE);
+        validateDeficit(deficit, Gender.MALE);
+        validateDeficit(deficit, Gender.FEMALE);
     }
 
     public static void validateDeficit(Population deficit, Gender gender) throws Exception

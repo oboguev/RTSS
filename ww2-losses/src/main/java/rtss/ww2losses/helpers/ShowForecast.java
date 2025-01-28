@@ -1,8 +1,7 @@
 package rtss.ww2losses.helpers;
 
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
@@ -14,7 +13,7 @@ import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
  */
 public class ShowForecast
 {
-    public static void show(AreaParameters ap, PopulationByLocality p1946_actual, HalfYearEntries<HalfYearEntry> halves, int age) throws Exception
+    public static void show(AreaParameters ap, Population p1946_actual, HalfYearEntries<HalfYearEntry> halves, int age) throws Exception
     {
         Util.out("");
         Util.out(String.format("%s, возраст %d (на начало 1941)", ap.area.toString(), age));
@@ -29,19 +28,19 @@ public class ShowForecast
         show("1946, фактическое", p1946_actual, age + 1946 - 1941, false);
     }
     
-    private static void show(String what, PopulationByLocality p, int age, boolean secondHalfyear) throws Exception
+    private static void show(String what, Population p, int age, boolean secondHalfyear) throws Exception
     {
         String sage = "возраст " + age;
         
-        double f = p.get(Locality.TOTAL, Gender.FEMALE, age); 
-        double m = p.get(Locality.TOTAL, Gender.MALE, age); 
-        double b = p.get(Locality.TOTAL, Gender.BOTH, age);
+        double f = p.get(Gender.FEMALE, age); 
+        double m = p.get(Gender.MALE, age); 
+        double b = p.get(Gender.BOTH, age);
         
         if (secondHalfyear && Util.False)
         {
-            double f2 = p.get(Locality.TOTAL, Gender.FEMALE, age + 1); 
-            double m2 = p.get(Locality.TOTAL, Gender.MALE, age + 1); 
-            double b2 = p.get(Locality.TOTAL, Gender.BOTH, age + 1);
+            double f2 = p.get(Gender.FEMALE, age + 1); 
+            double m2 = p.get(Gender.MALE, age + 1); 
+            double b2 = p.get(Gender.BOTH, age + 1);
             
             f = (f + f2) / 2;
             m = (m + m2) / 2;

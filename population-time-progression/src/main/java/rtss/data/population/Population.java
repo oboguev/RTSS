@@ -46,6 +46,11 @@ public class Population
         return new DoubleArray(MAX_AGE, vc);
     }
 
+    static public Population newTotalPopulation()
+    {
+        return newPopulation(Locality.TOTAL);
+    }
+
     static public Population newPopulation(Locality locality)
     {
         Population p = new Population();
@@ -172,6 +177,21 @@ public class Population
         }
 
         return Util.validate(sum);
+    }
+
+    public double sum(int age1, int age2) throws Exception
+    {
+        return sum(Gender.BOTH, age1, age2);
+    }
+
+    public double sum(Gender gender) throws Exception
+    {
+        return sum(gender, 0, MAX_AGE);
+    }
+
+    public double sum() throws Exception
+    {
+        return sum(Gender.BOTH, 0, MAX_AGE);
     }
 
     public void set(Gender gender, int age, double value) throws Exception
@@ -465,6 +485,13 @@ public class Population
     public Population avg(Population p) throws Exception
     {
         Population p2 = this.add(p);
+        p2 = RescalePopulation.scaleBy(p2, 0.5);
+        return p2;
+    }
+
+    public Population avg(Population p, ValueConstraint rvc) throws Exception
+    {
+        Population p2 = this.add(p, rvc);
         p2 = RescalePopulation.scaleBy(p2, 0.5);
         return p2;
     }

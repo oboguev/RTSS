@@ -294,6 +294,13 @@ public class PopulationForwardingContext
      * Переместить детские ряды из @p в контекст.
      * Вернуть население с обнулёнными детскими рядами.
      */
+    public Population begin(final Population p) throws Exception
+    {
+        PopulationByLocality xp = new PopulationByLocality(p);
+        PopulationByLocality xp2 = begin(xp);
+        return xp2.forLocality(Locality.TOTAL);
+    }
+    
     public PopulationByLocality begin(final PopulationByLocality p) throws Exception
     {
         // TODO: сделать аргументом (таблица смертности в год, для которого указана структура населения)
@@ -498,6 +505,13 @@ public class PopulationForwardingContext
      * 
      * Возвращает результат добавления. Исходная структура @p не меняется.   
      */
+    public Population end(final Population p) throws Exception
+    {
+        PopulationByLocality xp = new PopulationByLocality(p);
+        PopulationByLocality xp2 = end(xp);
+        return xp2.forLocality(Locality.TOTAL);
+    }
+
     public PopulationByLocality end(final PopulationByLocality p) throws Exception
     {
         if (!began)
