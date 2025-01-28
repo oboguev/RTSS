@@ -235,7 +235,7 @@ public class TestValidate_193x
         }
 
         PopulationByLocality p = p1939;
-        // p = p.selectByAge(8, MAX_AGE);
+        // p = p.selectByAgeYears(8, MAX_AGE);
         
         final double ruralPopulation = p.sum(Locality.RURAL, Gender.BOTH, 0, MAX_AGE);
         final double urbanPopulation = p.sum(Locality.URBAN, Gender.BOTH, 0, MAX_AGE);
