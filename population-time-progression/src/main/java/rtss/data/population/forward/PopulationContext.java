@@ -552,6 +552,7 @@ public class PopulationContext
         }
 
         pto.recalcTotalForEveryLocality();
+        pto.recalcTotalLocalityFromUrbanRural();
         pto.validate();
 
         return pto;
@@ -720,9 +721,17 @@ public class PopulationContext
         {
             p = PopulationByLocality.newPopulationTotalOnly();
         }
+
+        if (this.valueConstraint != null)
+            p.setValueConstraint(this.valueConstraint);
         
         p.zero();
         p = this.end(p);
         return p;
+    }
+    
+    public void validate() throws Exception
+    {
+        // currently no-op
     }
 }
