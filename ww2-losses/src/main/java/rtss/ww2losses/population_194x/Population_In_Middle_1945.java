@@ -10,7 +10,7 @@ import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
 
 /**
- * Вычислить возрастную структуру населения СССР или РСФСР на середину 1945 года
+ * Вычислить половозрастную структуру населения СССР или РСФСР на середину 1945 года
  */
 public class Population_In_Middle_1945 extends UtilBase_194x
 {
