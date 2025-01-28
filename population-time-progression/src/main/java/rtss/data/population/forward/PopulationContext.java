@@ -74,6 +74,7 @@ public class PopulationContext
 {
     public static final int DEFAULT_NYEARS = 5; /* years 0-4 */
     public static final int ALL_AGES = Population.MAX_AGE + 1; /* years 0-MAX_AGE */
+    private static final int MAX_AGE = Population.MAX_AGE;
 
     public final int DAYS_PER_YEAR = 365;
 
@@ -552,10 +553,10 @@ public class PopulationContext
         }
 
         pto.recalcTotalForEveryLocality();
-        
+
         if (pto.hasRuralUrban())
             pto.recalcTotalLocalityFromUrbanRural();
-        
+
         pto.validate();
 
         return pto;
@@ -737,4 +738,29 @@ public class PopulationContext
     {
         // currently no-op
     }
+
+    /* =============================================================================================== */
+
+    /*
+     * Simulate population interface
+     */
+    public void makeBoth()
+    {
+        // no-op
+    }
+
+    public void recalcTotal()
+    {
+        // no-op
+    }
+
+    public void validateBMF()
+    {
+        // no-op
+    }
+
+    // public double sum() throws Exception
+    // {
+    //    return sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+    //}
 }
