@@ -50,7 +50,10 @@ public class BackwardPopulationT extends ForwardPopulation
             throws Exception
     {
         if (fctx == null || fctx.MAX_YEAR != MAX_AGE || p.sum() != 0)
-            throw new IllegalArgumentException("население не перегружено в PopulationForwardingContext");
+            throw new IllegalArgumentException("население не перегружено целиком в PopulationForwardingContext, используйте PopulationForwardingContext.ALL_AGES");
+
+        if (yfraction > 1)
+            throw new IllegalArgumentException("передвижка на более чем год");
 
         backward(fctx, Locality.TOTAL, mt, yfraction);
 
