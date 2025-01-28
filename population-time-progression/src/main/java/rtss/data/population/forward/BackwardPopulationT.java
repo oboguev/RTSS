@@ -13,11 +13,19 @@ import rtss.data.selectors.Locality;
  * Все данные о численности населения должны находиться в PopulationForwardingContext с размером ALL_AGES:
  * 
  *     PopulationForwardingContext fctx = new PopulationForwardingContext(PopulationForwardingContext.ALL_AGES);
- *     PopulationByLocality pto = fctx.begin(p);    // pto - пустой
+ *     PopulationByLocality pto = fctx.begin(p); // pto - пустой
  *     ....
- *     pto = backward(pto, fctx, mt, yfraction)      <== повторяемое сколько требуется
+ *     pto = backward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
  *     ....
  *     ptoEnd = fctx.end(pto);
+ * 
+ * Величины
+ *     observed_deaths
+ *     fctx_t_male_deaths
+ *     fctx_t_female_deaths
+ * содержат число "отмерших".
+ * 
+ * Родившиеся за период исчезают.
  * 
  */
 public class BackwardPopulationT extends ForwardPopulation
@@ -98,8 +106,17 @@ public class BackwardPopulationT extends ForwardPopulation
         double[] p2 = new double[p.length];
 
         double sum_deaths = 0;
-        
-        // ###
+
+        for (int nd = ndays; nd < p.length; nd++)
+        {
+            int nd2 = nd - ndays;
+            double v = p[nd];
+            double v2 = v * day_lx[nd2] / day_lx[nd];
+            p2[nd2] = v2;
+            sum_deaths += v2 - v;
+        }
+
+        // ### восстановить число умерших
 
         fctx.fromArray(locality, gender, p2);
 
@@ -113,8 +130,6 @@ public class BackwardPopulationT extends ForwardPopulation
             fctx_t_female_deaths += sum_deaths;
             break;
         }
-        
-        // ### восстановить число умерших
 
         observed_deaths += sum_deaths;
     }

@@ -45,13 +45,13 @@ import rtss.util.Util;
  * 
  * Использование:
  * 
- * PopulationByLocality p = ...
- * PopulationForwardingContext fctx = new PopulationForwardingContext();
- * PopulationByLocality pto = fctx.begin(p);
- * ....
- * pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
- * ....
- * ptoEnd = fctx.end(pto);
+ *     PopulationByLocality p = ...
+ *     PopulationForwardingContext fctx = new PopulationForwardingContext();
+ *     PopulationByLocality pto = fctx.begin(p);
+ *     ....
+ *     pto = forward(pto, fctx, mt, yfraction) <== повторяемое сколько требуется
+ *     ....
+ *     ptoEnd = fctx.end(pto);
  * 
  * fctx.begin переносит младшие возрастные группы в контекст, обнуляя их в возвращаеммом @pto.
  * 
@@ -300,7 +300,7 @@ public class PopulationForwardingContext
         PopulationByLocality xp2 = begin(xp);
         return xp2.forLocality(Locality.TOTAL);
     }
-    
+
     public PopulationByLocality begin(final PopulationByLocality p) throws Exception
     {
         // TODO: сделать аргументом (таблица смертности в год, для которого указана структура населения)
