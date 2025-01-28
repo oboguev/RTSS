@@ -186,6 +186,16 @@ public class PopulationContext
         return sum;
     }
 
+    public double sumDays(Gender gender, int nd1, int nd2) throws Exception
+    {
+        return sumDays(Locality.TOTAL, gender, nd1, nd2);
+    }
+    
+    public double sumDays(int nd1, int nd2) throws Exception
+    {
+        return sumDays(Locality.TOTAL, Gender.BOTH, nd1, nd2);
+    }
+    
     public double sumAge(Locality locality, Gender gender, int age) throws Exception
     {
         return sumDays(locality, gender, firstDayForAge(age), lastDayForAge(age));
@@ -759,8 +769,33 @@ public class PopulationContext
         // no-op
     }
 
-    // public double sum() throws Exception
-    // {
-    //    return sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
-    //}
+    public double sum(Gender gender, int age1, int age2) throws Exception
+    {
+        return sum(Locality.TOTAL, gender, age1, age2);
+    }
+    
+    public double sum(int age1, int age2) throws Exception
+    {
+        return sum(Locality.TOTAL, Gender.BOTH, age1, age2);
+    }
+    
+    public double sum(Locality locality) throws Exception
+    {
+        return sum(locality, Gender.BOTH, 0, MAX_AGE);
+    }
+
+    public double sum(Gender gender) throws Exception
+    {
+        return sum(Locality.TOTAL, gender, 0, MAX_AGE);
+    }
+
+    public double sum() throws Exception
+    {
+        return sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+    }
+
+    public double sum(Locality locality, Gender gender, int age1, int age2) throws Exception
+    {
+        return sumDays(locality, gender, firstDayForAge(age1), lastDayForAge(age2));
+    }
 }
