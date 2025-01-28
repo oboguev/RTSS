@@ -930,11 +930,39 @@ public class PopulationContext
     {
         return avg(p, null);
     }
-    
+
     public PopulationContext avg(PopulationContext p, ValueConstraint rvc) throws Exception
     {
         PopulationContext p2 = this.add(p, rvc);
         p2 = RescalePopulation.scaleAllBy(p2, 0.5);
         return p2;
+    }
+
+    /* ---------------------------------------------------------------------------- */
+
+    /*
+     * Сдвинуть возрастное распределение на @years лет вниз
+     */
+    public PopulationContext moveDown(double years) throws Exception
+    {
+        return moveDownByDays((int) Math.round(years * DAYS_PER_YEAR));
+    }
+
+    public PopulationContext moveDownByDays(int ndays) throws Exception
+    {
+        PopulationContext c = clone();
+
+        for (LocalityGender lg : lgs())
+        {
+            double[] v = c.asArray(lg.locality, lg.gender);
+            double[] v2 = new double[v.length];
+
+            for (int nd = ndays; nd < v.length; nd++)
+                v2[nd - ndays] = v[nd];
+
+            c.fromArray(lg.locality, lg.gender, v2);
+        }
+
+        return c;
     }
 }
