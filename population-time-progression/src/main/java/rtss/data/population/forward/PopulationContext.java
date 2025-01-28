@@ -1,6 +1,8 @@
 package rtss.data.population.forward;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import rtss.data.ValueConstraint;
@@ -13,6 +15,7 @@ import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.data.selectors.LocalityGender;
 import rtss.data.selectors.holders.LocalityGenderToDoubleArray;
 import rtss.util.Util;
 
@@ -761,9 +764,30 @@ public class PopulationContext
             if (this.valueConstraint != null && cx.valueConstraint != null && !this.valueConstraint.equals(cx.valueConstraint))
                 throw new Exception("разнородные контексты");
         }
-        
+
         if (this.MAX_DAY != cx.MAX_DAY)
             throw new Exception("разнородные контексты");
+    }
+
+    private List<LocalityGender> lgs()
+    {
+        List<LocalityGender> list = new ArrayList<>();
+
+        if (hasRuralUrban)
+        {
+            list.add(LocalityGender.URBAN_MALE);
+            list.add(LocalityGender.URBAN_FEMALE);
+
+            list.add(LocalityGender.RURAL_MALE);
+            list.add(LocalityGender.RURAL_FEMALE);
+        }
+        else
+        {
+            list.add(LocalityGender.TOTAL_MALE);
+            list.add(LocalityGender.TOTAL_FEMALE);
+
+        }
+        return list;
     }
 
     /* =============================================================================================== */
@@ -785,7 +809,7 @@ public class PopulationContext
     {
         // no-op
     }
-    
+
     /* ---------------------------------------------------------------------------- */
 
     public double sum(Gender gender, int age1, int age2) throws Exception
@@ -822,10 +846,9 @@ public class PopulationContext
 
     public PopulationContext sub(PopulationContext p) throws Exception
     {
-        ValueConstraint vc = null;
-        return sub(p, vc);
+        return sub(p, (ValueConstraint) null);
     }
-    
+
     public PopulationContext sub(PopulationContext cx, ValueConstraint vc) throws Exception
     {
         checkConforming(cx, vc);
@@ -833,47 +856,30 @@ public class PopulationContext
         PopulationContext c = clone();
         if (vc != null)
             c.setValueConstraint(vc);
-        
-        if (hasRuralUrban)
+
+        for (LocalityGender lg : lgs())
         {
-            c.sub_inner(cx, Locality.URBAN);
-            c.sub_inner(cx, Locality.RURAL);
-        }
-        else
-        {
-            c.sub_inner(cx, Locality.TOTAL);
+            double[] v = c.asArray(lg.locality, lg.gender);
+            double[] vx = cx.asArray(lg.locality, lg.gender);
+            if (v.length != vx.length)
+                throw new IllegalArgumentException("разнородные контексты");
+
+            for (int nd = 0; nd < v.length; nd++)
+                v[nd] -= vx[nd];
+
+            c.fromArray(lg.locality, lg.gender, v);
         }
 
         return c;
-    }
-    
-    private void sub_inner(PopulationContext cx, Locality locality) throws Exception
-    {
-        sub_inner(cx, locality, Gender.MALE);
-        sub_inner(cx, locality, Gender.FEMALE);
-    }
-
-    private void sub_inner(PopulationContext cx, Locality locality, Gender gender) throws Exception
-    {
-        double[] v = this.asArray(locality, gender);
-        double[] vx = cx.asArray(locality, gender);
-        if (v.length != vx.length)
-            throw new IllegalArgumentException("разнородные контексты");
-        
-        for (int nd = 0; nd < v.length; nd++)
-            v[nd] -= vx[nd];
-
-        this.fromArray(locality, gender, v);
     }
 
     /* ---------------------------------------------------------------------------- */
 
     public PopulationContext add(PopulationContext p) throws Exception
     {
-        ValueConstraint vc = null;
-        return add(p, vc);
+        return add(p, (ValueConstraint) null);
     }
-    
+
     public PopulationContext add(PopulationContext cx, ValueConstraint vc) throws Exception
     {
         checkConforming(cx, vc);
@@ -881,37 +887,21 @@ public class PopulationContext
         PopulationContext c = clone();
         if (vc != null)
             c.setValueConstraint(vc);
-        
-        if (hasRuralUrban)
+
+        for (LocalityGender lg : lgs())
         {
-            c.add_inner(cx, Locality.URBAN);
-            c.add_inner(cx, Locality.RURAL);
-        }
-        else
-        {
-            c.add_inner(cx, Locality.TOTAL);
+            double[] v = c.asArray(lg.locality, lg.gender);
+            double[] vx = cx.asArray(lg.locality, lg.gender);
+            if (v.length != vx.length)
+                throw new IllegalArgumentException("разнородные контексты");
+
+            for (int nd = 0; nd < v.length; nd++)
+                v[nd] += vx[nd];
+
+            c.fromArray(lg.locality, lg.gender, v);
         }
 
         return c;
-    }
-    
-    private void add_inner(PopulationContext cx, Locality locality) throws Exception
-    {
-        add_inner(cx, locality, Gender.MALE);
-        add_inner(cx, locality, Gender.FEMALE);
-    }
-
-    private void add_inner(PopulationContext cx, Locality locality, Gender gender) throws Exception
-    {
-        double[] v = this.asArray(locality, gender);
-        double[] vx = cx.asArray(locality, gender);
-        if (v.length != vx.length)
-            throw new IllegalArgumentException("разнородные контексты");
-        
-        for (int nd = 0; nd < v.length; nd++)
-            v[nd] += vx[nd];
-
-        this.fromArray(locality, gender, v);
     }
 
     /* ---------------------------------------------------------------------------- */
@@ -920,32 +910,16 @@ public class PopulationContext
     {
         PopulationContext c = clone();
 
-        if (hasRuralUrban)
+        for (LocalityGender lg : lgs())
         {
-            c.scale_inner(Locality.URBAN, scale);
-            c.scale_inner(Locality.RURAL, scale);
-        }
-        else
-        {
-            c.scale_inner(Locality.TOTAL, scale);
+            double[] v = c.asArray(lg.locality, lg.gender);
+
+            for (int nd = 0; nd < v.length; nd++)
+                v[nd] *= scale;
+
+            c.fromArray(lg.locality, lg.gender, v);
         }
 
         return c;
-    }
-
-    private void scale_inner(Locality locality, double scale) throws Exception
-    {
-        scale_inner(locality, Gender.MALE, scale);
-        scale_inner(locality, Gender.FEMALE, scale);
-    }
-
-    private void scale_inner(Locality locality, Gender gender, double scale) throws Exception
-    {
-        double[] v = this.asArray(locality, gender);
-        
-        for (int nd = 0; nd < v.length; nd++)
-            v[nd] *= scale;
-
-        this.fromArray(locality, gender, v);
     }
 }

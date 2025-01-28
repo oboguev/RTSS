@@ -128,8 +128,8 @@ public class RescalePopulation
 
     public static PopulationContext scaleAllTo(PopulationContext p, double target) throws Exception
     {
-        // ###
-        return null;
+        double scale = target / p.sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
+        return scaleAllBy(p, scale);
     }
 
     public static PopulationContext scaleAllBy(PopulationContext p, double scale) throws Exception
