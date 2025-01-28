@@ -211,32 +211,32 @@ public class PopulationByLocality
      * Аналогично, age2 = 80.5 означает, что включена половина населения в возрасте 80 лет,
      * а население начиная с возраста 81 года исключено целиком. 
      */
-    public PopulationByLocality selectByAge(double age1, double age2) throws Exception
+    public PopulationByLocality selectByAgeYears(double age1, double age2) throws Exception
     {
         if (rural != null && urban != null)
         {
-            Population x_urban = urban.selectByAge(age1, age2);
-            Population x_rural = rural.selectByAge(age1, age2);
+            Population x_urban = urban.selectByAgeYears(age1, age2);
+            Population x_rural = rural.selectByAgeYears(age1, age2);
             return new PopulationByLocality(x_urban, x_rural);
         }
         else
         {
-            Population x_total = total.selectByAge(age1, age2);
+            Population x_total = total.selectByAgeYears(age1, age2);
             return new PopulationByLocality(x_total);
         }
     }
 
-    public PopulationByLocality selectByAge(int ageday1, int ageday2) throws Exception
+    public PopulationByLocality selectByAgeDays(int ageday1, int ageday2) throws Exception
     {
         if (rural != null && urban != null)
         {
-            Population x_urban = urban.selectByAge(ageday1, ageday2);
-            Population x_rural = rural.selectByAge(ageday1, ageday2);
+            Population x_urban = urban.selectByAgeDays(ageday1, ageday2);
+            Population x_rural = rural.selectByAgeDays(ageday1, ageday2);
             return new PopulationByLocality(x_urban, x_rural);
         }
         else
         {
-            Population x_total = total.selectByAge(ageday1, ageday2);
+            Population x_total = total.selectByAgeDays(ageday1, ageday2);
             return new PopulationByLocality(x_total);
         }
     }

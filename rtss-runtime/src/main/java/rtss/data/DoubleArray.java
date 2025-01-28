@@ -102,7 +102,7 @@ public class DoubleArray
      * Аналогично, age2 = 80.5 означает, что включена половина населения в возрасте 80 лет,
      * а население начиная с возраста 81 года исключено целиком. 
      */
-    public DoubleArray selectByAge(double age1, double age2) throws Exception
+    public DoubleArray selectByAgeYears(double age1, double age2) throws Exception
     {
         DoubleArray selection = clone();
 

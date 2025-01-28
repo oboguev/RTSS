@@ -698,8 +698,8 @@ public class Main
     {
         int nd_4_5 = age2day(4.5);
 
-        p1946_actual_born_postwar = p1946_actual.selectByAge(0, nd_4_5);
-        p1946_actual_born_prewar = p1946_actual.selectByAge(nd_4_5 + 1, age2day(MAX_AGE + 1));
+        p1946_actual_born_postwar = p1946_actual.selectByAgeDays(0, nd_4_5);
+        p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5 + 1, age2day(MAX_AGE + 1));
 
         Population p = p1946_actual.sub(p1946_actual_born_postwar, ValueConstraint.NONE);
         p = p.sub(p1946_actual_born_prewar, ValueConstraint.NONE);

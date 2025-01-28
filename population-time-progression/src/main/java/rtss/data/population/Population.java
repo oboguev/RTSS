@@ -349,14 +349,14 @@ public class Population
      */
     private final int DAYS_PER_YEAR = 365;
 
-    public Population selectByAge(double age1, double age2) throws Exception
+    public Population selectByAgeYears(double age1, double age2) throws Exception
     {
         int ageday1 = (int) Math.round(age1 * DAYS_PER_YEAR);
         int ageday2 = (int) Math.round(age2 * DAYS_PER_YEAR);
-        return selectByAge(ageday1, ageday2);
+        return selectByAgeDays(ageday1, ageday2);
     }
     
-    public Population selectByAge(int ageday1, int ageday2) throws Exception
+    public Population selectByAgeDays(int ageday1, int ageday2) throws Exception
     {
         Population p = new Population();
 
@@ -396,17 +396,17 @@ public class Population
             if (male != null || female != null)
             {
                 if (male != null)
-                    p.male = male.selectByAge(age1, age2);
+                    p.male = male.selectByAgeYears(age1, age2);
 
                 if (female != null)
-                    p.female = female.selectByAge(age1, age2);
+                    p.female = female.selectByAgeYears(age1, age2);
 
                 if (both != null)
                     p.makeBoth();
             }
             else if (both != null)
             {
-                p.both = both.selectByAge(age1, age2);
+                p.both = both.selectByAgeYears(age1, age2);
             }
         }
 
