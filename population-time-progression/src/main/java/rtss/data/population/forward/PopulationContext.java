@@ -13,6 +13,7 @@ import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
+import rtss.data.population.RescalePopulation;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.data.selectors.LocalityGender;
@@ -921,5 +922,19 @@ public class PopulationContext
         }
 
         return c;
+    }
+
+    /* ---------------------------------------------------------------------------- */
+
+    public PopulationContext avg(PopulationContext p) throws Exception
+    {
+        return avg(p, null);
+    }
+    
+    public PopulationContext avg(PopulationContext p, ValueConstraint rvc) throws Exception
+    {
+        PopulationContext p2 = this.add(p, rvc);
+        p2 = RescalePopulation.scaleAllBy(p2, 0.5);
+        return p2;
     }
 }
