@@ -5,6 +5,7 @@ import rtss.data.population.Population;
 import rtss.data.population.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /**
  * Обратная во времени передвижка населения по таблице смертности не имеющей отдельных частей
@@ -116,7 +117,18 @@ public class BackwardPopulationT extends ForwardPopulation
             sum_deaths += v2 - v;
         }
 
-        // ### восстановить число умерших
+        // восстановить умерших
+        if (Util.True)
+        {
+            int back = fctx.DAYS_PER_YEAR;
+
+            for (int nd = p.length - ndays; nd < p.length; nd++)
+            {
+                double ratio = day_lx[nd] / day_lx[nd - back];
+                p2[nd] = p2[nd - back] * ratio;
+                sum_deaths += p2[nd];
+            }
+        }
 
         fctx.fromArray(locality, gender, p2);
 
