@@ -59,8 +59,11 @@ import rtss.util.Util;
  * аргуметном для fctx.end при этом не изменяются, что позволяет сделать снимок населения в настоящий момент и
  * затем продолжить передвижку.
  * 
+ * ************************************
+ * 
  * PopulationContext также может быть использован для отслеживания всех (а не только детских) возрастов
- * при передвижке. Это полезно при последовательных продвижениях на интервалы не кратные году. Контекст вбирающий
+ * при передвижке. Это полезно при последовательных продвижениях на интервалы не кратные году, или когда желательно
+ * сохранить детальную возрастную структуру (с грануляцией не по годам, а по дням возраста). Контекст вбирающий
  * все возрасты позволяет отслеживать возраст по дням, а не годам, и избегать проблем "расплытия" структуры населения
  * при не-годовых передвижках. См. более подробное разъяснение в заголовках файлов ForwardPopulationT/ForwardPopulationUR.
  * Чтобы создать контекст охватывающий все возрасты (0 ... MAX_AGE), следует использовать
@@ -83,6 +86,7 @@ public class PopulationContext
     private boolean began = false;
     private boolean hasRuralUrban;
     private LocalityGenderToDoubleArray m;
+    private ValueConstraint valueConstraint; 
 
     /*
      * Total number of births during forwarding
@@ -114,6 +118,16 @@ public class PopulationContext
         cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
         return cx;
+    }
+    
+    public void setValueConstraint(ValueConstraint valueConstraint)
+    {
+        this.valueConstraint = valueConstraint;
+    }
+
+    public ValueConstraint valueConstraint()
+    {
+        return valueConstraint;
     }
 
     public double get(Locality locality, Gender gender, int day) throws Exception
@@ -306,18 +320,20 @@ public class PopulationContext
         // TODO: сделать аргументом (таблица смертности в год, для которого указана структура населения)
         CombinedMortalityTable mt = null;
 
-        if (began)
+        if (this.began)
             throw new IllegalArgumentException();
 
         m.clear();
 
         PopulationByLocality pto = p.clone();
 
-        hasRuralUrban = p.hasRuralUrban();
-        began = true;
+        this.hasRuralUrban = p.hasRuralUrban();
+        this.began = true;
 
         if (hasRuralUrban)
         {
+            this.valueConstraint = p.forLocality(Locality.URBAN).valueConstraint();
+
             try
             {
                 begin_spline(pto, Locality.RURAL);
@@ -339,6 +355,8 @@ public class PopulationContext
         }
         else
         {
+            this.valueConstraint = p.forLocality(Locality.TOTAL).valueConstraint();
+
             try
             {
                 begin_spline(pto, Locality.TOTAL);
@@ -366,6 +384,9 @@ public class PopulationContext
         {
             validate_begin(p, pto, Locality.TOTAL);
         }
+        
+        if (NYEARS == ALL_AGES && pto.sum() != 0)
+                throw new Exception("внутренняя ошибка");
 
         return pto;
     }

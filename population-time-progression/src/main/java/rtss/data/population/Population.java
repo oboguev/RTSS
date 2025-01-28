@@ -69,6 +69,18 @@ public class Population
         both.setValueConstraint(vc);
     }
 
+    public ValueConstraint valueConstraint()
+    {
+        if (both != null)
+            return both.valueConstraint();
+        else if (male != null)
+            return male.valueConstraint();
+        else if (female != null)
+            return female.valueConstraint();
+        else
+            return null;
+    }
+
     public Population(Locality locality,
             double[] m, double m_unknown, ValueConstraint mvc,
             double[] f, double f_unknown, ValueConstraint fvc) throws Exception
