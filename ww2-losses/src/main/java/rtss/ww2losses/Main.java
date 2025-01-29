@@ -358,7 +358,7 @@ public class Main
 
         /* =================================================== */
 
-        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
 
         if (Util.False)
         {
@@ -377,7 +377,7 @@ public class Main
              * в возрастах 15-60 лет как вызванные вероятно миграцией
              */
             cancelNegativeDeficit(Gender.FEMALE, 15, 60);
-            deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+            deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
         }
 
         v = p1946_expected_with_births.sum();
@@ -407,7 +407,7 @@ public class Main
         /* оставить только сверхсмертность */
         PopulationContext emigration = emigration();
         outk("Эмиграция, тыс. чел.", emigration.sum());
-        deficit = deficit.sub(emigration);
+        deficit = deficit.sub(emigration, ValueConstraint.NONE);
 
         if (area == Area.RSFSR)
             deficit = cancelNegativeDeficit(deficit, Gender.FEMALE, 15, 60);
@@ -434,14 +434,15 @@ public class Main
     private void cancelNegativeDeficit(Gender gender, int age1, int age2) throws Exception
     {
         PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
-        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
 
         for (int age = age1; age <= age2; age++)
         {
             double v = deficit.getYearValue(gender, age);
             if (v < 0)
             {
-                p1946_actual.addYearValue(gender, age, v);
+                // p1946_actual.addYearValue(gender, age, v);
+                unneg(p1946_actual, gender, age, deficit);
             }
         }
 
@@ -459,7 +460,8 @@ public class Main
             double v = deficit.getYearValue(gender, age);
             if (v < 0)
             {
-                p1946_actual.addYearValue(gender, age, v);
+                // p1946_actual.addYearValue(gender, age, v);
+                unneg(p1946_actual, gender, age, deficit);
                 deficit.setYearValue(gender, age, 0);
             }
         }
@@ -475,19 +477,27 @@ public class Main
         return deficit;
     }
 
-    
+    private void unneg(PopulationContext p, Gender gender, int age, PopulationContext deficit) throws Exception
+    {
+        for (int nd = p.firstDayForAge(age); nd <= p.lastDayForAge(age); nd++)
+        {
+            double v = deficit.getDay(Locality.TOTAL, gender, nd);
+            p.addDay(Locality.TOTAL, gender, nd, -v);
+        }
+    }
+
     /* ======================================================================================================= */
 
     private void outk(String what, double v)
     {
-        Util.out(what + ": " + f2k(v / 1000.0));
+        out(what + ": " + f2k(v / 1000.0));
     }
-    
+
     private void out(String what)
     {
         Util.out(what);
     }
-    
+
     private String f2k(double v)
     {
         String s = String.format("%,15.0f", v);

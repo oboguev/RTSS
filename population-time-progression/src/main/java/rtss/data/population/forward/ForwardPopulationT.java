@@ -512,7 +512,7 @@ public class ForwardPopulationT extends ForwardPopulation
                 v *= survivalRate(fctx, day_lx, nd, nd2);
                 p2[nd2] = v;
             }
-            else if (fctx.NYEARS < fctx.ALL_AGES)
+            else if (fctx.NYEARS < PopulationContext.ALL_AGES)
             {
                 int age = fctx.day2age(nd2);
                 nd2 = age * fctx.DAYS_PER_YEAR;
