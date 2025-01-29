@@ -512,12 +512,18 @@ public class ForwardPopulationT extends ForwardPopulation
                 v *= survivalRate(fctx, day_lx, nd, nd2);
                 p2[nd2] = v;
             }
-            else
+            else if (fctx.NYEARS < fctx.ALL_AGES)
             {
                 int age = fctx.day2age(nd2);
                 nd2 = age * fctx.DAYS_PER_YEAR;
                 v *= survivalRate(fctx, day_lx, nd, nd2);
                 pto.add(locality, gender, Math.min(age, MAX_AGE), v);
+            }
+            else
+            {
+                int back = fctx.DAYS_PER_YEAR;
+                v *= survivalRate(fctx, day_lx, nd - back, nd2 - back);
+                p2[p2.length - 1] += v;
             }
 
             sum_deaths += v_initial - v;

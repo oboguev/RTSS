@@ -21,6 +21,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import rtss.data.DoubleArray;
 import rtss.data.population.Population;
 import rtss.data.population.RescalePopulation;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 
@@ -45,9 +46,19 @@ public class PopulationChart extends ApplicationFrame
         new PopulationChart(title).show(name, p).display();
     }
 
+    public static void display(String title, PopulationContext p, String name) throws Exception
+    {
+        new PopulationChart(title).show(name, p.toPopulation()).display();
+    }
+
     public static void display(String title, Population p1, String name1, Population p2, String name2) throws Exception
     {
         new PopulationChart(title).show(name1, p1).show(name2, p2).display();
+    }
+
+    public static void display(String title, PopulationContext p1, String name1, PopulationContext p2, String name2) throws Exception
+    {
+        new PopulationChart(title).show(name1, p1.toPopulation()).show(name2, p2.toPopulation()).display();
     }
 
     public static void displayToScale(String title, Population pScale, String nameScale, Population p1, String name1) throws Exception
@@ -69,6 +80,11 @@ public class PopulationChart extends ApplicationFrame
         return this;
     }
 
+    public PopulationChart show(String name, PopulationContext p) throws Exception
+    {
+        return show(name, p.toPopulation()); 
+    }
+    
     public PopulationChart show(String name, Population p) throws Exception
     {
         if (pScale != null)

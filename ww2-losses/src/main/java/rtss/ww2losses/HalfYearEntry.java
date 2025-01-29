@@ -1,5 +1,6 @@
 package rtss.ww2losses;
 
+import rtss.data.population.forward.PopulationContext;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 
 public class HalfYearEntry
@@ -11,13 +12,32 @@ public class HalfYearEntry
     /* обозначение периода (год и полугодие) */
     final public int year;
     final public HalfYearSelector halfyear;
+    
+    /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
+    public PopulationContext p_nonwar_with_births;
+
+    /* ожидаемое в условиях мира население на начало периода, без учёта рождений после середины 1941 */
+    public PopulationContext p_nonwar_without_births;
+    
+    /* 
+     * ожидаемое в условиях мира число смертей за период (от начала до конца периода) 
+     * в наличном на начало войны населении
+     */
+    public double expected_nonwar_deaths;
+
+    /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
+    public double expected_nonwar_births;
 
     public HalfYearEntry(
             int year,
-            HalfYearSelector halfyear)
+            HalfYearSelector halfyear,
+            PopulationContext p_nonwar_with_births,
+            PopulationContext p_nonwar_without_births)
     {
         this.year = year;
         this.halfyear = halfyear;
+        this.p_nonwar_with_births = p_nonwar_with_births;
+        this.p_nonwar_without_births = p_nonwar_without_births;
     }
 
     public String toString()
@@ -25,10 +45,10 @@ public class HalfYearEntry
         switch (halfyear)
         {
         case FirstHalfYear:
-            return nbsp(year + ", первое полугодие");
+            return nbsp(year + " первое полугодие");
             
         case SecondHalfYear:
-            return nbsp(year + ", второе полугодие");
+            return nbsp(year + " второе полугодие");
             
         default:
             return nbsp("неопределённая дата");
@@ -36,7 +56,7 @@ public class HalfYearEntry
     }
     
     // заменить пробелы на неразбивающий пробел, 
-    // для удобства импорта таблицы в Excel 
+    // для удобства импорта распечатанной таблицы в Excel 
     private String nbsp(String s)
     {
         final char nbsp = (char) 0xA0;

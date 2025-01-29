@@ -1,18 +1,25 @@
 package rtss.ww2losses;
 
+import rtss.data.ValueConstraint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.asfr.InterpolateASFR;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.Population;
+import rtss.data.population.RescalePopulation;
+import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
+import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
-import rtss.ww2losses.old2.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
+import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.CalibrateASFR;
 
 public class Main
@@ -68,12 +75,12 @@ public class Main
 
     /* фактическое население на начало 1946 года рождённое после середины 1941 */
     private PopulationContext p1946_actual_born_postwar;
-    
+
     /* возрастные коэффициенты рождаемости */
     private AgeSpecificFertilityRatesByYear yearly_asfrs;
     private AgeSpecificFertilityRatesByTimepoint halfyearly_asfrs;
     private double asfr_calibration;
-    
+
     /* таблицы смертности */
     private CombinedMortalityTable mt1940;
     private PeacetimeMortalityTables peacetimeMortalityTables;
@@ -89,7 +96,7 @@ public class Main
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
         Util.out("");
-        
+
         switch (area)
         {
         case USSR:
@@ -105,17 +112,143 @@ public class Main
 
         asfr_calibration = CalibrateASFR.calibrate1940(ap, yearly_asfrs);
 
-        /* таблица смертности для 1940 года */
+        /* таблицы смертности для 1940 года и полугодий 1941-1945 при мирных условиях */
         mt1940 = new MortalityTable_1940(ap).evaluate();
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
 
+        /* население на середину 1941 года */
+        Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
+        PopulationContext fctx_mid1941 = new PopulationContext(PopulationContextSize);
+        Population p = pm1941.evaluateAsPopulation(fctx_mid1941, mt1940);
+        Util.assertion(p.sum() == 0);
+
+        if (Util.False)
+        {
+            new PopulationChart("Население " + area + " на середину 1941 года")
+                    .show("перепись", fctx_mid1941.toPopulation())
+                    .display();
+        }
+
+        /* передвижка для мирных условий */
+        halves = evalHalves_step_6mo(pm1941, fctx_mid1941);
+
+        if (Util.False)
+        {
+            String point = "1946.1";
+            new PopulationChart("Ожидаемое население " + area.toString() + " на " + point)
+                    .show("1", halves.get(point).p_nonwar_without_births)
+                    .display();
+        }
+
+        if (Util.True)
+        {
+            new PopulationChart("Дефицита населения " + area.toString() + " на 1946.1")
+                    .show("1", eval_deficit_1946(halves))
+                    .display();
+        }
+
         // ###
     }
+
+    /* ================================================================================== */
+
+    /*
+     * Подготовить полугодовые сегменты.
+     * Передвижка с шагом полгода.
+     */
+    @SuppressWarnings("unused")
+    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(Population_In_Middle_1941 pm1941, PopulationContext fctx_mid1941) throws Exception
+    {
+        HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
+        PopulationContext fctx = fctx_mid1941.clone();
+
+        HalfYearEntry curr, prev;
+        int year = 1941;
+
+        /* первое полугодие 1941 */
+        HalfYearSelector half = HalfYearSelector.FirstHalfYear;
+        prev = curr = new HalfYearEntry(year, half,
+                                        pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext(),
+                                        pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext());
+        curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
+        curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
+        halves.add(curr);
+
+        /* второе полугодие 1941 */
+        half = HalfYearSelector.SecondHalfYear;
+        curr = new HalfYearEntry(year, half, fctx.clone(), fctx.clone());
+        prev.next = curr;
+        curr.prev = prev;
+        prev = curr;
+        halves.add(curr);
+
+        /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
+        PopulationContext pwb = fctx.clone();
+
+        /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
+        PopulationContext pxb = fctx.clone();
+
+        /* продвигать с шагом по полгода до января 1946 */
+        for (;;)
+        {
+            int current_year = year;
+            HalfYearSelector current_half = half;
+
+            if (half == HalfYearSelector.FirstHalfYear)
+            {
+                if (year == 1946)
+                    break;
+                half = HalfYearSelector.SecondHalfYear;
+            }
+            else
+            {
+                half = HalfYearSelector.FirstHalfYear;
+                year++;
+            }
+
+            /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
+            CombinedMortalityTable mt = peacetimeMortalityTables.get(current_year, current_half);
+
+            /* передвижка на следующие полгода населения с учётом рождений */
+            ForwardPopulationT fw1 = new ForwardPopulationT();
+            fw1.setBirthRateTotal(ap.CBR_1940);
+            fw1.forward(pwb, mt, 0.5);
+
+            /* передвижка на следующие полгода населения без учёта рождений */
+            ForwardPopulationT fw2 = new ForwardPopulationT();
+            fw2.setBirthRateTotal(0);
+            fw2.forward(pxb, mt, 0.5);
+
+            /* сохранить результаты в полугодовой записи */
+            curr = new HalfYearEntry(year, half, pwb.clone(), pxb.clone());
+            prev.expected_nonwar_births = fw1.getObservedBirths();
+            prev.expected_nonwar_deaths = fw2.getObservedDeaths();
+            
+            Util.out("HALF: " + curr.toString());
+
+            curr.prev = prev;
+            prev.next = curr;
+            prev = curr;
+            halves.add(curr);
+        }
+
+        return halves;
+    }
+
+    /* ================================================================================== */
 
     /* вычесть население Тувы из населения начала 1946 года */
     private void adjustForTuva() throws Exception
     {
         // ###
+    }
+
+    private PopulationContext  eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    {
+        PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
+        deficit = deficit.sub(emigration(), ValueConstraint.NONE);
+        return deficit;
     }
 
     private void split_p1946() throws Exception
@@ -137,5 +270,40 @@ public class Main
     {
         final int DAYS_PER_YEAR = 365;
         return (int) Math.round(age * DAYS_PER_YEAR);
+    }
+
+    private PopulationContext emigration() throws Exception
+    {
+        double emig = 0;
+
+        switch (area)
+        {
+        case USSR:
+            emig = 850_000;
+            break;
+
+        case RSFSR:
+            emig = 70_000;
+            break;
+        }
+
+        Population p = Population.newTotalPopulation();
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            p.setYearValue(Gender.MALE, age, 0);
+            p.setYearValue(Gender.FEMALE, age, 0);
+        }
+
+        for (int age = 20; age <= 60; age++)
+        {
+            p.setYearValue(Gender.MALE, age, 0.8);
+            p.setYearValue(Gender.FEMALE, age, 0.2);
+        }
+
+        p.makeBoth();
+
+        p = RescalePopulation.scaleAllTo(p, emig);
+
+        return p.toPopulationContext();
     }
 }

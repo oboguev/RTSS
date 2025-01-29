@@ -149,7 +149,7 @@ public class PopulationContext
     public void setDay(Locality locality, Gender gender, int day, double v) throws Exception
     {
         checkAccess(locality, gender, day);
-        checkNonNegative(v);
+        checkValueConstraint(v);
         m.put(locality, gender, day, v);
     }
 
@@ -160,7 +160,7 @@ public class PopulationContext
         if (d == null)
             d = 0.0;
         v += d;
-        checkNonNegative(v);
+        checkValueConstraint(v);
         m.put(locality, gender, day, v);
         return v;
     }
@@ -172,7 +172,7 @@ public class PopulationContext
         if (d == null)
             d = 0.0;
         v = d - v;
-        checkNonNegative(v);
+        checkValueConstraint(v);
         m.put(locality, gender, day, v);
         return v;
     }
@@ -235,11 +235,30 @@ public class PopulationContext
             throw new IllegalArgumentException();
     }
 
-    private void checkNonNegative(double v) throws Exception
+    private void checkValueConstraint(double v) throws Exception
     {
         Util.validate(v);
-        if (v < 0)
-            throw new Exception("Negative population");
+        
+        ValueConstraint vc = this.valueConstraint;
+        if (vc == null)
+            vc = ValueConstraint.NON_NEGATIVE;
+        
+        switch (vc)
+        {
+        case POSITIVE:
+            if (v <= 0)
+                throw new IllegalArgumentException("Population is negative or zero");
+            break;
+
+        case NON_NEGATIVE:
+            if (v < 0)
+                throw new IllegalArgumentException("Negative population");
+            break;
+
+        case NONE:
+        default:
+            break;
+        }
     }
 
     public int firstDayForAge(int age)
@@ -698,11 +717,14 @@ public class PopulationContext
                 sb_out(sb, "rural.", m, f);
             }
             
-            Population p = toPopulation();
-            sb.append(Util.nl);
-            sb.append(Util.nl);
-            sb.append(p.dump());
-
+            if (began)
+            {
+                Population p = toPopulation();
+                sb.append(Util.nl);
+                sb.append(Util.nl);
+                sb.append(p.dump());
+            }
+            
             return sb.toString();
         }
         catch (Throwable ex)
