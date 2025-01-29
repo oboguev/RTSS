@@ -17,6 +17,8 @@ import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
+import rtss.ww2losses.helpers.ShowForecast;
+import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;

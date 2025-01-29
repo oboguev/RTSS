@@ -1063,6 +1063,11 @@ public class PopulationContext
 
     /* ---------------------------------------------------------------------------- */
 
+    public double getYearValue(Gender gender, int age) throws Exception
+    {
+        return sumAge(Locality.TOTAL, gender, age);
+    }
+
     public void setYearValue(Gender gender, int age, double v) throws Exception
     {
         setYearValue(Locality.TOTAL, gender, age, v);
