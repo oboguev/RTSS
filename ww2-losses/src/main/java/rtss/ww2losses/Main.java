@@ -242,6 +242,9 @@ public class Main
                 he.peace_mt = peacetimeMortalityTables.get(he.year, he.halfyear);
         }
         
+        // ### обратная передвижка к середине 1945
+        // ### IMR = по peace_mt, остальные коэф. так чтобы сохранить потери?
+        
         // ### make lx curves for peace_mt
 
         return halves;
