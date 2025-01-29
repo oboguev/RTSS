@@ -238,11 +238,11 @@ public class PopulationContext
     private void checkValueConstraint(double v) throws Exception
     {
         Util.validate(v);
-        
+
         ValueConstraint vc = this.valueConstraint;
         if (vc == null)
             vc = ValueConstraint.NON_NEGATIVE;
-        
+
         switch (vc)
         {
         case POSITIVE:
@@ -351,6 +351,27 @@ public class PopulationContext
         PopulationByLocality xp = new PopulationByLocality(p);
         PopulationByLocality xp2 = begin(xp);
         return xp2.forLocality(Locality.TOTAL);
+    }
+    
+    public void beginTotal()
+    {
+        begin(false);
+    }
+
+    public void beginUrbanRural()
+    {
+        begin(true);
+    }
+
+    private void begin(boolean hasRuralUrban)
+    {
+        if (this.began)
+            throw new IllegalArgumentException();
+
+        m.clear();
+
+        this.hasRuralUrban = hasRuralUrban;
+        this.began = true;
     }
 
     public PopulationByLocality begin(final PopulationByLocality p) throws Exception
@@ -716,7 +737,7 @@ public class PopulationContext
                 f = sumAllAges(Locality.RURAL, Gender.FEMALE);
                 sb_out(sb, "rural.", m, f);
             }
-            
+
             if (began)
             {
                 Population p = toPopulation();
@@ -724,7 +745,7 @@ public class PopulationContext
                 sb.append(Util.nl);
                 sb.append(p.dump());
             }
-            
+
             return sb.toString();
         }
         catch (Throwable ex)
@@ -1038,5 +1059,19 @@ public class PopulationContext
         }
 
         return c;
+    }
+
+    /* ---------------------------------------------------------------------------- */
+
+    public void setYearValue(Gender gender, int age, double v) throws Exception
+    {
+        setYearValue(Locality.TOTAL, gender, age, v);
+
+    }
+
+    public void setYearValue(Locality locality, Gender gender, int age, double v) throws Exception
+    {
+        for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
+            setDay(locality, gender, nd, v / DAYS_PER_YEAR);
     }
 }

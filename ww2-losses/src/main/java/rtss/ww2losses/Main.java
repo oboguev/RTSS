@@ -288,6 +288,7 @@ public class Main
         }
         
         PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
+        p.beginTotal();
         
         for (int age = 0; age <= MAX_AGE; age++)
         {
