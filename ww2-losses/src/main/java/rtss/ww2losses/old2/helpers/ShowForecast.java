@@ -1,4 +1,4 @@
-package rtss.ww2losses.helpers;
+package rtss.ww2losses.old2.helpers;
 
 import rtss.data.population.Population;
 import rtss.data.selectors.Gender;

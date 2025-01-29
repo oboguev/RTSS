@@ -1,6 +1,5 @@
 package rtss.ww2losses;
 
-import rtss.data.ValueConstraint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.asfr.InterpolateASFR;
@@ -10,6 +9,7 @@ import rtss.data.population.forward.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
+import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.old2.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
@@ -44,7 +44,7 @@ public class Main
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
      */
-    private static boolean AppyAntibiotics = Util.True;
+    private static boolean ApplyAntibiotics = Util.True;
 
     /*
      * Распечатывать диагностический вывод
@@ -73,7 +73,10 @@ public class Main
     private AgeSpecificFertilityRatesByYear yearly_asfrs;
     private AgeSpecificFertilityRatesByTimepoint halfyearly_asfrs;
     private double asfr_calibration;
+    
+    /* таблицы смертности */
     private CombinedMortalityTable mt1940;
+    private PeacetimeMortalityTables peacetimeMortalityTables;
 
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
@@ -104,6 +107,7 @@ public class Main
 
         /* таблица смертности для 1940 года */
         mt1940 = new MortalityTable_1940(ap).evaluate();
+        peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
 
         // ###
     }

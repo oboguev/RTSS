@@ -25,22 +25,22 @@ import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
-import rtss.ww2losses.helpers.PrintHalves;
-import rtss.ww2losses.helpers.ShowForecast;
-import rtss.ww2losses.helpers.WarHelpers;
+import rtss.ww2losses.old2.helpers.PrintHalves;
+import rtss.ww2losses.old2.helpers.ShowForecast;
+import rtss.ww2losses.old2.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.CalibrateASFR;
 
-public class Main
+public class Main_old_2
 {
     public static void main(String[] args)
     {
         try
         {
-            new Main(Area.USSR).main();
-            new Main(Area.RSFSR).main();
+            new Main_old_2(Area.USSR).main();
+            new Main_old_2(Area.RSFSR).main();
         }
         catch (Exception ex)
         {
@@ -49,7 +49,7 @@ public class Main
         }
     }
 
-    private Main(Area area) throws Exception
+    private Main_old_2(Area area) throws Exception
     {
         this.area = area;
         this.ap = AreaParameters.forArea(area);
@@ -62,7 +62,7 @@ public class Main
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
      */
-    private static boolean AppyAntibiotics = Util.True;
+    private static boolean ApplyAntibiotics = Util.True;
 
     /*
      * Распечатывать диагностический вывод
@@ -462,7 +462,7 @@ public class Main
      */
     private CombinedMortalityTable peace_year_mt(CombinedMortalityTable mt1940, int year) throws Exception
     {
-        if (!AppyAntibiotics)
+        if (!ApplyAntibiotics)
             return mt1940;
 
         double scale0 = peace_imr_scale(year);
@@ -484,7 +484,7 @@ public class Main
      */
     private CombinedMortalityTable peace_cross_year_mt(CombinedMortalityTable mt1940, int year) throws Exception
     {
-        if (!AppyAntibiotics)
+        if (!ApplyAntibiotics)
             return mt1940;
 
         double scale0 = (peace_imr_scale(year) + peace_imr_scale(year + 1)) / 2;
