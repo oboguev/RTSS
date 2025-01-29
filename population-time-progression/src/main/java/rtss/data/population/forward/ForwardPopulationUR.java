@@ -180,6 +180,21 @@ public class ForwardPopulationUR extends ForwardPopulation
         return pto;
     }
 
+    public void forward(
+            PopulationContext fctx,
+            final CombinedMortalityTable mt,
+            final double yfraction)
+            throws Exception
+    {
+        if (fctx.MAX_YEAR != MAX_AGE)
+            throw new IllegalArgumentException("население не перегружено целиком в PopulationContext, используйте PopulationContext.ALL_AGES");
+
+        PopulationByLocality p = PopulationByLocality.newPopulationByLocality();
+        p.zero();
+        PopulationByLocality pto = forward(p, fctx, mt, yfraction);
+        Util.assertion(pto.sum() == 0);
+    }
+
     public void forward(PopulationByLocality pto,
             final PopulationByLocality p,
             PopulationContext fctx,
@@ -452,7 +467,7 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         observed_deaths += sum_deaths;
     }
-    
+
     private double survivalRate(PopulationContext fctx, double[] day_lx, int nd, int nd2) throws Exception
     {
         if (nd2 < day_lx.length)
@@ -461,9 +476,9 @@ public class ForwardPopulationUR extends ForwardPopulation
         }
         else
         {
-            if (nd2 / fctx.DAYS_PER_YEAR  < Population.MAX_AGE)
+            if (nd2 / fctx.DAYS_PER_YEAR < Population.MAX_AGE)
                 throw new Exception("unexpected nd2");
-            
+
             /* использовать коэффициент смертности последнего года */
             int extra = 10;
             return day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];

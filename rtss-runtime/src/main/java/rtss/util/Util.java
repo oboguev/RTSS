@@ -582,8 +582,23 @@ public class Util
 
     public static void assertion(boolean b) throws Exception
     {
+        assertion(b, null);
+    }
+
+    public static void assertion(String msg, boolean b) throws Exception
+    {
+        assertion(b, msg);
+    }
+
+    public static void assertion(boolean b, String msg) throws Exception
+    {
         if (!b)
-            throw new Exception("unexpected: assertion failed");
+        {
+            if (msg != null && msg.length() != 0)
+                throw new Exception("внутренняя ошибка: " + msg);
+            else
+                throw new Exception("внутренняя ошибка");
+        }
     }
 
     public static void sleep(long ms)

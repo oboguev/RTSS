@@ -134,6 +134,21 @@ public class ForwardPopulationT extends ForwardPopulation
         return xp2.forLocality(Locality.TOTAL);
     }
     
+    public void forward(
+            PopulationContext fctx,
+            final CombinedMortalityTable mt,
+            final double yfraction)
+            throws Exception
+    {
+        if (fctx.MAX_YEAR != MAX_AGE)
+            throw new IllegalArgumentException("население не перегружено целиком в PopulationContext, используйте PopulationContext.ALL_AGES");
+
+        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        p.zero();
+        PopulationByLocality pto = forward(p, fctx, mt, yfraction);
+        Util.assertion(pto.sum() == 0);
+    }
+    
     public PopulationByLocality forward(final PopulationByLocality p,
             PopulationContext fctx,
             final CombinedMortalityTable mt,
