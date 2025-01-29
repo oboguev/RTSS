@@ -244,6 +244,7 @@ public class Main
         
         // ### обратная передвижка к середине 1945
         // ### IMR = по peace_mt, остальные коэф. так чтобы сохранить потери?
+        // ### или определить фактическую таблицу 1945.2 по смертности в 1946 ?
         
         // ### make lx curves for peace_mt (M/F), 
         // ### then for each gender+year-group make forwarding through halfyears
