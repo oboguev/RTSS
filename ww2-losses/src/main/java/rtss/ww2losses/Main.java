@@ -242,6 +242,8 @@ public class Main
                 he.peace_mt = peacetimeMortalityTables.get(he.year, he.halfyear);
         }
         
+        // ### АДХ СССР 1946 -- население до эмиграции? стр. 118
+        
         // ### обратная передвижка к середине 1945
         // ### IMR = по peace_mt, остальные коэф. так чтобы сохранить потери?
         // ### или определить фактическую таблицу 1945.2 по смертности в 1946 ?
@@ -420,7 +422,7 @@ public class Main
             ShowForecast.show(ap, p1946_actual, halves, 3);
             ShowForecast.show(ap, p1946_actual, halves, 4);
         }
-
+        
         /* оставить только сверхсмертность */
         PopulationContext emigration = emigration();
         outk("Эмиграция, тыс. чел.", emigration.sum());
