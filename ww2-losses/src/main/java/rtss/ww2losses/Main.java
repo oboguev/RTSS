@@ -245,7 +245,11 @@ public class Main
         // ### обратная передвижка к середине 1945
         // ### IMR = по peace_mt, остальные коэф. так чтобы сохранить потери?
         
-        // ### make lx curves for peace_mt
+        // ### make lx curves for peace_mt (M/F), 
+        // ### then for each gender+year-group make forwarding through halfyears
+        // ### at each halfyear step: (apply peace_mt -- use attrition coef from lx, add extradeaths from deficit * weight_coef * alpha)
+        // ### find alpha value such that projected_end_v == actual_end_v
+        // ### use it to calc excess deaths and leftover pop
 
         return halves;
     }
