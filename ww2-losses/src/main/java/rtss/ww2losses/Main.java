@@ -124,7 +124,7 @@ public class Main
         Population p = pm1941.evaluateAsPopulation(fctx_mid1941, mt1940);
         Util.assertion(p.sum() == 0);
 
-        if (Util.True)
+        if (Util.False)
         {
             new PopulationChart("Население " + area + " на середину 1941 года")
                     .show("перепись", fctx_mid1941.toPopulation())
@@ -427,6 +427,21 @@ public class Main
                                     deficit,
                                     "1");
         }
+
+        /*
+         * разбить сверхсмертность на категории 
+         */
+        double deficit_total = deficit.sum();
+        double deficit_m_conscripts = subcount(deficit, Gender.MALE, 19, 59);
+        double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 58);
+        double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
+
+        out("");
+        outk("Сверхсмертность всего наличного на середину 1941 года населения", deficit_total);
+        out("Предварительная разбивка на категории по временному окну:");
+        outk("    Сверхсмертность мужчин призывного возраста", deficit_m_conscripts);
+        outk("    Сверхсмертность женщин фертильного возраста", deficit_f_fertile);
+        outk("    Сверхсмертность остального наличного на середину 1941 года населения", deficit_other);
     }
 
     /* ======================================================================================================= */
@@ -504,5 +519,64 @@ public class Main
         while (s.startsWith(" "))
             s = s.substring(1);
         return s;
+    }
+
+    private double subcount(PopulationContext p, Gender gender, int age1, int age2) throws Exception
+    {
+        double sum_wv = 0;
+        double sum_weights = 0;
+
+        for (int age = age1; age <= age2; age++)
+        {
+            /*
+             * Окно возрастающее с обеих концов с 0.5 (полгода expsure) до 4.0 (exposure на всё время войны)
+             */
+            double weight = 4.0;
+
+            switch (Math.abs(age - age1))
+            {
+            case 0:
+                weight = 0.5;
+                break;
+
+            case 1:
+                weight = 1.5;
+                break;
+
+            case 2:
+                weight = 2.5;
+                break;
+            case 3:
+
+                weight = 3.5;
+                break;
+            }
+
+            switch (Math.abs(age2 - age))
+            {
+            case 0:
+                weight = 0.5;
+                break;
+
+            case 1:
+                weight = 1.5;
+                break;
+
+            case 2:
+                weight = 2.5;
+                break;
+            case 3:
+
+                weight = 3.5;
+                break;
+            }
+
+            double v = p.getYearValue(gender, age);
+            sum_weights += weight;
+            sum_wv += v * weight;
+        }
+
+        sum_weights /= (age2 - age1 + 1);
+        return sum_wv / sum_weights;
     }
 }
