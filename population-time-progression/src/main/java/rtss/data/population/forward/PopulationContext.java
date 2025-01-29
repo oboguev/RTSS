@@ -379,7 +379,7 @@ public class PopulationContext
             }
             catch (Exception ex)
             {
-                Util.err("PopulationContext.begin: using basic method");
+                Util.err("PopulationContext.begin: using basic method, cause: " + ex.getLocalizedMessage());
                 m.clear();
                 begin_basic(pto, Locality.RURAL, mt);
                 begin_basic(pto, Locality.URBAN, mt);
@@ -401,7 +401,7 @@ public class PopulationContext
             }
             catch (Exception ex)
             {
-                Util.err("PopulationContext.begin: using basic method");
+                Util.err("PopulationContext.begin: using basic method, cause: " + ex.getLocalizedMessage());
                 m.clear();
                 begin_basic(pto, Locality.TOTAL, mt);
             }

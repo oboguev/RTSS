@@ -286,8 +286,9 @@ public class Main
             emig = 70_000;
             break;
         }
-
-        Population p = Population.newTotalPopulation();
+        
+        PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
+        
         for (int age = 0; age <= MAX_AGE; age++)
         {
             p.setYearValue(Gender.MALE, age, 0);
@@ -300,10 +301,8 @@ public class Main
             p.setYearValue(Gender.FEMALE, age, 0.2);
         }
 
-        p.makeBoth();
-
         p = RescalePopulation.scaleAllTo(p, emig);
 
-        return p.toPopulationContext();
+        return p;
     }
 }
