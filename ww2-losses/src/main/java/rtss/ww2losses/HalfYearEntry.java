@@ -16,6 +16,9 @@ public class HalfYearEntry
     
     /* таблица смертности для этого полугодия в условиях мира */
     CombinedMortalityTable peace_mt;
+    /* кривые l(x) с разрешением 1 день возраста для условий мира */
+    public double[] peace_lx_male;
+    public double[] peace_lx_female;
     
     /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
     public PopulationContext p_nonwar_with_births;

@@ -4,6 +4,7 @@ import rtss.data.ValueConstraint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.asfr.InterpolateASFR;
+import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.Population;
 import rtss.data.population.RescalePopulation;
@@ -238,8 +239,12 @@ public class Main
         {
             if (he.year == 1946)
                 break;
+            
             if (he.peace_mt == null)
                 he.peace_mt = peacetimeMortalityTables.get(he.year, he.halfyear);
+            
+            he.peace_lx_male = mt2lx(he.peace_mt, Locality.TOTAL, Gender.MALE);
+            he.peace_lx_female = mt2lx(he.peace_mt, Locality.TOTAL, Gender.FEMALE);
         }
         
         // ### АДХ СССР 1946 -- население до эмиграции? стр. 118
@@ -597,5 +602,34 @@ public class Main
 
         sum_weights /= (age2 - age1 + 1);
         return sum_wv / sum_weights;
+    }
+
+    /* ======================================================================================================= */
+    
+    private double[] mt2lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
+    {
+        double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
+
+        /*
+         * Провести дневную кривую так что
+         *       daily_lx[0]         = yearly_lx[0]
+         *       daily_lx[365]       = yearly_lx[1]
+         *       daily_lx[365 * 2]   = yearly_lx[2]
+         *       etc.
+         */
+        double[] daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
+
+        /*
+         * Базовая проверка правильности
+         */
+        if (Util.differ(daily_lx[0], yearly_lx[0]) ||
+            Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
+            Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
+            Util.differ(daily_lx[365 * 3], yearly_lx[3]))
+        {
+            throw new Exception("Ошибка в построении daily_lx");
+        }
+        
+        return daily_lx; 
     }
 }
