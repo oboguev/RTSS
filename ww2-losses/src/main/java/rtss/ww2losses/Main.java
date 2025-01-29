@@ -431,6 +431,53 @@ public class Main
 
     /* ======================================================================================================= */
 
+    private void cancelNegativeDeficit(Gender gender, int age1, int age2) throws Exception
+    {
+        PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+
+        for (int age = age1; age <= age2; age++)
+        {
+            double v = deficit.getYearValue(gender, age);
+            if (v < 0)
+            {
+                p1946_actual.addYearValue(gender, age, v);
+            }
+        }
+
+        p1946_actual.makeBoth();
+        p1946_actual.recalcTotal();
+        split_p1946();
+    }
+
+    private PopulationContext cancelNegativeDeficit(PopulationContext deficit, Gender gender, int age1, int age2) throws Exception
+    {
+        deficit.setValueConstraint(ValueConstraint.NONE);
+
+        for (int age = age1; age <= age2; age++)
+        {
+            double v = deficit.getYearValue(gender, age);
+            if (v < 0)
+            {
+                p1946_actual.addYearValue(gender, age, v);
+                deficit.setYearValue(gender, age, 0);
+            }
+        }
+
+        deficit.makeBoth();
+        deficit.recalcTotal();
+
+        p1946_actual.makeBoth();
+        p1946_actual.recalcTotal();
+
+        split_p1946();
+
+        return deficit;
+    }
+
+    
+    /* ======================================================================================================= */
+
     private void outk(String what, double v)
     {
         Util.out(what + ": " + f2k(v / 1000.0));
