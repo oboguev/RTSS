@@ -5,8 +5,8 @@ import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.FieldValue;
 import rtss.util.Util;
-import rtss.ww2losses.HalfYearEntry;
-import rtss.ww2losses.util.HalfYearEntries;
+import rtss.ww2losses.HalfYearEntries;
+import rtss.ww2losses.old2.HalfYearEntry;
 
 public class PrintHalves
 {

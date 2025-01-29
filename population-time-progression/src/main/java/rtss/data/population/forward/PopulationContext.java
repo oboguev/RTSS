@@ -697,6 +697,11 @@ public class PopulationContext
                 f = sumAllAges(Locality.RURAL, Gender.FEMALE);
                 sb_out(sb, "rural.", m, f);
             }
+            
+            Population p = toPopulation();
+            sb.append(Util.nl);
+            sb.append(Util.nl);
+            sb.append(p.dump());
 
             return sb.toString();
         }

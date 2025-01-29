@@ -1,7 +1,7 @@
 package rtss.ww2losses.params;
 
 import rtss.data.selectors.Area;
-import rtss.ww2losses.old.Main_old_1;
+import rtss.ww2losses.old1.Main_old_1;
 
 public class AreaParameters_USSR extends AreaParameters
 {

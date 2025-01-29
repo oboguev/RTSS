@@ -1,7 +1,7 @@
 package rtss.ww2losses.util;
 
 import rtss.data.selectors.BirthDeath;
-import rtss.ww2losses.old.EvaluatePopulationLossBase;
+import rtss.ww2losses.old1.EvaluatePopulationLossBase;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.util.Util;
 

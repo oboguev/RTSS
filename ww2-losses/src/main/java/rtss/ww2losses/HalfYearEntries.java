@@ -1,4 +1,4 @@
-package rtss.ww2losses.util;
+package rtss.ww2losses;
 
 import java.util.ArrayList;
 

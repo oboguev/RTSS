@@ -3,10 +3,10 @@ package rtss.ww2losses.helpers;
 import rtss.data.population.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
-import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.HalfYearEntries;
+import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
+import rtss.ww2losses.old2.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
-import rtss.ww2losses.util.HalfYearEntries;
-import rtss.ww2losses.util.HalfYearEntries.HalfYearSelector;
 
 /*
  * Распечатать движение населения определённых возрастов сквозь период войны
