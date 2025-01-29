@@ -140,13 +140,14 @@ public class Main
                     .display();
         }
 
-        if (Util.True)
+        if (Util.False)
         {
-            new PopulationChart("Дефицит населения " + area.toString() + " на 1946.1")
-                    .show("1", eval_deficit_1946(halves))
+            new PopulationChart("Сверхсмертность населения " + area.toString() + " на 1946.1")
+                    .show("1", eval_deficit_1946(halves, true))
                     .display();
         }
 
+        evalDeficit1946();
         // ###
     }
 
@@ -223,7 +224,7 @@ public class Main
             curr = new HalfYearEntry(year, half, pwb.clone(), pxb.clone());
             prev.expected_nonwar_births = fw1.getObservedBirths();
             prev.expected_nonwar_deaths = fw2.getObservedDeaths();
-            
+
             Util.out("HALF: " + curr.toString());
 
             curr.prev = prev;
@@ -246,14 +247,23 @@ public class Main
         p1946_actual = RescalePopulation.scaleBy(p1946_actual, scale);
     }
 
-    private PopulationContext  eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    /*
+     * Вычислить половозрастную структуру дефицита населения на 1946.1 для графического изображения.
+     * Возвращаемый дефицит охватывает только наличное на начало войны население, без учёта рождений
+     * во время войны.  
+     */
+    private PopulationContext eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves, boolean substractEmigration) throws Exception
     {
         PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
         PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
-        deficit = deficit.sub(emigration(), ValueConstraint.NONE);
+        if (substractEmigration)
+            deficit = deficit.sub(emigration(), ValueConstraint.NONE);
         return deficit;
     }
 
+    /*
+     * Разбить наличное на начало 1946 года население на родившееся до и после середины 1941 года 
+     */
     private void split_p1946() throws Exception
     {
         int nd_4_5 = age2day(4.5);
@@ -275,6 +285,11 @@ public class Main
         return (int) Math.round(age * DAYS_PER_YEAR);
     }
 
+    /*
+     * Половозрастная структура эмиграции.
+     * 80% мужчин, 20% женщин, возрасты 20-60,
+     * СССР = 850 тыс., РСФСР = 70 тыс.
+     */
     private PopulationContext emigration() throws Exception
     {
         double emig = 0;
@@ -289,10 +304,10 @@ public class Main
             emig = 70_000;
             break;
         }
-        
+
         PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
         p.beginTotal();
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             p.setYearValue(Gender.MALE, age, 0);
@@ -308,5 +323,127 @@ public class Main
         p = RescalePopulation.scaleAllTo(p, emig);
 
         return p;
+    }
+
+    /* ======================================================================================================= */
+
+    private void evalDeficit1946() throws Exception
+    {
+        PopulationContext p1946_expected_with_births = halves.last().p_nonwar_with_births;
+        PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
+        PopulationContext p1946_expected_newonly = p1946_expected_with_births.sub(p1946_expected_without_births);
+        PopulationContext p1941_mid = halves.get(1941, HalfYearSelector.SecondHalfYear).p_nonwar_without_births;
+
+        /*
+         * проверить, что сумма expected_nonwar_deaths примерно равна разнице численностей
+         * p_nonwar_without_births
+         */
+        double v_sum = 0;
+        for (HalfYearEntry curr : halves)
+        {
+            if (curr.year == 1941 && curr.halfyear == HalfYearSelector.FirstHalfYear)
+                continue;
+            if (curr.year == 1946)
+                continue;
+
+            v_sum += curr.expected_nonwar_deaths;
+        }
+
+        double v = p1941_mid.sum();
+        v -= p1946_expected_without_births.sum();
+        if (Util.differ(v_sum, v, 0.0001))
+            Util.err("Несовпадение числа смертей");
+
+        /* =================================================== */
+
+        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+
+        if (Util.False)
+        {
+            new PopulationChart("Дефицит " + ap.area)
+                    .show("дефицит", deficit)
+                    .display();
+        }
+
+        if (area == Area.RSFSR)
+        {
+            if (PrintDiagnostics)
+                WarHelpers.validateDeficit(deficit, "До эмиграции и отмены отрицательных женских значений:");
+
+            /*
+             * Для РСФСР отменить отрицательные значения дефицита женского населения
+             * в возрастах 15-60 лет как вызванные вероятно миграцией
+             */
+            cancelNegativeDeficit(Gender.FEMALE, 15, 60);
+            deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar);
+        }
+
+        v = p1946_expected_with_births.sum();
+        v -= p1946_actual.sum();
+        double v_total = v;
+        outk("Общий дефицит населения к январю 1946, тыс. чел.", v);
+
+        v = p1946_expected_without_births.sum();
+        v -= p1946_actual_born_prewar.sum();
+        double v_prewar = v;
+        outk("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.", v);
+
+        v = p1946_expected_newonly.sum();
+        v -= p1946_actual_born_postwar.sum();
+        double v_postwar = v;
+        outk("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.", v);
+
+        if (Util.differ(v_total, v_prewar + v_postwar))
+            Util.err("Расхождение категорий дефицита");
+
+        if (PrintDiagnostics)
+        {
+            ShowForecast.show(ap, p1946_actual, halves, 3);
+            ShowForecast.show(ap, p1946_actual, halves, 4);
+        }
+
+        /* оставить только сверхсмертность */
+        PopulationContext emigration = emigration();
+        outk("Эмиграция, тыс. чел.", emigration.sum());
+        deficit = deficit.sub(emigration);
+
+        if (area == Area.RSFSR)
+            deficit = cancelNegativeDeficit(deficit, Gender.FEMALE, 15, 60);
+
+        if (PrintDiagnostics)
+        {
+            if (area == Area.RSFSR)
+                WarHelpers.validateDeficit(deficit, "После эмиграции и отмены отрицательных женских значений:");
+            else
+                WarHelpers.validateDeficit(deficit);
+        }
+
+        if (Util.False)
+        {
+            /* график сверхсмертности */
+            PopulationChart.display("Cверхсмертность населения " + area + " накопленная с середины 1941 по конец 1945 года",
+                                    deficit,
+                                    "1");
+        }
+    }
+
+    /* ======================================================================================================= */
+
+    private void outk(String what, double v)
+    {
+        Util.out(what + ": " + f2k(v / 1000.0));
+    }
+    
+    private void out(String what)
+    {
+        Util.out(what);
+    }
+    
+    private String f2k(double v)
+    {
+        String s = String.format("%,15.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
     }
 }
