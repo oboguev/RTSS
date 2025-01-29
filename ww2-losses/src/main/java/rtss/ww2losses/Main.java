@@ -122,7 +122,7 @@ public class Main
         Population p = pm1941.evaluateAsPopulation(fctx_mid1941, mt1940);
         Util.assertion(p.sum() == 0);
 
-        if (Util.False)
+        if (Util.True)
         {
             new PopulationChart("Население " + area + " на середину 1941 года")
                     .show("перепись", fctx_mid1941.toPopulation())
@@ -142,7 +142,7 @@ public class Main
 
         if (Util.True)
         {
-            new PopulationChart("Дефицита населения " + area.toString() + " на 1946.1")
+            new PopulationChart("Дефицит населения " + area.toString() + " на 1946.1")
                     .show("1", eval_deficit_1946(halves))
                     .display();
         }
@@ -240,7 +240,10 @@ public class Main
     /* вычесть население Тувы из населения начала 1946 года */
     private void adjustForTuva() throws Exception
     {
-        // ###
+        final double tuva_pop = 100_000;
+        double pop = p1946_actual.sum();
+        double scale = (pop - tuva_pop) / pop;
+        p1946_actual = RescalePopulation.scaleBy(p1946_actual, scale);
     }
 
     private PopulationContext  eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves) throws Exception

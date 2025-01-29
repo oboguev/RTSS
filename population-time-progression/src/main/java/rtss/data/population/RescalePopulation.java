@@ -139,4 +139,12 @@ public class RescalePopulation
         else
             return p.scaleAllBy(scale);
     }
+
+    public static PopulationContext scaleBy(PopulationContext p, double scale) throws Exception
+    {
+        if (p == null)
+            return null;
+        else
+            return p.scaleAllBy(scale);
+    }
 }
