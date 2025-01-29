@@ -151,6 +151,7 @@ public class Main
         }
 
         evalDeficit1946();
+
         // ###
     }
 
@@ -177,7 +178,7 @@ public class Main
         curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
         curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
         halves.add(curr);
-
+        
         /* второе полугодие 1941 */
         half = HalfYearSelector.SecondHalfYear;
         curr = new HalfYearEntry(year, half, fctx.clone(), fctx.clone());
@@ -249,9 +250,7 @@ public class Main
         
         // ### АДХ СССР 1946 -- население до эмиграции? стр. 118
         
-        // ### обратная передвижка к середине 1945
-        // ### IMR = по peace_mt, остальные коэф. так чтобы сохранить потери?
-        // ### или определить фактическую таблицу 1945.2 по смертности в 1946 ?
+        // ### backpropagate deficit to accumulated_excess_death и вычислить halfyear excess_death  
         
         // ### make lx curves for peace_mt (M/F), 
         // ### then for each gender+year-group make forwarding through halfyears
