@@ -211,6 +211,7 @@ public class Main
 
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
             CombinedMortalityTable mt = peacetimeMortalityTables.get(current_year, current_half);
+            curr.peace_mt = mt;
 
             /* передвижка на следующие полгода населения с учётом рождений */
             ForwardPopulationT fw1 = new ForwardPopulationT();
@@ -227,13 +228,21 @@ public class Main
             prev.expected_nonwar_births = fw1.getObservedBirths();
             prev.expected_nonwar_deaths = fw2.getObservedDeaths();
 
-            Util.out("HALF: " + curr.toString());
-
             curr.prev = prev;
             prev.next = curr;
             prev = curr;
             halves.add(curr);
         }
+        
+        for (HalfYearEntry he : halves)
+        {
+            if (he.year == 1946)
+                break;
+            if (he.peace_mt == null)
+                he.peace_mt = peacetimeMortalityTables.get(he.year, he.halfyear);
+        }
+        
+        // ### make lx curves for peace_mt
 
         return halves;
     }
@@ -437,7 +446,7 @@ public class Main
         double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
 
         out("");
-        outk("Сверхсмертность всего наличного на середину 1941 года населения", deficit_total);
+        outk("Сверхсмертность всего наличного на середину 1941 года населения к концу 1945 года", deficit_total);
         out("Предварительная разбивка на категории по временному окну:");
         outk("    Сверхсмертность мужчин призывного возраста", deficit_m_conscripts);
         outk("    Сверхсмертность женщин фертильного возраста", deficit_f_fertile);

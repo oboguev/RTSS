@@ -1,5 +1,6 @@
 package rtss.ww2losses;
 
+import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.forward.PopulationContext;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 
@@ -12,6 +13,9 @@ public class HalfYearEntry
     /* обозначение периода (год и полугодие) */
     final public int year;
     final public HalfYearSelector halfyear;
+    
+    /* таблица смертности для этого полугодия в условиях мира */
+    CombinedMortalityTable peace_mt;
     
     /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
     public PopulationContext p_nonwar_with_births;
