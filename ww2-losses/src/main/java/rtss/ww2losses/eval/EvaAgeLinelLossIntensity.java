@@ -33,20 +33,40 @@ public class EvaAgeLinelLossIntensity
             double final_population) throws Exception
     {
         double a1 = 0;
-        double div1 = divergence(
-                              initial_age_ndays,
-                              gender,
-                              initial_population,
-                              final_population,
-                              a1);
-        if (div1 < 0)
+        double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, a1);
+        if (div1 <= 0)
             return 0;
         
-        double a2 = 0;
+        double a2 = 2.0;
+        double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+        if (div2 >= 0)
+            throw new Exception("внутренняя ошибка");
         
-
-        // ###
-        return 0;
+        /*
+         * Искать а между а1 и a2, покуда div не приблизится к нулю
+         */
+        for(int pass = 0;;)
+        {
+            if (pass++ > 10000)
+                throw new Exception("поиск не сходится");
+            
+            double a = (a1 + a2) /2;
+            if (Math.abs(div2 - div1) < final_population * 0.0001)
+                return a;
+            double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);
+            if (div == 0)
+            {
+                return a;
+            }
+            else if (div < 0)
+            {
+                a2 = a;
+            }
+            else if (div > 0)
+            {
+                a1 = a;
+            }
+        }
     }
 
     private double divergence(
