@@ -566,8 +566,12 @@ public class Main
         /* полугодовой коэффициент распределения потерь для призывного населения */
         double[] ac_conscripts = wsum(0.9, rkka_loss_intensity, 0.1, ac_general);
 
+        /* вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола */
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);
         AgeLineLossIntensities alis = eval.eval(p1946_actual);
+
+        /* расчёт возрастных линий с учётов найденных коэфициентов интенсивности */
+        eval.processAgeLines(alis, p1946_actual);
         
         Util.noop();
         // ### calc he.actual_deaths and he.actual_population

@@ -112,4 +112,44 @@ public class SteerAgeLine
         return (he.year - 1941) * 2 + he.halfyear.seq(0);
     }
 
+    /* ============================================================================== */
+
+    /*
+     * Обработка возрастной линии с учётом найденного коэффициента интенсивности военных потерь
+     */
+    public void steerActual(Gender gender, int initial_age_ndays, AgeLineLossIntensities alis, double initial_population) throws Exception
+    {
+        double loss_intensity = alis.get(gender, initial_age_ndays);
+        steerActual(gender, initial_age_ndays, loss_intensity, initial_population);
+    }
+
+    private void steerActual(Gender gender, int initial_age_ndays, double loss_intensity, double initial_population) throws Exception
+    {
+        double population = initial_population;
+        int nd_age = initial_age_ndays;
+        int span = ForwardPopulation.years2days(0.5);
+
+        for (HalfYearEntry he = halves.get("1941.2"); he.year != 1946; he = he.next)
+        {
+            int nd1 = nd_age;
+            int nd2 = nd1 + span;
+            int ndm = (nd1 + nd2) / 2;
+
+            double peace_deaths = population * deathRatio(he, gender, nd1, nd2);
+
+            double[] ac = ac(gender, ndm);
+            double excess_war_deaths = ac[ac_index(he)] * initial_population * loss_intensity;
+
+            population -= peace_deaths;
+            population -= excess_war_deaths;
+            
+            Util.assertion(population >= 0);
+            Util.assertion(peace_deaths >= 0);
+            Util.assertion(excess_war_deaths >= 0);
+            
+            // ###
+
+            nd_age += span;
+        }
+    }
 }

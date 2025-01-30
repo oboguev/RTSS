@@ -29,6 +29,7 @@ public class EvalAgeLineLossIntensities
         AgeLineLossIntensities intensities = new AgeLineLossIntensities();
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
+
         SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts);
         EvaAgeLinelLossIntensity eval = new EvaAgeLinelLossIntensity(steer);
 
@@ -53,5 +54,28 @@ public class EvalAgeLineLossIntensities
         }
 
         return intensities;
+    }
+    
+    public void processAgeLines(AgeLineLossIntensities alis, PopulationContext p1946_actual) throws Exception
+    {
+        HalfYearEntry he1941_2 = halves.get("1941.2");
+        PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
+
+        SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts);
+        int ndays = 9 * years2days(0.5);
+        
+        double v, initial_population;
+
+        for (int nd = 0; nd <= p1941_2.MAX_DAY; nd++)
+        {
+            if (nd + ndays > p1946_actual.MAX_DAY)
+                break;
+            
+            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.MALE, nd);
+            steer.steerActual(Gender.MALE, nd, alis, initial_population);
+
+            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.FEMALE, nd);
+            steer.steerActual(Gender.FEMALE, nd, alis, initial_population);
+        }
     }
 }
