@@ -1,5 +1,6 @@
 package rtss.ww2losses;
 
+import rtss.data.ValueConstraint;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.forward.PopulationContext;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
@@ -34,6 +35,12 @@ public class HalfYearEntry
 
     /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
+    
+    /* действительное число смертей (по возрастам и полам) в этом полугодии */
+    public PopulationContext actual_deaths = newPopulationContext();
+
+    /* действительное насееление (по возрастам и полам) в начале полугодия */
+    public PopulationContext actual_population = newPopulationContext();
 
     public HalfYearEntry(
             int year,
@@ -45,6 +52,14 @@ public class HalfYearEntry
         this.halfyear = halfyear;
         this.p_nonwar_with_births = p_nonwar_with_births;
         this.p_nonwar_without_births = p_nonwar_without_births;
+    }
+    
+    private PopulationContext newPopulationContext()
+    {
+        PopulationContext p = new PopulationContext();
+        p.setValueConstraint(ValueConstraint.NONE);
+        p.beginTotal();
+        return p;
     }
 
     public String toString()

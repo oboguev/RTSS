@@ -570,7 +570,8 @@ public class Main
         AgeLineLossIntensities alis = eval.eval(p1946_actual);
         
         Util.noop();
-        // ###
+        // ### calc he.actual_deaths and he.actual_population
+        // ### also calc excess conscript deaths
     }
 
     /* ======================================================================================================= */
