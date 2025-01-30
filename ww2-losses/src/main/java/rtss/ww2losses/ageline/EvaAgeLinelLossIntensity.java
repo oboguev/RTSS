@@ -1,6 +1,7 @@
 package rtss.ww2losses.ageline;
 
 import rtss.data.selectors.Gender;
+import rtss.util.Util;
 
 /*
  * Найти величину loss_intensity, при которой проводка возрастной линии от середины 1941 года
@@ -34,40 +35,80 @@ public class EvaAgeLinelLossIntensity
     {
         double a1 = 0;
         double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, a1);
-        if (div1 <= 0)
+        if (div1 == 0)
             return 0;
-        
-        double a2 = 2.0;
-        double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
-        if (div2 >= 0)
-            throw new Exception("внутренняя ошибка");
-        
-        /*
-         * Искать а между а1 и a2, покуда div не приблизится к нулю
-         */
-        for(int pass = 0;;)
-        {
-            double a = (a1 + a2) /2;
-            if (Math.abs(div2 - div1) < final_population * 0.0001)
-                return a;
-            double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);
-            if (div == 0)
-            {
-                return a;
-            }
-            else if (div < 0)
-            {
-                a2 = a;
-                div2 = div;
-            }
-            else if (div > 0)
-            {
-                a1 = a;
-                div1 = div;
-            }
 
-            if (pass++ > 10000)
-                throw new Exception("поиск не сходится");
+        if (div1 > 0)
+        {
+            double a2 = 2.0;
+            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+            if (div2 >= 0)
+                throw new Exception("внутренняя ошибка");
+
+            /*
+             * Искать а между а1 и a2, покуда div не приблизится к нулю
+             */
+            for (int pass = 0;;)
+            {
+                double a = (a1 + a2) / 2;
+                if (Math.abs(div2 - div1) < final_population * 0.0001)
+                    return checksign(a, 1);
+                
+                double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);
+                if (div == 0)
+                {
+                    return checksign(a, 1);
+                }
+                else if (div < 0)
+                {
+                    a2 = a;
+                    div2 = div;
+                }
+                else if (div > 0)
+                {
+                    a1 = a;
+                    div1 = div;
+                }
+
+                if (pass++ > 10000)
+                    throw new Exception("поиск не сходится");
+            }
+        }
+        else // if (div1 < 0)
+        {
+            double a2 = -2.0;
+            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+            if (div2 <= 0)
+                throw new Exception("внутренняя ошибка");
+
+            /*
+             * Искать а между а1 и a2, покуда div не приблизится к нулю
+             */
+            for (int pass = 0;;)
+            {
+                double a = (a1 + a2) / 2;
+                if (Math.abs(div2 - div1) < final_population * 0.0001)
+                    return checksign(a, -1);
+                
+                double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);
+                if (div == 0)
+                {
+                    return checksign(a, -1);
+                }
+                else if (div < 0)
+                {
+                    a1 = a;
+                    div1 = div;
+                }
+                else if (div > 0)
+                {
+                    a2 = a;
+                    div2 = div;
+                }
+
+                if (pass++ > 10000)
+                    throw new Exception("поиск не сходится");
+            }
         }
     }
 
@@ -85,5 +126,23 @@ public class EvaAgeLinelLossIntensity
                                        loss_intensity);
 
         return remainder - final_population;
+    }
+    
+    private double checksign(double a, int sign) throws Exception
+    {
+        if (sign > 0)
+        {
+            Util.assertion(a > 0);;
+        }
+        else if (sign < 0)
+        {
+            Util.assertion(a < 0);
+        }
+        else // if (sign == 0)
+        {
+            Util.assertion(a == 0);
+        }
+        
+        return a;
     }
 }

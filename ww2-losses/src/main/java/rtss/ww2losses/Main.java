@@ -125,6 +125,15 @@ public class Main
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
         Util.out("");
+        
+        if (ApplyAntibiotics)
+        {
+            Util.out("С учётом влияния антибиотиков");
+        }
+        else
+        {
+            Util.out("Без учёта влияния антибиотиков");
+        }
 
         switch (area)
         {
@@ -450,12 +459,14 @@ public class Main
         if (DeductEmigration)
         {
             PopulationContext emigration = emigration();
+            out("");
             outk("Эмиграция, тыс. чел.", emigration.sum());
             deficit = deficit.sub(emigration, ValueConstraint.NONE);
         }
         else
         {
-            out("Эмиграция ещё включена в половозрастную структуру начала 1946 года");
+            out("");
+            out("Эмиграция ещё включена в половозрастную структуру начала 1946 года, и не вычитается из смертности");
         }
 
         if (area == Area.RSFSR)
@@ -486,7 +497,7 @@ public class Main
         double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
 
         out("");
-        outk("Сверхсмертность всего наличного на середину 1941 года населения к концу 1945 года", deficit_total);
+        outk("Предварительная сверхсмертность всего наличного на середину 1941 года населения к концу 1945 года, по дефициту", deficit_total);
         out("Предварительная разбивка на категории по временному окну:");
         outk("    Сверхсмертность мужчин призывного возраста", deficit_m_conscripts);
         outk("    Сверхсмертность женщин фертильного возраста", deficit_f_fertile);
@@ -568,6 +579,9 @@ public class Main
         eval.processAgeLines(alis, p1946_actual);
         
         // ### EvalAgeLineLossIntensities.processAgeLines для старших возрастов
+        // ### use alis.average
+        
+        // ### compare halves.last.actual_population vs. p1946_actual_born_prewar
         
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births;

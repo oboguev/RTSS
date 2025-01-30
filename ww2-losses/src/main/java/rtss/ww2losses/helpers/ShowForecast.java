@@ -32,6 +32,8 @@ public class ShowForecast
     {
         String sage = "возраст " + age;
         
+        // ### вырезку из PopulationContext 
+        
         double f = p.getYearValue(Gender.FEMALE, age); 
         double m = p.getYearValue(Gender.MALE, age); 
         double b = p.getYearValue(Gender.BOTH, age);

@@ -146,11 +146,15 @@ public class SteerAgeLine
 
             population -= peace_deaths;
             population -= excess_war_deaths;
-            
+
             Util.assertion(population >= 0);
             Util.assertion(peace_deaths >= 0);
-            Util.assertion(excess_war_deaths >= 0);
-            
+
+            if (loss_intensity >= 0)
+                Util.assertion(excess_war_deaths >= 0);
+            else
+                Util.assertion(excess_war_deaths <= 0);
+
             setcap(he.next.actual_population);
 
             he.next.actual_population.addDay(Locality.TOTAL, gender, cap(nd2), population);
@@ -162,14 +166,14 @@ public class SteerAgeLine
             nd_age += span;
         }
     }
-    
+
     private int maxday;
-    
+
     private void setcap(PopulationContext p)
     {
         maxday = p.MAX_DAY;
     }
-    
+
     private int cap(int nd)
     {
         return nd <= maxday ? nd : maxday;

@@ -26,4 +26,21 @@ public class AgeLineLossIntensities
     {
         m.put(key(gender, nd), v);
     }
+    
+    public double average(Gender gender, int nd1, int nd2) throws Exception
+    {
+        int count = 0;
+        int sum = 0;
+        
+        for (int nd = nd1; nd <= nd2; nd++)
+        {
+            sum += get(gender, nd);
+            count++;
+        }
+        
+        if (count == 0)
+            throw new IllegalArgumentException();
+        
+        return sum / count;
+    }
 }
