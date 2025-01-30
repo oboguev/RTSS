@@ -38,6 +38,8 @@ public class HalfYearEntry
     
     /* действительное число смертей (по возрастам и полам) в этом полугодии */
     public PopulationContext actual_deaths = newPopulationContext();
+    public PopulationContext actual_peace_deaths = newPopulationContext();
+    public PopulationContext actual_excess_wartime_deaths = newPopulationContext();
 
     /* действительное насееление (по возрастам и полам) в начале полугодия */
     public PopulationContext actual_population = newPopulationContext();
@@ -56,7 +58,7 @@ public class HalfYearEntry
     
     private PopulationContext newPopulationContext()
     {
-        PopulationContext p = new PopulationContext();
+        PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
         p.setValueConstraint(ValueConstraint.NONE);
         p.beginTotal();
         return p;
