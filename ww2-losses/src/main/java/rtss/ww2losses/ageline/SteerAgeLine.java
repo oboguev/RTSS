@@ -1,6 +1,7 @@
 package rtss.ww2losses.ageline;
 
 import rtss.data.population.forward.ForwardPopulation;
+import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -150,13 +151,27 @@ public class SteerAgeLine
             Util.assertion(peace_deaths >= 0);
             Util.assertion(excess_war_deaths >= 0);
             
-            he.next.actual_population.setDay(Locality.TOTAL, gender, nd2, population);
+            setcap(he.next.actual_population);
 
-            he.actual_peace_deaths.setDay(Locality.TOTAL, gender, nd1, peace_deaths);
-            he.actual_excess_wartime_deaths.setDay(Locality.TOTAL, gender, nd1, excess_war_deaths);
-            he.actual_deaths.setDay(Locality.TOTAL, gender, nd1, peace_deaths + excess_war_deaths);
+            he.next.actual_population.addDay(Locality.TOTAL, gender, cap(nd2), population);
+
+            he.actual_peace_deaths.addDay(Locality.TOTAL, gender, cap(nd1), peace_deaths);
+            he.actual_excess_wartime_deaths.addDay(Locality.TOTAL, gender, cap(nd1), excess_war_deaths);
+            he.actual_deaths.addDay(Locality.TOTAL, gender, cap(nd1), peace_deaths + excess_war_deaths);
 
             nd_age += span;
         }
+    }
+    
+    private int maxday;
+    
+    private void setcap(PopulationContext p)
+    {
+        maxday = p.MAX_DAY;
+    }
+    
+    private int cap(int nd)
+    {
+        return nd <= maxday ? nd : maxday;
     }
 }

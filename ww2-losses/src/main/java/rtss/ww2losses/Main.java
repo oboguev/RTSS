@@ -277,14 +277,6 @@ public class Main
 
         // ### АДХ СССР 1946 -- население до эмиграции? стр. 118
 
-        // ### backpropagate deficit to accumulated_excess_death и вычислить halfyear excess_death  
-
-        // ### make lx curves for peace_mt (M/F), 
-        // ### then for each gender+year-group make forwarding through halfyears
-        // ### at each halfyear step: (apply peace_mt -- use attrition coef from lx, add extradeaths from deficit * weight_coef * alpha)
-        // ### find alpha value such that projected_end_v == actual_end_v
-        // ### use it to calc excess deaths and leftover pop
-
         return halves;
     }
 
@@ -575,6 +567,8 @@ public class Main
         /* расчёт возрастных линий с учётов найденных коэфициентов интенсивности */
         eval.processAgeLines(alis, p1946_actual);
         
+        // ### EvalAgeLineLossIntensities.processAgeLines для старших возрастов
+        
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births;
         he.actual_deaths = null;
@@ -592,7 +586,7 @@ public class Main
         double sum_all = 0;
         double sum_conscripts = 0;
         
-        /* к середине полуголия исполнится FROM/TO */
+        /* к середине полугодия исполнится FROM/TO */
         int conscript_age_from = years2days(Constants.CONSCRIPT_AGE_FROM - 0.25);
         int conscript_age_to = years2days(Constants.CONSCRIPT_AGE_TO - 0.25);
 
