@@ -790,12 +790,8 @@ public class Main
          */
         PopulationContext p = newPopulationContext();
 
-        HalfYearEntry he = halves.get("1941.2");
-        for (;;)
+        for (HalfYearEntry he = halves.get("1941.2"); he.year != 1946; he = he.next)
         {
-            if (he.year == 1946)
-                break;
-
             ForwardPopulationT fw = new ForwardPopulationT();
             int ndays = fw.birthDays(0.5);
 
@@ -815,19 +811,18 @@ public class Main
 
             fw.forward(p, mt, 0.5);
 
-            // число смертей от рождений
             if (record)
             {
+                // число смертей от рождений
                 he.actual_warborn_deaths = fw.getObservedDeaths();
-
-                // ### add p to he.next.actual_population 
+                
+                // ввести остаток рождённых до конца полугодия в население начала следующего полугодия
+                merge(p, he.next.actual_population);
 
                 // ### actual_deaths 
                 // ### add to actual_peace_deaths 
                 // ### actual_excess_wartime_deaths
             }
-
-            he = he.next;
         }
 
         double v1 = p.sum();
@@ -838,6 +833,8 @@ public class Main
 
     private double imr_fy_multiplier(HalfYearEntry he) throws Exception
     {
+        // ### поправка на оккупированность ???
+        
         String yh = he.year + "." + he.halfyear.seq(1);
 
         switch (yh)
@@ -956,6 +953,28 @@ public class Main
         p.setValueConstraint(ValueConstraint.NONE);
         p.beginTotal();
         return p;
+    }
+
+    private void merge(PopulationContext from, PopulationContext to) throws Exception
+    {
+        merge(from, to, Gender.MALE);
+        merge(from, to, Gender.FEMALE);
+    }
+    
+    private void merge(PopulationContext from, PopulationContext to, Gender gender)  throws Exception
+    {
+        for (int nd = 0; nd <= from.MAX_DAY; nd++)
+        {
+            double v1 = from.getDay(Locality.TOTAL, gender, nd);
+            
+            if (v1 != 0)
+            {
+                double v2 = to.getDay(Locality.TOTAL, gender, nd);
+                if (v2 != 0)
+                    throw new Exception("unable to merge: already has data for this age");
+                to.setDay(Locality.TOTAL, gender, nd, v1);
+            }
+        }
     }
 
     /* ======================================================================================================= */
