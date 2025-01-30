@@ -1,4 +1,4 @@
-package rtss.ww2losses.eval;
+package rtss.ww2losses.ageline;
 
 import rtss.data.population.forward.ForwardPopulation;
 import rtss.data.selectors.Gender;
@@ -17,8 +17,8 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 public class SteerAgeLine
 {
     private final HalfYearEntries<HalfYearEntry> halves;
-    private double[] ac_conscripts;
     private double[] ac_general;
+    private double[] ac_conscripts;
 
     private static final double CONSCRIPT_AGE_FROM = 18.5;
     private static final double CONSCRIPT_AGE_TO = 54.5;
@@ -28,11 +28,11 @@ public class SteerAgeLine
      * @ac_conscripts  = удельные весовые коэфициенты военной сверхсмертности (по полугодиям) для призывников  
      * @ac_general     = удельные весовые коэфициенты военной сверхсмертности (по полугодиям) для непризывного населения   
      */
-    public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, double[] ac_conscripts, double[] ac_general)
+    public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, double[] ac_general, double[] ac_conscripts)
     {
         this.halves = halves;
-        this.ac_conscripts = ac_conscripts;
         this.ac_general = ac_general;
+        this.ac_conscripts = ac_conscripts;
     }
 
     /*

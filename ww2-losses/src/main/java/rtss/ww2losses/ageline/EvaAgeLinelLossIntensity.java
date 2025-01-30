@@ -1,4 +1,4 @@
-package rtss.ww2losses.eval;
+package rtss.ww2losses.ageline;
 
 import rtss.data.selectors.Gender;
 
