@@ -481,10 +481,10 @@ public class Main
         }
 
         /*
-         * разбить сверхсмертность на категории 
+         * разбить сверхсмертность на категории с примерной (предварительной) численностью 
          */
         double deficit_total = deficit.sum();
-        double deficit_m_conscripts = subcount(deficit, Gender.MALE, 19, 59);
+        double deficit_m_conscripts = subcount(deficit, Gender.MALE, Constants.CONSCRIPT_AGE_FROM, Constants.CONSCRIPT_AGE_TO + 4.5);
         double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 58);
         double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
 
@@ -640,6 +640,7 @@ public class Main
     {
         double sum = 0;
         
+        // весовые коэффициенты для возрастного окна
         double[] weights = {0.5, 1.5, 2.5, 3.5};
         
         for (int k = 0; k < weights.length; k++)
