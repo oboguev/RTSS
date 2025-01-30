@@ -566,6 +566,15 @@ public class Main
 
     /* ======================================================================================================= */
 
+    /*
+     * Обработать возрастные линии для наличного на середину 1941 года населения.
+     * 
+     * Для каждой линии определить интенсивность потерь, которая при данных весовых коэффициентах разбивки attrition 
+     * связывает начальную численность линии (на середину 1941 года) с конечной численностью (на начало 1946 года).
+     * 
+     * Затем с использованием найденной интенсивности потерь расчитать ход линии по полугодиям,
+     * включая число смертей за каждое полугодие и численность населения в этой линии на каждое полугодие. 
+     */
     private void evalAgeLines() throws Exception
     {
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
@@ -587,13 +596,16 @@ public class Main
         Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 1200);
 
         HalfYearEntry he = halves.get("1941.1");
-        he.actual_population = he.p_nonwar_with_births;
+        he.actual_population = he.p_nonwar_with_births.clone();
         he.actual_deaths = null;
         he.actual_peace_deaths = null;
         he.actual_excess_wartime_deaths = null;
 
         he = halves.get("1941.2");
-        he.actual_population = he.p_nonwar_with_births;
+        he.actual_population = he.p_nonwar_with_births.clone();
+
+        for (HalfYearEntry hx : halves)
+            hx.actual_population_without_births = hx.actual_population.clone();
 
         printExcessDeaths();
     }
@@ -641,7 +653,7 @@ public class Main
 
             /* взрослое население в начале периода */
             PopulationContext p1 = he.actual_population;
-            
+
             /* взрослое население в конце периода */
             PopulationContext p2 = he.next.actual_population;
 
@@ -807,7 +819,9 @@ public class Main
             if (record)
             {
                 he.actual_warborn_deaths = fw.getObservedDeaths();
-                // ### add to actual_population 
+
+                // ### add p to he.next.actual_population 
+
                 // ### actual_deaths 
                 // ### add to actual_peace_deaths 
                 // ### actual_excess_wartime_deaths

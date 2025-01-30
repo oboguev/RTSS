@@ -41,9 +41,18 @@ public class HalfYearEntry
     public PopulationContext actual_peace_deaths = newPopulationContext();
     public PopulationContext actual_excess_wartime_deaths = newPopulationContext();
 
-    /* действительное население (по возрастам и полам) в начале полугодия */
+    /* 
+     * действительное население (по возрастам и полам) в начале полугодия
+     * включая начальное на середину 1941 и рождённое после
+     */
     public PopulationContext actual_population = newPopulationContext();
     
+    /* 
+     * действительное население (по возрастам и полам) в начале полугодия
+     * включая только начальное на середину 1941 года
+     */
+    public PopulationContext actual_population_without_births = newPopulationContext();
+
     /* действительное число рождений в полугодии */
     public double actual_births; 
     
