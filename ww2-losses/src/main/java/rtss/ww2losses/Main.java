@@ -62,6 +62,11 @@ public class Main
     private static boolean PrintDiagnostics = Util.True;
 
     /*
+     * Использовать если население на начало 1946 года уже не содержит эмигрантов
+     */
+    private static boolean DeductEmigration = Util.False;
+
+    /*
      * Размер контекста отслеживания: только дети или все возраста
      */
     private static int PopulationContextSize = PopulationContext.ALL_AGES;
@@ -146,7 +151,7 @@ public class Main
         if (Util.False)
         {
             new PopulationChart("Сверхсмертность населения " + area.toString() + " на 1946.1")
-                    .show("1", eval_deficit_1946(halves, true))
+                    .show("1", eval_deficit_1946(halves, DeductEmigration))
                     .display();
         }
 
@@ -178,7 +183,7 @@ public class Main
         curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
         curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
         halves.add(curr);
-        
+
         /* второе полугодие 1941 */
         half = HalfYearSelector.SecondHalfYear;
         curr = new HalfYearEntry(year, half, fctx.clone(), fctx.clone());
@@ -235,23 +240,23 @@ public class Main
             prev = curr;
             halves.add(curr);
         }
-        
+
         for (HalfYearEntry he : halves)
         {
             if (he.year == 1946)
                 break;
-            
+
             if (he.peace_mt == null)
                 he.peace_mt = peacetimeMortalityTables.get(he.year, he.halfyear);
-            
+
             he.peace_lx_male = mt2lx(he.peace_mt, Locality.TOTAL, Gender.MALE);
             he.peace_lx_female = mt2lx(he.peace_mt, Locality.TOTAL, Gender.FEMALE);
         }
-        
+
         // ### АДХ СССР 1946 -- население до эмиграции? стр. 118
-        
+
         // ### backpropagate deficit to accumulated_excess_death и вычислить halfyear excess_death  
-        
+
         // ### make lx curves for peace_mt (M/F), 
         // ### then for each gender+year-group make forwarding through halfyears
         // ### at each halfyear step: (apply peace_mt -- use attrition coef from lx, add extradeaths from deficit * weight_coef * alpha)
@@ -277,11 +282,11 @@ public class Main
      * Возвращаемый дефицит охватывает только наличное на начало войны население, без учёта рождений
      * во время войны.  
      */
-    private PopulationContext eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves, boolean substractEmigration) throws Exception
+    private PopulationContext eval_deficit_1946(HalfYearEntries<HalfYearEntry> halves, boolean deductEmigration) throws Exception
     {
         PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
         PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
-        if (substractEmigration)
+        if (deductEmigration)
             deficit = deficit.sub(emigration(), ValueConstraint.NONE);
         return deficit;
     }
@@ -312,7 +317,7 @@ public class Main
 
     /*
      * Половозрастная структура эмиграции.
-     * 80% мужчин, 20% женщин, возрасты 20-60,
+     * 80% мужчин, 20% женщин, возрасты 20-50,
      * СССР = 850 тыс., РСФСР = 70 тыс.
      */
     private PopulationContext emigration() throws Exception
@@ -339,7 +344,7 @@ public class Main
             p.setYearValue(Gender.FEMALE, age, 0);
         }
 
-        for (int age = 20; age <= 60; age++)
+        for (int age = 20; age <= 50; age++)
         {
             p.setYearValue(Gender.MALE, age, 0.8);
             p.setYearValue(Gender.FEMALE, age, 0.2);
@@ -426,11 +431,18 @@ public class Main
             ShowForecast.show(ap, p1946_actual, halves, 3);
             ShowForecast.show(ap, p1946_actual, halves, 4);
         }
-        
+
         /* оставить только сверхсмертность */
-        PopulationContext emigration = emigration();
-        outk("Эмиграция, тыс. чел.", emigration.sum());
-        deficit = deficit.sub(emigration, ValueConstraint.NONE);
+        if (DeductEmigration)
+        {
+            PopulationContext emigration = emigration();
+            outk("Эмиграция, тыс. чел.", emigration.sum());
+            deficit = deficit.sub(emigration, ValueConstraint.NONE);
+        }
+        else
+        {
+            out("Эмиграция ещё включена в половозрастную структуру начала 1946 года");
+        }
 
         if (area == Area.RSFSR)
             deficit = cancelNegativeDeficit(deficit, Gender.FEMALE, 15, 60);
@@ -604,7 +616,7 @@ public class Main
     }
 
     /* ======================================================================================================= */
-    
+
     private double[] mt2lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
     {
         double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
@@ -628,7 +640,7 @@ public class Main
         {
             throw new Exception("Ошибка в построении daily_lx");
         }
-        
-        return daily_lx; 
+
+        return daily_lx;
     }
 }
