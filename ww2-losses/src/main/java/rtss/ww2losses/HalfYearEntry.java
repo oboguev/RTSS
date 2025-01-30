@@ -36,9 +36,19 @@ public class HalfYearEntry
     /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
     
-    /* действительное число смертей (по возрастам и полам) в этом полугодии */
+    /* действительное общее число смертей (по возрастам и полам) в этом полугодии */
     public PopulationContext actual_deaths = newPopulationContext();
+
+    /* 
+     * часть действительного числа смертей (по возрастам и полам) в этом полугодии, 
+     * состоявшихся бы в действительном военном населении при смертности мирного времени
+     */
     public PopulationContext actual_peace_deaths = newPopulationContext();
+    
+    /* 
+     * часть действительного числа смертей (по возрастам и полам) в этом полугодии, 
+     * состоявшихся в действительном военном населении избыточно к смертности мирного времени
+     */
     public PopulationContext actual_excess_wartime_deaths = newPopulationContext();
 
     /* 

@@ -820,7 +820,7 @@ public class Main
                 merge(p, he.next.actual_population);
 
                 // ### actual_deaths 
-                // ### add to actual_peace_deaths 
+                // ### actual_peace_deaths 
                 // ### actual_excess_wartime_deaths
             }
         }
