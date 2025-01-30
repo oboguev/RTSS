@@ -321,8 +321,8 @@ public class Main
     {
         int nd_4_5 = 9 * years2days(0.5);
 
-        p1946_actual_born_postwar = p1946_actual.selectByAgeDays(0, nd_4_5);
-        p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5 + 1, years2days(MAX_AGE + 1));
+        p1946_actual_born_postwar = p1946_actual.selectByAgeDays(0, nd_4_5 - 1);
+        p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5, years2days(MAX_AGE + 1));
 
         double v_total = p1946_actual.sum();
         double v_prewar = p1946_actual_born_prewar.sum();
@@ -573,11 +573,9 @@ public class Main
         eval.processAgeLines(alis, p1946_actual);
         
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
-        
         PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);
-        diff.toString();
-        
-        // ### compare halves.last.actual_population vs. p1946_actual_born_prewar
+        Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 100);
+        Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 1200);
         
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births;
