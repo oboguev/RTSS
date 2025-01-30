@@ -47,9 +47,6 @@ public class EvaAgeLinelLossIntensity
          */
         for(int pass = 0;;)
         {
-            if (pass++ > 10000)
-                throw new Exception("поиск не сходится");
-            
             double a = (a1 + a2) /2;
             if (Math.abs(div2 - div1) < final_population * 0.0001)
                 return a;
@@ -61,11 +58,16 @@ public class EvaAgeLinelLossIntensity
             else if (div < 0)
             {
                 a2 = a;
+                div2 = div;
             }
             else if (div > 0)
             {
                 a1 = a;
+                div1 = div;
             }
+
+            if (pass++ > 10000)
+                throw new Exception("поиск не сходится");
         }
     }
 

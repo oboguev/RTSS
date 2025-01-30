@@ -17,6 +17,8 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
+import rtss.ww2losses.ageline.AgeLineLossIntensities;
+import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.ShowForecast;
 import rtss.ww2losses.helpers.WarHelpers;
@@ -93,6 +95,23 @@ public class Main
     private CombinedMortalityTable mt1940;
     private PeacetimeMortalityTables peacetimeMortalityTables;
 
+    /* 
+     * интенсивность потерь РККА по полугодиям
+     * (Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга потерь", М. : Вече, 2010, стр. 236, 242, 245)
+     */
+    private static final double[] rkka_loss_intensity = { 0, 3_137_673, 1_518_213, 1_740_003, 918_618, 1_393_811, 915_019, 848_872, 800_817, 0 };
+
+    /* 
+     * интенсивность оккупации по полугодиям
+     * (Федеральная служба государственной статистики, "Великая отечественная война : юбилейный статистический сборник", М. 2020, стр. 36)
+     */
+    private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
+
+    /* 
+     * равномерная интенсивность по военным полугодиям
+     */
+    private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
      */
@@ -156,6 +175,7 @@ public class Main
         }
 
         evalDeficit1946();
+        evalAgeLines();
 
         // ###
     }
@@ -537,6 +557,37 @@ public class Main
     }
 
     /* ======================================================================================================= */
+    
+    private void evalAgeLines() throws Exception
+    {
+        /* полугодовой коэффициент распределения потерь для не-призывного населения */
+        double[] ac_general = wsum(0.6, even_intensity, 0.4, occupation_intensity);
+
+        /* полугодовой коэффициент распределения потерь для призывного населения */
+        double[] ac_conscripts = wsum(0.9, rkka_loss_intensity, 0.1, ac_general);
+
+        EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);
+        AgeLineLossIntensities alis = eval.eval(p1946_actual);
+        
+        Util.noop();
+        // ###
+    }
+
+    /* ======================================================================================================= */
+
+    private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
+    {
+        ww1 = Util.normalize(ww1);
+        ww2 = Util.normalize(ww2);
+
+        ww1 = Util.multiply(ww1, w1);
+        ww2 = Util.multiply(ww2, w2);
+
+        double[] ww = Util.add(ww1, ww2);
+        ww = Util.normalize(ww);
+
+        return ww;
+    }
 
     private void outk(String what, double v)
     {

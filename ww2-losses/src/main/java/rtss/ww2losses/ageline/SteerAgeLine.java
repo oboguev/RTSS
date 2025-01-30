@@ -94,7 +94,10 @@ public class SteerAgeLine
     private double survivalRatio(HalfYearEntry he, Gender gender, int nd1, int nd2) throws Exception
     {
         double[] lx = (gender == Gender.MALE) ? he.peace_lx_male : he.peace_lx_female;
-        double r = lx[nd2] / lx[nd1];
+        int back = 0;
+        if (nd2 >= lx.length)
+            back = nd2 - lx.length + 1;
+        double r = lx[nd2 - back] / lx[nd1 - back];
         Util.assertion(r >= 0 && r <= 1);
         return r;
     }
