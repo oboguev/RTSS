@@ -573,8 +573,16 @@ public class Main
         /* расчёт возрастных линий с учётов найденных коэфициентов интенсивности */
         eval.processAgeLines(alis, p1946_actual);
         
+        HalfYearEntry he = halves.get("1941.1");
+        he.actual_population = he.p_nonwar_with_births;
+        he.actual_deaths = null;
+        he.actual_peace_deaths = null;
+        he.actual_excess_wartime_deaths = null;
+        
+        he = halves.get("1941.2");
+        he.actual_population = he.p_nonwar_with_births;
+        
         Util.noop();
-        // ### calc he.actual_deaths and he.actual_population
         // ### also calc excess conscript deaths
     }
 
