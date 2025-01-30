@@ -6,6 +6,9 @@ import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.asfr.InterpolateASFR;
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.struct.Population;
@@ -28,6 +31,9 @@ import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.CalibrateASFR;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main
 {
@@ -189,7 +195,8 @@ public class Main
         evalAgeLines();
         evalNewBirths();
         evalNewBirthsDeaths();
-        // ### fitNewBirthsDeaths();
+        fitNewBirthsDeaths();
+
         // ### print half-yearly
         // ### print yearly
         // ### save files: population structure, excess deaths
@@ -620,6 +627,8 @@ public class Main
 
     /*
      * Вычислить фактическое число рождений в военное время
+     * по данным анамнеситического опроса 1960 года 
+     * и по числу женщин фертильного возраста согласно расчитанной ранее структуре остатка населения наличного в начале войны
      */
     private void evalNewBirths() throws Exception
     {
@@ -632,6 +641,7 @@ public class Main
 
             /* взрослое население в начале периода */
             PopulationContext p1 = he.actual_population;
+            
             /* взрослое население в конце периода */
             PopulationContext p2 = he.next.actual_population;
 
@@ -671,7 +681,7 @@ public class Main
             he2.actual_births += delta;
         }
     }
-    
+
     /*
      * Вычислить ожидаемое число смертей от новых рождений в военное время (от фактического числа военных рождений),
      * ожидаемый остаток фактически рождённых в 1941.вт.пол. - 1945.вт.пол. к началу 1946 при детской смертности 
@@ -717,7 +727,142 @@ public class Main
 
         outk("Сверхсмертность рождённых во время войны, по дефициту к началу 1946 года, тыс. чел.", v1 - v2);
     }
-    
+
+    /* ======================================================================================================= */
+
+    /*
+     * Итеративно повторять передвижку рождений военного времени до начала 1946 года с со-пропорциональным повышением 
+     * всех коэффициентов смертности детских лет на одну и ту же величину (общий множитель), однако сохраняя разницу 
+     * между таблицами разных лет связанную с введением антибиотиков. 
+     * 
+     * Мы итеративно повторяем передвижку до тех пор, пока не найдётся множитель дающий остаток рождённых в годы войны 
+     * на начало 1946 года равный их численности по реконструкции АДХ (обратным отсчётом от переписи 1959 года, 
+     * для РСФСР с учётом межреспубликанской миграции). 
+     * 
+     * Такая передвижка даст приближение к фактическому распределению смертей рождённых в годы войны.
+     */
+    private void fitNewBirthsDeaths() throws Exception
+    {
+        double m1 = 0.5;
+        double m2 = 2.5;
+
+        for (;;)
+        {
+            double m = (m1 + m2) / 2;
+            double diff = fitNewBirthsDeaths(m, false);
+
+            if (Math.abs(diff) < 200)
+            {
+                Util.out(String.format("Множитель детской смертности военного времени: %.2f", m));
+                fitNewBirthsDeaths(m, true);
+                break;
+            }
+
+            if (diff > 0)
+                m1 = m;
+            else
+                m2 = m;
+        }
+
+        double excess = 0;
+        for (HalfYearEntry he = halves.get("1941.2"); he.year != 1946; he = he.next)
+            excess += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline;
+        outk("Сверхсмертность рождённых во время войны, фактическая к началу 1946 года, тыс. чел.", excess);
+    }
+
+    private double fitNewBirthsDeaths(double multiplier, boolean record) throws Exception
+    {
+        /*
+         * передвижка новрождаемого населения по полугодиям
+         * от середины 1941 с добавлением числа рождений за полугодие согласно he.actual_births
+         */
+        PopulationContext p = newPopulationContext();
+
+        HalfYearEntry he = halves.get("1941.2");
+        for (;;)
+        {
+            if (he.year == 1946)
+                break;
+
+            ForwardPopulationT fw = new ForwardPopulationT();
+            int ndays = fw.birthDays(0.5);
+
+            // добавить фактические рождения, распределив их по дням
+            double nb1 = he.prev.actual_births;
+            double nb2 = he.actual_births;
+            double nb3 = (he.next != null) ? he.next.actual_births : nb2;
+            double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            double[] m_births = WarHelpers.male_births(births);
+            double[] f_births = WarHelpers.female_births(births);
+            fw.setBirthCount(m_births, f_births);
+
+            List<PatchInstruction> instructions = new ArrayList<>();
+            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier * imr_fy_multiplier(he));
+            instructions.add(instruction);
+            CombinedMortalityTable mt = PatchMortalityTable.patch(mt1940, instructions, "множитель смертности " + multiplier);
+
+            fw.forward(p, mt, 0.5);
+
+            // число смертей от рождений
+            if (record)
+            {
+                he.actual_warborn_deaths = fw.getObservedDeaths();
+                // ### add to actual_population 
+                // ### actual_deaths 
+                // ### add to actual_peace_deaths 
+                // ### actual_excess_wartime_deaths
+            }
+
+            he = he.next;
+        }
+
+        double v1 = p.sum();
+        double v2 = p1946_actual_born_postwar.sum();
+
+        return v1 - v2;
+    }
+
+    private double imr_fy_multiplier(HalfYearEntry he) throws Exception
+    {
+        String yh = he.year + "." + he.halfyear.seq(1);
+
+        switch (yh)
+        {
+        case "1941.1":
+            return 1.00;
+
+        case "1941.2":
+            return 1.27;
+
+        case "1942.1":
+            return 2.25;
+
+        case "1942.2":
+            return 2.30;
+
+        case "1943.1":
+            return 1.20;
+
+        case "1943.2":
+            return 1.08;
+
+        case "1944.1":
+            return 0.72;
+
+        case "1944.2":
+            return 0.54;
+
+        case "1945.1":
+            return 0.40;
+
+        case "1945.2":
+            return 0.40;
+
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
+
     /* ======================================================================================================= */
 
     /*
