@@ -284,8 +284,6 @@ public class Main
             he.peace_lx_female = mt2lx(he.peace_mt, Locality.TOTAL, Gender.FEMALE);
         }
 
-        // ### АДХ СССР 1946 -- население до эмиграции? стр. 118
-
         return halves;
     }
 
