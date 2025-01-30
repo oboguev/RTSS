@@ -2,6 +2,8 @@ package rtss.data.population;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;

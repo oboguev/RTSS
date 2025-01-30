@@ -1,4 +1,4 @@
-package rtss.data.population;
+package rtss.data.population.calc;
 
 import java.util.ArrayList;
 import java.util.Collections;

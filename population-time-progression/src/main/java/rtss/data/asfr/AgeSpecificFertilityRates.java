@@ -5,8 +5,8 @@ import java.util.List;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.population.Population;
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 

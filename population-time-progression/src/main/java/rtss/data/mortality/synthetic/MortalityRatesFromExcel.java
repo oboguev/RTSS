@@ -5,7 +5,7 @@ import java.util.List;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.population.Population;
+import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.excel.ExcelLoader;
 

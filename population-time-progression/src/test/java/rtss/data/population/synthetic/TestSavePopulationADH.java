@@ -2,7 +2,7 @@ package rtss.data.population.synthetic;
 
 import java.io.File;
 
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 

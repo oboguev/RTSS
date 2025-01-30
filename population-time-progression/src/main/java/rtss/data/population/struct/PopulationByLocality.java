@@ -1,7 +1,7 @@
-package rtss.data.population;
+package rtss.data.population.struct;
 
 import rtss.data.ValueConstraint;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.calc.RescalePopulation;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;

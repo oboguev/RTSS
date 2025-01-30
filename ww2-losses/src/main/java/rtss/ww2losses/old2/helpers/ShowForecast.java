@@ -1,6 +1,6 @@
 package rtss.ww2losses.old2.helpers;
 
-import rtss.data.population.Population;
+import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;

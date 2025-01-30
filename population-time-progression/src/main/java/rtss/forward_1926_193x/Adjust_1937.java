@@ -1,6 +1,6 @@
 package rtss.forward_1926_193x;
 
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 

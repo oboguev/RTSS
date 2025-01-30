@@ -1,5 +1,8 @@
 package rtss.data.population;
 
+import rtss.data.population.calc.RescalePopulation;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;

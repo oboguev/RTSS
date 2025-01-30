@@ -2,10 +2,10 @@ package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.InterpolateMortalityTable;
-import rtss.data.population.PopulationByLocality;
-import rtss.data.population.RescalePopulation;
+import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.struct.PopulationByLocality;
+import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.forward_1926_193x.Adjust_1939;
 import rtss.ww2losses.params.AreaParameters;

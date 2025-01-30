@@ -1,7 +1,7 @@
 package rtss.ww2losses.util;
 
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.ww2losses.params.AreaParameters;
 

@@ -1,4 +1,4 @@
-package rtss.data.population.forward;
+package rtss.data.population.struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,9 +11,8 @@ import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.population.Population;
-import rtss.data.population.PopulationByLocality;
-import rtss.data.population.RescalePopulation;
+import rtss.data.population.calc.RescalePopulation;
+import rtss.data.population.forward.ForwardPopulation;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.data.selectors.LocalityGender;

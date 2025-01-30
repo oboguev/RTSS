@@ -2,7 +2,7 @@ package rtss.ww2losses;
 
 import rtss.data.ValueConstraint;
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.struct.PopulationContext;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 
 public class HalfYearEntry
@@ -41,8 +41,11 @@ public class HalfYearEntry
     public PopulationContext actual_peace_deaths = newPopulationContext();
     public PopulationContext actual_excess_wartime_deaths = newPopulationContext();
 
-    /* действительное насееление (по возрастам и полам) в начале полугодия */
+    /* действительное население (по возрастам и полам) в начале полугодия */
     public PopulationContext actual_population = newPopulationContext();
+    
+    /* действительное число рождений в полугодии */
+    public double actual_births; 
 
     public HalfYearEntry(
             int year,

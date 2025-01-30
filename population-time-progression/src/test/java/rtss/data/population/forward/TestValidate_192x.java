@@ -2,8 +2,9 @@ package rtss.data.population.forward;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.EvalMortalityRate;
-import rtss.data.population.Population;
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
+import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;

@@ -4,7 +4,7 @@ import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.population.Population;
+import rtss.data.population.struct.Population;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;

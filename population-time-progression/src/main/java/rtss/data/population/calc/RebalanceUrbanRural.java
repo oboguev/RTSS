@@ -1,5 +1,7 @@
-package rtss.data.population;
+package rtss.data.population.calc;
 
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 

@@ -3,9 +3,9 @@ package rtss.ww2losses.population_194x;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.struct.PopulationByLocality;
+import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;

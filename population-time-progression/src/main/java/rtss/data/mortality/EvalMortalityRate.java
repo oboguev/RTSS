@@ -1,8 +1,8 @@
 package rtss.data.mortality;
 
-import rtss.data.population.PopulationByLocality;
 import rtss.data.population.forward.ForwardPopulation;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.struct.PopulationByLocality;
+import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Loggable;

@@ -1,6 +1,6 @@
 package rtss.data.rates;
 
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;

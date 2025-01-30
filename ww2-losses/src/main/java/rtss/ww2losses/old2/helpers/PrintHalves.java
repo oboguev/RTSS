@@ -1,7 +1,7 @@
 package rtss.ww2losses.old2.helpers;
 
 import rtss.data.ValueConstraint;
-import rtss.data.population.Population;
+import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.util.FieldValue;
 import rtss.util.Util;

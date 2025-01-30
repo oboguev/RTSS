@@ -1,6 +1,8 @@
-package rtss.data.population;
+package rtss.data.population.calc;
 
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
+import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -112,12 +114,12 @@ public class RescalePopulation
         double m_unknown = scale * p.getUnknown(Gender.MALE);
         double f_unknown = scale * p.getUnknown(Gender.FEMALE);
 
-        return new Population(p.locality,
-                              m, m_unknown, p.male.valueConstraint(),
-                              f, f_unknown, p.female.valueConstraint());
+        return new Population(p.locality(),
+                              m, m_unknown, p.valueConstraint(Gender.MALE),
+                              f, f_unknown, p.valueConstraint(Gender.FEMALE));
     }
 
-    static Population scaleTo(Population p, double new_amount) throws Exception
+    public static Population scaleTo(Population p, double new_amount) throws Exception
     {
         if (p == null)
             return null;

@@ -1,9 +1,9 @@
 package rtss.forward_1926_193x;
 
-import rtss.data.population.Population;
-import rtss.data.population.PopulationByLocality;
-import rtss.data.population.RebalanceUrbanRural;
-import rtss.data.population.RescalePopulation;
+import rtss.data.population.calc.RebalanceUrbanRural;
+import rtss.data.population.calc.RescalePopulation;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;

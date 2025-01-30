@@ -1,6 +1,6 @@
 package rtss.data.population.forward;
 
-import rtss.data.population.Population;
+import rtss.data.population.struct.Population;
 import rtss.util.Loggable;
 
 public class ForwardPopulation extends Loggable

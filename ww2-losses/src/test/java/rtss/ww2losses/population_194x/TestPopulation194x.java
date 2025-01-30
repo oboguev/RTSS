@@ -1,7 +1,7 @@
 package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;

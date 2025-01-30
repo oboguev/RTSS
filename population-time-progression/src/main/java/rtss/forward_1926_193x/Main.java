@@ -1,8 +1,8 @@
 package rtss.forward_1926_193x;
 
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.population.PopulationByLocality;
-import rtss.data.population.SmoothPopulation;
+import rtss.data.population.calc.SmoothPopulation;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;

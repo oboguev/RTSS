@@ -19,9 +19,9 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import rtss.data.DoubleArray;
-import rtss.data.population.Population;
-import rtss.data.population.RescalePopulation;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.calc.RescalePopulation;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 

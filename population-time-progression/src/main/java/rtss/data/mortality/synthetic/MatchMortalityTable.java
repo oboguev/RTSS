@@ -6,7 +6,7 @@ import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
-import rtss.data.population.PopulationByLocality;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.util.Util;
 
 /*

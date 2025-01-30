@@ -64,7 +64,7 @@ public class SmoothPopulation
         
         int[] ages = Bins.start_x(bins);
         double[] counts = Bins.midpoint_y(bins);
-        counts = rtss.data.population.SmoothPopulation.smooth(counts);
+        counts = rtss.data.population.calc.SmoothPopulation.smooth(counts);
         Clipboard.put(" ", ages, counts);
     }
     

@@ -1,5 +1,6 @@
 package rtss.data.population;
 
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.forward_1926_193x.Adjust_1939;
 import rtss.util.Util;

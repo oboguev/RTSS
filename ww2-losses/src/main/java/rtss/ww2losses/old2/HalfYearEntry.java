@@ -1,7 +1,7 @@
 package rtss.ww2losses.old2;
 
-import rtss.data.population.Population;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationContext;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 
 public class HalfYearEntry

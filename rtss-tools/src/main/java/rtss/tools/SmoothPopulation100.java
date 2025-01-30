@@ -81,7 +81,7 @@ public class SmoothPopulation100
         }
         
         double[] counts = Bins.midpoint_y(bins);
-        counts = rtss.data.population.SmoothPopulation.smooth(counts);
+        counts = rtss.data.population.calc.SmoothPopulation.smooth(counts);
         
         StringBuilder sb = new StringBuilder(); 
         for (double count : counts)

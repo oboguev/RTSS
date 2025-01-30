@@ -6,10 +6,10 @@ import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.asfr.InterpolateASFR;
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
-import rtss.data.population.Population;
-import rtss.data.population.RescalePopulation;
+import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
@@ -125,7 +125,7 @@ public class Main
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
         Util.out("");
-        
+
         if (ApplyAntibiotics)
         {
             Util.out("С учётом влияния антибиотиков");
@@ -187,8 +187,12 @@ public class Main
 
         evalDeficit1946();
         evalAgeLines();
-
-        // ###
+        evalNewBirths();
+        // ### evalNewBirthsDeaths();
+        // ### fitNewBirthsDeaths();
+        // ### print half-yearly
+        // ### print yearly
+        // ### save files: population structure, excess deaths
     }
 
     /* ================================================================================== */
@@ -554,7 +558,7 @@ public class Main
     }
 
     /* ======================================================================================================= */
-    
+
     private void evalAgeLines() throws Exception
     {
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
@@ -569,21 +573,21 @@ public class Main
 
         /* расчёт возрастных линий с учётов найденных коэфициентов интенсивности */
         eval.processAgeLines(alis, p1946_actual);
-        
+
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
         PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);
         Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 100);
         Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 1200);
-        
+
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births;
         he.actual_deaths = null;
         he.actual_peace_deaths = null;
         he.actual_excess_wartime_deaths = null;
-        
+
         he = halves.get("1941.2");
         he.actual_population = he.p_nonwar_with_births;
-        
+
         printExcessDeaths();
     }
 
@@ -591,7 +595,7 @@ public class Main
     {
         double sum_all = 0;
         double sum_conscripts = 0;
-        
+
         /* к середине полугодия исполнится FROM/TO */
         int conscript_age_from = years2days(Constants.CONSCRIPT_AGE_FROM - 0.25);
         int conscript_age_to = years2days(Constants.CONSCRIPT_AGE_TO - 0.25);
@@ -600,18 +604,76 @@ public class Main
         {
             if (he.actual_excess_wartime_deaths == null || he.actual_excess_wartime_deaths.sum() == 0)
                 continue;
-            
+
             sum_all += he.actual_excess_wartime_deaths.sum();
-            sum_conscripts += he.actual_excess_wartime_deaths.sumDays(Gender.MALE, conscript_age_from , conscript_age_to);
+            sum_conscripts += he.actual_excess_wartime_deaths.sumDays(Gender.MALE, conscript_age_from, conscript_age_to);
         }
-        
+
         outk("Избыточное число всех смертей", sum_all);
-        outk(String.format("Избыточное число смертей мужчин призывного возраста (%.1f-%.1f лет)", 
-                           Constants.CONSCRIPT_AGE_FROM, 
-                           Constants.CONSCRIPT_AGE_TO), 
+        outk(String.format("Избыточное число смертей мужчин призывного возраста (%.1f-%.1f лет)",
+                           Constants.CONSCRIPT_AGE_FROM,
+                           Constants.CONSCRIPT_AGE_TO),
              sum_conscripts);
     }
 
+    /* ======================================================================================================= */
+
+    /*
+     * Вычислить число рождений в военное время
+     */
+    private void evalNewBirths() throws Exception
+    {
+        Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
+
+        for (HalfYearEntry he : halves)
+        {
+            if (he.next == null)
+                break;
+
+            /* взрослое население в начале периода */
+            PopulationContext p1 = he.actual_population;
+            /* взрослое население в конце периода */
+            PopulationContext p2 = he.next.actual_population;
+
+            /* среднее взрослое население за период */
+            PopulationContext pavg = p1.avg(p2, ValueConstraint.NONE);
+
+            if (Util.False)
+            {
+                he.actual_births = asfr_calibration * 0.5 * yearly_asfrs.getForYear(he.year).births(pavg.toPopulation());
+            }
+            else
+            {
+                String timepoint = null;
+                switch (he.halfyear)
+                {
+                case FirstHalfYear:
+                    timepoint = he.year + ".0";
+                    break;
+                case SecondHalfYear:
+                    timepoint = he.year + ".1";
+                    break;
+                }
+
+                he.actual_births = asfr_calibration * 0.5 * halfyearly_asfrs.getForTimepoint(timepoint).births(pavg.toPopulation());
+            }
+        }
+
+        /*
+         * Для 1941 года (оба полугодия)
+         */
+        if (Util.False)
+        {
+            HalfYearEntry he1 = halves.get(0);
+            HalfYearEntry he2 = halves.get(1);
+            double delta = he1.actual_births - he1.expected_nonwar_births;
+            he1.actual_births = he1.expected_nonwar_births;
+            he2.actual_births += delta;
+        }
+        
+        Util.noop();
+    }
+    
     /* ======================================================================================================= */
 
     /*
@@ -639,29 +701,29 @@ public class Main
     private double subcount(PopulationContext p, Gender gender, double age1, double age2) throws Exception
     {
         double sum = 0;
-        
+
         // весовые коэффициенты для возрастного окна
-        double[] weights = {0.5, 1.5, 2.5, 3.5};
-        
+        double[] weights = { 0.5, 1.5, 2.5, 3.5 };
+
         for (int k = 0; k < weights.length; k++)
         {
             double weight = weights[k] / 4.0;
             double v = p.getYearValue(gender, age1 + k);
             sum += v * weight;
         }
-        
+
         for (int k = 0; k < weights.length; k++)
         {
             double weight = weights[k] / 4.0;
             double v = p.getYearValue(gender, age2 - k - 1);
             sum += v * weight;
         }
-        
+
         int nd1 = years2days(age1 + weights.length) + 1;
         int nd2 = years2days(age2 - weights.length) - 1;
-        
+
         sum += p.sumDays(gender, nd1, nd2);
-        
+
         return sum;
     }
 

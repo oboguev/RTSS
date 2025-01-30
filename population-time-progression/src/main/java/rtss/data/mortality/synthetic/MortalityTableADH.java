@@ -21,7 +21,7 @@ import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.MortalityUtil;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
-import rtss.data.population.Population;
+import rtss.data.population.struct.Population;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;

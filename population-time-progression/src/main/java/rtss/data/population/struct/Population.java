@@ -1,4 +1,4 @@
-package rtss.data.population;
+package rtss.data.population.struct;
 
 import java.io.File;
 import java.util.HashMap;
@@ -8,7 +8,8 @@ import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.population.forward.PopulationContext;
+import rtss.data.population.calc.RescalePopulation;
+import rtss.data.population.calc.SmoothPopulation;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -79,6 +80,16 @@ public class Population
             return female.valueConstraint();
         else
             return null;
+    }
+    
+    public ValueConstraint valueConstraint(Gender gender)
+    {
+        return forGender(gender).valueConstraint();
+    }
+
+    public Locality locality()
+    {
+        return locality;
     }
 
     public Population(Locality locality,
