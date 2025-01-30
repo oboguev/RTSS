@@ -614,6 +614,14 @@ public class Main
 
     /* ======================================================================================================= */
 
+    /*
+     * Взвешенная сумма w1*ww1 + w2*ww2
+     * 
+     * Массивы ww1 и ww2 предварительно нормализуются по сумме всех членов на 1.0
+     * (без изменения начальных копий).
+     * 
+     * Возвращаемый результат также нормализуется. 
+     */
     private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
     {
         ww1 = Util.normalize(ww1);
@@ -626,24 +634,6 @@ public class Main
         ww = Util.normalize(ww);
 
         return ww;
-    }
-
-    private void outk(String what, double v)
-    {
-        out(what + ": " + f2k(v / 1000.0));
-    }
-
-    private void out(String what)
-    {
-        Util.out(what);
-    }
-
-    private String f2k(double v)
-    {
-        String s = String.format("%,15.0f", v);
-        while (s.startsWith(" "))
-            s = s.substring(1);
-        return s;
     }
 
     private double subcount(PopulationContext p, Gender gender, int age1, int age2) throws Exception
@@ -707,6 +697,29 @@ public class Main
 
     /* ======================================================================================================= */
 
+    private void outk(String what, double v)
+    {
+        out(what + ": " + f2k(v / 1000.0));
+    }
+
+    private void out(String what)
+    {
+        Util.out(what);
+    }
+
+    private String f2k(double v)
+    {
+        String s = String.format("%,15.0f", v);
+        while (s.startsWith(" "))
+            s = s.substring(1);
+        return s;
+    }
+
+    /* ======================================================================================================= */
+
+    /*
+     * Построить кривую l(x) для таблицы смертности mt, указаного типа местности и пола
+     */
     private double[] mt2lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
     {
         double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
