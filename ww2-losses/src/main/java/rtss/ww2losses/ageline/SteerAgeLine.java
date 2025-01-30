@@ -4,6 +4,7 @@ import rtss.data.population.forward.ForwardPopulation;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
 
@@ -20,9 +21,6 @@ public class SteerAgeLine
     private final HalfYearEntries<HalfYearEntry> halves;
     private double[] ac_general;
     private double[] ac_conscripts;
-
-    private static final double CONSCRIPT_AGE_FROM = 18.5;
-    private static final double CONSCRIPT_AGE_TO = 54.5;
 
     /*
      * @halves         = данные для полугодий, от начала 1941 до начала 1946 года
@@ -77,8 +75,8 @@ public class SteerAgeLine
     private double[] ac(Gender gender, int nd)
     {
         if (gender == Gender.MALE &&
-            nd >= years2days(CONSCRIPT_AGE_FROM) &&
-            nd <= years2days(CONSCRIPT_AGE_TO))
+            nd >= years2days(Constants.CONSCRIPT_AGE_FROM) &&
+            nd <= years2days(Constants.CONSCRIPT_AGE_TO))
         {
             return ac_conscripts;
         }
@@ -102,6 +100,9 @@ public class SteerAgeLine
         return r;
     }
 
+    /*
+     * Доля умирающих при перемещении из возраста @nd1 в @nd2
+     */
     private double deathRatio(HalfYearEntry he, Gender gender, int nd1, int nd2) throws Exception
     {
         return 1 - survivalRatio(he, gender, nd1, nd2);
@@ -116,7 +117,8 @@ public class SteerAgeLine
     /* ============================================================================== */
 
     /*
-     * Обработка возрастной линии с учётом найденного коэффициента интенсивности военных потерь
+     * Обработка возрастной линии с учётом ранее найденного коэффициента интенсивности военных потерь
+     * для этой линии.
      */
     public void steerActual(Gender gender, int initial_age_ndays, AgeLineLossIntensities alis, double initial_population) throws Exception
     {

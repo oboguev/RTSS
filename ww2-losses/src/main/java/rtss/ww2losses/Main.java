@@ -27,6 +27,8 @@ import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.CalibrateASFR;
 
+import static rtss.data.population.forward.ForwardPopulation.years2days;
+
 public class Main
 {
     public static void main(String[] args)
@@ -582,8 +584,32 @@ public class Main
         he = halves.get("1941.2");
         he.actual_population = he.p_nonwar_with_births;
         
-        Util.noop();
-        // ### also calc excess conscript deaths
+        printExcessDeaths();
+    }
+
+    private void printExcessDeaths() throws Exception
+    {
+        double sum_all = 0;
+        double sum_conscripts = 0;
+        
+        /* к середине полуголия исполнится FROM/TO */
+        int conscript_age_from = years2days(Constants.CONSCRIPT_AGE_FROM - 0.25);
+        int conscript_age_to = years2days(Constants.CONSCRIPT_AGE_TO - 0.25);
+
+        for (HalfYearEntry he : halves)
+        {
+            if (he.actual_excess_wartime_deaths == null || he.actual_excess_wartime_deaths.sum() == 0)
+                continue;
+            
+            sum_all += he.actual_excess_wartime_deaths.sum();
+            sum_conscripts += he.actual_excess_wartime_deaths.sumDays(Gender.MALE, conscript_age_from , conscript_age_to);
+        }
+        
+        outk("Избыточное число всех смертей", sum_all);
+        outk(String.format("Избыточное число смертей мужчин призывного возраста (%.1f-%.1f лет)", 
+                           Constants.CONSCRIPT_AGE_FROM, 
+                           Constants.CONSCRIPT_AGE_TO), 
+             sum_conscripts);
     }
 
     /* ======================================================================================================= */
