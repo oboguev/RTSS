@@ -636,63 +636,32 @@ public class Main
         return ww;
     }
 
-    private double subcount(PopulationContext p, Gender gender, int age1, int age2) throws Exception
+    private double subcount(PopulationContext p, Gender gender, double age1, double age2) throws Exception
     {
-        double sum_wv = 0;
-        double sum_weights = 0;
-
-        for (int age = age1; age <= age2; age++)
+        double sum = 0;
+        
+        double[] weights = {0.5, 1.5, 2.5, 3.5};
+        
+        for (int k = 0; k < weights.length; k++)
         {
-            /*
-             * Окно возрастающее с обеих концов с 0.5 (полгода expsure) до 4.0 (exposure на всё время войны)
-             */
-            double weight = 4.0;
-
-            switch (Math.abs(age - age1))
-            {
-            case 0:
-                weight = 0.5;
-                break;
-
-            case 1:
-                weight = 1.5;
-                break;
-
-            case 2:
-                weight = 2.5;
-                break;
-            case 3:
-
-                weight = 3.5;
-                break;
-            }
-
-            switch (Math.abs(age2 - age))
-            {
-            case 0:
-                weight = 0.5;
-                break;
-
-            case 1:
-                weight = 1.5;
-                break;
-
-            case 2:
-                weight = 2.5;
-                break;
-            case 3:
-
-                weight = 3.5;
-                break;
-            }
-
-            double v = p.getYearValue(gender, age);
-            sum_weights += weight;
-            sum_wv += v * weight;
+            double weight = weights[k] / 4.0;
+            double v = p.getYearValue(gender, age1 + k);
+            sum += v * weight;
         }
-
-        sum_weights /= (age2 - age1 + 1);
-        return sum_wv / sum_weights;
+        
+        for (int k = 0; k < weights.length; k++)
+        {
+            double weight = weights[k] / 4.0;
+            double v = p.getYearValue(gender, age2 - k - 1);
+            sum += v * weight;
+        }
+        
+        int nd1 = years2days(age1 + weights.length) + 1;
+        int nd2 = years2days(age2 - weights.length) - 1;
+        
+        sum += p.sumDays(gender, nd1, nd2);
+        
+        return sum;
     }
 
     /* ======================================================================================================= */

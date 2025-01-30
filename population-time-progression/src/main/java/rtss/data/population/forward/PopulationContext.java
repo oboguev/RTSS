@@ -20,6 +20,8 @@ import rtss.data.selectors.LocalityGender;
 import rtss.data.selectors.holders.LocalityGenderToDoubleArray;
 import rtss.util.Util;
 
+import static rtss.data.population.forward.ForwardPopulation.years2days;
+
 /**
  * 
  * Структура PopulationContext применяется для детального учёта населения с разрешением по возрасту
@@ -1087,6 +1089,12 @@ public class PopulationContext
     public double getYearValue(Gender gender, int age) throws Exception
     {
         return sumAge(Locality.TOTAL, gender, age);
+    }
+
+    public double getYearValue(Gender gender, double age) throws Exception
+    {
+        int nd = years2days(age);
+        return sumDays(Locality.TOTAL, gender, nd, nd + this.DAYS_PER_YEAR - 1);
     }
 
     public void setYearValue(Gender gender, int age, double v) throws Exception
