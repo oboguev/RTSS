@@ -16,12 +16,12 @@ import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 
 /*
- * Вычислить таблицу мирного времени с учётом антибиотиков
+ * Вычислить таблицу смертности для условий мирного времени с учётом антибиотиков
  */
 public class PeacetimeMortalityTables
 {
     /*
-     * таблица смертностти 1940 года
+     * таблица смертности 1940 года
      */
     private final CombinedMortalityTable mt1940;
     private final boolean applyAntibiotics;
@@ -37,7 +37,7 @@ public class PeacetimeMortalityTables
         this.mt1940 = mt1940;
         this.applyAntibiotics = applyAntibiotics;
         
-        /* интерполяция на полугодия */
+        /* интерполяция на полугодия, но для 1941 и 1941 оставить 1.0 */
         halfyearly_imr_multiplier = yearly2timepoints(yearly_imr_multiplier, 2, 100);
         halfyearly_imr_multiplier[0] = halfyearly_imr_multiplier[1] = halfyearly_imr_multiplier[2] = halfyearly_imr_multiplier[3] = 1.0;
     }

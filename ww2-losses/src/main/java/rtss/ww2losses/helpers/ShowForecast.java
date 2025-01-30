@@ -8,6 +8,8 @@ import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
 
+import static rtss.data.population.forward.ForwardPopulation.years2days;
+
 /*
  * Распечатать движение населения определённых возрастов сквозь период войны
  */
@@ -25,32 +27,21 @@ public class ShowForecast
             show(he.toString(), he.p_nonwar_without_births, age + he.year - 1941, he.halfyear == HalfYearSelector.SecondHalfYear);
         }
         
-        show("1946, фактическое", p1946_actual, age + 1946 - 1941, false);
+        show("1946 фактическое", p1946_actual, age + 1946 - 1941, false);
     }
     
-    private static void show(String what, PopulationContext p, int age, boolean secondHalfyear) throws Exception
+    private static void show(String what, PopulationContext p, double age, boolean secondHalfyear) throws Exception
     {
-        String sage = "возраст " + age;
+        if (secondHalfyear)
+            age += 0.5;
         
-        // ### вырезку из PopulationContext 
+        String sage = String.format("возраст %.1f", age);
+
+        int nd = years2days(age);
         
-        double f = p.getYearValue(Gender.FEMALE, age); 
-        double m = p.getYearValue(Gender.MALE, age); 
-        double b = p.getYearValue(Gender.BOTH, age);
-        
-        if (secondHalfyear && Util.False)
-        {
-            double f2 = p.getYearValue(Gender.FEMALE, age + 1); 
-            double m2 = p.getYearValue(Gender.MALE, age + 1); 
-            double b2 = p.getYearValue(Gender.BOTH, age + 1);
-            
-            f = (f + f2) / 2;
-            m = (m + m2) / 2;
-            b = (b + b2) / 2;
-            sage += ".5";
-            
-            return;
-        }
+        double f = p.sumDays(Gender.FEMALE, nd, nd + p.DAYS_PER_YEAR - 1);
+        double m = p.sumDays(Gender.MALE, nd, nd + p.DAYS_PER_YEAR - 1);
+        double b = p.sumDays(Gender.BOTH, nd, nd + p.DAYS_PER_YEAR - 1);
         
         Util.out(String.format("%-24s %5s  %5s  %5s  [%s]", what, f2k(m/1000.0), f2k(f/1000.0), f2k(b/1000.0), sage));
     }
