@@ -127,7 +127,7 @@ public class SteerAgeLine
         steerActual(gender, initial_age_ndays, loss_intensity, initial_population);
     }
 
-    private void steerActual(Gender gender, int initial_age_ndays, double loss_intensity, double initial_population) throws Exception
+    public void steerActual(Gender gender, int initial_age_ndays, double loss_intensity, double initial_population) throws Exception
     {
         double population = initial_population;
         int nd_age = initial_age_ndays;

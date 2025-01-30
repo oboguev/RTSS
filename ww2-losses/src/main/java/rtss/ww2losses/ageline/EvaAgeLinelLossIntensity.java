@@ -33,6 +33,8 @@ public class EvaAgeLinelLossIntensity
             double initial_population,
             double final_population) throws Exception
     {
+        final double tolerance = 1.0e-5; 
+        
         double a1 = 0;
         double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, a1);
         if (div1 == 0)
@@ -51,7 +53,7 @@ public class EvaAgeLinelLossIntensity
             for (int pass = 0;;)
             {
                 double a = (a1 + a2) / 2;
-                if (Math.abs(div2 - div1) < final_population * 0.0001)
+                if (Math.abs(div2 - div1) < final_population * tolerance)
                     return checksign(a, 1);
                 
                 double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);
@@ -87,7 +89,7 @@ public class EvaAgeLinelLossIntensity
             for (int pass = 0;;)
             {
                 double a = (a1 + a2) / 2;
-                if (Math.abs(div2 - div1) < final_population * 0.0001)
+                if (Math.abs(div2 - div1) < final_population * tolerance)
                     return checksign(a, -1);
                 
                 double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);

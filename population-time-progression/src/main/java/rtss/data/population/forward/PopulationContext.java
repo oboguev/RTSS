@@ -740,7 +740,7 @@ public class PopulationContext
 
             if (began)
             {
-                Population p = toPopulation();
+                Population p = toPopulation(ValueConstraint.NONE);
                 sb.append(Util.nl);
                 sb.append(Util.nl);
                 sb.append(p.dump());
@@ -750,6 +750,7 @@ public class PopulationContext
         }
         catch (Throwable ex)
         {
+            // ex.printStackTrace();
             return "<exception while formating>";
         }
     }
@@ -773,10 +774,20 @@ public class PopulationContext
 
     public Population toPopulation() throws Exception
     {
-        return toPopulationByLocality().forLocality(Locality.TOTAL);
+        return toPopulation(null);
+    }
+    
+    public Population toPopulation(ValueConstraint vc) throws Exception
+    {
+        return toPopulationByLocality(vc).forLocality(Locality.TOTAL);
     }
 
     public PopulationByLocality toPopulationByLocality() throws Exception
+    {
+        return toPopulationByLocality(null);
+    }
+    
+    public PopulationByLocality toPopulationByLocality(ValueConstraint vc) throws Exception
     {
         if (!began)
             throw new Exception("context is idle");
@@ -792,7 +803,9 @@ public class PopulationContext
             p = PopulationByLocality.newPopulationTotalOnly();
         }
 
-        if (this.valueConstraint != null)
+        if (vc != null)
+            p.setValueConstraint(vc);
+        else if (this.valueConstraint != null)
             p.setValueConstraint(this.valueConstraint);
 
         p.zero();

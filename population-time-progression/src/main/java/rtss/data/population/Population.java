@@ -837,9 +837,10 @@ public class Population
 
         if (both_total == 0)
             both_total = sum_b + both_unknown;
-
-        if (male_total < 0 || female_total < 0 || both_total < 0)
-            negative();
+        
+        validateValue(male_total, male);
+        validateValue(female_total, female);
+        validateValue(both_total, both);
 
         if (Util.differ(male_total + female_total, both_total))
             mismatch();
@@ -894,6 +895,21 @@ public class Population
     private int asInt(String s)
     {
         return Integer.parseInt(s.replace(",", ""));
+    }
+    
+    private void validateValue(double v, DoubleArray m) throws Exception
+    {
+        Util.checkValid(v);
+
+        if (m == null || m.valueConstraint() == null)
+        {
+            if (v < 0)
+                negative();
+        }
+        else
+        {
+            m.valueConstraint().validate(v);;
+        }
     }
 
     /****************************************************************************************************/

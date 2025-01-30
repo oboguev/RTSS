@@ -319,10 +319,10 @@ public class Main
      */
     private void split_p1946() throws Exception
     {
-        int nd_4_5 = age2day(4.5);
+        int nd_4_5 = 9 * years2days(0.5);
 
         p1946_actual_born_postwar = p1946_actual.selectByAgeDays(0, nd_4_5);
-        p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5 + 1, age2day(MAX_AGE + 1));
+        p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5 + 1, years2days(MAX_AGE + 1));
 
         double v_total = p1946_actual.sum();
         double v_prewar = p1946_actual_born_prewar.sum();
@@ -330,12 +330,6 @@ public class Main
 
         if (Util.differ(v_total, v_prewar + v_postwar))
             Util.err("Ошибка расщепления");
-    }
-
-    private int age2day(double age)
-    {
-        final int DAYS_PER_YEAR = 365;
-        return (int) Math.round(age * DAYS_PER_YEAR);
     }
 
     /*
@@ -578,8 +572,10 @@ public class Main
         /* расчёт возрастных линий с учётов найденных коэфициентов интенсивности */
         eval.processAgeLines(alis, p1946_actual);
         
-        // ### EvalAgeLineLossIntensities.processAgeLines для старших возрастов
-        // ### use alis.average
+        /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
+        
+        PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);
+        diff.toString();
         
         // ### compare halves.last.actual_population vs. p1946_actual_born_prewar
         

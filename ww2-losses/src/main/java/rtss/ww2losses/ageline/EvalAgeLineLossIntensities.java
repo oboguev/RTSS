@@ -3,6 +3,7 @@ package rtss.ww2losses.ageline;
 import rtss.data.population.forward.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
 
@@ -64,7 +65,7 @@ public class EvalAgeLineLossIntensities
         SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts);
         int ndays = 9 * years2days(0.5);
         
-        double v, initial_population;
+        double initial_population;
 
         for (int nd = 0; nd <= p1941_2.MAX_DAY; nd++)
         {
@@ -76,6 +77,37 @@ public class EvalAgeLineLossIntensities
 
             initial_population = p1941_2.getDay(Locality.TOTAL, Gender.FEMALE, nd);
             steer.steerActual(Gender.FEMALE, nd, alis, initial_population);
+        }
+
+        processSeniorAgeLines(steer, Gender.MALE, alis, p1941_2, p1946_actual);
+        processSeniorAgeLines(steer, Gender.FEMALE, alis, p1941_2, p1946_actual);
+    }
+    
+    /*
+     * Обработать возрастные линии не имеющие прямого конца в 1946 году,
+     * т.е. в возрастах на начало середины 1941 старше чем MAX_AGE - 4.5 + 1.
+     */
+    private void processSeniorAgeLines(
+            SteerAgeLine steer,
+            Gender gender,
+            AgeLineLossIntensities alis,
+            PopulationContext p1941_2,
+            PopulationContext p1946_actual) throws Exception
+    {
+        int ndays = 9 * years2days(0.5);
+        
+        int nd1 = p1946_actual.MAX_DAY - ndays; 
+        
+        double senior_loss_intensity = alis.average(gender, nd1 - 1 - years2days(1.0), nd1 - 1);
+        double initial_population;
+        
+        for (int nd = nd1; nd <= p1941_2.MAX_DAY; nd++)
+        {
+            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.MALE, nd);
+            steer.steerActual(Gender.MALE, nd, senior_loss_intensity, initial_population);
+
+            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.FEMALE, nd);
+            steer.steerActual(Gender.FEMALE, nd, senior_loss_intensity, initial_population);
         }
     }
 }
