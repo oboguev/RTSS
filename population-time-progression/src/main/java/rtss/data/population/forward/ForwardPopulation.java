@@ -22,4 +22,9 @@ public class ForwardPopulation extends Loggable
     {
         return observed_deaths;
     }
+    
+    public static int years2days(double years)
+    {
+        return (int) Math.round(years * DAYS_PER_YEAR);
+    }
 }

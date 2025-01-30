@@ -997,7 +997,7 @@ public class PopulationContext
      */
     public PopulationContext moveDown(double years) throws Exception
     {
-        return moveDownByDays((int) Math.round(years * DAYS_PER_YEAR));
+        return moveDownByDays(ForwardPopulation.years2days(years));
     }
 
     public PopulationContext moveDownByDays(int ndays) throws Exception
@@ -1030,8 +1030,8 @@ public class PopulationContext
      */
     public PopulationContext selectByAgeYears(double age1, double age2) throws Exception
     {
-        int ageday1 = (int) Math.round(age1 * DAYS_PER_YEAR);
-        int ageday2 = (int) Math.round(age2 * DAYS_PER_YEAR);
+        int ageday1 = ForwardPopulation.years2days(age1);
+        int ageday2 = ForwardPopulation.years2days(age2);
         return selectByAgeDays(ageday1, ageday2);
     }
 

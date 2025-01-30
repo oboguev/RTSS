@@ -271,7 +271,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
-        int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
+        int ndays = years2days(yfraction);
         ndays = Math.max(1, ndays);
 
         add_births(fctx, locality, Gender.MALE, m_births, mt, ndays);
@@ -409,7 +409,7 @@ public class ForwardPopulationUR extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
-        int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
+        int ndays = years2days(yfraction);
         if (ndays == 0)
             return;
 

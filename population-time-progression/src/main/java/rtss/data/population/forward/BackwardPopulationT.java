@@ -96,7 +96,7 @@ public class BackwardPopulationT extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
-        int ndays = (int) Math.round(yfraction * fctx.DAYS_PER_YEAR);
+        int ndays = years2days(yfraction);
         if (ndays == 0)
             return;
 
