@@ -188,7 +188,7 @@ public class Main
         evalDeficit1946();
         evalAgeLines();
         evalNewBirths();
-        // ### evalNewBirthsDeaths();
+        evalNewBirthsDeaths();
         // ### fitNewBirthsDeaths();
         // ### print half-yearly
         // ### print yearly
@@ -619,7 +619,7 @@ public class Main
     /* ======================================================================================================= */
 
     /*
-     * Вычислить число рождений в военное время
+     * Вычислить фактическое число рождений в военное время
      */
     private void evalNewBirths() throws Exception
     {
@@ -670,8 +670,52 @@ public class Main
             he1.actual_births = he1.expected_nonwar_births;
             he2.actual_births += delta;
         }
-        
-        Util.noop();
+    }
+    
+    /*
+     * Вычислить ожидаемое число смертей от новых рождений в военное время (от фактического числа военных рождений),
+     * ожидаемый остаток фактически рождённых в 1941.вт.пол. - 1945.вт.пол. к началу 1946 при детской смертности 
+     * мирных условий, и дефицит остатка на начало 1946 года из-за возросшей в военное время детской смертности. 
+     */
+    private void evalNewBirthsDeaths() throws Exception
+    {
+        /*
+         * передвижка новрождаемого населения по полугодиям
+         * от середины 1941 с p = empty
+         * и добавлением числа рождений за полугодие согласно he.actual_births
+         */
+        PopulationContext p = newPopulationContext();
+
+        HalfYearEntry he = halves.get("1941.2");
+        for (;;)
+        {
+            if (he.year == 1946)
+                break;
+
+            ForwardPopulationT fw = new ForwardPopulationT();
+            int ndays = fw.birthDays(0.5);
+
+            // добавить фактические рождения, распределив их по дням
+            double nb1 = he.prev.actual_births;
+            double nb2 = he.actual_births;
+            double nb3 = (he.next != null) ? he.next.actual_births : nb2;
+            double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            double[] m_births = WarHelpers.male_births(births);
+            double[] f_births = WarHelpers.female_births(births);
+            fw.setBirthCount(m_births, f_births);
+
+            fw.forward(p, he.peace_mt, 0.5);
+
+            // число смертей от рождений
+            he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
+
+            he = he.next;
+        }
+
+        double v1 = p.sum();
+        double v2 = p1946_actual_born_postwar.sum();
+
+        outk("Сверхсмертность рождённых во время войны, по дефициту к началу 1946 года, тыс. чел.", v1 - v2);
     }
     
     /* ======================================================================================================= */
@@ -745,6 +789,14 @@ public class Main
         while (s.startsWith(" "))
             s = s.substring(1);
         return s;
+    }
+
+    private PopulationContext newPopulationContext()
+    {
+        PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
+        p.setValueConstraint(ValueConstraint.NONE);
+        p.beginTotal();
+        return p;
     }
 
     /* ======================================================================================================= */

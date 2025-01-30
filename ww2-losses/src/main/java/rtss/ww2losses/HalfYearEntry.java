@@ -46,6 +46,12 @@ public class HalfYearEntry
     
     /* действительное число рождений в полугодии */
     public double actual_births; 
+    
+    /* 
+     * число смертей в данном полугодии от фактического рождений во время войны
+     * ожидаемое при смертности мирного времени
+     */
+    public double actual_warborn_deaths_baseline; 
 
     public HalfYearEntry(
             int year,
