@@ -1,12 +1,12 @@
 package rtss.ww2losses.old1;
 
 import rtss.ww2losses.BirthTrough;
+import rtss.ww2losses.old1.util.RecombineRates;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.Expected_Population_In_Early_1946;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Early_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
-import rtss.ww2losses.util.RecombineRates;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 

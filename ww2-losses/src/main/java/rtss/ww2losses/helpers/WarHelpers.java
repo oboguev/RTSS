@@ -6,6 +6,9 @@ import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 
+/*
+ * Вспомогательные функции
+ */
 public class WarHelpers
 {
     public static void validateDeficit(PopulationContext deficit) throws Exception

@@ -11,6 +11,9 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
+/*
+ * Вспомогательные функции для правки состава населения
+ */
 public class AdjustPopulation
 {
     protected static final int[] ADH_binning = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16 };
@@ -60,6 +63,10 @@ public class AdjustPopulation
         }
     }
 
+    /*
+     * Проверить, что разбивка населения по возрастным группам (как-то 5-летней агрегации) 
+     * не изменилась 
+     */
     protected void verifyBinning(final int[] binning, Population p1, Population p2) throws Exception
     {
         verifyBinning(Gender.MALE, binning, p1, p2);

@@ -6,7 +6,7 @@ import java.util.Map;
 import rtss.data.selectors.Gender;
 
 /*
- * Map (Gender, nd_age) -> loss intensity
+ * Хранит отображение (Gender, nd_age) -> loss intensity
  */
 public class AgeLineLossIntensities 
 {

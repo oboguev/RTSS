@@ -10,6 +10,9 @@ import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
 
+/*
+ * Распечатать сводку данных для полугодий
+ */
 public class PrintHalfYears
 {
     private static double PROMILLE = 1000.0;

@@ -6,6 +6,9 @@ import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
 
+/*
+ * Распечатать сводку данных для 1941-1945 гг.
+ */
 public class PrintYears
 {
     private static double PROMILLE = 1000.0;
