@@ -43,6 +43,8 @@ public class Main
         {
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
+            Util.out("");
+            Util.out("=== Конец расчёта ===");
         }
         catch (Exception ex)
         {
@@ -725,6 +727,7 @@ public class Main
             fw.forward(p, he.peace_mt, 0.5);
 
             // число смертей от рождений при мирной смертности
+            Util.assertion(Util.same(fw.getObservedDeaths(), fw.deathsByGenderAge().sum()));
             he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
             add(fw.deathsByGenderAge(), he.actual_peace_deaths);
         }
@@ -812,9 +815,10 @@ public class Main
                 merge(p, he.next.actual_population);
 
                 // число смертей от рождений
+                Util.assertion(Util.same(fw.getObservedDeaths(), fw.deathsByGenderAge().sum()));
                 he.actual_warborn_deaths = fw.getObservedDeaths();
                 add(fw.deathsByGenderAge(), he.actual_deaths);
-                // ### actual_excess_wartime_deaths
+                // ### add(fw.deathsByGenderAge(), he.actual_excess_wartime_deaths);
             }
         }
 
