@@ -23,6 +23,7 @@ import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.ageline.AgeLineLossIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
+import rtss.ww2losses.helpers.PrintHalfYears;
 import rtss.ww2losses.helpers.PrintYears;
 import rtss.ww2losses.helpers.ShowForecast;
 import rtss.ww2losses.helpers.WarHelpers;
@@ -200,10 +201,9 @@ public class Main
         evalNewBirthsDeaths();
         fitNewBirthsDeaths();
         
+        PrintHalfYears.print(halves);
         PrintYears.print(halves);
 
-        // ### print half-yearly
-        // ### print yearly
         // ### save files: population structure, excess deaths
     }
 

@@ -13,14 +13,14 @@ public class PrintYears
     public static void print(HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
         Util.out("");
-        Util.out("Годовые величины");
+        Util.out("Годовые величины:");
         Util.out("");
         Util.out("    р       = рождаемость, промилле");
         Util.out("    с       = смертность, промилле");
-        Util.out("    н.нач   = население в начале года, тыс. чел");
-        Util.out("    н.сред  = среднегодовое население, тыс. чел");
-        Util.out("    н.кон   = население в конце года, тыс. чел");
-        Util.out("    изб.ум  = число избыточных смертей, тыс. чел");
+        Util.out("    н.нач   = численность населения в начале года, тыс. чел");
+        Util.out("    н.сред  = среднегодовая численность населения, тыс. чел");
+        Util.out("    н.кон   = численность населения в конце года, тыс. чел");
+        Util.out("    ум.изб  = число избыточных смертей, тыс. чел");
         Util.out("    н.рожд  = дефицит рождений в году, тыс. новорожденных");
         Util.out("");
         Util.out("год     р    с     н.нач   н.сред    н.кон   изб.ум н.рожд");
@@ -49,13 +49,16 @@ public class PrintYears
 
         double births_shortfall = (he1.expected_nonwar_births - he1.actual_births) + (he2.expected_nonwar_births - he2.actual_births);
 
-        Util.out(String.format("%d %5.1f %5.1f %8s %8s %8s %7s %6s",
+        Util.out(String.format("%d %5.1f %5.1f %8s %8s %8s" + " %7s %6s",
                                he1.year, cbr, cdr,
                                f2k(p1.sum() / 1000.0),
                                f2k(pavg.sum() / 1000.0),
                                f2k(p2.sum() / 1000.0),
+                               //
                                f2k(exd / 1000.0),
-                               f2k(births_shortfall / 1000.0)));
+                               f2k(births_shortfall / 1000.0)
+        //
+        ));
 
     }
 
