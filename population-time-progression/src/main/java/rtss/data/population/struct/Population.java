@@ -8,6 +8,7 @@ import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.calc.SmoothPopulation;
 import rtss.data.selectors.Gender;
@@ -81,7 +82,7 @@ public class Population
         else
             return null;
     }
-    
+
     public ValueConstraint valueConstraint(Gender gender)
     {
         return forGender(gender).valueConstraint();
@@ -381,7 +382,7 @@ public class Population
         int ageday2 = (int) Math.round(age2 * DAYS_PER_YEAR);
         return selectByAgeDays(ageday1, ageday2);
     }
-    
+
     public Population selectByAgeDays(int ageday1, int ageday2) throws Exception
     {
         Population p = new Population();
@@ -848,7 +849,7 @@ public class Population
 
         if (both_total == 0)
             both_total = sum_b + both_unknown;
-        
+
         validateValue(male_total, male);
         validateValue(female_total, female);
         validateValue(both_total, both);
@@ -907,7 +908,7 @@ public class Population
     {
         return Integer.parseInt(s.replace(",", ""));
     }
-    
+
     private void validateValue(double v, DoubleArray m) throws Exception
     {
         Util.checkValid(v);
@@ -919,7 +920,7 @@ public class Population
         }
         else
         {
-            m.valueConstraint().validate(v);;
+            m.valueConstraint().validate(v);
         }
     }
 
@@ -1019,6 +1020,31 @@ public class Population
         return Bins.bins(bins);
     }
 
+    /*
+     * Return population binned by age bins with indicated widths, e.g.
+     * 
+     *     Bin[] m = binSumByAge(Gender.MALE, 1, 1, 1, 1, 1, 5, 5, 5, ...., 5, 15);
+     *     
+     * Value returned in bin "avg" field is SUM rather than AVG
+     */
+    public Bin[] binSumByAge(Gender gender, int... agewidth) throws Exception
+    {
+        if (Util.sum(agewidth) != MAX_AGE + 1)
+            throw new Exception("");
+
+        Bin[] ages = new Bin[agewidth.length];
+        int age = 0;
+
+        for (int k = 0; k < agewidth.length; k++)
+        {
+            ages[k].age_x1 = age;
+            ages[k].age_x2 = age + agewidth[k] - 1;
+            age += agewidth[k];
+        }
+
+        return binSumByAge(gender, ages);
+    }
+
     public void zero() throws Exception
     {
         zero(Gender.MALE);
@@ -1088,7 +1114,7 @@ public class Population
         {
             if (rounded)
             {
-                sb.append(String.format("%-3d %,15d %,15d %,15d", age, 
+                sb.append(String.format("%-3d %,15d %,15d %,15d", age,
                                         Math.round(both(age)), Math.round(male(age)), Math.round(female(age))));
             }
             else
@@ -1232,11 +1258,49 @@ public class Population
     }
 
     /*****************************************************************************************************/
-    
+
     public PopulationContext toPopulationContext() throws Exception
     {
         PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
         fctx.begin(this.clone());
         return fctx;
+    }
+
+    /*****************************************************************************************************/
+
+    public Population(Bin[] maleBins, Bin[] femaleBins) throws Exception
+    {
+        this(Locality.TOTAL,
+             bin2array(maleBins), 0, null,
+             bin2array(femaleBins), 0, null);
+    }
+
+    private static double[] bin2array(Bin[] bins) throws Exception
+    {
+        bins = Bins.bins(bins);
+        if (Bins.firstBin(bins).age_x1 != 0 || Bins.widths_in_years(bins) != MAX_AGE + 1)
+            throw new IllegalArgumentException("invalid bins layout");
+        return bins2yearly(bins, "dynamic");
+    }
+
+    private static double[] bins2yearly(Bin[] bins, String title) throws Exception
+    {
+        boolean interpolate = false;
+
+        for (Bin bin : bins)
+        {
+            if (bin.widths_in_years != 1)
+                interpolate = true;
+        }
+
+        if (!interpolate)
+        {
+            double[] v = new double[Population.MAX_AGE + 1];
+            for (int k = 0; k < v.length; k++)
+                v[k] = bins[k].avg;
+            return v;
+        }
+
+        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title);
     }
 }

@@ -288,6 +288,14 @@ public class Util
     }
 
     // sum of array values
+    public static int sum(final int[] y)
+    {
+        int sum = 0;
+        for (int k = 0; k < y.length; k++)
+            sum += y[k];
+        return sum;
+    }
+
     public static double sum(final double[] y)
     {
         double sum = 0;
