@@ -846,8 +846,6 @@ public class Main
 
     private double imr_fy_multiplier(HalfYearEntry he) throws Exception
     {
-        // ### поправка на оккупированность ???
-
         String yh = he.year + "." + he.halfyear.seq(1);
 
         switch (yh)
