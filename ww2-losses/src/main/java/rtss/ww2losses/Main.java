@@ -726,7 +726,7 @@ public class Main
 
             // число смертей от рождений при мирной смертности
             he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
-            merge(fw.deathsByGenderAge(), he.actual_peace_deaths);
+            add(fw.deathsByGenderAge(), he.actual_peace_deaths);
         }
 
         double v1 = p.sum();
@@ -808,13 +808,12 @@ public class Main
 
             if (record)
             {
-                // число смертей от рождений
-                he.actual_warborn_deaths = fw.getObservedDeaths();
-
                 // ввести остаток рождённых до конца полугодия в население начала следующего полугодия
                 merge(p, he.next.actual_population);
 
-                // ### actual_deaths 
+                // число смертей от рождений
+                he.actual_warborn_deaths = fw.getObservedDeaths();
+                add(fw.deathsByGenderAge(), he.actual_deaths);
                 // ### actual_excess_wartime_deaths
             }
         }
@@ -965,6 +964,21 @@ public class Main
                     throw new Exception("unable to merge: already has data for this age");
                 to.setDay(Locality.TOTAL, gender, nd, v1);
             }
+        }
+    }
+
+    private void add(PopulationContext from, PopulationContext to) throws Exception
+    {
+        add(from, to, Gender.MALE);
+        add(from, to, Gender.FEMALE);
+    }
+
+    private void add(PopulationContext from, PopulationContext to, Gender gender) throws Exception
+    {
+        for (int nd = 0; nd <= from.MAX_DAY; nd++)
+        {
+            double v = from.getDay(Locality.TOTAL, gender, nd);
+            to.addDay(Locality.TOTAL, gender, nd, v);
         }
     }
 
