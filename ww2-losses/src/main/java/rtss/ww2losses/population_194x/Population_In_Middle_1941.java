@@ -21,6 +21,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
     public PopulationByLocality p_start_1941;
     public double observed_births_1941_1st_halfyear;
     public double observed_deaths_1941_1st_halfyear;
+    public PopulationContext observed_deaths_1941_1st_halfyear_byGenderAge;
     
     public Population_In_Middle_1941(AreaParameters ap)
     {
@@ -86,6 +87,7 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         
         observed_births_1941_1st_halfyear = fw.getObservedBirths();
         observed_deaths_1941_1st_halfyear = fw.getObservedDeaths();
+        observed_deaths_1941_1st_halfyear_byGenderAge = fw.deathsByGenderAge();
         
         /*
          * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ

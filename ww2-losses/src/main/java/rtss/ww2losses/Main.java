@@ -226,6 +226,11 @@ public class Main
                                         pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext());
         curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
         curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
+
+        curr.actual_deaths = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
+        curr.actual_peace_deaths = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
+        curr.actual_excess_wartime_deaths = newPopulationContext();
+
         halves.add(curr);
 
         /* второе полугодие 1941 */
@@ -599,9 +604,6 @@ public class Main
 
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births.clone();
-        he.actual_deaths = null;
-        he.actual_peace_deaths = null;
-        he.actual_excess_wartime_deaths = null;
 
         he = halves.get("1941.2");
         he.actual_population = he.p_nonwar_with_births.clone();
@@ -818,7 +820,17 @@ public class Main
                 Util.assertion(Util.same(fw.getObservedDeaths(), fw.deathsByGenderAge().sum()));
                 he.actual_warborn_deaths = fw.getObservedDeaths();
                 add(fw.deathsByGenderAge(), he.actual_deaths);
-                // ### add(fw.deathsByGenderAge(), he.actual_excess_wartime_deaths);
+                add(fw.deathsByGenderAge(), he.actual_excess_wartime_deaths);
+            }
+        }
+
+        // проверка
+        if (record)
+        {
+            for (HalfYearEntry he : halves)
+            {
+                if (he.year != 1946)
+                    check_actual_deaths(he);
             }
         }
 
@@ -868,6 +880,28 @@ public class Main
 
         default:
             throw new IllegalArgumentException();
+        }
+    }
+
+    private void check_actual_deaths(HalfYearEntry he) throws Exception
+    {
+        check_actual_deaths(he, Gender.MALE);
+        check_actual_deaths(he, Gender.FEMALE);
+    }
+
+    private void check_actual_deaths(HalfYearEntry he, Gender gender) throws Exception
+    {
+        if (he.actual_deaths == null)
+        {
+            Util.noop();
+        }
+
+        for (int nd = 0; nd <= he.actual_deaths.MAX_DAY; nd++)
+        {
+            double total = he.actual_deaths.getDay(Locality.TOTAL, gender, nd);
+            double excess_wartime = he.actual_excess_wartime_deaths.getDay(Locality.TOTAL, gender, nd);
+            double peace = he.actual_peace_deaths.getDay(Locality.TOTAL, gender, nd);
+            Util.assertion(Util.same(peace + excess_wartime, total));
         }
     }
 
