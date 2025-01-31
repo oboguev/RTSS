@@ -12,7 +12,6 @@ import rtss.util.plot.PopulationChart;
 
 public class AdjustPopulation1941 extends AdjustPopulation
 {
-    private static final int[] ADH_refined_widths = { 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16 };
     private final Area area;
 
     public AdjustPopulation1941(Area area)
@@ -49,8 +48,8 @@ public class AdjustPopulation1941 extends AdjustPopulation
             Util.noop();
         }
 
-        Bin[] male = p.binSumByAge(Gender.MALE, ADH_refined_widths);
-        Bin[] female = p.binSumByAge(Gender.FEMALE, ADH_refined_widths);
+        Bin[] male = p.binSumByAge(Gender.MALE, rebin(ADH_binning, isolateAgesMale));
+        Bin[] female = p.binSumByAge(Gender.FEMALE, rebin(ADH_binning, isolateAgesFemale));
         p = new Population(male, female);
 
         if (Util.True && area == Area.USSR)
@@ -75,19 +74,51 @@ public class AdjustPopulation1941 extends AdjustPopulation
         // в частности нельзя перераспределять из 0..4 в 5+
         // или из 5+ в 0...4 
 
-        redistribute_to(p, Gender.MALE, 3, 9_103 + 44_000, 2);
-        redistribute_to(p, Gender.MALE, 4, 70_125 + 44_000, 2);
-        isolateAgesMale.add(3);
-        isolateAgesMale.add(4);
+        if (Util.True)
+        {
+            redistribute_to(p, Gender.MALE, 3, 9_103 + 44_000, 2);
+            redistribute_to(p, Gender.MALE, 4, 70_125 + 44_000, 2);
+            isolateAgesMale.add(3);
+            isolateAgesMale.add(4);
+        }
 
-        // redistribute_to(p, Gender.MALE, 5, 1_327, 6);
+        if (Util.True)
+        {
+            redistribute_to(p, Gender.MALE, 8, 14_037, 7);
+            redistribute_to(p, Gender.MALE, 9, 24_651, 7);
 
-        redistribute_to(p, Gender.FEMALE, 3, 37_471 + 24_000, 2, 1);
-        redistribute_to(p, Gender.FEMALE, 4, 89_171 + 24_000, 2, 1);
-        isolateAgesFemale.add(3);
-        isolateAgesFemale.add(4);
+            redistribute_to(p, Gender.MALE, 5, 40_955 + 10_000, 6, 7);
 
-        // redistribute_to(p, Gender.FEMALE, 5, 13_434, 6);
+            isolateAgesMale.add(5);
+            isolateAgesMale.add(6);
+            isolateAgesMale.add(7);
+            isolateAgesMale.add(8);
+            isolateAgesMale.add(9);
+        }
+
+        /* ------------------------------------------------- */
+
+        if (Util.True)
+        {
+            redistribute_to(p, Gender.FEMALE, 3, 37_471 + 24_000, 2, 1);
+            redistribute_to(p, Gender.FEMALE, 4, 89_171 + 24_000, 2, 1);
+            isolateAgesFemale.add(3);
+            isolateAgesFemale.add(4);
+        }
+
+        if (Util.True)
+        {
+            // redistribute_to(p, Gender.FEMALE, 8, 37_216 / 10.0, 6, 7);
+            // redistribute_to(p, Gender.FEMALE, 9, 51_386 / 10.0, 6, 7);
+
+            redistribute_to(p, Gender.FEMALE, 5, 50_734 + 10_000, 6, 7, 8, 9);
+
+            isolateAgesFemale.add(5);
+            isolateAgesFemale.add(6);
+            isolateAgesFemale.add(7);
+            isolateAgesFemale.add(8);
+            isolateAgesFemale.add(9);
+        }
 
         p.makeBoth();
         p.recalcTotal();

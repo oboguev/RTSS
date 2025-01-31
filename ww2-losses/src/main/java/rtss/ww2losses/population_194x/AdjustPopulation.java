@@ -1,7 +1,6 @@
 package rtss.ww2losses.population_194x;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import rtss.data.bin.Bin;
