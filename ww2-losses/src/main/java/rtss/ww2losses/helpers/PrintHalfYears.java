@@ -12,7 +12,24 @@ import rtss.ww2losses.HalfYearEntry;
 
 public class PrintHalfYears
 {
+    private static double PROMILLE = 1000.0;
+
+    private double sum_actual_deaths = 0;
+    private double sum_actual_excess_wartime_deaths = 0;
+    private double sum_exd_conscripts = 0;
+    private double sum_excess_warborn_deaths = 0;
+    private double sum_expected_nonwar_births = 0;
+    private double sum_actual_births = 0;
+    private double sum_birth_shortfall = 0;
+    private double sum_actual_warborn_deaths_baseline = 0;
+    private double sum_actual_warborn_deaths = 0;
+
     public static void print(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    {
+        new PrintHalfYears().do_print(halves);
+    }
+
+    public void do_print(HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
         Util.out("");
         Util.out("Величины для полугодий:");
@@ -24,7 +41,7 @@ public class PrintHalfYears
         Util.out("    ум      = общее число смертей за полугодие, тыс. чел");
         Util.out("    с.изб   = число избыточных смертей за полугодие, тыс. чел");
         Util.out("    с.прз   = число избыточных смертей за полугодие среди мужчин призывного возраста, тыс. чел");
-        Util.out("    с.нов   = число избыточных смертей за полугодие среди родившихся после середины 1941 года, тыс. чел");
+        Util.out("    с.инов  = число избыточных смертей за полугодие среди родившихся после середины 1941 года, тыс. чел, равняется (фcр - фcр.мир)");
         Util.out("");
         Util.out("    р.ожид    = ожидаемое число рождений в условиях мира (за полугодие)");
         Util.out("    р.факт    = фактическое число рождений (за полугодие)");
@@ -36,14 +53,37 @@ public class PrintHalfYears
         Util.out("    с         = смертность (промилле, для полугодия, но в нормировке на год)");
         Util.out("");
 
+        Util.out("п/год    н.нач   н.сред   н.кон      ум    с.изб   с.прз   с.инов  р.ожид  р.факт  р.нехв   фср.мир    фср    р     с");
+        Util.out("=====  =======   =======  =======  ======  ======  ======  ======  ======  ======  =======  =======  ======  ====  ====");
+
         for (HalfYearEntry he : halves)
         {
             if (he.year != 1946)
                 print(he);
         }
+
+        String s = String.format("%-6s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5s %5s",
+                                 "всего", "", "", "",
+                                 //
+                                 f2k(sum_actual_deaths),
+                                 f2k(sum_actual_excess_wartime_deaths),
+                                 f2k(sum_exd_conscripts),
+                                 f2k(sum_excess_warborn_deaths),
+                                 //
+                                 f2k(sum_expected_nonwar_births),
+                                 f2k(sum_actual_births),
+                                 f2k(sum_birth_shortfall),
+                                 f2k(sum_actual_warborn_deaths_baseline),
+                                 f2k(sum_actual_warborn_deaths),
+                                 //
+                                 "", ""
+        //
+        );
+
+        Util.out(s);
     }
 
-    private static void print(HalfYearEntry he) throws Exception
+    private void print(HalfYearEntry he) throws Exception
     {
         PopulationContext p1 = he.actual_population;
         PopulationContext p2 = he.next.actual_population;
@@ -54,7 +94,20 @@ public class PrintHalfYears
         int conscript_age_to = years2days(Constants.CONSCRIPT_AGE_TO - 0.25);
         double exd_conscripts = he.actual_excess_wartime_deaths.sumDays(Gender.MALE, conscript_age_from, conscript_age_to);
 
-        String s = String.format("%d.%d %8s %8s %8s" + " %7s %7s %7s %7s",
+        double cdr = 2 * PROMILLE * he.actual_deaths.sum() / pavg.sum();
+        double cbr = 2 * PROMILLE * he.actual_births / pavg.sum();
+
+        sum_actual_deaths += he.actual_deaths.sum();
+        sum_actual_excess_wartime_deaths += he.actual_excess_wartime_deaths.sum();
+        sum_exd_conscripts += exd_conscripts;
+        sum_excess_warborn_deaths += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline;
+        sum_expected_nonwar_births += he.expected_nonwar_births;
+        sum_actual_births += he.actual_births;
+        sum_birth_shortfall += he.expected_nonwar_births - he.actual_births;
+        sum_actual_warborn_deaths_baseline += he.actual_warborn_deaths_baseline;
+        sum_actual_warborn_deaths += he.actual_warborn_deaths;
+
+        String s = String.format("%d.%d %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5.1f %5.1f",
                                  he.year, he.halfyear.seq(1),
                                  f2k(p1.sum()),
                                  f2k(pavg.sum()),
@@ -63,12 +116,20 @@ public class PrintHalfYears
                                  f2k(he.actual_deaths.sum()),
                                  f2k(he.actual_excess_wartime_deaths.sum()),
                                  f2k(exd_conscripts),
-                                 f2k((he.actual_warborn_deaths - he.actual_warborn_deaths_baseline))
+                                 f2k(he.actual_warborn_deaths - he.actual_warborn_deaths_baseline),
+                                 //
+                                 f2k(he.expected_nonwar_births),
+                                 f2k(he.actual_births),
+                                 f2k(he.expected_nonwar_births - he.actual_births),
+                                 f2k(he.actual_warborn_deaths_baseline),
+                                 f2k(he.actual_warborn_deaths),
+                                 //
+                                 cbr,
+                                 cdr
         //
         );
 
         Util.out(s);
-        // ###
     }
 
     /* ======================================================================================== */

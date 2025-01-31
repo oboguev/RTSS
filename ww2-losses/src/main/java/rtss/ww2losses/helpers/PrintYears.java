@@ -40,7 +40,9 @@ public class PrintYears
         Util.out(String.format("%5s %5s %5s %8s %8s %8s" + " %7s %6s",
                                "всего", "", "", "", "", "",
                                f2k(sum_exd),
-                               f2k(sum_births_shortfall)));
+                               f2k(sum_births_shortfall)
+        //
+        ));
     }
 
     private void print(HalfYearEntry he1, HalfYearEntry he2) throws Exception
