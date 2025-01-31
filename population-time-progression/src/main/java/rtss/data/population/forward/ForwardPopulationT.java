@@ -61,6 +61,7 @@ public class ForwardPopulationT extends ForwardPopulation
     
     /*
      * Число смертей по полу и по возрасту в днях на начало передвижки.
+     * Для рождённых во время передвижки возраст = 0.
      */
     private PopulationContext deathsByGenderAge = PopulationContext.newTotalPopulationContext();
 
@@ -120,6 +121,15 @@ public class ForwardPopulationT extends ForwardPopulation
     {
         this.daily_birth_count_m = daily_birth_count_m;
         this.daily_birth_count_f = daily_birth_count_f;
+    }
+    
+    /*
+     * Число смертей по полу и по возрасту в днях на начало передвижки.
+     * Для рождённых во время передвижки возраст = 0.
+     */
+    public PopulationContext deathsByGenderAge()
+    {
+        return deathsByGenderAge;
     }
 
     /*
@@ -340,7 +350,12 @@ public class ForwardPopulationT extends ForwardPopulation
          */
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
+        {
+            double deaths = day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
+            deathsByGenderAge.addDay(locality, gender, 0, deaths);
+
             day_births[nd] *= day_lx[nd] / day_lx[0];
+        }
 
         /*
          * добавить результат в контекст
@@ -350,7 +365,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
-
+        
         switch (gender)
         {
         case MALE:
@@ -394,7 +409,12 @@ public class ForwardPopulationT extends ForwardPopulation
          */
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
+        {
+            double deaths = day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
+            deathsByGenderAge.addDay(locality, gender, 0, deaths);
+
             day_births[nd] *= day_lx[nd] / day_lx[0];
+        }
 
         /*
          * добавить результат в контекст
@@ -404,7 +424,7 @@ public class ForwardPopulationT extends ForwardPopulation
 
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
-
+        
         switch (gender)
         {
         case MALE:
@@ -461,6 +481,8 @@ public class ForwardPopulationT extends ForwardPopulation
             observed_deaths += deaths;
             sum_deaths += deaths;
 
+            deathsByGenderAge.addDay(locality, gender, age * DAYS_PER_YEAR, deaths);
+
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
@@ -515,6 +537,9 @@ public class ForwardPopulationT extends ForwardPopulation
 
             if (nd2 < p2.length)
             {
+                double deaths = v * deathRate(fctx, day_lx, nd, nd2);
+                deathsByGenderAge.addDay(locality, gender, nd, deaths);
+
                 v *= survivalRate(fctx, day_lx, nd, nd2);
                 p2[nd2] = v;
             }
@@ -522,12 +547,20 @@ public class ForwardPopulationT extends ForwardPopulation
             {
                 int age = fctx.day2age(nd2);
                 nd2 = age * fctx.DAYS_PER_YEAR;
+
+                double deaths = v * deathRate(fctx, day_lx, nd, nd2);
+                deathsByGenderAge.addDay(locality, gender, nd, deaths);
+                
                 v *= survivalRate(fctx, day_lx, nd, nd2);
                 pto.add(locality, gender, Math.min(age, MAX_AGE), v);
             }
             else
             {
                 int back = fctx.DAYS_PER_YEAR;
+
+                double deaths = v * deathRate(fctx, day_lx, nd - back, nd2 - back);
+                deathsByGenderAge.addDay(locality, gender, nd, deaths);
+                
                 v *= survivalRate(fctx, day_lx, nd - back, nd2 - back);
                 p2[p2.length - 1] += v;
             }
@@ -536,7 +569,7 @@ public class ForwardPopulationT extends ForwardPopulation
         }
 
         fctx.fromArray(locality, gender, p2);
-
+        
         switch (gender.name())
         {
         case "MALE":
@@ -551,11 +584,18 @@ public class ForwardPopulationT extends ForwardPopulation
         observed_deaths += sum_deaths;
     }
 
+    private double deathRate(PopulationContext fctx, double[] day_lx, int nd, int nd2) throws Exception
+    {
+        return 1 - survivalRate(fctx, day_lx, nd, nd2);
+    }
+
     private double survivalRate(PopulationContext fctx, double[] day_lx, int nd, int nd2) throws Exception
     {
+        double rate;
+        
         if (nd2 < day_lx.length)
         {
-            return day_lx[nd2] / day_lx[nd];
+            rate = day_lx[nd2] / day_lx[nd];
         }
         else
         {
@@ -564,8 +604,18 @@ public class ForwardPopulationT extends ForwardPopulation
 
             /* использовать коэффициент смертности последнего года */
             int extra = 10;
-            return day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
+            rate = day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
         }
+        
+        return check_range(rate, 0, 1);
+    }
+    
+    private double check_range(double v, double v1, double v2) throws Exception
+    {
+        if (v >= v1 && v <= v2)
+            return v;
+        else
+            throw new Exception("Out of range");
     }
 
     /*****************************************************************************************/
