@@ -22,12 +22,13 @@ public class PrintHalfYears
         Util.out("    н.кон   = численность населения в конце полугодия, тыс. чел");
         Util.out("");
         Util.out("    ум      = общее число смертей за полугодие, тыс. чел");
-        Util.out("    ум.изб  = число избыточных смертей за полугодие, тыс. чел");
-        Util.out("    ум.прз  = число избыточных смертей за полугодие среди мужчин призывного возраста, тыс. чел");
-        Util.out("    ум.нов  = число избыточных смертей за полугодие среди родившихся после середины 1941 года, тыс. чел");
+        Util.out("    с.изб   = число избыточных смертей за полугодие, тыс. чел");
+        Util.out("    с.прз   = число избыточных смертей за полугодие среди мужчин призывного возраста, тыс. чел");
+        Util.out("    с.нов   = число избыточных смертей за полугодие среди родившихся после середины 1941 года, тыс. чел");
         Util.out("");
         Util.out("    р.ожид    = ожидаемое число рождений в условиях мира (за полугодие)");
-        Util.out("    р.факт    = фактическое число рождений  (за полугодие)");
+        Util.out("    р.факт    = фактическое число рождений (за полугодие)");
+        Util.out("    р.нехв    = дефицит рождений за полугодие, тыс. новорожденных");
         Util.out("    фcр.мир   = число смертей (в данном полугодии) от фактических рождений во время войны, ожидаемое при смертности мирного времени");
         Util.out("    фcр       = фактическое число смертей (в данном полугодии) от фактических рождений во время войны, при фактической военной смертности");
         Util.out("");
@@ -55,14 +56,14 @@ public class PrintHalfYears
 
         String s = String.format("%d.%d %8s %8s %8s" + " %7s %7s %7s %7s",
                                  he.year, he.halfyear.seq(1),
-                                 f2k(p1.sum() / 1000.0),
-                                 f2k(pavg.sum() / 1000.0),
-                                 f2k(p2.sum() / 1000.0),
+                                 f2k(p1.sum()),
+                                 f2k(pavg.sum()),
+                                 f2k(p2.sum()),
                                  //
-                                 f2k(he.actual_deaths.sum() / 1000.0),
-                                 f2k(he.actual_excess_wartime_deaths.sum() / 1000.0),
-                                 f2k(exd_conscripts / 1000.0),
-                                 f2k((he.actual_warborn_deaths - he.actual_warborn_deaths_baseline) / 1000.0)
+                                 f2k(he.actual_deaths.sum()),
+                                 f2k(he.actual_excess_wartime_deaths.sum()),
+                                 f2k(exd_conscripts),
+                                 f2k((he.actual_warborn_deaths - he.actual_warborn_deaths_baseline))
         //
         );
 
@@ -72,11 +73,16 @@ public class PrintHalfYears
 
     /* ======================================================================================== */
 
-    private static String f2k(double v)
+    private static String f2s(double v)
     {
         String s = String.format("%,15.0f", v);
         while (s.startsWith(" "))
             s = s.substring(1);
         return s;
+    }
+
+    private static String f2k(double v)
+    {
+        return f2s(v / 1000.0);
     }
 }
