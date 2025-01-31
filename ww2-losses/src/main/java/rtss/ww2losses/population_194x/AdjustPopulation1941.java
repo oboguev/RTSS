@@ -70,17 +70,17 @@ public class AdjustPopulation1941 extends AdjustPopulation
         // нельзя изменять значения 5-летних групповых корзин,
         // в частности нельзя перераспределять из 0..4 в 5+
         // или из 5+ в 0...4 
-        
+
         redistribute_to(p, Gender.MALE, 3, 9_103 + 44_000, 2);
         redistribute_to(p, Gender.MALE, 4, 70_125 + 44_000, 2);
-        
-        redistribute_to(p, Gender.MALE, 5, 1_327, 6);
 
-        redistribute_to(p, Gender.FEMALE, 3, 37_471 + 4_000, 2, 1);
-        redistribute_to(p, Gender.FEMALE, 4, 89_171 + 4_000, 2, 1);
-        
-        redistribute_to(p, Gender.FEMALE, 5, 13_434, 6);
-        
+        // redistribute_to(p, Gender.MALE, 5, 1_327, 6);
+
+        redistribute_to(p, Gender.FEMALE, 3, 37_471 + 24_000, 2, 1);
+        redistribute_to(p, Gender.FEMALE, 4, 89_171 + 24_000, 2, 1);
+
+        // redistribute_to(p, Gender.FEMALE, 5, 13_434, 6);
+
         p.makeBoth();
         p.recalcTotal();
     }
@@ -89,43 +89,38 @@ public class AdjustPopulation1941 extends AdjustPopulation
     {
         // ###
     }
-    
+
     /* ================================================= */
-    
+
     /*
      * Перераспределить @amount человек в возраст to_age из возрастов from_ages
      */
-    private void redistribute_to(Population p, Gender gender, int to_age, double amount, int ... from_ages) throws Exception
+    private void redistribute_to(Population p, Gender gender, int to_age, double amount, int... from_ages) throws Exception
     {
         p.add(gender, to_age, amount);
-        
-        // TODO later: пропорционально численности в возрастах from_ages, если их несколько
-        
-        double remainder = amount;
-        int agecount = from_ages.length;
-        
+
+        // распределить перенос из "from" пропорционально численности в возрастах from_ages
+        double from_sum = 0;
+        for (int age : from_ages)
+            from_sum += p.get(gender, age);
+
         for (int age : from_ages)
         {
             double v = p.get(gender, age);
-            double share = remainder / agecount;
+            double share = amount * (v / from_sum);
             if (share > v)
-                share = v;
+                throw new Exception("невозможно перераспределить");
             p.sub(gender, age, share);
-            remainder -= share;
-            agecount--;
         }
-        
-        if (remainder != 0)
-            throw new Exception("Невозможно перепаспределить");
     }
-    
+
     private void verifyBinning(final int[] binning, Population p1, Population p2) throws Exception
     {
         verifyBinning(Gender.MALE, binning, p1, p2);
         verifyBinning(Gender.FEMALE, binning, p1, p2);
         verifyBinning(Gender.BOTH, binning, p1, p2);
     }
-    
+
     private void verifyBinning(Gender gender, final int[] binning, Population p1, Population p2) throws Exception
     {
         Bin[] b1 = p1.binSumByAge(gender, binning);
