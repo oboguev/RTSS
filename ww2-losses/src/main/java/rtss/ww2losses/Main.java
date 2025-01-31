@@ -731,7 +731,7 @@ public class Main
             // число смертей от рождений при мирной смертности
             Util.assertion(Util.same(fw.getObservedDeaths(), fw.deathsByGenderAge().sum()));
             he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
-            add(fw.deathsByGenderAge(), he.actual_peace_deaths);
+            he.actual_peace_deaths_from_newborn = fw.deathsByGenderAge().clone();
         }
 
         double v1 = p.sum();
@@ -818,9 +818,13 @@ public class Main
 
                 // число смертей от рождений
                 Util.assertion(Util.same(fw.getObservedDeaths(), fw.deathsByGenderAge().sum()));
+                
                 he.actual_warborn_deaths = fw.getObservedDeaths();
                 add(fw.deathsByGenderAge(), he.actual_deaths);
-                add(fw.deathsByGenderAge(), he.actual_excess_wartime_deaths);
+                add(he.actual_peace_deaths_from_newborn, he.actual_peace_deaths);
+                
+                PopulationContext delta = fw.deathsByGenderAge().sub(he.actual_peace_deaths_from_newborn, ValueConstraint.NONE);
+                add(delta, he.actual_excess_wartime_deaths);
             }
         }
 

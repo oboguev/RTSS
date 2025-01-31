@@ -10,23 +10,23 @@ public class HalfYearEntry
     /* предыдущий и следующий периоды */
     public HalfYearEntry prev;
     public HalfYearEntry next;
-    
+
     /* обозначение периода (год и полугодие) */
     final public int year;
     final public HalfYearSelector halfyear;
-    
+
     /* таблица смертности для этого полугодия в условиях мира */
     CombinedMortalityTable peace_mt;
     /* кривые l(x) с разрешением 1 день возраста для условий мира */
     public double[] peace_lx_male;
     public double[] peace_lx_female;
-    
+
     /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
     public PopulationContext p_nonwar_with_births;
 
     /* ожидаемое в условиях мира население на начало периода, без учёта рождений после середины 1941 */
     public PopulationContext p_nonwar_without_births;
-    
+
     /* 
      * ожидаемое в условиях мира число смертей за период (от начала до конца периода) 
      * в наличном на начало войны населении
@@ -35,7 +35,7 @@ public class HalfYearEntry
 
     /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
-    
+
     /* действительное общее число смертей (по возрастам и полам) в этом полугодии */
     public PopulationContext actual_deaths = newPopulationContext();
 
@@ -44,7 +44,14 @@ public class HalfYearEntry
      * состоявшихся бы в действительном военном населении при смертности мирного времени
      */
     public PopulationContext actual_peace_deaths = newPopulationContext();
-    
+
+    /* 
+     * смерти состоявшееся бы от рождённых в военное время если бы они умирали 
+     * по смертности мирного времени; промежуточный элемент, в конце расчёта
+     * уже прибавлен к actual_peace_deaths 
+     */
+    public PopulationContext actual_peace_deaths_from_newborn = newPopulationContext();
+
     /* 
      * часть действительного числа смертей (по возрастам и полам) в этом полугодии, 
      * состоявшихся в действительном военном населении избыточно к смертности мирного времени
@@ -56,7 +63,7 @@ public class HalfYearEntry
      * включая начальное на середину 1941 и рождённое после
      */
     public PopulationContext actual_population = newPopulationContext();
-    
+
     /* 
      * действительное население (по возрастам и полам) в начале полугодия
      * включая только начальное на середину 1941 года
@@ -64,14 +71,14 @@ public class HalfYearEntry
     public PopulationContext actual_population_without_births = newPopulationContext();
 
     /* действительное число рождений в полугодии */
-    public double actual_births; 
-    
+    public double actual_births;
+
     /* 
      * число смертей в данном полугодии от фактического рождений во время войны
      * ожидаемое при смертности мирного времени
      */
     public double actual_warborn_deaths_baseline;
-    
+
     /* 
      * фактическое число смертей в данном полугодии от фактического рождений во время войны,
      * при фактической смертности военного времени
@@ -89,7 +96,7 @@ public class HalfYearEntry
         this.p_nonwar_with_births = p_nonwar_with_births;
         this.p_nonwar_without_births = p_nonwar_without_births;
     }
-    
+
     private PopulationContext newPopulationContext()
     {
         return PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
@@ -101,15 +108,15 @@ public class HalfYearEntry
         {
         case FirstHalfYear:
             return nbsp(year + " первое полугодие");
-            
+
         case SecondHalfYear:
             return nbsp(year + " второе полугодие");
-            
+
         default:
             return nbsp("неопределённая дата");
         }
     }
-    
+
     // заменить пробелы на неразбивающий пробел, 
     // для удобства импорта распечатанной таблицы в Excel 
     private String nbsp(String s)
