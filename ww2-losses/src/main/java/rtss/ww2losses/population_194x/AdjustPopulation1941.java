@@ -65,7 +65,8 @@ public class AdjustPopulation1941 extends AdjustPopulation
 
     private void adjust_USSR(Population p) throws Exception
     {
-        // нельзя перераспределять из 0..4 в 5+
+        // нельзя изменять значения 5-летних групповых корзин,
+        // в частности нельзя перераспределять из 0..4 в 5+
         // или из 5+ в 0...4 
         
         redistribute(p, Gender.MALE, 3, 9_103, 2);
