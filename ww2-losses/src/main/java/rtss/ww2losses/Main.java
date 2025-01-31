@@ -451,7 +451,7 @@ public class Main
 
             /*
              * Для РСФСР отменить отрицательные значения дефицита женского населения
-             * в возрастах 15-60 лет как вызванные вероятно миграцией
+             * в возрастах 15-60 лет как вызванные вероятно миграцией.
              */
             cancelNegativeDeficit(Gender.FEMALE, 15, 60);
             deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
