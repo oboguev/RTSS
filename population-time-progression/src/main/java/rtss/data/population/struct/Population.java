@@ -1270,7 +1270,12 @@ public class Population
 
     public Population(Bin[] maleBins, Bin[] femaleBins) throws Exception
     {
-        this(Locality.TOTAL,
+        this(Locality.TOTAL, maleBins, femaleBins);
+    }
+
+    public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins) throws Exception
+    {
+        this(locality,
              bin2array(maleBins), 0, null,
              bin2array(femaleBins), 0, null);
     }

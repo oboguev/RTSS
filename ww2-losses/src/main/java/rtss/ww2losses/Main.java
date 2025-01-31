@@ -28,6 +28,7 @@ import rtss.ww2losses.helpers.PrintYears;
 import rtss.ww2losses.helpers.ShowForecast;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.population_194x.AdjustPopulation;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.CalibrateASFR;
@@ -165,7 +166,8 @@ public class Main
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
 
         /* население на середину 1941 года */
-        Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap);
+        AdjustPopulation adjuster1941 = null;
+        Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap, adjuster1941);
         PopulationContext fctx_mid1941 = new PopulationContext(PopulationContextSize);
         Population p = pm1941.evaluateAsPopulation(fctx_mid1941, mt1940);
         Util.assertion(p.sum() == 0);

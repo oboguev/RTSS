@@ -16,7 +16,8 @@ import rtss.ww2losses.params.AreaParameters;
  */
 public class Population_In_Middle_1941 extends UtilBase_194x
 {
-    private AreaParameters ap;
+    private final AreaParameters ap;
+    private final AdjustPopulation adjuster1941;
     
     public PopulationByLocality p_start_1941;
     public double observed_births_1941_1st_halfyear;
@@ -25,7 +26,13 @@ public class Population_In_Middle_1941 extends UtilBase_194x
     
     public Population_In_Middle_1941(AreaParameters ap)
     {
+        this(ap, null);
+    }
+
+    public Population_In_Middle_1941(AreaParameters ap, AdjustPopulation adjuster1941)
+    {
         this.ap = ap;
+        this.adjuster1941 = adjuster1941;
     }
 
     public PopulationByLocality evaluate() throws Exception
@@ -62,6 +69,8 @@ public class Population_In_Middle_1941 extends UtilBase_194x
         if (useADH)
         {
             p = PopulationADH.getPopulationByLocality(ap.area, 1941);
+            if (adjuster1941 != null)
+                p = adjuster1941.adjust(p);
             p_start_1941 = p.clone();
             p = fctx.begin(p);
         }

@@ -47,7 +47,7 @@ import rtss.ww2losses.params.AreaParameters;
  *       также в таблицах для отдельных полов.
  *     - Смертность в возрастах 1-5 лет повышается на множитель линейно спадающий с возрастом от величины 184.0/163.5 в возрасте 1 год 
  *       до 1.0 в возрасте 5 лет.
- *     - Возрастные коэффциенты смертности в возрастах 5-100 лет повышаются на одинаковый множитель, при котором полученная таблица даёт 
+ *     - Возрастные коэффициенты смертности в возрастах 5-100 лет повышаются на одинаковый множитель, при котором полученная таблица даёт 
  *       годовую смертность в 21.7 промилле при рождаемости 36.1 промилле (с учётом смертности рождённых в текущем году). 
  *       Этот множитель исчислим как 1.326.
  *       
@@ -107,7 +107,7 @@ public class MortalityTable_1940 extends UtilBase_194x
             instructions.add(instruction);
             
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для СССР 1940");
-            Util.out(String.format("Для таблицы смертности СССР 1940 года все коэффциенты в возрастах 5-100 увеличены на %.4f", instruction.scale));
+            Util.out(String.format("Для таблицы смертности СССР 1940 года все коэффициенты в возрастах 5-100 увеличены на %.4f", instruction.scale));
 
             return xmt;
         }
@@ -122,7 +122,7 @@ public class MortalityTable_1940 extends UtilBase_194x
             instructions.add(instruction);
 
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для РСФСР 1940");
-            Util.out(String.format("Для таблицы смертности РСФСР 1940 года все коэффциенты увеличены на %.4f", instruction.scale));
+            Util.out(String.format("Для таблицы смертности РСФСР 1940 года все коэффициенты увеличены на %.4f", instruction.scale));
 
             return xmt;
         }
