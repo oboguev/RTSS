@@ -68,7 +68,7 @@ public class PrintYears
 
         double births_shortfall = (he1.expected_nonwar_births - he1.actual_births) + (he2.expected_nonwar_births - he2.actual_births);
 
-        Util.out(String.format("%5d %8s %8s %8s" + " %7s %6s" + " %5.1f %5.1f",
+        Util.out(String.format("%-5d %8s %8s %8s" + " %7s %6s" + " %5.1f %5.1f",
                                he1.year,
                                f2k(p1.sum()),
                                f2k(pavg.sum()),
