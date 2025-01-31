@@ -90,6 +90,7 @@ public class AdjustPopulation1941 extends AdjustPopulation
     private void redistribute(Population p, Gender gender, int from_age, double amount, int ... to_ages) throws Exception
     {
         p.sub(gender, from_age, amount);
+        
         for (int age : to_ages)
             p.add(gender, age, amount / to_ages.length);
     }
