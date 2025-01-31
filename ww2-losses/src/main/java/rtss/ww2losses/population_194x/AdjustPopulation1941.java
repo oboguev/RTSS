@@ -65,12 +65,15 @@ public class AdjustPopulation1941 extends AdjustPopulation
 
     private void adjust_USSR(Population p) throws Exception
     {
+        // нельзя перераспределять из 0..4 в 5+
+        // или из 5+ в 0...4 
+        
         redistribute(p, Gender.MALE, 3, 9_103, 2);
-        redistribute(p, Gender.MALE, 4, 70_125, 2, 6);
+        redistribute(p, Gender.MALE, 4, 70_125, 2);
         redistribute(p, Gender.MALE, 5, 1_327, 6);
 
         redistribute(p, Gender.FEMALE, 3, 37_471, 2);
-        redistribute(p, Gender.FEMALE, 4, 89_171, 2, 6);
+        redistribute(p, Gender.FEMALE, 4, 89_171, 2);
         redistribute(p, Gender.FEMALE, 5, 13_434, 6);
         
         p.makeBoth();
