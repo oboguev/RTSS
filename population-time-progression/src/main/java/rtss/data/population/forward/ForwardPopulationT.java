@@ -58,6 +58,11 @@ public class ForwardPopulationT extends ForwardPopulation
 
     private double[] daily_birth_count_m = null;
     private double[] daily_birth_count_f = null;
+    
+    /*
+     * Число смертей по полу и по возрасту в днях на начало передвижки.
+     */
+    private PopulationContext deathsByGenderAge = PopulationContext.newTotalPopulationContext();
 
     /*
      * В настоящее время мы не используем эту функцию практически.

@@ -92,10 +92,7 @@ public class HalfYearEntry
     
     private PopulationContext newPopulationContext()
     {
-        PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
-        p.setValueConstraint(ValueConstraint.NONE);
-        p.beginTotal();
-        return p;
+        return PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
     }
 
     public String toString()

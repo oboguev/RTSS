@@ -361,7 +361,7 @@ public class PopulationContext
         PopulationByLocality xp2 = begin(xp);
         return xp2.forLocality(Locality.TOTAL);
     }
-    
+
     public void beginTotal()
     {
         begin(false);
@@ -785,7 +785,7 @@ public class PopulationContext
     {
         return toPopulation(null);
     }
-    
+
     public Population toPopulation(ValueConstraint vc) throws Exception
     {
         return toPopulationByLocality(vc).forLocality(Locality.TOTAL);
@@ -795,7 +795,7 @@ public class PopulationContext
     {
         return toPopulationByLocality(null);
     }
-    
+
     public PopulationByLocality toPopulationByLocality(ValueConstraint vc) throws Exception
     {
         if (!began)
@@ -1106,5 +1106,21 @@ public class PopulationContext
     {
         for (int nd = firstDayForAge(age); nd <= lastDayForAge(age); nd++)
             setDay(locality, gender, nd, v / DAYS_PER_YEAR);
+    }
+
+    /* ---------------------------------------------------------------------------- */
+
+    public static PopulationContext newTotalPopulationContext()
+    {
+        return newTotalPopulationContext(null);
+    }
+
+    public static PopulationContext newTotalPopulationContext(ValueConstraint vc)
+    {
+        PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
+        if (vc != null)
+            p.setValueConstraint(vc);
+        p.beginTotal();
+        return p;
     }
 }

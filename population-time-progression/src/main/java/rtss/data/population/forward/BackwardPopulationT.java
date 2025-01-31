@@ -34,7 +34,7 @@ public class BackwardPopulationT extends ForwardPopulation
 {
     private double fctx_t_male_deaths = 0;
     private double fctx_t_female_deaths = 0;
-
+    
     /*
      * Обратная передвижка населения во времени на целый год или на часть года.
      * Начальное население (@p) и таблица смертности (@mt) неизменны. 

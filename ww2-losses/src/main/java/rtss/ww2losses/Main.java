@@ -728,8 +728,10 @@ public class Main
 
             fw.forward(p, he.peace_mt, 0.5);
 
-            // число смертей от рождений
+            // число смертей от рождений при мирной смертности
             he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
+
+            // ### actual_peace_deaths 
 
             he = he.next;
         }
@@ -820,7 +822,6 @@ public class Main
                 merge(p, he.next.actual_population);
                 
                 // ### actual_deaths 
-                // ### actual_peace_deaths 
                 // ### actual_excess_wartime_deaths
             }
         }
@@ -949,10 +950,7 @@ public class Main
 
     private PopulationContext newPopulationContext()
     {
-        PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
-        p.setValueConstraint(ValueConstraint.NONE);
-        p.beginTotal();
-        return p;
+        return PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
     }
 
     private void merge(PopulationContext from, PopulationContext to) throws Exception
