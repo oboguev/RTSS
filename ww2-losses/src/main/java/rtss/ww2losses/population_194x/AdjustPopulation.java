@@ -1,6 +1,11 @@
 package rtss.ww2losses.population_194x;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import rtss.data.bin.Bin;
+import rtss.data.bin.Bins;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
@@ -30,7 +35,7 @@ public class AdjustPopulation
 
         if (total != null)
             total = adjust(total);
-        
+
         return new PopulationByLocality(total, urban, rural);
     }
 
@@ -73,5 +78,111 @@ public class AdjustPopulation
             if (!Util.same(b1[k].avg, b2[k].avg))
                 throw new Exception("расклад по возрастным корзинам изменился");
         }
+    }
+
+    /* ============================================================================== */
+
+    /* 
+     * пересчитать структуру возрастных корзин так, чтобы указанные возраста имели отдельные 1-годовые корзины 
+     */
+    protected int[] rebin(int[] binning, List<Integer> isolateAges) throws Exception
+    {
+        Util.assertion(Util.sum(binning) == Population.MAX_AGE + 1);
+        for (int age : isolateAges)
+            binning = rebin(binning, age);
+
+        Util.assertion(Util.sum(binning) == Population.MAX_AGE + 1);
+        return binning;
+    }
+
+    private int[] rebin(int[] binning, int age)
+    {
+        List<Integer> list = new ArrayList<>();
+        
+        int x = 0;
+        
+        for (int w : binning)
+        {
+            int x1 = x;
+            int x2 = x1 + w - 1;
+            
+            if (!(age >= x1 && age <= x2))
+            {
+                list.add(w);
+            }
+            else if (age == x1 && age == x2)
+            {
+                list.add(w);
+            }
+            else if (age == x1)
+            {
+                list.add(1);
+                list.add(w - 1);
+            }
+            else if (age == x2)
+            {
+                list.add(w - 1);
+                list.add(1);
+            }
+            else 
+            {
+                list.add(age - x1);
+                list.add(1);
+                list.add(x2 - age);
+            }
+
+            x += w;
+        }
+
+        return Util.toIntArray(list);
+    }
+
+    @SuppressWarnings("unused")
+    private Bin[] binning2bins(final int[] binning) throws Exception
+    {
+        if (Util.sum(binning) != Population.MAX_AGE + 1)
+            throw new IllegalArgumentException(String.format("сумма ширины корзин %d != %d", Util.sum(binning), Population.MAX_AGE + 1));
+
+        Bin[] bins = new Bin[binning.length];
+        int age = 0;
+
+        for (int k = 0; k < binning.length; k++)
+        {
+            bins[k] = new Bin(age, age + binning[k] - 1, 0);
+            age += binning[k];
+        }
+
+        return Bins.bins(bins);
+    }
+
+    @SuppressWarnings("unused")
+    private int[] bins2binning(Bin bin0) throws Exception
+    {
+        /* check bins are contigious and widsth sum is correct */
+        Util.assertion(bin0.age_x1 == 0);
+        int width = 0;
+        for (Bin bin = bin0; bin != null; bin = bin.next)
+        {
+            Util.assertion(bin.age_x1 >= 0 && bin.age_x2 >= 0 && bin.age_x2 >= bin.age_x1);
+            width += bin.age_x2 - bin.age_x1 + 1;
+            if (bin.next != null)
+                Util.assertion(bin.next.age_x1 == bin.age_x2 + 1);
+        }
+
+        Util.assertion(width == Population.MAX_AGE + 1);
+
+        /* actually make binning */
+        int count = 0;
+        for (Bin bin = bin0; bin != null; bin = bin.next)
+            count++;
+
+        int[] binning = new int[count];
+        int k = 0;
+        for (Bin bin = bin0; bin != null; bin = bin.next)
+        {
+            binning[k++] = bin.age_x2 - bin.age_x1 + 1;
+        }
+
+        return binning;
     }
 }

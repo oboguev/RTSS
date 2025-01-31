@@ -560,6 +560,24 @@ public class Util
         Collections.sort(list);
         return list;
     }
+    
+    public static int[] toIntArray(List<Integer> list)
+    {
+        int[] a = new int[list.size()];
+        int k = 0;
+        for (int v : list)
+            a[k++] = v;
+        return a;
+    }
+
+    public static double[] toDoubleArray(List<Double> list)
+    {
+        double[] a = new double[list.size()];
+        int k = 0;
+        for (double v : list)
+            a[k++] = v;
+        return a;
+    }
 
     /*
      * Return stack frame string.
