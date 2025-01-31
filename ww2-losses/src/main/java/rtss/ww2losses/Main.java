@@ -891,11 +891,6 @@ public class Main
 
     private void check_actual_deaths(HalfYearEntry he, Gender gender) throws Exception
     {
-        if (he.actual_deaths == null)
-        {
-            Util.noop();
-        }
-
         for (int nd = 0; nd <= he.actual_deaths.MAX_DAY; nd++)
         {
             double total = he.actual_deaths.getDay(Locality.TOTAL, gender, nd);
