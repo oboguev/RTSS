@@ -436,6 +436,13 @@ public class Main
                     .display();
         }
 
+        if (Util.False)
+        {
+            new PopulationChart("Дефицит " + ap.area + " сдвинутый вниз на 5 лет")
+                    .show("дефицит", deficit.moveDown(5))
+                    .display();
+        }
+
         if (area == Area.RSFSR)
         {
             if (PrintDiagnostics)
