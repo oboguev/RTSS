@@ -125,13 +125,27 @@ public class AdjustPopulation1941 extends AdjustPopulation
             isolateAgesFemale.add(15);
             isolateAgesFemale.add(16);
         }
-        
+
         p.makeBoth();
         p.recalcTotal();
     }
 
     private void adjust_RSFSR(Population p, List<Integer> isolateAgesMale, List<Integer> isolateAgesFemale) throws Exception
     {
-        // ###
+        if (Util.True)
+        {
+            redistribute_to(p, Gender.FEMALE, 10, 2_691 + 600, 14);
+            redistribute_to(p, Gender.FEMALE, 11, 8_224 + 300, 14);
+            redistribute_to(p, Gender.FEMALE, 12, 5_427 + 300, 14);
+            redistribute_to(p, Gender.FEMALE, 13, 1_934 + 200, 14);
+
+            isolateAgesFemale.add(10);
+            isolateAgesFemale.add(11);
+            isolateAgesFemale.add(12);
+            isolateAgesFemale.add(13);
+        }
+
+        p.makeBoth();
+        p.recalcTotal();
     }
 }
