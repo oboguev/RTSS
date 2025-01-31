@@ -44,9 +44,9 @@ public class WarHelpers
             {
                 negsum += -v;
                 if (v == 0)
-                    Util.err(String.format("Отрицательный дефицит %s %-3d %,15.0f", gender.name(), age, 0.0));
+                    Util.err(String.format("Отрицательный дефицит %s %-3d %,15.0f [1941 age: %d]", gender.name(), age, 0.0, age - 5));
                 else
-                    Util.err(String.format("Отрицательный дефицит %s %-3d %,15.0f", gender.name(), age, -v));
+                    Util.err(String.format("Отрицательный дефицит %s %-3d %,15.0f  [1941 age: %d]", gender.name(), age, -v, age - 5));
             }
         }
 

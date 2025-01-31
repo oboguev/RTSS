@@ -9,6 +9,7 @@ import rtss.ww2losses.HalfYearEntry;
 public class PrintYears
 {
     private static double PROMILLE = 1000.0;
+    private static String EMPTY = "" + (char) 0xA0;
 
     public static void print(HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
@@ -23,24 +24,27 @@ public class PrintYears
         Util.out("");
         Util.out("Годовые величины:");
         Util.out("");
-        Util.out("    р       = рождаемость, промилле");
-        Util.out("    с       = смертность, промилле");
         Util.out("    н.нач   = численность населения в начале года, тыс. чел");
         Util.out("    н.сред  = среднегодовая численность населения, тыс. чел");
         Util.out("    н.кон   = численность населения в конце года, тыс. чел");
         Util.out("    с.изб   = число избыточных смертей за год, тыс. чел");
         Util.out("    р.нехв  = дефицит рождений в году, тыс. новорожденных");
+        Util.out("    р       = рождаемость, промилле");
+        Util.out("    с       = смертность, промилле");
         Util.out("");
-        Util.out(" год     р    с     н.нач   н.сред    н.кон   с.изб  р.нехв");
-        Util.out("=====  ==== =====  =======  =======  =======  ====== ======");
+        Util.out(" год    н.нач   н.сред    н.кон   с.изб  р.нехв    р    с ");
+        Util.out("=====  =======  =======  =======  ====== ======  ==== =====");
 
         for (HalfYearEntry he = halves.get("1941.1"); he.year != 1946; he = he.next.next)
             print(he, he.next);
 
-        Util.out(String.format("%5s %5s %5s %8s %8s %8s" + " %7s %6s",
-                               "всего", "", "", "", "", "",
+        Util.out(String.format("%5s %8s %8s %8s" + " %7s %6s" + " %5s %5s",
+                               "всего", EMPTY, EMPTY, EMPTY,
                                f2k(sum_exd),
-                               f2k(sum_births_shortfall)
+                               f2k(sum_births_shortfall),
+                               //
+                               EMPTY,
+                               EMPTY
         //
         ));
     }
@@ -64,14 +68,16 @@ public class PrintYears
 
         double births_shortfall = (he1.expected_nonwar_births - he1.actual_births) + (he2.expected_nonwar_births - he2.actual_births);
 
-        Util.out(String.format("%5d %5.1f %5.1f %8s %8s %8s" + " %7s %6s",
-                               he1.year, cbr, cdr,
+        Util.out(String.format("%5d %8s %8s %8s" + " %7s %6s" + " %5.1f %5.1f",
+                               he1.year,
                                f2k(p1.sum()),
                                f2k(pavg.sum()),
                                f2k(p2.sum()),
                                //
                                f2k(exd),
-                               f2k(births_shortfall)
+                               f2k(births_shortfall),
+                               //
+                               cbr, cdr
         //
         ));
 

@@ -9,6 +9,7 @@ import rtss.util.plot.PopulationChart;
 
 public class AdjustPopulation1941 extends AdjustPopulation
 {
+    private static final int[] ADH_binning = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16 };
     private static final int[] ADH_refined_widths = { 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16 };
     private final Area area;
 
@@ -59,6 +60,7 @@ public class AdjustPopulation1941 extends AdjustPopulation
 
         Util.assertion(Util.same(p.sum(Gender.MALE), p0.sum(Gender.MALE)));
         Util.assertion(Util.same(p.sum(Gender.FEMALE), p0.sum(Gender.FEMALE)));
+        verifyBinning(ADH_binning, p0, p);
 
         return p;
     }
@@ -69,13 +71,15 @@ public class AdjustPopulation1941 extends AdjustPopulation
         // в частности нельзя перераспределять из 0..4 в 5+
         // или из 5+ в 0...4 
         
-        redistribute(p, Gender.MALE, 3, 9_103, 2);
-        redistribute(p, Gender.MALE, 4, 70_125, 2);
-        redistribute(p, Gender.MALE, 5, 1_327, 6);
+        redistribute_to(p, Gender.MALE, 3, 9_103 + 44_000, 2);
+        redistribute_to(p, Gender.MALE, 4, 70_125 + 44_000, 2);
+        
+        redistribute_to(p, Gender.MALE, 5, 1_327, 6);
 
-        redistribute(p, Gender.FEMALE, 3, 37_471, 2);
-        redistribute(p, Gender.FEMALE, 4, 89_171, 2);
-        redistribute(p, Gender.FEMALE, 5, 13_434, 6);
+        redistribute_to(p, Gender.FEMALE, 3, 37_471 + 4_000, 2, 1);
+        redistribute_to(p, Gender.FEMALE, 4, 89_171 + 4_000, 2, 1);
+        
+        redistribute_to(p, Gender.FEMALE, 5, 13_434, 6);
         
         p.makeBoth();
         p.recalcTotal();
@@ -88,11 +92,49 @@ public class AdjustPopulation1941 extends AdjustPopulation
     
     /* ================================================= */
     
-    private void redistribute(Population p, Gender gender, int from_age, double amount, int ... to_ages) throws Exception
+    /*
+     * Перераспределить @amount человек в возраст to_age из возрастов from_ages
+     */
+    private void redistribute_to(Population p, Gender gender, int to_age, double amount, int ... from_ages) throws Exception
     {
-        p.sub(gender, from_age, amount);
+        p.add(gender, to_age, amount);
         
-        for (int age : to_ages)
-            p.add(gender, age, amount / to_ages.length);
+        // TODO later: пропорционально численности в возрастах from_ages, если их несколько
+        
+        double remainder = amount;
+        int agecount = from_ages.length;
+        
+        for (int age : from_ages)
+        {
+            double v = p.get(gender, age);
+            double share = remainder / agecount;
+            if (share > v)
+                share = v;
+            p.sub(gender, age, share);
+            remainder -= share;
+            agecount--;
+        }
+        
+        if (remainder != 0)
+            throw new Exception("Невозможно перепаспределить");
+    }
+    
+    private void verifyBinning(final int[] binning, Population p1, Population p2) throws Exception
+    {
+        verifyBinning(Gender.MALE, binning, p1, p2);
+        verifyBinning(Gender.FEMALE, binning, p1, p2);
+        verifyBinning(Gender.BOTH, binning, p1, p2);
+    }
+    
+    private void verifyBinning(Gender gender, final int[] binning, Population p1, Population p2) throws Exception
+    {
+        Bin[] b1 = p1.binSumByAge(gender, binning);
+        Bin[] b2 = p2.binSumByAge(gender, binning);
+        Util.assertion(b1.length == b2.length);
+        for (int k = 0; k < b1.length; k++)
+        {
+            if (!Util.same(b1[k].avg, b2[k].avg))
+                throw new Exception("расклад по возрастным корзинам изменился");
+        }
     }
 }

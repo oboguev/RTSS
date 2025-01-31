@@ -13,6 +13,7 @@ import rtss.ww2losses.HalfYearEntry;
 public class PrintHalfYears
 {
     private static double PROMILLE = 1000.0;
+    private static String EMPTY = "" + (char) 0xA0;
 
     private double sum_actual_deaths = 0;
     private double sum_actual_excess_wartime_deaths = 0;
@@ -63,7 +64,7 @@ public class PrintHalfYears
         }
 
         String s = String.format("%-6s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5s %5s",
-                                 "всего", "", "", "",
+                                 "всего", EMPTY, EMPTY, EMPTY,
                                  //
                                  f2k(sum_actual_deaths),
                                  f2k(sum_actual_excess_wartime_deaths),
@@ -76,7 +77,7 @@ public class PrintHalfYears
                                  f2k(sum_actual_warborn_deaths_baseline),
                                  f2k(sum_actual_warborn_deaths),
                                  //
-                                 "", ""
+                                 EMPTY, EMPTY
         //
         );
 
