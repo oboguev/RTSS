@@ -29,6 +29,7 @@ import rtss.ww2losses.helpers.ShowForecast;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.AdjustPopulation;
+import rtss.ww2losses.population_194x.AdjustPopulation1941;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.CalibrateASFR;
@@ -167,6 +168,7 @@ public class Main
 
         /* население на середину 1941 года */
         AdjustPopulation adjuster1941 = null;
+        adjuster1941 = new AdjustPopulation1941(area);
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap, adjuster1941);
         PopulationContext fctx_mid1941 = new PopulationContext(PopulationContextSize);
         Population p = pm1941.evaluateAsPopulation(fctx_mid1941, mt1940);
@@ -206,6 +208,7 @@ public class Main
         PrintHalfYears.print(halves);
         PrintYears.print(halves);
 
+        // ### verify halves
         // ### save files: population structure, excess deaths
     }
 

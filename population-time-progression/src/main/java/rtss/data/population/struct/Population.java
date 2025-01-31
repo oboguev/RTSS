@@ -1030,15 +1030,14 @@ public class Population
     public Bin[] binSumByAge(Gender gender, int... agewidth) throws Exception
     {
         if (Util.sum(agewidth) != MAX_AGE + 1)
-            throw new Exception("");
+            throw new IllegalArgumentException(String.format("сумма ширины корзин %d != %d", Util.sum(agewidth), MAX_AGE + 1));
 
         Bin[] ages = new Bin[agewidth.length];
         int age = 0;
 
         for (int k = 0; k < agewidth.length; k++)
         {
-            ages[k].age_x1 = age;
-            ages[k].age_x2 = age + agewidth[k] - 1;
+            ages[k] = new Bin(age, age + agewidth[k] - 1, 0);
             age += agewidth[k];
         }
 
@@ -1305,7 +1304,19 @@ public class Population
                 v[k] = bins[k].avg;
             return v;
         }
+        
+        bins = Bins.sum2avg(bins);
+        if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
+            throw new Exception("Invalid population age range");
 
-        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title);
+        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title);
+
+        double sum1 = Util.sum(counts);
+        double sum2 = Bins.sum(bins);
+        
+        if (Util.differ(sum1, sum2))
+            throw new Exception("Curve count mismatches bin count");
+        
+        return counts;
     }
 }
