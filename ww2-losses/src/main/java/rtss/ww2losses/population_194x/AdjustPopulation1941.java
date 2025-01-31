@@ -46,7 +46,7 @@ public class AdjustPopulation1941 extends AdjustPopulation
             break;
         }
 
-        if (Util.True && area == Area.USSR)
+        if (Util.False)
         {
             new PopulationChart("Население " + area.toString() + " на начало 1941 года, этап 1")
                     .show("p0", p0)
@@ -59,7 +59,7 @@ public class AdjustPopulation1941 extends AdjustPopulation
         Bin[] female = p.binSumByAge(Gender.FEMALE, rebin(ADH_binning, isolateAgesFemale));
         p = new Population(male, female);
 
-        if (Util.True && area == Area.USSR)
+        if (Util.False)
         {
             new PopulationChart("Население " + area.toString() + " на начало 1941 года, этап 2")
                     .show("p0", p0)

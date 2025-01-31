@@ -26,6 +26,7 @@ import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PrintHalfYears;
 import rtss.ww2losses.helpers.PrintYears;
 import rtss.ww2losses.helpers.ShowForecast;
+import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.AdjustPopulation;
@@ -204,12 +205,12 @@ public class Main
         evalNewBirths();
         evalNewBirthsDeaths();
         fitNewBirthsDeaths();
+        
+        new VerifyHalfYears().verify(halves);
 
         PrintHalfYears.print(halves);
         PrintYears.print(halves);
-
-        // ### verify halves
-
+        
         // ### save files: population structure, excess deaths
     }
 
@@ -437,7 +438,7 @@ public class Main
                     .display();
         }
 
-        if (Util.True)
+        if (Util.False)
         {
             deficit.setValueConstraint(ValueConstraint.NONE);
             new PopulationChart("Дефицит " + ap.area + " сдвинутый по возрасту вниз на 5 лет")
