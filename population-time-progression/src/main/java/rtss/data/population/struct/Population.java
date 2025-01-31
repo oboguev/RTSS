@@ -1074,6 +1074,11 @@ public class Population
 
     public String dump() throws Exception
     {
+        return dump(false);
+    }
+
+    public String dump(boolean rounded) throws Exception
+    {
         StringBuilder sb = new StringBuilder();
 
         sb.append(String.format("AGE B M F"));
@@ -1081,7 +1086,15 @@ public class Population
 
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            sb.append(String.format("%-3d %f %f %f", age, both(age), male(age), female(age)));
+            if (rounded)
+            {
+                sb.append(String.format("%-3d %,15d %,15d %,15d", age, 
+                                        Math.round(both(age)), Math.round(male(age)), Math.round(female(age))));
+            }
+            else
+            {
+                sb.append(String.format("%-3d %f %f %f", age, both(age), male(age), female(age)));
+            }
             sb.append(Util.nl);
         }
 

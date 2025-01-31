@@ -818,7 +818,7 @@ public class Main
                 
                 // ввести остаток рождённых до конца полугодия в население начала следующего полугодия
                 merge(p, he.next.actual_population);
-
+                
                 // ### actual_deaths 
                 // ### actual_peace_deaths 
                 // ### actual_excess_wartime_deaths

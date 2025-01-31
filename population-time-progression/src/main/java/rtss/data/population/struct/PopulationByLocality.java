@@ -653,13 +653,18 @@ public class PopulationByLocality
 
     public String dump() throws Exception
     {
+        return dump(false);
+    }
+
+    public String dump(boolean rounded) throws Exception
+    {
         StringBuilder sb = new StringBuilder();
         
         if (total != null)
         {
             sb.append("TOTAL:");
             sb.append(Util.nl);
-            sb.append(total.dump());
+            sb.append(total.dump(rounded));
             sb.append("");
         }
  
@@ -667,7 +672,7 @@ public class PopulationByLocality
         {
             sb.append("URBAN:");
             sb.append(Util.nl);
-            sb.append(urban.dump());
+            sb.append(urban.dump(rounded));
             sb.append("");
         }
 
@@ -675,7 +680,7 @@ public class PopulationByLocality
         {
             sb.append("RURAL:");
             sb.append(Util.nl);
-            sb.append(rural.dump());
+            sb.append(rural.dump(rounded));
             sb.append("");
         }
         
