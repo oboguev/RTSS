@@ -436,9 +436,10 @@ public class Main
                     .display();
         }
 
-        if (Util.False)
+        if (Util.True)
         {
-            new PopulationChart("Дефицит " + ap.area + " сдвинутый вниз на 5 лет")
+            deficit.setValueConstraint(ValueConstraint.NONE);
+            new PopulationChart("Дефицит " + ap.area + " сдвинутый по возрасту вниз на 5 лет")
                     .show("дефицит", deficit.moveDown(5))
                     .display();
         }

@@ -130,6 +130,7 @@ public class PopulationContext
     public PopulationContext clone()
     {
         PopulationContext cx = new PopulationContext(NYEARS);
+        cx.valueConstraint = valueConstraint; 
         cx.began = began;
         cx.hasRuralUrban = hasRuralUrban;
         cx.m = new LocalityGenderToDoubleArray(m);

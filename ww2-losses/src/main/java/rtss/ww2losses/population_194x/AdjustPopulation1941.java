@@ -35,13 +35,22 @@ public class AdjustPopulation1941 extends AdjustPopulation
             break;
         }
 
+        if (Util.True && area == Area.USSR)
+        {
+            new PopulationChart("Население " + area.toString() + " на начало 1941 года, этап 1")
+                    .show("p0", p0)
+                    .show("p", p)
+                    .display();
+            Util.noop();
+        }
+
         Bin[] male = p.binSumByAge(Gender.MALE, ADH_refined_widths);
         Bin[] female = p.binSumByAge(Gender.FEMALE, ADH_refined_widths);
         p = new Population(male, female);
 
-        if (Util.False)
+        if (Util.True && area == Area.USSR)
         {
-            new PopulationChart("Население " + area.toString() + " на начало 1941 года")
+            new PopulationChart("Население " + area.toString() + " на начало 1941 года, этап 2")
                     .show("p0", p0)
                     .show("p", p)
                     .display();
@@ -54,13 +63,31 @@ public class AdjustPopulation1941 extends AdjustPopulation
         return p;
     }
 
-    private void adjust_USSR(Population p)
+    private void adjust_USSR(Population p) throws Exception
+    {
+        redistribute(p, Gender.MALE, 3, 9_103, 2);
+        redistribute(p, Gender.MALE, 4, 70_125, 2, 6);
+        redistribute(p, Gender.MALE, 5, 1_327, 6);
+
+        redistribute(p, Gender.FEMALE, 3, 37_471, 2);
+        redistribute(p, Gender.FEMALE, 4, 89_171, 2, 6);
+        redistribute(p, Gender.FEMALE, 5, 13_434, 6);
+        
+        p.makeBoth();
+        p.recalcTotal();
+    }
+
+    private void adjust_RSFSR(Population p) throws Exception
     {
         // ###
     }
-
-    private void adjust_RSFSR(Population p)
+    
+    /* ================================================= */
+    
+    private void redistribute(Population p, Gender gender, int from_age, double amount, int ... to_ages) throws Exception
     {
-        // ###
+        p.sub(gender, from_age, amount);
+        for (int age : to_ages)
+            p.add(gender, age, amount / to_ages.length);
     }
 }
