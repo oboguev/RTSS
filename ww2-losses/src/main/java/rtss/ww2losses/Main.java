@@ -453,7 +453,7 @@ public class Main
              * Для РСФСР отменить отрицательные значения дефицита женского населения
              * в возрастах 15-60 лет как вызванные вероятно миграцией.
              */
-            cancelNegativeDeficit(Gender.FEMALE, 15, 60);
+            cancelNegativeDeficit(cancelDeficitRSFSR);
             deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
         }
 
@@ -496,7 +496,7 @@ public class Main
         }
 
         if (area == Area.RSFSR)
-            deficit = cancelNegativeDeficit(deficit, Gender.FEMALE, 15, 60);
+            deficit = cancelNegativeDeficit(deficit, cancelDeficitRSFSR);
 
         if (PrintDiagnostics)
         {
@@ -532,38 +532,64 @@ public class Main
 
     /* ======================================================================================================= */
 
-    private void cancelNegativeDeficit(Gender gender, int age1, int age2) throws Exception
+    public static class CancelDeficit
+    {
+        public Gender gender;
+        public int age1;
+        public int age2;
+
+        public CancelDeficit(Gender gender, int age1, int age2)
+        {
+            this.gender = gender;
+            this.age1 = age1;
+            this.age2 = age2;
+        }
+    }
+
+    private static CancelDeficit[] cancelDeficitRSFSR = {
+                                                          new CancelDeficit(Gender.MALE, 7, 10),
+                                                          new CancelDeficit(Gender.FEMALE, 7, 11),
+                                                          new CancelDeficit(Gender.FEMALE, 15, 60)
+    };
+
+    private void cancelNegativeDeficit(CancelDeficit[] cancels) throws Exception
     {
         PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
         PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
-
-        for (int age = age1; age <= age2; age++)
+        
+        for (CancelDeficit cancel : cancels)
         {
-            double v = deficit.getYearValue(gender, age);
-            if (v < 0)
+            for (int age = cancel.age1; age <= cancel.age2; age++)
             {
-                // p1946_actual.addYearValue(gender, age, v);
-                unneg(p1946_actual, gender, age, deficit);
+                double v = deficit.getYearValue(cancel.gender, age);
+                if (v < 0)
+                {
+                    // p1946_actual.addYearValue(gender, age, v);
+                    unneg(p1946_actual, cancel.gender, age, deficit);
+                }
             }
-        }
+        }        
 
         p1946_actual.makeBoth();
         p1946_actual.recalcTotal();
         split_p1946();
     }
 
-    private PopulationContext cancelNegativeDeficit(PopulationContext deficit, Gender gender, int age1, int age2) throws Exception
+    private PopulationContext cancelNegativeDeficit(PopulationContext deficit, CancelDeficit[] cancels) throws Exception
     {
         deficit.setValueConstraint(ValueConstraint.NONE);
-
-        for (int age = age1; age <= age2; age++)
+        
+        for (CancelDeficit cancel : cancels)
         {
-            double v = deficit.getYearValue(gender, age);
-            if (v < 0)
+            for (int age = cancel.age1; age <= cancel.age2; age++)
             {
-                // p1946_actual.addYearValue(gender, age, v);
-                unneg(p1946_actual, gender, age, deficit);
-                deficit.setYearValue(gender, age, 0);
+                double v = deficit.getYearValue(cancel.gender, age);
+                if (v < 0)
+                {
+                    // p1946_actual.addYearValue(gender, age, v);
+                    unneg(p1946_actual, cancel.gender, age, deficit);
+                    deficit.setYearValue(cancel.gender, age, 0);
+                }
             }
         }
 
