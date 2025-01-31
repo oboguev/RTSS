@@ -108,10 +108,8 @@ public class AdjustPopulation1941 extends AdjustPopulation
 
         if (Util.True)
         {
-            // redistribute_to(p, Gender.FEMALE, 8, 37_216 / 10.0, 6, 7);
-            // redistribute_to(p, Gender.FEMALE, 9, 51_386 / 10.0, 6, 7);
-
-            redistribute_to(p, Gender.FEMALE, 5, 50_734 + 10_000, 6, 7, 8, 9);
+            // redistribute_to(p, Gender.FEMALE, 5, 50_734 + 10_000, 6, 7, 8, 9);
+            redistribute_to(p, Gender.FEMALE, 5, 50_734 + 10_000, 7, 8, 9);
 
             isolateAgesFemale.add(5);
             isolateAgesFemale.add(6);
@@ -120,6 +118,14 @@ public class AdjustPopulation1941 extends AdjustPopulation
             isolateAgesFemale.add(9);
         }
 
+        if (Util.True)
+        {
+            redistribute_to(p, Gender.FEMALE, 15, 5_069 + 500, 17, 18, 19);
+
+            isolateAgesFemale.add(15);
+            isolateAgesFemale.add(16);
+        }
+        
         p.makeBoth();
         p.recalcTotal();
     }
