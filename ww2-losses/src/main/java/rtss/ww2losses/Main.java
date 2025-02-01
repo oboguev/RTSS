@@ -69,7 +69,7 @@ public class Main
         split_p1946();
     }
 
-    private Main(Model model) throws Exception
+    Main(Model model) throws Exception
     {
         this(model.params.area);
         this.model = model;
@@ -79,17 +79,17 @@ public class Main
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
      */
-    private static boolean ApplyAntibiotics = Util.True;
+    private boolean ApplyAntibiotics = Util.True;
 
     /*
      * Распечатывать диагностический вывод
      */
-    private static boolean PrintDiagnostics = Util.True;
+    private boolean PrintDiagnostics = Util.True;
 
     /*
      * Использовать если население на начало 1946 года уже не содержит эмигрантов
      */
-    private static boolean DeductEmigration = Util.False;
+    private boolean DeductEmigration = Util.False;
 
     /*
      * Размер контекста отслеживания: только дети или все возраста
@@ -146,7 +146,7 @@ public class Main
     
     private Model model;
 
-    private void main() throws Exception
+    void main() throws Exception
     {
         Util.out("");
         Util.out("**********************************************************************************");
@@ -157,6 +157,7 @@ public class Main
         {
             this.aw_conscripts_rkka_loss = model.params.aw_conscripts_rkka_loss;
             this.aw_general_occupation = model.params.aw_general_occupation;
+            this.PrintDiagnostics = model.params.PrintDiagnostics; 
         }
         else
         {
