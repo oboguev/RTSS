@@ -43,6 +43,8 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
+// ### при подсчётах actual_deaths, excess_deaths, CBR -- убирать протяжённые блоки отрицательных значений (РСФСР)
+
 public class Main
 {
     public static void main(String[] args)
