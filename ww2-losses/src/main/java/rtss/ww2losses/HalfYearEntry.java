@@ -139,4 +139,11 @@ public class HalfYearEntry
         final char nbsp = (char) 0xA0;
         return s.replace(' ', nbsp);
     }
+    
+    /* смещение относительно начала начала 1941, в годах */  
+    public double offset_start1941() throws Exception
+    {
+        double v = (year - 1941) * 2 + this.halfyear.seq(0);
+        return v / 2;
+    }
 }
