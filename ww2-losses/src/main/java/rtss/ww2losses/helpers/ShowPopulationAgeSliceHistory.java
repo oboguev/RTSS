@@ -14,9 +14,9 @@ import rtss.data.population.struct.PopulationContext;
 /*
  * Распечатать движение населения определённых возрастов сквозь период войны
  */
-public class ShowForecast
+public class ShowPopulationAgeSliceHistory
 {
-    public static void show(AreaParameters ap, PopulationContext p1946_actual, HalfYearEntries<HalfYearEntry> halves, int age) throws Exception
+    public static void showWithoutBirhts(AreaParameters ap, PopulationContext p1946_actual, HalfYearEntries<HalfYearEntry> halves, int age) throws Exception
     {
         Util.out("");
         Util.out(String.format("%s, возраст %d (на начало 1941)", ap.area.toString(), age));

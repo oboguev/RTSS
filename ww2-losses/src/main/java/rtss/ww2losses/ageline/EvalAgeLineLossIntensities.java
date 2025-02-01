@@ -105,13 +105,10 @@ public class EvalAgeLineLossIntensities
         
         for (int nd = nd1; nd <= p1941_2.MAX_DAY; nd++)
         {
-            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.MALE, nd);
-            VerifyHalfYears.catch_bug_1_enable(); // ### HERE !!!
-            steer.steerActual(Gender.MALE, nd, senior_loss_intensity, initial_population);
-            VerifyHalfYears.catch_bug_1(halves); // ### HERE !!!
-
-            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.FEMALE, nd);
-            steer.steerActual(Gender.FEMALE, nd, senior_loss_intensity, initial_population);
+            initial_population = p1941_2.getDay(Locality.TOTAL, gender, nd);
+            // VerifyHalfYears.catch_bug_1_enable(); // ### HERE !!!
+            steer.steerActual(gender, nd, senior_loss_intensity, initial_population);
+            // VerifyHalfYears.catch_bug_1(halves); // ### HERE !!!
         }
     }
 }

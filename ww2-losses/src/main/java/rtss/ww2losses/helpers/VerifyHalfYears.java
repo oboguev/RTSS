@@ -156,11 +156,11 @@ public class VerifyHalfYears
     
     /* ====================================================================== */
     
-    private static boolean enabled = false;
+    private static boolean enabled = false; // ###
 
     public static void catch_bug_1_enable() throws Exception
     {
-        enabled = true;
+        enabled = true; // ###
     }
     
     public static void catch_bug_1(HalfYearEntries<HalfYearEntry> halves) throws Exception

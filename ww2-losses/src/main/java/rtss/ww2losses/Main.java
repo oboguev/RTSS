@@ -25,7 +25,7 @@ import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PrintHalfYears;
 import rtss.ww2losses.helpers.PrintYears;
-import rtss.ww2losses.helpers.ShowForecast;
+import rtss.ww2losses.helpers.ShowPopulationAgeSliceHistory;
 import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
@@ -211,6 +211,7 @@ public class Main
         evalDeathsForNewBirths_UnderPeacetimeChildMortality();
         fitDeathsForNewBirths_UnderActualWartimeChildMortality();
 
+        VerifyHalfYears.catch_bug_1(halves);
         new VerifyHalfYears().verify(halves);
 
         PrintHalfYears.print(halves);
@@ -485,10 +486,10 @@ public class Main
         if (Util.differ(v_total, v_prewar + v_postwar))
             Util.err("Расхождение категорий дефицита");
 
-        if (PrintDiagnostics)
+        if (PrintDiagnostics && Util.False)
         {
-            ShowForecast.show(ap, p1946_actual, halves, 3);
-            ShowForecast.show(ap, p1946_actual, halves, 4);
+            ShowPopulationAgeSliceHistory.showWithoutBirhts(ap, p1946_actual, halves, 3);
+            ShowPopulationAgeSliceHistory.showWithoutBirhts(ap, p1946_actual, halves, 4);
         }
 
         /* оставить только сверхсмертность */
