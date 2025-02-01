@@ -43,7 +43,14 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
+
+// ### отрицательные значения дефицита дают усиленные отрицательные значения excess deaths
+// ### ??? steering проводка -- лучше давать нуль?
+// ### ??? отрицательные значения loss_intensity ???
+// ### для РСФСР проследить AgeSlice линий 7-10 в 1946 (2-5 в 1941)
+
 // ### при подсчётах actual_deaths, excess_deaths, CBR -- убирать протяжённые блоки отрицательных значений (РСФСР)
+// ### причём отдельно по MALE и FEMALE
 
 public class Main
 {
