@@ -236,6 +236,8 @@ public class Main
         PrintHalfYears.print(ap, halves);
         PrintYears.print(ap, halves);
 
+        // ### фcр.мир фcр -- для 1го полугодия 1941
+
         // ### график и файл сверхсмертности на момент смерти
         // ### save files: population structure, excess deaths
     }
