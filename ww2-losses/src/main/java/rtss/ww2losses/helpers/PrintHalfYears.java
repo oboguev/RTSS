@@ -66,7 +66,7 @@ public class PrintHalfYears
         for (HalfYearEntry he : halves)
         {
             if (he.year != 1946)
-                print(he);
+                print(he, results);
         }
 
         String s = String.format("%-6s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5s %5s",
@@ -96,7 +96,7 @@ public class PrintHalfYears
         }
     }
 
-    private void print(HalfYearEntry he) throws Exception
+    private void print(HalfYearEntry he, ModelResults results) throws Exception
     {
         PopulationContext p1 = he.actual_population;
         PopulationContext p2 = he.next.actual_population;
@@ -143,6 +143,14 @@ public class PrintHalfYears
         );
 
         Util.out(s);
+        
+        if (!he.index().equals("1941.1"))
+        {
+            results.actual_excess_wartime_deaths += he.actual_excess_wartime_deaths.sum();
+            results.exd_conscripts += exd_conscripts;
+            results.excess_warborn_deaths += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline;
+            results.actual_births += he.actual_births;
+        }
     }
 
     /* ======================================================================================== */

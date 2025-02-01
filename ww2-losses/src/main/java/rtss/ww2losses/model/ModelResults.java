@@ -6,14 +6,14 @@ public class ModelResults
     public double cdr_1942;
 
     /* сумма избыточных смертей (с.изб) с середины 1941 по конец 1945 гг. */
-    double actual_excess_wartime_deaths;
+    public double actual_excess_wartime_deaths;
     
     /* сумма избыточных смертей мужчин призывного возраста (с.прз) с середины 1941 по конец 1945 гг. */
-    double exd_conscripts;
+    public double exd_conscripts;
     
     /* сумма избыточных смертей среди родившихся после середины 1941 года (с.инов) по конец 1945 гг. */
-    double excess_warborn_deaths;
+    public double excess_warborn_deaths;
     
     /* фактическое число рождений (р.факт) с середины 1941 по конец 1945 гг. */
-    double actual_births;
+    public double actual_births;
 }

@@ -42,7 +42,7 @@ public class PrintYears
         Util.out("=====  =======  =======  =======  ====== ======  ==== =====");
 
         for (HalfYearEntry he = halves.get("1941.1"); he.year != 1946; he = he.next.next)
-            print(he, he.next);
+            print(he, he.next, results);
 
         Util.out(String.format("%5s %8s %8s %8s" + " %7s %6s" + " %5s %5s",
                                "всего", EMPTY, EMPTY, EMPTY,
@@ -61,7 +61,7 @@ public class PrintYears
         }
     }
 
-    private void print(HalfYearEntry he1, HalfYearEntry he2) throws Exception
+    private void print(HalfYearEntry he1, HalfYearEntry he2, ModelResults results) throws Exception
     {
         PopulationContext p1 = he1.actual_population;
         PopulationContext p2 = he2.next.actual_population;
@@ -95,6 +95,9 @@ public class PrintYears
 
         sum_exd += exd;
         sum_births_shortfall += births_shortfall;
+        
+        if (he1.year == 1942)
+            results.cdr_1942 = cdr;
     }
 
     /* ======================================================================================== */
