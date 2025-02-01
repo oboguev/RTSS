@@ -1209,6 +1209,8 @@ public class Main
         {
             throw new Exception("Ошибка в построении daily_lx");
         }
+        
+        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, false));
 
         return daily_lx;
     }

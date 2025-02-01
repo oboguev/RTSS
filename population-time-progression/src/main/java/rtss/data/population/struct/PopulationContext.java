@@ -346,6 +346,8 @@ public class PopulationContext
 
             m_lx.put(key, daily_lx);
         }
+        
+        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, false));
 
         return daily_lx;
     }

@@ -482,6 +482,28 @@ public class Util
 
         return true;
     }
+    
+    public static boolean isMonotonicallyDecreasing(final double [] y, boolean strict)
+    {
+        if (y.length == 0)
+            return true;
+        
+        boolean b = true;
+        
+        for (int k = 0; k < y.length - 1; k++)
+        {
+            if (strict)
+            {
+                b = b && y[k] > y[k + 1];
+            }
+            else
+            {
+                b = b && y[k] >= y[k + 1];
+            }
+        }
+        
+        return b;
+    }
 
     public static void print(String title, final double[] y, int start_year)
     {
