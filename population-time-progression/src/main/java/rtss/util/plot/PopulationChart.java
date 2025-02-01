@@ -97,8 +97,8 @@ public class PopulationChart extends ApplicationFrame
         double[] f_y = p.asArray(Gender.FEMALE);
         double[] f_x = years(f_y);
 
-        addSeries(name + " MALE", m_x, m_y);
-        addSeries(name + " FEMALE", f_x, f_y);
+        addSeries(name + " муж", m_x, m_y);
+        addSeries(name + " жен", f_x, f_y);
 
         return this;
     }

@@ -75,6 +75,7 @@ public class MultiModelMain
         model.params = params;
 
         Main main = new Main(model);
+        main.exportDirectory = null;
         main.main();
         return model.results;
     }

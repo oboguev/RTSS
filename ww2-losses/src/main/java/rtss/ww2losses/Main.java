@@ -22,6 +22,7 @@ import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.ageline.AgeLineLossIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
+import rtss.ww2losses.helpers.ExportResults;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PrintHalfYears;
 import rtss.ww2losses.helpers.PrintYears;
@@ -74,7 +75,7 @@ public class Main
         this(model.params.area);
         this.model = model;
     }
-    
+
     /*
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
@@ -143,8 +144,12 @@ public class Main
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
      */
     private HalfYearEntries<HalfYearEntry> halves;
-    
+
+    /* параметры настроек при многократном автоматическом исполнении внешним драйвером */
     private Model model;
+
+    /* директория для сохранения файлов с результатами (если null -- не сохранять) */
+    public String exportDirectory = "c:\\@ww2losses\\export";
 
     void main() throws Exception
     {
@@ -152,12 +157,12 @@ public class Main
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
         Util.out("");
-        
+
         if (model != null)
         {
             this.aw_conscripts_rkka_loss = model.params.aw_conscripts_rkka_loss;
             this.aw_general_occupation = model.params.aw_general_occupation;
-            this.PrintDiagnostics = model.params.PrintDiagnostics; 
+            this.PrintDiagnostics = model.params.PrintDiagnostics;
         }
         else
         {
@@ -260,11 +265,16 @@ public class Main
         PrintHalfYears.print(ap, halves, model.results);
         PrintYears.print(ap, halves, model.results);
 
-        // ### график и файл сверхсмертности на момент смерти
-        // ### save files: population structure, excess deaths
+        PopulationContext allExcessDeathsByDeathAge = allExcessDeathsByDeathAge();
 
-        // ### MutliModel с вариацией параметров, выдача: 
-        // ### см. в 42, сумма изб. смертей (с.изб), сумма изб. призывных смертей (с.прз), сверхсмертность рождений (с.инов), число рождений (р.факт)
+        if (Util.True)
+        {
+            new PopulationChart("Избыточные смерти " + area + " в 1941-1945 гг. по возрасту в момент смерти")
+                    .show("смерти", allExcessDeathsByDeathAge.toPopulation())
+                    .display();
+        }
+
+        ExportResults.exportResults(exportDirectory, ap, halves, allExcessDeathsByDeathAge);
     }
 
     /* ================================================================================== */
@@ -1187,5 +1197,25 @@ public class Main
         }
 
         return daily_lx;
+    }
+
+    /* ======================================================================================================= */
+
+    /*
+     * Составить половозрастную стркутуру всех смертей по возрасту в момент смерти
+     */
+    private PopulationContext allExcessDeathsByDeathAge() throws Exception
+    {
+        PopulationContext p = newPopulationContext();
+
+        for (HalfYearEntry he : halves)
+        {
+            if (he.index().equals("1941.1") || he.index().equals("1946.1"))
+                continue;
+
+            p = p.add(he.actual_excess_wartime_deaths, ValueConstraint.NONE);
+        }
+
+        return p;
     }
 }
