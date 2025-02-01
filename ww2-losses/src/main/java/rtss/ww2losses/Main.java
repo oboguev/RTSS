@@ -184,7 +184,10 @@ public class Main
         }
 
         /* передвижка по полугодиям для мирных условий */
-        halves = evalHalves_step_6mo(pm1941, p_mid1941);
+        PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
+        PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
+        double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
+        halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941);
 
         if (Util.False)
         {
@@ -220,10 +223,14 @@ public class Main
 
     /*
      * Подготовить полугодовые сегменты.
-     * Передвижка с шагом полгода.
+     * Передвижка с шагом полгода от середины 1941 до начала 1946 года.
      */
     @SuppressWarnings("unused")
-    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(Population_In_Middle_1941 pm1941, PopulationContext p_mid1941) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(
+            PopulationContext p_start1941, 
+            PopulationContext deaths_1941_1st_halfyear, 
+            double births_1941_1st_halfyear, 
+            PopulationContext p_mid1941) throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
         PopulationContext pctx = p_mid1941.clone();
@@ -234,14 +241,13 @@ public class Main
         /* первое полугодие 1941 */
         HalfYearSelector half = HalfYearSelector.FirstHalfYear;
         prev = curr = new HalfYearEntry(year, half,
-                                        pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext(),
-                                        pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext());
-        curr.expected_nonwar_deaths = pm1941.observed_deaths_1941_1st_halfyear;
-        curr.expected_nonwar_births = pm1941.observed_births_1941_1st_halfyear;
-
-        curr.actual_deaths = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
-        curr.actual_peace_deaths = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
+                                        p_start1941.clone(),
+                                        p_start1941.clone());
+        curr.actual_deaths = deaths_1941_1st_halfyear.clone();
+        curr.actual_peace_deaths = deaths_1941_1st_halfyear.clone();
         curr.actual_excess_wartime_deaths = newPopulationContext();
+        curr.expected_nonwar_deaths = curr.actual_deaths.sum();
+        curr.expected_nonwar_births = births_1941_1st_halfyear;
 
         halves.add(curr);
 
