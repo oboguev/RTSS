@@ -2,9 +2,11 @@ package rtss.ww2losses.helpers;
 
 import rtss.data.ValueConstraint;
 import rtss.data.population.struct.PopulationContext;
+import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.params.AreaParameters;
 
 /*
  * Распечатать сводку данных для 1941-1945 гг.
@@ -14,15 +16,15 @@ public class PrintYears
     private static double PROMILLE = 1000.0;
     private static String EMPTY = "" + (char) 0xA0;
 
-    public static void print(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public static void print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
-        new PrintYears().do_print(halves);
+        new PrintYears().do_print(ap, halves);
     }
 
     private double sum_exd = 0;
     private double sum_births_shortfall = 0;
 
-    public void do_print(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public void do_print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
         Util.out("");
         Util.out("Годовые величины:");
@@ -50,6 +52,12 @@ public class PrintYears
                                EMPTY
         //
         ));
+        
+        if (ap.area == Area.RSFSR)
+        {
+            Util.out("");
+            Util.out("Напомним, что оценка потерь РСФСР занижена из-за неучёта межреспубликанского миграционного притока в 1941-1945 годах");
+        }
     }
 
     private void print(HalfYearEntry he1, HalfYearEntry he2) throws Exception

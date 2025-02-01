@@ -4,11 +4,13 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 import rtss.data.ValueConstraint;
 import rtss.data.population.struct.PopulationContext;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.params.AreaParameters;
 
 /*
  * Распечатать сводку данных для полугодий
@@ -28,12 +30,12 @@ public class PrintHalfYears
     private double sum_actual_warborn_deaths_baseline = 0;
     private double sum_actual_warborn_deaths = 0;
 
-    public static void print(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public static void print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
-        new PrintHalfYears().do_print(halves);
+        new PrintHalfYears().do_print(ap, halves);
     }
 
-    public void do_print(HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public void do_print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
         Util.out("");
         Util.out("Величины для полугодий:");
@@ -85,6 +87,12 @@ public class PrintHalfYears
         );
 
         Util.out(s);
+
+        if (ap.area == Area.RSFSR)
+        {
+            Util.out("");
+            Util.out("Напомним, что оценка потерь РСФСР занижена из-за неучёта межреспубликанского миграционного притока в 1941-1945 годах");
+        }
     }
 
     private void print(HalfYearEntry he) throws Exception

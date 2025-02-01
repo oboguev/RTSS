@@ -214,8 +214,8 @@ public class Main
         VerifyHalfYears.catch_bug_1(halves);
         new VerifyHalfYears().verify(halves);
 
-        PrintHalfYears.print(halves);
-        PrintYears.print(halves);
+        PrintHalfYears.print(ap, halves);
+        PrintYears.print(ap, halves);
 
         // ### save files: population structure, excess deaths
     }
