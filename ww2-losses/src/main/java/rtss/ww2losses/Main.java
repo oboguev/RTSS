@@ -34,6 +34,7 @@ import rtss.ww2losses.population_194x.AdjustPopulation1941;
 import rtss.ww2losses.population_194x.MortalityTable_1940;
 import rtss.ww2losses.population_194x.Population_In_Middle_1941;
 import rtss.ww2losses.util.CalibrateASFR;
+import rtss.ww2losses.util.RebalanceASFR;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 
@@ -163,6 +164,14 @@ public class Main
 
         asfr_calibration = CalibrateASFR.calibrate1940(ap, yearly_asfrs);
         Util.out(String.format("Калибровочная поправка ASFR (возрастных коэффициентов женской плодовитости): %.3f", asfr_calibration));
+        
+        /* 
+         * Перечитать ASFR для полугодий 1941 года,
+         * оставив на первую половину 1941 года коэффициенты плодовитости 1940-го года,
+         * а коэффициенты на вторую половину 1941-го года исправить соответственно для сохранения среднего за 1941 год значения. 
+         */
+        RebalanceASFR.rebalance_1941_halfyears(yearly_asfrs, halfyearly_asfrs);
+        // ###
 
         /* таблицы смертности для 1940 года и полугодий 1941-1945 при мирных условиях */
         mt1940 = new MortalityTable_1940(ap).evaluate();

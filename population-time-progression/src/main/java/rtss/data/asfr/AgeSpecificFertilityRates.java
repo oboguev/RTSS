@@ -9,6 +9,7 @@ import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /**
  * Возрастные коэффициенты женской плодовитости
@@ -28,6 +29,16 @@ public class AgeSpecificFertilityRates
         this.bins = Bins.clone(Bins.bins(bins)); 
     }
     
+    public Bin[] binsReadonly() throws Exception
+    {
+        return Bins.clone(bins);
+    }
+    
+    public Bin[] binsWritable() throws Exception
+    {
+        return bins;
+    }
+
     public double forAge(int age)
     {
         for (Bin bin : bins)
@@ -119,5 +130,13 @@ public class AgeSpecificFertilityRates
         }
         
         return new AgeSpecificFertilityRates(Bins.bins(list));
+    }
+    
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        for (Bin bin : bins)
+            sb.append(String.format("%d-%d %6.1f" + Util.nl, bin.age_x1, bin.age_x2, bin.avg));
+        return sb.toString();
     }
 }

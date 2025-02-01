@@ -523,4 +523,21 @@ public class Bins
 
         return Bins.bins(list);
     }
+    
+    public static boolean compatibleLayout(Bin[] bins1, Bin[] bins2)
+    {
+        if (bins1.length != bins2.length)
+            return false;
+        
+        for (int k = 0; k < bins1.length; k++)
+        {
+            if (bins1[k].age_x1 != bins2[k].age_x1)
+                return false;
+            
+            if (bins1[k].age_x2 != bins2[k].age_x2)
+                return false;
+        }
+        
+        return true;
+    }
 }
