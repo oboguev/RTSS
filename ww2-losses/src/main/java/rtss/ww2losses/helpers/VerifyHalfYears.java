@@ -1,6 +1,7 @@
 package rtss.ww2losses.helpers;
 
 import rtss.data.ValueConstraint;
+import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
@@ -18,6 +19,8 @@ public class VerifyHalfYears
 {
     private final HalfYearEntries<HalfYearEntry> halves;
     private final AreaParameters ap;
+
+    private static final int MAX_AGE  = Population.MAX_AGE;
 
     public VerifyHalfYears(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves)
     {
@@ -48,8 +51,8 @@ public class VerifyHalfYears
             same(he.actual_deaths.sum(), he.actual_peace_deaths.sum() + he.actual_excess_wartime_deaths.sum());
             same(he.actual_deaths.sum(Gender.MALE), he.actual_peace_deaths.sum(Gender.MALE) + he.actual_excess_wartime_deaths.sum(Gender.MALE));
             same(he.actual_deaths.sum(Gender.FEMALE), he.actual_peace_deaths.sum(Gender.FEMALE) + he.actual_excess_wartime_deaths.sum(Gender.FEMALE));
-            
-            same(he.actual_peace_deaths_from_newborn.sum(), he.actual_warborn_deaths_baseline);            
+
+            same(he.actual_peace_deaths_from_newborn.sum(), he.actual_warborn_deaths_baseline);
         }
 
         if (print)
@@ -76,35 +79,45 @@ public class VerifyHalfYears
 
         if (Util.True)
         {
-            PopulationContext p = p2.moveDown(0.5).sub(p1, ValueConstraint.NONE);
-            p = p.add(he.actual_deaths, ValueConstraint.NONE);
-            
+            PopulationContext p = p1.sub(he.actual_deaths, ValueConstraint.NONE);
+            p = p2.moveDown(0.5).sub(p, ValueConstraint.NONE);
+
             double v = p.sumDays(ndays, p.MAX_DAY);
             Util.assertion(Math.abs(v) < 10);
-            
-            v = p.sumDays(0, ndays - 1);
-            double v2 = p.sumDays(0, p.DAYS_PER_YEAR - 1);
-            // ### 0-я строка равна ...
-            Util.noop();
         }
 
         if (Util.True)
         {
-            PopulationContext p = p1.moveUp(0.5).sub(p2, ValueConstraint.NONE);
-            p = he.actual_deaths.moveUp(0.5).sub(p, ValueConstraint.NONE);
+            PopulationContext p = p1.sub(he.actual_deaths, ValueConstraint.NONE);
+            p = p2.sub(p.moveUp(0.5), ValueConstraint.NONE);
             
-            double v = p.sumDays(ndays, p.MAX_DAY);
-            // Util.assertion(Math.abs(v) < 10);
-            double v2 = p.sumDays(0, ndays - 1);
-            double v3 = p.sumDays(0, p.DAYS_PER_YEAR - 1);
-            // ### 0-я строка равна ...
-            Util.noop();
+            // округления
+            Util.assertion(Math.abs(p.sum(1, MAX_AGE - 1)) < 10);
+            
+            // накопление возрастов более MAX_AGE, но не должно становиться очень большим 
+            Util.assertion(Math.abs(p.getYearValue(Gender.BOTH, MAX_AGE)) < 1000);
+            
+            if (he.index().equals("1941.1"))
+            {
+                same(p.getYearValue(Gender.BOTH, 0), he.actual_births, 0.0002);
+                same(p.sumDays(0, ndays), he.actual_births, 0.0002);
+            }
+            else
+            {
+                same(p.getYearValue(Gender.BOTH, 0), he.actual_births);
+                same(p.sumDays(0, ndays), he.actual_births);
+            }
         }
-}
+    }
 
     private void same(double a, double b) throws Exception
     {
         Util.assertion(Util.same(a, b));
+    }
+
+    private void same(double a, double b, double diff) throws Exception
+    {
+        Util.assertion(Util.same(a, b, diff));
     }
 
     /* ====================================================================== */
