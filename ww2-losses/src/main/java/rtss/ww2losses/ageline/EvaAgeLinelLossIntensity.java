@@ -33,7 +33,9 @@ public class EvaAgeLinelLossIntensity
             double initial_population,
             double final_population) throws Exception
     {
-        final double tolerance = 1.0e-5; 
+        final double tolerance = 1.0e-5;
+        
+        Util.assertion(initial_population >= 0 && final_population >= 0);
         
         double a1 = 0;
         double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, a1);

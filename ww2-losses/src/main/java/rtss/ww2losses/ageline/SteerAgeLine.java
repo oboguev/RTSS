@@ -51,6 +51,8 @@ public class SteerAgeLine
             double initial_population,
             double loss_intensity) throws Exception
     {
+        Util.assertion(initial_population >= 0);
+        
         double population = initial_population;
         int nd_age = initial_age_ndays;
         int span = ForwardPopulation.years2days(0.5);
@@ -66,6 +68,8 @@ public class SteerAgeLine
 
             double[] ac = ac(gender, ndm);
             population -= ac[ac_index(he)] * initial_population * loss_intensity;
+
+            Util.assertion(population >= 0);
 
             nd_age += span;
         }
@@ -129,6 +133,8 @@ public class SteerAgeLine
 
     public void steerActual(Gender gender, int initial_age_ndays, double loss_intensity, double initial_population) throws Exception
     {
+        Util.assertion(initial_population >= 0);
+
         double population = initial_population;
         int nd_age = initial_age_ndays;
         int span = ForwardPopulation.years2days(0.5);
