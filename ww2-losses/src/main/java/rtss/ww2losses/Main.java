@@ -206,7 +206,7 @@ public class Main
         evalNewBirthsDeaths();
         fitNewBirthsDeaths();
         
-        // ### new VerifyHalfYears().verify(halves);
+        new VerifyHalfYears().verify(halves);
 
         PrintHalfYears.print(halves);
         PrintYears.print(halves);
@@ -1003,7 +1003,7 @@ public class Main
 
     private void outk(String what, double v)
     {
-        out(what + ": " + f2k(v / 1000.0));
+        out(what + ": " + f2s(v / 1000.0));
     }
 
     private void out(String what)
@@ -1011,7 +1011,7 @@ public class Main
         Util.out(what);
     }
 
-    private String f2k(double v)
+    private String f2s(double v)
     {
         String s = String.format("%,15.0f", v);
         while (s.startsWith(" "))

@@ -17,9 +17,12 @@ public class HalfYearEntry
 
     /* таблица смертности для этого полугодия в условиях мира */
     CombinedMortalityTable peace_mt;
+
     /* кривые l(x) с разрешением 1 день возраста для условий мира */
     public double[] peace_lx_male;
     public double[] peace_lx_female;
+
+    /** ============================ Ожидаемое движение в условияaх мира ============================ **/
 
     /* ожидаемое в условиях мира население на начало периода, с учётом рождений после середины 1941 */
     public PopulationContext p_nonwar_with_births;
@@ -35,6 +38,8 @@ public class HalfYearEntry
 
     /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
+
+    /** ============================ Фактические смерти ============================ **/
 
     /* действительное общее число смертей (по возрастам и полам) в этом полугодии */
     public PopulationContext actual_deaths = newPopulationContext();
@@ -58,6 +63,8 @@ public class HalfYearEntry
      */
     public PopulationContext actual_excess_wartime_deaths = newPopulationContext();
 
+    /** ============================ Фактическое население ============================ **/
+
     /* 
      * действительное население (по возрастам и полам) в начале полугодия
      * включая начальное на середину 1941 и рождённое после
@@ -70,6 +77,8 @@ public class HalfYearEntry
      */
     public PopulationContext actual_population_without_births = newPopulationContext();
 
+    /** ============================ Фактическее рождения ============================ **/
+
     /* действительное число рождений в полугодии */
     public double actual_births;
 
@@ -80,10 +89,13 @@ public class HalfYearEntry
     public double actual_warborn_deaths_baseline;
 
     /* 
-     * фактическое число смертей в данном полугодии от фактического рождений во время войны,
+     * фактическое число смертей в данном полугодии от фактических рождений во время войны
+     * (рождений состоявшихся как в текущем, так и в предыдуших военных полугодиях)
      * при фактической смертности военного времени
      */
     public double actual_warborn_deaths;
+
+    /** ============================================================================== **/
 
     public HalfYearEntry(
             int year,
