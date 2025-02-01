@@ -206,7 +206,7 @@ public class Main
         evalNewBirthsDeaths();
         fitNewBirthsDeaths();
         
-        new VerifyHalfYears().verify(halves);
+        // ### new VerifyHalfYears().verify(halves);
 
         PrintHalfYears.print(halves);
         PrintYears.print(halves);

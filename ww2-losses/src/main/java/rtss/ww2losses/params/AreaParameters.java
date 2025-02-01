@@ -7,8 +7,7 @@ import rtss.data.selectors.Area;
 public class AreaParameters
 {
     public /*final*/ Area area;
-    public /*final*/ int NYears;
-    
+
     /*
      * Уровни рождаемости и смертности CBR_xxx и CDR_xxx нормированы на численность населения в начале календарного года.
      * Уровни рождаемости и смертности CBR_xxx_MIDYEAR и CDR_xxx_MIDYEAR нормированы на среднегодовую численность населения.
@@ -56,49 +55,17 @@ public class AreaParameters
     public double CBR_1946_MIDYEAR;
     public double CDR_1946_MIDYEAR;
 
-    /* 
-     * прирост населения в 1946 году, с учётом миграции, 
-     * если не задан, то полагается равным естественному приросту (CBR_1946 - CDR_1946) 
-     */
-    public final /*final*/ Double growth_1946 = null;
-
     /* население по АДХ на начало 1939 и начало 1940 гг. */
     public double ADH_MALES_1939;
     public double ADH_FEMALES_1939;
     public double ADH_MALES_1940;
     public double ADH_FEMALES_1940;
 
-    /* среднее дожитие родившихся в 1941-1945 гг. до переписи 15 января 1959 года */
-    public double survival_rate_194x_1959 = 0.68;
-
-    /* баланс миграции возрастной группы военных лет рожденния в период с войны по 15 января 1959 года */
-    public double immigration = 0;
-
-    /* результаты вычислений: вариант с постоянной (по годам войны) рождаемостью и смертностью */
-
-    /* population at the beginning and end of the war */
-    public /*final*/ double ACTUAL_POPULATION_START;
-    public /*final*/ double ACTUAL_POPULATION_END;
-
-    /* target excess deaths and birth shortage */
-    public /*final*/ double ACTUAL_EXCESS_DEATHS;
-    public /*final*/ double ACTUAL_BIRTH_DEFICIT;
-
     /* ======================================================================= */
 
-    public double constant_cbr;
-    public double constant_cdr;
-
-    /* результаты вычислений: вариант с переменной (по годам войны) рождаемостью и смертностью */
-    public double[] var_cbr;
-    public double[] var_cdr;
-
-    protected AreaParameters(Area area, int NYears)
+    protected AreaParameters(Area area)
     {
         this.area = area;
-        this.NYears = NYears;
-        this.var_cbr = new double[NYears];
-        this.var_cdr = new double[NYears];
     }
 
     static public AreaParameters forArea(Area area) throws Exception
@@ -120,14 +87,6 @@ public class AreaParameters
             return growth_1940;
         else
             return CBR_1940 - CDR_1940;
-    }
-
-    public double growth_1946()
-    {
-        if (growth_1946 != null)
-            return growth_1946;
-        else
-            return CBR_1946 - CDR_1946;
     }
 
     public void build() throws Exception
