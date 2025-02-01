@@ -150,6 +150,9 @@ public class Main
 
     /* директория для сохранения файлов с результатами (если null -- не сохранять) */
     public String exportDirectory = "c:\\@ww2losses\\export";
+    
+    private PopulationContext deficit1946_raw;
+    private PopulationContext deficit1946_adjusted;
 
     void main() throws Exception
     {
@@ -274,7 +277,9 @@ public class Main
                     .display();
         }
 
-        ExportResults.exportResults(exportDirectory, ap, halves, allExcessDeathsByDeathAge);
+        ExportResults.exportResults(exportDirectory, ap, halves, 
+                                    allExcessDeathsByDeathAge, 
+                                    deficit1946_raw, deficit1946_adjusted);
     }
 
     /* ================================================================================== */
@@ -533,6 +538,8 @@ public class Main
         /* =================================================== */
 
         PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
+        PopulationContext deficit_wb_raw = p1946_expected_with_births.sub(p1946_actual, ValueConstraint.NONE);
+        PopulationContext deficit_wb_adjusted = null;
 
         if (Util.False)
         {
@@ -560,6 +567,7 @@ public class Main
              */
             cancelNegativeDeficit(cancelDeficitRSFSR);
             deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
+            deficit_wb_adjusted = p1946_expected_with_births.sub(p1946_actual, ValueConstraint.NONE);
         }
 
         v = p1946_expected_with_births.sum();
@@ -601,7 +609,10 @@ public class Main
         }
 
         if (area == Area.RSFSR)
+        {
             deficit = cancelNegativeDeficit(deficit, cancelDeficitRSFSR);
+            deficit_wb_adjusted = cancelNegativeDeficit(deficit_wb_adjusted, cancelDeficitRSFSR);
+        }
 
         if (PrintDiagnostics)
         {
@@ -633,6 +644,9 @@ public class Main
         outk("    Сверхсмертность [по дефициту] мужчин призывного возраста", deficit_m_conscripts);
         outk("    Сверхсмертность [по дефициту] женщин фертильного возраста", deficit_f_fertile);
         outk("    Сверхсмертность [по дефициту] остального наличного на середину 1941 года населения", deficit_other);
+        
+        this.deficit1946_raw = deficit_wb_raw;
+        this.deficit1946_adjusted = deficit_wb_adjusted;
     }
 
     /* ======================================================================================================= */
