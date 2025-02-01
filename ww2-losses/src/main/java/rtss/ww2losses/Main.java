@@ -917,7 +917,8 @@ public class Main
             fw.setBirthCount(m_births, f_births);
 
             List<PatchInstruction> instructions = new ArrayList<>();
-            PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier * imr_fy_multiplier(he));
+            PatchInstruction instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 0, 5, multiplier * imr_fy_multiplier(he), 1.0);
+            // PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier * imr_fy_multiplier(he));
             instructions.add(instruction);
             CombinedMortalityTable mt = PatchMortalityTable.patch(mt1940, instructions, "множитель смертности " + multiplier);
 

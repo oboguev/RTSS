@@ -63,7 +63,16 @@ public class PatchMortalityTable
 
     public static enum PatchOpcode
     {
-        Multiply, MultiplyWithDecay
+        /*
+         * Умножить все коэффициенты смертности в диапазоне [age1 ... age2] на @scale
+         */
+        Multiply,
+
+        /*
+         * Умножить все коэффициенты смертности в диапазоне [age1 ... age2] на множитель
+         * линейно изменяющийся от @scale (в @age1) до @scale2 (в @age2) 
+         */
+        MultiplyWithDecay
     }
 
     public static class PatchInstruction
@@ -73,7 +82,7 @@ public class PatchMortalityTable
         public int age2;
         public double scale;
         public double scale2;
-        
+
         public PatchInstruction(PatchOpcode opcode, int age1, int age2, double scale)
         {
             this.opcode = opcode;
@@ -138,7 +147,7 @@ public class PatchMortalityTable
             return;
 
         double[] qx = smt.qx();
-        
+
         patch(qx, instructions);
 
         String source = smt.source();
@@ -150,10 +159,10 @@ public class PatchMortalityTable
         smt = SingleMortalityTable.from_qx(source + addComment, qx);
         cmt.setTable(locality, gender, smt);
     }
-    
+
     private static void patch(double[] qx, List<PatchInstruction> instructions)
     {
-        for (PatchInstruction instruction: instructions)
+        for (PatchInstruction instruction : instructions)
             patch(qx, instruction);
     }
 
@@ -164,9 +173,10 @@ public class PatchMortalityTable
         case Multiply:
             patchMultiply(qx, instruction);
             break;
-        
+
         case MultiplyWithDecay:
-            patchMultiplyWithDecay(qx, instruction);;
+            patchMultiplyWithDecay(qx, instruction);
+            ;
             break;
         }
     }
@@ -181,7 +191,7 @@ public class PatchMortalityTable
     {
         double a = (instruction.scale2 - instruction.scale) / (instruction.age2 - instruction.age1);
         double b = instruction.scale - a * instruction.age1;
-        
+
         for (int age = instruction.age1; age <= instruction.age2; age++)
         {
             double scale = a * age + b;
