@@ -66,20 +66,22 @@ public class VerifyHalfYears
         {
             double v1 = -1 * (p2.sum() - p1.sum());
             double v2 = -1 * (he.actual_births - he.actual_deaths.sum());
-            double vv = Math.abs(v1 - v2);
+            double abs_dv = Math.abs(v1 - v2);
 
-            if (he.year == 1941 && he.halfyear.seq(0) == 0 && ap.area == Area.USSR)
-                Util.assertion(vv < 500);
+            if (he.index().equals("1941.1") && ap.area == Area.USSR)
+                Util.assertion(abs_dv < 500);
             else
-                Util.assertion(vv < 10);
+                Util.assertion(abs_dv < 10);
         }
 
         if (Util.True)
         {
             PopulationContext p = p2.moveDown(0.5).sub(p1, ValueConstraint.NONE);
             p = p.add(he.actual_deaths, ValueConstraint.NONE);
+            
             double v = p.sumDays(ndays, p.MAX_DAY);
             Util.assertion(Math.abs(v) < 10);
+            
             v = p.sumDays(0, ndays - 1);
             double v2 = p.sumDays(0, p.DAYS_PER_YEAR - 1);
             // ### 0-я строка равна ...
@@ -90,10 +92,11 @@ public class VerifyHalfYears
         {
             PopulationContext p = p1.moveUp(0.5).sub(p2, ValueConstraint.NONE);
             p = he.actual_deaths.moveUp(0.5).sub(p, ValueConstraint.NONE);
+            
             double v = p.sumDays(ndays, p.MAX_DAY);
             // Util.assertion(Math.abs(v) < 10);
-            v = p.sumDays(0, ndays - 1);
-            double v2 = p.sumDays(0, p.DAYS_PER_YEAR - 1);
+            double v2 = p.sumDays(0, ndays - 1);
+            double v3 = p.sumDays(0, p.DAYS_PER_YEAR - 1);
             // ### 0-я строка равна ...
             Util.noop();
         }

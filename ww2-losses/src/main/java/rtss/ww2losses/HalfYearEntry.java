@@ -131,6 +131,11 @@ public class HalfYearEntry
             return nbsp("неопределённая дата");
         }
     }
+    
+    public String index()
+    {
+        return year + "." + halfyear;
+    }
 
     // заменить пробелы на неразбивающий пробел, 
     // для удобства импорта распечатанной таблицы в Excel 
