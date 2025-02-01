@@ -79,8 +79,6 @@ public class VerifyHalfYears
              * при 1941.2 -> 1942.1 возрастают группы 96 97 98
              * 
              */
-            verify_2();
-
             PopulationContext px2 = p2.moveDown(0.5);
             PopulationContext p = px2.sub(p1, ValueConstraint.NONE);
             p = p.add(he.actual_deaths, ValueConstraint.NONE);
@@ -120,40 +118,6 @@ public class VerifyHalfYears
         return s;
     }
 
-    /* ====================================================================== */
-
-    private void verify_2() throws Exception
-    {
-        verify_2(95);
-        verify_2(96);
-        verify_2(97);
-        verify_2(98);
-    }
-
-    private void verify_2(double age) throws Exception
-    {
-        Util.out("");
-        Util.out(String.format("Проводка возраста %.1f", age));
-        
-        int nd1 = years2days(age);
-
-        for (HalfYearEntry he : halves)
-        {
-            PopulationContext p = he.actual_population;
-            
-            int nd2 = nd1 + p.DAYS_PER_YEAR - 1;
-            
-            nd1 = Math.min(nd1, p.MAX_DAY);
-            nd2 = Math.min(nd2, p.MAX_DAY);
-            double v = p.sumDays(nd1, nd2);
-            
-            out(String.format("%d.%d %5.1f %f", he.year, he.halfyear.seq(1), age, v));
-            
-            age += 0.5;
-            nd1 += years2days(0.5);
-        }
-    }
-    
     /* ====================================================================== */
     
     private static boolean enabled = false; // ###

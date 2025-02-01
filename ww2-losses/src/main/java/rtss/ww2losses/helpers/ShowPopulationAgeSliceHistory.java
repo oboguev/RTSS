@@ -44,10 +44,43 @@ public class ShowPopulationAgeSliceHistory
         double m = p.sumDays(Gender.MALE, nd, nd + p.DAYS_PER_YEAR - 1);
         double b = p.sumDays(Gender.BOTH, nd, nd + p.DAYS_PER_YEAR - 1);
         
-        Util.out(String.format("%-24s %5s  %5s  %5s  [%s]", what, f2k(m/1000.0), f2k(f/1000.0), f2k(b/1000.0), sage));
+        Util.out(String.format("%-24s %5s  %5s  %5s  [%s]", what, f2k(m), f2k(f), f2k(b), sage));
     }
+    
+    /* ================================================================================= */
+
+    public static void showActual(HalfYearEntries<HalfYearEntry> halves, double age) throws Exception
+    {
+        Util.out("");
+        Util.out(String.format("Проводка возраста %.1f", age));
+        
+        int nd1 = years2days(age);
+
+        for (HalfYearEntry he : halves)
+        {
+            PopulationContext p = he.actual_population;
+            
+            int nd2 = nd1 + p.DAYS_PER_YEAR - 1;
+            
+            nd1 = Math.min(nd1, p.MAX_DAY);
+            nd2 = Math.min(nd2, p.MAX_DAY);
+            double v = p.sumDays(nd1, nd2);
+            
+            Util.out(String.format("%d.%d %5.1f %f", he.year, he.halfyear.seq(1), age, v));
+            
+            age += 0.5;
+            nd1 += years2days(0.5);
+        }
+    }
+    
+    /* ================================================================================= */
 
     private static String f2k(double v)
+    {
+        return f2s(v / 1000.0);
+    }
+
+    private static String f2s(double v)
     {
         String s = String.format("%,15.0f", v);
         while (s.startsWith(" "))
