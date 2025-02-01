@@ -81,10 +81,23 @@ public class VerifyHalfYears
             double v = p.sumDays(ndays, p.MAX_DAY);
             Util.assertion(Math.abs(v) < 10);
             v = p.sumDays(0, ndays - 1);
+            double v2 = p.sumDays(0, p.DAYS_PER_YEAR - 1);
             // ### 0-я строка равна ...
             Util.noop();
         }
-    }
+
+        if (Util.True)
+        {
+            PopulationContext p = p1.moveUp(0.5).sub(p2, ValueConstraint.NONE);
+            p = he.actual_deaths.moveUp(0.5).sub(p, ValueConstraint.NONE);
+            double v = p.sumDays(ndays, p.MAX_DAY);
+            // Util.assertion(Math.abs(v) < 10);
+            v = p.sumDays(0, ndays - 1);
+            double v2 = p.sumDays(0, p.DAYS_PER_YEAR - 1);
+            // ### 0-я строка равна ...
+            Util.noop();
+        }
+}
 
     private void same(double a, double b) throws Exception
     {

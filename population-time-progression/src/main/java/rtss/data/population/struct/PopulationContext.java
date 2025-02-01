@@ -1041,6 +1041,32 @@ public class PopulationContext
         return c;
     }
 
+    /*
+     * Сдвинуть возрастное распределение на @years лет вверх
+     */
+    public PopulationContext moveUp(double years) throws Exception
+    {
+        return moveUpByDays(ForwardPopulation.years2days(years));
+    }
+
+    public PopulationContext moveUpByDays(int ndays) throws Exception
+    {
+        PopulationContext c = clone();
+
+        for (LocalityGender lg : lgs())
+        {
+            double[] v = c.asArray(lg.locality, lg.gender);
+            double[] v2 = new double[v.length];
+
+            for (int nd = 0; nd < v.length - ndays; nd++)
+                v2[nd + ndays] = v[nd];
+
+            c.fromArray(lg.locality, lg.gender, v2);
+        }
+
+        return c;
+    }
+
     /* ---------------------------------------------------------------------------- */
 
     /*
