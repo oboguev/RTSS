@@ -94,8 +94,9 @@ public class ForwardPopulationT extends ForwardPopulation
      * Для целей передвижки требуется уровень рождаемости нормированный на население начала года
      * для временного отрезка [0, T] (а не на население середины года с отрезком [-T,-T]).    
      */
-    public ForwardPopulationT setBirthRateTotal(double BirthRateTotal)
+    public ForwardPopulationT setBirthRateTotal(double BirthRateTotal) throws Exception
     {
+        Util.assertion(BirthRateTotal >= 0);
         this.BirthRateTotal = BirthRateTotal;
         return this;
     }
@@ -106,8 +107,9 @@ public class ForwardPopulationT extends ForwardPopulation
     }
 
     /* требуемая длина массивов setBirthCount */
-    public int birthDays(double yfraction)
+    public int birthDays(double yfraction) throws Exception
     {
+        Util.assertion(yfraction >= 0);
         int ndays = years2days(yfraction);
         ndays = Math.max(1, ndays);
         return ndays;
@@ -117,8 +119,14 @@ public class ForwardPopulationT extends ForwardPopulation
      * Ручная установка числа рождений на каждый день,
      * имеет приоритет над setBirthRateTotal. 
      */
-    public void setBirthCount(double[] daily_birth_count_m, double[] daily_birth_count_f)
+    public void setBirthCount(double[] daily_birth_count_m, double[] daily_birth_count_f) throws Exception
     {
+        for (int k = 0; k < daily_birth_count_m.length; k++)
+            Util.assertion(daily_birth_count_m[k] >= 0);
+        
+        for (int k = 0; k < daily_birth_count_f.length; k++)
+            Util.assertion(daily_birth_count_f[k] >= 0);
+        
         this.daily_birth_count_m = daily_birth_count_m;
         this.daily_birth_count_f = daily_birth_count_f;
     }
@@ -220,6 +228,8 @@ public class ForwardPopulationT extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
+        Util.assertion(yfraction > 0 && yfraction <= 1);
+        
         if (daily_birth_count_m != null || daily_birth_count_f != null)
         {
             if ((daily_birth_count_m != null) != (daily_birth_count_f != null))
@@ -267,6 +277,8 @@ public class ForwardPopulationT extends ForwardPopulation
                     double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
                     births = yfraction * sum * birthRate / 1000;
                 }
+                
+                Util.assertion(births >= 0);
 
                 m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
                 f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
@@ -314,6 +326,8 @@ public class ForwardPopulationT extends ForwardPopulation
             double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx_initial.sumAllAges(locality, Gender.BOTH);
             births = yfraction * sum * birthRate / 1000;
         }
+        
+        Util.assertion(births >= 0);
 
         observed_births += births;
 
@@ -334,6 +348,8 @@ public class ForwardPopulationT extends ForwardPopulation
             final CombinedMortalityTable mt,
             final int ndays) throws Exception
     {
+        Util.assertion(total_births >= 0);
+
         fctx.addTotalBirths(locality, gender, total_births);
 
         /*
@@ -473,6 +489,8 @@ public class ForwardPopulationT extends ForwardPopulation
         {
             MortalityInfo mi = mt.get(locality, gender, age);
             double current = p.get(locality, gender, age);
+            
+            Util.assertion(current >= 0);
 
             double moving = current * yfraction;
             double staying = current - moving;
@@ -534,6 +552,8 @@ public class ForwardPopulationT extends ForwardPopulation
 
             double v = p[nd];
             double v_initial = v;
+            
+            Util.assertion(v >= 0);
 
             if (nd2 < p2.length)
             {
