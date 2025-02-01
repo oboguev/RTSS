@@ -28,6 +28,7 @@ import rtss.ww2losses.helpers.PrintYears;
 import rtss.ww2losses.helpers.ShowPopulationAgeSliceHistory;
 import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
+import rtss.ww2losses.model.Model;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population_194x.AdjustPopulation;
 import rtss.ww2losses.population_194x.AdjustPopulation1941;
@@ -68,6 +69,12 @@ public class Main
         split_p1946();
     }
 
+    private Main(Model model) throws Exception
+    {
+        this(model.params.area);
+        this.model = model;
+    }
+    
     /*
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
@@ -111,10 +118,14 @@ public class Main
     private CombinedMortalityTable mt1940;
     private PeacetimeMortalityTables peacetimeMortalityTables;
 
+    /* весовые коэффцииенты для факторов распределяющих потери по времени */
+    private double aw_conscripts_rkka_loss = 0.9;
+    private double aw_general_occupation = 0.4;
+
     /* 
-     * интенсивность потерь РККА по полугодиям
-     * (Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга потерь", М. : Вече, 2010, стр. 236, 242, 245)
-     */
+    * интенсивность потерь РККА по полугодиям
+    * (Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга потерь", М. : Вече, 2010, стр. 236, 242, 245)
+    */
     private static final double[] rkka_loss_intensity = { 0, 3_137_673, 1_518_213, 1_740_003, 918_618, 1_393_811, 915_019, 848_872, 800_817, 0 };
 
     /* 
@@ -132,6 +143,8 @@ public class Main
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
      */
     private HalfYearEntries<HalfYearEntry> halves;
+    
+    private Model model;
 
     private void main() throws Exception
     {
@@ -139,6 +152,17 @@ public class Main
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
         Util.out("");
+        
+        if (model != null)
+        {
+            this.aw_conscripts_rkka_loss = model.params.aw_conscripts_rkka_loss;
+            this.aw_general_occupation = model.params.aw_general_occupation;
+        }
+        else
+        {
+            model = new Model();
+            model.params = null;
+        }
 
         if (ApplyAntibiotics)
         {
@@ -188,7 +212,7 @@ public class Main
         PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
         PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
         double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
-        
+
         /* по передвижке на основе ASFR */
         if (Util.True)
         {
@@ -232,12 +256,12 @@ public class Main
 
         new VerifyHalfYears(ap, halves).verify(false);
 
-        PrintHalfYears.print(ap, halves);
-        PrintYears.print(ap, halves);
+        PrintHalfYears.print(ap, halves, model.results);
+        PrintYears.print(ap, halves, model.results);
 
         // ### график и файл сверхсмертности на момент смерти
         // ### save files: population structure, excess deaths
-        
+
         // ### MutliModel с вариацией параметров, выдача: 
         // ### см. в 42, сумма изб. смертей (с.изб), сумма изб. призывных смертей (с.прз), сверхсмертность рождений (с.инов), число рождений (р.факт)
     }
@@ -250,7 +274,7 @@ public class Main
     private ForwardingResult forward_1941_1st_halfyear(PopulationContext p_start1941, PopulationContext p_mid1941) throws Exception
     {
         PopulationContext pavg = p_start1941.avg(p_mid1941);
-        
+
         PopulationContext p = p_start1941.clone();
         CombinedMortalityTable mt = peacetimeMortalityTables.get(1941, HalfYearSelector.FirstHalfYear);
 
@@ -264,14 +288,14 @@ public class Main
         double[] f_births = WarHelpers.female_births(births);
         fw.setBirthCount(m_births, f_births);
         fw.forward(p, mt, 0.5);
-        
+
         ForwardingResult res = new ForwardingResult();
         res.p_result = p.clone();
         res.observed_deaths_byGenderAge = fw.deathsByGenderAge().clone();
         res.observed_births = nbirths;
         return res;
     }
-    
+
     public static class ForwardingResult
     {
         public PopulationContext p_result;
@@ -697,10 +721,12 @@ public class Main
     private void evalAgeLines() throws Exception
     {
         /* полугодовой коэффициент распределения потерь для не-призывного населения */
-        double[] ac_general = wsum(0.6, even_intensity, 0.4, occupation_intensity);
+        double[] ac_general = wsum(aw_general_occupation, occupation_intensity,
+                                   1 - aw_general_occupation, even_intensity);
 
         /* полугодовой коэффициент распределения потерь для призывного населения */
-        double[] ac_conscripts = wsum(0.9, rkka_loss_intensity, 0.1, ac_general);
+        double[] ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
+                                      1.0 - aw_conscripts_rkka_loss, ac_general);
 
         /* вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола */
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);

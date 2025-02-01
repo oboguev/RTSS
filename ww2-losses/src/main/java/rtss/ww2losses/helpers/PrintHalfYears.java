@@ -10,6 +10,7 @@ import rtss.util.Util;
 import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.model.ModelResults;
 import rtss.ww2losses.params.AreaParameters;
 
 /*
@@ -30,12 +31,12 @@ public class PrintHalfYears
     private double sum_actual_warborn_deaths_baseline = 0;
     private double sum_actual_warborn_deaths = 0;
 
-    public static void print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public static void print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, ModelResults results) throws Exception
     {
-        new PrintHalfYears().do_print(ap, halves);
+        new PrintHalfYears().do_print(ap, halves, results);
     }
 
-    public void do_print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public void do_print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, ModelResults results) throws Exception
     {
         Util.out("");
         Util.out("Величины для полугодий:");

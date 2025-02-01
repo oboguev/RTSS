@@ -6,6 +6,7 @@ import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.model.ModelResults;
 import rtss.ww2losses.params.AreaParameters;
 
 /*
@@ -16,15 +17,15 @@ public class PrintYears
     private static double PROMILLE = 1000.0;
     private static String EMPTY = "" + (char) 0xA0;
 
-    public static void print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public static void print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, ModelResults results) throws Exception
     {
-        new PrintYears().do_print(ap, halves);
+        new PrintYears().do_print(ap, halves, results);
     }
 
     private double sum_exd = 0;
     private double sum_births_shortfall = 0;
 
-    public void do_print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public void do_print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, ModelResults results) throws Exception
     {
         Util.out("");
         Util.out("Годовые величины:");
