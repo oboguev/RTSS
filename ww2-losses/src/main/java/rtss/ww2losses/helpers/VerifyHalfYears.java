@@ -35,9 +35,9 @@ public class VerifyHalfYears
         double v1 = -1 * (p2.sum() - p1.sum());
         double v2 = -1 * (he.actual_births - he.actual_deaths.sum());
         
-        out(String.format("%d.%d %8s %8s %8s", 
+        out(String.format("%d.%d %8s %8s %8s = %s", 
                           he.year, he.halfyear.seq(1),
-                          f2k(v1), f2k(v2), f2k(v1-v2)));
+                          f2k(v1), f2k(v2), f2k(v1-v2), f2s(v1-v2)));
         
         if (he.year == 1941 && he.halfyear == HalfYearSelector.FirstHalfYear)
         {
