@@ -63,6 +63,7 @@ public class VerifyHalfYears
         Util.out(what);
     }
 
+    @SuppressWarnings("unused")
     private void outk(String what, double v)
     {
         out(what + ": " + f2k(v));

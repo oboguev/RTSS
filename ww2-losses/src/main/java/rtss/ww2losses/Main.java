@@ -223,10 +223,10 @@ public class Main
      * Передвижка с шагом полгода.
      */
     @SuppressWarnings("unused")
-    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(Population_In_Middle_1941 pm1941, PopulationContext fctx_mid1941) throws Exception
+    private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(Population_In_Middle_1941 pm1941, PopulationContext p_mid1941) throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
-        PopulationContext fctx = fctx_mid1941.clone();
+        PopulationContext pctx = p_mid1941.clone();
 
         HalfYearEntry curr, prev;
         int year = 1941;
@@ -247,17 +247,17 @@ public class Main
 
         /* второе полугодие 1941 */
         half = HalfYearSelector.SecondHalfYear;
-        curr = new HalfYearEntry(year, half, fctx.clone(), fctx.clone());
+        curr = new HalfYearEntry(year, half, pctx.clone(), pctx.clone());
         prev.next = curr;
         curr.prev = prev;
         prev = curr;
         halves.add(curr);
 
         /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
-        PopulationContext pwb = fctx.clone();
+        PopulationContext pwb = pctx.clone();
 
         /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
-        PopulationContext pxb = fctx.clone();
+        PopulationContext pxb = pctx.clone();
 
         /* продвигать с шагом по полгода до января 1946 */
         for (;;)
