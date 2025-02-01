@@ -162,6 +162,7 @@ public class Main
         }
 
         asfr_calibration = CalibrateASFR.calibrate1940(ap, yearly_asfrs);
+        Util.out(String.format("Калибровочная поправка ASFR (возрастных коэффициентов женской плодовитости): %.3f", asfr_calibration));
 
         /* таблицы смертности для 1940 года и полугодий 1941-1945 при мирных условиях */
         mt1940 = new MortalityTable_1940(ap).evaluate();
@@ -171,19 +172,19 @@ public class Main
         AdjustPopulation adjuster1941 = null;
         adjuster1941 = new AdjustPopulation1941(area);
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap, adjuster1941);
-        PopulationContext fctx_mid1941 = new PopulationContext(PopulationContextSize);
-        Population p = pm1941.evaluateAsPopulation(fctx_mid1941, mt1940);
-        Util.assertion(p.sum() == 0);
+        PopulationContext p_mid1941 = new PopulationContext(PopulationContextSize);
+        Population p_leftover = pm1941.evaluateAsPopulation(p_mid1941, mt1940);
+        Util.assertion(p_leftover.sum() == 0);
 
         if (Util.False)
         {
             new PopulationChart("Население " + area + " на середину 1941 года")
-                    .show("перепись", fctx_mid1941.toPopulation())
+                    .show("перепись", p_mid1941.toPopulation())
                     .display();
         }
 
-        /* передвижка для мирных условий */
-        halves = evalHalves_step_6mo(pm1941, fctx_mid1941);
+        /* передвижка по полугодиям для мирных условий */
+        halves = evalHalves_step_6mo(pm1941, p_mid1941);
 
         if (Util.False)
         {
@@ -202,15 +203,16 @@ public class Main
 
         evalDeficit1946();
         evalAgeLines();
+
         evalNewBirths();
-        evalNewBirthsDeaths();
-        fitNewBirthsDeaths();
-        
+        evalDeathsForNewBirths_UnderPeacetimeChildMortality();
+        fitDeathsForNewBirths_UnderActualWartimeChildMortality();
+
         new VerifyHalfYears().verify(halves);
 
         PrintHalfYears.print(halves);
         PrintYears.print(halves);
-        
+
         // ### save files: population structure, excess deaths
     }
 
@@ -558,7 +560,7 @@ public class Main
     {
         PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
         PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
-        
+
         for (CancelDeficit cancel : cancels)
         {
             for (int age = cancel.age1; age <= cancel.age2; age++)
@@ -570,7 +572,7 @@ public class Main
                     unneg(p1946_actual, cancel.gender, age, deficit);
                 }
             }
-        }        
+        }
 
         p1946_actual.makeBoth();
         p1946_actual.recalcTotal();
@@ -580,7 +582,7 @@ public class Main
     private PopulationContext cancelNegativeDeficit(PopulationContext deficit, CancelDeficit[] cancels) throws Exception
     {
         deficit.setValueConstraint(ValueConstraint.NONE);
-        
+
         for (CancelDeficit cancel : cancels)
         {
             for (int age = cancel.age1; age <= cancel.age2; age++)
@@ -692,8 +694,6 @@ public class Main
      */
     private void evalNewBirths() throws Exception
     {
-        Util.out(String.format("Калибровочная поправка ASFR: %.3f", asfr_calibration));
-
         for (HalfYearEntry he : halves)
         {
             if (he.next == null)
@@ -742,12 +742,14 @@ public class Main
         }
     }
 
+    /* ======================================================================================================= */
+
     /*
      * Вычислить ожидаемое число смертей от новых рождений в военное время (от фактического числа военных рождений),
      * ожидаемый остаток фактически рождённых в 1941.вт.пол. - 1945.вт.пол. к началу 1946 при детской смертности 
      * мирных условий, и дефицит остатка на начало 1946 года из-за возросшей в военное время детской смертности. 
      */
-    private void evalNewBirthsDeaths() throws Exception
+    private void evalDeathsForNewBirths_UnderPeacetimeChildMortality() throws Exception
     {
         /*
          * передвижка новрождаемого населения по полугодиям
@@ -797,7 +799,7 @@ public class Main
      * 
      * Такая передвижка даст приближение к фактическому распределению смертей рождённых в годы войны.
      */
-    private void fitNewBirthsDeaths() throws Exception
+    private void fitDeathsForNewBirths_UnderActualWartimeChildMortality() throws Exception
     {
         double m1 = 0.5;
         double m2 = 2.5;
@@ -805,12 +807,12 @@ public class Main
         for (;;)
         {
             double m = (m1 + m2) / 2;
-            double diff = fitNewBirthsDeaths(m, false);
+            double diff = fitDeathsForNewBirths(m, false);
 
             if (Math.abs(diff) < 200)
             {
                 Util.out(String.format("Множитель детской смертности военного времени: %.2f", m));
-                fitNewBirthsDeaths(m, true);
+                fitDeathsForNewBirths(m, true);
                 break;
             }
 
@@ -826,7 +828,7 @@ public class Main
         outk("Сверхсмертность рождённых во время войны, фактическая к началу 1946 года, тыс. чел.", excess);
     }
 
-    private double fitNewBirthsDeaths(double multiplier, boolean record) throws Exception
+    private double fitDeathsForNewBirths(double multiplier, boolean record) throws Exception
     {
         /*
          * передвижка новрождаемого населения по полугодиям
