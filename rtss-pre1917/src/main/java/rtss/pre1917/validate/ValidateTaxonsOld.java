@@ -80,8 +80,7 @@ public class ValidateTaxonsOld
         
         // Число смертей в Сибири (уезды) в 1902 расходится на 20 тыс. с пообластными данными
 
-
-        // ### validate deaths, cbr, cdr
+        // TODO: validate deaths, cbr, cdr
     }
 
     private boolean differ(Long a, Long b, double tolerance)
