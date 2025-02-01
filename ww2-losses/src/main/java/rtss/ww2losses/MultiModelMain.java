@@ -84,11 +84,26 @@ public class MultiModelMain
     private void print()
     {
         Util.out("");
-        Util.out("Распечатка моделей:");
+        Util.out("Расчёт моделей (сумма с середины 1941 по конец 1945):");
         Util.out("");
+        
+        printHeaders();
 
         for (AreaModel am : areaModels)
             print(am);
+    }
+
+    private void printHeaders()
+    {
+        String a1 = "СССР                                 ";
+        String a2 = "РФССР                                ";
+
+        String h1 = " с.изб   с.прз   с.инов  р.факт  с42 ";
+        String h2 = "======= ======= ======= =======  ====";
+        
+        Util.out(String.format("        * %s * %s", a1, a2));
+        Util.out(String.format("прз окк * %s * %s", h1, h1));
+        Util.out(String.format("=== === * %s * %s", h2, h2));
     }
 
     private void print(AreaModel am)
