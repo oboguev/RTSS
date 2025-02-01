@@ -171,7 +171,6 @@ public class Main
          * а коэффициенты на вторую половину 1941-го года исправить соответственно для сохранения среднего за 1941 год значения. 
          */
         RebalanceASFR.rebalance_1941_halfyears(yearly_asfrs, halfyearly_asfrs);
-        // ###
 
         /* таблицы смертности для 1940 года и полугодий 1941-1945 при мирных условиях */
         mt1940 = new MortalityTable_1940(ap).evaluate();
@@ -185,6 +184,11 @@ public class Main
         Population p_leftover = pm1941.evaluateAsPopulation(p_mid1941, mt1940);
         Util.assertion(p_leftover.sum() == 0);
 
+        /* по передвижке на основе CBR_1940 */
+        PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
+        PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
+        double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
+
         if (Util.False)
         {
             new PopulationChart("Население " + area + " на середину 1941 года")
@@ -193,9 +197,6 @@ public class Main
         }
 
         /* передвижка по полугодиям для мирных условий */
-        PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
-        PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
-        double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
         halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941);
 
         if (Util.False)
