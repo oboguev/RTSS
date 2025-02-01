@@ -4,7 +4,6 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
-import rtss.ww2losses.helpers.VerifyHalfYears;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 
@@ -81,7 +80,6 @@ public class EvalAgeLineLossIntensities
         }
 
         processSeniorAgeLines(steer, Gender.MALE, alis, p1941_2, p1946_actual);
-        VerifyHalfYears.catch_bug_1(halves); // #### HERE!!!!
         processSeniorAgeLines(steer, Gender.FEMALE, alis, p1941_2, p1946_actual);
     }
     
@@ -106,9 +104,7 @@ public class EvalAgeLineLossIntensities
         for (int nd = nd1; nd <= p1941_2.MAX_DAY; nd++)
         {
             initial_population = p1941_2.getDay(Locality.TOTAL, gender, nd);
-            // VerifyHalfYears.catch_bug_1_enable(); // ### HERE !!!
             steer.steerActual(gender, nd, senior_loss_intensity, initial_population);
-            // VerifyHalfYears.catch_bug_1(halves); // ### HERE !!!
         }
     }
 }

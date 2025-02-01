@@ -8,7 +8,6 @@ import rtss.util.Util;
 import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
-import rtss.ww2losses.helpers.VerifyHalfYears;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 
@@ -159,7 +158,6 @@ public class SteerAgeLine
             setcap(he.next.actual_population);
 
             he.next.actual_population.addDay(Locality.TOTAL, gender, cap(nd2), population);
-            VerifyHalfYears.catch_bug_1(halves); // ### HERE!!!
 
             he.actual_peace_deaths.addDay(Locality.TOTAL, gender, cap(nd1), peace_deaths);
             he.actual_excess_wartime_deaths.addDay(Locality.TOTAL, gender, cap(nd1), excess_war_deaths);

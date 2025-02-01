@@ -230,8 +230,7 @@ public class Main
         evalDeathsForNewBirths_UnderPeacetimeChildMortality();
         fitDeathsForNewBirths_UnderActualWartimeChildMortality();
 
-        VerifyHalfYears.catch_bug_1(halves);
-        new VerifyHalfYears().verify(halves);
+        new VerifyHalfYears(ap, halves).verify(false);
 
         PrintHalfYears.print(ap, halves);
         PrintYears.print(ap, halves);
