@@ -123,7 +123,7 @@ public class EvaAgeLinelLossIntensity
             double final_population,
             double loss_intensity) throws Exception
     {
-        double remainder = steer.steer(
+        double remainder = steer.steerPreliminary(
                                        initial_age_ndays,
                                        gender,
                                        initial_population,

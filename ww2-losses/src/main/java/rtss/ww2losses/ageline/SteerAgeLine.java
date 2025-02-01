@@ -45,7 +45,7 @@ public class SteerAgeLine
      * 
      * Военные потери в полугодии вычисляются как ac_xxx * initial_population * loss_intensity.     
      */
-    public double steer(
+    public double steerPreliminary(
             int initial_age_ndays,
             Gender gender,
             double initial_population,
@@ -68,6 +68,8 @@ public class SteerAgeLine
 
             double[] ac = ac(gender, ndm);
             population -= ac[ac_index(he)] * initial_population * loss_intensity;
+            if (population < 0)
+                population = 0;
 
             Util.assertion(population >= 0);
 
