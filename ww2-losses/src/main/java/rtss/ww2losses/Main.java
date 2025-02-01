@@ -164,7 +164,7 @@ public class Main
 
         asfr_calibration = CalibrateASFR.calibrate1940(ap, yearly_asfrs);
         Util.out(String.format("Калибровочная поправка ASFR (возрастных коэффициентов женской плодовитости): %.3f", asfr_calibration));
-        
+
         /* 
          * Перечитать ASFR для полугодий 1941 года,
          * оставив на первую половину 1941 года коэффициенты плодовитости 1940-го года,
@@ -188,6 +188,15 @@ public class Main
         PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
         PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
         double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
+        
+        /* по передвижке на основе ASFR */
+        if (Util.True)
+        {
+            ForwardingResult fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
+            p_mid1941 = fr.p_result;
+            deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
+            births_1941_1st_halfyear = fr.observed_births;
+        }
 
         if (Util.False)
         {
@@ -227,7 +236,45 @@ public class Main
         PrintHalfYears.print(ap, halves);
         PrintYears.print(ap, halves);
 
+        // ### график и файл сверхсмертности на момент смерти
         // ### save files: population structure, excess deaths
+    }
+
+    /* ================================================================================== */
+
+    /*
+     * Передвижка от начала до середины 1941 года с использованием ASFR для расчёта рождений
+     */
+    private ForwardingResult forward_1941_1st_halfyear(PopulationContext p_start1941, PopulationContext p_mid1941) throws Exception
+    {
+        PopulationContext pavg = p_start1941.avg(p_mid1941);
+        
+        PopulationContext p = p_start1941.clone();
+        CombinedMortalityTable mt = peacetimeMortalityTables.get(1941, HalfYearSelector.FirstHalfYear);
+
+        ForwardPopulationT fw = new ForwardPopulationT();
+        int ndays = fw.birthDays(0.5);
+
+        double nbirths = asfr_calibration * 0.5 * halfyearly_asfrs.getForTimepoint("1941.0").births(pavg.toPopulation());
+
+        double[] births = WarHelpers.births(ndays, nbirths, nbirths, nbirths);
+        double[] m_births = WarHelpers.male_births(births);
+        double[] f_births = WarHelpers.female_births(births);
+        fw.setBirthCount(m_births, f_births);
+        fw.forward(p, mt, 0.5);
+        
+        ForwardingResult res = new ForwardingResult();
+        res.p_result = p.clone();
+        res.observed_deaths_byGenderAge = fw.deathsByGenderAge().clone();
+        res.observed_births = nbirths;
+        return res;
+    }
+    
+    public static class ForwardingResult
+    {
+        public PopulationContext p_result;
+        public PopulationContext observed_deaths_byGenderAge;
+        public double observed_births;
     }
 
     /* ================================================================================== */
@@ -238,9 +285,9 @@ public class Main
      */
     @SuppressWarnings("unused")
     private HalfYearEntries<HalfYearEntry> evalHalves_step_6mo(
-            PopulationContext p_start1941, 
-            PopulationContext deaths_1941_1st_halfyear, 
-            double births_1941_1st_halfyear, 
+            PopulationContext p_start1941,
+            PopulationContext deaths_1941_1st_halfyear,
+            double births_1941_1st_halfyear,
             PopulationContext p_mid1941) throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
