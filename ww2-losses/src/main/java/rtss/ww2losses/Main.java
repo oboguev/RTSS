@@ -269,16 +269,25 @@ public class Main
         PrintYears.print(ap, halves, model.results);
 
         PopulationContext allExcessDeathsByDeathAge = allExcessDeathsByDeathAge();
+        PopulationContext allExcessDeathsByAgeAt1946 = allExcessDeathsByAgeAt1946();
 
-        if (Util.True)
+        if (Util.False)
         {
             new PopulationChart("Избыточные смерти " + area + " в 1941-1945 гг. по возрасту в момент смерти")
                     .show("смерти", allExcessDeathsByDeathAge.toPopulation())
                     .display();
         }
 
+        if (Util.True)
+        {
+            new PopulationChart("Избыточные смерти " + area + " в 1941-1945 гг. по возрасту на начало 1946")
+                    .show("смерти", allExcessDeathsByAgeAt1946.toPopulation())
+                    .display();
+        }
+
         ExportResults.exportResults(exportDirectory, ap, halves, 
                                     allExcessDeathsByDeathAge, 
+                                    allExcessDeathsByAgeAt1946,
                                     deficit1946_raw, deficit1946_adjusted);
     }
 
@@ -1210,7 +1219,7 @@ public class Main
             throw new Exception("Ошибка в построении daily_lx");
         }
         
-        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, false));
+        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
 
         return daily_lx;
     }
@@ -1230,6 +1239,27 @@ public class Main
                 continue;
 
             p = p.add(he.actual_excess_wartime_deaths, ValueConstraint.NONE);
+        }
+
+        return p;
+    }
+
+    /*
+     * Составить половозрастную стркутуру всех смертей по возрасту на начало 1946 года
+     */
+    private PopulationContext allExcessDeathsByAgeAt1946() throws Exception
+    {
+        PopulationContext p = newPopulationContext();
+
+        for (HalfYearEntry he : halves)
+        {
+            if (he.index().equals("1941.1") || he.index().equals("1946.1"))
+                continue;
+            
+            double offset = (1946 + 0) - (he.year + 0.5 * he.halfyear.seq(0));
+            
+            PopulationContext up = he.actual_excess_wartime_deaths.moveUp(offset);
+            p = p.add(up, ValueConstraint.NONE);
         }
 
         return p;

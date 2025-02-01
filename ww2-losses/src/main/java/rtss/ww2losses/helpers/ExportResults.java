@@ -16,6 +16,7 @@ public class ExportResults
             AreaParameters ap,
             HalfYearEntries<HalfYearEntry> halves,
             PopulationContext allExcessDeathsByDeathAge,
+            PopulationContext allExcessDeathsByAgeAt1946,
             PopulationContext deficit1946_raw,
             PopulationContext deficit1946_adjusted) throws Exception
     {
@@ -47,8 +48,11 @@ public class ExportResults
             }
         }
 
-        fn = String.format("%s-all-excess-deaths-by-age.txt", ap.area.name());
+        fn = String.format("%s-all-excess-deaths-by-age-at-time-of-death.txt", ap.area.name());
         Util.writeAsFile(fpath(fdir, fn), allExcessDeathsByDeathAge.toPopulation().dump(true));
+
+        fn = String.format("%s-all-excess-deaths-by-age-at-1946.1.txt", ap.area.name());
+        Util.writeAsFile(fpath(fdir, fn), allExcessDeathsByAgeAt1946.toPopulation().dump(true));
 
         if (deficit1946_adjusted != null)
         {
