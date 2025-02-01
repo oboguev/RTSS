@@ -1258,7 +1258,7 @@ public class Main
             
             double offset = (1946 + 0) - (he.year + 0.5 * he.halfyear.seq(0));
             
-            PopulationContext up = he.actual_excess_wartime_deaths.moveUp(offset);
+            PopulationContext up = he.actual_excess_wartime_deaths.moveUpPreserving(offset);
             p = p.add(up, ValueConstraint.NONE);
         }
 

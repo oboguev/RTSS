@@ -89,7 +89,7 @@ public class VerifyHalfYears
         if (Util.True)
         {
             PopulationContext p = p1.sub(he.actual_deaths, ValueConstraint.NONE);
-            p = p2.sub(p.moveUp(0.5), ValueConstraint.NONE);
+            p = p2.sub(p.moveUpPreserving(0.5), ValueConstraint.NONE);
             
             // округления
             Util.assertion(Math.abs(p.sum(1, MAX_AGE - 1)) < 10);

@@ -1044,7 +1044,8 @@ public class PopulationContext
     }
 
     /*
-     * Сдвинуть возрастное распределение на @years лет вверх
+     * Сдвинуть возрастное распределение на @years лет вверх.
+     * Верхняя часть (выходящая за MAX_DAY) теряется.
      */
     public PopulationContext moveUp(double years) throws Exception
     {
@@ -1063,6 +1064,36 @@ public class PopulationContext
             for (int nd = 0; nd < v.length - ndays; nd++)
                 v2[nd + ndays] = v[nd];
 
+            c.fromArray(lg.locality, lg.gender, v2);
+        }
+
+        return c;
+    }
+
+    /*
+     * Сдвинуть возрастное распределение на @years лет вверх.
+     * Верхняя часть (выходящая за MAX_DAY) добавляется к MAX_DAY.
+     */
+    public PopulationContext moveUpPreserving(double years) throws Exception
+    {
+        return moveUpByDaysPreserving(ForwardPopulation.years2days(years));
+    }
+
+    public PopulationContext moveUpByDaysPreserving(int ndays) throws Exception
+    {
+        PopulationContext c = clone();
+
+        for (LocalityGender lg : lgs())
+        {
+            double[] v = c.asArray(lg.locality, lg.gender);
+            double[] v2 = new double[v.length];
+
+            for (int nd = 0; nd < v.length - ndays; nd++)
+                v2[nd + ndays] = v[nd];
+
+            for (int nd = v.length - ndays; nd < v.length; nd++)
+                v2[v.length - 1] += v[nd];
+            
             c.fromArray(lg.locality, lg.gender, v2);
         }
 
