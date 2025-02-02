@@ -50,11 +50,14 @@ public class SteerAgeLine
             int initial_age_ndays,
             Gender gender,
             double initial_population,
-            double loss_intensity) throws Exception
+            double loss_intensity,
+            Double immigration_intensity) throws Exception
     {
+        Util.assertion((immigration_intensity == null || immigration_intensity == 0) == (ac_immigration == null));
         Util.assertion(initial_population >= 0);
 
         double population = initial_population;
+        double delta = 0;
         int nd_age = initial_age_ndays;
         int span = ForwardPopulation.years2days(0.5);
 
@@ -64,20 +67,32 @@ public class SteerAgeLine
             int nd2 = nd1 + span;
             int ndm = (nd1 + nd2) / 2;
 
-            if (population > 0)
-                population *= survivalRatio(he, gender, nd1, nd2);
+            double peace_deaths = (population <= 0) ? 0 : population * deathRatio(he, gender, nd1, nd2);
 
             double[] ac = attrition_coefficient(gender, ndm);
-            population -= ac[ac_index(he)] * initial_population * loss_intensity;
+            double excess_war_deaths = ac[ac_index(he)] * initial_population * loss_intensity;
+
+            double immigration = 0;
+            if (ac_immigration != null && immigration_intensity != null)
+                immigration =  ac_immigration[ac_index(he)] * initial_population * immigration_intensity;
+            
+            population += immigration;
+            population -= peace_deaths;
+            population -= excess_war_deaths;
+            population += immigration;
+            
             if (population < 0)
+            {
+                delta += population;
                 population = 0;
+            }
 
             Util.assertion(population >= 0);
 
             nd_age += span;
         }
 
-        return population;
+        return population + delta;
     }
 
     private double[] attrition_coefficient(Gender gender, int nd)
@@ -158,7 +173,7 @@ public class SteerAgeLine
             int nd2 = nd1 + span;
             int ndm = (nd1 + nd2) / 2;
 
-            double peace_deaths = population * deathRatio(he, gender, nd1, nd2);
+            double peace_deaths = (population <= 0) ? 0 : population * deathRatio(he, gender, nd1, nd2);
 
             double[] ac = attrition_coefficient(gender, ndm);
             double excess_war_deaths = ac[ac_index(he)] * initial_population * loss_intensity;
@@ -170,6 +185,7 @@ public class SteerAgeLine
             population += immigration;
             population -= peace_deaths;
             population -= excess_war_deaths;
+            population += immigration;
 
             Util.assertion(population >= 0);
             Util.assertion(peace_deaths >= 0);

@@ -128,7 +128,8 @@ public class EvalAgeLinelLossIntensity
                                        initial_age_ndays,
                                        gender,
                                        initial_population,
-                                       loss_intensity);
+                                       loss_intensity,
+                                       null);
 
         return remainder - final_population;
     }
@@ -172,7 +173,105 @@ public class EvalAgeLinelLossIntensity
             double final_population, 
             double loss_intensity) throws Exception
     {
-        // ###
-        return 0;
+
+        final double tolerance = 1.0e-5;
+        
+        Util.assertion(initial_population >= 0 && final_population >= 0);
+        
+        double a1 = 0;
+        double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a1);
+        if (div1 == 0)
+            return 0;
+
+        if (div1 > 0)
+        {
+            double a2 = 2.0;
+            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a2);
+            if (div2 >= 0)
+                throw new Exception("внутренняя ошибка");
+
+            /*
+             * Искать а между а1 и a2, покуда div не приблизится к нулю
+             */
+            for (int pass = 0;;)
+            {
+                double a = (a1 + a2) / 2;
+                if (Math.abs(div2 - div1) < final_population * tolerance)
+                    return checksign(a, 1);
+                
+                double div = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a);
+                if (div == 0)
+                {
+                    return checksign(a, 1);
+                }
+                else if (div < 0)
+                {
+                    a2 = a;
+                    div2 = div;
+                }
+                else if (div > 0)
+                {
+                    a1 = a;
+                    div1 = div;
+                }
+
+                if (pass++ > 10000)
+                    throw new Exception("поиск не сходится");
+            }
+        }
+        else // if (div1 < 0)
+        {
+            double a2 = -2.0;
+            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a2);
+            if (div2 <= 0)
+                throw new Exception("внутренняя ошибка");
+
+            /*
+             * Искать а между а1 и a2, покуда div не приблизится к нулю
+             */
+            for (int pass = 0;;)
+            {
+                double a = (a1 + a2) / 2;
+                if (Math.abs(div2 - div1) < final_population * tolerance)
+                    return checksign(a, -1);
+                
+                double div = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a);
+                if (div == 0)
+                {
+                    return checksign(a, -1);
+                }
+                else if (div < 0)
+                {
+                    a1 = a;
+                    div1 = div;
+                }
+                else if (div > 0)
+                {
+                    a2 = a;
+                    div2 = div;
+                }
+
+                if (pass++ > 10000)
+                    throw new Exception("поиск не сходится");
+            }
+        }
+    }
+
+    private double divergence(
+            int initial_age_ndays,
+            Gender gender,
+            double initial_population,
+            double final_population,
+            double loss_intensity,
+            double immigration_intensity) throws Exception
+    {
+        double remainder = steer.steerPreliminary(
+                                       initial_age_ndays,
+                                       gender,
+                                       initial_population,
+                                       loss_intensity,
+                                       immigration_intensity);
+
+        return final_population - remainder;
     }
 }
