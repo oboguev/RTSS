@@ -799,6 +799,7 @@ public class Main
         }
 
         AgeLineFactorIntensities amig = null;
+        double[] ac_immigration = null;
 
         if (ap.area == Area.RSFSR)
         {
@@ -814,10 +815,11 @@ public class Main
             // PopulationContext p = alis.toPopulationContext();
 
             amig = new AgeLineFactorIntensities();
+            ac_immigration = ac_rsfsr_immigration;
 
-            // eval.evalMigration(amig, alis, Gender.MALE, 2, 7)
-            // eval.evalMigration(amig, alis, Gender.FEMALE, 2, 7)
-            // eval.evalMigration(amig, alis, Gender.FEMALE, 42, 57)
+            // eval.evalMigration(amig, alis, Gender.MALE, 2.5, 7.5)
+            // eval.evalMigration(amig, alis, Gender.FEMALE, 2.1, 7.37)
+            // eval.evalMigration(amig, alis, Gender.FEMALE, 42.5, 57.5)
 
             // ### при processAgeLines использовать amig
         }
