@@ -291,7 +291,7 @@ public class Main
                     .display();
         }
 
-        if (Util.True)
+        if (Util.False)
         {
             new PopulationChart("Избыточные смерти " + area + " в 1941-1945 гг. по возрасту на начало 1946")
                     .show("смерти", allExcessDeathsByAgeAt1946.toPopulation())
@@ -779,6 +779,11 @@ public class Main
         /* вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола */
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);
         AgeLineLossIntensities alis = eval.eval(p1946_actual);
+        
+        if (Util.True)
+        {
+            alis.display("Интенсивность потерь " + area);
+        }
 
         /* расчёт возрастных линий с учётов найденных коэфициентов интенсивности */
         eval.processAgeLines(alis, p1946_actual);
