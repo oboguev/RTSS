@@ -780,7 +780,7 @@ public class Main
         /* полугодовой коэффициент распределения потерь для призывного населения */
         double[] ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
                                       1.0 - aw_conscripts_rkka_loss, ac_general);
-        
+
         /* полугодовой коэффициент интенсивности иммиграции в РСФСР */
         double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
 
@@ -790,14 +790,14 @@ public class Main
          */
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);
         AgeLineFactorIntensities alis = eval.eval(p1946_actual);
-        
+
         if (Util.False)
         {
             alis.display("Интенсивность потерь " + area);
             // PopulationContext p = alis.toPopulationContext();
             // Util.noop();
         }
-        
+
         AgeLineFactorIntensities amig = null;
 
         if (ap.area == Area.RSFSR)
@@ -807,16 +807,18 @@ public class Main
             // ### интерполировать ALI между точками age1-age2
             // ### затем найти коэф. иммиграционной интенсивности в этих возрастах/полах (для этих линий)
 
-            // alis.unnegInterpolate(Gender.MALE, 2, 7)
-            // alis.unnegInterpolate(Gender.FEMALE, 2, 7)
-            // alis.unnegInterpolate(Gender.FEMALE, 42, 57)
+            // alis.unnegInterpolateYears(Gender.MALE, 2.5, 7.5);
+            // alis.unnegInterpolateYears(Gender.FEMALE, 2.1, 7.37);
+            // alis.unnegInterpolateYears(Gender.FEMALE, 42.5, 57.5);
+            // alis.display("Исправленная интенсивность потерь " + area);
+            // PopulationContext p = alis.toPopulationContext();
 
             amig = new AgeLineFactorIntensities();
-            
+
             // eval.evalMigration(amig, alis, Gender.MALE, 2, 7)
             // eval.evalMigration(amig, alis, Gender.FEMALE, 2, 7)
             // eval.evalMigration(amig, alis, Gender.FEMALE, 42, 57)
-            
+
             // ### при processAgeLines использовать amig
         }
 

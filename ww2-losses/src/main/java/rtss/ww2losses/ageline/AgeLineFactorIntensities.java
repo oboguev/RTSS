@@ -6,7 +6,10 @@ import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
+
+import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 /*
  * Хранит отображение (Gender, nd_age) -> loss intensity или immigration intensity
@@ -26,17 +29,17 @@ public class AgeLineFactorIntensities
     {
         return new DoubleArray(MAX_DAY, vc);
     }
-    
+
     private DoubleArray forGender(Gender gender)
     {
         switch (gender)
         {
         case MALE:
             return male;
-            
+
         case FEMALE:
             return female;
-            
+
         default:
             return null;
         }
@@ -95,5 +98,83 @@ public class AgeLineFactorIntensities
                 .show("loss intensity", toPopulationContext().toPopulation())
                 .display();
 
+    }
+
+    /* ========================================================== */
+
+    /*
+     * Проложить интерполирующую линию от @age1 до @age2.
+     * Намерение -- устанить отрицательные значения в диапазоне [age1 ... age2],
+     * проведя линию между двумя положительными точками.  
+     */
+    public void unnegInterpolateMidYears(Gender gender, int age1, int age2) throws Exception
+    {
+        Util.assertion(age1 >= 0 && age2 >= 0 && age1 < age2);
+
+        unnegInterpolateYears(gender, age1 + 0.5, age2 + 0.5);
+    }
+
+    private void check_unneg(Gender gender, double age1, double age2) throws Exception
+    {
+        Double[] a = forGender(gender).get();
+
+        int nd1 = years2days(age1);
+        int nd2 = years2days(age2);
+        Util.assertion(nd1 >= 0 && nd2 >= 0 && nd1 < nd2);
+        
+        for (int nd = nd1; nd <= nd2; nd++)
+        {
+            if (a[nd] == null || a[nd] <= 0)
+                throw new IllegalArgumentException("doubtful unneg pivot points");
+        }
+    }
+
+    public void unnegInterpolateYears(Gender gender, double age1, double age2) throws Exception
+    {
+        Util.assertion(age1 >= 0 && age2 >= 0 && age1 < age2);
+
+        check_unneg(gender, Math.floor(age1), age1);
+        check_unneg(gender, age2, Math.ceil(age2));
+
+        int nd1 = years2days(age1);
+        int nd2 = years2days(age2);
+        unnegInterpolateDays(gender, nd1, nd2);
+    }
+
+    public void unnegInterpolateDays(Gender gender, int nd1, int nd2) throws Exception
+    {
+        Util.assertion(nd1 >= 0 && nd2 >= 0 && nd1 < nd2);
+
+        Double[] a = forGender(gender).get();
+        double a1 = a[nd1];
+        double a2 = a[nd2];
+
+        if (a1 <= 0 || a2 <= 0)
+            throw new IllegalArgumentException("doubtful unneg pivot points");
+
+        for (int nd = nd1 + 1; nd < nd2; nd++)
+            a[nd] = a1 + (nd - nd1) * (a2 - a1) / (nd2 - nd1);
+    }
+
+    /* ========================================================== */
+
+    public String dumpYear(Gender gender, int year) throws Exception
+    {
+        Double[] a = forGender(gender).get();
+
+        int nd = year * DAYS_PER_YEAR;
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int k = 0; k < DAYS_PER_YEAR; k++)
+        {
+            if (a[nd + k] == null)
+                sb.append(String.format("%-3d null", k));
+            else
+                sb.append(String.format("%-3d %f", k, a[nd + k]));
+            sb.append(Util.nl);
+        }
+
+        return sb.toString();
     }
 }
