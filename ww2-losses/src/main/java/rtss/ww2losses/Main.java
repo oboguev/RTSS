@@ -51,6 +51,8 @@ import java.util.List;
 // ### при подсчётах actual_deaths, excess_deaths, CBR -- убирать протяжённые блоки отрицательных значений (РСФСР)
 // ### причём отдельно по MALE и FEMALE
 
+// ### смертность при числе смертей < 0 ???
+
 public class Main
 {
     public static void main(String[] args)
