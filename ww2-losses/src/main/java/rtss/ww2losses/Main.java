@@ -43,7 +43,6 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
-
 // ### отрицательные значения дефицита дают усиленные отрицательные значения excess deaths
 // ### ??? steering проводка -- лучше давать нуль?
 // ### ??? отрицательные значения loss_intensity ???
@@ -100,6 +99,11 @@ public class Main
      * Использовать если население на начало 1946 года уже не содержит эмигрантов
      */
     private boolean DeductEmigration = Util.False;
+
+    /*
+     * Заменить некоторые части отрицательного дефицита РФСР на нули 
+     */
+    private boolean CancelNegativeDeficit = Util.False;
 
     /*
      * Размер контекста отслеживания: только дети или все возраста
@@ -159,7 +163,7 @@ public class Main
 
     /* директория для сохранения файлов с результатами (если null -- не сохранять) */
     public String exportDirectory = "c:\\@ww2losses\\export";
-    
+
     private PopulationContext deficit1946_raw;
     private PopulationContext deficit1946_adjusted;
 
@@ -294,8 +298,8 @@ public class Main
                     .display();
         }
 
-        ExportResults.exportResults(exportDirectory, ap, halves, 
-                                    allExcessDeathsByDeathAge, 
+        ExportResults.exportResults(exportDirectory, ap, halves,
+                                    allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,
                                     deficit1946_raw, deficit1946_adjusted);
     }
@@ -574,7 +578,7 @@ public class Main
                     .display();
         }
 
-        if (area == Area.RSFSR)
+        if (area == Area.RSFSR && CancelNegativeDeficit)
         {
             if (PrintDiagnostics)
                 WarHelpers.validateDeficit(deficit, "До эмиграции и отмены отрицательных женских значений:");
@@ -626,15 +630,16 @@ public class Main
             out("Эмиграция ещё включена в половозрастную структуру начала 1946 года, и не вычитается из смертности");
         }
 
-        if (area == Area.RSFSR)
+        if (area == Area.RSFSR && CancelNegativeDeficit)
         {
             deficit = cancelNegativeDeficit(deficit, cancelDeficitRSFSR);
+            deficit_wb_raw = cancelNegativeDeficit(deficit_wb_raw, cancelDeficitRSFSR);
             deficit_wb_adjusted = cancelNegativeDeficit(deficit_wb_adjusted, cancelDeficitRSFSR);
         }
 
         if (PrintDiagnostics)
         {
-            if (area == Area.RSFSR)
+            if (area == Area.RSFSR && CancelNegativeDeficit)
                 WarHelpers.validateDeficit(deficit, "После эмиграции и отмены отрицательных женских значений:");
             else
                 WarHelpers.validateDeficit(deficit);
@@ -662,7 +667,7 @@ public class Main
         outk("    Сверхсмертность [по дефициту] мужчин призывного возраста", deficit_m_conscripts);
         outk("    Сверхсмертность [по дефициту] женщин фертильного возраста", deficit_f_fertile);
         outk("    Сверхсмертность [по дефициту] остального наличного на середину 1941 года населения", deficit_other);
-        
+
         this.deficit1946_raw = deficit_wb_raw;
         this.deficit1946_adjusted = deficit_wb_adjusted;
     }
@@ -1227,7 +1232,7 @@ public class Main
         {
             throw new Exception("Ошибка в построении daily_lx");
         }
-        
+
         Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
 
         return daily_lx;
@@ -1264,9 +1269,9 @@ public class Main
         {
             if (he.index().equals("1941.1") || he.index().equals("1946.1"))
                 continue;
-            
+
             double offset = (1946 + 0) - (he.year + 0.5 * he.halfyear.seq(0));
-            
+
             PopulationContext up = he.actual_excess_wartime_deaths.moveUpPreserving(offset);
             p = p.add(up, ValueConstraint.NONE);
         }
