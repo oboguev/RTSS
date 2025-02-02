@@ -4,6 +4,7 @@ import java.io.File;
 
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
+import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
@@ -50,6 +51,15 @@ public class ExportResults
                 Util.writeAsFile(fpath(fdir, fn), 
                                  dump(p, "Избыточные смерти населения " + areaname + " в полугодии " + he.index()));
             }
+            
+            /* иммиграция в РСФСР */
+            if (ap.area == Area.RSFSR)
+            {
+                fn = String.format("%s-immigration-%s.txt", ap.area.name(), he.index());
+                p = he.immigration.toPopulation();
+                Util.writeAsFile(fpath(fdir, fn), 
+                                 dump(p, "Минимальная межреспубликанская миграция в РСФСР в полугодии " + he.index()));
+            }
         }
 
         fn = String.format("%s-all-excess-deaths-by-age-at-time-of-death.txt", ap.area.name());
@@ -77,6 +87,7 @@ public class ExportResults
                              dump(deficit1946_raw, "Дефицит населения "+ areaname + " на начало 1946 года"));
         }
 
+        Util.out("");
         Util.out("Файлы сохранены в директории " + exportDirectory);
     }
 

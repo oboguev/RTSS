@@ -87,6 +87,8 @@ public class MultiModelMain
         Util.out("");
         Util.out("Расчёт моделей (сумма с середины 1941 по конец 1945):");
         Util.out("");
+        Util.out("   с42 = смертност в 1942 году, промилле");
+        Util.out("");
         
         printHeaders();
 
@@ -96,11 +98,11 @@ public class MultiModelMain
 
     private void printHeaders()
     {
-        String a1 = "СССР                                 ";
-        String a2 = "РФССР                                ";
+        String a1 = "СССР                                         ";
+        String a2 = "РФССР                                        ";
 
-        String h1 = " с.изб   с.прз   с.инов  р.факт  с42 ";
-        String h2 = "======= ======= ======= =======  ====";
+        String h1 = " с.изб   с.прз   с.инов  р.факт иммигр   с42 ";
+        String h2 = "======= ======= ======= ======= =======  ====";
         
         Util.out(String.format("        * %s * %s", a1, a2));
         Util.out(String.format("прз окк * %s * %s", h1, h1));
@@ -121,11 +123,12 @@ public class MultiModelMain
 
     private String result2str(ModelResults r)
     {
-        return String.format("%7s %7s %7s %7s %5.1f",
+        return String.format("%7s %7s %7s %7s %7s %5.1f",
                              f2k(r.actual_excess_wartime_deaths),
                              f2k(r.exd_conscripts),
                              f2k(r.excess_warborn_deaths),
                              f2k(r.actual_births),
+                             f2k(r.immigration),
                              r.cdr_1942);
     }
 

@@ -16,4 +16,7 @@ public class ModelResults
 
     /* смертность в 1942 году */
     public double cdr_1942;
+
+    /* сумма иммиграции с середины 1941 по конец 1945 гг., только для РСФСР */
+    public double immigration;
 }

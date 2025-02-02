@@ -160,6 +160,7 @@ public class PrintHalfYears
             results.exd_conscripts += exd_conscripts;
             results.excess_warborn_deaths += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline;
             results.actual_births += he.actual_births;
+            results.immigration += he.immigration.sum();
         }
     }
 
