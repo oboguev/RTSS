@@ -789,7 +789,7 @@ public class Main
          * подогнав их так, чтобы начальное население линии (середины 1941) приходило к конечному (начала 1946) 
          */
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);
-        AgeLineFactorIntensities alis = eval.eval(p1946_actual);
+        AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual);
 
         if (Util.False)
         {
@@ -799,7 +799,6 @@ public class Main
         }
 
         AgeLineFactorIntensities amig = null;
-        double[] ac_immigration = null;
 
         if (ap.area == Area.RSFSR)
         {
@@ -814,8 +813,8 @@ public class Main
             // alis.display("Исправленная интенсивность потерь " + area);
             // PopulationContext p = alis.toPopulationContext();
 
+            eval.setImmigration(ac_rsfsr_immigration);
             amig = new AgeLineFactorIntensities();
-            ac_immigration = ac_rsfsr_immigration;
 
             // eval.evalMigration(amig, alis, Gender.MALE, 2.5, 7.5)
             // eval.evalMigration(amig, alis, Gender.FEMALE, 2.1, 7.37)
@@ -828,7 +827,7 @@ public class Main
          * расчёт (и действительное построение) возрастных линий с учётов найденных коэфициентов интенсивности потерь
          * и иммиграционной интенсивности 
          */
-        eval.processAgeLines(alis, p1946_actual);
+        eval.processAgeLines(alis, amig, p1946_actual);
 
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
         PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);

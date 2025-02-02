@@ -22,13 +22,14 @@ public class SteerAgeLine
     private final HalfYearEntries<HalfYearEntry> halves;
     private double[] ac_general;
     private double[] ac_conscripts;
+    private double[] ac_immigration;
 
     /*
      * @halves         = данные для полугодий, от начала 1941 до начала 1946 года
      * @ac_conscripts  = удельные весовые коэфициенты военной сверхсмертности (по полугодиям) для призывников  
      * @ac_general     = удельные весовые коэфициенты военной сверхсмертности (по полугодиям) для непризывного населения   
      */
-    public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, double[] ac_general, double[] ac_conscripts)
+    public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, double[] ac_general, double[] ac_conscripts, double[] ac_immigration)
     {
         this.halves = halves;
         this.ac_general = ac_general;
@@ -127,13 +128,22 @@ public class SteerAgeLine
      * Обработка возрастной линии с учётом ранее найденного коэффициента интенсивности военных потерь
      * для этой линии.
      */
-    public void steerActual(Gender gender, int initial_age_ndays, AgeLineFactorIntensities alis, double initial_population) throws Exception
+    public void steerActual(Gender gender, 
+            int initial_age_ndays, 
+            AgeLineFactorIntensities alis, 
+            AgeLineFactorIntensities amig, 
+            double initial_population) throws Exception
     {
         double loss_intensity = alis.get(gender, initial_age_ndays);
-        steerActual(gender, initial_age_ndays, loss_intensity, initial_population);
+        Double immigration_intensity = amig == null ? null : amig.get(gender, initial_age_ndays);
+        steerActual(gender, initial_age_ndays, loss_intensity, immigration_intensity, initial_population);
     }
 
-    public void steerActual(Gender gender, int initial_age_ndays, double loss_intensity, double initial_population) throws Exception
+    public void steerActual(Gender gender, 
+            int initial_age_ndays, 
+            double loss_intensity, 
+            Double immigration_intensity,
+            double initial_population) throws Exception
     {
         Util.assertion(initial_population >= 0);
 
@@ -151,6 +161,8 @@ public class SteerAgeLine
 
             double[] ac = ac(gender, ndm);
             double excess_war_deaths = ac[ac_index(he)] * initial_population * loss_intensity;
+            
+            // ### immigration
 
             population -= peace_deaths;
             population -= excess_war_deaths;

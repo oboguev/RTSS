@@ -27,7 +27,7 @@ public class EvaAgeLinelLossIntensity
      * 
      * Военные потери в полугодии вычисляются как ac_xxx * initial_population * loss_intensity.     
      */
-    public double evalLossIntensity(
+    public double evalPreliminaryLossIntensity(
             int initial_age_ndays,
             Gender gender,
             double initial_population,
