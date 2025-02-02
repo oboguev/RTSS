@@ -119,9 +119,9 @@ public class EvalAgeLineLossIntensities
         double senior_loss_intensity = alis.average(gender, nd1 - 1 - years2days(1.0), nd1 - 1);
         double initial_population;
         
-        // ### immigration
         Double senior_immigration_intensity = null;
-        // ###amig == null ? null : amig.get(gender, initial_age_ndays);
+        if (amig != null)
+            senior_immigration_intensity = amig.average(gender, nd1 - 1 - years2days(1.0), nd1 - 1);
 
         for (int nd = nd1; nd <= p1941_2.MAX_DAY; nd++)
         {

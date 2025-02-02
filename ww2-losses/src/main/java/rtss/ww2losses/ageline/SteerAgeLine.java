@@ -135,7 +135,7 @@ public class SteerAgeLine
             double initial_population) throws Exception
     {
         double loss_intensity = alis.get(gender, initial_age_ndays);
-        Double immigration_intensity = amig == null ? null : amig.get(gender, initial_age_ndays);
+        Double immigration_intensity = (amig == null) ? null : amig.get(gender, initial_age_ndays);
         steerActual(gender, initial_age_ndays, loss_intensity, immigration_intensity, initial_population);
     }
 

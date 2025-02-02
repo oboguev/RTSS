@@ -47,7 +47,10 @@ public class AgeLineFactorIntensities
 
     public Double get(Gender gender, int nd) throws Exception
     {
-        return forGender(gender).getNullable(nd);
+        Double v = forGender(gender).getNullable(nd);
+        if (v == null)
+            v = 0.0;
+        return v;
     }
 
     public void set(Gender gender, int nd, double v) throws Exception
