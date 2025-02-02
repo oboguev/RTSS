@@ -58,23 +58,23 @@ public class ExportResults
 
         fn = String.format("%s-all-excess-deaths-by-age-at-1946.1.txt", ap.area.name());
         Util.writeAsFile(fpath(fdir, fn), 
-                         dump(allExcessDeathsByAgeAt1946, "Избыточные смерти населения " + areaname + " в 1941-1945 гг. по возрасту, который был бы на начало 1946 года"));
+                         dump(allExcessDeathsByAgeAt1946, "Избыточные смерти населения " + areaname + " в 1941-1945 гг. по возрасту, в котором умерший был бы на начало 1946 года"));
 
         if (deficit1946_adjusted != null)
         {
             fn = String.format("%s-deficit-1946.1-raw.txt", ap.area.name());
             Util.writeAsFile(fpath(fdir, fn), 
-                             dump(deficit1946_raw, "Дефицит населения "+ areaname + "на начало 1946 года (неисправленный)"));
+                             dump(deficit1946_raw, "Дефицит населения "+ areaname + " на начало 1946 года (неисправленный)"));
 
             fn = String.format("%s-deficit-1946.1-adjusted.txt", ap.area.name());
             Util.writeAsFile(fpath(fdir, fn), 
-                             dump(deficit1946_adjusted, "Дефицит населения "+ areaname + "на начало 1946 года (исправленный)"));
+                             dump(deficit1946_adjusted, "Дефицит населения "+ areaname + " на начало 1946 года (исправленный)"));
         }
         else
         {
             fn = String.format("%s-deficit-1946.txt", ap.area.name());
             Util.writeAsFile(fpath(fdir, fn), 
-                             dump(deficit1946_raw, "Дефицит населения "+ areaname + "на начало 1946 года)"));
+                             dump(deficit1946_raw, "Дефицит населения "+ areaname + " на начало 1946 года"));
         }
 
         Util.out("Файлы сохранены в директории " + exportDirectory);
