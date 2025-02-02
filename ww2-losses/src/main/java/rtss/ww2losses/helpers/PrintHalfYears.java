@@ -30,6 +30,7 @@ public class PrintHalfYears
     private double sum_birth_shortfall = 0;
     private double sum_actual_warborn_deaths_baseline = 0;
     private double sum_actual_warborn_deaths = 0;
+    private double sum_immigration = 0;
 
     public static void print(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, ModelResults results) throws Exception
     {
@@ -55,13 +56,19 @@ public class PrintHalfYears
         Util.out("    р.нехв    = дефицит рождений за полугодие, тыс. новорожденных");
         Util.out("    фcр.мир   = число смертей (в данном полугодии) от фактических рождений c начала войны, ожидаемое при смертности мирного времени");
         Util.out("    фcр       = фактическое число смертей (в данном полугодии) от фактических рождений с начала войны, при фактической военной смертности");
+
+        if (ap.area == Area.RSFSR)
+            Util.out("    иммигр    = миграция из других республик в РСФСР в данном полугодии, тыс. чел");
+        else
+            Util.out("    иммигр    = всегда нуль");
+
         Util.out("");
         Util.out("    р         = рождаемость (промилле, для полугодия, но в нормировке на год");
         Util.out("    с         = смертность (промилле, для полугодия, но в нормировке на год)");
         Util.out("");
 
-        Util.out("п/год   н.нач    н.сред    н.кон     ум    с.изб   с.прз   с.инов  р.ожид  р.факт  р.нехв   фср.мир    фср    р     с");
-        Util.out("=====  =======   =======  =======  ======  ======  ======  ======  ======  ======  =======  =======  ======  ====  ====");
+        Util.out("п/год   н.нач    н.сред    н.кон     ум    с.изб   с.прз   с.инов  р.ожид  р.факт  р.нехв   фср.мир   фср    иммигр    р     с  ");
+        Util.out("=====  =======   =======  =======  ======  ======  ======  ======  ======  ======  =======  =======  ======  =======  ====  ====");
 
         for (HalfYearEntry he : halves)
         {
@@ -69,7 +76,7 @@ public class PrintHalfYears
                 print(he, results);
         }
 
-        String s = String.format("%-6s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5s %5s",
+        String s = String.format("%-6s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s %8s" + " %5s %5s",
                                  "всего", EMPTY, EMPTY, EMPTY,
                                  //
                                  f2k(sum_actual_deaths),
@@ -82,6 +89,7 @@ public class PrintHalfYears
                                  f2k(sum_birth_shortfall),
                                  f2k(sum_actual_warborn_deaths_baseline),
                                  f2k(sum_actual_warborn_deaths),
+                                 f2k(sum_immigration),
                                  //
                                  EMPTY, EMPTY
         //
@@ -119,8 +127,9 @@ public class PrintHalfYears
         sum_birth_shortfall += he.expected_nonwar_births - he.actual_births;
         sum_actual_warborn_deaths_baseline += he.actual_warborn_deaths_baseline;
         sum_actual_warborn_deaths += he.actual_warborn_deaths;
+        sum_immigration += he.immigration.sum();
 
-        String s = String.format("%d.%d %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5.1f %5.1f",
+        String s = String.format("%d.%d %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s %8s" + " %5.1f %5.1f",
                                  he.year, he.halfyear.seq(1),
                                  f2k(p1.sum()),
                                  f2k(pavg.sum()),
@@ -136,6 +145,7 @@ public class PrintHalfYears
                                  f2k(he.expected_nonwar_births - he.actual_births),
                                  f2k(he.actual_warborn_deaths_baseline),
                                  f2k(he.actual_warborn_deaths),
+                                 f2k(he.immigration.sum()),
                                  //
                                  cbr,
                                  cdr
@@ -143,7 +153,7 @@ public class PrintHalfYears
         );
 
         Util.out(s);
-        
+
         if (!he.index().equals("1941.1"))
         {
             results.actual_excess_wartime_deaths += he.actual_excess_wartime_deaths.sum();
