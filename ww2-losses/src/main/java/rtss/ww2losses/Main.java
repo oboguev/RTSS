@@ -794,8 +794,8 @@ public class Main
         if (Util.False)
         {
             alis.display("Интенсивность потерь " + area);
-            PopulationContext p = alis.toPopulationContext();
-            Util.noop();
+            // PopulationContext p = alis.toPopulationContext();
+            // Util.noop();
         }
         
         AgeLineFactorIntensities amig = null;

@@ -45,6 +45,11 @@ public class DoubleArray
         return values[age];
     }
 
+    public Double getNullable(int age) throws Exception
+    {
+        return values[age];
+    }
+
     public boolean containsKey(int age)
     {
         return values[age] != null;

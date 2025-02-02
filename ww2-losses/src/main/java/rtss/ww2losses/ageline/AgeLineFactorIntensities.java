@@ -1,9 +1,8 @@
 package rtss.ww2losses.ageline;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import rtss.data.DoubleArray;
 import rtss.data.ValueConstraint;
+import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -14,23 +13,43 @@ import rtss.util.plot.PopulationChart;
  */
 public class AgeLineFactorIntensities
 {
-    // ### change to DoubleArray
+    private static final int NYEARS = Population.MAX_AGE + 1;
+    private static final int DAYS_PER_YEAR = 365;
+    // private static final int MAX_YEAR = NYEARS - 1;
+    private static final int NDAYS = NYEARS * DAYS_PER_YEAR;
+    private static final int MAX_DAY = NDAYS - 1;
+
+    private DoubleArray male = newDoubleArray(ValueConstraint.NONE);
+    private DoubleArray female = newDoubleArray(ValueConstraint.NONE);
+
+    private DoubleArray newDoubleArray(ValueConstraint vc)
+    {
+        return new DoubleArray(MAX_DAY, vc);
+    }
     
-    private Map<String, Double> m = new HashMap<>();
-
-    private String key(Gender gender, int nd)
+    private DoubleArray forGender(Gender gender)
     {
-        return gender.name() + "." + nd;
+        switch (gender)
+        {
+        case MALE:
+            return male;
+            
+        case FEMALE:
+            return female;
+            
+        default:
+            return null;
+        }
     }
 
-    public Double get(Gender gender, int nd)
+    public Double get(Gender gender, int nd) throws Exception
     {
-        return m.get(key(gender, nd));
+        return forGender(gender).getNullable(nd);
     }
 
-    public void set(Gender gender, int nd, double v)
+    public void set(Gender gender, int nd, double v) throws Exception
     {
-        m.put(key(gender, nd), v);
+        forGender(gender).set(nd, v);
     }
 
     public double average(Gender gender, int nd1, int nd2) throws Exception
