@@ -153,6 +153,11 @@ public class Main
      */
     private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 
+    /* 
+     * интенсивность иммиграции в РСФСР из западных ССР
+     */
+    private static final double[] rsfsr_immigration_intensity = { 0, 10.5, 1.8, 1.6, 0, 0, 0, 0, 0, 0 };
+
     /*
      * данные для полугодий начиная с середины 1941 и по начало 1946 года
      */
@@ -775,6 +780,9 @@ public class Main
         /* полугодовой коэффициент распределения потерь для призывного населения */
         double[] ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
                                       1.0 - aw_conscripts_rkka_loss, ac_general);
+        
+        /* полугодовой коэффициент интенсивности иммиграции в РСФСР */
+        double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
 
         /* 
          * вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола,
@@ -790,7 +798,7 @@ public class Main
         
         // ### для РСФСР 
         // ### для определенных групп (gender, age1, age2)
-        // ### интерполиолвать ALI между точками age1-age2
+        // ### интерполировать ALI между точками age1-age2
         // ### и найти коэф. иммиграционной интенсивности в этих возрастах/полах (для этих линий)
 
         /* 
