@@ -817,9 +817,9 @@ public class Main
             amig = new AgeLineFactorIntensities();
 
             // ### вычислить содержимое amig
-            // eval.evalMigration(amig, alis, Gender.MALE, 2.5, 7.5)
-            // eval.evalMigration(amig, alis, Gender.FEMALE, 2.1, 7.37)
-            // eval.evalMigration(amig, alis, Gender.FEMALE, 42.5, 57.5)
+            // eval.evalMigration(p1946_actual, amig, alis, Gender.MALE, 2.5, 7.5)
+            // eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 2.1, 7.37)
+            // eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 42.5, 57.5)
         }
 
         /* 

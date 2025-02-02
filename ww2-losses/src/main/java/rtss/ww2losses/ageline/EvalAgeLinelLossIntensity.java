@@ -7,11 +7,11 @@ import rtss.util.Util;
  * Найти величину loss_intensity, при которой проводка возрастной линии от середины 1941 года
  * до начала 1946 года даёт ожидаемый остаток населения в начале 1946 года.
  */
-public class EvaAgeLinelLossIntensity
+public class EvalAgeLinelLossIntensity
 {
     private final SteerAgeLine steer;
 
-    public EvaAgeLinelLossIntensity(SteerAgeLine steer)
+    public EvalAgeLinelLossIntensity(SteerAgeLine steer)
     {
         this.steer = steer;
     }
@@ -25,7 +25,8 @@ public class EvaAgeLinelLossIntensity
      * initial_population = начальная численность населения возрастной линии в середине 1941 года
      * final_population = начальная численность населения возрастной линии в начале 1946 года
      * 
-     * Военные потери в полугодии вычисляются как ac_xxx * initial_population * loss_intensity.     
+     * Военные потери в полугодии вычисляются как ac_xxx * initial_population * loss_intensity.
+     * Миграция полагается нулевой.     
      */
     public double evalPreliminaryLossIntensity(
             int initial_age_ndays,
@@ -148,5 +149,30 @@ public class EvaAgeLinelLossIntensity
         }
         
         return a;
+    }
+    
+    /* ============================================================================================ */
+
+    /*
+     * Вычислить интенсивность миграции, при которой к началу 1946 года будет достигнут ожидаемый
+     * остаток возрастной линии.
+     * 
+     * initial_age_ndays = начальный возраст в середине 1941 года
+     * gender = пол
+     * initial_population = начальная численность населения возрастной линии в середине 1941 года
+     * final_population = начальная численность населения возрастной линии в начале 1946 года
+     * loss_intensity = интенсивность потерь
+     * 
+     * Военные потери в полугодии вычисляются как ac_xxx * initial_population * loss_intensity.     
+     */
+    public double evalMigrationIntensity(
+            int initial_age_ndays, 
+            Gender gender, 
+            double initial_population, 
+            double final_population, 
+            double loss_intensity) throws Exception
+    {
+        // ###
+        return 0;
     }
 }

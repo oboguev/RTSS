@@ -38,6 +38,8 @@ public class EvalAgeLineLossIntensities
         this.ac_immigration = ac_immigration;
     }
 
+    /* ========================================================================================================== */
+
     public AgeLineFactorIntensities evalPreliminaryLossIntensity(PopulationContext p1946_actual) throws Exception
     {
         AgeLineFactorIntensities intensities = new AgeLineFactorIntensities();
@@ -45,7 +47,7 @@ public class EvalAgeLineLossIntensities
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
         SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts, null);
-        EvaAgeLinelLossIntensity eval = new EvaAgeLinelLossIntensity(steer);
+        EvalAgeLinelLossIntensity eval = new EvalAgeLinelLossIntensity(steer);
 
         int ndays = 9 * years2days(0.5);
 
@@ -70,12 +72,48 @@ public class EvalAgeLineLossIntensities
         return intensities;
     }
 
+    /* ========================================================================================================== */
+
+    public void evalMigration(
+            PopulationContext p1946_actual,
+            AgeLineFactorIntensities amig,
+            final AgeLineFactorIntensities alis,
+            Gender gender, double age1, double age2) throws Exception
+    {
+        int nd1 = years2days(age1);
+        int nd2 = years2days(age2);
+
+        HalfYearEntry he1941_2 = halves.get("1941.2");
+        PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
+
+        SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts, ac_immigration);
+        EvalAgeLinelLossIntensity eval = new EvalAgeLinelLossIntensity(steer);
+
+        int ndays = 9 * years2days(0.5);
+
+        double v, initial_population, final_population, loss_intensity;
+        
+        for (int nd = nd1; nd <= nd2; nd++)
+        {
+            if (nd + ndays > p1946_actual.MAX_DAY)
+                break;
+
+            initial_population = p1941_2.getDay(Locality.TOTAL, gender, nd);
+            final_population = p1946_actual.getDay(Locality.TOTAL, gender, nd + ndays);
+            loss_intensity = alis.get(gender, nd);
+            v = eval.evalMigrationIntensity(nd, gender, initial_population, final_population, loss_intensity);
+            amig.set(gender, nd, v);
+        }
+    }
+
+    /* ========================================================================================================== */
+
     public void processAgeLines(AgeLineFactorIntensities alis,
             AgeLineFactorIntensities amig,
             PopulationContext p1946_actual) throws Exception
     {
         Util.assertion((amig != null) == (ac_immigration != null));
-        
+
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
@@ -118,7 +156,7 @@ public class EvalAgeLineLossIntensities
 
         double senior_loss_intensity = alis.average(gender, nd1 - 1 - years2days(1.0), nd1 - 1);
         double initial_population;
-        
+
         Double senior_immigration_intensity = null;
         if (amig != null)
             senior_immigration_intensity = amig.average(gender, nd1 - 1 - years2days(1.0), nd1 - 1);
