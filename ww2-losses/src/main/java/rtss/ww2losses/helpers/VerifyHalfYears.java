@@ -32,7 +32,7 @@ public class VerifyHalfYears
     {
         if (print)
             Util.out("Верификация:");
-
+        
         for (HalfYearEntry he : halves)
             verify(he, print);
     }
@@ -80,6 +80,7 @@ public class VerifyHalfYears
         if (Util.True)
         {
             PopulationContext p = p1.sub(he.actual_deaths, ValueConstraint.NONE);
+            p = p.add(he.immigration, ValueConstraint.NONE);
             p = p2.moveDown(0.5).sub(p, ValueConstraint.NONE);
 
             double v = p.sumDays(ndays, p.MAX_DAY);
@@ -89,6 +90,7 @@ public class VerifyHalfYears
         if (Util.True)
         {
             PopulationContext p = p1.sub(he.actual_deaths, ValueConstraint.NONE);
+            p = p.add(he.immigration, ValueConstraint.NONE);
             p = p2.sub(p.moveUpPreserving(0.5), ValueConstraint.NONE);
 
             // округления

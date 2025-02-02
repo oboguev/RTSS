@@ -56,13 +56,13 @@ public class SteerAgeLine
     {
         if (ac_immigration == null)
         {
-            Util.assertion(immigration_intensity == null ||  immigration_intensity == 0);
+            Util.assertion(immigration_intensity == null || immigration_intensity == 0);
         }
         else
         {
             Util.assertion(immigration_intensity != null);
         }
-        
+
         Util.assertion(initial_population >= 0);
 
         double population = initial_population;
@@ -83,13 +83,12 @@ public class SteerAgeLine
 
             double immigration = 0;
             if (ac_immigration != null && immigration_intensity != null)
-                immigration =  ac_immigration[ac_index(he)] * initial_population * immigration_intensity;
-            
+                immigration = ac_immigration[ac_index(he)] * initial_population * immigration_intensity;
+
             population += immigration;
             population -= peace_deaths;
             population -= excess_war_deaths;
-            population += immigration;
-            
+
             if (population < 0)
             {
                 delta += population;
@@ -197,12 +196,11 @@ public class SteerAgeLine
 
             double immigration = 0;
             if (ac_immigration != null)
-                immigration =  ac_immigration[ac_index(he)] * initial_population * immigration_intensity;
+                immigration = ac_immigration[ac_index(he)] * initial_population * immigration_intensity;
 
             population += immigration;
             population -= peace_deaths;
             population -= excess_war_deaths;
-            population += immigration;
 
             Util.assertion(population >= 0);
             Util.assertion(peace_deaths >= 0);
