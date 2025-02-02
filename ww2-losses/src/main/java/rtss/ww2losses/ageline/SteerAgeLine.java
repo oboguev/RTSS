@@ -53,7 +53,7 @@ public class SteerAgeLine
             double loss_intensity) throws Exception
     {
         Util.assertion(initial_population >= 0);
-        
+
         double population = initial_population;
         int nd_age = initial_age_ndays;
         int span = ForwardPopulation.years2days(0.5);
@@ -67,7 +67,7 @@ public class SteerAgeLine
             if (population > 0)
                 population *= survivalRatio(he, gender, nd1, nd2);
 
-            double[] ac = ac(gender, ndm);
+            double[] ac = attrition_coefficient(gender, ndm);
             population -= ac[ac_index(he)] * initial_population * loss_intensity;
             if (population < 0)
                 population = 0;
@@ -80,7 +80,7 @@ public class SteerAgeLine
         return population;
     }
 
-    private double[] ac(Gender gender, int nd)
+    private double[] attrition_coefficient(Gender gender, int nd)
     {
         if (gender == Gender.MALE &&
             nd >= years2days(Constants.CONSCRIPT_AGE_FROM) &&
@@ -125,13 +125,13 @@ public class SteerAgeLine
     /* ============================================================================== */
 
     /*
-     * Обработка возрастной линии с учётом ранее найденного коэффициента интенсивности военных потерь
-     * для этой линии.
+     * Обработка возрастной линии с учётом ранее найденных коэффициентов интенсивности военных потерь
+     * и интенсивности иммиграции для этой линии.
      */
-    public void steerActual(Gender gender, 
-            int initial_age_ndays, 
-            AgeLineFactorIntensities alis, 
-            AgeLineFactorIntensities amig, 
+    public void steerActual(Gender gender,
+            int initial_age_ndays,
+            AgeLineFactorIntensities alis,
+            AgeLineFactorIntensities amig,
             double initial_population) throws Exception
     {
         double loss_intensity = alis.get(gender, initial_age_ndays);
@@ -139,12 +139,13 @@ public class SteerAgeLine
         steerActual(gender, initial_age_ndays, loss_intensity, immigration_intensity, initial_population);
     }
 
-    public void steerActual(Gender gender, 
-            int initial_age_ndays, 
-            double loss_intensity, 
+    public void steerActual(Gender gender,
+            int initial_age_ndays,
+            double loss_intensity,
             Double immigration_intensity,
             double initial_population) throws Exception
     {
+        Util.assertion((immigration_intensity == null || immigration_intensity == 0) == (ac_immigration == null));
         Util.assertion(initial_population >= 0);
 
         double population = initial_population;
@@ -159,11 +160,14 @@ public class SteerAgeLine
 
             double peace_deaths = population * deathRatio(he, gender, nd1, nd2);
 
-            double[] ac = ac(gender, ndm);
+            double[] ac = attrition_coefficient(gender, ndm);
             double excess_war_deaths = ac[ac_index(he)] * initial_population * loss_intensity;
-            
-            // ### immigration
 
+            double immigration = 0;
+            if (ac_immigration != null)
+                immigration =  ac_immigration[ac_index(he)] * initial_population * immigration_intensity;
+
+            population += immigration;
             population -= peace_deaths;
             population -= excess_war_deaths;
 
@@ -182,6 +186,7 @@ public class SteerAgeLine
             he.actual_peace_deaths.addDay(Locality.TOTAL, gender, cap(nd1), peace_deaths);
             he.actual_excess_wartime_deaths.addDay(Locality.TOTAL, gender, cap(nd1), excess_war_deaths);
             he.actual_deaths.addDay(Locality.TOTAL, gender, cap(nd1), peace_deaths + excess_war_deaths);
+            he.immigration.addDay(Locality.TOTAL, gender, cap(nd1), immigration);
 
             nd_age += span;
         }
