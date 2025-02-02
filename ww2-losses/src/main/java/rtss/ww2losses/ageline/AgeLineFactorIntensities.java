@@ -10,9 +10,9 @@ import rtss.data.selectors.Locality;
 import rtss.util.plot.PopulationChart;
 
 /*
- * Хранит отображение (Gender, nd_age) -> loss intensity
+ * Хранит отображение (Gender, nd_age) -> loss intensity или immigration intensity
  */
-public class AgeLineLossIntensities
+public class AgeLineFactorIntensities
 {
     private Map<String, Double> m = new HashMap<>();
 

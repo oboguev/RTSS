@@ -20,7 +20,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
-import rtss.ww2losses.ageline.AgeLineLossIntensities;
+import rtss.ww2losses.ageline.AgeLineFactorIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
 import rtss.ww2losses.helpers.ExportResults;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
@@ -776,16 +776,27 @@ public class Main
         double[] ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
                                       1.0 - aw_conscripts_rkka_loss, ac_general);
 
-        /* вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола */
+        /* 
+         * вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола,
+         * подогнав их так, чтобы начальное население линии (середины 1941) приходило к конечному (начала 1946) 
+         */
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);
-        AgeLineLossIntensities alis = eval.eval(p1946_actual);
+        AgeLineFactorIntensities alis = eval.eval(p1946_actual);
         
         if (Util.True)
         {
             alis.display("Интенсивность потерь " + area);
         }
+        
+        // ### для РСФСР 
+        // ### для определенных групп (gender, age1, age2)
+        // ### интерполиолвать ALI между точками age1-age2
+        // ### и найти коэф. иммиграционной интенсивности в этих возрастах/полах (для этих линий)
 
-        /* расчёт возрастных линий с учётов найденных коэфициентов интенсивности */
+        /* 
+         * расчёт (и действительное построение) возрастных линий с учётов найденных коэфициентов интенсивности потерь
+         * и иммиграционной интенсивности 
+         */
         eval.processAgeLines(alis, p1946_actual);
 
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */

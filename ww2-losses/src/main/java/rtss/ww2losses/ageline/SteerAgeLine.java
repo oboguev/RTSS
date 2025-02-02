@@ -127,7 +127,7 @@ public class SteerAgeLine
      * Обработка возрастной линии с учётом ранее найденного коэффициента интенсивности военных потерь
      * для этой линии.
      */
-    public void steerActual(Gender gender, int initial_age_ndays, AgeLineLossIntensities alis, double initial_population) throws Exception
+    public void steerActual(Gender gender, int initial_age_ndays, AgeLineFactorIntensities alis, double initial_population) throws Exception
     {
         double loss_intensity = alis.get(gender, initial_age_ndays);
         steerActual(gender, initial_age_ndays, loss_intensity, initial_population);

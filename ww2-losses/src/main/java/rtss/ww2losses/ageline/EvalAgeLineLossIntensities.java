@@ -25,9 +25,9 @@ public class EvalAgeLineLossIntensities
         this.ac_conscripts = ac_conscripts;
     }
 
-    public AgeLineLossIntensities eval(PopulationContext p1946_actual) throws Exception
+    public AgeLineFactorIntensities eval(PopulationContext p1946_actual) throws Exception
     {
-        AgeLineLossIntensities intensities = new AgeLineLossIntensities();
+        AgeLineFactorIntensities intensities = new AgeLineFactorIntensities();
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
@@ -57,7 +57,7 @@ public class EvalAgeLineLossIntensities
         return intensities;
     }
     
-    public void processAgeLines(AgeLineLossIntensities alis, PopulationContext p1946_actual) throws Exception
+    public void processAgeLines(AgeLineFactorIntensities alis, PopulationContext p1946_actual) throws Exception
     {
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
@@ -90,7 +90,7 @@ public class EvalAgeLineLossIntensities
     private void processSeniorAgeLines(
             SteerAgeLine steer,
             Gender gender,
-            AgeLineLossIntensities alis,
+            AgeLineFactorIntensities alis,
             PopulationContext p1941_2,
             PopulationContext p1946_actual) throws Exception
     {
