@@ -102,6 +102,7 @@ public class EvalAgeLineLossIntensities
             final_population = p1946_actual.getDay(Locality.TOTAL, gender, nd + ndays);
             loss_intensity = alis.get(gender, nd);
             v = eval.evalMigrationIntensity(nd, gender, initial_population, final_population, loss_intensity);
+            Util.assertion(v >= 0);
             amig.set(gender, nd, v);
         }
     }

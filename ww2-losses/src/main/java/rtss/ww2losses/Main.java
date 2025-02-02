@@ -775,15 +775,15 @@ public class Main
      */
     private void evalAgeLines() throws Exception
     {
-        /* полугодовой коэффициент распределения потерь для не-призывного населения */
+        /* нормализованный полугодовой коэффициент распределения потерь для не-призывного населения */
         double[] ac_general = wsum(aw_general_occupation, occupation_intensity,
                                    1 - aw_general_occupation, even_intensity);
 
-        /* полугодовой коэффициент распределения потерь для призывного населения */
+        /* нормализованный полугодовой коэффициент распределения потерь для призывного населения */
         double[] ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
                                       1.0 - aw_conscripts_rkka_loss, ac_general);
 
-        /* полугодовой коэффициент интенсивности иммиграции в РСФСР */
+        /* нормализованный полугодовой коэффициент интенсивности иммиграции в РСФСР */
         double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
 
         /* 
@@ -795,7 +795,7 @@ public class Main
 
         if (Util.False)
         {
-            alis.display("Интенсивность потерь " + area);
+            alis.display("Интенсивность военных потерь " + area);
             // PopulationContext p = alis.toPopulationContext();
             // Util.noop();
         }
@@ -804,24 +804,34 @@ public class Main
 
         if (ap.area == Area.RSFSR)
         {
-            // ### для РСФСР 
-            // ### для определенных групп (gender, age1, age2)
-            // ### интерполировать ALI между точками age1-age2
-            // ### затем найти коэф. иммиграционной интенсивности в этих возрастах/полах (для этих линий)
+            /*
+             * Для РСФСР для определенных групп (gender, age1-age2)
+             * устранить отрицательные коэффициенты военных потерь, вызываемые иммиграцией.
+             * 
+             * Интерполировать значения коэффициента военных потерь (хранимые в @alis) между положительными 
+             * точками age1-age2 для устранения промежуточных отрицательных значений.
+             * 
+             * Затем найти положительный коэф. иммиграционной интенсивности в этих возрастах/полах (для этих половозрастных линий).
+             */
 
-            // alis.unnegInterpolateYears(Gender.MALE, 2.5, 7.5);
-            // alis.unnegInterpolateYears(Gender.FEMALE, 2.1, 7.37);
-            // alis.unnegInterpolateYears(Gender.FEMALE, 42.5, 57.5);
-            // alis.display("Исправленная интенсивность потерь " + area);
-            // PopulationContext p = alis.toPopulationContext();
+            alis.unnegInterpolateYears(Gender.MALE, 2.5, 7.5);
+            alis.unnegInterpolateYears(Gender.FEMALE, 2.1, 7.37);
+            alis.unnegInterpolateYears(Gender.FEMALE, 42.5, 57.5);
+
+            // alis.display("Исправленная интенсивность военных потерь " + area);
+            // PopulationContext p_alis = alis.toPopulationContext();
 
             eval.setImmigration(ac_rsfsr_immigration);
             amig = new AgeLineFactorIntensities();
 
-            // ### вычислить содержимое amig
-            // eval.evalMigration(p1946_actual, amig, alis, Gender.MALE, 2.5, 7.5)
-            // eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 2.1, 7.37)
-            // eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 42.5, 57.5)
+            // вычислить мнтенсивность иммиграции
+            eval.evalMigration(p1946_actual, amig, alis, Gender.MALE, 2.5, 7.5);
+            eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 2.1, 7.37);
+            eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 42.5, 57.5);
+
+            // amig.display("Интенсивность иммиграции" + area);
+            // PopulationContext p_amig = amig.toPopulationContext();
+            // Util.noop();
         }
 
         /* 

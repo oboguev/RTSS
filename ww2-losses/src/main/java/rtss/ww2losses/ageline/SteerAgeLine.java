@@ -20,9 +20,9 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 public class SteerAgeLine
 {
     private final HalfYearEntries<HalfYearEntry> halves;
-    private double[] ac_general;
-    private double[] ac_conscripts;
-    private double[] ac_immigration;
+    private final double[] ac_general;
+    private final double[] ac_conscripts;
+    private final double[] ac_immigration;
 
     /*
      * @halves         = данные для полугодий, от начала 1941 до начала 1946 года
@@ -34,6 +34,7 @@ public class SteerAgeLine
         this.halves = halves;
         this.ac_general = ac_general;
         this.ac_conscripts = ac_conscripts;
+        this.ac_immigration = ac_immigration;
     }
 
     /*
@@ -53,7 +54,15 @@ public class SteerAgeLine
             double loss_intensity,
             Double immigration_intensity) throws Exception
     {
-        Util.assertion((immigration_intensity == null || immigration_intensity == 0) == (ac_immigration == null));
+        if (ac_immigration == null)
+        {
+            Util.assertion(immigration_intensity == null ||  immigration_intensity == 0);
+        }
+        else
+        {
+            Util.assertion(immigration_intensity != null);
+        }
+        
         Util.assertion(initial_population >= 0);
 
         double population = initial_population;
@@ -160,7 +169,15 @@ public class SteerAgeLine
             Double immigration_intensity,
             double initial_population) throws Exception
     {
-        Util.assertion((immigration_intensity == null || immigration_intensity == 0) == (ac_immigration == null));
+        if (ac_immigration == null)
+        {
+            Util.assertion(immigration_intensity == null);
+        }
+        else
+        {
+            Util.assertion(immigration_intensity != null);
+        }
+
         Util.assertion(initial_population >= 0);
 
         double population = initial_population;

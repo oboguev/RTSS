@@ -20,7 +20,7 @@ public class VerifyHalfYears
     private final HalfYearEntries<HalfYearEntry> halves;
     private final AreaParameters ap;
 
-    private static final int MAX_AGE  = Population.MAX_AGE;
+    private static final int MAX_AGE = Population.MAX_AGE;
 
     public VerifyHalfYears(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves)
     {
@@ -58,7 +58,7 @@ public class VerifyHalfYears
         if (print)
         {
             double v1 = -1 * (p2.sum() - p1.sum());
-            double v2 = -1 * (he.actual_births - he.actual_deaths.sum());
+            double v2 = -1 * (he.actual_births + he.immigration.sum() - he.actual_deaths.sum());
 
             out(String.format("%d.%d %8s %8s %8s = %s",
                               he.year, he.halfyear.seq(1),
@@ -68,7 +68,7 @@ public class VerifyHalfYears
         if (Util.True)
         {
             double v1 = -1 * (p2.sum() - p1.sum());
-            double v2 = -1 * (he.actual_births - he.actual_deaths.sum());
+            double v2 = -1 * (he.actual_births + he.immigration.sum() - he.actual_deaths.sum());
             double abs_dv = Math.abs(v1 - v2);
 
             if (he.index().equals("1941.1") && ap.area == Area.USSR)
@@ -90,13 +90,13 @@ public class VerifyHalfYears
         {
             PopulationContext p = p1.sub(he.actual_deaths, ValueConstraint.NONE);
             p = p2.sub(p.moveUpPreserving(0.5), ValueConstraint.NONE);
-            
+
             // округления
             Util.assertion(Math.abs(p.sum(1, MAX_AGE - 1)) < 10);
-            
+
             // накопление возрастов более MAX_AGE, но не должно становиться очень большим 
             Util.assertion(Math.abs(p.getYearValue(Gender.BOTH, MAX_AGE)) < 1000);
-            
+
             if (he.index().equals("1941.1"))
             {
                 same(p.getYearValue(Gender.BOTH, 0), he.actual_births, 0.0002);
