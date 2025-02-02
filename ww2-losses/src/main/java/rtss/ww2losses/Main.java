@@ -791,15 +791,34 @@ public class Main
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, ac_general, ac_conscripts);
         AgeLineFactorIntensities alis = eval.eval(p1946_actual);
         
-        if (Util.True)
+        if (Util.False)
         {
             alis.display("Интенсивность потерь " + area);
+            PopulationContext p = alis.toPopulationContext();
+            Util.noop();
         }
         
-        // ### для РСФСР 
-        // ### для определенных групп (gender, age1, age2)
-        // ### интерполировать ALI между точками age1-age2
-        // ### и найти коэф. иммиграционной интенсивности в этих возрастах/полах (для этих линий)
+        AgeLineFactorIntensities amig = null;
+
+        if (ap.area == Area.RSFSR)
+        {
+            // ### для РСФСР 
+            // ### для определенных групп (gender, age1, age2)
+            // ### интерполировать ALI между точками age1-age2
+            // ### затем найти коэф. иммиграционной интенсивности в этих возрастах/полах (для этих линий)
+
+            // alis.unnegInterpolate(Gender.MALE, 2, 7)
+            // alis.unnegInterpolate(Gender.FEMALE, 2, 7)
+            // alis.unnegInterpolate(Gender.FEMALE, 42, 57)
+
+            amig = new AgeLineFactorIntensities();
+            
+            // eval.evalMigration(amig, alis, Gender.MALE, 2, 7)
+            // eval.evalMigration(amig, alis, Gender.FEMALE, 2, 7)
+            // eval.evalMigration(amig, alis, Gender.FEMALE, 42, 57)
+            
+            // ### при processAgeLines использовать amig
+        }
 
         /* 
          * расчёт (и действительное построение) возрастных линий с учётов найденных коэфициентов интенсивности потерь

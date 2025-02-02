@@ -14,6 +14,8 @@ import rtss.util.plot.PopulationChart;
  */
 public class AgeLineFactorIntensities
 {
+    // ### change to DoubleArray
+    
     private Map<String, Double> m = new HashMap<>();
 
     private String key(Gender gender, int nd)
@@ -50,7 +52,7 @@ public class AgeLineFactorIntensities
 
     /* ========================================================== */
 
-    private PopulationContext toPopulationContext() throws Exception
+    public PopulationContext toPopulationContext() throws Exception
     {
         PopulationContext p = PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
 
