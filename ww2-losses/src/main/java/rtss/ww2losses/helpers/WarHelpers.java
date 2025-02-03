@@ -30,7 +30,7 @@ public class WarHelpers
         validateDeficit(deficit, Gender.FEMALE);
     }
 
-    public static void validateDeficit(PopulationContext deficit, Gender gender) throws Exception
+    private static void validateDeficit(PopulationContext deficit, Gender gender) throws Exception
     {
         double negsum = 0;
         double sum = 0;

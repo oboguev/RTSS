@@ -170,6 +170,13 @@ public class Main
     private PopulationContext deficit1946_raw;
     private PopulationContext deficit1946_adjusted;
 
+    public static enum Phase
+    {
+        PRELIMINARY, ACTUAL
+    };
+
+    private Phase phase;
+
     void main() throws Exception
     {
         Util.out("");
@@ -254,10 +261,17 @@ public class Main
                     .display();
         }
 
-        stage_1(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
-        
-        // ###
-        
+        stage_1(Phase.PRELIMINARY, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
+
+        if (ap.area == Area.RSFSR)
+        {
+            HalfYearEntries<HalfYearEntry> immigration_halves = halves;
+            halves = null;
+            stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
+            // ### avoid double printing
+            // ### check imm result is the same, recrursive
+        }
+
         evalNewBirths();
         evalDeathsForNewBirths_UnderPeacetimeChildMortality();
         fitDeathsForNewBirths_UnderActualWartimeChildMortality();
@@ -284,19 +298,23 @@ public class Main
                     .display();
         }
 
+        // ### to do: also initial-stage deficit (pre-immigration)
         ExportResults.exportResults(exportDirectory, ap, halves,
                                     allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,
                                     deficit1946_raw, deficit1946_adjusted);
     }
-    
+
     private void stage_1(
+            Phase phase,
             PopulationContext p_start1941,
             PopulationContext deaths_1941_1st_halfyear,
             double births_1941_1st_halfyear,
             PopulationContext p_mid1941,
             HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
+        this.phase = phase;
+
         /* передвижка по полугодиям для мирных условий */
         halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
 
@@ -315,7 +333,7 @@ public class Main
                     .display();
         }
 
-        evalDeficit1946();
+        evalDeficit1946(immigration_halves);
         evalAgeLines();
     }
 
@@ -431,7 +449,7 @@ public class Main
             fw1.forward(pwb, mt, 0.5);
             if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
             {
-                pwb = pwb.add(immigration_halves.get(year, half).prev.immigration);
+                pwb = pwb.add(immigration_halves.get(year, half).prev.immigration, ValueConstraint.NON_NEGATIVE);
             }
 
             /* передвижка на следующие полгода населения без учёта рождений */
@@ -440,7 +458,7 @@ public class Main
             fw2.forward(pxb, mt, 0.5);
             if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
             {
-                pxb = pxb.add(immigration_halves.get(year, half).prev.immigration);
+                pxb = pxb.add(immigration_halves.get(year, half).prev.immigration, ValueConstraint.NON_NEGATIVE);
             }
 
             /* сохранить результаты в полугодовой записи */
@@ -554,7 +572,7 @@ public class Main
 
     /* ======================================================================================================= */
 
-    private void evalDeficit1946() throws Exception
+    private void evalDeficit1946(HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         PopulationContext p1946_expected_with_births = halves.last().p_nonwar_with_births;
         PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
@@ -565,7 +583,8 @@ public class Main
          * проверить, что сумма expected_nonwar_deaths примерно равна разнице численностей
          * p_nonwar_without_births
          */
-        double v_sum = 0;
+        double v_sum_deaths = 0;
+        double v_sum_immigration = 0;
         for (HalfYearEntry curr : halves)
         {
             if (curr.year == 1941 && curr.halfyear == HalfYearSelector.FirstHalfYear)
@@ -573,12 +592,17 @@ public class Main
             if (curr.year == 1946)
                 continue;
 
-            v_sum += curr.expected_nonwar_deaths;
+            v_sum_deaths += curr.expected_nonwar_deaths;
+            
+            if (immigration_halves != null)
+            {
+                v_sum_immigration += immigration_halves.get(curr.year, curr.halfyear).immigration.sum();
+            }
         }
 
         double v = p1941_mid.sum();
         v -= p1946_expected_without_births.sum();
-        if (Util.differ(v_sum, v, 0.0001))
+        if (Util.differ(v_sum_deaths - v_sum_immigration, v, 0.0001))
             Util.err("Несовпадение числа смертей");
 
         /* =================================================== */
@@ -604,7 +628,7 @@ public class Main
 
         if (area == Area.RSFSR && CancelNegativeDeficit)
         {
-            if (PrintDiagnostics)
+            if (PrintDiagnostics && phase == Phase.ACTUAL)
                 WarHelpers.validateDeficit(deficit, "До эмиграции и отмены отрицательных женских значений:");
 
             /*
@@ -619,22 +643,25 @@ public class Main
         v = p1946_expected_with_births.sum();
         v -= p1946_actual.sum();
         double v_total = v;
-        outk("Общий дефицит населения к январю 1946, тыс. чел.", v);
+        if (phase == Phase.ACTUAL)
+            outk("Общий дефицит населения к январю 1946, тыс. чел.", v);
 
         v = p1946_expected_without_births.sum();
         v -= p1946_actual_born_prewar.sum();
         double v_prewar = v;
-        outk("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.", v);
+        if (phase == Phase.ACTUAL)
+            outk("Дефицит наличного в начале войны населения к январю 1946, тыс. чел.", v);
 
         v = p1946_expected_newonly.sum();
         v -= p1946_actual_born_postwar.sum();
         double v_postwar = v;
-        outk("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.", v);
+        if (phase == Phase.ACTUAL)
+            outk("Дефицит рождённного во время войны населения к январю 1946, тыс. чел.", v);
 
         if (Util.differ(v_total, v_prewar + v_postwar))
             Util.err("Расхождение категорий дефицита");
 
-        if (PrintDiagnostics && Util.False)
+        if (PrintDiagnostics && Util.False && phase == Phase.ACTUAL)
         {
             ShowPopulationAgeSliceHistory.showWithoutBirhts(ap, p1946_actual, halves, 3);
             ShowPopulationAgeSliceHistory.showWithoutBirhts(ap, p1946_actual, halves, 4);
@@ -644,14 +671,20 @@ public class Main
         if (DeductEmigration)
         {
             PopulationContext emigration = emigration();
-            out("");
-            outk("Эмиграция, тыс. чел.", emigration.sum());
+            if (phase == Phase.ACTUAL)
+            {
+                out("");
+                outk("Эмиграция, тыс. чел.", emigration.sum());
+            }
             deficit = deficit.sub(emigration, ValueConstraint.NONE);
         }
         else
         {
-            out("");
-            out("Эмиграция ещё включена в половозрастную структуру начала 1946 года, и не вычитается из смертности");
+            if (phase == Phase.ACTUAL)
+            {
+                out("");
+                out("Эмиграция ещё включена в половозрастную структуру начала 1946 года, и не вычитается из смертности");
+            }
         }
 
         if (area == Area.RSFSR && CancelNegativeDeficit)
@@ -661,7 +694,7 @@ public class Main
             deficit_wb_adjusted = cancelNegativeDeficit(deficit_wb_adjusted, cancelDeficitRSFSR);
         }
 
-        if (PrintDiagnostics)
+        if (PrintDiagnostics && phase == Phase.ACTUAL)
         {
             if (area == Area.RSFSR && CancelNegativeDeficit)
                 WarHelpers.validateDeficit(deficit, "После эмиграции и отмены отрицательных женских значений:");
@@ -685,12 +718,15 @@ public class Main
         double deficit_f_fertile = subcount(deficit, Gender.FEMALE, 15, 58);
         double deficit_other = deficit_total - deficit_m_conscripts - deficit_f_fertile;
 
-        out("");
-        outk("Предварительная сверхсмертность всего наличного на середину 1941 года населения к концу 1945 года, по дефициту", deficit_total);
-        out("Предварительная разбивка на категории по временному окну:");
-        outk("    Сверхсмертность [по дефициту] мужчин призывного возраста", deficit_m_conscripts);
-        outk("    Сверхсмертность [по дефициту] женщин фертильного возраста", deficit_f_fertile);
-        outk("    Сверхсмертность [по дефициту] остального наличного на середину 1941 года населения", deficit_other);
+        if (phase == Phase.ACTUAL)
+        {
+            out("");
+            outk("Предварительная сверхсмертность всего наличного на середину 1941 года населения к концу 1945 года, по дефициту", deficit_total);
+            out("Предварительная разбивка на категории по временному окну:");
+            outk("    Сверхсмертность [по дефициту] мужчин призывного возраста", deficit_m_conscripts);
+            outk("    Сверхсмертность [по дефициту] женщин фертильного возраста", deficit_f_fertile);
+            outk("    Сверхсмертность [по дефициту] остального наличного на середину 1941 года населения", deficit_other);
+        }
 
         this.deficit1946_raw = deficit_wb_raw;
         this.deficit1946_adjusted = deficit_wb_adjusted;
@@ -891,7 +927,9 @@ public class Main
             sum_conscripts += he.actual_excess_wartime_deaths.sumDays(Gender.MALE, conscript_age_from, conscript_age_to);
         }
 
+        // ###
         outk("Избыточное число всех смертей", sum_all);
+        // ###
         outk(String.format("Избыточное число смертей мужчин призывного возраста (%.1f-%.1f лет)",
                            Constants.CONSCRIPT_AGE_FROM,
                            Constants.CONSCRIPT_AGE_TO),
@@ -986,7 +1024,7 @@ public class Main
             fw.setBirthCount(m_births, f_births);
 
             fw.forward(p, he.peace_mt, 0.5);
-            
+
             // остаток родившихся за время войны
             he.next.wartime_born_remainder_UnderPeacetimeChildMortality = p.clone();
 
@@ -1078,7 +1116,7 @@ public class Main
             {
                 // остаток родившихся за время войны
                 he.next.wartime_born_remainder_UnderActualWartimeChildMortality = p.clone();
-                
+
                 // ввести остаток рождённых до конца полугодия в население начала следующего полугодия
                 merge(p, he.next.actual_population);
 
