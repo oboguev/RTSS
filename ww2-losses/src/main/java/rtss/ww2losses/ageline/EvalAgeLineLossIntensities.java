@@ -92,7 +92,10 @@ public class EvalAgeLineLossIntensities
         int ndays = 9 * years2days(0.5);
 
         double v, initial_population, final_population, loss_intensity;
-        
+
+        double min_v = 0;
+        double min_vp = 0;
+
         for (int nd = nd1; nd <= nd2; nd++)
         {
             if (nd + ndays > p1946_actual.MAX_DAY)
@@ -102,12 +105,30 @@ public class EvalAgeLineLossIntensities
             final_population = p1946_actual.getDay(Locality.TOTAL, gender, nd + ndays);
             loss_intensity = alis.get(gender, nd);
             v = eval.evalMigrationIntensity(nd, gender, initial_population, final_population, loss_intensity);
-            
-            if (v < 0 && Math.abs(initial_population * v) < 10)
-                v = 0;
+
+            if (v < 0)
+            {
+                min_v = Math.min(min_v, v);
+                min_vp = Math.min(min_vp, v * initial_population);
+
+                if (Math.abs(v) < 5e-4 && Math.abs(initial_population * v) < 0.5)
+                {
+                    v = 0;
+                }
+                else
+                {
+                    Util.err(String.format("evalMigration: v = %f, vp = %f", v, v * initial_population));
+                }
+            }
+
             Util.assertion(v >= 0);
 
             amig.set(gender, nd, v);
+        }
+        
+        if (min_v < 0)
+        {
+            // Util.err(String.format("evalMigration: min_v = %f, min_vp = %f", min_v, min_vp));
         }
     }
 

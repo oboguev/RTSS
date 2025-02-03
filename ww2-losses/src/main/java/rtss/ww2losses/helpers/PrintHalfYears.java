@@ -45,6 +45,20 @@ public class PrintHalfYears
         Util.out("    н.нач   = численность населения в начале полугодия, тыс. чел");
         Util.out("    н.сред  = средняя численность населения за полугодие, тыс. чел");
         Util.out("    н.кон   = численность населения в конце полугодия, тыс. чел");
+
+        Util.out("");
+        if (ap.area == Area.RSFSR)
+        {
+            Util.out("    иммигр  = минимальная миграция из других республик в РСФСР в данном полугодии, тыс. чел,");
+            Util.out("              не отражает ни фактическую эвакуационную миграцию, ни даже начальную миграционную величину");
+            Util.out("              для остатока осевшего после 1946 года в РСФСР, но только превышение некоторых особо");
+            Util.out("              многочисленных половозрастных групп переселенцев над средним по возрасту миграционным притоком");
+        }
+        else
+        {
+            Util.out("    иммигр  = иммиграция, для СССР всегда нуль");
+        }
+
         Util.out("");
         Util.out("    ум      = общее число смертей за полугодие, тыс. чел");
         Util.out("    с.изб   = число избыточных смертей за полугодие, тыс. чел");
@@ -57,18 +71,13 @@ public class PrintHalfYears
         Util.out("    фcр.мир   = число смертей (в данном полугодии) от фактических рождений c начала войны, ожидаемое при смертности мирного времени");
         Util.out("    фcр       = фактическое число смертей (в данном полугодии) от фактических рождений с начала войны, при фактической военной смертности");
 
-        if (ap.area == Area.RSFSR)
-            Util.out("    иммигр    = миграция из других республик в РСФСР в данном полугодии, тыс. чел");
-        else
-            Util.out("    иммигр    = иммиграция, для СССР всегда нуль");
-
         Util.out("");
         Util.out("    р         = рождаемость (промилле, для полугодия, но в нормировке на год");
         Util.out("    с         = смертность (промилле, для полугодия, но в нормировке на год)");
         Util.out("");
 
-        Util.out("п/год   н.нач    н.сред    н.кон     ум    с.изб   с.прз   с.инов  р.ожид  р.факт  р.нехв   фср.мир   фср    иммигр    р     с  ");
-        Util.out("=====  =======   =======  =======  ======  ======  ======  ======  ======  ======  =======  =======  ======  =======  ====  ====");
+        Util.out("п/год   н.нач    н.сред    н.кон   иммигр     ум    с.изб   с.прз   с.инов  р.ожид  р.факт  р.нехв   фср.мир   фср     р     с  ");
+        Util.out("=====  =======   =======  =======  =======  ======  ======  ======  ======  ======  ======  =======  =======  ======  ====  ====");
 
         for (HalfYearEntry he : halves)
         {
@@ -76,8 +85,9 @@ public class PrintHalfYears
                 print(he, results);
         }
 
-        String s = String.format("%-6s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s %8s" + " %5s %5s",
+        String s = String.format("%-6s %8s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5s %5s",
                                  "всего", EMPTY, EMPTY, EMPTY,
+                                 f2k(sum_immigration),
                                  //
                                  f2k(sum_actual_deaths),
                                  f2k(sum_actual_excess_wartime_deaths),
@@ -89,7 +99,6 @@ public class PrintHalfYears
                                  f2k(sum_birth_shortfall),
                                  f2k(sum_actual_warborn_deaths_baseline),
                                  f2k(sum_actual_warborn_deaths),
-                                 f2k(sum_immigration),
                                  //
                                  EMPTY, EMPTY
         //
@@ -129,11 +138,12 @@ public class PrintHalfYears
         sum_actual_warborn_deaths += he.actual_warborn_deaths;
         sum_immigration += he.immigration.sum();
 
-        String s = String.format("%d.%d %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s %8s" + " %5.1f %5.1f",
+        String s = String.format("%d.%d %8s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5.1f %5.1f",
                                  he.year, he.halfyear.seq(1),
                                  f2k(p1.sum()),
                                  f2k(pavg.sum()),
                                  f2k(p2.sum()),
+                                 f2k(he.immigration.sum()),
                                  //
                                  f2k(he.actual_deaths.sum()),
                                  f2k(he.actual_excess_wartime_deaths.sum()),
@@ -145,7 +155,6 @@ public class PrintHalfYears
                                  f2k(he.expected_nonwar_births - he.actual_births),
                                  f2k(he.actual_warborn_deaths_baseline),
                                  f2k(he.actual_warborn_deaths),
-                                 f2k(he.immigration.sum()),
                                  //
                                  cbr,
                                  cdr
