@@ -261,12 +261,18 @@ public class Main
                     .display();
         }
 
-        stage_1(Phase.PRELIMINARY, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
-
-        if (ap.area == Area.RSFSR)
+        if (ap.area == Area.USSR)
         {
+            stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
+            
+        }
+        else if (ap.area == Area.RSFSR)
+        {
+            stage_1(Phase.PRELIMINARY, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
+
             HalfYearEntries<HalfYearEntry> immigration_halves = halves;
             halves = null;
+
             stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
             // ### avoid double printing
             // ### check imm result is the same, recrursive
