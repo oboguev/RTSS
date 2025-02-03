@@ -254,27 +254,10 @@ public class Main
                     .display();
         }
 
-        /* передвижка по полугодиям для мирных условий */
-        halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
-
-        if (Util.False)
-        {
-            String point = "1946.1";
-            new PopulationChart("Ожидаемое население " + area.toString() + " на " + point)
-                    .show("1", halves.get(point).p_nonwar_without_births)
-                    .display();
-        }
-
-        if (Util.False)
-        {
-            new PopulationChart("Сверхсмертность населения " + area.toString() + " на 1946.1")
-                    .show("1", eval_deficit_1946(halves, DeductEmigration))
-                    .display();
-        }
-
-        evalDeficit1946();
-        evalAgeLines();
-
+        stage_1(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
+        
+        // ###
+        
         evalNewBirths();
         evalDeathsForNewBirths_UnderPeacetimeChildMortality();
         fitDeathsForNewBirths_UnderActualWartimeChildMortality();
@@ -305,6 +288,35 @@ public class Main
                                     allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,
                                     deficit1946_raw, deficit1946_adjusted);
+    }
+    
+    private void stage_1(
+            PopulationContext p_start1941,
+            PopulationContext deaths_1941_1st_halfyear,
+            double births_1941_1st_halfyear,
+            PopulationContext p_mid1941,
+            HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
+    {
+        /* передвижка по полугодиям для мирных условий */
+        halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
+
+        if (Util.False)
+        {
+            String point = "1946.1";
+            new PopulationChart("Ожидаемое население " + area.toString() + " на " + point)
+                    .show("1", halves.get(point).p_nonwar_without_births)
+                    .display();
+        }
+
+        if (Util.False)
+        {
+            new PopulationChart("Сверхсмертность населения " + area.toString() + " на 1946.1")
+                    .show("1", eval_deficit_1946(halves, DeductEmigration))
+                    .display();
+        }
+
+        evalDeficit1946();
+        evalAgeLines();
     }
 
     /* ================================================================================== */
