@@ -255,7 +255,7 @@ public class Main
         }
 
         /* передвижка по полугодиям для мирных условий */
-        halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941);
+        halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
 
         if (Util.False)
         {
@@ -355,7 +355,8 @@ public class Main
             PopulationContext p_start1941,
             PopulationContext deaths_1941_1st_halfyear,
             double births_1941_1st_halfyear,
-            PopulationContext p_mid1941) throws Exception
+            PopulationContext p_mid1941,
+            HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
         PopulationContext pctx = p_mid1941.clone();
@@ -416,11 +417,19 @@ public class Main
             ForwardPopulationT fw1 = new ForwardPopulationT();
             fw1.setBirthRateTotal(ap.CBR_1940);
             fw1.forward(pwb, mt, 0.5);
+            if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
+            {
+                pwb = pwb.add(immigration_halves.get(year, half).prev.immigration);
+            }
 
             /* передвижка на следующие полгода населения без учёта рождений */
             ForwardPopulationT fw2 = new ForwardPopulationT();
             fw2.setBirthRateTotal(0);
             fw2.forward(pxb, mt, 0.5);
+            if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
+            {
+                pxb = pxb.add(immigration_halves.get(year, half).prev.immigration);
+            }
 
             /* сохранить результаты в полугодовой записи */
             curr = new HalfYearEntry(year, half, pwb.clone(), pxb.clone());
