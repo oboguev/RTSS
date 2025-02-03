@@ -26,6 +26,7 @@ import rtss.ww2losses.helpers.ExportResults;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PrintHalfYears;
 import rtss.ww2losses.helpers.PrintYears;
+import rtss.ww2losses.helpers.ShowAgeSliceDeathHistory;
 import rtss.ww2losses.helpers.ShowPopulationAgeSliceHistory;
 import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
@@ -48,6 +49,8 @@ import java.util.List;
 // ### при подсчётах actual_deaths, excess_deaths, CBR -- убирать протяжённые блоки отрицательных значений (РСФСР)
 // ### причём отдельно по MALE и FEMALE
 // ### смертность при числе смертей < 0 ???
+
+// ### распечатать число смертей за каждое полугодие для возрастных линий 0-20 (на 1941) male and female
 
 public class Main
 {
@@ -350,6 +353,11 @@ public class Main
             new PopulationChart("Избыточные смерти " + area + " в 1941-1945 гг. по возрасту на начало 1946")
                     .show("смерти", allExcessDeathsByAgeAt1946.toPopulation())
                     .display();
+        }
+        
+        if (Util.True)
+        {
+            ShowAgeSliceDeathHistory.show(halves, Gender.BOTH, 0, 20);            
         }
 
         ExportResults.exportResults(exportDirectory, ap, halves,
