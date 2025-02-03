@@ -200,6 +200,7 @@ public class Main
         {
             model = new Model();
             model.params = null;
+            // only model.results
         }
 
         if (ApplyAntibiotics)
