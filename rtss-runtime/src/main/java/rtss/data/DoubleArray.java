@@ -234,10 +234,17 @@ public class DoubleArray
 
     public double[] asUnboxedArray() throws Exception
     {
+        return asUnboxedArray(null);
+    }
+    
+    public double[] asUnboxedArray(Double defaultValue) throws Exception
+    {
         double[] d = new double[values.length];
         for (int age = 0; age < values.length; age++)
         {
             Double v = values[age];
+            if (v == null)
+                v = defaultValue;
             if (v == null)
                 throw new Exception("Mising value for age " + age);
             d[age] = v;

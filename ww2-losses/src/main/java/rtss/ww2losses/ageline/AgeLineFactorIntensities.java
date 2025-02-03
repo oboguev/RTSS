@@ -11,6 +11,9 @@ import rtss.util.plot.PopulationChart;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
  * Хранит отображение (Gender, nd_age) -> loss intensity или immigration intensity
  */
@@ -124,7 +127,7 @@ public class AgeLineFactorIntensities
         int nd1 = years2days(age1);
         int nd2 = years2days(age2);
         Util.assertion(nd1 >= 0 && nd2 >= 0 && nd1 < nd2);
-        
+
         for (int nd = nd1; nd <= nd2; nd++)
         {
             if (a[nd] == null || a[nd] <= 0)
@@ -179,5 +182,68 @@ public class AgeLineFactorIntensities
         }
 
         return sb.toString();
+    }
+
+    /* ========================================================== */
+
+    /*
+     * Locate and display regions with negative intensities
+     */
+    public static class Region
+    {
+        public int nd1;
+        public int nd2;
+    }
+
+    public List<Region> negRegions(Gender gender) throws Exception
+    {
+        List<Region> list = new ArrayList<>();
+
+        double[] a = forGender(gender).asUnboxedArray(0.0);
+
+        for (int nd = 0; nd < a.length;)
+        {
+            // find first negative point
+            while (nd < a.length && a[nd] >= 0)
+                nd++;
+            if (nd == a.length)
+                break;
+
+            Region r = new Region();
+            r.nd1 = nd;
+
+            // find first positive point
+            while (nd < a.length && a[nd] < 0)
+                nd++;
+            r.nd2 = nd - 1;
+            list.add(r);
+        }
+
+        return list;
+    }
+
+    public String dumpNegRegions(Gender gender) throws Exception
+    {
+        List<Region> list = negRegions(gender);
+        if (list.size() == 0)
+            return "No negative regions";
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Region r : list)
+        {
+            sb.append(String.format("%5d - %5d  =  %7.3f - %7.3f  = %7.3f - %7.3f",
+                                    r.nd1, r.nd2,
+                                    day2year(r.nd1), day2year(r.nd2),
+                                    day2year(r.nd1) - 0.5, day2year(r.nd2) - 0.5));
+            sb.append(Util.nl);
+        }
+
+        return sb.toString();
+    }
+
+    private double day2year(int nd)
+    {
+        return nd / 365.0;
     }
 }

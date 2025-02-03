@@ -44,13 +44,20 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
-// ### для девочек РСФСР провал в числе избыточных смертей в возрастах 10-15 на 1941.2(см .txt)
+// ### для девочек РСФСР провал в числе избыточных смертей в возрастах 10-15 на 1941.2 (см .txt)
+// ### поставить выравнивающую миграцию
 
-// ### при подсчётах actual_deaths, excess_deaths, CBR -- убирать протяжённые блоки отрицательных значений (РСФСР)
-// ### причём отдельно по MALE и FEMALE
-// ### смертность при числе смертей < 0 ???
+/* ******************************
 
-// ### распечатать число смертей за каждое полугодие для возрастных линий 0-20 (на 1941) male and female
+### CCCР : отрицательные ali, т.е слишком много начального населения
+
+nd (1941 mid) = age (1941 mid) = age (1941 start)
+
+ 1319 -  1350  =    3.614 -   3.699  =   3.114 -   3.199
+ 1918 -  2160  =    5.255 -   5.918  =   4.755 -   5.418
+ 2564 -  2904  =    7.025 -   7.956  =   6.525 -   7.456
+
+********************************/
 
 public class Main
 {
@@ -956,9 +963,17 @@ public class Main
             // Util.noop();
         }
         
-        if (phase == phase.ACTUAL)
+        if (phase == Phase.ACTUAL && Util.False)
         {
-            // ### распечатать участки с отрицательным ali (порождающим отрицательную величину excess deaths)
+            /* распечатать участки с отрицательным ali (порождающим отрицательную величину excess deaths) */
+
+            // String neg_male = alis.dumpNegRegions(Gender.MALE);
+            // String neg_female = alis.dumpNegRegions(Gender.FEMALE);
+            // Util.noop();
+            
+            // alis.display("Интенсивность военных потерь " + area);
+            // PopulationContext p = alis.toPopulationContext();
+            // Util.noop();
         }
 
         /* 
