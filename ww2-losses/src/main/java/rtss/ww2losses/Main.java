@@ -184,6 +184,9 @@ public class Main
 
     void main() throws Exception
     {
+        /*
+         * Установка конфигурации 
+         */
         Util.out("");
         Util.out("**********************************************************************************");
         Util.out("Вычисление для " + area.toString());
@@ -211,7 +214,10 @@ public class Main
         {
             Util.out("Без учёта влияния антибиотиков");
         }
-
+        
+        /*
+         * Подготовить возрастные коэффциенты рождаемости 
+         */
         switch (area)
         {
         case USSR:
@@ -247,12 +253,12 @@ public class Main
         Population p_leftover = pm1941.evaluateAsPopulation(p_mid1941, mt1940);
         Util.assertion(p_leftover.sum() == 0);
 
-        /* по передвижке на основе CBR_1940 */
+        /* население на середину 1941 года -- по передвижке на основе CBR_1940 */
         PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
         PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
         double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
 
-        /* по передвижке на основе ASFR */
+        /* население на середину 1941 года -- по передвижке на основе ASFR */
         if (Util.True)
         {
             ForwardingResult fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
@@ -263,25 +269,39 @@ public class Main
 
         if (Util.False)
         {
+            /* отобразить график населения на середину 1941 года */
             new PopulationChart("Население " + area + " на середину 1941 года")
                     .show("перепись", p_mid1941.toPopulation())
                     .display();
         }
 
+        /*
+         * Расчёт дефицита, возрастных линий и др. данных по полугодиям для населения наличного на середину 1941 года,
+         * без учёта рождений после середины 1941 года.
+         */
         if (ap.area == Area.USSR)
         {
             stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
-
         }
         else if (ap.area == Area.RSFSR)
         {
+            /*
+             * Предварительный расчёт без учёта иммиграции.
+             * Вычисляет иммиграцию.
+             */
             stage_1(Phase.PRELIMINARY, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
 
+            /*
+             * Перерасчёт с учётом иммиграции.
+             */
             HalfYearEntries<HalfYearEntry> immigration_halves = halves;
             halves = null;
 
             stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
 
+            /*
+             * Проверить, что новый расчёт иммиграции не отличается от начального.
+             */
             double v1 = totalImmigration(immigration_halves);
             double v2 = totalImmigration(halves);
 
@@ -290,10 +310,26 @@ public class Main
                 throw new Exception("Расхождение в исчисленном объёме иммиграции на предварительном и окончательном шагах");
         }
 
+        /*
+         * Расчёт числа рождений по полугодиям начиная с середины 1941 года.
+         */
         evalNewBirths();
-        evalDeathsForNewBirths_UnderPeacetimeChildMortality();
-        fitDeathsForNewBirths_UnderActualWartimeChildMortality();
 
+        /*
+         * Расчёт числа смертей от новых рождений (после середины 1941 года) при условии, если бы
+         * детская смертность имела величину мирного времени. 
+         */
+        evalDeathsForNewBirths_UnderPeacetimeChildMortality();
+
+        /*
+         * Расчёт числа смертей от новых рождений (после середины 1941 года) при фактической военной величине 
+         * детской смертности. Заполняет возрастные линии для населения родившегося после середины 1941 года. 
+         */
+        fitDeathsForNewBirths_UnderActualWartimeChildMortality();
+        
+        /*
+         * Проверка и распечатка результатов
+         */
         new VerifyHalfYears(ap, halves).verify(false);
 
         PrintHalfYears.print(ap, halves, model.results);
