@@ -70,14 +70,17 @@ public class PrintHalfYears
         Util.out("    р.нехв    = дефицит рождений за полугодие, тыс. новорожденных");
         Util.out("    фcр.мир   = число смертей (в данном полугодии) от фактических рождений c начала войны, ожидаемое при смертности мирного времени");
         Util.out("    фcр       = фактическое число смертей (в данном полугодии) от фактических рождений с начала войны, при фактической военной смертности");
+        Util.out("");
+        Util.out("    од.мир    = остаток (на начало полугодия) детей фактически родившихся c начала войны, ожидаемое при смертности мирного времени");
+        Util.out("    од        = остаток (на начало полугодия) детей фактически родившихся c начала войны, при фактической военной смертности");
 
         Util.out("");
         Util.out("    р         = рождаемость (промилле, для полугодия, но в нормировке на год");
         Util.out("    с         = смертность (промилле, для полугодия, но в нормировке на год)");
         Util.out("");
 
-        Util.out("п/год   н.нач    н.сред    н.кон   иммигр     ум    с.изб   с.прз   с.инов  р.ожид  р.факт  р.нехв   фср.мир   фср     р     с  ");
-        Util.out("=====  =======   =======  =======  =======  ======  ======  ======  ======  ======  ======  =======  =======  ======  ====  ====");
+        Util.out("п/год   н.нач    н.сред    н.кон   иммигр     ум    с.изб   с.прз   с.инов  р.ожид  р.факт  р.нехв   фср.мир   фср    од.мир    од     р     с  ");
+        Util.out("=====  =======   =======  =======  =======  ======  ======  ======  ======  ======  ======  =======  =======  ======  ======= ======= ====  ====");
 
         for (HalfYearEntry he : halves)
         {
@@ -85,7 +88,7 @@ public class PrintHalfYears
                 print(he, results);
         }
 
-        String s = String.format("%-6s %8s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5s %5s",
+        String s = String.format("%-6s %8s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %7s %7s" + " %5s %5s",
                                  "всего", EMPTY, EMPTY, EMPTY,
                                  f2k(sum_immigration),
                                  //
@@ -99,6 +102,8 @@ public class PrintHalfYears
                                  f2k(sum_birth_shortfall),
                                  f2k(sum_actual_warborn_deaths_baseline),
                                  f2k(sum_actual_warborn_deaths),
+                                 //
+                                 EMPTY, EMPTY,
                                  //
                                  EMPTY, EMPTY
         //
@@ -138,7 +143,15 @@ public class PrintHalfYears
         sum_actual_warborn_deaths += he.actual_warborn_deaths;
         sum_immigration += he.immigration.sum();
 
-        String s = String.format("%d.%d %8s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %5.1f %5.1f",
+        String wartime_born_remainder_UnderPeacetimeChildMortality = EMPTY;
+        if (he.wartime_born_remainder_UnderPeacetimeChildMortality != null)
+            wartime_born_remainder_UnderPeacetimeChildMortality = f2k(he.wartime_born_remainder_UnderPeacetimeChildMortality.sum());
+
+        String wartime_born_remainder_UnderActualWartimeChildMortality = EMPTY;
+        if (he.wartime_born_remainder_UnderActualWartimeChildMortality != null)
+            wartime_born_remainder_UnderActualWartimeChildMortality = f2k(he.wartime_born_remainder_UnderActualWartimeChildMortality.sum());
+
+        String s = String.format("%d.%d %8s %8s %8s %8s" + " %7s %7s %7s %7s" + " %7s %7s %8s %8s %7s" + " %7s %7s" + " %5.1f %5.1f",
                                  he.year, he.halfyear.seq(1),
                                  f2k(p1.sum()),
                                  f2k(pavg.sum()),
@@ -155,6 +168,9 @@ public class PrintHalfYears
                                  f2k(he.expected_nonwar_births - he.actual_births),
                                  f2k(he.actual_warborn_deaths_baseline),
                                  f2k(he.actual_warborn_deaths),
+                                 //
+                                 wartime_born_remainder_UnderPeacetimeChildMortality,
+                                 wartime_born_remainder_UnderActualWartimeChildMortality,
                                  //
                                  cbr,
                                  cdr

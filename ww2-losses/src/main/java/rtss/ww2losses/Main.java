@@ -965,6 +965,9 @@ public class Main
             fw.setBirthCount(m_births, f_births);
 
             fw.forward(p, he.peace_mt, 0.5);
+            
+            // остаток родившихся за время войны
+            he.next.wartime_born_remainder_UnderPeacetimeChildMortality = p.clone();
 
             // число смертей от рождений при мирной смертности
             Util.assertion(Util.same(fw.getObservedDeaths(), fw.deathsByGenderAge().sum()));
@@ -1052,6 +1055,9 @@ public class Main
 
             if (record)
             {
+                // остаток родившихся за время войны
+                he.next.wartime_born_remainder_UnderActualWartimeChildMortality = p.clone();
+                
                 // ввести остаток рождённых до конца полугодия в население начала следующего полугодия
                 merge(p, he.next.actual_population);
 

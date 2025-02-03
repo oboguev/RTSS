@@ -84,8 +84,20 @@ public class HalfYearEntry
      * включая только начальное на середину 1941 года
      */
     public PopulationContext actual_population_without_births = newPopulationContext();
+    
+    /*
+     * остаток на начало полугодия от родившихся с середины 1941 года
+     * при фактических условиях военной смертности
+     */
+    public PopulationContext wartime_born_remainder_UnderActualWartimeChildMortality;
 
-    /** ============================ Фактическее рождения ============================ **/
+    /*
+     * остаток на начало полугодия от родившихся с середины 1941 года
+     * при условии, что детская смертность имела бы значения мирного времени
+     */
+    public PopulationContext wartime_born_remainder_UnderPeacetimeChildMortality;
+
+    /** ============================ Фактические рождения ============================ **/
 
     /* действительное число рождений в полугодии */
     public double actual_births;
