@@ -27,45 +27,24 @@ public class ShowAgeSliceDeathHistory
         }
 
         double slice = 1.0;
-        int nslices = 0;
-
-        for (double age = age1; age <= age2; age += slice)
-            nslices++;
-        
-        Util.unused(nslices);
 
         Util.out("");
         Util.out(String.format("Число смертей " + gender + " в возрастах %.1f-%.1f", age1, age2));
         Util.out("");
 
-        // обозначения колонок
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-6s ", "п/год"));
-        for (double age = age1; age <= age2; age += slice)
-        {
-            if (age == Math.floor(age))
-            {
-                sb.append(String.format("   %2d   ", (int) Math.floor(age)));
-            }
-            else
-            {
-                sb.append(String.format("  %4.1f  ", age));
-            }
-        }
-        Util.out(sb.toString());
+        printHeaders(age1, age2, slice);
 
-        // разделители
-        sb = new StringBuilder();
-        sb.append(repeat('=', 6));
-        for (double age = age1; age <= age2; age += slice)
-            sb.append(" " + repeat('=', 8));
-        Util.out(sb.toString());
 
         for (HalfYearEntry he : halves)
         {
-            sb = new StringBuilder();
-            double offset = he.offset_start1941();
+            if (he.year == 1946)
+                break;
+            
+            StringBuilder sb = new StringBuilder();
             sb.append(he.index());
+
+            double offset = he.offset_start1941();
+            
             for (double age = age1; age <= age2; age += slice)
             {
                 double xage1 = age + offset;
@@ -85,6 +64,32 @@ public class ShowAgeSliceDeathHistory
 
             Util.out(sb.toString());
         }
+    }
+    
+    private static void printHeaders(double age1, double age2, double slice)
+    {
+        // обозначения колонок
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%-6s ", "п/год"));
+        for (double age = age1; age <= age2; age += slice)
+        {
+            if (age == Math.floor(age))
+            {
+                sb.append(String.format("   %2d    ", (int) Math.floor(age)));
+            }
+            else
+            {
+                sb.append(String.format("  %4.1f   ", age));
+            }
+        }
+        Util.out(sb.toString());
+
+        // разделители
+        sb = new StringBuilder();
+        sb.append(repeat('=', 6));
+        for (double age = age1; age <= age2; age += slice)
+            sb.append(" " + repeat('=', 8));
+        Util.out(sb.toString());
     }
 
     private static String repeat(char c, int times)
