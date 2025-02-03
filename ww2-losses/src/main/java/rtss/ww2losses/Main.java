@@ -355,9 +355,8 @@ public class Main
                     .display();
         }
         
-        if (Util.True)
+        if (Util.False)
         {
-            // ### show excess deaths
             ShowAgeSliceDeathHistory.show(halves, Gender.BOTH, 0, 20);            
         }
 
