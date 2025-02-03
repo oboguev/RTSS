@@ -92,9 +92,7 @@ public class EvalAgeLineLossIntensities
         int ndays = 9 * years2days(0.5);
 
         double v, initial_population, final_population, loss_intensity;
-
-        double min_v = 0;
-        double min_vp = 0;
+        double min_v = 0, min_vp = 0;
 
         for (int nd = nd1; nd <= nd2; nd++)
         {
@@ -108,6 +106,10 @@ public class EvalAgeLineLossIntensities
 
             if (v < 0)
             {
+                /*
+                 * Итерация может прерваться, дав маленькое отрицательное значение иммиграции.
+                 * Проверить, что оно мало и обнулить его.
+                 */
                 min_v = Math.min(min_v, v);
                 min_vp = Math.min(min_vp, v * initial_population);
 
