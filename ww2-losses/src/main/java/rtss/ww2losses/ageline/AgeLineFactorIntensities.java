@@ -126,7 +126,7 @@ public class AgeLineFactorIntensities
 
         int nd1 = years2days(age1);
         int nd2 = years2days(age2);
-        Util.assertion(nd1 >= 0 && nd2 >= 0 && nd1 < nd2);
+        Util.assertion(nd1 >= 0 && nd2 >= 0 && nd1 <= nd2);
 
         for (int nd = nd1; nd <= nd2; nd++)
         {

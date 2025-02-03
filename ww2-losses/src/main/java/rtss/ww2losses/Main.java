@@ -942,9 +942,12 @@ public class Main
              * точками age1-age2 для устранения промежуточных отрицательных значений.
              * 
              * Затем найти положительный коэф. иммиграционной интенсивности в этих возрастах/полах (для этих половозрастных линий).
+             * 
+             * Возраст указывается на середину 1941 года.
              */
             alis.unnegInterpolateYears(Gender.MALE, 2.5, 7.5);
             alis.unnegInterpolateYears(Gender.FEMALE, 2.1, 7.37);
+            // alis.unnegInterpolateYears(Gender.FEMALE, 10.0, 16.0); // ###
             alis.unnegInterpolateYears(Gender.FEMALE, 42.5, 57.5);
 
             // alis.display("Исправленная интенсивность военных потерь " + area);
