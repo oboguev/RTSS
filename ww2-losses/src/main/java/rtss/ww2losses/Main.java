@@ -946,7 +946,7 @@ public class Main
             eval.setImmigration(ac_rsfsr_immigration);
             amig = new AgeLineFactorIntensities();
 
-            // вычислить мнтенсивность иммиграции
+            // вычислить интенсивность иммиграции
             eval.evalMigration(p1946_actual, amig, alis, Gender.MALE, 2.5, 7.5);
             eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 2.1, 7.37);
             eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 42.5, 57.5);
@@ -954,6 +954,11 @@ public class Main
             // amig.display("Интенсивность иммиграции" + area);
             // PopulationContext p_amig = amig.toPopulationContext();
             // Util.noop();
+        }
+        
+        if (phase == phase.ACTUAL)
+        {
+            // ### распечатать участки с отрицательным ali (порождающим отрицательную величину excess deaths)
         }
 
         /* 
