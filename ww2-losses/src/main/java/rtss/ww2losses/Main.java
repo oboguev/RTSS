@@ -22,6 +22,7 @@ import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.ageline.AgeLineFactorIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
+import rtss.ww2losses.ageline.FixAgeLine;
 import rtss.ww2losses.helpers.ExportResults;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PrintHalfYears;
@@ -44,12 +45,9 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
-// ### для девочек РСФСР провал в числе избыточных смертей в возрастах 10-15 на 1941.2 (см .txt)
-// ### поставить выравнивающую миграцию
-
 /* ******************************
 
-### CCCР : отрицательные ali, т.е слишком много начального населения
+### CCCР : отрицательные ali (и отрицательные excess deaths), т.е слишком много начального населения
 
 nd (1941 mid) = age (1941 mid) = age (1941 start)
 
@@ -224,7 +222,7 @@ public class Main
         {
             Util.out("Без учёта влияния антибиотиков");
         }
-        
+
         /*
          * Подготовить возрастные коэффциенты рождаемости 
          */
@@ -336,7 +334,7 @@ public class Main
          * детской смертности. Заполняет возрастные линии для населения родившегося после середины 1941 года. 
          */
         fitDeathsForNewBirths_UnderActualWartimeChildMortality();
-        
+
         /*
          * Проверка и распечатка результатов
          */
@@ -361,10 +359,10 @@ public class Main
                     .show("смерти", allExcessDeathsByAgeAt1946.toPopulation())
                     .display();
         }
-        
+
         if (Util.False)
         {
-            ShowAgeSliceDeathHistory.show(halves, Gender.BOTH, 0, 20);            
+            ShowAgeSliceDeathHistory.show(halves, Gender.BOTH, 0, 20);
         }
 
         ExportResults.exportResults(exportDirectory, ap, halves,
@@ -803,7 +801,7 @@ public class Main
         {
             if (this.deficit1946_raw_preimmigration == null)
                 this.deficit1946_raw_preimmigration = deficit_wb_raw;
-            
+
             if (this.deficit1946_adjusted_preimmigration == null)
                 this.deficit1946_adjusted_preimmigration = deficit_wb_adjusted;
         }
@@ -945,27 +943,31 @@ public class Main
              * 
              * Возраст указывается на середину 1941 года.
              */
-            alis.unnegInterpolateYears(Gender.MALE, 2.5, 7.5);
-            alis.unnegInterpolateYears(Gender.FEMALE, 2.1, 7.37);
-            // alis.unnegInterpolateYears(Gender.FEMALE, 10.0, 16.0); // ###
-            alis.unnegInterpolateYears(Gender.FEMALE, 42.5, 57.5);
+
+            FixAgeLine[] fixes = {
+                                   new FixAgeLine(Gender.MALE, 2.5, 7.5),
+                                   new FixAgeLine(Gender.FEMALE, 2.1, 7.37),
+                                   new FixAgeLine(Gender.FEMALE, 10.0, 16.0),
+                                   new FixAgeLine(Gender.FEMALE, 42.5, 57.5)
+            };
+            
+            for (FixAgeLine fix : fixes)
+                alis.unnegInterpolateYears(fix.gender, fix.age1, fix.age2);
 
             // alis.display("Исправленная интенсивность военных потерь " + area);
             // PopulationContext p_alis = alis.toPopulationContext();
 
+            /* вычислить интенсивность иммиграции */
             eval.setImmigration(ac_rsfsr_immigration);
             amig = new AgeLineFactorIntensities();
-
-            // вычислить интенсивность иммиграции
-            eval.evalMigration(p1946_actual, amig, alis, Gender.MALE, 2.5, 7.5);
-            eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 2.1, 7.37);
-            eval.evalMigration(p1946_actual, amig, alis, Gender.FEMALE, 42.5, 57.5);
+            for (FixAgeLine fix : fixes)
+                eval.evalMigration(p1946_actual, amig, alis, fix.gender, fix.age1, fix.age2);
 
             // amig.display("Интенсивность иммиграции" + area);
             // PopulationContext p_amig = amig.toPopulationContext();
             // Util.noop();
         }
-        
+
         if (phase == Phase.ACTUAL && Util.False)
         {
             /* распечатать участки с отрицательным ali (порождающим отрицательную величину excess deaths) */
@@ -973,7 +975,7 @@ public class Main
             // String neg_male = alis.dumpNegRegions(Gender.MALE);
             // String neg_female = alis.dumpNegRegions(Gender.FEMALE);
             // Util.noop();
-            
+
             // alis.display("Интенсивность военных потерь " + area);
             // PopulationContext p = alis.toPopulationContext();
             // Util.noop();
@@ -1019,7 +1021,7 @@ public class Main
             sum_all += he.actual_excess_wartime_deaths.sum();
             sum_conscripts += he.actual_excess_wartime_deaths.sumDays(Gender.MALE, conscript_age_from, conscript_age_to);
         }
-        
+
         if (phase == Phase.ACTUAL)
         {
             outk("Избыточное число всех смертей", sum_all);
