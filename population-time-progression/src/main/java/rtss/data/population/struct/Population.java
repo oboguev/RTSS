@@ -1106,7 +1106,8 @@ public class Population
     {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(String.format("AGE B M F"));
+        sb.append(String.format("# age, both genders, male, female"));
+        sb.append(Util.nl);
         sb.append(Util.nl);
 
         for (int age = 0; age <= MAX_AGE; age++)

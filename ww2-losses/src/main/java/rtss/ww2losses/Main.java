@@ -314,7 +314,6 @@ public class Main
                     .display();
         }
 
-        // ### to do: also initial-stage deficit (pre-immigration)
         ExportResults.exportResults(exportDirectory, ap, halves,
                                     allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,
@@ -951,14 +950,15 @@ public class Main
             sum_all += he.actual_excess_wartime_deaths.sum();
             sum_conscripts += he.actual_excess_wartime_deaths.sumDays(Gender.MALE, conscript_age_from, conscript_age_to);
         }
-
-        // ###
-        outk("Избыточное число всех смертей", sum_all);
-        // ###
-        outk(String.format("Избыточное число смертей мужчин призывного возраста (%.1f-%.1f лет)",
-                           Constants.CONSCRIPT_AGE_FROM,
-                           Constants.CONSCRIPT_AGE_TO),
-             sum_conscripts);
+        
+        if (phase == Phase.ACTUAL)
+        {
+            outk("Избыточное число всех смертей", sum_all);
+            outk(String.format("Избыточное число смертей мужчин призывного возраста (%.1f-%.1f лет)",
+                               Constants.CONSCRIPT_AGE_FROM,
+                               Constants.CONSCRIPT_AGE_TO),
+                 sum_conscripts);
+        }
     }
 
     public double totalImmigration(HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
