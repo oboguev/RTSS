@@ -274,8 +274,13 @@ public class Main
             halves = null;
 
             stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
-            // ### avoid double printing
-            // ### check imm result is the same, recrursive
+            
+            double v1 = totalImmigration(immigration_halves);
+            double v2 = totalImmigration(halves);
+            
+            // в случае расхождения делать stage_1 итеративно до схождения
+            if (!Util.same(v1, v2))
+                throw new Exception("Расхождение в исчисленном объёме иммиграции на предварительном и окончательном шагах");
         }
 
         evalNewBirths();
@@ -940,6 +945,19 @@ public class Main
                            Constants.CONSCRIPT_AGE_FROM,
                            Constants.CONSCRIPT_AGE_TO),
              sum_conscripts);
+    }
+    
+    public double totalImmigration(HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
+    {
+        double sum = 0;
+    
+        for (HalfYearEntry he : immigration_halves)
+        {
+            if (he.immigration != null)
+                sum += he.immigration.sum();
+        }
+
+        return sum;
     }
 
     /* ======================================================================================================= */
