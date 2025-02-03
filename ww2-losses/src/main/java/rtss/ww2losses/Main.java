@@ -167,8 +167,13 @@ public class Main
     /* директория для сохранения файлов с результатами (если null -- не сохранять) */
     public String exportDirectory = "c:\\@ww2losses\\export";
 
-    private PopulationContext deficit1946_raw;
-    private PopulationContext deficit1946_adjusted;
+    /* дефицит населения на начало 1946 года, до поправки на иммиграцию */
+    private PopulationContext deficit1946_raw_preimmigration;
+    private PopulationContext deficit1946_adjusted_preimmigration;
+
+    /* дефицит населения  на начало 1946 года, после поправки на иммиграцию */
+    private PopulationContext deficit1946_raw_postimmigration;
+    private PopulationContext deficit1946_adjusted_postimmigration;
 
     public static enum Phase
     {
@@ -264,7 +269,7 @@ public class Main
         if (ap.area == Area.USSR)
         {
             stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, null);
-            
+
         }
         else if (ap.area == Area.RSFSR)
         {
@@ -274,10 +279,10 @@ public class Main
             halves = null;
 
             stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
-            
+
             double v1 = totalImmigration(immigration_halves);
             double v2 = totalImmigration(halves);
-            
+
             // в случае расхождения делать stage_1 итеративно до схождения
             if (!Util.same(v1, v2))
                 throw new Exception("Расхождение в исчисленном объёме иммиграции на предварительном и окончательном шагах");
@@ -313,7 +318,8 @@ public class Main
         ExportResults.exportResults(exportDirectory, ap, halves,
                                     allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,
-                                    deficit1946_raw, deficit1946_adjusted);
+                                    deficit1946_raw_preimmigration, deficit1946_adjusted_preimmigration,
+                                    deficit1946_raw_postimmigration, deficit1946_adjusted_postimmigration);
     }
 
     private void stage_1(
@@ -604,7 +610,7 @@ public class Main
                 continue;
 
             v_sum_deaths += curr.expected_nonwar_deaths;
-            
+
             if (immigration_halves != null)
             {
                 v_sum_immigration += immigration_halves.get(curr.year, curr.halfyear).immigration.sum();
@@ -737,10 +743,18 @@ public class Main
             outk("    Сверхсмертность [по дефициту] мужчин призывного возраста", deficit_m_conscripts);
             outk("    Сверхсмертность [по дефициту] женщин фертильного возраста", deficit_f_fertile);
             outk("    Сверхсмертность [по дефициту] остального наличного на середину 1941 года населения", deficit_other);
-        }
 
-        this.deficit1946_raw = deficit_wb_raw;
-        this.deficit1946_adjusted = deficit_wb_adjusted;
+            this.deficit1946_raw_postimmigration = deficit_wb_raw;
+            this.deficit1946_adjusted_postimmigration = deficit_wb_adjusted;
+        }
+        else if (phase == Phase.PRELIMINARY)
+        {
+            if (this.deficit1946_raw_preimmigration == null)
+                this.deficit1946_raw_preimmigration = deficit_wb_raw;
+            
+            if (this.deficit1946_adjusted_preimmigration == null)
+                this.deficit1946_adjusted_preimmigration = deficit_wb_adjusted;
+        }
     }
 
     /* ======================================================================================================= */
@@ -946,11 +960,11 @@ public class Main
                            Constants.CONSCRIPT_AGE_TO),
              sum_conscripts);
     }
-    
+
     public double totalImmigration(HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         double sum = 0;
-    
+
         for (HalfYearEntry he : immigration_halves)
         {
             if (he.immigration != null)
