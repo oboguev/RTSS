@@ -1169,6 +1169,49 @@ public class PopulationContext
     }
 
     /* ---------------------------------------------------------------------------- */
+    
+    /*
+     * возвращает @true если в контексте нет людей
+     */
+    public boolean isEmpty() throws Exception
+    {
+        if (!began)
+            throw new Exception("неактивный контекст");
+
+        if (hasRuralUrban)
+        {
+            return isEmpty(Locality.URBAN) && isEmpty(Locality.RURAL);
+        }
+        else
+        {
+            return isEmpty(Locality.TOTAL);
+        }
+    }
+    
+    public boolean isEmpty(Locality locality) throws Exception
+    {
+        if (!began)
+            throw new Exception("неактивный контекст");
+
+        return isEmpty(locality, Gender.MALE) && isEmpty(locality, Gender.FEMALE);
+    }
+
+    public boolean isEmpty(Locality locality, Gender gender) throws Exception
+    {
+        if (!began)
+            throw new Exception("неактивный контекст");
+
+        for (int nd = 0; nd <= MAX_DAY; nd++)
+        {
+            double v = getDay(locality, gender, nd);
+            if (v != 0)
+                return false;
+        }
+        
+        return true;
+    }
+    
+    /* ---------------------------------------------------------------------------- */
 
     public static PopulationContext newTotalPopulationContext()
     {

@@ -8,6 +8,7 @@ public class ModelParameters
     public double aw_conscripts_rkka_loss;
     public double aw_general_occupation;
     public boolean PrintDiagnostics;
+    public String exportDirectory; 
     
     public ModelParameters()
     {
@@ -18,6 +19,7 @@ public class ModelParameters
         this.aw_conscripts_rkka_loss = params.aw_conscripts_rkka_loss;
         this.aw_general_occupation = params.aw_general_occupation;
         this.PrintDiagnostics = params.PrintDiagnostics;
+        this.exportDirectory = params.exportDirectory;
     }
     
     public String toString()

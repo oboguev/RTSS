@@ -194,6 +194,7 @@ public class Main
             this.aw_conscripts_rkka_loss = model.params.aw_conscripts_rkka_loss;
             this.aw_general_occupation = model.params.aw_general_occupation;
             this.PrintDiagnostics = model.params.PrintDiagnostics;
+            this.exportDirectory = model.params.exportDirectory;
         }
         else
         {

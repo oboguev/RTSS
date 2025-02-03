@@ -49,6 +49,7 @@ public class MultiModelMain
                 ModelParameters params = new ModelParameters();
                 params.aw_conscripts_rkka_loss = aw_conscripts_rkka_loss;
                 params.aw_general_occupation = aw_general_occupation;
+                params.exportDirectory = null;
                 AreaModel am = run(params);
                 areaModels.add(am);
             }
