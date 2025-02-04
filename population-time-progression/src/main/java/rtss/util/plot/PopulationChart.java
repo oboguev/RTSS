@@ -24,7 +24,6 @@ import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 public class PopulationChart extends ApplicationFrame

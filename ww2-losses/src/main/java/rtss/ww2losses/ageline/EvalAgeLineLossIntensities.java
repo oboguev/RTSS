@@ -16,20 +16,18 @@ import rtss.data.population.struct.PopulationContext;
 public class EvalAgeLineLossIntensities
 {
     private final HalfYearEntries<HalfYearEntry> halves;
-    private final double[] ac_general;
-    private final double[] ac_conscripts;
+    private final WarAttritionModel wam; 
     private double[] ac_immigration;
 
-    public EvalAgeLineLossIntensities(HalfYearEntries<HalfYearEntry> halves, double[] ac_general, double[] ac_conscripts)
+    public EvalAgeLineLossIntensities(HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam)
     {
-        this(halves, ac_general, ac_conscripts, null);
+        this(halves, wam, null);
     }
 
-    public EvalAgeLineLossIntensities(HalfYearEntries<HalfYearEntry> halves, double[] ac_general, double[] ac_conscripts, double[] ac_immigration)
+    public EvalAgeLineLossIntensities(HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam , double[] ac_immigration)
     {
         this.halves = halves;
-        this.ac_general = ac_general;
-        this.ac_conscripts = ac_conscripts;
+        this.wam = wam;
         this.ac_immigration = ac_immigration;
     }
 
@@ -46,7 +44,7 @@ public class EvalAgeLineLossIntensities
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
-        SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts, null);
+        SteerAgeLine steer = new SteerAgeLine(halves, wam, null);
         EvalAgeLinelLossIntensity eval = new EvalAgeLinelLossIntensity(steer);
 
         int ndays = 9 * years2days(0.5);
@@ -86,7 +84,7 @@ public class EvalAgeLineLossIntensities
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
-        SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts, ac_immigration);
+        SteerAgeLine steer = new SteerAgeLine(halves, wam, ac_immigration);
         EvalAgeLinelLossIntensity eval = new EvalAgeLinelLossIntensity(steer);
 
         int ndays = 9 * years2days(0.5);
@@ -145,7 +143,7 @@ public class EvalAgeLineLossIntensities
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
-        SteerAgeLine steer = new SteerAgeLine(halves, ac_general, ac_conscripts, ac_immigration);
+        SteerAgeLine steer = new SteerAgeLine(halves, wam, ac_immigration);
         int ndays = 9 * years2days(0.5);
 
         double initial_population;

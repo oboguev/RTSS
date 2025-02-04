@@ -5,11 +5,8 @@ import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
-import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
-
-import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 /*
  * Проводка возрастной линии от середины 1941 года до начала 1946 года.
@@ -20,20 +17,17 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 public class SteerAgeLine
 {
     private final HalfYearEntries<HalfYearEntry> halves;
-    private final double[] ac_general;
-    private final double[] ac_conscripts;
+    private final WarAttritionModel wam;
     private final double[] ac_immigration;
 
     /*
-     * @halves         = данные для полугодий, от начала 1941 до начала 1946 года
-     * @ac_conscripts  = удельные весовые коэфициенты военной сверхсмертности (по полугодиям) для призывников  
-     * @ac_general     = удельные весовые коэфициенты военной сверхсмертности (по полугодиям) для непризывного населения   
+     * @halves  = данные для полугодий, от начала 1941 до начала 1946 года
+     * @wam     = модель военных потерь   
      */
-    public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, double[] ac_general, double[] ac_conscripts, double[] ac_immigration)
+    public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, double[] ac_immigration)
     {
         this.halves = halves;
-        this.ac_general = ac_general;
-        this.ac_conscripts = ac_conscripts;
+        this.wam = wam;
         this.ac_immigration = ac_immigration;
     }
 
@@ -78,8 +72,7 @@ public class SteerAgeLine
 
             double peace_deaths = (population <= 0) ? 0 : population * deathRatio(he, gender, nd1, nd2);
 
-            double[] ac = attrition_coefficient(gender, ndm);
-            double excess_war_deaths = ac[ac_index(he)] * initial_population * loss_intensity;
+            double excess_war_deaths = loss_intensity * wam.excessWarDeaths(gender, ndm, he, initial_population);
 
             double immigration = 0;
             if (ac_immigration != null && immigration_intensity != null)
@@ -101,20 +94,6 @@ public class SteerAgeLine
         }
 
         return population + delta;
-    }
-
-    private double[] attrition_coefficient(Gender gender, int nd)
-    {
-        if (gender == Gender.MALE &&
-            nd >= years2days(Constants.CONSCRIPT_AGE_FROM) &&
-            nd <= years2days(Constants.CONSCRIPT_AGE_TO))
-        {
-            return ac_conscripts;
-        }
-        else
-        {
-            return ac_general;
-        }
     }
 
     /*
@@ -191,8 +170,7 @@ public class SteerAgeLine
 
             double peace_deaths = (population <= 0) ? 0 : population * deathRatio(he, gender, nd1, nd2);
 
-            double[] ac = attrition_coefficient(gender, ndm);
-            double excess_war_deaths = ac[ac_index(he)] * initial_population * loss_intensity;
+            double excess_war_deaths = loss_intensity * wam.excessWarDeaths(gender, ndm, he, initial_population);
 
             double immigration = 0;
             if (ac_immigration != null)
