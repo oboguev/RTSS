@@ -150,6 +150,24 @@ public class ExportResults
 
     /* ============================================================================================= */
 
+    public static String imageFilename(String exportDirectory, AreaParameters ap, String suffix) throws Exception
+    {
+        if (exportDirectory == null || exportDirectory.trim().length() == 0)
+            return null;
+
+        File fdir = new File(exportDirectory);
+        fdir.mkdirs();
+
+        fdir = new File(fdir, "images");
+        fdir.mkdirs();
+
+        String fn = ap.area.name() + "-" + suffix;
+
+        return fpath(fdir, fn);
+    }
+
+    /* ============================================================================================= */
+
     private static String fpath(File fdir, String fn) throws Exception
     {
         File fp = new File(fdir, fn);

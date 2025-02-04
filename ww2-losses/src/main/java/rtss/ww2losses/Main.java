@@ -279,8 +279,17 @@ public class Main
         {
             /* отобразить график населения на середину 1941 года */
             new PopulationChart("Население " + area + " на середину 1941 года")
-                    .show("перепись", p_mid1941.toPopulation())
+                    .show("", p_mid1941.toPopulation())
                     .display();
+        }
+
+        if (Util.False && exportDirectory != null)
+        {
+            /* отобразить график населения на середину 1941 года */
+            new PopulationChart("Население " + area + " на середину 1941 года")
+                    .show("", p_mid1941.toPopulation())
+                    .exportImage(600, 1200, ExportResults.imageFilename(exportDirectory, ap, "population-1941.2.png"))
+                    .exportImage(300, 600, ExportResults.imageFilename(exportDirectory, ap, "population-1941.2-tn.png"));
         }
 
         /*
@@ -950,7 +959,7 @@ public class Main
                                    new FixAgeLine(Gender.FEMALE, 10.0, 16.0),
                                    new FixAgeLine(Gender.FEMALE, 42.5, 57.5)
             };
-            
+
             for (FixAgeLine fix : fixes)
                 alis.unnegInterpolateYears(fix.gender, fix.age1, fix.age2);
 

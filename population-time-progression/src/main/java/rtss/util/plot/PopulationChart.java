@@ -1,6 +1,7 @@
 package rtss.util.plot;
 
 import java.awt.Color;
+import java.io.ByteArrayOutputStream;
 
 import javax.swing.JPanel;
 
@@ -82,9 +83,9 @@ public class PopulationChart extends ApplicationFrame
 
     public PopulationChart show(String name, PopulationContext p) throws Exception
     {
-        return show(name, p.toPopulation()); 
+        return show(name, p.toPopulation());
     }
-    
+
     public PopulationChart show(String name, Population p) throws Exception
     {
         if (pScale != null)
@@ -97,8 +98,8 @@ public class PopulationChart extends ApplicationFrame
         double[] f_y = p.asArray(Gender.FEMALE);
         double[] f_x = years(f_y);
 
-        addSeries(name + " муж", m_x, m_y);
-        addSeries(name + " жен", f_x, f_y);
+        addSeries(combine(name, "муж"), m_x, m_y);
+        addSeries(combine(name, "жен"), f_x, f_y);
 
         return this;
     }
@@ -112,10 +113,18 @@ public class PopulationChart extends ApplicationFrame
         f_y = Util.multiply(f_y, -1);
         double[] f_x = years(f_y);
 
-        addSeries(name + " MALE", m_x, m_y);
-        addSeries(name + " FEMALE", f_x, f_y);
+        addSeries(combine(name, "муж"), m_x, m_y);
+        addSeries(combine(name, "жен"), f_x, f_y);
 
         return this;
+    }
+
+    private String combine(String name, String gender)
+    {
+        if (name != null && name.trim().length() != 0)
+            return name.trim() + " " + gender;
+        else
+            return gender;
     }
 
     private void addSeries(String name, double[] x, double[] y)
@@ -157,15 +166,22 @@ public class PopulationChart extends ApplicationFrame
 
     private JPanel createPanel()
     {
+        JFreeChart chart = createChart();
+        ChartPanel chartPanel = new ChartPanel(chart);
+        return chartPanel;
+    }
+
+    private JFreeChart createChart()
+    {
         // create plot
         NumberAxis xAxis = new NumberAxis(xLabel);
         xAxis.setAutoRangeIncludesZero(false);
         NumberAxis yAxis = new NumberAxis(yLabel);
         yAxis.setAutoRangeIncludesZero(false);
 
-        XYSplineRenderer renderer1 = new XYSplineRenderer();
-        renderer1.setDefaultShapesVisible(false);
-        XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer1);
+        XYSplineRenderer renderer = new XYSplineRenderer();
+        renderer.setDefaultShapesVisible(false);
+        XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
         plot.setBackgroundPaint(Color.LIGHT_GRAY);
         plot.setDomainGridlinePaint(Color.WHITE);
         plot.setRangeGridlinePaint(Color.WHITE);
@@ -185,7 +201,16 @@ public class PopulationChart extends ApplicationFrame
         );
 
         ChartUtils.applyCurrentTheme(chart);
-        ChartPanel chartPanel = new ChartPanel(chart);
-        return chartPanel;
+        return chart;
+    }
+
+    public PopulationChart exportImage(int cx, int cy, String fn) throws Exception
+    {
+        JFreeChart chart = createChart();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ChartUtils.writeChartAsPNG(baos, chart, cx, cy);
+        Util.writeAsFile(fn, baos.toByteArray());
+
+        return this;
     }
 }
