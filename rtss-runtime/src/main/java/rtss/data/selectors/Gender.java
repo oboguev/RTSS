@@ -17,4 +17,5 @@ public enum Gender
     }
 
     public static final Gender[] TwoGenders = { Gender.MALE, Gender.FEMALE };
+    public static final Gender[] ThreeGenders = { Gender.BOTH, Gender.MALE, Gender.FEMALE };
 }

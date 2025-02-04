@@ -8,6 +8,12 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.FastUUID;
 
+/*
+ * Таблица смертности для трёх видов местности (URBAN, RURAL и TOTAL).
+ * Каждая секция (для того или вида вида местности) содержит содержит разделы для полов (MALE, FEMALE, BOTH) в этой местности.
+ * 
+ * Может также содержать таблицу только для местности TOTAL (с тремя полами для этой местности). 
+ */
 public class CombinedMortalityTable
 {
     public static final int MAX_AGE = SingleMortalityTable.MAX_AGE;
@@ -23,6 +29,23 @@ public class CombinedMortalityTable
     public static CombinedMortalityTable newEmptyTable()
     {
         return new CombinedMortalityTable();
+    }
+    
+    public boolean isTotalOnly() throws Exception
+    {
+        for (Gender gender : Gender.ThreeGenders)
+        {
+            if (getSingleTable(Locality.URBAN, gender) != null)
+                return false;
+        }
+
+        for (Gender gender : Gender.ThreeGenders)
+        {
+            if (getSingleTable(Locality.RURAL, gender) != null)
+                return false;
+        }
+        
+        return true;
     }
 
     static public CombinedMortalityTable loadTotal(String path) throws Exception

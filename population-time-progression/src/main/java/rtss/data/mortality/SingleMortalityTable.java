@@ -6,6 +6,10 @@ import java.util.Map;
 import rtss.util.FastUUID;
 import rtss.util.Util;
 
+/*
+ * Таблица смертности для одного вида местности (URBAN, RURAL или TOTAL) 
+ * и одного пола (MALE, FEMALE или BOTH).
+ */
 public class SingleMortalityTable
 {
     private Map<Integer, MortalityInfo> m = new HashMap<>();
