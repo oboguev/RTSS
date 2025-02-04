@@ -161,7 +161,7 @@ public class ExportResults
         title = "";
 
         new PopulationChart(title)
-                .show("", p.toPopulation())
+                .show("", p)
                 .exportImage(IMAGE_CX, IMAGE_CY, imageFilename(exportDirectory, ap, suffix + ".png"))
                 .exportImage(TN_CX, TN_CY, imageTnFilename(exportDirectory, ap, suffix + ".png"));
     }

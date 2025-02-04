@@ -24,6 +24,7 @@ import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 public class PopulationChart extends ApplicationFrame
@@ -49,7 +50,7 @@ public class PopulationChart extends ApplicationFrame
 
     public static void display(String title, PopulationContext p, String name) throws Exception
     {
-        new PopulationChart(title).show(name, p.toPopulation()).display();
+        new PopulationChart(title).show(name, p).display();
     }
 
     public static void display(String title, Population p1, String name1, Population p2, String name2) throws Exception
@@ -59,7 +60,7 @@ public class PopulationChart extends ApplicationFrame
 
     public static void display(String title, PopulationContext p1, String name1, PopulationContext p2, String name2) throws Exception
     {
-        new PopulationChart(title).show(name1, p1.toPopulation()).show(name2, p2.toPopulation()).display();
+        new PopulationChart(title).show(name1, p1).show(name2, p2).display();
     }
 
     public static void displayToScale(String title, Population pScale, String nameScale, Population p1, String name1) throws Exception
@@ -83,13 +84,37 @@ public class PopulationChart extends ApplicationFrame
 
     public PopulationChart show(String name, PopulationContext p) throws Exception
     {
-        return show(name, p.toPopulation());
+        if (Util.True)
+            return show(name, p.toPopulation());
+        
+        if (pScale != null)
+            p = RescalePopulation.scaleAllTo(p, pScale.sum());
+        
+        double[] m_y = new double[p.MAX_DAY + 1];
+        double[] m_x = new double[p.MAX_DAY + 1];
+            
+        double[] f_y = new double[p.MAX_DAY + 1];
+        double[] f_x = new double[p.MAX_DAY + 1];
+        
+        for (int nd = 0; nd <= p.MAX_DAY; nd++)
+        {
+            m_x[nd] = f_x[nd] = nd / 365.0;
+            m_y[nd] = p.getDay(Locality.TOTAL, Gender.MALE, nd);
+            f_y[nd] = p.getDay(Locality.TOTAL, Gender.FEMALE, nd);
+        }
+        
+        m_y = Util.multiply(m_y, -1);
+
+        addSeries(combine(name, "муж"), m_x, m_y);
+        addSeries(combine(name, "жен"), f_x, f_y);
+
+        return this;
     }
 
     public PopulationChart show(String name, Population p) throws Exception
     {
         if (pScale != null)
-            p = RescalePopulation.scaleAllTo(p, pScale.sum(Gender.BOTH, 0, Population.MAX_AGE));
+            p = RescalePopulation.scaleAllTo(p, pScale.sum());
 
         double[] m_y = p.asArray(Gender.MALE);
         m_y = Util.multiply(m_y, -1);
