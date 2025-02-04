@@ -949,11 +949,11 @@ public class Main
 
             FixAgeLine[] fixes = {
                                    new FixAgeLine(Gender.MALE, 2.5, 7.5),
-                                   // new FixAgeLine(Gender.FEMALE, 2.1, 7.37), // ###
-                                   // new FixAgeLine(Gender.FEMALE, 2.1, 7.48), // ###
-                                   // new FixAgeLine(Gender.FEMALE, 2.1, 9.0), // ###
-                                   // new FixAgeLine(Gender.FEMALE, 10.0, 16.0), // ###
-                                   new FixAgeLine(Gender.FEMALE, 2.1, 16.0), // ???!!! -- why causes exception during eval Migration???
+                                   new FixAgeLine(Gender.FEMALE, 2.1, 7.37), 
+                                   new FixAgeLine(Gender.FEMALE, 10.0, 16.0), 
+                                   // ### new FixAgeLine(Gender.FEMALE, 2.1, 7.48), // ###
+                                   // ### new FixAgeLine(Gender.FEMALE, 2.1, 9.0), // ###
+                                   // ### new FixAgeLine(Gender.FEMALE, 2.1, 16.0), // ???!!! -- why causes exception during eval Migration???
                                    new FixAgeLine(Gender.FEMALE, 42.5, 57.5)
             };
 
