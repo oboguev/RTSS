@@ -82,27 +82,51 @@ public class PopulationChart extends ApplicationFrame
         return this;
     }
 
+    private final int DAYS_PER_YEAR = 365;
+
     public PopulationChart show(String name, PopulationContext p) throws Exception
     {
         if (Util.True)
             return show(name, p.toPopulation());
-        
+
         if (pScale != null)
             p = RescalePopulation.scaleAllTo(p, pScale.sum());
-        
-        double[] m_y = new double[p.MAX_DAY + 1];
-        double[] m_x = new double[p.MAX_DAY + 1];
-            
-        double[] f_y = new double[p.MAX_DAY + 1];
-        double[] f_x = new double[p.MAX_DAY + 1];
-        
-        for (int nd = 0; nd <= p.MAX_DAY; nd++)
+
+        int days_per_sample = DAYS_PER_YEAR / 1;
+        int npoints = p.MAX_DAY + 1;
+
+        if (days_per_sample != 1)
         {
-            m_x[nd] = f_x[nd] = nd / 365.0;
-            m_y[nd] = p.getDay(Locality.TOTAL, Gender.MALE, nd);
-            f_y[nd] = p.getDay(Locality.TOTAL, Gender.FEMALE, nd);
+            int npx = npoints  / days_per_sample;
+            if (0 != (npoints % days_per_sample))
+                npx++;
+            npoints = npx;
         }
-        
+
+        double[] m_y = new double[npoints];
+        double[] m_x = new double[npoints];
+
+        double[] f_y = new double[npoints];
+        double[] f_x = new double[npoints];
+
+        for (int np = 0; np < npoints; np++)
+        {
+            m_x[np] = f_x[np] = Population.MAX_AGE * (double) np / (npoints - 1);
+
+            int nd1 = np * days_per_sample;
+
+            int samplesize = p.MAX_DAY + 1 - nd1;
+            if (samplesize > days_per_sample)
+                samplesize = days_per_sample;
+
+            Util.assertion(samplesize != 0);
+
+            int nd2 = nd1 + samplesize - 1;
+
+            m_y[np] = p.sumDays(Gender.MALE, nd1, nd2) * DAYS_PER_YEAR / (double) samplesize;
+            f_y[np] = p.sumDays(Gender.FEMALE, nd1, nd2) * DAYS_PER_YEAR / (double) samplesize;
+        }
+
         m_y = Util.multiply(m_y, -1);
 
         addSeries(combine(name, "муж"), m_x, m_y);

@@ -16,10 +16,10 @@ public class ExportResults
     /*
      * Разрешение для сохраняемых графиков
      */
-    public static final int IMAGE_CX = 750;
+    public static final int IMAGE_CX = 1000;
     public static final int IMAGE_CY = 1500;
 
-    public static final int TN_CX = 450;
+    public static final int TN_CX = 600;
     public static final int TN_CY = 900;
 
     /* ============================================================================================= */
