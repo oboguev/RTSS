@@ -2,6 +2,7 @@ package rtss.ww2losses.population_194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.SingleMortalityTable;
+import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
@@ -37,17 +38,17 @@ public class AdjustSeniorRates
     {
         Adjustment male = new Adjustment(Gender.MALE, 80.5, 90.5, 83.2);
         Adjustment female = new Adjustment(Gender.FEMALE, 80.5, 93.5, 83.2);
-        return adjust(mt, male, female);
+        return adjust(mt, male, female, null);
     }
 
     public static CombinedMortalityTable adjust_rsfsr(CombinedMortalityTable mt) throws Exception
     {
         Adjustment male = new Adjustment(Gender.MALE, 80.5, 93.5, 83.8);
         Adjustment female = new Adjustment(Gender.FEMALE, 81.5, 86.5, 83.8);
-        return adjust(mt, male, female);
+        return adjust(mt, male, female, null);
     }
 
-    private static CombinedMortalityTable adjust(CombinedMortalityTable mt, Adjustment male, Adjustment female) throws Exception
+    private static CombinedMortalityTable adjust(CombinedMortalityTable mt, Adjustment male, Adjustment female, Population p) throws Exception
     {
         Util.assertion(male.gender == Gender.MALE);
         Util.assertion(female.gender == Gender.FEMALE);
@@ -56,23 +57,27 @@ public class AdjustSeniorRates
         double[] qx_male = mt.getSingleTable(Locality.TOTAL, Gender.MALE).qx();
         double[] qx_female = mt.getSingleTable(Locality.TOTAL, Gender.FEMALE).qx();
 
-        double[] male_fraction = male_fraction(qx_both, qx_male, qx_female);
-        
+        double[] male_fraction;
+        if (p != null)
+            male_fraction = male_fraction(p);
+        else
+            male_fraction = male_fraction(qx_both, qx_male, qx_female);
+
         // ### edit qx_male, qx_female
-        
+
         qx_both = recombine_both(male_fraction, qx_male, qx_female);
 
         String comment = mt.comment() + ", поправки для старших возрастов";
-        
+
         SingleMortalityTable smt_male = SingleMortalityTable.from_qx(comment, qx_male);
         SingleMortalityTable smt_female = SingleMortalityTable.from_qx(comment, qx_female);
         SingleMortalityTable smt_both = SingleMortalityTable.from_qx(comment, qx_both);
-        
+
         CombinedMortalityTable cmt = CombinedMortalityTable.newEmptyTable();
         cmt.setTable(Locality.TOTAL, Gender.MALE, smt_male);
         cmt.setTable(Locality.TOTAL, Gender.FEMALE, smt_female);
         cmt.setTable(Locality.TOTAL, Gender.BOTH, smt_both);
-        
+
         return cmt;
     }
 
@@ -113,10 +118,24 @@ public class AdjustSeniorRates
             male_fraction[age] = (qx_both[age] - qx_female[age]) / (qx_male[age] - qx_female[age]);
         }
 
+        // проверка мниимальной разумности значений
         for (int age = 0; age < qx_both.length; age++)
         {
-            // проверка мниимальной разумности значений
             Util.assertion(male_fraction[age] >= 0.2 && male_fraction[age] <= 0.7);
+        }
+
+        return male_fraction;
+    }
+
+    private static double[] male_fraction(Population p) throws Exception
+    {
+        double[] male_fraction = new double[Population.MAX_AGE + 1];
+
+        for (int age = 0; age < male_fraction.length; age++)
+        {
+            double m = p.male(age);
+            double f = p.female(age);
+            male_fraction[age] = m / (m + f);
         }
 
         return male_fraction;
