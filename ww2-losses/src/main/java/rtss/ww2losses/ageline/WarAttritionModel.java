@@ -1,6 +1,7 @@
 package rtss.ww2losses.ageline;
 
 import rtss.data.selectors.Gender;
+import rtss.util.Util;
 import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntry;
 
@@ -11,13 +12,66 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
  */
 public class WarAttritionModel
 {
-    private final double[] ac_general;
-    private final double[] ac_conscripts;
+    private double[] ac_general;
+    private double[] ac_conscripts;
 
-    public WarAttritionModel(double[] ac_general, double[] ac_conscripts)
+    /* =========================================================================================== */
+    
+    /* 
+     * интенсивность потерь РККА по полугодиям с 1941.1
+     * (Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга потерь", М. : Вече, 2010, стр. 236, 242, 245)
+     */
+    private static final double[] rkka_loss_intensity = { 0, 3_137_673, 1_518_213, 1_740_003, 918_618, 1_393_811, 915_019, 848_872, 800_817, 0 };
+
+    /* 
+     * интенсивность оккупации по полугодиям с 1941.1
+     * (Федеральная служба государственной статистики, "Великая отечественная война : юбилейный статистический сборник", М. 2020, стр. 36)
+     */
+    private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
+
+    /* 
+     * равномерная интенсивность по военным полугодиям с 1941.1
+     */
+    private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+    private void initModel(double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
     {
-        this.ac_general = ac_general;
-        this.ac_conscripts = ac_conscripts;
+        /* нормализованный полугодовой коэффициент распределения потерь для не-призывного населения */
+        ac_general = wsum(aw_general_occupation, occupation_intensity,
+                                   1 - aw_general_occupation, even_intensity);
+
+        /* нормализованный полугодовой коэффициент распределения потерь для призывного населения */
+        ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
+                                      1.0 - aw_conscripts_rkka_loss, ac_general);
+    }
+
+    /*
+     * Взвешенная сумма w1*ww1 + w2*ww2
+     * 
+     * Массивы ww1 и ww2 предварительно нормализуются по сумме всех членов на 1.0
+     * (без изменения начальных копий).
+     * 
+     * Возвращаемый результат также нормализуется. 
+     */
+    private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
+    {
+        ww1 = Util.normalize(ww1);
+        ww2 = Util.normalize(ww2);
+
+        ww1 = Util.multiply(ww1, w1);
+        ww2 = Util.multiply(ww2, w2);
+
+        double[] ww = Util.add(ww1, ww2);
+        ww = Util.normalize(ww);
+
+        return ww;
+    }
+
+    /* =========================================================================================== */
+
+    public WarAttritionModel(double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
+    {
+        initModel(aw_general_occupation, aw_conscripts_rkka_loss);
     }
 
     /*

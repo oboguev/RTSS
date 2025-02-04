@@ -144,24 +144,7 @@ public class Main
     private double aw_general_occupation = 0.4;
 
     /* 
-    * интенсивность потерь РККА по полугодиям с 1941.1
-    * (Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга потерь", М. : Вече, 2010, стр. 236, 242, 245)
-    */
-    private static final double[] rkka_loss_intensity = { 0, 3_137_673, 1_518_213, 1_740_003, 918_618, 1_393_811, 915_019, 848_872, 800_817, 0 };
-
-    /* 
-     * интенсивность оккупации по полугодиям
-     * (Федеральная служба государственной статистики, "Великая отечественная война : юбилейный статистический сборник", М. 2020, стр. 36)
-     */
-    private static final double[] occupation_intensity = { 0, 37_265, 71_754, 77_177, 63_740, 47_258, 31_033, 5_041, 0, 0 };
-
-    /* 
-     * равномерная интенсивность по военным полугодиям
-     */
-    private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
-
-    /* 
-     * интенсивность иммиграции в РСФСР из западных ССР по полугодиям
+     * интенсивность иммиграции в РСФСР из западных ССР по полугодиям с 1941.1
      */
     private static final double[] rsfsr_immigration_intensity = { 0, 10.5, 1.8, 1.6, 0, 0, 0, 0, 0, 0 };
 
@@ -907,14 +890,6 @@ public class Main
      */
     private void evalAgeLines() throws Exception
     {
-        /* нормализованный полугодовой коэффициент распределения потерь для не-призывного населения */
-        double[] ac_general = wsum(aw_general_occupation, occupation_intensity,
-                                   1 - aw_general_occupation, even_intensity);
-
-        /* нормализованный полугодовой коэффициент распределения потерь для призывного населения */
-        double[] ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
-                                      1.0 - aw_conscripts_rkka_loss, ac_general);
-
         /* нормализованный полугодовой коэффициент интенсивности иммиграции в РСФСР */
         double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
 
@@ -922,7 +897,7 @@ public class Main
          * вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола,
          * подогнав их так, чтобы начальное население линии (середины 1941) приходило к конечному (начала 1946) 
          */
-        WarAttritionModel wam = new WarAttritionModel(ac_general, ac_conscripts);
+        WarAttritionModel wam = new WarAttritionModel(aw_general_occupation, aw_conscripts_rkka_loss);
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, wam);
         AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual);
 
@@ -951,8 +926,8 @@ public class Main
 
             FixAgeLine[] fixes = {
                                    new FixAgeLine(Gender.MALE, 2.5, 7.5),
-                                   new FixAgeLine(Gender.FEMALE, 2.1, 7.37), 
-                                   new FixAgeLine(Gender.FEMALE, 10.0, 16.0), 
+                                   new FixAgeLine(Gender.FEMALE, 2.1, 7.37),
+                                   new FixAgeLine(Gender.FEMALE, 10.0, 16.0),
                                    // ### new FixAgeLine(Gender.FEMALE, 2.1, 7.48), // ###
                                    // ### new FixAgeLine(Gender.FEMALE, 2.1, 9.0), // ###
                                    // ### new FixAgeLine(Gender.FEMALE, 2.1, 16.0), // ???!!! -- why causes exception during eval Migration???
@@ -1324,28 +1299,6 @@ public class Main
     }
 
     /* ======================================================================================================= */
-
-    /*
-     * Взвешенная сумма w1*ww1 + w2*ww2
-     * 
-     * Массивы ww1 и ww2 предварительно нормализуются по сумме всех членов на 1.0
-     * (без изменения начальных копий).
-     * 
-     * Возвращаемый результат также нормализуется. 
-     */
-    private double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
-    {
-        ww1 = Util.normalize(ww1);
-        ww2 = Util.normalize(ww2);
-
-        ww1 = Util.multiply(ww1, w1);
-        ww2 = Util.multiply(ww2, w2);
-
-        double[] ww = Util.add(ww1, ww2);
-        ww = Util.normalize(ww);
-
-        return ww;
-    }
 
     private double subcount(PopulationContext p, Gender gender, double age1, double age2) throws Exception
     {
