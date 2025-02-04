@@ -44,23 +44,24 @@ public class AdjustSeniorRates
     public static CombinedMortalityTable adjust_ussr(CombinedMortalityTable mt) throws Exception
     {
         Adjustment male = null, female = null;
-        // ### male = new Adjustment(Gender.MALE, 80.5, 90.5, 83.2, 0.01);
-        // ### female = new Adjustment(Gender.FEMALE, 80.5, 93.5, 83.2, 0.01);
+        male = new Adjustment(Gender.MALE, 80.5, 92.5, 83.2, 0.39);
+        female = new Adjustment(Gender.FEMALE, 80.5, 95.5, 83.2, 0.3);
+
         return adjust(mt, male, female, null);
     }
 
     public static CombinedMortalityTable adjust_rsfsr(CombinedMortalityTable mt) throws Exception
     {
         Adjustment male = null, female = null;
-        // ### male = new Adjustment(Gender.MALE, 80.5, 93.5, 83.8, 0.01);
-        // ### female = new Adjustment(Gender.FEMALE, 81.5, 86.5, 83.8, 0.01);
+        male = new Adjustment(Gender.MALE, 80.5, 93.5, 83.8, 0.39);
+        female = new Adjustment(Gender.FEMALE, 81.5, 86.5, 83.8, 0.3);
         return adjust(mt, male, female, null);
     }
 
     private static CombinedMortalityTable adjust(CombinedMortalityTable mt, Adjustment adj_male, Adjustment adj_female, Population p) throws Exception
     {
-        Util.assertion(adj_male.gender == Gender.MALE);
-        Util.assertion(adj_female.gender == Gender.FEMALE);
+        Util.assertion(adj_male == null || adj_male.gender == Gender.MALE);
+        Util.assertion(adj_female == null || adj_female.gender == Gender.FEMALE);
 
         double[] qx_both = mt.getSingleTable(Locality.TOTAL, Gender.BOTH).qx();
         double[] qx_male = mt.getSingleTable(Locality.TOTAL, Gender.MALE).qx();
@@ -121,7 +122,7 @@ public class AdjustSeniorRates
 
         for (int age = 0; age < qx.length; age++)
         {
-            rqx[age] = qx[age] - adj.amount * adjustment[age];
+            rqx[age] = qx[age] * (1 - adjustment[age]);
             Util.assertion(rqx[age] > 0);
         }
 
@@ -129,7 +130,8 @@ public class AdjustSeniorRates
     }
 
     /*
-     * определить, какая доля возрастного диапазона [age... age+1[ находится в диапазоне [age1...age2]
+     * определить, какая часть возрастного диапазона [age... age+1[ находится в диапазоне [age1...age2],
+     * т.е. перекрывается с ним
      */
     public static class Part
     {

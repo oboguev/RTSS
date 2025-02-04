@@ -189,7 +189,7 @@ public class Main
     };
 
     private Phase phase;
-    
+
     void main() throws Exception
     {
         /*
@@ -367,7 +367,7 @@ public class Main
         {
             ShowAgeSliceDeathHistory.show(halves, Gender.BOTH, 0, 20);
         }
-        
+
         ExportResults.exportResults(exportDirectory, ap, halves,
                                     allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,
