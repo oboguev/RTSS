@@ -89,8 +89,6 @@ public class MortalityTable_1940 extends UtilBase_194x
             CombinedMortalityTable mt = CombinedMortalityTable.load("mortality_tables/USSR/1938-1939");
             mt.comment("ГКС-СССР-1938");
 
-            mt = AdjustSeniorRates.adjust_ussr(mt);
-            
             double[] qx = mt.getSingleTable(Locality.TOTAL, Gender.BOTH).qx();
             
             List<PatchInstruction> instructions = new ArrayList<>();
@@ -112,6 +110,8 @@ public class MortalityTable_1940 extends UtilBase_194x
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для СССР 1940");
             Util.out(String.format("Для таблицы смертности СССР 1940 года все коэффициенты в возрастах 5-100 увеличены на %.4f", instruction.scale));
 
+            xmt = AdjustSeniorRates.adjust_ussr(xmt);
+            
             return xmt;
         }
         else if (ap.area == Area.RSFSR)
@@ -119,8 +119,6 @@ public class MortalityTable_1940 extends UtilBase_194x
             CombinedMortalityTable mt = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
             mt.comment("АДХ-РСФСР-1940");
             
-            mt = AdjustSeniorRates.adjust_rsfsr(mt);
-
             // рабочий дескриптор для MatchMortalityTable.match
             List<PatchInstruction> instructions = new ArrayList<>();
             PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, 1.0);
@@ -128,6 +126,8 @@ public class MortalityTable_1940 extends UtilBase_194x
 
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для РСФСР 1940");
             Util.out(String.format("Для таблицы смертности РСФСР 1940 года все коэффициенты увеличены на %.4f", instruction.scale));
+
+            xmt = AdjustSeniorRates.adjust_rsfsr(xmt);
 
             return xmt;
         }
