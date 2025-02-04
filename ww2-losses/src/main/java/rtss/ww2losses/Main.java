@@ -211,7 +211,7 @@ public class Main
         {
             model = new Model();
             model.params = null;
-            // only model.results
+            // keep only model.results
         }
 
         if (ApplyAntibiotics)
@@ -280,7 +280,7 @@ public class Main
                     .display();
         }
 
-        if (Util.False && exportDirectory != null)
+        if (Util.False)
         {
             /* сохранить график населения на середину 1941 года */
             ExportResults.exportImage("Население " + area + " на середину 1941 года", p_mid1941, ap, exportDirectory, "population-1941.2");
@@ -367,7 +367,7 @@ public class Main
         {
             ShowAgeSliceDeathHistory.show(halves, Gender.BOTH, 0, 20);
         }
-
+        
         ExportResults.exportResults(exportDirectory, ap, halves,
                                     allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,

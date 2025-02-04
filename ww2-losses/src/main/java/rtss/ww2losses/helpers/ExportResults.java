@@ -40,20 +40,22 @@ public class ExportResults
         if (exportDirectory == null || exportDirectory.trim().length() == 0)
             return;
 
+        Area area = ap.area;
+        String areaname = area.toString();
+        String fn, title;
+
         File fdir = new File(exportDirectory);
         fdir.mkdirs();
 
-        String areaname = ap.area.toString();
-
-        String fn;
+        /* ========================================================================================================= */
 
         for (HalfYearEntry he : halves)
         {
             /* структура населения */
+            title = "Население " + areaname + " в начале полугодия " + he.index();
             fn = String.format("%s-population-%s.txt", ap.area.name(), he.index());
             Population p = he.actual_population.toPopulation();
-            Util.writeAsFile(fpath(fdir, fn),
-                             dump(p, "Население " + areaname + " в начале полугодия " + he.index()));
+            Util.writeAsFile(fpath(fdir, fn), dump(p, title));
 
             /* избыточные смерти */
             if (he.index().equals("1941.1") || he.index().equals("1946.1"))
@@ -62,10 +64,10 @@ public class ExportResults
             }
             else
             {
+                title = "Избыточные смерти населения " + areaname + " в полугодии " + he.index();
                 fn = String.format("%s-excess-deaths-%s.txt", ap.area.name(), he.index());
                 p = he.actual_excess_wartime_deaths.toPopulation();
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(p, "Избыточные смерти населения " + areaname + " в полугодии " + he.index()));
+                Util.writeAsFile(fpath(fdir, fn), dump(p, title));
             }
 
             /* иммиграция в РСФСР */
@@ -73,22 +75,27 @@ public class ExportResults
             {
                 if (!he.immigration.isEmpty())
                 {
+                    title = "Минимальная межреспубликанская миграция в РСФСР в полугодии " + he.index();
                     fn = String.format("%s-immigration-%s.txt", ap.area.name(), he.index());
                     p = he.immigration.toPopulation();
-                    Util.writeAsFile(fpath(fdir, fn),
-                                     dump(p, "Минимальная межреспубликанская миграция в РСФСР в полугодии " + he.index()));
+                    Util.writeAsFile(fpath(fdir, fn), dump(p, title));
                 }
             }
         }
+        
+        /* ========================================================================================================= */
 
+        title = "Избыточные смерти населения " + areaname + " в 1941-1945 гг. по возрасту в момент смерти";
         fn = String.format("%s-all-excess-deaths-by-age-at-time-of-death.txt", ap.area.name());
-        Util.writeAsFile(fpath(fdir, fn),
-                         dump(allExcessDeathsByDeathAge, "Избыточные смерти населения " + areaname + " в 1941-1945 гг. по возрасту в момент смерти"));
+        Util.writeAsFile(fpath(fdir, fn), dump(allExcessDeathsByDeathAge, title));
+        exportImage(title, allExcessDeathsByDeathAge, ap, exportDirectory, "all-excess-deaths-by-age-at-time-of-death");
 
+        title = "Избыточные смерти населения " + areaname + " в 1941-1945 гг. по возрасту, в котором умерший был бы на начало 1946 года";
         fn = String.format("%s-all-excess-deaths-by-age-at-1946.1.txt", ap.area.name());
-        Util.writeAsFile(fpath(fdir, fn),
-                         dump(allExcessDeathsByAgeAt1946, "Избыточные смерти населения " + areaname
-                                                          + " в 1941-1945 гг. по возрасту, в котором умерший был бы на начало 1946 года"));
+        Util.writeAsFile(fpath(fdir, fn), dump(allExcessDeathsByAgeAt1946, title));
+        exportImage(title, allExcessDeathsByAgeAt1946, ap, exportDirectory, "all-excess-deaths-by-age-at-1946.1");
+
+        /* ========================================================================================================= */
 
         if (deficit1946_raw_preimmigration == null && deficit1946_adjusted_preimmigration == null)
         {
@@ -96,19 +103,19 @@ public class ExportResults
 
             if (deficit1946_adjusted_postimmigration != null)
             {
+                title = "Дефицит населения " + areaname + " на начало 1946 года (неисправленный)";
                 fn = String.format("%s-deficit-1946.1-raw.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_raw_postimmigration, "Дефицит населения " + areaname + " на начало 1946 года (неисправленный)"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_postimmigration, title));
 
+                title = "Дефицит населения " + areaname + " на начало 1946 года (исправленный)";
                 fn = String.format("%s-deficit-1946.1-adjusted.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_adjusted_postimmigration, "Дефицит населения " + areaname + " на начало 1946 года (исправленный)"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_adjusted_postimmigration, title));
             }
             else
             {
+                title = "Дефицит населения " + areaname + " на начало 1946 года";
                 fn = String.format("%s-deficit-1946.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_raw_postimmigration, "Дефицит населения " + areaname + " на начало 1946 года"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_postimmigration, title));
             }
         }
         else
@@ -117,42 +124,36 @@ public class ExportResults
 
             if (deficit1946_adjusted_preimmigration != null)
             {
+                title = "Дефицит населения " + areaname + " на начало 1946 года (неисправленный), без учёта иммиграции";
                 fn = String.format("%s-deficit-1946.1-raw-without-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_raw_preimmigration,
-                                      "Дефицит населения " + areaname + " на начало 1946 года (неисправленный), без учёта иммиграции"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_preimmigration, title));
 
+                title = "Дефицит населения " + areaname + " на начало 1946 года (исправленный), без учёта иммиграции";
                 fn = String.format("%s-deficit-1946.1-adjusted-without-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_adjusted_preimmigration,
-                                      "Дефицит населения " + areaname + " на начало 1946 года (исправленный), без учёта иммиграции"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_adjusted_preimmigration, title));
             }
             else
             {
+                title = "Дефицит населения " + areaname + " на начало 1946 года, без учёта иммиграции";
                 fn = String.format("%s-deficit-1946-without-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_raw_preimmigration,
-                                      "Дефицит населения " + areaname + " на начало 1946 года, без учёта иммиграции"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_preimmigration, title));
             }
 
             if (deficit1946_adjusted_postimmigration != null)
             {
+                title = "Дефицит населения " + areaname + " на начало 1946 года (неисправленный), с учётом иммиграции";
                 fn = String.format("%s-deficit-1946.1-raw-with-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_raw_postimmigration,
-                                      "Дефицит населения " + areaname + " на начало 1946 года (неисправленный), с учётом иммиграции"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_postimmigration, title));
 
+                title = "Дефицит населения " + areaname + " на начало 1946 года (исправленный), с учётом иммиграции";
                 fn = String.format("%s-deficit-1946.1-adjusted-with-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_adjusted_postimmigration,
-                                      "Дефицит населения " + areaname + " на начало 1946 года (исправленный), с учётом иммиграции"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_adjusted_postimmigration, title));
             }
             else
             {
+                title = "Дефицит населения " + areaname + " на начало 1946 года, с учётом иммиграции";
                 fn = String.format("%s-deficit-1946-with-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn),
-                                 dump(deficit1946_raw_postimmigration,
-                                      "Дефицит населения " + areaname + " на начало 1946 года, с учётом иммиграции"));
+                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_postimmigration, title));
             }
         }
 
@@ -164,8 +165,11 @@ public class ExportResults
 
     public static void exportImage(String title, PopulationContext p, AreaParameters ap, String exportDirectory, String suffix) throws Exception
     {
+        if (exportDirectory == null || exportDirectory.trim().length() == 0)
+            return;
+
         title = "";
-        
+
         new PopulationChart(title)
                 .show("", p.toPopulation())
                 .exportImage(IMAGE_CX, IMAGE_CY, imageFilename(exportDirectory, ap, suffix + ".png"))
