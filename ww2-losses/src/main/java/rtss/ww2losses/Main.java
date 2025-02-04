@@ -189,7 +189,7 @@ public class Main
     };
 
     private Phase phase;
-
+    
     void main() throws Exception
     {
         /*
@@ -267,13 +267,10 @@ public class Main
         double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
 
         /* население на середину 1941 года -- по передвижке на основе ASFR */
-        if (Util.True)
-        {
-            ForwardingResult fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
-            p_mid1941 = fr.p_result;
-            deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
-            births_1941_1st_halfyear = fr.observed_births;
-        }
+        ForwardingResult fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
+        p_mid1941 = fr.p_result;
+        deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
+        births_1941_1st_halfyear = fr.observed_births;
 
         if (Util.False)
         {
@@ -285,11 +282,8 @@ public class Main
 
         if (Util.False && exportDirectory != null)
         {
-            /* отобразить график населения на середину 1941 года */
-            new PopulationChart("Население " + area + " на середину 1941 года")
-                    .show("", p_mid1941.toPopulation())
-                    .exportImage(600, 1200, ExportResults.imageFilename(exportDirectory, ap, "population-1941.2.png"))
-                    .exportImage(300, 600, ExportResults.imageFilename(exportDirectory, ap, "population-1941.2-tn.png"));
+            /* сохранить график населения на середину 1941 года */
+            ExportResults.exportImage("Население " + area + " на середину 1941 года", p_mid1941, ap, exportDirectory, "population-1941.2");
         }
 
         /*
@@ -322,7 +316,7 @@ public class Main
             double v1 = totalImmigration(immigration_halves);
             double v2 = totalImmigration(halves);
 
-            // в случае расхождения делать stage_1 итеративно до схождения
+            // в случае расхождения повторять stage_1 итеративно до схождения
             if (!Util.same(v1, v2))
                 throw new Exception("Расхождение в исчисленном объёме иммиграции на предварительном и окончательном шагах");
         }

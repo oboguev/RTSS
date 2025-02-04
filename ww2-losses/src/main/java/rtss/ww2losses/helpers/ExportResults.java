@@ -6,12 +6,24 @@ import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
 
 public class ExportResults
 {
+    /*
+     * Разрешение для сохраняемых графиков
+     */
+    public static final int IMAGE_CX = 750;
+    public static final int IMAGE_CY = 1500;
+
+    public static final int TN_CX = 450;
+    public static final int TN_CY = 900;
+
+    /* ============================================================================================= */
+
     public static void exportResults(
             String exportDirectory,
             AreaParameters ap,
@@ -149,6 +161,16 @@ public class ExportResults
     }
 
     /* ============================================================================================= */
+
+    public static void exportImage(String title, PopulationContext p, AreaParameters ap, String exportDirectory, String suffix) throws Exception
+    {
+        title = "";
+        
+        new PopulationChart(title)
+                .show("", p.toPopulation())
+                .exportImage(IMAGE_CX, IMAGE_CY, imageFilename(exportDirectory, ap, suffix + ".png"))
+                .exportImage(TN_CX, TN_CY, imageFilename(exportDirectory, ap, suffix + "-tn.png"));
+    }
 
     public static String imageFilename(String exportDirectory, AreaParameters ap, String suffix) throws Exception
     {
