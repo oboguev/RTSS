@@ -44,16 +44,16 @@ public class AdjustSeniorRates
     public static CombinedMortalityTable adjust_ussr(CombinedMortalityTable mt) throws Exception
     {
         Adjustment male = null, female = null;
-        male = new Adjustment(Gender.MALE, 80.5, 90.5, 83.2, 0.01);
-        female = new Adjustment(Gender.FEMALE, 80.5, 93.5, 83.2, 0.01);
+        // ### male = new Adjustment(Gender.MALE, 80.5, 90.5, 83.2, 0.01);
+        // ### female = new Adjustment(Gender.FEMALE, 80.5, 93.5, 83.2, 0.01);
         return adjust(mt, male, female, null);
     }
 
     public static CombinedMortalityTable adjust_rsfsr(CombinedMortalityTable mt) throws Exception
     {
         Adjustment male = null, female = null;
-        male = new Adjustment(Gender.MALE, 80.5, 93.5, 83.8, 0.01);
-        female = new Adjustment(Gender.FEMALE, 81.5, 86.5, 83.8, 0.01);
+        // ### male = new Adjustment(Gender.MALE, 80.5, 93.5, 83.8, 0.01);
+        // ### female = new Adjustment(Gender.FEMALE, 81.5, 86.5, 83.8, 0.01);
         return adjust(mt, male, female, null);
     }
 
@@ -100,9 +100,9 @@ public class AdjustSeniorRates
     {
         double[] adjustment = new double[qx.length];
         double[] rqx = new double[qx.length];
-        
+
         LinearInterpolator li = new LinearInterpolator(adj.age1, 0, adj.age_apex, adj.amount);
-        
+
         for (int age = (int) Math.floor(adj.age1); age <= Math.ceil(adj.age_apex); age++)
         {
             Part part = part(age, adj.age1, adj.age_apex);
@@ -124,10 +124,8 @@ public class AdjustSeniorRates
             rqx[age] = qx[age] - adj.amount * adjustment[age];
             Util.assertion(rqx[age] > 0);
         }
-        
-        // ### return rqx
 
-        return qx;
+        return rqx;
     }
 
     /*
@@ -137,24 +135,24 @@ public class AdjustSeniorRates
     {
         public double xa1;
         public double xa2;
-        
+
         public Part(double xa1, double xa2)
         {
             this.xa1 = xa1;
             this.xa2 = xa2;
         }
-        
+
         public double width()
         {
             return xa2 - xa1;
         }
-        
+
         public double mid()
         {
             return (xa1 + xa2) / 2;
         }
     }
-    
+
     private static Part part(int age, double age1, double age2) throws Exception
     {
         return part(age, age + 1.0, age1, age2);
@@ -214,7 +212,6 @@ public class AdjustSeniorRates
             Util.assertion(qx_male[age] != qx_female[age]);
             male_fraction[age] = (qx_both[age] - qx_female[age]) / (qx_male[age] - qx_female[age]);
         }
-
         // проверка мниимальной разумности значений
         for (int age = 0; age < qx_both.length; age++)
         {
