@@ -448,6 +448,20 @@ public class Util
         return d;
     }
 
+    public static void fill(final double[] y, double v)
+    {
+        for (int k = 0; k < y.length; k++)
+            y[k] = v;
+    }
+
+    public static double[] fill_double(int size, double v)
+    {
+        double[] y = new double[size];
+        for (int k = 0; k < y.length; k++)
+            y[k] = v;
+        return y;
+    }
+
     // concatenate arrays a and d
     public static double[] concat(double[] a, double[] b)
     {

@@ -1,20 +1,25 @@
 package rtss.ww2losses.ageline;
 
 import rtss.data.selectors.Gender;
+import rtss.math.interpolate.LinearInterpolator;
 import rtss.util.Util;
 import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntry;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 
+import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationContext;
+
 /*
  * Вычислить число избыточных смертей в половозрастной линии за полугодие
  */
 public class WarAttritionModel_New
 {
-    public WarAttritionModel_New(double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
+    public WarAttritionModel_New(PopulationContext p1941_mid, PopulationContext p1946_actual,
+            double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
     {
-        initModel(aw_general_occupation, aw_conscripts_rkka_loss);
+        initModel(p1941_mid, p1946_actual, aw_general_occupation, aw_conscripts_rkka_loss);
     }
 
     /* =========================================================================================== */
@@ -30,9 +35,9 @@ public class WarAttritionModel_New
      * Сумма равна 1. 
      */
     private double[] ac_general;
-    
+
     /* =========================================================================================== */
-    
+
     /* 
      * Интенсивность потерь РККА по полугодиям с 1941.1
      * (Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга потерь", М. : Вече, 2010, стр. 236, 242, 245)
@@ -44,22 +49,45 @@ public class WarAttritionModel_New
      * (Госкомстат СССР, "Народное хозяйство СССР в Великой Отечественной войне 1941–1945 гг. : Статистический сборник", М. 1990, стр. 20),
      * интерполяция и обработка в файле occupation_imr.xlsx. 
      */
-    private static final double[] occupation_intensity = { 0.0, 19.6, 37.8, 40.1, 32.7, 24.2, 14.2, 1.7, 0.0, 0.0 };
+    private static final double[] occupation_pct = { 0.0, 19.6, 37.8, 40.1, 32.7, 24.2, 14.2, 1.7, 0.0, 0.0 };
 
     /* 
      * Равномерная интенсивность по военным полугодиям с 1941.1
      */
     private static final double[] even_intensity = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 
-    private void initModel(double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
-    {
-        /* нормализованный полугодовой коэффициент распределения потерь для не-призывного населения */
-        ac_general = wsum(aw_general_occupation, occupation_intensity,
-                                   1 - aw_general_occupation, even_intensity);
+    /* 
+     * Относительная интенсивность потерь в оккупации и в тылу
+     */
+    double[] loss_intensity_occupation = { 0.00, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 0.00 };
+    double[] loss_intensity_rear = { 0.00, 1.00, 1.00, 1.00, 0.95, 0.90, 0.85, 0.80, 0.75, 0.00 };
 
-        /* нормализованный полугодовой коэффициент распределения потерь для призывного населения */
-        ac_conscripts = wsum(aw_conscripts_rkka_loss, rkka_loss_intensity,
-                                      1.0 - aw_conscripts_rkka_loss, ac_general);
+    /* =========================================================================================== */
+
+    private void initModel(PopulationContext p1941_mid,
+            PopulationContext p1946_actual,
+            double aw_general_occupation,
+            double aw_conscripts_rkka_loss) throws Exception
+    {
+        double[] rkka_loss_intensity_normalized = Util.normalize(rkka_loss_intensity);
+
+        /* доля населения в оккупации и в тылу */
+        double[] fraction_occupation = Util.divide(occupation_pct, 100.0);
+        double[] fraction_rear = Util.sub(Util.fill_double(fraction_occupation.length, 1), fraction_occupation);
+
+        /* остаток гражданского населения (доля) */
+        double[] civil_population_remainder = civil_population_remainder(p1941_mid, p1946_actual);
+
+        /* удельные веса потерь в тылу и в оккупации */
+        double[] w_occupation = Util.multiply(civil_population_remainder, Util.multiply(fraction_occupation, loss_intensity_occupation));
+        double[] w_rear = Util.multiply(civil_population_remainder, Util.multiply(fraction_rear, loss_intensity_rear));
+        double[] w_civil = Util.normalize(Util.add(w_occupation, w_rear));
+        
+        /* полугодовые веса потерь для мужчин призывного возраста и для остальных */
+        // ### коэф-ты 0.2 и 0.8
+        ac_conscripts = wsum(0.8, rkka_loss_intensity_normalized, 0.2, w_civil);
+        ac_general = wsum(0.2, rkka_loss_intensity_normalized, 0.8, w_civil);
+        Util.noop();
     }
 
     /*
@@ -84,6 +112,39 @@ public class WarAttritionModel_New
         return ww;
     }
 
+    private final int N_HALF_YEARS = 10;
+
+    /* 
+     * остаток гражданского населения 
+     */
+    private double[] civil_population_remainder(PopulationContext p1941_mid, PopulationContext p1946_actual) throws Exception
+    {
+        int nd_4_5 = 9 * years2days(0.5);
+        PopulationContext p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5, years2days(Population.MAX_AGE + 1));
+
+        double v1 = civil_population(p1941_mid);
+        double v2 = civil_population(p1946_actual_born_prewar);
+        LinearInterpolator li = new LinearInterpolator(1.0, v1, 10.0, v2);
+
+        double[] r = new double[N_HALF_YEARS];
+        r[0] = 1;
+
+        for (int k = 1; k < r.length; k++)
+            r[k] = li.interp(k + 0.5) / v1;
+
+        return r;
+    }
+
+    /* численность населения, но включая только 20% мужчин призывного возраста */
+    private double civil_population(PopulationContext p) throws Exception
+    {
+        double v1 = p.sum();
+        p = p.selectByAgeYears(Constants.CONSCRIPT_AGE_FROM, Constants.CONSCRIPT_AGE_TO);
+        double v2 = p.sum(Gender.MALE);
+        // ### 0.8
+        return v1 - 0.8 * v2;
+    }
+
     /* =========================================================================================== */
 
     /*
@@ -97,7 +158,7 @@ public class WarAttritionModel_New
     {
         double[] ac = attrition_coefficient(gender, nd_age);
         double excess_war_deaths = ac[he.index()] * initial_population;
-        return excess_war_deaths ;
+        return excess_war_deaths;
     }
 
     private double[] attrition_coefficient(Gender gender, int nd)
