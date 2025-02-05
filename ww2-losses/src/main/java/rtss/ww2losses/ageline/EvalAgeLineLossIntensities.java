@@ -38,7 +38,14 @@ public class EvalAgeLineLossIntensities
 
     /* ========================================================================================================== */
 
-    public AgeLineFactorIntensities evalPreliminaryLossIntensity(PopulationContext p1946_actual) throws Exception
+    /*
+     * Для каждой из возрастных линий вычислить интенсивность потерь (отдельную для каждой линии), которая связует 
+     * начальное население этой линии (в середине 1941) с конечным (в началу 1946) при данной модели военных потерь @wam.
+     * 
+     * Для некоторых линий интенсивность может быть отрицательной (если исходное население линии слишком мало,
+     * или конечное слишком велико). 
+     */
+    public AgeLineFactorIntensities evalPreliminaryLossIntensity(final PopulationContext p1946_actual) throws Exception
     {
         AgeLineFactorIntensities intensities = new AgeLineFactorIntensities();
         HalfYearEntry he1941_2 = halves.get("1941.2");
@@ -72,11 +79,20 @@ public class EvalAgeLineLossIntensities
 
     /* ========================================================================================================== */
 
+    /*
+     * Для каждой из возрастных линий вычислить интенсивность иммиграции, которая заполняет (обнуляет) разрыв
+     * между конечным насеелением на 1946 год по фактической величине и по проводке возрастной линии при 
+     * интенсивности её потерь указанной в @alis.
+     * 
+     * Применяеется только для РСФСР, т.к. для СССР иммиграции нет.
+     */
     public void evalMigration(
-            PopulationContext p1946_actual,
+            final PopulationContext p1946_actual,
             AgeLineFactorIntensities amig,
             final AgeLineFactorIntensities alis,
-            Gender gender, double age1, double age2) throws Exception
+            final Gender gender, 
+            final double age1, 
+            final double age2) throws Exception
     {
         int nd1 = years2days(age1);
         int nd2 = years2days(age2);
@@ -134,9 +150,14 @@ public class EvalAgeLineLossIntensities
 
     /* ========================================================================================================== */
 
-    public void processAgeLines(AgeLineFactorIntensities alis,
-            AgeLineFactorIntensities amig,
-            PopulationContext p1946_actual) throws Exception
+    /*
+     * Обработать возрастные линии, вычислив на их основании для всех полугодий фактическое население
+     * на начало полугодия, количество смертей за полугодие по категориям и иммиграцию за полугодие.
+     */
+    public void processAgeLines(
+            final AgeLineFactorIntensities alis,
+            final AgeLineFactorIntensities amig,
+            final PopulationContext p1946_actual) throws Exception
     {
         Util.assertion((amig != null) == (ac_immigration != null));
 
