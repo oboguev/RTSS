@@ -14,8 +14,6 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.util.Strings;
-
 /*
  * Хранит отображение (Gender, nd_age) -> loss intensity или immigration intensity
  */

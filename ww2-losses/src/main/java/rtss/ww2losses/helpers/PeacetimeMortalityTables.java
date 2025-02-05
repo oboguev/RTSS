@@ -7,10 +7,13 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
@@ -45,7 +48,7 @@ public class PeacetimeMortalityTables
         halfyearly_imr_multiplier[0] = halfyearly_imr_multiplier[1] = halfyearly_imr_multiplier[2] = halfyearly_imr_multiplier[3] = 1.0;
     }
 
-    public CombinedMortalityTable get(int year, HalfYearSelector halfyear) throws Exception
+    public CombinedMortalityTable getTable(int year, HalfYearSelector halfyear) throws Exception
     {
         if (!applyAntibiotics)
             return mt1940;
@@ -65,15 +68,67 @@ public class PeacetimeMortalityTables
             instructions.add(instruction);
 
             xmt = PatchMortalityTable.patch(mt1940, instructions, "поправка антибиотиков для " + year);
+            xmt.seal();
             cacheTable.put(key(year, halfyear), xmt);
         }
 
         return xmt;
     }
+    
+    /* ======================================================================================================= */
+
+    public double[] mt2lx(int year, HalfYearSelector halfyear, CombinedMortalityTable mt, Locality locality, Gender gender) throws Exception
+    {
+        CombinedMortalityTable xmt = getTable(year, halfyear);
+        Util.assertion(mt == xmt);
+
+        double[] lx = cacheLX.get(key(year, halfyear));
+        
+        if (lx == null)
+        {
+            lx = mt2lx(mt, locality, gender);
+            cacheLX.put(key(year, halfyear), lx);
+        }
+
+        return Util.dup(lx);
+    }
+
+    /*
+     * Построить кривую l(x) для таблицы смертности mt, указаного типа местности и пола
+     */
+    private double[] mt2lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
+    {
+        double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
+
+        /*
+         * Провести дневную кривую так что
+         *       daily_lx[0]         = yearly_lx[0]
+         *       daily_lx[365]       = yearly_lx[1]
+         *       daily_lx[365 * 2]   = yearly_lx[2]
+         *       etc.
+         */
+        double[] daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
+
+        /*
+         * Базовая проверка правильности
+         */
+        if (Util.differ(daily_lx[0], yearly_lx[0]) ||
+            Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
+            Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
+            Util.differ(daily_lx[365 * 3], yearly_lx[3]))
+        {
+            throw new Exception("Ошибка в построении daily_lx");
+        }
+
+        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
+
+        return daily_lx;
+    }
 
     /* ======================================================================================= */
     
     private Map<String, CombinedMortalityTable> cacheTable = new HashMap<>();
+    private Map<String, double[]> cacheLX = new HashMap<>();
 
     private String key(int year, HalfYearSelector halfyear)
     {

@@ -239,6 +239,7 @@ public class Main
 
         /* таблицы смертности для 1940 года и полугодий 1941-1945 при мирных условиях */
         mt1940 = new MortalityTable_1940(ap).evaluate();
+        mt1940.seal();
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
 
         /* население на середину 1941 года */
@@ -405,7 +406,7 @@ public class Main
         PopulationContext pavg = p_start1941.avg(p_mid1941);
 
         PopulationContext p = p_start1941.clone();
-        CombinedMortalityTable mt = peacetimeMortalityTables.get(1941, HalfYearSelector.FirstHalfYear);
+        CombinedMortalityTable mt = peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
 
         ForwardPopulationT fw = new ForwardPopulationT();
         int ndays = fw.birthDays(0.5);
@@ -498,7 +499,7 @@ public class Main
             }
 
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
-            CombinedMortalityTable mt = peacetimeMortalityTables.get(current_year, current_half);
+            CombinedMortalityTable mt = peacetimeMortalityTables.getTable(current_year, current_half);
             curr.peace_mt = mt;
 
             /* передвижка на следующие полгода населения с учётом рождений */
@@ -536,7 +537,9 @@ public class Main
                 break;
 
             if (he.peace_mt == null)
-                he.peace_mt = peacetimeMortalityTables.get(he.year, he.halfyear);
+                he.peace_mt = peacetimeMortalityTables.getTable(he.year, he.halfyear);
+            
+            // ###
 
             he.peace_lx_male = mt2lx(he.peace_mt, Locality.TOTAL, Gender.MALE);
             he.peace_lx_female = mt2lx(he.peace_mt, Locality.TOTAL, Gender.FEMALE);
