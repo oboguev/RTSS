@@ -41,7 +41,7 @@ public class ShowAgeSliceDeathHistory
                 break;
             
             StringBuilder sb = new StringBuilder();
-            sb.append(he.index());
+            sb.append(he.id());
 
             double offset = he.offset_start1941();
             

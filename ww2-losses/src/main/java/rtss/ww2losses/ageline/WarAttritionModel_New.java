@@ -10,8 +10,15 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 /*
  * Вычислить число избыточных смертей в половозрастной линии за полугодие
  */
-public class WarAttritionModel
+public class WarAttritionModel_New
 {
+    public WarAttritionModel_New(double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
+    {
+        initModel(aw_general_occupation, aw_conscripts_rkka_loss);
+    }
+
+    /* =========================================================================================== */
+
     /*
      * Удельные коэффициенты потерь среди мужчин призывного возраста, по полугодиям.
      * Сумма равна 1. 
@@ -78,11 +85,6 @@ public class WarAttritionModel
     }
 
     /* =========================================================================================== */
-
-    public WarAttritionModel(double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
-    {
-        initModel(aw_general_occupation, aw_conscripts_rkka_loss);
-    }
 
     /*
      * Число избыточных смертей за полугодие @he

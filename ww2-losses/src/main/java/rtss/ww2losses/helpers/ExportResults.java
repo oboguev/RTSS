@@ -52,21 +52,21 @@ public class ExportResults
         for (HalfYearEntry he : halves)
         {
             /* структура населения */
-            title = "Население " + areaname + " в начале полугодия " + he.index();
-            fn = String.format("%s-population-%s.txt", ap.area.name(), he.index());
+            title = "Население " + areaname + " в начале полугодия " + he.id();
+            fn = String.format("%s-population-%s.txt", ap.area.name(), he.id());
             Population p = he.actual_population.toPopulation();
             Util.writeAsFile(fpath(fdir, fn), dump(p, title));
 
             /* избыточные смерти */
-            if (he.index().equals("1941.1") || he.index().equals("1946.1"))
+            if (he.id().equals("1941.1") || he.id().equals("1946.1"))
             {
                 // skip
             }
             else
             {
                 p = he.actual_excess_wartime_deaths.toPopulation();
-                title = "Избыточные смерти населения " + areaname + " в полугодии " + he.index();
-                Util.writeAsFile(fpath(fdir, ap, "excess-deaths-" + he.index()), dump(p, title));
+                title = "Избыточные смерти населения " + areaname + " в полугодии " + he.id();
+                Util.writeAsFile(fpath(fdir, ap, "excess-deaths-" + he.id()), dump(p, title));
             }
 
             /* иммиграция в РСФСР */
@@ -75,8 +75,8 @@ public class ExportResults
                 if (!he.immigration.isEmpty())
                 {
                     p = he.immigration.toPopulation();
-                    title = "Минимальная межреспубликанская миграция в РСФСР в полугодии " + he.index();
-                    Util.writeAsFile(fpath(fdir, ap, "immigration-" + he.index()), dump(p, title));
+                    title = "Минимальная межреспубликанская миграция в РСФСР в полугодии " + he.id();
+                    Util.writeAsFile(fpath(fdir, ap, "immigration-" + he.id()), dump(p, title));
                 }
             }
         }

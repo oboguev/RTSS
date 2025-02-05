@@ -380,12 +380,32 @@ public class Util
         return yy;
     }
 
+    // return a new array with values representing y[] * f[]
+    public static double[] multiply(final double[] y, double[] f) throws Exception
+    {
+        Util.assertion(y.length == f.length);
+        double[] yy = new double[y.length];
+        for (int x = 0; x < y.length; x++)
+            yy[x] = y[x] * f[x];
+        return yy;
+    }
+
     // return a new array with values representing y[] / f
     public static double[] divide(final double[] y, double f)
     {
         double[] yy = new double[y.length];
         for (int x = 0; x < y.length; x++)
             yy[x] = y[x] / f;
+        return yy;
+    }
+
+    // return a new array with values representing y[] / f[]
+    public static double[] divide(final double[] y, double[] f) throws Exception
+    {
+        Util.assertion(y.length == f.length);
+        double[] yy = new double[y.length];
+        for (int x = 0; x < y.length; x++)
+            yy[x] = Util.validate(y[x] / f[x]);
         return yy;
     }
 

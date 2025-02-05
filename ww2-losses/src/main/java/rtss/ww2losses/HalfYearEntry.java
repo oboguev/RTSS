@@ -149,7 +149,7 @@ public class HalfYearEntry
         }
     }
     
-    public String index()
+    public String id()
     {
         return year + "." + halfyear;
     }
@@ -167,5 +167,11 @@ public class HalfYearEntry
     {
         double v = (year - 1941) * 2 + this.halfyear.seq(0);
         return v / 2;
+    }
+    
+    /* индекс в массиве полугодий 1941.1 = 0*/
+    public int index() throws Exception
+    {
+        return (year - 1941) * 2 + this.halfyear.seq(0);
     }
 }

@@ -179,7 +179,7 @@ public class PrintHalfYears
 
         Util.out(s);
 
-        if (!he.index().equals("1941.1"))
+        if (!he.id().equals("1941.1"))
         {
             results.actual_excess_wartime_deaths += he.actual_excess_wartime_deaths.sum();
             results.exd_conscripts += exd_conscripts;

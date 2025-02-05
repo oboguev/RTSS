@@ -1436,7 +1436,7 @@ public class Main
 
         for (HalfYearEntry he : halves)
         {
-            if (he.index().equals("1941.1") || he.index().equals("1946.1"))
+            if (he.id().equals("1941.1") || he.id().equals("1946.1"))
                 continue;
 
             p = p.add(he.actual_excess_wartime_deaths, ValueConstraint.NONE);
@@ -1454,7 +1454,7 @@ public class Main
 
         for (HalfYearEntry he : halves)
         {
-            if (he.index().equals("1941.1") || he.index().equals("1946.1"))
+            if (he.id().equals("1941.1") || he.id().equals("1946.1"))
                 continue;
 
             double offset = (1946 + 0) - (he.year + 0.5 * he.halfyear.seq(0));

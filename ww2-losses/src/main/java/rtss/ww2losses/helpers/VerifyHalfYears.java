@@ -71,7 +71,7 @@ public class VerifyHalfYears
             double v2 = -1 * (he.actual_births + he.immigration.sum() - he.actual_deaths.sum());
             double abs_dv = Math.abs(v1 - v2);
 
-            if (he.index().equals("1941.1") && ap.area == Area.USSR)
+            if (he.id().equals("1941.1") && ap.area == Area.USSR)
                 Util.assertion(abs_dv < 500);
             else
                 Util.assertion(abs_dv < 10);
@@ -99,7 +99,7 @@ public class VerifyHalfYears
             // накопление возрастов более MAX_AGE, но не должно становиться очень большим 
             Util.assertion(Math.abs(p.getYearValue(Gender.BOTH, MAX_AGE)) < 1000);
 
-            if (he.index().equals("1941.1"))
+            if (he.id().equals("1941.1"))
             {
                 same(p.getYearValue(Gender.BOTH, 0), he.actual_births, 0.0002);
                 same(p.sumDays(0, ndays), he.actual_births, 0.0002);
