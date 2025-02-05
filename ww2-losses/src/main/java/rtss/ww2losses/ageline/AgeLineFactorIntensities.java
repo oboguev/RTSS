@@ -232,8 +232,8 @@ public class AgeLineFactorIntensities
 
         for (Region r : list)
         {
-            sb.append(String.format("%5d - %5d  =  %7.3f - %7.3f  = %7.3f - %7.3f",
-                                    r.nd1, r.nd2,
+            sb.append(String.format("%5d - %5d  [%5d] =  %7.3f - %7.3f  = %7.3f - %7.3f",
+                                    r.nd1, r.nd2, r.nd2 - r.nd1 + 1,
                                     day2year(r.nd1), day2year(r.nd2),
                                     day2year(r.nd1) - 0.5, day2year(r.nd2) - 0.5));
             sb.append(Util.nl);
