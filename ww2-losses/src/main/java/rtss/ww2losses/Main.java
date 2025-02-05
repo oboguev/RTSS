@@ -965,17 +965,17 @@ public class Main
             String neg_male = alis.dumpNegRegions(Gender.MALE);
             String neg_female = alis.dumpNegRegions(Gender.FEMALE);
             
-            if (neg_male != null && neg_male.length() != 0)
+            if (alis.hasNegativeRegions(neg_male))
             {
                 Util.err("");
-                Util.err("Участки отрицательной интенсивности потерь для мужчин:");
+                Util.err("Участки отрицательной интенсивности потерь для мужчин (возраст дни в середине 1941 - годы в середине 1941 - годы в начале 1941):");
                 Util.err(neg_male);
             }
             
-            if (neg_female != null && neg_female.length() != 0)
+            if (alis.hasNegativeRegions(neg_female))
             {
                 Util.err("");
-                Util.err("Участки отрицательной интенсивности потерь для женщин:");
+                Util.err("Участки отрицательной интенсивности потерь для женщин (возраст дни в середине 1941 - годы в середине 1941 - годы в начале 1941):");
                 Util.err(neg_female);
             }
 

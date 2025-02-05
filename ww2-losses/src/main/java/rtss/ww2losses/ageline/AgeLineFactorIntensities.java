@@ -14,6 +14,8 @@ import static rtss.data.population.forward.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.util.Strings;
+
 /*
  * Хранит отображение (Gender, nd_age) -> loss intensity или immigration intensity
  */
@@ -226,7 +228,7 @@ public class AgeLineFactorIntensities
     {
         List<Region> list = negRegions(gender);
         if (list.size() == 0)
-            return "No negative regions";
+            return NoNegativeRegions;
 
         StringBuilder sb = new StringBuilder();
 
@@ -246,4 +248,11 @@ public class AgeLineFactorIntensities
     {
         return nd / 365.0;
     }
+    
+    public boolean hasNegativeRegions(String regs)
+    {
+        return !regs.equals(NoNegativeRegions);
+    }
+    
+    private final String NoNegativeRegions = "No negative regions"; 
 }
