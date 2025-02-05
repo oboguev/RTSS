@@ -165,13 +165,19 @@ public class HalfYearEntry
     /* смещение относительно начала начала 1941, в годах */  
     public double offset_start1941() throws Exception
     {
-        double v = (year - 1941) * 2 + this.halfyear.seq(0);
+        double v = (year - 1941) * 2 + halfyear.seq(0);
         return v / 2;
     }
     
     /* индекс в массиве полугодий 1941.1 = 0*/
     public int index() throws Exception
     {
-        return (year - 1941) * 2 + this.halfyear.seq(0);
+        return index(year, halfyear);
+    }
+
+    /* индекс в массиве полугодий 1941.1 = 0*/
+    public static int index(int year, HalfYearSelector halfyear) throws Exception
+    {
+        return (year - 1941) * 2 + halfyear.seq(0);
     }
 }
