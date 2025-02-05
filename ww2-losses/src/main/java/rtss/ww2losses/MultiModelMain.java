@@ -42,13 +42,13 @@ public class MultiModelMain
 
     private void main() throws Exception
     {
-        for (double aw_conscripts_rkka_loss = 0.5; aw_conscripts_rkka_loss <= 0.9; aw_conscripts_rkka_loss += 0.1)
+        for (double aw_conscript_combat = 0.7; aw_conscript_combat <= 0.9; aw_conscript_combat += 0.1)
         {
-            for (double aw_general_occupation = 0.2; aw_general_occupation <= 0.5; aw_general_occupation += 0.1)
+            for (double aw_civil_combat = 0.1; aw_civil_combat <= 0.4; aw_civil_combat += 0.1)
             {
                 ModelParameters params = new ModelParameters();
-                params.aw_conscripts_rkka_loss = aw_conscripts_rkka_loss;
-                params.aw_general_occupation = aw_general_occupation;
+                params.aw_conscript_combat = aw_conscript_combat;
+                params.aw_civil_combat = aw_civil_combat;
                 params.exportDirectory = null;
                 AreaModel am = run(params);
                 areaModels.add(am);
@@ -116,8 +116,8 @@ public class MultiModelMain
         String rsfsr = result2str(am.rsfsr);
         
         String s = String.format("%3.1f %3.1f * %s * %s",
-                                 am.params.aw_conscripts_rkka_loss,
-                                 am.params.aw_general_occupation,
+                                 am.params.aw_conscript_combat,
+                                 am.params.aw_civil_combat,
                                  ussr, rsfsr);
         Util.out(s);
     }

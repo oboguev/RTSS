@@ -139,10 +139,14 @@ public class Main
     private CombinedMortalityTable mt1940;
     private PeacetimeMortalityTables peacetimeMortalityTables;
 
-    /* весовые коэффцииенты для факторов распределяющих потери по времени */
-    private double aw_conscripts_rkka_loss = 0.9;
-    private double aw_general_occupation = 0.4;
-
+    /* 
+     * весовые коэффцииенты для факторов распределяющих потери по категориям
+     * 
+     *    aw_conscript_combat - доля потерь мужчин призывного возраста связанная с интенсивностью военных потерь РККА 
+     *    aw_civil_combat - доля потерь остальных групп (гражданского населения) связанная с интенсивностью военных потерь РККА
+     */
+    double aw_conscript_combat = 0.8;
+    double aw_civil_combat = 0.2;
     /* 
      * интенсивность иммиграции в РСФСР из западных ССР по полугодиям с 1941.1
      */
@@ -186,8 +190,8 @@ public class Main
 
         if (model != null)
         {
-            this.aw_conscripts_rkka_loss = model.params.aw_conscripts_rkka_loss;
-            this.aw_general_occupation = model.params.aw_general_occupation;
+            this.aw_conscript_combat = model.params.aw_conscript_combat;
+            this.aw_civil_combat = model.params.aw_civil_combat;
             this.PrintDiagnostics = model.params.PrintDiagnostics;
             this.exportDirectory = model.params.exportDirectory;
         }
@@ -899,8 +903,8 @@ public class Main
          */
         WarAttritionModel wam = new WarAttritionModel(halves.get("1941.2").p_nonwar_with_births, 
                                                       p1946_actual, 
-                                                      aw_general_occupation, 
-                                                      aw_conscripts_rkka_loss);
+                                                      aw_civil_combat, 
+                                                      aw_conscript_combat);
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, wam);
         AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual);
 

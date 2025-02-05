@@ -17,9 +17,9 @@ import rtss.data.population.struct.PopulationContext;
 public class WarAttritionModel
 {
     public WarAttritionModel(PopulationContext p1941_mid, PopulationContext p1946_actual,
-            double aw_general_occupation, double aw_conscripts_rkka_loss) throws Exception
+            double aw_civil_combat, double aw_conscript_combat) throws Exception
     {
-        initModel(p1941_mid, p1946_actual, aw_general_occupation, aw_conscripts_rkka_loss);
+        initModel(p1941_mid, p1946_actual, aw_civil_combat, aw_conscript_combat);
     }
 
     /* =========================================================================================== */
@@ -61,9 +61,12 @@ public class WarAttritionModel
 
     private void initModel(PopulationContext p1941_mid,
             PopulationContext p1946_actual,
-            double aw_general_occupation,
-            double aw_conscripts_rkka_loss) throws Exception
+            double aw_civil_combat,
+            double aw_conscript_combat) throws Exception
     {
+        Util.assertion(aw_civil_combat >= 0 && aw_civil_combat <= 1);
+        Util.assertion(aw_conscript_combat >= 0 && aw_conscript_combat <= 1);
+        
         double[] rkka_loss_intensity_normalized = Util.normalize(rkka_loss_intensity);
 
         /* доля населения в оккупации и в тылу */
@@ -71,18 +74,16 @@ public class WarAttritionModel
         double[] fraction_rear = Util.sub(Util.fill_double(fraction_occupation.length, 1), fraction_occupation);
 
         /* остаток гражданского населения (доля) */
-        double[] civil_population_remainder = civil_population_remainder(p1941_mid, p1946_actual);
+        double[] civil_population_remainder = civil_population_remainder(p1941_mid, p1946_actual, aw_conscript_combat);
 
         /* удельные веса потерь в тылу и в оккупации */
         double[] w_occupation = Util.multiply(civil_population_remainder, Util.multiply(fraction_occupation, loss_intensity_occupation));
         double[] w_rear = Util.multiply(civil_population_remainder, Util.multiply(fraction_rear, loss_intensity_rear));
         double[] w_civil = Util.normalize(Util.add(w_occupation, w_rear));
-        
+
         /* полугодовые веса потерь для мужчин призывного возраста и для остальных */
-        // ### коэф-ты 0.2 и 0.8
-        ac_conscripts = wsum(0.8, rkka_loss_intensity_normalized, 0.2, w_civil);
-        ac_general = wsum(0.2, rkka_loss_intensity_normalized, 0.8, w_civil);
-        Util.noop();
+        ac_conscripts = wsum(aw_conscript_combat, rkka_loss_intensity_normalized, 1 - aw_conscript_combat, w_civil);
+        ac_general = wsum(aw_civil_combat, rkka_loss_intensity_normalized, 1 - aw_civil_combat, w_civil);
     }
 
     /*
@@ -112,13 +113,13 @@ public class WarAttritionModel
     /* 
      * остаток гражданского населения 
      */
-    private double[] civil_population_remainder(PopulationContext p1941_mid, PopulationContext p1946_actual) throws Exception
+    private double[] civil_population_remainder(PopulationContext p1941_mid, PopulationContext p1946_actual, double aw_conscript_combat) throws Exception
     {
         int nd_4_5 = 9 * years2days(0.5);
         PopulationContext p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5, years2days(Population.MAX_AGE + 1));
 
-        double v1 = civil_population(p1941_mid);
-        double v2 = civil_population(p1946_actual_born_prewar);
+        double v1 = civil_population(p1941_mid, aw_conscript_combat);
+        double v2 = civil_population(p1946_actual_born_prewar, aw_conscript_combat);
         LinearInterpolator li = new LinearInterpolator(1.0, v1, 10.0, v2);
 
         double[] r = new double[N_HALF_YEARS];
@@ -131,13 +132,12 @@ public class WarAttritionModel
     }
 
     /* численность населения, но включая только 20% мужчин призывного возраста */
-    private double civil_population(PopulationContext p) throws Exception
+    private double civil_population(PopulationContext p, double aw_conscript_combat) throws Exception
     {
         double v1 = p.sum();
         p = p.selectByAgeYears(Constants.CONSCRIPT_AGE_FROM, Constants.CONSCRIPT_AGE_TO);
         double v2 = p.sum(Gender.MALE);
-        // ### 0.8
-        return v1 - 0.8 * v2;
+        return v1 - aw_conscript_combat * v2;
     }
 
     /* =========================================================================================== */
