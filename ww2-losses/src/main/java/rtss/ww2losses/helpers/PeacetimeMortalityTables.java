@@ -86,43 +86,11 @@ public class PeacetimeMortalityTables
         
         if (lx == null)
         {
-            lx = mt2lx(mt, locality, gender);
+            lx = mt.daily_lx(locality, gender);
             cacheLX.put(key(year, halfyear), lx);
         }
 
         return Util.dup(lx);
-    }
-
-    /*
-     * Построить кривую l(x) для таблицы смертности mt, указаного типа местности и пола
-     */
-    private double[] mt2lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
-    {
-        double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
-
-        /*
-         * Провести дневную кривую так что
-         *       daily_lx[0]         = yearly_lx[0]
-         *       daily_lx[365]       = yearly_lx[1]
-         *       daily_lx[365 * 2]   = yearly_lx[2]
-         *       etc.
-         */
-        double[] daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
-
-        /*
-         * Базовая проверка правильности
-         */
-        if (Util.differ(daily_lx[0], yearly_lx[0]) ||
-            Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
-            Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
-            Util.differ(daily_lx[365 * 3], yearly_lx[3]))
-        {
-            throw new Exception("Ошибка в построении daily_lx");
-        }
-
-        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
-
-        return daily_lx;
     }
 
     /* ======================================================================================= */

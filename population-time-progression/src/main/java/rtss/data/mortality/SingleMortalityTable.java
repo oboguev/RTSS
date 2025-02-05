@@ -3,6 +3,9 @@ package rtss.data.mortality;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.util.FastUUID;
 import rtss.util.Util;
 
@@ -442,5 +445,40 @@ public class SingleMortalityTable
     {
         if (sealed)
             throw new Exception("Table is sealed and cannot be modified");
+    }
+
+    /*****************************************************************************************************/
+    
+    /*
+     * Построить кривую l(x) интерполированную по дням
+     */
+    public double[] daily_lx() throws Exception
+    {
+        double[] yearly_lx = lx();
+
+        /*
+         * Провести дневную кривую так что
+         *       daily_lx[0]         = yearly_lx[0]
+         *       daily_lx[365]       = yearly_lx[1]
+         *       daily_lx[365 * 2]   = yearly_lx[2]
+         *       etc.
+         */
+        double[] daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
+
+        /*
+         * Базовая проверка правильности
+         */
+        if (Util.differ(daily_lx[0], yearly_lx[0]) ||
+            Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
+            Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
+            Util.differ(daily_lx[365 * 3], yearly_lx[3]))
+        {
+            throw new Exception("Ошибка в построении daily_lx");
+        }
+
+        // может не спадать, если для какого-то года смертность (qx) нулевая, но это было бы невозможным
+        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
+
+        return daily_lx;
     }
 }

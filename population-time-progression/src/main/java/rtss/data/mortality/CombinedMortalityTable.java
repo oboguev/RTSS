@@ -4,9 +4,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.FastUUID;
+import rtss.util.Util;
 
 /*
  * Таблица смертности для трёх видов местности (URBAN, RURAL и TOTAL).
@@ -315,5 +317,15 @@ public class CombinedMortalityTable
     {
         if (sealed)
             throw new Exception("Table is sealed and cannot be modified");
+    }
+
+    /*****************************************************************************************************/
+    
+    /*
+     * Построить кривую l(x) интерполированную по дням
+     */
+    public double[] daily_lx(final Locality locality, final Gender gender) throws Exception
+    {
+        return getSingleTable(locality, gender).daily_lx();
     }
 }
