@@ -958,12 +958,27 @@ public class Main
             // Util.noop();
         }
 
-        if (phase == Phase.ACTUAL && Util.False)
+        if (phase == Phase.ACTUAL && Util.True)
         {
             /* распечатать участки с отрицательным ali (порождающим отрицательную величину excess deaths) */
 
-            // String neg_male = alis.dumpNegRegions(Gender.MALE);
-            // String neg_female = alis.dumpNegRegions(Gender.FEMALE);
+            String neg_male = alis.dumpNegRegions(Gender.MALE);
+            String neg_female = alis.dumpNegRegions(Gender.FEMALE);
+            
+            if (neg_male != null && neg_male.length() != 0)
+            {
+                Util.err("");
+                Util.err("Участки отрицательной интенсивности потерь для мужчин:");
+                Util.err(neg_male);
+            }
+            
+            if (neg_female != null && neg_female.length() != 0)
+            {
+                Util.err("");
+                Util.err("Участки отрицательной интенсивности потерь для женщин:");
+                Util.err(neg_female);
+            }
+
             // Util.noop();
 
             // alis.display("Интенсивность военных потерь " + area);
