@@ -82,7 +82,7 @@ public class PeacetimeMortalityTables
         CombinedMortalityTable xmt = getTable(year, halfyear);
         Util.assertion(mt == xmt);
 
-        double[] lx = cacheLX.get(key(year, halfyear));
+        double[] lx = cacheLX.get(key(year, halfyear, locality, gender));
         
         if (lx == null)
         {
@@ -133,6 +133,11 @@ public class PeacetimeMortalityTables
     private String key(int year, HalfYearSelector halfyear)
     {
         return HalfYearEntry.id(year,  halfyear);
+    }
+
+    private String key(int year, HalfYearSelector halfyear, Locality locality, Gender gender)
+    {
+        return key(year, halfyear) + "." + locality.name() + "." + gender.name();
     }
 
     /* ======================================================================================= */

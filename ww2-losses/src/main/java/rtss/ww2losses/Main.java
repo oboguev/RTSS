@@ -4,7 +4,6 @@ import rtss.data.ValueConstraint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.asfr.InterpolateASFR;
-import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
@@ -538,11 +537,9 @@ public class Main
 
             if (he.peace_mt == null)
                 he.peace_mt = peacetimeMortalityTables.getTable(he.year, he.halfyear);
-            
-            // ###
 
-            he.peace_lx_male = mt2lx(he.peace_mt, Locality.TOTAL, Gender.MALE);
-            he.peace_lx_female = mt2lx(he.peace_mt, Locality.TOTAL, Gender.FEMALE);
+            he.peace_lx_male = peacetimeMortalityTables.mt2lx(he.year, he.halfyear, he.peace_mt, Locality.TOTAL, Gender.MALE);
+            he.peace_lx_female = peacetimeMortalityTables.mt2lx(he.year, he.halfyear, he.peace_mt, Locality.TOTAL, Gender.FEMALE);
         }
 
         return halves;
@@ -904,9 +901,9 @@ public class Main
          * вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола,
          * подогнав их так, чтобы начальное население линии (середины 1941) приходило к конечному (начала 1946) 
          */
-        WarAttritionModel wam = new WarAttritionModel(halves.get("1941.2").p_nonwar_with_births, 
-                                                      p1946_actual, 
-                                                      aw_civil_combat, 
+        WarAttritionModel wam = new WarAttritionModel(halves.get("1941.2").p_nonwar_with_births,
+                                                      p1946_actual,
+                                                      aw_civil_combat,
                                                       aw_conscript_combat);
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, wam);
         AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual);
@@ -967,14 +964,14 @@ public class Main
 
             String neg_male = alis.dumpNegRegions(Gender.MALE);
             String neg_female = alis.dumpNegRegions(Gender.FEMALE);
-            
+
             if (alis.hasNegativeRegions(neg_male))
             {
                 Util.err("");
                 Util.err("Участки отрицательной интенсивности потерь для мужчин (возраст: дни в середине 1941 - годы в середине 1941 - годы в начале 1941):");
                 Util.err(neg_male);
             }
-            
+
             if (alis.hasNegativeRegions(neg_female))
             {
                 Util.err("");
@@ -1414,40 +1411,6 @@ public class Main
             double v = from.getDay(Locality.TOTAL, gender, nd);
             to.addDay(Locality.TOTAL, gender, nd, v);
         }
-    }
-
-    /* ======================================================================================================= */
-
-    /*
-     * Построить кривую l(x) для таблицы смертности mt, указаного типа местности и пола
-     */
-    private double[] mt2lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
-    {
-        double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
-
-        /*
-         * Провести дневную кривую так что
-         *       daily_lx[0]         = yearly_lx[0]
-         *       daily_lx[365]       = yearly_lx[1]
-         *       daily_lx[365 * 2]   = yearly_lx[2]
-         *       etc.
-         */
-        double[] daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
-
-        /*
-         * Базовая проверка правильности
-         */
-        if (Util.differ(daily_lx[0], yearly_lx[0]) ||
-            Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
-            Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
-            Util.differ(daily_lx[365 * 3], yearly_lx[3]))
-        {
-            throw new Exception("Ошибка в построении daily_lx");
-        }
-
-        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
-
-        return daily_lx;
     }
 
     /* ======================================================================================================= */
