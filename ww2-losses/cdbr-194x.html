@@ -1743,22 +1743,19 @@
     <br>
     <div align="center">* * *<br>
     </div>
-    ### модель распределения интенсивности потерь<br>
-    ### суммарные значения мало изменяются в широких пределах вариации
-    параметов<br>
-    ### распределение (как напр. смертность в промилле в 1942 году)
-    испытывает умеренные изменения<br>
     <br>
-    Определим начальную модель.<br>
+    Для исчисления динамики населения и величин смертности нам
+    потребуется модель распределения интенсивности потерь по категориям
+    и времены́м периодам.<br>
     <br>
-    Люди погибали на линии боевых действий (как военные, так и местные
+    Люди погибали на линии боевых действий (как солдаты, так и местное
     гражданское население), на оккупированной территории и в тылу. <br>
     <br>
     Для временно́<font size="+1"><span style="font-size: 11pt;
         line-height: 107%;" lang="RU"></span><span style="font-size:
         11pt; line-height: 107%;" lang="RU">́</span></font>го
-    распределения интенсивности потерь РККА в ходе боевых дейсвий (как
-    proxy-представления интенсивности боевых действий) и дял объёма
+    распределения интенсивности потерь РККА в ходе боевых действий (как
+    proxy-представления интенсивности боевых действий) и для объёма
     оккупации мы располагаем следующими сведениями:<br>
     <blockquote><font size="-1">Интенсивность потерь РККА по кварталам
         см. Г.Ф. Кривошеев и др, "Россия и СССР в войнах XX века : Книга
@@ -1784,102 +1781,101 @@
           населения между точками данных и усреднением месячных значений
           по полугодиям (см. файл occupation-imr.xlsx). Полученные
           величины примерны, т.к. отражают долю населения проживавшего
-          на оккупированных (на тот или иной период в 1941-1945 гг.) в
-          1939 году, а не непосредственно в годы войны и не учитывают
-          изменения в пропорциях численности территорий из-за эвакуации,
-          мобилизаций и смерти населения. Однако это лучшее приближение,
-          которым мы располагаем. Д</font>ля РСФСР мы используем те же
-        коэффициенты, что и для СССР.</font><br>
+          на оккупированных (на тот или иной период в 1941-1945 гг.)
+          территориях в 1939 году, а не непосредственно в годы войны и
+          не учитывают изменения в пропорциях численности населения
+          территорий из-за эвакуации, мобилизаций и гибели населения.
+          Однако это лучшее приближение, которым мы располагаем. Д</font>ля
+        РСФСР мы используем те же коэффициенты, что и для СССР.</font><br>
     </blockquote>
     <blockquote>Весовые коэффициенты для полугодий:<br>
-    </blockquote>
-    <blockquote>
-      <table style="border-collapse: collapse;" width="319"
+      <br>
+      <table style="border-collapse: collapse;" width="360" height="333"
         cellspacing="2" cellpadding="2" border="1">
-        <colgroup><col
-            style="mso-width-source:userset;mso-width-alt:3045;width:68pt"
-            width="90"> <col
-            style="mso-width-source:userset;mso-width-alt:3206;width:71pt"
-            width="95"> <col style="width:50pt" width="67" span="2"> </colgroup><tbody>
-          <tr style="height:28.8pt" height="38">
-            <td class="xl66" style="height:28.8pt;width:68pt" width="90"
-              height="38" bgcolor="#ccccff" align="center"><b>год</b></td>
-            <td class="xl66" style="width:71pt" width="95"
+        <colgroup><col style="width:55pt" width="74" span="3"> </colgroup><tbody>
+          <tr style="mso-height-source:userset;height:55.2pt"
+            height="74">
+            <td rowspan="2" class="xl68"
+              style="height:69.0pt;width:55pt" width="74" height="92"
               bgcolor="#ccccff" align="center"><b>полугодие</b></td>
-            <td class="xl67" style="width:50pt" width="67"
+            <td rowspan="2" class="xl67" style="width:55pt" width="74"
               bgcolor="#ccccff" align="center"><b>потери</b><b><br>
               </b><b> РККА</b></td>
-            <td class="xl66" style="width:50pt" width="67"
-              bgcolor="#ccccff" align="center"><b>оккупация</b></td>
+            <td rowspan="2" class="xl67" style="width:55pt" width="74"
+              bgcolor="#ccccff" align="center"><b>% оккупированного</b><b><br>
+              </b><b> населения</b></td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center">1941</td>
-            <td align="center">первое</td>
+          <tr style="height:13.8pt" height="18">
+          </tr>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1941.1</td>
             <td align="right">0</td>
-            <td class="xl65" align="right">0</td>
+            <td class="xl66" align="right">0.0</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center"><br>
-            </td>
-            <td align="center">второе</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1941.2</td>
             <td class="xl65" align="right">3,137,673</td>
-            <td class="xl65" align="right">37,265</td>
+            <td class="xl66" align="right">19.6</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center">1942</td>
-            <td align="center">первое</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1942.1</td>
             <td class="xl65" align="right">1,518,213</td>
-            <td class="xl65" align="right">71,754</td>
+            <td class="xl66" align="right">37.8</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center"><br>
-            </td>
-            <td align="center">второе</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1942.2</td>
             <td class="xl65" align="right">1,740,003</td>
-            <td class="xl65" align="right">77,177</td>
+            <td class="xl66" align="right">40.1</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center">1943</td>
-            <td align="center">первое</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1943.1</td>
             <td class="xl65" align="right">918,618</td>
-            <td class="xl65" align="right">63,740</td>
+            <td class="xl66" align="right">32.7</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center"><br>
-            </td>
-            <td align="center">второе</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1943.2</td>
             <td class="xl65" align="right">1,393,811</td>
-            <td class="xl65" align="right">47,258</td>
+            <td class="xl66" align="right">24.2</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center">1944</td>
-            <td align="center">первое</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1944.1</td>
             <td class="xl65" align="right">915,019</td>
-            <td class="xl65" align="right">31,033</td>
+            <td class="xl66" align="right">14.2</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center"><br>
-            </td>
-            <td align="center">второе</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1944.4</td>
             <td class="xl65" align="right">848,872</td>
-            <td class="xl65" align="right">5,041</td>
+            <td class="xl66" align="right">1.7</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center">1945</td>
-            <td align="center">первое</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1945.1</td>
             <td class="xl65" align="right">800,817</td>
-            <td class="xl65" align="right">0</td>
+            <td class="xl66" align="right">0.0</td>
           </tr>
-          <tr style="height:14.4pt" height="19">
-            <td style="height:14.4pt" height="19" align="center"><br>
-            </td>
-            <td align="center">второе</td>
-            <td class="xl65" align="right">0</td>
-            <td class="xl65" align="right">0</td>
+          <tr style="height:13.8pt" height="18">
+            <td style="height:13.8pt" height="18" align="center">1945.2</td>
+            <td align="right">0</td>
+            <td class="xl66" align="right">0.0</td>
           </tr>
         </tbody>
       </table>
+      <br>
     </blockquote>
+    Определим используемую нами модель распределения интесивности потерь
+    по категориям и периодам. При её изложении мы называем конкретные
+    численные величины параметров модели, используемые в основном
+    варианте. Модель, однако, может быть расчитана для различных величин
+    параметров, сводку какового расчёта для разных наборов параметров мы
+    приводим в конечной части статьи. Расчёт по пространству параметров
+    показывает, что суммарные значения итогов расчёта (общее число
+    избыточных смертей за 4.5 года войны, число избыточных смертей
+    мужчин призывного возраста, количество рождений во время, число
+    избыточных смертей рождённых во время войны детей) мало изменяются в
+    широких пределах вариации параметов модели. Времнно́е распределение
+    числа смертей и отражающие его величины. как например смертность в
+    (наиболее смертоносном) 1942 году в промилле, претерпевают изменения
+    в зависимости от параметров, но умеренные по масшатбу изменения.<br>
+    <br>
     Мы cвяжем 80% сверхсмертности мужчин призывного возраста с боевыми
     действиями, а 20% с гибелью в оккупации или тылу, в виде
     гражданского населения. (В конце статьи мы подробнее обсудим
@@ -3782,5 +3778,6 @@ https://dvinatoday.ru/obshchestvo/igor-ivlev-zasekrechennye-arkhivy-skryvayut-ot
     <br>
     <br>
     <br>
+    ы́&nbsp; о́ –<br>
   </body>
 </html>
