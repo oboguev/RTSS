@@ -24,7 +24,6 @@ import rtss.ww2losses.ageline.AgeLineFactorIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
 import rtss.ww2losses.ageline.FixAgeLine;
 import rtss.ww2losses.ageline.WarAttritionModel;
-import rtss.ww2losses.ageline.WarAttritionModel_New;
 import rtss.ww2losses.helpers.ExportResults;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PrintHalfYears;
@@ -898,8 +897,10 @@ public class Main
          * вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола,
          * подогнав их так, чтобы начальное население линии (середины 1941) приходило к конечному (начала 1946) 
          */
-        WarAttritionModel_New wam2 = new WarAttritionModel_New(halves.get("1941.2").p_nonwar_with_births, p1946_actual, aw_general_occupation, aw_conscripts_rkka_loss); // ###
-        WarAttritionModel wam = new WarAttritionModel(aw_general_occupation, aw_conscripts_rkka_loss);
+        WarAttritionModel wam = new WarAttritionModel(halves.get("1941.2").p_nonwar_with_births, 
+                                                      p1946_actual, 
+                                                      aw_general_occupation, 
+                                                      aw_conscripts_rkka_loss);
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, wam);
         AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual);
 
