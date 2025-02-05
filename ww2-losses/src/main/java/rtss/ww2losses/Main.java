@@ -979,11 +979,11 @@ public class Main
                 Util.err(neg_female);
             }
 
-            // Util.noop();
-
-            // alis.display("Интенсивность военных потерь " + area);
-            // PopulationContext p = alis.toPopulationContext();
-            // Util.noop();
+            if (alis.hasNegativeRegions(neg_male) || alis.hasNegativeRegions(neg_female))
+            {
+                // PopulationContext p = alis.toPopulationContext();
+                // Util.noop();
+            }
         }
 
         /* 
