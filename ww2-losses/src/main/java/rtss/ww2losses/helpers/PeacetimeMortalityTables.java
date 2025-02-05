@@ -1,7 +1,9 @@
 package rtss.ww2losses.helpers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
@@ -14,6 +16,7 @@ import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
+import rtss.ww2losses.HalfYearEntry;
 
 /*
  * Вычислить таблицу смертности для условий мирного времени с учётом антибиотиков
@@ -36,30 +39,45 @@ public class PeacetimeMortalityTables
     {
         this.mt1940 = mt1940;
         this.applyAntibiotics = applyAntibiotics;
-        
+
         /* интерполяция на полугодия, но для 1941 и 1941 оставить 1.0 */
         halfyearly_imr_multiplier = yearly2timepoints(yearly_imr_multiplier, 2, 100);
         halfyearly_imr_multiplier[0] = halfyearly_imr_multiplier[1] = halfyearly_imr_multiplier[2] = halfyearly_imr_multiplier[3] = 1.0;
     }
-    
+
     public CombinedMortalityTable get(int year, HalfYearSelector halfyear) throws Exception
     {
         if (!applyAntibiotics)
             return mt1940;
-
-        int ix = (year - 1940) * 2 + halfyear.seq(0);
-        double scale0 = halfyearly_imr_multiplier[ix];
-
-        if (!Util.differ(scale0, 1.0))
-            return mt1940;
         
-        PatchInstruction instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 0, 5, scale0, 1.0);
-        List<PatchInstruction> instructions = new ArrayList<>();
-        instructions.add(instruction);
+        CombinedMortalityTable xmt = cacheTable.get(key(year, halfyear));
 
-        CombinedMortalityTable xmt = PatchMortalityTable.patch(mt1940, instructions, "поправка антибиотиков для " + year);
+        if (xmt == null)
+        {
+            int ix = (year - 1940) * 2 + halfyear.seq(0);
+            double scale0 = halfyearly_imr_multiplier[ix];
+
+            if (!Util.differ(scale0, 1.0))
+                return mt1940;
+
+            PatchInstruction instruction = new PatchInstruction(PatchOpcode.MultiplyWithDecay, 0, 5, scale0, 1.0);
+            List<PatchInstruction> instructions = new ArrayList<>();
+            instructions.add(instruction);
+
+            xmt = PatchMortalityTable.patch(mt1940, instructions, "поправка антибиотиков для " + year);
+            cacheTable.put(key(year, halfyear), xmt);
+        }
 
         return xmt;
+    }
+
+    /* ======================================================================================= */
+    
+    private Map<String, CombinedMortalityTable> cacheTable = new HashMap<>();
+
+    private String key(int year, HalfYearSelector halfyear)
+    {
+        return HalfYearEntry.id(year,  halfyear);
     }
 
     /* ======================================================================================= */

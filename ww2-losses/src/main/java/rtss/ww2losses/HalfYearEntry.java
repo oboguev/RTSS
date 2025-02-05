@@ -151,6 +151,11 @@ public class HalfYearEntry
     
     public String id()
     {
+        return id(year, halfyear);
+    }
+
+    public static String id(int year, HalfYearSelector halfyear)
+    {
         return year + "." + halfyear;
     }
 
