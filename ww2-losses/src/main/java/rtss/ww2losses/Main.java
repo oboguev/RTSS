@@ -22,7 +22,8 @@ import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.ageline.AgeLineFactorIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
 import rtss.ww2losses.ageline.FixAgeLine;
-import rtss.ww2losses.ageline.WarAttritionModel;
+import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
+import rtss.ww2losses.ageline.warmodel.WarAttritionModelParameters;
 import rtss.ww2losses.helpers.ExportResults;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PrintHalfYears;
@@ -138,14 +139,13 @@ public class Main
     private CombinedMortalityTable mt1940;
     private PeacetimeMortalityTables peacetimeMortalityTables;
 
-    /* 
-     * весовые коэффцииенты для факторов распределяющих потери по категориям
-     * 
-     *    aw_conscript_combat - доля потерь мужчин призывного возраста связанная с интенсивностью военных потерь РККА 
-     *    aw_civil_combat - доля потерь остальных групп (гражданского населения) связанная с интенсивностью военных потерь РККА
-     */
-    double aw_conscript_combat = 0.8;
-    double aw_civil_combat = 0.2;
+    /*  весовые коэффциенты для факторов распределяющих потери по категориям */
+    WarAttritionModelParameters wamp = new WarAttritionModelParameters()
+            // Доля потерь мужчин призывного возраста связанная с интенсивностью военных потерь РККА 
+            .aw_conscript_combat(0.8)
+            // Доля потерь остальных групп (гражданского населения) связанная с интенсивностью военных потерь РККА
+            .aw_civil_combat(0.2);
+
     /* 
      * интенсивность иммиграции в РСФСР из западных ССР по полугодиям с 1941.1
      */
@@ -189,8 +189,7 @@ public class Main
 
         if (model != null)
         {
-            this.aw_conscript_combat = model.params.aw_conscript_combat;
-            this.aw_civil_combat = model.params.aw_civil_combat;
+            this.wamp = model.params.wamp;
             this.PrintDiagnostics = model.params.PrintDiagnostics;
             this.exportDirectory = model.params.exportDirectory;
         }
@@ -906,8 +905,7 @@ public class Main
          */
         WarAttritionModel wam = new WarAttritionModel(halves.get("1941.2").p_nonwar_with_births,
                                                       p1946_actual,
-                                                      aw_civil_combat,
-                                                      aw_conscript_combat);
+                                                      wamp);
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, wam);
         AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual);
 

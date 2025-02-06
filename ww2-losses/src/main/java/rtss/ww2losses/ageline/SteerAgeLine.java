@@ -7,6 +7,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 
 /*
  * Проводка возрастной линии от середины 1941 года до начала 1946 года.

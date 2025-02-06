@@ -7,6 +7,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
+import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.HalfYearEntry;
 

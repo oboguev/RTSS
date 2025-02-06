@@ -47,8 +47,8 @@ public class MultiModelMain
             for (double aw_civil_combat = 0.1; aw_civil_combat <= 0.4; aw_civil_combat += 0.1)
             {
                 ModelParameters params = new ModelParameters();
-                params.aw_conscript_combat = aw_conscript_combat;
-                params.aw_civil_combat = aw_civil_combat;
+                params.wamp.aw_conscript_combat = aw_conscript_combat;
+                params.wamp.aw_civil_combat = aw_civil_combat;
                 params.exportDirectory = null;
                 AreaModel am = run(params);
                 areaModels.add(am);
@@ -116,8 +116,8 @@ public class MultiModelMain
         String rsfsr = result2str(am.rsfsr);
         
         String s = String.format("%3.1f %3.1f * %s * %s",
-                                 am.params.aw_conscript_combat,
-                                 am.params.aw_civil_combat,
+                                 am.params.wamp.aw_conscript_combat,
+                                 am.params.wamp.aw_civil_combat,
                                  ussr, rsfsr);
         Util.out(s);
     }

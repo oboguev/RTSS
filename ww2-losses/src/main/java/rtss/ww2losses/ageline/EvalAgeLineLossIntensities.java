@@ -5,6 +5,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 

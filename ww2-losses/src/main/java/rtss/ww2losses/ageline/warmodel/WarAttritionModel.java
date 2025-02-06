@@ -1,4 +1,4 @@
-package rtss.ww2losses.ageline;
+package rtss.ww2losses.ageline.warmodel;
 
 import rtss.data.selectors.Gender;
 import rtss.math.interpolate.LinearInterpolator;
@@ -16,10 +16,12 @@ import rtss.data.population.struct.PopulationContext;
  */
 public class WarAttritionModel
 {
-    public WarAttritionModel(PopulationContext p1941_mid, PopulationContext p1946_actual,
-            double aw_civil_combat, double aw_conscript_combat) throws Exception
+    public WarAttritionModel(
+            PopulationContext p1941_mid,
+            PopulationContext p1946_actual,
+            WarAttritionModelParameters wamp) throws Exception
     {
-        initModel(p1941_mid, p1946_actual, aw_civil_combat, aw_conscript_combat);
+        initModel(p1941_mid, p1946_actual, wamp);
     }
 
     /* =========================================================================================== */
@@ -59,14 +61,14 @@ public class WarAttritionModel
 
     /* =========================================================================================== */
 
-    private void initModel(PopulationContext p1941_mid,
+    private void initModel(
+            PopulationContext p1941_mid,
             PopulationContext p1946_actual,
-            double aw_civil_combat,
-            double aw_conscript_combat) throws Exception
+            WarAttritionModelParameters wamp) throws Exception
     {
-        Util.assertion(aw_civil_combat >= 0 && aw_civil_combat <= 1);
-        Util.assertion(aw_conscript_combat >= 0 && aw_conscript_combat <= 1);
-        
+        Util.assertion(wamp.aw_civil_combat >= 0 && wamp.aw_civil_combat <= 1);
+        Util.assertion(wamp.aw_conscript_combat >= 0 && wamp.aw_conscript_combat <= 1);
+
         double[] rkka_loss_intensity_normalized = Util.normalize(rkka_loss_intensity);
 
         /* доля населения в оккупации и в тылу */
@@ -74,7 +76,7 @@ public class WarAttritionModel
         double[] fraction_rear = Util.sub(Util.fill_double(fraction_occupation.length, 1), fraction_occupation);
 
         /* остаток гражданского населения (доля) */
-        double[] civil_population_remainder = civil_population_remainder(p1941_mid, p1946_actual, aw_conscript_combat);
+        double[] civil_population_remainder = civil_population_remainder(p1941_mid, p1946_actual, wamp.aw_conscript_combat);
 
         /* удельные веса потерь в тылу и в оккупации */
         double[] w_occupation = Util.multiply(civil_population_remainder, Util.multiply(fraction_occupation, loss_intensity_occupation));
@@ -82,8 +84,8 @@ public class WarAttritionModel
         double[] w_civil = Util.normalize(Util.add(w_occupation, w_rear));
 
         /* полугодовые веса потерь для мужчин призывного возраста и для остальных */
-        ac_conscripts = wsum(aw_conscript_combat, rkka_loss_intensity_normalized, 1 - aw_conscript_combat, w_civil);
-        ac_general = wsum(aw_civil_combat, rkka_loss_intensity_normalized, 1 - aw_civil_combat, w_civil);
+        ac_conscripts = wsum(wamp.aw_conscript_combat, rkka_loss_intensity_normalized, 1 - wamp.aw_conscript_combat, w_civil);
+        ac_general = wsum(wamp.aw_civil_combat, rkka_loss_intensity_normalized, 1 - wamp.aw_civil_combat, w_civil);
     }
 
     /*
@@ -113,7 +115,8 @@ public class WarAttritionModel
     /* 
      * остаток гражданского населения 
      */
-    private double[] civil_population_remainder(PopulationContext p1941_mid, PopulationContext p1946_actual, double aw_conscript_combat) throws Exception
+    private double[] civil_population_remainder(PopulationContext p1941_mid, PopulationContext p1946_actual, double aw_conscript_combat)
+            throws Exception
     {
         int nd_4_5 = 9 * years2days(0.5);
         PopulationContext p1946_actual_born_prewar = p1946_actual.selectByAgeDays(nd_4_5, years2days(Population.MAX_AGE + 1));
