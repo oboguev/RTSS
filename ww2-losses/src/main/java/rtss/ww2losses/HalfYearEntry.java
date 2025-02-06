@@ -16,7 +16,7 @@ public class HalfYearEntry
     final public HalfYearSelector halfyear;
 
     /* таблица смертности для этого полугодия в условиях мира */
-    CombinedMortalityTable peace_mt;
+    public CombinedMortalityTable peace_mt;
 
     /* кривые l(x) с разрешением 1 день возраста для условий мира */
     public double[] peace_lx_male;
