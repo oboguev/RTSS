@@ -9,6 +9,12 @@ import rtss.ww2losses.HalfYearEntry;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 
+import rtss.data.ValueConstraint;
+
+/*
+ * Определить структуру населения в начале 1941 года, которая при данных коэффициентах
+ * интенсивности военных потерь (в т.ч. например нулевых) даёт известное население на начало 1946 года. 
+ */
 public class BacktrackPopulation
 {
     private final HalfYearEntries<HalfYearEntry> halves;
@@ -23,20 +29,22 @@ public class BacktrackPopulation
         this.p1946_actual = p1946_actual;
     }
 
+    /* ========================================================================================= */
+
     /*
-     * Преобразования для дней
+     * Преобразования для возраста в днях
      */
-    public int nd_mid_1941_to_1946(int nd)
+    public int nd_mid1941_to_1946(int nd)
     {
         return nd + 9 * ndays_halfyear;
     }
 
-    public int nd_1946_to_mid_1941(int nd)
+    public int nd_1946_to_mid1941(int nd)
     {
         return nd - 9 * ndays_halfyear;
     }
 
-    public int nd_mid_1941_to_early1941(int nd)
+    public int nd_mid1941_to_early1941(int nd)
     {
         return nd - ndays_halfyear;
     }
@@ -45,6 +53,8 @@ public class BacktrackPopulation
     {
         return nd + ndays_halfyear;
     }
+
+    /* ========================================================================================= */
 
     /*
      * Определить численность возрастной линии на начало 1941 года (в начале первого полугодия 1941), 
@@ -73,7 +83,9 @@ public class BacktrackPopulation
             Gender gender,
             double loss_intensity) throws Exception
     {
-        Util.assertion(nd_mid_1941_to_1946(initial_age_ndays) <= p1946_actual.MAX_DAY);
+        Util.assertion(initial_age_ndays >= 0 && initial_age_ndays <= p1946_actual.MAX_DAY);
+
+        // Util.assertion(nd_mid_1941_to_1946(initial_age_ndays) <= p1946_actual.MAX_DAY);
         
         SteerAgeLine steer = new SteerAgeLine(halves, wam, null);
 
@@ -81,7 +93,22 @@ public class BacktrackPopulation
         Double immigration_intensity = null;
 
         double v1946_steer = steer.steerPreliminary(initial_age_ndays, gender, initial_population, loss_intensity, immigration_intensity);
-        double v1946_actual = p1946_actual.getDay(Locality.TOTAL, gender, nd_mid_1941_to_1946(initial_age_ndays));
+        
+        double v1946_actual;
+        if (nd_mid1941_to_1946(initial_age_ndays) >= p1946_actual.MAX_DAY)
+        {
+            /* 
+             * avoid topmost age day, as it accumulaytes the carryovers from the ages gone off range
+             */
+            int nd2  = p1946_actual.MAX_DAY - 1;
+            int nd1 = nd2 - 100;
+            v1946_actual = p1946_actual.sumDays(gender, nd1, nd2) / (nd2 - nd1 + 1);
+        }
+        else
+        {
+            v1946_actual = p1946_actual.getDay(Locality.TOTAL, gender, nd_mid1941_to_1946(initial_age_ndays));
+        }
+
         double v_mid1941 = v1946_actual * (initial_population / v1946_steer);
 
         return v_mid1941;
@@ -96,7 +123,7 @@ public class BacktrackPopulation
     public double population_mid1941_to_early1941(int initial_age_ndays, Gender gender, double v_mid1941) throws Exception
     {
         /* возраст в начале 1941 */
-        int nd = nd_mid_1941_to_early1941(initial_age_ndays);
+        int nd = nd_mid1941_to_early1941(initial_age_ndays);
         if (nd < 0)
             return 0;
 
@@ -126,23 +153,29 @@ public class BacktrackPopulation
 
     /*
      * Определить структуру населения в начале 1941 года, которая при данных коэффициентах
-     * интенсивности потрерь даёт известное население на начало 1946 года.  
+     * интенсивности военных потерь (в т.ч. например нулевых) даёт фактическое население на начало 1946 года.  
      */
-    public PopulationContext xxx(AgeLineFactorIntensities alis) throws Exception
+    public PopulationContext population_1946_to_early1941(AgeLineFactorIntensities alis) throws Exception
     {
+        if (alis == null)
+            alis = new AgeLineFactorIntensities();
+        
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
+        PopulationContext p = PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
 
         for (Gender gender : Gender.TwoGenders)
         {
-            for (int nd = 0; nd <= p1941_2.MAX_DAY; nd++)
+            for (int nd_mid1941 = nd_early1941_to_mid1941(0); nd_mid1941 <= p1941_2.MAX_DAY; nd_mid1941++)
             {
-                double loss_intensity = alis.get(gender, nd);
-                // ###    
+                double loss_intensity = alis.get(gender, nd_mid1941);
+                double v = population_1946_to_early1941(nd_mid1941, gender, loss_intensity);
+
+                int nd_early1941 = nd_mid1941_to_early1941(nd_mid1941);
+                p.setDay(Locality.TOTAL, gender, nd_early1941, v);
             }
         }
 
-        // ###    
-        return null;
+        return p;
     }
 }

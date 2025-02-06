@@ -214,15 +214,15 @@ public class PopulationContext
         return sumDays(Locality.TOTAL, Gender.BOTH, nd1, nd2);
     }
 
-    public double sumAge(Locality locality, Gender gender, int age) throws Exception
+    public double sumAge(Locality locality, Gender gender, int year_age) throws Exception
     {
-        return sumDays(locality, gender, firstDayForAge(age), lastDayForAge(age));
+        return sumDays(locality, gender, firstDayForAge(year_age), lastDayForAge(year_age));
     }
 
-    public double sumAges(Locality locality, Gender gender, int age1, int age2) throws Exception
+    public double sumAges(Locality locality, Gender gender, int year_age1, int year_age2) throws Exception
     {
         double sum = 0;
-        for (int age = age1; age <= age2; age++)
+        for (int age = year_age1; age <= year_age2; age++)
             sum += sumAge(locality, gender, age);
         return sum;
     }
@@ -890,14 +890,14 @@ public class PopulationContext
 
     /* ---------------------------------------------------------------------------- */
 
-    public double sum(Gender gender, int age1, int age2) throws Exception
+    public double sum(Gender gender, int year_age1, int year_age2) throws Exception
     {
-        return sum(Locality.TOTAL, gender, age1, age2);
+        return sum(Locality.TOTAL, gender, year_age1, year_age2);
     }
 
-    public double sum(int age1, int age2) throws Exception
+    public double sum(int year_age1, int year_age2) throws Exception
     {
-        return sum(Locality.TOTAL, Gender.BOTH, age1, age2);
+        return sum(Locality.TOTAL, Gender.BOTH, year_age1, year_age2);
     }
 
     public double sum(Locality locality) throws Exception
@@ -915,9 +915,9 @@ public class PopulationContext
         return sum(Locality.TOTAL, Gender.BOTH, 0, MAX_AGE);
     }
 
-    public double sum(Locality locality, Gender gender, int age1, int age2) throws Exception
+    public double sum(Locality locality, Gender gender, int year_age1, int year_age2) throws Exception
     {
-        return sumDays(locality, gender, firstDayForAge(age1), lastDayForAge(age2));
+        return sumDays(locality, gender, firstDayForAge(year_age1), lastDayForAge(year_age2));
     }
 
     /* ---------------------------------------------------------------------------- */
