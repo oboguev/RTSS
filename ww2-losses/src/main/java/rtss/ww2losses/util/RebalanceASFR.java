@@ -7,6 +7,11 @@ import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.util.Util;
 
+/* 
+ * Перечитать ASFR для полугодий 1941 года,
+ * оставив на первую половину 1941 года коэффициенты плодовитости 1940-го года,
+ * а коэффициенты на вторую половину 1941-го года исправить соответственно для сохранения среднего за 1941 год значения. 
+ */
 public class RebalanceASFR
 {
     public static void rebalance_1941_halfyears(
@@ -34,7 +39,5 @@ public class RebalanceASFR
             b1941_1[k].avg = b1940[k].avg;
             b1941_2[k].avg = 2 * b1941[k].avg - b1940[k].avg;
         }
-
-        Util.noop();
     }
 }
