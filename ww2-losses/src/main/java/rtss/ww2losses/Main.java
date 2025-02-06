@@ -142,7 +142,7 @@ public class Main
     /*  весовые коэффциенты для факторов распределяющих потери по категориям */
     WarAttritionModelParameters wamp = new WarAttritionModelParameters()
             // Доля потерь мужчин призывного возраста связанная с интенсивностью военных потерь РККА 
-            .aw_conscript_combat(0.8)
+            .aw_conscript_combat(0.7)
             // Доля потерь остальных групп (гражданского населения) связанная с интенсивностью военных потерь РККА
             .aw_civil_combat(0.2);
 
@@ -248,12 +248,12 @@ public class Main
         Population p_leftover = pm1941.evaluateAsPopulation(p_mid1941, mt1940);
         Util.assertion(p_leftover.sum() == 0);
 
-        /* население на середину 1941 года -- по передвижке на основе CBR_1940 */
+        /* население на середину 1941 года -- полученное по передвижке на основе CBR_1940 */
         PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
         PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
         double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
 
-        /* население на середину 1941 года -- по передвижке на основе ASFR */
+        /* население на середину 1941 года -- по повторной передвижке, теперь на основе ASFR */
         ForwardingResult fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
         p_mid1941 = fr.p_result;
         deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
@@ -395,6 +395,12 @@ public class Main
     }
 
     /* ================================================================================== */
+    
+    
+    public void xxx() throws Exception
+    {
+        // ###
+    }
 
     /*
      * Передвижка от начала до середины 1941 года с использованием ASFR для расчёта рождений

@@ -42,7 +42,7 @@ public class MultiModelMain
 
     private void main() throws Exception
     {
-        for (double aw_conscript_combat = 0.7; aw_conscript_combat <= 0.9; aw_conscript_combat += 0.1)
+        for (double aw_conscript_combat = 0.6; aw_conscript_combat <= 0.8; aw_conscript_combat += 0.1)
         {
             for (double aw_civil_combat = 0.1; aw_civil_combat <= 0.4; aw_civil_combat += 0.1)
             {
