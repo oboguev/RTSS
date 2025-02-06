@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
-import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 import rtss.util.FastUUID;
 import rtss.util.Util;
 

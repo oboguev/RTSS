@@ -7,7 +7,6 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
-import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
