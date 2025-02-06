@@ -240,20 +240,37 @@ public class Main
         mt1940.seal();
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
 
-        /* население на середину 1941 года */
+        /* 
+         * Население на начало и середину 1941 года.
+         * 
+         * К населению на начало 1941 года прилагается крупнозернистая коррекция раскладки численности внутри 5-летних групп.
+         * созданной автоматической дезагрегацией 5-летних групп в 1-годовые значения. 
+         * Разбивка по 5-летним группам не меняется, но значения для некоторых возрастов перераспределяются 
+         * по годам внутри групп так, чтобы избежать артефакта отрицательной величины потерь в 1941-1945 гг.
+         * 
+         * Население на середину 1941 года получается передвижкой по mt1940 с CBR_1940.
+         */
         AdjustPopulation adjuster1941 = null;
         adjuster1941 = new AdjustPopulation1941(area);
         Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap, adjuster1941);
         PopulationContext p_mid1941 = new PopulationContext(PopulationContextSize);
         Population p_leftover = pm1941.evaluateAsPopulation(p_mid1941, mt1940);
         Util.assertion(p_leftover.sum() == 0);
+        
+        // ### оставить только start1941, всё остальное перенести
 
         /* население на середину 1941 года -- полученное по передвижке на основе CBR_1940 */
         PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
         PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
         double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
 
-        /* население на середину 1941 года -- по повторной передвижке, теперь на основе ASFR */
+        /* 
+         * Население на середину 1941 года -- по повторной передвижке, теперь на основе ASFR.
+         * 
+         * Функция forward_1941_1st_halfyear использует входной параметр @p_mid1941 только для численности
+         * женских фертильных групп (их численность вычисляется средним от @p_start1941 и @p_mid1941).
+         * Другие величины во входном аргументе @p_mid1941 не имеют значения.
+         */
         ForwardingResult1941 fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
         p_start1941 = fr.p_start1941;
         p_mid1941 = fr.p_mid1941;
@@ -396,8 +413,7 @@ public class Main
     }
 
     /* ================================================================================== */
-    
-    
+
     public void xxx() throws Exception
     {
         // ###
