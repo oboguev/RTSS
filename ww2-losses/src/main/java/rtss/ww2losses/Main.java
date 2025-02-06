@@ -35,7 +35,9 @@ import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.model.Model;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population1941.AdjustPopulation1941;
-import rtss.ww2losses.population1941.old.Population_In_Middle_1941;
+import rtss.ww2losses.population1941.PopulationEarly1941;
+import rtss.ww2losses.population1941.PopulationMiddle1941;
+import rtss.ww2losses.population1941.PopulationMiddle1941.PopulationForwardingResult1941;
 import rtss.ww2losses.population194x.AdjustPopulation;
 import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.util.CalibrateASFR;
@@ -241,41 +243,28 @@ public class Main
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
 
         /* 
-         * Население на начало и середину 1941 года.
+         * Население на начало 1941 года.
          * 
          * К населению на начало 1941 года прилагается крупнозернистая коррекция раскладки численности внутри 5-летних групп.
          * созданной автоматической дезагрегацией 5-летних групп в 1-годовые значения. 
          * Разбивка по 5-летним группам не меняется, но значения для некоторых возрастов перераспределяются 
          * по годам внутри групп так, чтобы избежать артефакта отрицательной величины потерь в 1941-1945 гг.
-         * 
-         * Население на середину 1941 года получается передвижкой по mt1940 с CBR_1940.
          */
-        AdjustPopulation adjuster1941 = null;
-        adjuster1941 = new AdjustPopulation1941(area);
-        Population_In_Middle_1941 pm1941 = new Population_In_Middle_1941(ap, adjuster1941);
-        PopulationContext p_mid1941 = new PopulationContext(PopulationContextSize);
-        Population p_leftover = pm1941.evaluateAsPopulation(p_mid1941, mt1940);
-        Util.assertion(p_leftover.sum() == 0);
-        
-        // ### оставить только start1941, всё остальное перенести
-
-        /* население на середину 1941 года -- полученное по передвижке на основе CBR_1940 */
-        PopulationContext p_start1941 = pm1941.p_start_1941.forLocality(Locality.TOTAL).toPopulationContext();
-        PopulationContext deaths_1941_1st_halfyear = pm1941.observed_deaths_1941_1st_halfyear_byGenderAge.clone();
-        double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
+        AdjustPopulation adjuster1941 = new AdjustPopulation1941(area);
+        PopulationContext p_start1941 = new PopulationEarly1941(ap).evaluate(adjuster1941);
 
         /* 
-         * Население на середину 1941 года -- по повторной передвижке, теперь на основе ASFR.
-         * 
-         * Функция forward_1941_1st_halfyear использует входной параметр @p_mid1941 только для численности
-         * женских фертильных групп (их численность вычисляется средним от @p_start1941 и @p_mid1941).
-         * Другие величины во входном аргументе @p_mid1941 не имеют значения.
+         * Население на середину 1941 года по передвижке на основе ASFR.
          */
-        ForwardingResult1941 fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
+        PopulationForwardingResult1941 fr = new PopulationMiddle1941(ap)
+                .forward_1941_1st_halfyear(p_start1941,
+                                           peacetimeMortalityTables,
+                                           asfr_calibration,
+                                           halfyearly_asfrs.getForTimepoint("1941.0"));
         p_start1941 = fr.p_start1941;
-        p_mid1941 = fr.p_mid1941;
-        deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
-        births_1941_1st_halfyear = fr.observed_births;
+        PopulationContext p_mid1941 = fr.p_mid1941;
+        PopulationContext deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
+        double births_1941_1st_halfyear = fr.observed_births;
 
         if (Util.False)
         {

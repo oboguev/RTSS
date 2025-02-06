@@ -17,7 +17,14 @@ import rtss.ww2losses.population194x.UtilBase_194x;
  */
 public class PopulationEarly1941 extends UtilBase_194x
 {
-    public PopulationContext evaluate(AreaParameters ap, AdjustPopulation adjuster1941) throws Exception
+    private final AreaParameters ap;
+    
+    public PopulationEarly1941(AreaParameters ap)
+    {
+        this.ap = ap;
+    }
+    
+    public PopulationContext evaluate(AdjustPopulation adjuster1941) throws Exception
     {
         if (useADH)
         {

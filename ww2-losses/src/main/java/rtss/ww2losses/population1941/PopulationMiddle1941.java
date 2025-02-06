@@ -1,6 +1,6 @@
 package rtss.ww2losses.population1941;
 
-import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
+import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulationT;
@@ -15,20 +15,26 @@ import rtss.ww2losses.population194x.UtilBase_194x;
 
 public class PopulationMiddle1941 extends UtilBase_194x
 {
-    public static class ForwardingResult1941
+    public static class PopulationForwardingResult1941
     {
         public PopulationContext p_start1941;
         public PopulationContext p_mid1941;
         public PopulationContext observed_deaths_byGenderAge;
         public double observed_births;
     }
+    
+    private final AreaParameters ap;
+    
+    public PopulationMiddle1941(AreaParameters ap)
+    {
+        this.ap = ap;
+    }
 
-    public ForwardingResult1941 forward_1941_1st_halfyear(
+    public PopulationForwardingResult1941 forward_1941_1st_halfyear(
             PopulationContext p_start1941,
-            AreaParameters ap,
             PeacetimeMortalityTables peacetimeMortalityTables,
             double asfr_calibration,
-            AgeSpecificFertilityRatesByTimepoint halfyearly_asfrs) throws Exception
+            AgeSpecificFertilityRates asfrs) throws Exception
     {
         final CombinedMortalityTable mt1941_1 = peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
         PopulationContext p = p_start1941.clone();
@@ -46,10 +52,10 @@ public class PopulationMiddle1941 extends UtilBase_194x
         /*
          * Передвижка от начала до середины 1941 года с использованием ASFR для расчёта числа рождений
          */
-        if (halfyearly_asfrs != null)
+        if (asfrs != null)
         {
             PopulationContext pavg = p_start1941.avg(p);
-            double nbirths = asfr_calibration * 0.5 * halfyearly_asfrs.getForTimepoint("1941.0").births(pavg.toPopulation());
+            double nbirths = asfr_calibration * 0.5 * asfrs.births(pavg.toPopulation());
             final int ndays = fw.birthDays(0.5);
             double[] births = WarHelpers.births(ndays, nbirths, nbirths, nbirths);
             double[] m_births = WarHelpers.male_births(births);
@@ -61,7 +67,7 @@ public class PopulationMiddle1941 extends UtilBase_194x
             fw.forward(p, mt1941_1, 0.5);
         }
 
-        ForwardingResult1941 fr = new ForwardingResult1941();
+        PopulationForwardingResult1941 fr = new PopulationForwardingResult1941();
         fr.p_start1941 = p_start1941;
         fr.p_mid1941 = p;
         fr.observed_deaths_byGenderAge = fw.deathsByGenderAge();

@@ -5,7 +5,6 @@ import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
-import rtss.ww2losses.population1941.old.Population_In_Middle_1941;
 import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.population194x.Population_In_Early_1940;
 
@@ -23,7 +22,7 @@ public class TestPopulation194x
             
             CombinedMortalityTable mt1940 = new MortalityTable_1940(ap).evaluate();
             
-            p = new Population_In_Middle_1941(ap).evaluate();
+            // p = new Population_In_Middle_1941(ap).evaluate();
             
             new MortalityTable_1940(ap).show_survival_rates_1941_1946(); 
             
