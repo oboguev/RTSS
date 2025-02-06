@@ -1,4 +1,4 @@
-package rtss.ww2losses.population_194x;
+package rtss.ww2losses.population1941;
 
 import rtss.data.population.struct.PopulationContext;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModelParameters;

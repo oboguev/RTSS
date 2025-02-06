@@ -1,4 +1,4 @@
-package rtss.ww2losses.population_194x;
+package rtss.ww2losses.population194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.InterpolateMortalityTable;

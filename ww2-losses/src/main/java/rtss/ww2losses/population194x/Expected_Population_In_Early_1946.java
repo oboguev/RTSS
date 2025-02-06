@@ -1,4 +1,4 @@
-package rtss.ww2losses.population_194x;
+package rtss.ww2losses.population194x;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
@@ -9,6 +9,7 @@ import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.population1941.Population_In_Middle_1941;
 
 /**
  * Вычислить возрастную структуру и численность гипотетического населения СССР или РСФСР на начало 1946 года

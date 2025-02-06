@@ -6,7 +6,7 @@ import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
-import rtss.ww2losses.population_194x.Population_In_Early_1940;
+import rtss.ww2losses.population194x.Population_In_Early_1940;
 
 public class TestInterpolateMortalityTable
 {

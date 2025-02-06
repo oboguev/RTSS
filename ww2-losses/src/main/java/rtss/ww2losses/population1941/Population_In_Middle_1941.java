@@ -1,4 +1,4 @@
-package rtss.ww2losses.population_194x;
+package rtss.ww2losses.population1941;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
@@ -10,6 +10,10 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Locality;
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.population194x.AdjustPopulation;
+import rtss.ww2losses.population194x.MortalityTable_1940;
+import rtss.ww2losses.population194x.Population_In_Early_1940;
+import rtss.ww2losses.population194x.UtilBase_194x;
 
 /**
  * Вычислить возрастную структуру населения СССР или РСФСР на середину 1941 года

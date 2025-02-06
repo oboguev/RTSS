@@ -1,4 +1,4 @@
-package rtss.ww2losses.population_194x;
+package rtss.ww2losses.population1941;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +9,14 @@ import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
+import rtss.ww2losses.population194x.AdjustPopulation;
 
 /*
- * Ручная коррекция раскладки численности населения СССР/РСФСР в 1941 году внутри 5-летних групп.
+ * Ручная грубая (coarse) коррекция раскладки численности населения СССР/РСФСР в 1941 году внутри 5-летних групп.
  * Прилагаеся после автоматической дезагрегации 5-летних групп в 1-годовые значения. 
  * 
  * Разбивка по 5-летним группам не меняется, но значения для некоторых возрастов перераспределяются 
- * внутри групп так, чтобы избежать артефакта отрицательной величины потерь в 1941-1945 гг.
+ * по годам внутри групп так, чтобы избежать артефакта отрицательной величины потерь в 1941-1945 гг.
  */
 public class AdjustPopulation1941 extends AdjustPopulation
 {

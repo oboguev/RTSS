@@ -5,6 +5,9 @@ import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.population1941.Population_In_Middle_1941;
+import rtss.ww2losses.population194x.MortalityTable_1940;
+import rtss.ww2losses.population194x.Population_In_Early_1940;
 
 public class TestPopulation194x
 {

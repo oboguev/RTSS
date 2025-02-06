@@ -1,4 +1,4 @@
-package rtss.ww2losses.population_194x;
+package rtss.ww2losses.population194x;
 
 import java.util.ArrayList;
 import java.util.List;
