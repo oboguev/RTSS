@@ -905,9 +905,6 @@ public class Main
      */
     private void evalAgeLines() throws Exception
     {
-        /* нормализованный полугодовой коэффициент интенсивности иммиграции в РСФСР */
-        double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
-
         /* 
          * вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола,
          * подогнав их так, чтобы начальное население линии (середины 1941) приходило к конечному (начала 1946) 
@@ -957,6 +954,9 @@ public class Main
             // alis.display("Исправленная интенсивность военных потерь " + area);
             // PopulationContext p_alis = alis.toPopulationContext();
 
+            /* нормализованный полугодовой коэффициент интенсивности иммиграции в РСФСР */
+            double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
+
             /* вычислить интенсивность иммиграции */
             eval.setImmigration(ac_rsfsr_immigration);
             amig = new AgeLineFactorIntensities();
@@ -968,10 +968,9 @@ public class Main
             // Util.noop();
         }
 
-        if (phase == Phase.ACTUAL && Util.True)
+        if (phase == Phase.ACTUAL)
         {
             /* распечатать участки с отрицательным ali (порождающим отрицательную величину excess deaths) */
-
             String neg_male = alis.dumpNegRegions(Gender.MALE);
             String neg_female = alis.dumpNegRegions(Gender.FEMALE);
 
