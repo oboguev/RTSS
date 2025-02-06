@@ -254,8 +254,9 @@ public class Main
         double births_1941_1st_halfyear = pm1941.observed_births_1941_1st_halfyear;
 
         /* население на середину 1941 года -- по повторной передвижке, теперь на основе ASFR */
-        ForwardingResult fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
-        p_mid1941 = fr.p_result;
+        ForwardingResult1941 fr = forward_1941_1st_halfyear(p_start1941, p_mid1941);
+        p_start1941 = fr.p_start1941;
+        p_mid1941 = fr.p_mid1941;
         deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
         births_1941_1st_halfyear = fr.observed_births;
 
@@ -405,7 +406,7 @@ public class Main
     /*
      * Передвижка от начала до середины 1941 года с использованием ASFR для расчёта рождений
      */
-    private ForwardingResult forward_1941_1st_halfyear(PopulationContext p_start1941, PopulationContext p_mid1941) throws Exception
+    private ForwardingResult1941 forward_1941_1st_halfyear(PopulationContext p_start1941, PopulationContext p_mid1941) throws Exception
     {
         PopulationContext pavg = p_start1941.avg(p_mid1941);
 
@@ -423,16 +424,18 @@ public class Main
         fw.setBirthCount(m_births, f_births);
         fw.forward(p, mt, 0.5);
 
-        ForwardingResult res = new ForwardingResult();
-        res.p_result = p.clone();
-        res.observed_deaths_byGenderAge = fw.deathsByGenderAge().clone();
-        res.observed_births = nbirths;
-        return res;
+        ForwardingResult1941 fr = new ForwardingResult1941();
+        fr.p_start1941 = p_start1941;
+        fr.p_mid1941 = p.clone();
+        fr.observed_deaths_byGenderAge = fw.deathsByGenderAge().clone();
+        fr.observed_births = nbirths;
+        return fr;
     }
 
-    public static class ForwardingResult
+    public static class ForwardingResult1941
     {
-        public PopulationContext p_result;
+        public PopulationContext p_start1941;
+        public PopulationContext p_mid1941;
         public PopulationContext observed_deaths_byGenderAge;
         public double observed_births;
     }
