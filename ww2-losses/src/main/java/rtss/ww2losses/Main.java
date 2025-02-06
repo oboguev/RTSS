@@ -35,7 +35,7 @@ import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.model.Model;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population1941.AdjustPopulation1941;
-import rtss.ww2losses.population1941.Population_In_Middle_1941;
+import rtss.ww2losses.population1941.old.Population_In_Middle_1941;
 import rtss.ww2losses.population194x.AdjustPopulation;
 import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.util.CalibrateASFR;

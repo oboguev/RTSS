@@ -64,6 +64,17 @@ public class RescalePopulation
         return scaleTotal(p, null, males, females);
     }
 
+    public static PopulationContext scaleTotal(final PopulationContext fctx, double males, double females) throws Exception
+    {
+        PopulationByLocality p = PopulationByLocality.newPopulationTotalOnly();
+        PopulationByLocality pto = PopulationByLocality.newPopulationTotalOnly();
+
+        PopulationContext r_fctx = fctx.clone();
+        scaleTotal(pto, p, r_fctx, Gender.MALE, males);
+        scaleTotal(pto, p, r_fctx, Gender.FEMALE, females);
+        return r_fctx;
+    }
+
     public static PopulationByLocality scaleTotal(PopulationByLocality p, PopulationContext fctx, double males, double females) throws Exception
     {
         if (p.hasRuralUrban())

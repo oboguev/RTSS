@@ -1,4 +1,4 @@
-package rtss.ww2losses.population1941;
+package rtss.ww2losses.population1941.old;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
