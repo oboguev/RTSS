@@ -75,6 +75,8 @@ public class EnsureNonNegativeCurve
         }
 
     }
+    
+    /* ============================================================================================== */
 
     private static double[] reshape(double[] seg, double target_sum) throws Exception
     {
