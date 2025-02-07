@@ -9,28 +9,11 @@ public class EnsureNonNegativeCurve
     /*
      * Modify the curve @yyy interpolating bin set @bins to ensure the curve has only non-negative values.
      * 
-     * Currently this only is a partial implementation for specific practical case we encounter with our data sets,
+     * Currently this is only a partial implementation for specific practical case we encounter with our data sets,
      * but can be generalized if needed utilizing the same general approach of controlled (and iterative)
      * elastic distortion of y-scale within the bin. If segment endpoints are to be kept at their present values, 
      * the application of this distortion can further be controlled by a bell-shaped curve coming down to zero
      * at both ends of the segment.
-     * 
-     * Currently we implement only for the case of very last (rightmost) curve segment, corresponding to the
-     * last bin, going negative.
-     * It is assumed that:
-     * - the leftmost point of the segment is positive and is a maximum within the segment. 
-     *  
-     * The change is performed into two steps: 
-     *  
-     *  1. Remap the segment y-value range from [min...max] to [0...max].
-     *     This will eliminate negatives, but will also increase the mean value of the segment. 
-     *  
-     *  2. Distort y-scale (y-values) within the segment to preserve mean value for the segment,
-     *     so it still matches bin value.
-     *     Distortion is performed by y -> ymax * (y / ymax) ^ a, where a is > 1.
-     *     This effectively pulls down the curve in an elastic way.
-     *     Distortion is performed iteratively until a matching value of "a" is found.
-     * 
      */
     public static double[] ensureNonNegative(double[] yyy, Bin[] bins) throws Exception
     {
@@ -59,6 +42,24 @@ public class EnsureNonNegativeCurve
         
         if (bin == last)
         {
+            /*
+             * Currently we implement only for the case of very last (rightmost) curve segment, corresponding to the
+             * last bin, going negative.
+             * It is assumed that:
+             * - the leftmost point of the segment is positive and is a maximum within the segment. 
+             *  
+             * The change is performed into two steps: 
+             *  
+             *  1. Remap the segment y-value range from [min...max] to [0...max].
+             *     This will eliminate negatives, but will also increase the mean value of the segment. 
+             *  
+             *  2. Distort y-scale (y-values) within the segment to preserve mean value for the segment,
+             *     so it still matches the bin value.
+             *     Distortion is performed by y -> ymax * (y / ymax) ^ a, where a is > 1.
+             *     This effectively pulls down the curve in an elastic way.
+             *     Distortion is performed iteratively until a matching value of "a" is found.
+             * 
+             */
             int x1 = ppy * (last.age_x1 - first.age_x1);
             int x2 = ppy * (last.age_x2 + 1 - first.age_x1) - 1;
 
