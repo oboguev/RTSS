@@ -1,8 +1,12 @@
 package rtss.validate_table_193x;
 
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
+import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.ForwardPopulationUR;
+import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
@@ -47,8 +51,69 @@ public class ApplyTable
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
-        PopulationContext p = forward_without_births(p1937, p1939, mt, true);
+        // PopulationContext p = forward_without_births(p1937, p1939, mt, true);
+        double m_ur = find_multiplier(p1937, p1939, mt, true);
+        double m_t = find_multiplier(p1937, p1939, mt, false);
+                
         Util.noop();
+    }
+
+    /* ================================================================================================================== */
+    
+    private double find_multiplier(
+            final PopulationContext p1937,
+            final PopulationContext p1939,
+            CombinedMortalityTable mt,
+            boolean ur) throws Exception
+    {
+        double m1 = 0.5;
+        double m2 = 1.5;
+        
+        for (int pass = 0;; pass++)
+        {
+            if (pass > 10000)
+                throw new Exception("вычисление не сходится");
+            
+            double m = (m1 + m2) / 2;
+
+            if (Util.False && Math.abs(m1 - m2) < 0.0005)
+                return m;
+
+            double d = difference(p1937, p1939, mt, m, ur);
+            if (Math.abs(d) < 100)
+                return m;
+            
+            if (d > 0)
+            {
+                // пережвижка даёт слишком много населения, повысить мультипликатор смертности
+                m1 = m;
+            }
+            else
+            {
+                // пережвижка даёт слишком мало населения, понизить мультипликатор смертности
+                m2 = m;
+            }
+        }
+    }
+
+    private double difference(
+            final PopulationContext p1937,
+            final PopulationContext p1939,
+            CombinedMortalityTable mt,
+            double multiplier,
+            boolean ur) throws Exception
+    {
+        PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
+        CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
+        PopulationContext p = forward_without_births(p1937, p1939, xmt, ur);
+        return difference(p, p1939);
+    }
+
+    private double difference(final PopulationContext p, final PopulationContext p1939) throws Exception
+    {
+        double v_p = p.sumAges(Locality.TOTAL, Gender.BOTH, 3, Population.MAX_AGE);
+        double v_p1939 = p1939.sumAges(Locality.TOTAL, Gender.BOTH, 3, Population.MAX_AGE);
+        return v_p - v_p1939;
     }
 
     /* ================================================================================================================== */
@@ -57,7 +122,7 @@ public class ApplyTable
             final PopulationContext p1937,
             final PopulationContext p1939,
             final CombinedMortalityTable mt,
-            boolean ur) throws Exception
+            final boolean ur) throws Exception
     {
         if (ur)
             return forward_without_births_ur(p1937, p1939, mt);
@@ -148,7 +213,7 @@ public class ApplyTable
 
     /* ================================================================================================================== */
 
-    public double urban_fraction(PopulationContext p, Gender gender) throws Exception
+    public double urban_fraction(final PopulationContext p, final Gender gender) throws Exception
     {
         double urban = p.sumDays(Locality.URBAN, gender, 0, p.MAX_DAY);
         double total = p.sumDays(Locality.TOTAL, gender, 0, p.MAX_DAY);

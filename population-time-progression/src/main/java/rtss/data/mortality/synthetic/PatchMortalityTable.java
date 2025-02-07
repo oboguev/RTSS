@@ -1,5 +1,6 @@
 package rtss.data.mortality.synthetic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rtss.data.mortality.CombinedMortalityTable;
@@ -121,6 +122,15 @@ public class PatchMortalityTable
         patch(cmt, mt, instructions, Locality.URBAN, addComment);
 
         return cmt;
+    }
+
+    public static CombinedMortalityTable patch(CombinedMortalityTable mt,
+            PatchInstruction instruction,
+            String addComment) throws Exception
+    {
+        List<PatchInstruction> instructions = new ArrayList<>();
+        instructions.add(instruction);
+        return patch(mt, instructions, addComment);
     }
 
     private static void patch(CombinedMortalityTable cmt,
