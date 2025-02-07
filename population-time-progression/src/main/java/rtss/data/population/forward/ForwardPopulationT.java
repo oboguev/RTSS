@@ -623,7 +623,7 @@ public class ForwardPopulationT extends ForwardPopulation
                 throw new Exception("unexpected nd2");
 
             /* использовать коэффициент смертности последнего года */
-            int extra = 10;
+            final int extra = 10;
             rate = day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
         }
         
