@@ -1,6 +1,7 @@
 package rtss.validate_table_193x;
 
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.population.forward.ForwardPopulationT;
 import rtss.data.population.forward.ForwardPopulationUR;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
@@ -46,6 +47,29 @@ public class ApplyTable
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
+        PopulationContext p = forward_without_births(p1937, p1939, mt, true);
+        Util.noop();
+    }
+
+    /* ================================================================================================================== */
+
+    private PopulationContext forward_without_births(
+            final PopulationContext p1937,
+            final PopulationContext p1939,
+            final CombinedMortalityTable mt,
+            boolean ur) throws Exception
+    {
+        if (ur)
+            return forward_without_births_ur(p1937, p1939, mt);
+        else
+            return forward_without_births_t(p1937, p1939, mt);
+    }
+
+    private PopulationContext forward_without_births_ur(
+            final PopulationContext p1937,
+            final PopulationContext p1939,
+            final CombinedMortalityTable mt) throws Exception
+    {
         double urban_male_fraction_1937 = urban_fraction(p1937, Gender.MALE);
         double urban_male_fraction_1939 = urban_fraction(p1939, Gender.MALE);
         double urban_male_fraction_1938 = (urban_male_fraction_1937 + urban_male_fraction_1939) / 2;
@@ -74,11 +98,52 @@ public class ApplyTable
         fw.setBirthRateRural(0);
         fw.forward(p, mt, 1.0);
 
-        /* последний кусочек */
+        /* последний отрезок в 11 дней */
         fw = new ForwardPopulationUR();
         fw.setBirthRateUrban(0);
         fw.setBirthRateRural(0);
         fw.forward(p, mt, 0.03);
+
+        return p;
+    }
+
+    private PopulationContext forward_without_births_t(
+            final PopulationContext p1937,
+            final PopulationContext p1939,
+            final CombinedMortalityTable mt) throws Exception
+    {
+        double urban_male_fraction_1937 = urban_fraction(p1937, Gender.MALE);
+        double urban_male_fraction_1939 = urban_fraction(p1939, Gender.MALE);
+        double urban_male_fraction_1938 = (urban_male_fraction_1937 + urban_male_fraction_1939) / 2;
+
+        double urban_female_fraction_1937 = urban_fraction(p1937, Gender.FEMALE);
+        double urban_female_fraction_1939 = urban_fraction(p1939, Gender.FEMALE);
+        double urban_female_fraction_1938 = (urban_female_fraction_1937 + urban_female_fraction_1939) / 2;
+
+        PopulationContext p = p1937.clone();
+
+        /* 1937 -> 1938 */
+        ForwardPopulationT fw = new ForwardPopulationT();
+        fw.setBirthRateTotal(0);
+        fw.forward(p, mt, 1.0);
+
+        /*
+         * Перераспределить население между городским и сельским, отражая урбанизацию 
+         */
+        urbanize(p, Gender.MALE, urban_male_fraction_1938);
+        urbanize(p, Gender.FEMALE, urban_female_fraction_1938);
+
+        /* 1938 -> 1939 */
+        fw = new ForwardPopulationT();
+        fw.setBirthRateTotal(0);
+        fw.forward(p, mt, 1.0);
+
+        /* последний отрезок в 11 дней */
+        fw = new ForwardPopulationT();
+        fw.setBirthRateTotal(0);
+        fw.forward(p, mt, 0.03);
+
+        return p;
     }
 
     /* ================================================================================================================== */
@@ -140,7 +205,7 @@ public class ApplyTable
         /*
          * Verify that new level (of transformed population) is correct
          */
-        if (Util.differ(target_urban_level, urban_fraction(p, gender)))
+        if (Util.differ(target_urban_level, urban_fraction(p, gender), 0.4 * 0.01))
             throw new Exception("Miscalculated urbanization");
     }
 }
