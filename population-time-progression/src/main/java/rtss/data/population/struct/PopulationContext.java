@@ -1229,9 +1229,31 @@ public class PopulationContext
 
     /* ---------------------------------------------------------------------------- */
     
-    public static PopulationContext toTotal() throws Exception
+    public PopulationContext toTotal() throws Exception
     {
-        // ###
-        return null;
+        if (!began)
+            throw new IllegalArgumentException();
+
+        if (!hasRuralUrban)
+            return clone();
+
+        PopulationContext cx = new PopulationContext(NYEARS);
+        cx.valueConstraint = valueConstraint; 
+        cx.began = began;
+        cx.hasRuralUrban = false;
+        cx.m_lx = new HashMap<String, double[]>(m_lx);
+        cx.totalBirths = new HashMap<>(totalBirths);
+        
+        for (Gender gender : Gender.TwoGenders)
+        {
+            for (int nd = 0; nd <= MAX_DAY; nd++)
+            {
+                double v_urban = this.getDay(Locality.URBAN, gender, nd); 
+                double v_rural = this.getDay(Locality.RURAL, gender, nd);
+                cx.setDay(Locality.TOTAL, gender, nd, v_urban + v_rural);
+            }
+        }
+
+        return cx;
     }
 }
