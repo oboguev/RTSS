@@ -45,6 +45,29 @@ public class AnalyzeTable
             double r = 100.0 * ratios.get(key(age, Locality.RURAL));
             Util.out(String.format("%-3d %5.1f %5.1f %5.1f %4d", age, t, u, r, 1938 - age));
         }
+
+        ratios.clear();
+
+        for (Gender gender : Gender.ThreeGenders)
+            urbanProportionForGender(mt, gender);
+
+        Util.out("");
+        Util.out("% городского населения в совокупном, мужском, женском и год рождения");
+        for (int age = 0; age <= Population.MAX_AGE; age++)
+        {
+            Double b = ratios.get(key(age, Gender.BOTH));
+            Double m = ratios.get(key(age, Gender.MALE));
+            Double f = ratios.get(key(age, Gender.FEMALE));
+            Util.out(String.format("%-3d %5s %5s %5s %4d", age, pct(b), pct(m), pct(f), 1938 - age));
+        }
+    }
+
+    private String pct(Double ratio)
+    {
+        if (ratio == null)
+            return String.format("%5s", "????");
+        else
+            return String.format("%5.1f", 100 * ratio);
     }
 
     /* ========================================================================================================================= */
@@ -59,6 +82,7 @@ public class AnalyzeTable
         double[] qx_both = mt.getSingleTable(locality, Gender.BOTH).qx();
         double[] qx_male = mt.getSingleTable(locality, Gender.MALE).qx();
         double[] qx_female = mt.getSingleTable(locality, Gender.FEMALE).qx();
+
         double[] male_fraction = male_fraction(qx_both, qx_male, qx_female);
 
         for (int age = 0; age <= Population.MAX_AGE; age++)
@@ -66,10 +90,7 @@ public class AnalyzeTable
     }
 
     /*
-     * Вычислить долю мужского населения, по годам возраста, использованную при составлении таблицы.
-     * Функция опредляет величину из самой таблицы.
-     * На практике, таблица ГКС 1938-1939 гг. выказывает значительные вариации в половой пропорции,
-     * со значиями доли мужского пола колеблющимися от 0.25 до 0.66.
+     * Вычислить долю мужского населения, по годам возраста, использованную при составлении таблицы
      */
     private static double[] male_fraction(double[] qx_both, double[] qx_male, double[] qx_female) throws Exception
     {
@@ -85,12 +106,65 @@ public class AnalyzeTable
             Util.assertion(qx_male[age] != qx_female[age]);
             male_fraction[age] = (qx_both[age] - qx_female[age]) / (qx_male[age] - qx_female[age]);
         }
+
         // проверка мниимальной разумности значений
         for (int age = 0; age < qx_both.length; age++)
-        {
             Util.assertion(male_fraction[age] >= 0 && male_fraction[age] <= 1);
-        }
 
         return male_fraction;
+    }
+
+    /* ========================================================================================================================= */
+
+    private String key(int age, Gender gender)
+    {
+        return gender.name() + "." + age;
+    }
+
+    /*
+     * Вычислить долю городскоого населения, по годам возраста, использованную при составлении таблицы
+     */
+    private void urbanProportionForGender(CombinedMortalityTable mt, Gender gender) throws Exception
+    {
+        double[] qx_total = mt.getSingleTable(Locality.TOTAL, gender).qx();
+        double[] qx_urban = mt.getSingleTable(Locality.URBAN, gender).qx();
+        double[] qx_rural = mt.getSingleTable(Locality.RURAL, gender).qx();
+
+        Double[] urban_fraction = urban_fraction(qx_total, qx_urban, qx_rural);
+
+        for (int age = 0; age <= Population.MAX_AGE; age++)
+            ratios.put(key(age, gender), urban_fraction[age]);
+    }
+
+    private Double[] urban_fraction(double[] qx_total, double[] qx_urban, double[] qx_rural) throws Exception
+    {
+        Util.assertion(qx_total.length == qx_urban.length);
+        Util.assertion(qx_total.length == qx_rural.length);
+
+        Double[] urban_fraction = new Double[qx_total.length];
+
+        for (int age = 0; age < qx_total.length; age++)
+        {
+            // если городская и сельская смертности точно совпадают, пропорции следует определять из данных о населении
+            // или интерполяцией соседних значений пропорции
+            if (qx_urban[age] == qx_rural[age])
+            {
+                urban_fraction[age] = null;
+            }
+            else
+            {
+                // ###
+                urban_fraction[age] = (qx_total[age] - qx_urban[age]) / (qx_rural[age] - qx_urban[age]);
+            }
+        }
+
+        // проверка мниимальной разумности значений
+        for (int age = 0; age < qx_total.length; age++)
+        {
+            Util.assertion(urban_fraction[age] == null ||
+                           urban_fraction[age] >= 0 && urban_fraction[age] <= 1);
+        }
+
+        return urban_fraction;
     }
 }
