@@ -413,6 +413,7 @@ public class ForwardPopulationT extends ForwardPopulation
     {
         int ndays = daily_birth_count.length;
         double total_births = Util.sum(daily_birth_count);
+        observed_births += total_births;
 
         fctx.addTotalBirths(locality, gender, total_births);
         
