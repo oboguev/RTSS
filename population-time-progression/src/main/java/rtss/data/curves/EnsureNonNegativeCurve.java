@@ -38,6 +38,9 @@ public class EnsureNonNegativeCurve
             }
         }
         
+        if (!Util.isNonNegative(yyy))
+            throw new Exception("Error calculating curve (negative value)");
+
         return yyy;
     }
 
