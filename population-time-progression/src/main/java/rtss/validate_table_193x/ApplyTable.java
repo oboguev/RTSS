@@ -1,5 +1,6 @@
 package rtss.validate_table_193x;
 
+import rtss.data.ValueConstraint;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
@@ -15,6 +16,7 @@ import rtss.data.selectors.Locality;
 import rtss.forward_1926_193x.Adjust_1937;
 import rtss.forward_1926_193x.Adjust_1939;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
 
 /*
  * Приложить таблицу смертности ГКС 1938-1939 для передвижки населения переписи 1937 года 
@@ -52,14 +54,26 @@ public class ApplyTable
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
         // PopulationContext p = forward_without_births(p1937, p1939, mt, true);
-        double m_ur = find_multiplier(p1937, p1939, mt, true);
-        double m_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false);
-                
+        double multiplier_ur = find_multiplier(p1937, p1939, mt, true);
+        double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false);
+        Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
+        Util.out("к численности по переписи января 1939 года:");
+        Util.out(String.format("для раздельной передвижки городского и сельского населения: %.4f", multiplier_ur));
+        Util.out(String.format("для передвижки без разбивки населения по типу местности: %.4f", multiplier_t));
+
+        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
+        p = p.selectByAgeYears(3, Population.MAX_AGE);
+        p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
+
+        new PopulationChart("Расхождение между передвижкой и переписью 1939 года")
+                .show("", p)
+                .display();
+
         Util.noop();
     }
 
     /* ================================================================================================================== */
-    
+
     private double find_multiplier(
             final PopulationContext p1937,
             final PopulationContext p1939,
@@ -68,12 +82,12 @@ public class ApplyTable
     {
         double m1 = 0.5;
         double m2 = 1.5;
-        
+
         for (int pass = 0;; pass++)
         {
             if (pass > 10000)
                 throw new Exception("вычисление не сходится");
-            
+
             double m = (m1 + m2) / 2;
 
             if (Util.False && Math.abs(m1 - m2) < 0.0005)
@@ -82,15 +96,15 @@ public class ApplyTable
             double d = difference(p1937, p1939, mt, m, ur);
             if (Math.abs(d) < 100)
                 return m;
-            
+
             if (d > 0)
             {
-                // пережвижка даёт слишком много населения, повысить мультипликатор смертности
+                // передвижка даёт слишком много населения, повысить мультипликатор смертности
                 m1 = m;
             }
             else
             {
-                // пережвижка даёт слишком мало населения, понизить мультипликатор смертности
+                // передвижка даёт слишком мало населения, понизить мультипликатор смертности
                 m2 = m;
             }
         }
@@ -117,6 +131,18 @@ public class ApplyTable
     }
 
     /* ================================================================================================================== */
+
+    private PopulationContext forward_without_births(
+            final PopulationContext p1937,
+            final PopulationContext p1939,
+            final CombinedMortalityTable mt,
+            double multiplier,
+            final boolean ur) throws Exception
+    {
+        PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
+        CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
+        return forward_without_births(p1937, p1939, xmt, ur);
+    }
 
     private PopulationContext forward_without_births(
             final PopulationContext p1937,
