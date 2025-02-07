@@ -33,18 +33,29 @@ public class EnsureNonNegativeCurve
                 bin = Bins.binForAge(age, bins);
                 if (bin == null)
                     throw new Exception("Internal error");
-                break;
+                yyy = reshape(bins, bin, yyy);
+                x = bin.age_x2;
             }
         }
-
-        if (bin == null)
-            return Util.dup(yyy);
         
+        return yyy;
+    }
+
+    private static double[] reshape(Bin[] bins, Bin bin, double[] yyy) throws Exception
+    {
+        Bin first = Bins.firstBin(bins);
+        Bin last = Bins.lastBin(bins);
+        int ppy = yyy.length / (last.age_x2 + 1);
+
+        int x1 = ppy * (bin.age_x1 - first.age_x1);
+        int x2 = ppy * (bin.age_x2 + 1 - first.age_x1) - 1;
+        double[] seg = Util.splice(yyy, x1, x2);
+
         if (bin == last)
         {
             /*
-             * Currently we implement only for the case of very last (rightmost) curve segment, corresponding to the
-             * last bin, going negative.
+             * Currently we implement a correction only for the case of the very last (rightmost) curve segment, 
+             * corresponding to the last bin, going negative.
              * It is assumed that:
              * - the leftmost point of the segment is positive and is a maximum within the segment. 
              *  
@@ -60,25 +71,22 @@ public class EnsureNonNegativeCurve
              *     Distortion is performed iteratively until a matching value of "a" is found.
              * 
              */
-            int x1 = ppy * (last.age_x1 - first.age_x1);
-            int x2 = ppy * (last.age_x2 + 1 - first.age_x1) - 1;
-
-            yyy = Util.dup(yyy);
-            double[] seg = Util.splice(yyy, x1, x2);
-            seg = reshape(seg, bin.avg * bin.widths_in_years * ppy);
-            Util.insert(yyy, seg, x1);
-            return yyy;
+            seg = reshape(seg, bin.avg * bin.widths_in_years * ppy, true);
         }
         else
         {
-            throw new Exception("Unimplemented: can only fix negative values for the last bin, but not for intermediate bins");
+            seg = reshape(seg, bin.avg * bin.widths_in_years * ppy, false);
+            // throw new Exception("Unimplemented: can only fix negative values for the last bin, but not for intermediate bins");
         }
 
+        yyy = Util.dup(yyy);
+        Util.insert(yyy, seg, x1);
+        return yyy;
     }
-    
+
     /* ============================================================================================== */
 
-    private static double[] reshape(double[] seg, double target_sum) throws Exception
+    private static double[] reshape(double[] seg, double target_sum, boolean last) throws Exception
     {
         seg = Util.dup(seg);
 
@@ -87,14 +95,16 @@ public class EnsureNonNegativeCurve
          */
         double min = Util.min(seg);
         double max = Util.max(seg);
-        if (max <= 0 || seg[0] != max)
+
+        if (max <= 0)
+            throw new Exception("Negative values in the curve, the fix is not implemented");
+        if (last && seg[0] != max)
             throw new Exception("Negative values in the curve, the fix is not implemented");
 
         double new_min = 0.01 * max;
         for (int x = 0; x < seg.length; x++)
             seg[x] = new_min + (max - new_min) * (seg[x] - min) / (max - min);
 
-        
         /*
          * Find a1 and a2 as the range for binary search
          */
@@ -121,13 +131,13 @@ public class EnsureNonNegativeCurve
          */
         for (;;)
         {
-            double a = (a1 + a2) /2;
+            double a = (a1 + a2) / 2;
             xseg = distort(seg, a);
             double sum = Util.sum(xseg);
-            
+
             if (!Util.differ(sum, target_sum))
                 break;
-            
+
             if (sum > target_sum)
             {
                 // increase a
