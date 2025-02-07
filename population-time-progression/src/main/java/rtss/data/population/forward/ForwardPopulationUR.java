@@ -61,6 +61,16 @@ public class ForwardPopulationUR extends ForwardPopulation
     private double fctx_r_male_deaths = 0;
     private double fctx_u_female_deaths = 0;
     private double fctx_r_female_deaths = 0;
+    
+    public void setBirthRateRural(double rate)
+    {
+        this.BirthRateRural = rate;
+    }
+    
+    public void setBirthRateUrban(double rate)
+    {
+        this.BirthRateUrban = rate;
+    }
 
     /*
      * Оценить долю городского населения во всём населении (для указанного пола) 

@@ -1,4 +1,4 @@
-package rtss.validatetable_193x;
+package rtss.validate_table_193x;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -153,8 +153,7 @@ public class AnalyzeTable
             }
             else
             {
-                // ###
-                urban_fraction[age] = (qx_total[age] - qx_urban[age]) / (qx_rural[age] - qx_urban[age]);
+                urban_fraction[age] = (qx_total[age] - qx_rural[age]) / (qx_urban[age] - qx_rural[age]);
             }
         }
 
