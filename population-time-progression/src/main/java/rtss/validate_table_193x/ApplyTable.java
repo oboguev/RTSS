@@ -53,7 +53,7 @@ public class ApplyTable
 
         // PopulationContext p = forward_without_births(p1937, p1939, mt, true);
         double m_ur = find_multiplier(p1937, p1939, mt, true);
-        double m_t = find_multiplier(p1937, p1939, mt, false);
+        double m_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false);
                 
         Util.noop();
     }
@@ -177,26 +177,12 @@ public class ApplyTable
             final PopulationContext p1939,
             final CombinedMortalityTable mt) throws Exception
     {
-        double urban_male_fraction_1937 = urban_fraction(p1937, Gender.MALE);
-        double urban_male_fraction_1939 = urban_fraction(p1939, Gender.MALE);
-        double urban_male_fraction_1938 = (urban_male_fraction_1937 + urban_male_fraction_1939) / 2;
-
-        double urban_female_fraction_1937 = urban_fraction(p1937, Gender.FEMALE);
-        double urban_female_fraction_1939 = urban_fraction(p1939, Gender.FEMALE);
-        double urban_female_fraction_1938 = (urban_female_fraction_1937 + urban_female_fraction_1939) / 2;
-
         PopulationContext p = p1937.clone();
 
         /* 1937 -> 1938 */
         ForwardPopulationT fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         fw.forward(p, mt, 1.0);
-
-        /*
-         * Перераспределить население между городским и сельским, отражая урбанизацию 
-         */
-        urbanize(p, Gender.MALE, urban_male_fraction_1938);
-        urbanize(p, Gender.FEMALE, urban_female_fraction_1938);
 
         /* 1938 -> 1939 */
         fw = new ForwardPopulationT();

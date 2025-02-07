@@ -1226,4 +1226,12 @@ public class PopulationContext
         p.beginTotal();
         return p;
     }
+
+    /* ---------------------------------------------------------------------------- */
+    
+    public static PopulationContext toTotal() throws Exception
+    {
+        // ###
+        return null;
+    }
 }
