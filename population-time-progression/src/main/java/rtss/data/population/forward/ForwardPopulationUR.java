@@ -497,6 +497,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         observed_deaths += sum_deaths;
     }
 
+    @SuppressWarnings("unused")
     private double deathRate(PopulationContext fctx, double[] day_lx, int nd, int nd2) throws Exception
     {
         return 1 - survivalRate(fctx, day_lx, nd, nd2);

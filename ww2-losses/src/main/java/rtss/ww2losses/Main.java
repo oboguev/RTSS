@@ -114,11 +114,6 @@ public class Main
      */
     private boolean CancelNegativeDeficit = Util.False;
 
-    /*
-     * Размер контекста отслеживания: только дети или все возраста
-     */
-    private static int PopulationContextSize = PopulationContext.ALL_AGES;
-
     private Area area;
     private AreaParameters ap;
     private static int MAX_AGE = Population.MAX_AGE;
@@ -406,43 +401,6 @@ public class Main
     public void xxx() throws Exception
     {
         // ###
-    }
-
-    /*
-     * Передвижка от начала до середины 1941 года с использованием ASFR для расчёта рождений
-     */
-    private ForwardingResult1941 forward_1941_1st_halfyear(PopulationContext p_start1941, PopulationContext p_mid1941) throws Exception
-    {
-        PopulationContext pavg = p_start1941.avg(p_mid1941);
-
-        PopulationContext p = p_start1941.clone();
-        CombinedMortalityTable mt = peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
-
-        ForwardPopulationT fw = new ForwardPopulationT();
-        int ndays = fw.birthDays(0.5);
-
-        double nbirths = asfr_calibration * 0.5 * halfyearly_asfrs.getForTimepoint("1941.0").births(pavg.toPopulation());
-
-        double[] births = WarHelpers.births(ndays, nbirths, nbirths, nbirths);
-        double[] m_births = WarHelpers.male_births(births);
-        double[] f_births = WarHelpers.female_births(births);
-        fw.setBirthCount(m_births, f_births);
-        fw.forward(p, mt, 0.5);
-
-        ForwardingResult1941 fr = new ForwardingResult1941();
-        fr.p_start1941 = p_start1941;
-        fr.p_mid1941 = p.clone();
-        fr.observed_deaths_byGenderAge = fw.deathsByGenderAge().clone();
-        fr.observed_births = nbirths;
-        return fr;
-    }
-
-    public static class ForwardingResult1941
-    {
-        public PopulationContext p_start1941;
-        public PopulationContext p_mid1941;
-        public PopulationContext observed_deaths_byGenderAge;
-        public double observed_births;
     }
 
     /* ================================================================================== */
