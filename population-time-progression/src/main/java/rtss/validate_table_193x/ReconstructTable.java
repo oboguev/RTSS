@@ -30,6 +30,7 @@ public class ReconstructTable
 
     private void do_main() throws Exception
     {
+        // ### smooth = false?
         final boolean DoSmoothPopulation = true;
 
         final PopulationByLocality p1937_original = un100(PopulationByLocality.census(Area.USSR, 1937)).smooth(DoSmoothPopulation);
