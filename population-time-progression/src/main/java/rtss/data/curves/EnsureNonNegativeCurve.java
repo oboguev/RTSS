@@ -56,18 +56,23 @@ public class EnsureNonNegativeCurve
 
         if (bin == null)
             return Util.dup(yyy);
+        
+        if (bin == last)
+        {
+            int x1 = ppy * (last.age_x1 - first.age_x1);
+            int x2 = ppy * (last.age_x2 + 1 - first.age_x1) - 1;
 
-        if (bin != last)
+            yyy = Util.dup(yyy);
+            double[] seg = Util.splice(yyy, x1, x2);
+            seg = reshape(seg, bin.avg * bin.widths_in_years * ppy);
+            Util.insert(yyy, seg, x1);
+            return yyy;
+        }
+        else
+        {
             throw new Exception("Unimplemented: can only fix negative values for the last bin, but not for intermediate bins");
+        }
 
-        int x1 = ppy * (last.age_x1 - first.age_x1);
-        int x2 = ppy * (last.age_x2 + 1 - first.age_x1) - 1;
-
-        yyy = Util.dup(yyy);
-        double[] seg = Util.splice(yyy, x1, x2);
-        seg = reshape(seg, bin.avg * bin.widths_in_years * ppy);
-        Util.insert(yyy, seg, x1);
-        return yyy;
     }
 
     private static double[] reshape(double[] seg, double target_sum) throws Exception
