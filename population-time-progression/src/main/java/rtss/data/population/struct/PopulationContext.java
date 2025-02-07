@@ -105,6 +105,7 @@ public class PopulationContext
     private boolean hasRuralUrban;
     private LocalityGenderToDoubleArray m;
     private ValueConstraint valueConstraint;
+    private String title;
 
     /*
      * Total number of births during forwarding
@@ -130,13 +131,24 @@ public class PopulationContext
     public PopulationContext clone()
     {
         PopulationContext cx = new PopulationContext(NYEARS);
-        cx.valueConstraint = valueConstraint; 
+        cx.valueConstraint = valueConstraint;
         cx.began = began;
         cx.hasRuralUrban = hasRuralUrban;
         cx.m = new LocalityGenderToDoubleArray(m);
         cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
+        cx.title = title;
         return cx;
+    }
+
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    public String title()
+    {
+        return title;
     }
 
     public void setValueConstraint(ValueConstraint valueConstraint)
@@ -346,7 +358,7 @@ public class PopulationContext
 
             m_lx.put(key, daily_lx);
         }
-        
+
         Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
 
         return daily_lx;
@@ -493,7 +505,10 @@ public class PopulationContext
         /*
          * Построить распределение по дням
          */
-        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, "PopulationContext.begin");
+        String curve_title = String.format("[PopulationContext.begin] %s %s %s",
+                                           title != null ? title : "unnamed",
+                                           locality.name(), gender.name());
+        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, curve_title);
 
         for (int age = 0; age < NYEARS; age++)
         {
@@ -822,6 +837,8 @@ public class PopulationContext
 
         p.zero();
         p = this.end(p);
+        p.setTitle(title);
+
         return p;
     }
 
@@ -1093,7 +1110,7 @@ public class PopulationContext
 
             for (int nd = v.length - ndays; nd < v.length; nd++)
                 v2[v.length - 1] += v[nd];
-            
+
             c.fromArray(lg.locality, lg.gender, v2);
         }
 
@@ -1169,7 +1186,7 @@ public class PopulationContext
     }
 
     /* ---------------------------------------------------------------------------- */
-    
+
     /*
      * возвращает @true если в контексте нет людей
      */
@@ -1187,7 +1204,7 @@ public class PopulationContext
             return isEmpty(Locality.TOTAL);
         }
     }
-    
+
     public boolean isEmpty(Locality locality) throws Exception
     {
         if (!began)
@@ -1207,10 +1224,10 @@ public class PopulationContext
             if (v != 0)
                 return false;
         }
-        
+
         return true;
     }
-    
+
     /* ---------------------------------------------------------------------------- */
 
     public static PopulationContext newTotalPopulationContext()
@@ -1228,7 +1245,7 @@ public class PopulationContext
     }
 
     /* ---------------------------------------------------------------------------- */
-    
+
     public PopulationContext toTotal() throws Exception
     {
         if (!began)
@@ -1238,17 +1255,18 @@ public class PopulationContext
             return clone();
 
         PopulationContext cx = new PopulationContext(NYEARS);
-        cx.valueConstraint = valueConstraint; 
+        cx.valueConstraint = valueConstraint;
         cx.began = began;
         cx.hasRuralUrban = false;
         cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
-        
+        cx.title = title;
+
         for (Gender gender : Gender.TwoGenders)
         {
             for (int nd = 0; nd <= MAX_DAY; nd++)
             {
-                double v_urban = this.getDay(Locality.URBAN, gender, nd); 
+                double v_urban = this.getDay(Locality.URBAN, gender, nd);
                 double v_rural = this.getDay(Locality.RURAL, gender, nd);
                 cx.setDay(Locality.TOTAL, gender, nd, v_urban + v_rural);
             }

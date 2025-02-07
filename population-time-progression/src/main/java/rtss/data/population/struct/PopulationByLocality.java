@@ -17,6 +17,7 @@ public class PopulationByLocality
     private Population rural;
     private Population urban;
     private Population total;
+    private String title;
 
     private PopulationByLocality()
     {
@@ -70,6 +71,8 @@ public class PopulationByLocality
             p.urban = urban.clone();
         if (total != null)
             p.total = total.clone();
+        
+        p.title = title;
 
         return p;
     }
@@ -80,6 +83,8 @@ public class PopulationByLocality
 
         if (total != null)
             p.total = total.clone();
+
+        p.title = title;
 
         return p;
     }
@@ -93,7 +98,17 @@ public class PopulationByLocality
     {
         return total != null;
     }
+    
+    public String title()
+    {
+        return title;
+    }
 
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+    
     /****************************************************************************************************/
 
     public double get(Locality locality, Gender gender, int age) throws Exception
@@ -375,6 +390,8 @@ public class PopulationByLocality
 
     private void do_load(String path) throws Exception
     {
+        title = path;
+
         rural = load(path, Locality.RURAL);
         urban = load(path, Locality.URBAN);
         if (haveFile(path, Locality.TOTAL))
@@ -714,6 +731,7 @@ public class PopulationByLocality
     public PopulationContext toPopulationContext() throws Exception
     {
         PopulationContext fctx = new PopulationContext(PopulationContext.ALL_AGES);
+        fctx.setTitle(title);
         fctx.begin(this.clone());
         return fctx;
     }

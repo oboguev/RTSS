@@ -98,7 +98,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (yyy == null)
             yyy = yyy5;
         
-        yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins);
+        yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins, title);
         
         if (Util.False)
         {

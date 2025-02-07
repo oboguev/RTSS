@@ -34,6 +34,7 @@ public class Population
     double both_unknown = 0;
     double both_total = 0;
 
+    private String title;
     private boolean sealed = false;
 
     private DoubleArray newDoubleArray()
@@ -62,6 +63,16 @@ public class Population
 
     private Population()
     {
+    }
+
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+    
+    public String title()
+    {
+        return title;
     }
 
     public void setValueConstraint(ValueConstraint vc)
@@ -584,6 +595,7 @@ public class Population
     {
         Population p = new Population();
         p.locality = locality;
+        p.title = path;
         p.do_load(path);
         return p;
     }
