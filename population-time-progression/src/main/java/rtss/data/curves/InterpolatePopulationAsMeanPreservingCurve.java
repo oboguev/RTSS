@@ -44,14 +44,30 @@ public class InterpolatePopulationAsMeanPreservingCurve
         double[] xxx = Bins.ppy_x(bins, ppy);
         double[] sss = Bins.midpoint_y(bins);
 
+        int[] intervalWidths = Bins.widths(bins);
+        int numIterations = 2000;
+        double positivityThreshold = 1e-6;
+
         /*
          * For yearly data (targetResolution == YEARLY) use sigma around 1.0 (0.5-1.5).
          * Difference of results within this range is typically miniscule.
+         * 
+         * For daily data (targetResolution == DAILY) use sigma around 10.0.
          */
-        int[] intervalWidths = Bins.widths(bins);
-        int numIterations = 2000;
-        double smoothingSigma = 1.0;
-        double positivityThreshold = 1e-6;
+        double smoothingSigma;
+        switch (targetResolution)
+        {
+        case YEARLY:
+            smoothingSigma = 1.0;
+            break;
+
+        case DAILY:
+            smoothingSigma = 10.0;
+            break;
+        
+        default:
+            throw new IllegalArgumentException();
+        }
 
         double[] yyy = DisaggregateVariableWidthSeries.disaggregate(sss, intervalWidths, numIterations, smoothingSigma, positivityThreshold);
 
@@ -63,7 +79,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             chart.display();
             Util.noop();
         }
-        
+
         if (!Util.isNonNegative(yyy))
             throw new Exception("Error calculating curve (negative value)");
 
@@ -76,11 +92,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         // ### non-neg
         // ### avg match 
-        
+
         return yy;
     }
 
-    @SuppressWarnings("unsed")
+    @SuppressWarnings("unused")
     private static double[] curve_csasra_fixed(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
     {
         if (!Bins.isEqualWidths(bins))
@@ -107,7 +123,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             chart.display();
             Util.noop();
         }
-        
+
         return yyy;
     }
 
@@ -188,7 +204,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins, title, targetResolution);
 
-        if (Util.True) // ###
+        if (Util.False)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             if (yyy1 != null)

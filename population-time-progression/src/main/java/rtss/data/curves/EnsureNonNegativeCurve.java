@@ -90,6 +90,7 @@ public class EnsureNonNegativeCurve
                 throw new Exception("Unimplemented: can only fix negative values for high-age bin, but not for lower age bins: age " + age_years);
 
             seg = reshape(seg, bin.avg * bin.widths_in_years * ppy, false, title);
+            Util.err(String.format("Fixing negative values for high-age bin, population [%s] age %f ", title, age_years));
         }
 
         yyy = Util.dup(yyy);
