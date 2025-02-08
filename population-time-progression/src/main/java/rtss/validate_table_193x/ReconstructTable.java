@@ -117,9 +117,9 @@ public class ReconstructTable
         double v99 = p1939.sumAge(Locality.TOTAL, gender, 99);
         double v100 = p1939.sumAge(Locality.TOTAL, gender, 100);
 
-        double f98 = within_open_range(v98 / v97, 0, 1);
-        double f99 = within_open_range(v99 / v97, 0, 1);
-        double f100 = within_open_range(v100 / v97, 0, 1);
+        double f98 = within_range(v98 / v97, 0.3, 0.9, 0.7);
+        double f99 = within_range(v99 / v97, 0.3, 0.9, 0.6);
+        double f100 = within_range(v100 / v97, 0.3, 0.9, 0.5);
 
         fill_upper_ages(p1939_down, gender, 97, 98, f98);
         fill_upper_ages(p1939_down, gender, 97, 99, f99);
@@ -188,5 +188,13 @@ public class ReconstructTable
     {
         Util.assertion(f > fmin && f < fmax);
         return f;
+    }
+
+    private double within_range(double f, double fmin, double fmax, double fallback)
+    {
+        if (f > fmin && f < fmax)
+            return f;
+        else
+            return fallback;
     }
 }
