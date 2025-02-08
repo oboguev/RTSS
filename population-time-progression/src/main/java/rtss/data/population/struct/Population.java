@@ -9,6 +9,7 @@ import rtss.data.ValueConstraint;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
+import rtss.data.curves.TargetResolution;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.calc.SmoothPopulation;
 import rtss.data.selectors.Gender;
@@ -1322,7 +1323,7 @@ public class Population
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title);
+        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY);
 
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);

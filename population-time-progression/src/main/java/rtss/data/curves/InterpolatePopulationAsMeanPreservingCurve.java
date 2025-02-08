@@ -17,22 +17,23 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 /**
  * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
  * Typically used to interpolate population from an aggregated multi-year data to a yearly resolution.
+ * Or to a daily resolution, for use by PopulationContext.
  */
 public class InterpolatePopulationAsMeanPreservingCurve
 {
     public static final int MAX_AGE = Population.MAX_AGE;
 
-    public static double[] curve(Bin[] bins, String title) throws Exception
+    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
     {
         // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);
-        return curve_spline(bins, title);
+        return curve_spline(bins, title, targetResolution);
     }
-    
+
     /*
      * Spline implementation
      */
-    private static double[] curve_spline(Bin[] bins, String title) throws Exception
+    private static double[] curve_spline(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
@@ -47,6 +48,10 @@ public class InterpolatePopulationAsMeanPreservingCurve
         }
 
         int ppy = 12;
+        
+        if (targetResolution == TargetResolution.DAILY) // ###
+            ppy = 1;
+        
         double[] xxx = Bins.ppy_x(bins, ppy);
         double[] yyy1 = null;
         double[] yyy2 = null;
@@ -71,7 +76,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
             yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
         }
-        
+
         if (Util.False)
         {
             MeanPreservingIntegralSpline.Options xoptions = new MeanPreservingIntegralSpline.Options();
@@ -97,9 +102,9 @@ public class InterpolatePopulationAsMeanPreservingCurve
             yyy = yyy4;
         if (yyy == null)
             yyy = yyy5;
-        
-        yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins, title);
-        
+
+        yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins, title, targetResolution);
+
         if (Util.False)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
@@ -159,7 +164,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         return yy;
     }
-    
+
     @SuppressWarnings("unused")
     private static double[] curve_osier(Bin[] bins, String method, String params, String title) throws Exception
     {
@@ -169,7 +174,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         double[] yy = OsierTask.population(bins, "XXX", method, ppy);
         if (Util.True)
         {
-            String chartTitle = "Osier curve (" + method + ") "+ title;
+            String chartTitle = "Osier curve (" + method + ") " + title;
             ViewCurve.view(chartTitle, bins, yy);
         }
         double[] y = Bins.ppy2yearly(yy, ppy);

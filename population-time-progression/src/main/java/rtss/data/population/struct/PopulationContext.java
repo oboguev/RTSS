@@ -10,6 +10,7 @@ import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
+import rtss.data.curves.TargetResolution;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.forward.ForwardPopulation;
@@ -508,7 +509,7 @@ public class PopulationContext
         String curve_title = String.format("[PopulationContext.begin] %s %s %s",
                                            title != null ? title : "unnamed",
                                            locality.name(), gender.name());
-        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, curve_title);
+        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, curve_title, TargetResolution.DAILY);
 
         for (int age = 0; age < NYEARS; age++)
         {

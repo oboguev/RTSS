@@ -15,7 +15,7 @@ public class EnsureNonNegativeCurve
      * the application of this distortion can further be controlled by a bell-shaped curve coming down to zero
      * at both ends of the segment.
      */
-    public static double[] ensureNonNegative(double[] yyy, Bin[] bins, String title) throws Exception
+    public static double[] ensureNonNegative(double[] yyy, Bin[] bins, String title, TargetResolution targetResolution) throws Exception
     {
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
@@ -33,18 +33,18 @@ public class EnsureNonNegativeCurve
                 bin = Bins.binForAge(age, bins);
                 if (bin == null)
                     throw new Exception("Internal error");
-                yyy = reshape(bins, bin, yyy, title);
+                yyy = reshape(bins, bin, yyy, title, targetResolution);
                 x = bin.age_x2;
             }
         }
-        
+
         if (!Util.isNonNegative(yyy))
             throw new Exception("Error calculating curve (negative value)");
 
         return yyy;
     }
 
-    private static double[] reshape(Bin[] bins, Bin bin, double[] yyy, String title) throws Exception
+    private static double[] reshape(Bin[] bins, Bin bin, double[] yyy, String title, TargetResolution targetResolution) throws Exception
     {
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
@@ -76,10 +76,20 @@ public class EnsureNonNegativeCurve
              */
             seg = reshape(seg, bin.avg * bin.widths_in_years * ppy, true, title);
         }
+        else if (targetResolution == TargetResolution.YEARLY)
+        {
+            // untested
+            throw new Exception("Unimplemented: can only fix negative values for the last bin, but not for intermediate bins");
+        }
         else
         {
+            double age_years = bin.age_x1 / ppy;
+            if (targetResolution == TargetResolution.DAILY)
+                age_years /= 365;
+            if (age_years < 90)
+                throw new Exception("Unimplemented: can only fix negative values for high-age bin, but not for lower age bins");
+
             seg = reshape(seg, bin.avg * bin.widths_in_years * ppy, false, title);
-            // throw new Exception("Unimplemented: can only fix negative values for the last bin, but not for intermediate bins");
         }
 
         yyy = Util.dup(yyy);
