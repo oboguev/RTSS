@@ -549,13 +549,24 @@ public class PopulationContext
             int nd1 = firstDayForAge(age);
             int nd2 = lastDayForAge(age);
 
-            if (mt == null)
+            if (mt == null && Util.False)
             {
+                /* самый простой вариант */
                 for (int nd = nd1; nd <= nd2; nd++)
                     setDay(locality, gender, nd, v / DAYS_PER_YEAR);
             }
+            else if (mt == null)
+            {
+                /* интерполяция между численностями годов до и после */
+                double np1 = (age == 0) ? v : p.get(locality, gender, age - 1);
+                double np3 = (age == MAX_AGE) ? v : p.get(locality, gender, age + 1);
+                double[] np = np_basic(nd2 - nd1 + 1, np1, v, np3);
+                for (int nd = nd1; nd <= nd2; nd++)
+                    setDay(locality, gender, nd, np[nd - nd1]);
+            }
             else
             {
+                /* распределить с учётом коэффициента смертности */
                 double[] dlx = get_daily_lx(mt, locality, gender);
                 int offset = 0;
 
@@ -570,6 +581,27 @@ public class PopulationContext
                     setDay(locality, gender, nd, v * dlx[nd - nd1]);
             }
         }
+    }
+
+    /*
+     * Распределить число людей @np2 на число дней @ndays.
+     * Интенсивность до интервала = @np1; интенсивность после интервала = @np3.
+     */
+    public static double[] np_basic(int ndays, double np1, double np2, double np3) throws Exception
+    {
+        double[] np = new double[ndays];
+
+        double a = (np3 - np1) / (ndays + 1);
+        double b = np3 - a * ndays;
+
+        for (int k = 0; k < ndays; k++)
+            np[k] = a * k + b;
+
+        np = Util.normalize(np, np2);
+
+        Util.checkValidNonNegative(np);
+
+        return np;
     }
 
     /*

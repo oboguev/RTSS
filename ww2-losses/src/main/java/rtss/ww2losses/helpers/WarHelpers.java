@@ -62,7 +62,7 @@ public class WarHelpers
 
     /*
      * Распределить число рождений @nb2 на число дней @ndays.
-     * Интенсивность рождений до интервала = @nb1; интенсивность рождений до интервала = @nb3.
+     * Интенсивность рождений до интервала = @nb1; интенсивность рождений после интервала = @nb3.
      */
     public static double[] births(int ndays, double nb1, double nb2, double nb3) throws Exception
     {
