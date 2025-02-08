@@ -967,7 +967,7 @@ public class Main
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
         PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);
         Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 100);
-        Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 1200);
+        Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 2500);
 
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births.clone();

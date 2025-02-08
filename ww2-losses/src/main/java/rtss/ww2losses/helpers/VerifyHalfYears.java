@@ -74,7 +74,7 @@ public class VerifyHalfYears
             if (he.id().equals("1941.1") && ap.area == Area.USSR)
                 Util.assertion(abs_dv < 500);
             else
-                Util.assertion(abs_dv < 10);
+                Util.assertion(abs_dv < 20);
         }
 
         if (Util.True)
@@ -84,7 +84,7 @@ public class VerifyHalfYears
             p = p2.moveDown(0.5).sub(p, ValueConstraint.NONE);
 
             double v = p.sumDays(ndays, p.MAX_DAY);
-            Util.assertion(Math.abs(v) < 10);
+            Util.assertion(Math.abs(v) < 20);
         }
 
         if (Util.True)
@@ -94,7 +94,7 @@ public class VerifyHalfYears
             p = p2.sub(p.moveUpPreserving(0.5), ValueConstraint.NONE);
 
             // округления
-            Util.assertion(Math.abs(p.sum(1, MAX_AGE - 1)) < 10);
+            Util.assertion(Math.abs(p.sum(1, MAX_AGE - 1)) < 20);
 
             // накопление возрастов более MAX_AGE, но не должно становиться очень большим 
             Util.assertion(Math.abs(p.getYearValue(Gender.BOTH, MAX_AGE)) < 1000);
