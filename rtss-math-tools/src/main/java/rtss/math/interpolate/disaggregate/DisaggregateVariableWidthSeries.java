@@ -47,9 +47,10 @@ public class DisaggregateVariableWidthSeries
     public static double[] disaggregate(
             double[] aggregated,
             int[] intervalWidths,
-            int numIterations,
+            int maxIterations,
             double smoothingSigma,
-            double positivityThreshold) throws Exception
+            double positivityThreshold,
+            double maxConvergenceDifference) throws Exception
     {
         boolean converged = false;
         int totalPoints = Arrays.stream(intervalWidths).sum();
@@ -69,18 +70,23 @@ public class DisaggregateVariableWidthSeries
 
         double[] restoredPrev = new double[totalPoints];
         System.arraycopy(restored, 0, restoredPrev, 0, totalPoints);
-
+        
+        /*
+         * Initialize gaussian smoothing kernel
+         */
+        double[] kernel = createGaussianKernel(smoothingSigma);
+        
         /*
          * The smoothing and adjustment steps are repeated until the series converges (changes between iterations fall below a threshold).
          */
-        for (int iteration = 0; iteration < numIterations; iteration++)
+        for (int iteration = 0; iteration < maxIterations; iteration++)
         {
             /* 
              * Apply Gaussian smoothing.
              * A Gaussian filter is applied to smooth the @restored array. 
              * The gaussianFilter method creates a Gaussian kernel and convolves it with the data.
              */
-            double[] restoredSmoothed = gaussianFilter(restored, smoothingSigma);
+            double[] restoredSmoothed = gaussianFilter(restored, kernel);
 
             /*
              * Enforce average constraints.
@@ -107,19 +113,23 @@ public class DisaggregateVariableWidthSeries
             for (int i = 0; i < restored.length; i++)
             {
                 if (restored[i] < positivityThreshold)
-                {
                     restored[i] = positivityThreshold;
-                }
             }
 
             /* 
              * Optional: Check for convergence
              * The maxDifference method calculates the maximum difference between the current and previous iterations to determine convergence. 
              */
-            if (iteration > 0 && maxDifference(restored, restoredPrev) < 1e-6)
+            if (iteration > 0 && maxDifference(restored, restoredPrev) < maxConvergenceDifference)
             {
                 converged = true;
                 break;
+            }
+            
+            if (iteration == maxIterations - 1)
+            {
+                // about to abort due to non-convergence
+                Util.noop();
             }
 
             System.arraycopy(restored, 0, restoredPrev, 0, totalPoints);
@@ -131,12 +141,11 @@ public class DisaggregateVariableWidthSeries
         return linearize_first_segment(restored, intervalWidths[0], intervalWidths[0] * aggregated[0]);
     }
 
-    private static double[] gaussianFilter(double[] data, double sigma)
+    private static double[] gaussianFilter(double[] data, double[] kernel)
     {
         int size = data.length;
         double[] smoothedData = new double[size];
-        double[] kernel = createGaussianKernel(sigma);
-
+    
         int kernelRadius = kernel.length / 2;
 
         for (int i = 0; i < size; i++)

@@ -38,6 +38,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         }
         catch (Exception e2)
         {
+            Util.err("CSASRA disaggregation failed for " + title);
             ex = e2;
         }
 
@@ -47,6 +48,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         }
         catch (Exception e2)
         {
+            Util.err("Spline disaggregation failed for " + title);
             // ex = e2;
         }
 
@@ -59,11 +61,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
     {
         final int ppy = 1;
         double[] xxx = Bins.ppy_x(bins, ppy);
-        double[] sss = Bins.midpoint_y(bins);
+        double[] averages = Bins.midpoint_y(bins);
 
         int[] intervalWidths = Bins.widths(bins);
-        int numIterations = 2000;
+        int maxIterations = 5000;
         double positivityThreshold = 1e-6;
+        double maxConvergenceDifference = 1e-3;
 
         /*
          * For yearly data (targetResolution == YEARLY) use sigma around 1.0 (0.5-1.5).
@@ -86,9 +89,14 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new IllegalArgumentException();
         }
 
-        double[] yyy = DisaggregateVariableWidthSeries.disaggregate(sss, intervalWidths, numIterations, smoothingSigma, positivityThreshold);
+        double[] yyy = DisaggregateVariableWidthSeries.disaggregate(averages, 
+                                                                    intervalWidths, 
+                                                                    maxIterations, 
+                                                                    smoothingSigma, 
+                                                                    positivityThreshold,
+                                                                    maxConvergenceDifference);
 
-        if (Util.True)
+        if (Util.False)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             chart.addSeries("csasra", xxx, yyy);
