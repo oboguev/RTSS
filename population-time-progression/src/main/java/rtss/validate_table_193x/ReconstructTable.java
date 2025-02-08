@@ -34,7 +34,7 @@ public class ReconstructTable
     private void do_main() throws Exception
     {
         // ### smooth = false?
-        final boolean DoSmoothPopulation = true;
+        final boolean DoSmoothPopulation = false;
 
         final PopulationByLocality p1937_original = un100(PopulationByLocality.census(Area.USSR, 1937)).smooth(DoSmoothPopulation);
         final PopulationContext p1937 = new Adjust_1937().adjust(p1937_original).toPopulationContext().toTotal();
@@ -50,7 +50,7 @@ public class ReconstructTable
 
         new PopulationChart("Соотношение между слоями населения по переписям 1937 и 1939 года")
                 .show("1937", p1937)
-                .show("1939", p1939)
+                .show("1939", p1939_down)
                 .display();
 
         buildTable(p1937.clone(), p1939_down);
