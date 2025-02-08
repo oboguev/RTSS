@@ -27,13 +27,30 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
     {
-        // ### try to use curve_spline, if fails then curve_csasra
-
-        curve_csasra(bins, title, targetResolution);
-        // test_xxx_equal_width_bins(bins, title, targetResolution);
         // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);
-        return curve_spline(bins, title, targetResolution);
+
+        Exception ex = null;
+
+        try
+        {
+            return curve_csasra(bins, title, targetResolution);
+        }
+        catch (Exception e2)
+        {
+            ex = e2;
+        }
+
+        try
+        {
+            return curve_spline(bins, title, targetResolution);
+        }
+        catch (Exception e2)
+        {
+            // ex = e2;
+        }
+
+        throw ex;
     }
 
     /* ================================================================================================ */
@@ -64,7 +81,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         case DAILY:
             smoothingSigma = 10.0;
             break;
-        
+
         default:
             throw new IllegalArgumentException();
         }
@@ -89,9 +106,6 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new Exception("Error calculating curve (negative value)");
 
         validate_means(yy, bins);
-
-        // ### non-neg
-        // ### avg match 
 
         return yy;
     }

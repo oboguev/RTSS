@@ -51,6 +51,7 @@ public class DisaggregateVariableWidthSeries
             double smoothingSigma,
             double positivityThreshold) throws Exception
     {
+        boolean converged = false;
         int totalPoints = Arrays.stream(intervalWidths).sum();
         double[] restored = new double[totalPoints];
 
@@ -116,10 +117,16 @@ public class DisaggregateVariableWidthSeries
              * The maxDifference method calculates the maximum difference between the current and previous iterations to determine convergence. 
              */
             if (iteration > 0 && maxDifference(restored, restoredPrev) < 1e-6)
+            {
+                converged = true;
                 break;
+            }
 
             System.arraycopy(restored, 0, restoredPrev, 0, totalPoints);
         }
+        
+        if (!converged)
+            throw new Exception("disaggregation failed to converge");
 
         return linearize_first_segment(restored, intervalWidths[0], intervalWidths[0] * aggregated[0]);
     }
