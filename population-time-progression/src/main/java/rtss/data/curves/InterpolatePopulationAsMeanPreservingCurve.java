@@ -38,7 +38,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     /* ================================================================================================ */
 
-    private static void curve_csasra(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
+    private static double[] curve_csasra(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
     {
         final int ppy = 1;
         double[] xxx = Bins.ppy_x(bins, ppy);
@@ -48,7 +48,6 @@ public class InterpolatePopulationAsMeanPreservingCurve
          * For yearly data (targetResolution == YEARLY) use sigma around 1.0 (0.5-1.5).
          * Difference of results within this range is typically miniscule.
          */
-
         int[] intervalWidths = Bins.widths(bins);
         int numIterations = 2000;
         double smoothingSigma = 1.0;
@@ -59,13 +58,26 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (Util.True)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("gausian", xxx, yyy);
+            chart.addSeries("csasra", xxx, yyy);
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
             chart.display();
             Util.noop();
         }
+        
+        if (!Util.isNonNegative(yyy))
+            throw new Exception("Error calculating curve (negative value)");
 
-        Util.noop();
+        double[] yy = Bins.ppy2yearly(yyy, ppy);
+
+        if (!Util.isNonNegative(yy))
+            throw new Exception("Error calculating curve (negative value)");
+
+        validate_means(yy, bins);
+
+        // ### non-neg
+        // ### avg match 
+        
+        return yy;
     }
 
     @SuppressWarnings("unsed")
