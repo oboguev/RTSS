@@ -8,6 +8,8 @@ import rtss.data.population.struct.Population;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
+import rtss.math.interpolate.disaggregate.DisaggregateConstantWidthSeries;
+import rtss.math.interpolate.disaggregate.DisaggregateVariableWidthSeries;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
@@ -25,10 +27,79 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
     {
+        // ### try to use curve_spline, if fails then curve_csasra
+
+        curve_csasra(bins, title, targetResolution);
+        // test_xxx_equal_width_bins(bins, title, targetResolution);
         // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);
         return curve_spline(bins, title, targetResolution);
     }
+
+    /* ================================================================================================ */
+
+    private static void curve_csasra(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
+    {
+        final int ppy = 1;
+        double[] xxx = Bins.ppy_x(bins, ppy);
+        double[] sss = Bins.midpoint_y(bins);
+
+        /*
+         * For yearly data (targetResolution == YEARLY) use sigma around 1.0 (0.5-1.5).
+         * Difference of results within this range is typically miniscule.
+         */
+
+        int[] intervalWidths = Bins.widths(bins);
+        int numIterations = 2000;
+        double smoothingSigma = 1.0;
+        double positivityThreshold = 1e-6;
+
+        double[] yyy = DisaggregateVariableWidthSeries.disaggregate(sss, intervalWidths, numIterations, smoothingSigma, positivityThreshold);
+
+        if (Util.True)
+        {
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("gausian", xxx, yyy);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.display();
+            Util.noop();
+        }
+
+        Util.noop();
+    }
+
+    @SuppressWarnings("unsed")
+    private static double[] curve_csasra_fixed(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
+    {
+        if (!Bins.isEqualWidths(bins))
+            throw new IllegalArgumentException();
+
+        final int ppy = 1;
+        double[] xxx = Bins.ppy_x(bins, ppy);
+        double[] sss = Bins.midpoint_y(bins);
+
+        int restoredPoints = Bins.lastBin(bins).age_x2 + 1;
+        int samplinglSize = Bins.firstBin(bins).widths_in_years;
+        int numIterations = 2000;
+        double smoothingSigma = 50.0;
+        double positivityThreshold = 1e-6;
+
+        double[] yyy = DisaggregateConstantWidthSeries.disaggregate(sss, restoredPoints, samplinglSize, numIterations, smoothingSigma,
+                                                                    positivityThreshold);
+
+        if (Util.False)
+        {
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("1", xxx, yyy);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.display();
+            Util.noop();
+        }
+        
+        return yyy;
+    }
+
+    /* ================================================================================================ */
 
     /*
      * Spline implementation
@@ -48,10 +119,10 @@ public class InterpolatePopulationAsMeanPreservingCurve
         }
 
         int ppy = 12;
-        
+
         if (targetResolution == TargetResolution.DAILY) // ###
             ppy = 1;
-        
+
         double[] xxx = Bins.ppy_x(bins, ppy);
         double[] yyy1 = null;
         double[] yyy2 = null;
@@ -105,7 +176,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         yyy = EnsureNonNegativeCurve.ensureNonNegative(yyy, bins, title, targetResolution);
 
-        if (Util.False)
+        if (Util.True) // ###
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             if (yyy1 != null)

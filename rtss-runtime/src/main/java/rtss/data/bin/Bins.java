@@ -87,11 +87,25 @@ public class Bins
 
     public static double[] midpoint_y(Bin... bins)
     {
-        double[] x = new double[bins.length];
+        double[] y = new double[bins.length];
         int k = 0;
         for (Bin bin : bins)
-            x[k++] = bin.avg;
-        return x;
+            y[k++] = bin.avg;
+        return y;
+    }
+    
+    public static int[] widths(Bin...bins)
+    {
+        return widths(1, bins);
+    }
+    
+    public static int[] widths(int ppy, Bin...bins)
+    {
+        int[] w = new int[bins.length];
+        int k = 0;
+        for (Bin bin : bins)
+            w[k++] = bin.widths_in_years * ppy;
+        return w;
     }
 
     public static Bin[] multiply(Bin[] bins, double f) throws Exception
@@ -535,6 +549,19 @@ public class Bins
                 return false;
             
             if (bins1[k].age_x2 != bins2[k].age_x2)
+                return false;
+        }
+        
+        return true;
+    }
+    
+    public static boolean isEqualWidths(Bin... bins)
+    {
+        Bin first = bins[0];
+        
+        for (Bin bin : bins)
+        {
+            if (bin.widths_in_years != first.widths_in_years)
                 return false;
         }
         
