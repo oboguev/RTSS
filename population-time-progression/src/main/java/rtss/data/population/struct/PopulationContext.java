@@ -401,7 +401,11 @@ public class PopulationContext
 
     public PopulationByLocality begin(final PopulationByLocality p) throws Exception
     {
-        // TODO: сделать аргументом (таблица смертности в год, для которого указана структура населения)
+        /*
+         * TODO: сделать аргументом (таблица смертности в год, для которого указана структура населения),
+         *       позволяет интерполировать снижение численности опираясь на коэффциенты смертности,
+         *       реализовать в begin_basic
+         */
         CombinedMortalityTable mt = null;
 
         if (this.began)

@@ -87,7 +87,7 @@ public class EnsureNonNegativeCurve
             if (targetResolution == TargetResolution.DAILY)
                 age_years /= 365;
             if (age_years < 90)
-                throw new Exception("Unimplemented: can only fix negative values for high-age bin, but not for lower age bins");
+                throw new Exception("Unimplemented: can only fix negative values for high-age bin, but not for lower age bins: age " + age_years);
 
             seg = reshape(seg, bin.avg * bin.widths_in_years * ppy, false, title);
         }

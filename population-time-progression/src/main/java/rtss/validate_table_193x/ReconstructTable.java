@@ -9,6 +9,9 @@ import rtss.data.selectors.Locality;
 import rtss.forward_1926_193x.Adjust_1937;
 import rtss.forward_1926_193x.Adjust_1939;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
+
+import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 /*
  * Построить таблицу смертности населения СССР для 1937-1938 гг.
@@ -31,7 +34,7 @@ public class ReconstructTable
     private void do_main() throws Exception
     {
         // ### smooth = false?
-        final boolean DoSmoothPopulation = true;
+        final boolean DoSmoothPopulation = false;
 
         final PopulationByLocality p1937_original = un100(PopulationByLocality.census(Area.USSR, 1937)).smooth(DoSmoothPopulation);
         final PopulationContext p1937 = new Adjust_1937().adjust(p1937_original).toPopulationContext().toTotal();
@@ -39,9 +42,18 @@ public class ReconstructTable
         final PopulationByLocality p1939_original = un100(PopulationByLocality.census(Area.USSR, 1939)).smooth(DoSmoothPopulation);
         final PopulationContext p1939 = new Adjust_1939().adjust(Area.USSR, p1939_original).toPopulationContext().toTotal();
 
-        // ### fill ages 98-100 after move down
+        /*
+         * Сдвинуть структуру населения по переписи 1939 года вниз по возрасту 
+         * на размер промежутка между периписями 
+         */
+        PopulationContext p1939_down = move_down_1939(p1939);
 
-        buildTable(p1937.clone(), p1939.moveDownByDays(2 * 365 + 11));
+        new PopulationChart("Соотношение между слоями населения по переписям 1937 и 1939 года")
+                .show("1937", p1937)
+                .show("1939", p1939)
+                .display();
+
+        buildTable(p1937.clone(), p1939_down);
     }
 
     private void buildTable(PopulationContext p1, PopulationContext p2) throws Exception
@@ -87,8 +99,51 @@ public class ReconstructTable
     /* ============================================================================================================= */
 
     /*
-     * Устранить накопление возрастов 100+ в возрасте 100,
-     * также убрать "неизвестные возраста"
+     * Сдвинуть структуру населения по переписи 1939 года вниз по возрасту 
+     * на размер промежутка между периписями 1937 и 1939 гг. 
+     */
+    private PopulationContext move_down_1939(final PopulationContext p1939) throws Exception
+    {
+        PopulationContext p1939_down = p1939.moveDownByDays(2 * 365 + 11);
+        fill_upper_ages(p1939_down, p1939, Gender.MALE);
+        fill_upper_ages(p1939_down, p1939, Gender.FEMALE);
+        return p1939_down;
+    }
+
+    private void fill_upper_ages(PopulationContext p1939_down, final PopulationContext p1939, Gender gender) throws Exception
+    {
+        double v97 = p1939.sumAge(Locality.TOTAL, gender, 97);
+        double v98 = p1939.sumAge(Locality.TOTAL, gender, 98);
+        double v99 = p1939.sumAge(Locality.TOTAL, gender, 99);
+        double v100 = p1939.sumAge(Locality.TOTAL, gender, 100);
+
+        double f98 = within_open_range(v98 / v97, 0, 1);
+        double f99 = within_open_range(v99 / v97, 0, 1);
+        double f100 = within_open_range(v100 / v97, 0, 1);
+
+        fill_upper_ages(p1939_down, gender, 97, 98, f98);
+        fill_upper_ages(p1939_down, gender, 97, 99, f99);
+        fill_upper_ages(p1939_down, gender, 97, 100, f100);
+    }
+
+    private void fill_upper_ages(PopulationContext p1939_down, Gender gender, int year_age_from, int year_age_to, double f) throws Exception
+    {
+        int from_nd1 = years2days(year_age_from);
+        int from_nd2 = from_nd1 + 365 - 1;
+        int to_nd1 = years2days(year_age_to);
+
+        for (int nd = from_nd1; nd <= from_nd2; nd++)
+        {
+            double v = p1939_down.getDay(Locality.TOTAL, gender, nd);
+            p1939_down.setDay(Locality.TOTAL, gender, to_nd1 + (nd - from_nd1), v * f);
+        }
+    }
+
+    /* ============================================================================================================= */
+
+    /*
+     * Устранить накопление возрастов 100+ в возрасте 100 (оставив значение только для самого возраста 100),
+     * а также убрать "неизвестные возраста"
      */
     private PopulationByLocality un100(PopulationByLocality p) throws Exception
     {
@@ -102,10 +157,10 @@ public class ReconstructTable
         p = p.clone();
         p.resetUnknown();
         p.recalcTotal();
-        
+
         un100(p, Gender.MALE);
         un100(p, Gender.FEMALE);
-        
+
         p.recalcTotal();
         p.makeBoth();
 
@@ -117,15 +172,21 @@ public class ReconstructTable
         @SuppressWarnings("all")
         boolean cond = (Population.MAX_AGE == 100);
         Util.assertion(cond);
-        
+
         double v97 = p.get(gender, 97);
         double v98 = p.get(gender, 98);
         double v99 = p.get(gender, 99);
-        
-        double vv = v99 / ((v97 + v98) / 2);
-        
-        Util.assertion(vv > 0 && vv < 1);
-        
-        p.set(gender, 100, v99 * vv);
+
+        double f = v99 / ((v97 + v98) / 2);
+
+        f = within_open_range(f, 0, 1);
+
+        p.set(gender, 100, v99 * f);
+    }
+
+    private double within_open_range(double f, double fmin, double fmax) throws Exception
+    {
+        Util.assertion(f > fmin && f < fmax);
+        return f;
     }
 }
