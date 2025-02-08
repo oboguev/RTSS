@@ -26,6 +26,7 @@ import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModelParameters;
 import rtss.ww2losses.helpers.ExportResults;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
+import rtss.ww2losses.helpers.PopulationContextCache;
 import rtss.ww2losses.helpers.PrintHalfYears;
 import rtss.ww2losses.helpers.PrintYears;
 import rtss.ww2losses.helpers.ShowAgeSliceDeathHistory;
@@ -82,7 +83,8 @@ public class Main
     {
         this.area = area;
         this.ap = AreaParameters.forArea(area);
-        this.p1946_actual = PopulationADH.getPopulation(ap.area, 1946).toPopulationContext();
+        // this.p1946_actual = PopulationADH.getPopulation(ap.area, 1946).toPopulationContext();
+        this.p1946_actual = PopulationContextCache.get(area, "early-1946", () -> PopulationADH.getPopulation(ap.area, 1946).toPopulationContext());
         adjustForTuva();
         split_p1946();
     }

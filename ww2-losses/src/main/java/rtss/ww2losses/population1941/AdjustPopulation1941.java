@@ -26,6 +26,12 @@ public class AdjustPopulation1941 extends AdjustPopulation
     {
         this.area = area;
     }
+    
+    @Override
+    public String name()
+    {
+        return area.name();
+    }
 
     @Override
     public Population adjust(Population p) throws Exception

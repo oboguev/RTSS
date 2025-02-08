@@ -14,7 +14,7 @@ import rtss.util.Util;
 /*
  * Вспомогательные функции для правки состава населения
  */
-public class AdjustPopulation
+public abstract class AdjustPopulation
 {
     protected static final int[] ADH_binning = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16 };
 
@@ -22,6 +22,8 @@ public class AdjustPopulation
     {
         return p;
     }
+    
+    public abstract String name();
 
     public PopulationByLocality adjust(PopulationByLocality p) throws Exception
     {
