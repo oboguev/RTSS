@@ -29,7 +29,8 @@ public class BacktrackPopulation
     private final int DAYS_PER_YEAR = 365;
     private final int MAX_DAY = DAYS_PER_YEAR * (Population.MAX_AGE + 1) - 1;
 
-    public BacktrackPopulation(PeacetimeMortalityTables peacetimeMortalityTables, WarAttritionModel wam, final PopulationContext p1946_actual) throws Exception
+    public BacktrackPopulation(PeacetimeMortalityTables peacetimeMortalityTables, WarAttritionModel wam, final PopulationContext p1946_actual)
+            throws Exception
     {
         this.halves = shellHalves(peacetimeMortalityTables);
         this.wam = wam;
@@ -166,7 +167,11 @@ public class BacktrackPopulation
             throw new IllegalArgumentException();
         }
 
-        double v_early1941 = v_mid1941 * lx[nd] / lx[initial_age_ndays];
+        int back = 0;
+        back = Math.max(back, nd - (lx.length - 1));
+        back = Math.max(back, initial_age_ndays - (lx.length - 1));
+
+        double v_early1941 = v_mid1941 * lx[nd - back] / lx[initial_age_ndays - back];
 
         return v_early1941;
     }

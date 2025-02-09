@@ -39,6 +39,7 @@ import rtss.ww2losses.population1941.AdjustPopulation1941;
 import rtss.ww2losses.population1941.PopulationEarly1941;
 import rtss.ww2losses.population1941.PopulationMiddle1941;
 import rtss.ww2losses.population1941.PopulationMiddle1941.PopulationForwardingResult1941;
+import rtss.ww2losses.population1941.RefinePopulation1941;
 import rtss.ww2losses.population194x.AdjustPopulation;
 import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.util.CalibrateASFR;
@@ -251,17 +252,39 @@ public class Main
         PopulationContext p_start1941 = new PopulationEarly1941(ap).evaluate(adjuster1941);
 
         /* 
-         * Население на середину 1941 года по передвижке на основе ASFR.
+         * Итеративно перераспределять население внутри 5-летних групп аггреграции,
+         * пока не устранены артефакты отрицательной величины потерь в 1941-1945 гг.
+         * для некоторых возрастных линий.
          */
-        PopulationForwardingResult1941 fr = new PopulationMiddle1941(ap)
-                .forward_1941_1st_halfyear(p_start1941,
-                                           peacetimeMortalityTables,
-                                           asfr_calibration,
-                                           halfyearly_asfrs.getForTimepoint("1941.0"));
-        p_start1941 = fr.p_start1941;
-        PopulationContext p_mid1941 = fr.p_mid1941;
-        PopulationContext deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
-        double births_1941_1st_halfyear = fr.observed_births;
+        PopulationContext p_mid1941;
+        PopulationContext deaths_1941_1st_halfyear;
+        double births_1941_1st_halfyear;
+        for (;;)
+        {
+            /* 
+             * Население на середину 1941 года по передвижке на основе ASFR.
+             */
+            PopulationForwardingResult1941 fr = new PopulationMiddle1941(ap)
+                    .forward_1941_1st_halfyear(p_start1941,
+                                               peacetimeMortalityTables,
+                                               asfr_calibration,
+                                               halfyearly_asfrs.getForTimepoint("1941.0"));
+            p_start1941 = fr.p_start1941;
+            p_mid1941 = fr.p_mid1941;
+            deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
+            births_1941_1st_halfyear = fr.observed_births;
+
+            /*
+             * Нужно ли перераспрелелить население внутри 5-летних групп?
+             */
+            WarAttritionModel wam = new WarAttritionModel(p_mid1941, p1946_actual, wamp);
+            RefinePopulation1941 rp = new RefinePopulation1941(ap, peacetimeMortalityTables, wam, p1946_actual);
+            PopulationContext p = rp.refine(p_start1941);
+            if (p == null)
+                break;
+            Util.assertion(Util.same(p.sum(), p_start1941.sum()));
+            p_start1941 = p;
+        }
 
         if (Util.False)
         {
@@ -899,7 +922,7 @@ public class Main
                 Util.err("");
                 Util.err("Участки отрицательной интенсивности потерь MALE:");
                 Util.err(alis.dumpNegRegions(Gender.MALE));
-                
+
                 Util.err("");
                 Util.err("Участки отрицательной интенсивности потерь FEMALE:");
                 Util.err(alis.dumpNegRegions(Gender.FEMALE));

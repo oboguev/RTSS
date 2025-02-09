@@ -1,0 +1,51 @@
+package rtss.ww2losses.population1941;
+
+import rtss.data.population.struct.PopulationContext;
+import rtss.data.selectors.Area;
+import rtss.ww2losses.ageline.BacktrackPopulation;
+import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
+import rtss.ww2losses.helpers.PeacetimeMortalityTables;
+import rtss.ww2losses.params.AreaParameters;
+
+/* 
+ * Перераспределить население внутри 5-летних групп аггреграции
+ * для устаренения артефактов отрицательной величины потерь в 1941-1945 гг.
+ * для некоторых возрастных линий.
+ */
+public class RefinePopulation1941
+{
+    final private AreaParameters ap;
+    final PeacetimeMortalityTables peacetimeMortalityTables;
+    final WarAttritionModel wam;
+    final PopulationContext p1946_actual;
+    
+    public RefinePopulation1941(AreaParameters ap, PeacetimeMortalityTables peacetimeMortalityTables, WarAttritionModel wam, final PopulationContext p1946_actual)
+    {
+        this.ap = ap;
+        this.peacetimeMortalityTables = peacetimeMortalityTables;
+        this.wam = wam;
+        this.p1946_actual = p1946_actual;
+    }
+    
+    /*
+     * Если требуется перераспределение, возвращает перераспределённое население.
+     * Если перераспределения не требуется, возвращает null.
+     */
+    public PopulationContext refine(PopulationContext p_start1941) throws Exception
+    {
+        /* требуется учёт миграции */
+        if (ap.area == Area.RSFSR)
+            return null;
+        
+        BacktrackPopulation backtrack = new BacktrackPopulation(peacetimeMortalityTables, wam, p1946_actual);
+        
+        /* 
+         * Для каждой возрастной линии -- требуемое минимальное население, которое обеспечивает достижения
+         * населения в 1946 года при заданном (в данном случае нулевом) уровне потерь.
+         */
+        PopulationContext p = backtrack.population_1946_to_early1941(null);
+        
+        return null;
+    }
+    
+}
