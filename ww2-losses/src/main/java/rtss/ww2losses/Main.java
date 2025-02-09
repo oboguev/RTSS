@@ -39,7 +39,7 @@ import rtss.ww2losses.population1941.AdjustPopulation1941;
 import rtss.ww2losses.population1941.PopulationEarly1941;
 import rtss.ww2losses.population1941.PopulationMiddle1941;
 import rtss.ww2losses.population1941.PopulationMiddle1941.PopulationForwardingResult1941;
-import rtss.ww2losses.population1941.RefinePopulation1941;
+import rtss.ww2losses.population1941.AdjustPopulation1941vs1946;
 import rtss.ww2losses.population194x.AdjustPopulation;
 import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.util.CalibrateASFR;
@@ -278,7 +278,7 @@ public class Main
              * Нужно ли перераспрелелить население внутри 5-летних групп?
              */
             WarAttritionModel wam = new WarAttritionModel(p_mid1941, p1946_actual, wamp);
-            RefinePopulation1941 rp = new RefinePopulation1941(ap, peacetimeMortalityTables, wam, p1946_actual);
+            AdjustPopulation1941vs1946 rp = new AdjustPopulation1941vs1946(ap, peacetimeMortalityTables, wam, p1946_actual);
             PopulationContext p = rp.refine(p_start1941);
             if (p == null)
                 break;
