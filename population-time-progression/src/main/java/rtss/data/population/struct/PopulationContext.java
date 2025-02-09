@@ -19,6 +19,7 @@ import rtss.data.selectors.Locality;
 import rtss.data.selectors.LocalityGender;
 import rtss.data.selectors.holders.LocalityGenderToDoubleArray;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
 
 import static rtss.data.population.forward.ForwardPopulation.years2days;
 
@@ -1309,5 +1310,10 @@ public class PopulationContext
         }
 
         return cx;
+    }
+
+    public void display(String title) throws Exception
+    {
+        PopulationChart.display(title, this, "1");
     }
 }

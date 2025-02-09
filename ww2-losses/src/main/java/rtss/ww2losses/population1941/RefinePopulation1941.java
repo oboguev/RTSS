@@ -1,7 +1,9 @@
 package rtss.ww2losses.population1941;
 
+import rtss.data.ValueConstraint;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
+import rtss.util.Util;
 import rtss.ww2losses.ageline.BacktrackPopulation;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
@@ -40,10 +42,14 @@ public class RefinePopulation1941
         BacktrackPopulation backtrack = new BacktrackPopulation(peacetimeMortalityTables, wam, p1946_actual);
         
         /* 
-         * Для каждой возрастной линии -- требуемое минимальное население, обеспечивающее достижения
+         * Для каждой возрастной линии -- требуемое минимальное население, обеспечивающее достижение
          * населения в начале 1946 года при заданном (в данном случае нулевом) уровне потерь.
          */
         PopulationContext p = backtrack.population_1946_to_early1941(null);
+        p = p.sub(p_start1941, ValueConstraint.NONE);
+        p.display("Разница 1941");
+        Util.noop();
+        // ###
         
         return null;
     }

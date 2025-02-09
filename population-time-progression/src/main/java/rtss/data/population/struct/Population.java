@@ -15,6 +15,7 @@ import rtss.data.population.calc.SmoothPopulation;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
 
 /**
  * Holds male, female and both-genders populations by age
@@ -1332,5 +1333,10 @@ public class Population
             throw new Exception("Curve count mismatches bin count");
         
         return counts;
+    }
+    
+    public void display(String title) throws Exception
+    {
+        PopulationChart.display(title, this, "1");
     }
 }
