@@ -25,31 +25,55 @@ package rtss.ww2losses.population1941.math;
  *     
  *     Please implement in Java.
  *     
+ *     ...............
+ *     
  *     Can you rather use a Gaussian kernel for better smoothing?
  *     With this algorithm, will the sum over every x-interval retains the original value even after smoothing?
  *     But... some of the produced values are zero, whereas they should be at least 10% of the average over x-interval and thus positive.
+ *     
+ *     ...............
+ *     
+ *     I used the  algorithm on real data and there is a divergence between the sum of original f(x) and the sum of produced f2(x). 
+ *     The divergence is small, about 0.005% of the total, but it is there. What can be causing it?
+ *     
+ *     ...............
+ *     
+ *     It is important that the sum is exactly preserved not only for the whole series, but also for each x-interval. 
+ *     Can you please amend the algorithm to ensure it?
+ *     
+ *     ...............
+ *     
+ *     I noticed that enforcing the minimum value constraint results in hard clipping of values for f2(x), and a horizontal line on the chart where f2 hits minimum. 
+ *     Is it possible to modify the algorithm such that 10% of average value designates the limit only for the bottom-most value or values in the x-interval, 
+ *     but descent to this local minimum or minimums and ascent from them are gradual. 
+ *     I.e. to replace hard clipping with more gradual and smooth f2 series behavior around local minimums?
+ *     
+ *     ...............
+ *
+ *     I have a large number of points, a typical x-interval width is 1825 points. 
+ *     Should I use larger values for some smoothing parameters in the code? Such as for gaussian kernel window, or for sigmoid transition?
+ *     
+ *     ...............
+ *     
+ *     And yet, it still clips minimal values. 
+ *     The bottom part of f2 series runs on the chart as a horizontal line rather than smooth curve.
+ *     What could be the cause?  
  *     
  *     https://chat.deepseek.com/a/chat/s/534e72a7-acca-4905-b531-385778cad57a
  */
 public class RefineSeries
 {
-    public static double[] modifySeries(double[] f, int[] intervalLengths, int XMAX, Double minRelativeLevel, Double sigma)
+    public double minRelativeLevel = 0.1; 
+    public double sigma = 1.0;
+    public int gaussianKernelWindow = 3;
+
+    public double[] modifySeries(double[] f, int[] intervalLengths, int XMAX)
     {
-        if (minRelativeLevel == null)
-            minRelativeLevel = 0.1;
-
-        if (sigma == null)
-            sigma = 1.0;
-
         int numIntervals = intervalLengths.length;
         double[] f2 = new double[XMAX + 1];
         int start = 0;
 
-        /*
-         * Modify each interval
-         * Replace negative values in f(x) with @minLevel of the average value within the interval.
-         * Adjust the values to ensure the sum of f2(x) within each interval matches the sum of f(x).
-         */
+        // Modify each interval
         for (int i = 0; i < numIntervals; i++)
         {
             int end = start + intervalLengths[i];
@@ -85,12 +109,12 @@ public class RefineSeries
         }
 
         // Smooth the series using a Gaussian kernel while preserving the sum and minimum value
-        smoothSeriesWithGaussian(f2, intervalLengths, sigma, minRelativeLevel);
+        smoothSeriesWithGaussian(f2, intervalLengths);
 
         return f2;
     }
 
-    private static void smoothSeriesWithGaussian(double[] f2, int[] intervalLengths, double sigma, double minRelativeLevel)
+    private void smoothSeriesWithGaussian(double[] f2, int[] intervalLengths)
     {
         int numIntervals = intervalLengths.length;
         int start = 0;
@@ -116,7 +140,7 @@ public class RefineSeries
                 double weightSum = 0.0;
 
                 // Apply the Gaussian kernel to neighboring points
-                for (int dx = -3; dx <= 3; dx++)
+                for (int dx = -gaussianKernelWindow; dx <= gaussianKernelWindow; dx++)
                 { // Use a window of 7 points (-3 to +3)
                     int neighborX = x + dx;
                     if (neighborX >= start && neighborX < end)
@@ -138,51 +162,61 @@ public class RefineSeries
             // Normalize the smoothed interval to match the original sum
             double normalizationFactor = originalSum / smoothedSum;
             for (int x = start; x < end; x++)
-            {
                 f2[x] = smoothedInterval[x - start] * normalizationFactor;
 
-                // Enforce the minimum value constraint
-                if (f2[x] < minValue)
-                    f2[x] = minValue;
-            }
+            // Enforce the minimum value constraint gradually
+            enforceMinimumValueGradually(f2, start, end, minValue, originalSum);
 
             start = end;
         }
     }
 
-    private static double gaussian(int x, double sigma)
+    private void enforceMinimumValueGradually(double[] f2, int start, int end, double minValue, double originalSum)
+    {
+        // Find the bottom-most value(s) in the interval
+        int numBottomValues = 1; // Number of bottom-most values to adjust
+        int[] bottomIndices = new int[numBottomValues];
+        double[] bottomValues = new double[numBottomValues];
+
+        for (int i = 0; i < numBottomValues; i++)
+        {
+            bottomIndices[i] = start;
+            bottomValues[i] = f2[start];
+            for (int x = start + 1; x < end; x++)
+            {
+                if (f2[x] < bottomValues[i])
+                {
+                    bottomIndices[i] = x;
+                    bottomValues[i] = f2[x];
+                }
+            }
+        }
+
+        // Apply a gradual scaling function to the bottom-most values
+        for (int i = 0; i < numBottomValues; i++)
+        {
+            int x = bottomIndices[i];
+            double currentValue = f2[x];
+            if (currentValue < minValue)
+            {
+                // Use a gradual scaling function to approach the minimum value
+                double scale = Math.sqrt((currentValue - minValue) / (0 - minValue)); // Gradual scaling
+                f2[x] = minValue + (currentValue - minValue) * scale;
+            }
+        }
+
+        // Re-normalize to ensure the sum matches the original sum
+        double finalSum = 0.0;
+        for (int x = start; x < end; x++)
+            finalSum += f2[x];
+        double finalAdjustmentFactor = originalSum / finalSum;
+        for (int x = start; x < end; x++)
+            f2[x] *= finalAdjustmentFactor;
+    }
+
+    private double gaussian(int x, double sigma)
     {
         // Gaussian function: e^(-x^2 / (2 * sigma^2))
         return Math.exp(-(x * x) / (2 * sigma * sigma));
-    }
-
-    public static void example_main(String[] args)
-    {
-        // Example usage
-        int XMAX = 10;
-        double[] f = { 1.0, 2.0, -1.0, 3.0, -2.0, 4.0, 5.0, -3.0, 6.0, 7.0, 8.0 };
-        int[] intervalLengths = { 3, 4, 4 };
-
-        double[] f2 = modifySeries(f, intervalLengths, XMAX, null, null);
-
-        // Print the modified series
-        for (double value : f2)
-        {
-            System.out.println(value);
-        }
-
-        // Verify that the sum over each interval is preserved
-        int start = 0;
-        for (int length : intervalLengths)
-        {
-            int end = start + length;
-            double sum = 0.0;
-            for (int x = start; x < end; x++)
-            {
-                sum += f2[x];
-            }
-            System.out.println("Sum over interval [" + start + ", " + (end - 1) + "]: " + sum);
-            start = end;
-        }
     }
 }

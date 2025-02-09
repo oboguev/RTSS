@@ -15,7 +15,7 @@ import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population1941.math.RefineSeriesV3;
-import rtss.ww2losses.population1941.math.RefineSeriesV4;
+import rtss.ww2losses.population1941.math.RefineSeries;
 
 /* 
  * Перераспределить население внутри 5-летних групп аггреграции
@@ -81,11 +81,10 @@ public class RefinePopulation1941
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
 
             // redistribute the excess
-            RefineSeriesV4 rs = new RefineSeriesV4();
+            RefineSeries rs = new RefineSeries();
             rs.minRelativeLevel = 0.2;
             rs.sigma = 10.0;
             rs.gaussianKernelWindow = 50;
-            rs.sigmoidTransitionSteepness = 0.1; // ###
             double[] a_excess2 = rs.modifySeries(a_excess, PopulationADH.AgeBinWidthsDays(),  a_excess.length - 1);
             p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
             ChartXYSplineAdvanced.display2("Refinement " + gender.name(), a_excess, a_excess2);
