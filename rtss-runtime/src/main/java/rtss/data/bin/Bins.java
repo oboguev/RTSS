@@ -567,4 +567,22 @@ public class Bins
         
         return true;
     }
+
+    /*
+     * Create empty bin set with specified bin widths 
+     */
+    public static Bin[] forWidths(int... widths) throws Exception
+    {
+        List<Bin> list = new ArrayList<>();
+        
+        int age_x1 = 0;
+        for (int w : widths)
+        {
+            int age_x2 = age_x1 + w - 1;
+            list.add(new Bin(age_x1, age_x2, 0));
+            age_x1 += w;
+        }
+        
+        return bins(list);
+    }
 }

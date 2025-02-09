@@ -61,14 +61,16 @@ package rtss.ww2losses.population1941.math;
  */
 public class RefineSeriesV3
 {
-    public static double[] modifySeries(double[] f, int[] intervalLengths, int XMAX, Double minRelativeLevel, Double sigma)
+    public Double minRelativeLevel = 0.1; 
+    public Double sigma = 1.0;
+    public Integer gaussianKernelWindow = 3;
+    public Double sigmoidTransitionSteepness = 10.0;
+
+    public double[] modifySeries(
+            double[] f, 
+            int[] intervalLengths, 
+            int XMAX)
     {
-        if (minRelativeLevel == null)
-            minRelativeLevel = 0.1;
-
-        if (sigma == null)
-            sigma = 1.0;
-
         int numIntervals = intervalLengths.length;
         double[] f2 = new double[XMAX + 1];
         int start = 0;
@@ -81,9 +83,7 @@ public class RefineSeriesV3
 
             // Calculate the sum of f(x) in the current interval
             for (int x = start; x < end; x++)
-            {
                 sum += f[x];
-            }
 
             // Calculate the average value of f2(x) in the current interval
             double average = sum / intervalLengths[i];
@@ -93,38 +93,30 @@ public class RefineSeriesV3
             for (int x = start; x < end; x++)
             {
                 if (f[x] < minValue)
-                {
                     f2[x] = minValue; // Ensure minimum value is at least 10% of the average
-                }
                 else
-                {
                     f2[x] = f[x];
-                }
             }
 
             // Adjust the values to ensure the sum remains the same
             double sumF2 = 0.0;
             for (int x = start; x < end; x++)
-            {
                 sumF2 += f2[x];
-            }
 
             double adjustmentFactor = sum / sumF2;
             for (int x = start; x < end; x++)
-            {
                 f2[x] *= adjustmentFactor;
-            }
 
             start = end;
         }
 
         // Smooth the series using a Gaussian kernel while preserving the sum and minimum value
-        smoothSeriesWithGaussian(f2, intervalLengths, sigma, minRelativeLevel);
+        smoothSeriesWithGaussian(f2, intervalLengths);
 
         return f2;
     }
 
-    private static void smoothSeriesWithGaussian(double[] f2, int[] intervalLengths, double sigma, double minRelativeLevel)
+    private void smoothSeriesWithGaussian(double[] f2, int[] intervalLengths)
     {
         int numIntervals = intervalLengths.length;
         int start = 0;
@@ -136,9 +128,7 @@ public class RefineSeriesV3
             // Calculate the original sum and average of the interval
             double originalSum = 0.0;
             for (int x = start; x < end; x++)
-            {
                 originalSum += f2[x];
-            }
             double average = originalSum / intervalLengths[i];
             double minValue = minRelativeLevel * average; // Minimum value constraint
 
@@ -152,7 +142,7 @@ public class RefineSeriesV3
                 double weightSum = 0.0;
 
                 // Apply the Gaussian kernel to neighboring points
-                for (int dx = -3; dx <= 3; dx++)
+                for (int dx = -gaussianKernelWindow; dx <= gaussianKernelWindow; dx++)
                 { // Use a window of 7 points (-3 to +3)
                     int neighborX = x + dx;
                     if (neighborX >= start && neighborX < end)
@@ -169,16 +159,12 @@ public class RefineSeriesV3
             // Calculate the sum of the smoothed interval
             double smoothedSum = 0.0;
             for (double value : smoothedInterval)
-            {
                 smoothedSum += value;
-            }
 
             // Normalize the smoothed interval to match the original sum
             double normalizationFactor = originalSum / smoothedSum;
             for (int x = start; x < end; x++)
-            {
                 f2[x] = smoothedInterval[x - start] * normalizationFactor;
-            }
 
             // Enforce the minimum value constraint gradually
             enforceMinimumValueGradually(f2, start, end, minValue, originalSum);
@@ -187,7 +173,7 @@ public class RefineSeriesV3
         }
     }
 
-    private static void enforceMinimumValueGradually(double[] f2, int start, int end, double minValue, double originalSum)
+    private void enforceMinimumValueGradually(double[] f2, int start, int end, double minValue, double originalSum)
     {
         // Find the bottom-most value(s) in the interval
         int numBottomValues = 1; // Number of bottom-most values to adjust
@@ -224,56 +210,22 @@ public class RefineSeriesV3
         // Re-normalize to ensure the sum matches the original sum
         double finalSum = 0.0;
         for (int x = start; x < end; x++)
-        {
             finalSum += f2[x];
-        }
         double finalAdjustmentFactor = originalSum / finalSum;
         for (int x = start; x < end; x++)
-        {
             f2[x] *= finalAdjustmentFactor;
-        }
     }
 
-    private static double sigmoidTransition(double value, double minValue)
+    private double sigmoidTransition(double value, double minValue)
     {
         // Sigmoid function for smooth transition
-        double k = 10.0; // Controls the steepness of the transition
+        double k = sigmoidTransitionSteepness; // Controls the steepness of the transition
         return 1.0 / (1.0 + Math.exp(-k * (value - minValue)));
     }
 
-    private static double gaussian(int x, double sigma)
+    private double gaussian(int x, double sigma)
     {
         // Gaussian function: e^(-x^2 / (2 * sigma^2))
         return Math.exp(-(x * x) / (2 * sigma * sigma));
-    }
-
-    public static void example_main(String[] args)
-    {
-        // Example usage
-        int XMAX = 10;
-        double[] f = { 1.0, 2.0, -1.0, 3.0, -2.0, 4.0, 5.0, -3.0, 6.0, 7.0, 8.0 };
-        int[] intervalLengths = { 3, 4, 4 };
-
-        double[] f2 = modifySeries(f, intervalLengths, XMAX, null, null);
-
-        // Print the modified series
-        for (double value : f2)
-        {
-            System.out.println(value);
-        }
-
-        // Verify that the sum over each interval is preserved
-        int start = 0;
-        for (int length : intervalLengths)
-        {
-            int end = start + length;
-            double sum = 0.0;
-            for (int x = start; x < end; x++)
-            {
-                sum += f2[x];
-            }
-            System.out.println("Sum over interval [" + start + ", " + (end - 1) + "]: " + sum);
-            start = end;
-        }
     }
 }

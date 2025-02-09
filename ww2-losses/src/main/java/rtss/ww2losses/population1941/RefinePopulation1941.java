@@ -1,6 +1,8 @@
 package rtss.ww2losses.population1941;
 
 import rtss.data.ValueConstraint;
+import rtss.data.bin.Bin;
+import rtss.data.bin.Bins;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
@@ -12,7 +14,6 @@ import rtss.ww2losses.ageline.BacktrackPopulation;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.params.AreaParameters;
-import rtss.ww2losses.population1941.math.RefineSeries;
 import rtss.ww2losses.population1941.math.RefineSeriesV3;
 
 /* 
@@ -52,24 +53,59 @@ public class RefinePopulation1941
          * Для каждой возрастной линии -- требуемое минимальное население, обеспечивающее достижение
          * населения в начале 1946 года при заданном (в данном случае нулевом) уровне потерь.
          */
-        PopulationContext p = backtrack.population_1946_to_early1941(null);
-        p = p_start1941.sub(p, ValueConstraint.NONE);
-        // p.display("Разница 1941");
-        Util.noop();
+        PopulationContext pmin = backtrack.population_1946_to_early1941(null);
 
+        // population excess over minimum
+        PopulationContext p_excess = p_start1941.sub(pmin, ValueConstraint.NONE);
+
+        // check if need to adjust it
+        boolean do_adjust = false;
         for (Gender gender : Gender.TwoGenders)
         {
-            double[] y = p.asArray(Locality.TOTAL, gender);
-            double minRelativeLevel = 0.2;
-            double smoohingSigma = 10.0;
-            double[] y2 = RefineSeriesV3.modifySeries(y, PopulationADH.AgeBinWidthsDays(), y.length, minRelativeLevel, smoohingSigma);
-            ChartXYSplineAdvanced.display2("Refinement " + gender.name(), y, y2);
+            // population excess over minimum
+            double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
+            if (Util.min(a_excess) < 50)
+                do_adjust = true;
+        }
+        
+        if (!do_adjust)
+            return null;
+
+        // will adjust and collect the adjusted excess here 
+        PopulationContext p_excess2 = PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
+        
+        for (Gender gender : Gender.TwoGenders)
+        {
+            // population excess over minimum
+            double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
+
+            // redistribute the excess
+            RefineSeriesV3 rs = new RefineSeriesV3();
+            rs.minRelativeLevel = 0.2;
+            rs.sigma = 10.0;
+            rs.gaussianKernelWindow = 50;
+            rs.sigmoidTransitionSteepness = 0.1;
+            double[] a_excess2 = rs.modifySeries(a_excess, PopulationADH.AgeBinWidthsDays(),  a_excess.length - 1);
+            p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
+            ChartXYSplineAdvanced.display2("Refinement " + gender.name(), a_excess, a_excess2);
             Util.noop();
         }
+        
+        PopulationContext p_new1941 = pmin.add(p_excess2);
+        
+        for (Gender gender : Gender.TwoGenders)
+        {
+            Util.assertion(Util.same(p_new1941.sum(gender), p_start1941.sum(gender)));
 
-        // ###
-
-        return null;
+            for (Bin bin : Bins.forWidths(PopulationADH.AgeBinWidthsDays()))
+            {
+                double v1 = p_new1941.sumDays(gender, bin.age_x1, bin.age_x2);
+                double v2 = p_start1941.sumDays(gender, bin.age_x1, bin.age_x2);
+                Util.assertion(Util.same(v1, v2));
+            }
+        }
+        
+        return p_new1941;
     }
 
 }
