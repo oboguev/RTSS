@@ -54,22 +54,21 @@ package rtss.ww2losses.population1941.math;
  *     Should I use larger values for some smoothing parameters in the code? Such as for gaussian kernel window, or for sigmoid transition?
  *     
  *     ...............
-
- *     It still clips.  
+ *     
+ *     And yet, it still clips minimal values. 
+ *     The bottom part of f2 series runs on the chart as a horizontal line rather than smooth curve.
+ *     What could be the cause?  
  *     
  *     https://chat.deepseek.com/a/chat/s/534e72a7-acca-4905-b531-385778cad57a
  */
-public class RefineSeriesV3
+public class RefineSeriesV4
 {
     public double minRelativeLevel = 0.1; 
     public double sigma = 1.0;
     public int gaussianKernelWindow = 3;
     public double sigmoidTransitionSteepness = 10.0;
 
-    public double[] modifySeries(
-            double[] f, 
-            int[] intervalLengths, 
-            int XMAX)
+    public double[] modifySeries(double[] f, int[] intervalLengths, int XMAX)
     {
         int numIntervals = intervalLengths.length;
         double[] f2 = new double[XMAX + 1];
@@ -194,16 +193,16 @@ public class RefineSeriesV3
             }
         }
 
-        // Apply a smooth transition function to the bottom-most values
+        // Apply a gradual scaling function to the bottom-most values
         for (int i = 0; i < numBottomValues; i++)
         {
             int x = bottomIndices[i];
             double currentValue = f2[x];
             if (currentValue < minValue)
             {
-                // Use a smooth transition function (e.g., sigmoid) to approach the minimum value
-                double transition = sigmoidTransition(currentValue, minValue);
-                f2[x] = minValue + (currentValue - minValue) * transition;
+                // Use a gradual scaling function to approach the minimum value
+                double scale = Math.sqrt((currentValue - minValue) / (0 - minValue)); // Gradual scaling
+                f2[x] = minValue + (currentValue - minValue) * scale;
             }
         }
 
@@ -214,13 +213,6 @@ public class RefineSeriesV3
         double finalAdjustmentFactor = originalSum / finalSum;
         for (int x = start; x < end; x++)
             f2[x] *= finalAdjustmentFactor;
-    }
-
-    private double sigmoidTransition(double value, double minValue)
-    {
-        // Sigmoid function for smooth transition
-        double k = sigmoidTransitionSteepness; // Controls the steepness of the transition
-        return 1.0 / (1.0 + Math.exp(-k * (value - minValue)));
     }
 
     private double gaussian(int x, double sigma)
