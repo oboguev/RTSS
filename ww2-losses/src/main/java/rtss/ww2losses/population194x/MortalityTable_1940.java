@@ -96,6 +96,9 @@ public class MortalityTable_1940 extends UtilBase_194x
             
             if (use_ADH_USSR_InfantMortalityRate)
             {
+                /*
+                 * Младенческая смертность по АДХ
+                 */
                 instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 0, ADH_USSR_infant_CDR_1940 / qx[0]);
                 instructions.add(instruction);
 
@@ -103,13 +106,20 @@ public class MortalityTable_1940 extends UtilBase_194x
                 instructions.add(instruction);
             }
             
-            // рабочий дескриптор для MatchMortalityTable.match
+            /*
+             * Рабочий дескриптор для MatchMortalityTable.match.
+             * Равномерно повысить коэффициенты смертности в возрастах 5-100 так, чтобы в наседении p1940 
+             * при рождаемости CBR_1940 достигалась смертность CDR_1940.
+             */
             instruction = new PatchInstruction(PatchOpcode.Multiply, 5, Population.MAX_AGE, 1.0);
             instructions.add(instruction);
             
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для СССР 1940");
             Util.out(String.format("Для таблицы смертности СССР 1940 года все коэффициенты в возрастах 5-100 увеличены на %.4f", instruction.scale));
 
+            /*
+             * Исправить коэффициенты смертности в старших возрастах (80+)
+             */
             xmt = AdjustSeniorRates.adjust_ussr(xmt);
             
             return xmt;
@@ -124,9 +134,16 @@ public class MortalityTable_1940 extends UtilBase_194x
             PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, 1.0);
             instructions.add(instruction);
 
+            /*
+             * Равномерно повысить коэффициенты смертности в возрастах 0-100 так, чтобы в наседении p1940 
+             * при рождаемости CBR_1940 достигалась смертность CDR_1940.
+             */
             CombinedMortalityTable xmt = MatchMortalityTable.match(mt, p1940, instructions, ap.CBR_1940, ap.CDR_1940, "модиф. для РСФСР 1940");
             Util.out(String.format("Для таблицы смертности РСФСР 1940 года все коэффициенты увеличены на %.4f", instruction.scale));
 
+            /*
+             * Исправить коэффициенты смертности в старших возрастах (80+)
+             */
             xmt = AdjustSeniorRates.adjust_rsfsr(xmt);
 
             return xmt;

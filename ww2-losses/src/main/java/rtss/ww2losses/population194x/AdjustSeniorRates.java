@@ -44,8 +44,9 @@ public class AdjustSeniorRates
     public static CombinedMortalityTable adjust_ussr(CombinedMortalityTable mt) throws Exception
     {
         Adjustment male = null, female = null;
-        male = new Adjustment(Gender.MALE, 80.5, 92.5, 83.2, 0.39);
-        female = new Adjustment(Gender.FEMALE, 80.5, 95.5, 83.2, 0.3);
+
+        male = new Adjustment(Gender.MALE, 80.5, 92.5, 83.2, 0.41);
+        female = new Adjustment(Gender.FEMALE, 80.5, 95.5, 83.2, 0.39);
 
         return adjust(mt, male, female, null);
     }
@@ -53,8 +54,10 @@ public class AdjustSeniorRates
     public static CombinedMortalityTable adjust_rsfsr(CombinedMortalityTable mt) throws Exception
     {
         Adjustment male = null, female = null;
+
         male = new Adjustment(Gender.MALE, 80.5, 93.5, 83.8, 0.39);
         female = new Adjustment(Gender.FEMALE, 81.5, 86.5, 83.8, 0.3);
+        
         return adjust(mt, male, female, null);
     }
 

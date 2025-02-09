@@ -891,6 +891,24 @@ public class Main
 
         if (ap.area == Area.RSFSR)
         {
+            if (Util.True)
+            {
+                /*
+                 * Диагностика
+                 */
+                Util.err("");
+                Util.err("Участки отрицательной интенсивности потерь MALE:");
+                Util.err(alis.dumpNegRegions(Gender.MALE));
+                
+                Util.err("");
+                Util.err("Участки отрицательной интенсивности потерь FEMALE:");
+                Util.err(alis.dumpNegRegions(Gender.FEMALE));
+
+                alis.display("Интенсивность военных потерь " + area);
+                PopulationContext p = alis.toPopulationContext();
+                Util.noop();
+            }
+
             /*
              * Для РСФСР для определенных групп (gender, age1-age2)
              * устранить отрицательные коэффициенты военных потерь (или провалы в смертности), вызываемые иммиграцией.
