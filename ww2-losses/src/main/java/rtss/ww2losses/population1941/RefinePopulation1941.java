@@ -40,8 +40,8 @@ public class RefinePopulation1941
         BacktrackPopulation backtrack = new BacktrackPopulation(peacetimeMortalityTables, wam, p1946_actual);
         
         /* 
-         * Для каждой возрастной линии -- требуемое минимальное население, которое обеспечивает достижения
-         * населения в 1946 года при заданном (в данном случае нулевом) уровне потерь.
+         * Для каждой возрастной линии -- требуемое минимальное население, обеспечивающее достижения
+         * населения в начале 1946 года при заданном (в данном случае нулевом) уровне потерь.
          */
         PopulationContext p = backtrack.population_1946_to_early1941(null);
         
