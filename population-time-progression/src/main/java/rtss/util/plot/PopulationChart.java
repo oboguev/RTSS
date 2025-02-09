@@ -85,22 +85,14 @@ public class PopulationChart extends ApplicationFrame
 
     public PopulationChart show(String name, PopulationContext p) throws Exception
     {
-        if (Util.True)
+        if (Util.False)
             return show(name, p.toPopulation());
 
         if (pScale != null)
             p = RescalePopulation.scaleAllTo(p, pScale.sum());
 
-        int days_per_sample = DAYS_PER_YEAR / 1;
-        int npoints = p.MAX_DAY + 1;
-
-        if (days_per_sample != 1)
-        {
-            int npx = npoints  / days_per_sample;
-            if (0 != (npoints % days_per_sample))
-                npx++;
-            npoints = npx;
-        }
+        int days_per_sample = 10;
+        int npoints = div_roundup(p.MAX_DAY + 1, days_per_sample);
 
         double[] m_y = new double[npoints];
         double[] m_x = new double[npoints];
@@ -110,17 +102,12 @@ public class PopulationChart extends ApplicationFrame
 
         for (int np = 0; np < npoints; np++)
         {
-            m_x[np] = f_x[np] = Population.MAX_AGE * (double) np / (npoints - 1);
-
             int nd1 = np * days_per_sample;
+            int nd2 = Math.min(nd1 + days_per_sample - 1, p.MAX_DAY);
+            int samplesize = nd2 - nd1 + 1;
+            Util.assertion(samplesize >= 1);
 
-            int samplesize = p.MAX_DAY + 1 - nd1;
-            if (samplesize > days_per_sample)
-                samplesize = days_per_sample;
-
-            Util.assertion(samplesize != 0);
-
-            int nd2 = nd1 + samplesize - 1;
+            m_x[np] = f_x[np] = ((Population.MAX_AGE + 1.0) / (p.MAX_DAY + 1)) * ((nd1 + nd2) / 2);
 
             m_y[np] = p.sumDays(Gender.MALE, nd1, nd2) * DAYS_PER_YEAR / (double) samplesize;
             f_y[np] = p.sumDays(Gender.FEMALE, nd1, nd2) * DAYS_PER_YEAR / (double) samplesize;
@@ -260,5 +247,13 @@ public class PopulationChart extends ApplicationFrame
         Util.writeAsFile(fn, baos.toByteArray());
 
         return this;
+    }
+
+    private int div_roundup(int a, int b)
+    {
+        int r = a / b;
+        if (r * b != a)
+            r++;
+        return r;
     }
 }
