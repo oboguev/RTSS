@@ -18,6 +18,18 @@ public class PopulationADH
     static public boolean UseCache = true;
 
     private static Map<String, Population> cache = new HashMap<>();
+    
+    private static int[] ageBinWidths = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16};
+    
+    public static int[] AgeBinWidthsYears()
+    {
+        return Util.dup(ageBinWidths);
+    }
+
+    public static int[] AgeBinWidthsDays()
+    {
+        return Util.multiply(ageBinWidths, 365);
+    }
 
     public static Population getPopulation(Area area, int year) throws Exception
     {

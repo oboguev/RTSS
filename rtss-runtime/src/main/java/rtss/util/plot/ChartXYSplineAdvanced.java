@@ -25,18 +25,26 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class ChartXYSplineAdvanced extends ApplicationFrame
 {
-    public static void quick_view(String title, double[] y)
+    public static void display(String title, double[] y)
     {
         new ChartXYSplineAdvanced(title, "x", "y")
-            .addSeries(title, y)
-            .display();        
+                .addSeries(title, y)
+                .display();
     }
-    
-    public static void quick_view(String title, double[] x, double[] y)
+
+    public static void display2(String title, double[] y1, double[] y2)
     {
         new ChartXYSplineAdvanced(title, "x", "y")
-            .addSeries(title, x, y)
-            .display();        
+                .addSeries(title + "-1", y1)
+                .addSeries(title + "-2", y2)
+                .display();
+    }
+
+    public static void display(String title, double[] x, double[] y)
+    {
+        new ChartXYSplineAdvanced(title, "x", "y")
+                .addSeries(title, x, y)
+                .display();
     }
 
     public static final long serialVersionUID = 1;
@@ -56,20 +64,20 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
     {
         this(title, "", "");
     }
-    
+
     public ChartXYSplineAdvanced(String title, String xLabel, String yLabel)
     {
         super(title);
         this.xLabel = xLabel;
         this.yLabel = yLabel;
     }
-    
+
     public ChartXYSplineAdvanced showSplinePane(boolean b)
     {
         this.showSplinePane = b;
         return this;
     }
-    
+
     public ChartXYSplineAdvanced addSeries(String name, double[] y)
     {
         double[] x = new double[y.length];
@@ -81,30 +89,30 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
     public ChartXYSplineAdvanced addSeries(String name, double[] x, double[] y)
     {
         XYSeries series = new XYSeries(name);
-        
+
         for (int k = 0; k < x.length; k++)
             series.add(x[k], y[k]);
-        
+
         dataset.addSeries(series);
         asDots.add(false);
-        
-        return this;
-    }
-    
-    public ChartXYSplineAdvanced addSeriesAsDots(String name, double[] x, double[] y)
-    {
-        XYSeries series = new XYSeries(name);
-        
-        for (int k = 0; k < x.length; k++)
-            series.add(x[k], y[k]);
-        
-        dataset.addSeries(series);
-        asDots.add(true);
-        
+
         return this;
     }
 
-    public void display() 
+    public ChartXYSplineAdvanced addSeriesAsDots(String name, double[] x, double[] y)
+    {
+        XYSeries series = new XYSeries(name);
+
+        for (int k = 0; k < x.length; k++)
+            series.add(x[k], y[k]);
+
+        dataset.addSeries(series);
+        asDots.add(true);
+
+        return this;
+    }
+
+    public void display()
     {
         JPanel content = new MyDisplayPanel(this);
         content.setPreferredSize(new java.awt.Dimension(800, 600));
@@ -113,15 +121,15 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
         pack();
         UIUtils.centerFrameOnScreen(this);
         setVisible(true);
-    }       
-    
+    }
+
     static class MyDisplayPanel extends DisplayPanel
     {
         public static final long serialVersionUID = 1;
-    
+
         /** Dataset 1. */
         private final XYDataset data1;
-        
+
         private ChartXYSplineAdvanced chart;
 
         /**
@@ -164,7 +172,7 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
             plot.setDomainGridlinePaint(Color.WHITE);
             plot.setRangeGridlinePaint(Color.WHITE);
             plot.setAxisOffset(new RectangleInsets(4, 4, 4, 4));
-            
+
             for (int k = 0; k < chart.asDots.size(); k++)
             {
                 if (chart.asDots.get(k))

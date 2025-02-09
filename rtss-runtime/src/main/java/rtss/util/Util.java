@@ -380,6 +380,14 @@ public class Util
         return yy;
     }
 
+    public static int[] multiply(final int[] y, int f)
+    {
+        int[] yy = new int[y.length];
+        for (int x = 0; x < y.length; x++)
+            yy[x] = y[x] * f;
+        return yy;
+    }
+
     // return a new array with values representing y[] * f[]
     public static double[] multiply(final double[] y, double[] f) throws Exception
     {
@@ -434,6 +442,15 @@ public class Util
             return new double[0];
         else
             return splice(y, 0, y.length - 1);
+    }
+
+    // clone array of integers
+    public static int[] dup(final int[] y)
+    {
+        int[] r = new int[y.length];
+        for (int k = 0; k < y.length; k++)
+            r[k]  = y[k];
+        return r;
     }
 
     // clone array of doubles in reverse order
@@ -516,14 +533,14 @@ public class Util
 
         return true;
     }
-    
-    public static boolean isMonotonicallyDecreasing(final double [] y, boolean strict)
+
+    public static boolean isMonotonicallyDecreasing(final double[] y, boolean strict)
     {
         if (y.length == 0)
             return true;
-        
+
         boolean b = true;
-        
+
         for (int k = 0; k < y.length - 1; k++)
         {
             if (strict)
@@ -535,7 +552,7 @@ public class Util
                 b = b && y[k] >= y[k + 1];
             }
         }
-        
+
         return b;
     }
 
@@ -616,7 +633,7 @@ public class Util
         Collections.sort(list);
         return list;
     }
-    
+
     public static int[] toIntArray(List<Integer> list)
     {
         int[] a = new int[list.size()];

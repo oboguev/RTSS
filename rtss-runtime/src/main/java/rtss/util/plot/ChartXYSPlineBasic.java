@@ -18,14 +18,14 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class ChartXYSPlineBasic extends ApplicationFrame
 {
-    public static void quick_view(String title, double[] y)
+    public static void display(String title, double[] y)
     {
         new ChartXYSPlineBasic(title, "x", "y")
             .addSeries(title, y)
             .display();        
     }
     
-    public static void quick_view(String title, double[] x, double[] y)
+    public static void display(String title, double[] x, double[] y)
     {
         new ChartXYSPlineBasic(title, "x", "y")
             .addSeries(title, x, y)
