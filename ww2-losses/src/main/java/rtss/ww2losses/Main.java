@@ -259,7 +259,7 @@ public class Main
         PopulationContext p_mid1941;
         PopulationContext deaths_1941_1st_halfyear;
         double births_1941_1st_halfyear;
-        for (;;)
+        for (int npass = 0;;)
         {
             /* 
              * Население на середину 1941 года по передвижке на основе ASFR.
@@ -282,6 +282,10 @@ public class Main
             PopulationContext p = rp.refine(p_start1941);
             if (p == null)
                 break;
+            
+            if (npass++ > 10)
+                throw new Exception("Коррекция населения на начало 1941 года не сходится");
+
             Util.assertion(Util.same(p.sum(), p_start1941.sum()));
             p_start1941 = p;
         }
