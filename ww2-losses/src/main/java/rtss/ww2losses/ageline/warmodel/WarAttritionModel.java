@@ -6,7 +6,7 @@ import rtss.util.Util;
 import rtss.ww2losses.Constants;
 import rtss.ww2losses.HalfYearEntry;
 
-import static rtss.data.population.forward.ForwardPopulation.years2days;
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;

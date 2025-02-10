@@ -1,14 +1,14 @@
 package rtss.validate_table_193x;
 
-import static rtss.data.population.forward.ForwardPopulation.years2days;
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import rtss.data.ValueConstraint;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
-import rtss.data.population.forward.ForwardPopulationT;
-import rtss.data.population.forward.ForwardPopulationUR;
+import rtss.data.population.projection.ForwardPopulationT;
+import rtss.data.population.projection.ForwardPopulationUR;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;

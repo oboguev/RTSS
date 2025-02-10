@@ -1,6 +1,6 @@
 package rtss.data.mortality;
 
-import rtss.data.population.forward.ForwardPopulation;
+import rtss.data.population.projection.ForwardPopulation;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;

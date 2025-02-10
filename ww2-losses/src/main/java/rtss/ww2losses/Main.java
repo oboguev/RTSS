@@ -9,7 +9,7 @@ import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.calc.RescalePopulation;
-import rtss.data.population.forward.ForwardPopulationT;
+import rtss.data.population.projection.ForwardPopulationT;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
@@ -45,7 +45,7 @@ import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.util.CalibrateASFR;
 import rtss.ww2losses.util.RebalanceASFR;
 
-import static rtss.data.population.forward.ForwardPopulation.years2days;
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import java.util.ArrayList;
 import java.util.List;

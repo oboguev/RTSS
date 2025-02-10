@@ -1,4 +1,4 @@
-package rtss.data.population.forward;
+package rtss.data.population.projection;
 
 import rtss.data.population.struct.Population;
 import rtss.util.Loggable;

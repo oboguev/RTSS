@@ -3,7 +3,7 @@ package rtss.ww2losses.population194x;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.InterpolateMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
-import rtss.data.population.forward.ForwardPopulationT;
+import rtss.data.population.projection.ForwardPopulationT;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;

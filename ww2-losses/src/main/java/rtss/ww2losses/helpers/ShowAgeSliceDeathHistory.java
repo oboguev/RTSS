@@ -1,11 +1,11 @@
 package rtss.ww2losses.helpers;
 
+import static rtss.data.population.projection.ForwardPopulation.years2days;
+
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
-
-import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 /*
  * Печатать количество смертей в каждом полугодии для возрастных линий начинающихся с января 1941

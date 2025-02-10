@@ -7,7 +7,7 @@ import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 
-import static rtss.data.population.forward.ForwardPopulation.years2days;
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import rtss.data.population.struct.PopulationContext;
 

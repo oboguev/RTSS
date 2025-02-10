@@ -1,6 +1,6 @@
 package rtss.ww2losses.helpers;
 
-import static rtss.data.population.forward.ForwardPopulation.years2days;
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import rtss.data.ValueConstraint;
 import rtss.data.population.struct.PopulationContext;

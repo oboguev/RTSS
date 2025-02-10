@@ -1,6 +1,6 @@
 package rtss.ww2losses.helpers;
 
-import rtss.data.population.forward.ForwardPopulation;
+import rtss.data.population.projection.ForwardPopulation;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;

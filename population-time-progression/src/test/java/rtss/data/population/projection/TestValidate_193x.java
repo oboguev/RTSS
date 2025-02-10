@@ -1,4 +1,4 @@
-package rtss.data.population.forward;
+package rtss.data.population.projection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,8 @@ import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
+import rtss.data.population.projection.ForwardPopulationT;
+import rtss.data.population.projection.ForwardPopulationUR;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;

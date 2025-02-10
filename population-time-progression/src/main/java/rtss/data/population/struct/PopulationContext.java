@@ -1,5 +1,7 @@
 package rtss.data.population.struct;
 
+import static rtss.data.population.projection.ForwardPopulation.years2days;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,15 +15,13 @@ import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.curves.TargetResolution;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
-import rtss.data.population.forward.ForwardPopulation;
+import rtss.data.population.projection.ForwardPopulation;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.data.selectors.LocalityGender;
 import rtss.data.selectors.holders.LocalityGenderToDoubleArray;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
-
-import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 /**
  * 

@@ -1,5 +1,7 @@
 package rtss.validate_table_193x;
 
+import static rtss.data.population.projection.ForwardPopulation.years2days;
+
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
@@ -10,8 +12,6 @@ import rtss.forward_1926_193x.Adjust_1937;
 import rtss.forward_1926_193x.Adjust_1939;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
-
-import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 /*
  * Построить таблицу смертности населения СССР для 1937-1938 гг.

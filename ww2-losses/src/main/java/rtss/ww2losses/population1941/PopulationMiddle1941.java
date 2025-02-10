@@ -3,7 +3,7 @@ package rtss.ww2losses.population1941;
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
-import rtss.data.population.forward.ForwardPopulationT;
+import rtss.data.population.projection.ForwardPopulationT;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.util.Util;

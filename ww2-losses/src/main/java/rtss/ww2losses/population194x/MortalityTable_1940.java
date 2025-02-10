@@ -8,7 +8,7 @@ import rtss.data.mortality.synthetic.MatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
-import rtss.data.population.forward.ForwardPopulationT;
+import rtss.data.population.projection.ForwardPopulationT;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;

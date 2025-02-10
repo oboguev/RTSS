@@ -11,7 +11,7 @@ import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.HalfYearEntry;
 
-import static rtss.data.population.forward.ForwardPopulation.years2days;
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import rtss.data.ValueConstraint;
 

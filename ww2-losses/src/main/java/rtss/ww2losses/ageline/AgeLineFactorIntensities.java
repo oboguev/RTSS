@@ -9,7 +9,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
 
-import static rtss.data.population.forward.ForwardPopulation.years2days;
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,7 @@
 package rtss.ww2losses.helpers;
 
+import static rtss.data.population.projection.ForwardPopulation.years2days;
+
 import rtss.data.ValueConstraint;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
@@ -9,8 +11,6 @@ import rtss.util.Util;
 import rtss.ww2losses.HalfYearEntries;
 import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
-
-import static rtss.data.population.forward.ForwardPopulation.years2days;
 
 /*
  * Проверка самосогласованности вычисленных значений
