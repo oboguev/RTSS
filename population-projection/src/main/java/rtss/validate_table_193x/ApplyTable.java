@@ -68,21 +68,30 @@ public class ApplyTable
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
-        double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false);
-        double multiplier_ur = find_multiplier(p1937, p1939, mt, true);
         Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
         Util.out("к численности по переписи января 1939 года:");
-        Util.out(String.format("для раздельной передвижки городского и сельского населения: %.4f", multiplier_ur));
-        Util.out(String.format("для передвижки без разбивки населения по типу местности: %.4f", multiplier_t));
-
-        if (Util.False)
+        Util.out("возраст --- для раздельной передвижки городского и сельского населения --- для передвижки без разбивки населения по типу местности");
+        
+        Double final_multiplier_t = null;
+        
+        for (int cutoffAge = 3; cutoffAge <= 20; cutoffAge++)
         {
-            double diff_t = difference(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
-            double diff_ur = difference(p1937, p1939, mt, multiplier_ur, true);
-            Util.unused(diff_t, diff_ur);
+            double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false, cutoffAge);
+            double multiplier_ur = find_multiplier(p1937, p1939, mt, true, cutoffAge);
+            Util.out(String.format("%-2d %.4f %.4f", cutoffAge, multiplier_ur, multiplier_t));
+
+            if (Util.False)
+            {
+                double diff_t = difference(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false, 3);
+                double diff_ur = difference(p1937, p1939, mt, multiplier_ur, true, 3);
+                Util.unused(diff_t, diff_ur);
+            }
+            
+            if (final_multiplier_t == null)
+                final_multiplier_t = multiplier_t;
         }
 
-        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false, true);
+        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, final_multiplier_t, false, true);
         p = p.selectByAgeYears(3, Population.MAX_AGE);
         p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
 
@@ -97,7 +106,8 @@ public class ApplyTable
             final PopulationContext p1937,
             final PopulationContext p1939,
             CombinedMortalityTable mt,
-            boolean ur) throws Exception
+            boolean ur, 
+            int cutoffAge) throws Exception
     {
         double m1 = 0.5;
         double m2 = 1.5;
@@ -112,7 +122,7 @@ public class ApplyTable
             if (Util.False && Math.abs(m1 - m2) < 0.0005)
                 return m;
 
-            double d = difference(p1937, p1939, mt, m, ur);
+            double d = difference(p1937, p1939, mt, m, ur, cutoffAge);
             if (Math.abs(d) < 100)
                 return m;
 
@@ -134,18 +144,19 @@ public class ApplyTable
             final PopulationContext p1939,
             CombinedMortalityTable mt,
             double multiplier,
-            boolean ur) throws Exception
+            boolean ur, 
+            int cutoffAge) throws Exception
     {
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
         PopulationContext p = forward_without_births(p1937, p1939, xmt, ur, false);
-        return difference(p, p1939);
+        return difference(p, p1939, cutoffAge);
     }
 
-    private double difference(final PopulationContext p, final PopulationContext p1939) throws Exception
+    private double difference(final PopulationContext p, final PopulationContext p1939, int cutoffAge) throws Exception
     {
-        double v_p = p.sumAges(Locality.TOTAL, Gender.BOTH, 3, Population.MAX_AGE);
-        double v_p1939 = p1939.sumAges(Locality.TOTAL, Gender.BOTH, 3, Population.MAX_AGE);
+        double v_p = p.sumAges(Locality.TOTAL, Gender.BOTH, cutoffAge, Population.MAX_AGE);
+        double v_p1939 = p1939.sumAges(Locality.TOTAL, Gender.BOTH, cutoffAge, Population.MAX_AGE);
         return v_p - v_p1939;
     }
 
