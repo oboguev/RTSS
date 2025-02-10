@@ -109,8 +109,11 @@ public class ApplyTable
             boolean ur, 
             int cutoffAge) throws Exception
     {
+        double mmax = 1.5;
+        int mmaxcount = 0;
+
         double m1 = 0.5;
-        double m2 = 1.5;
+        double m2 = mmax;
 
         for (int pass = 0;; pass++)
         {
@@ -125,6 +128,22 @@ public class ApplyTable
             double d = difference(p1937, p1939, mt, m, ur, cutoffAge);
             if (Math.abs(d) < 100)
                 return m;
+
+            if (Math.abs(m1 - m2) < 0.00005 && Math.abs(d) > 40_000)
+                return -1;            
+            
+            if (Math.abs(m1 - m2) < 0.00005 && Math.abs(d) < 20_000)
+                return m;
+            
+            if (Math.abs(m - mmax) < 0.001)
+            {
+                if (mmaxcount++ >= 5 && Util.False)
+                {
+                    mmaxcount = 0;
+                    mmax += 0.1;
+                    m2 += 0.1;
+                }
+            }
 
             if (d > 0)
             {
