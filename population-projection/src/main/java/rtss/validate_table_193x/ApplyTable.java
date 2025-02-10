@@ -82,7 +82,7 @@ public class ApplyTable
             Util.unused(diff_t, diff_ur);
         }
 
-        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
+        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false, true);
         p = p.selectByAgeYears(3, Population.MAX_AGE);
         p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
 
@@ -138,7 +138,7 @@ public class ApplyTable
     {
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
-        PopulationContext p = forward_without_births(p1937, p1939, xmt, ur);
+        PopulationContext p = forward_without_births(p1937, p1939, xmt, ur, false);
         return difference(p, p1939);
     }
 
@@ -156,29 +156,32 @@ public class ApplyTable
             final PopulationContext p1939,
             final CombinedMortalityTable mt,
             double multiplier,
-            final boolean ur) throws Exception
+            final boolean ur,
+            boolean printDeaths) throws Exception
     {
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
-        return forward_without_births(p1937, p1939, xmt, ur);
+        return forward_without_births(p1937, p1939, xmt, ur, printDeaths);
     }
 
     private PopulationContext forward_without_births(
             final PopulationContext p1937,
             final PopulationContext p1939,
             final CombinedMortalityTable mt,
-            final boolean ur) throws Exception
+            final boolean ur,
+            boolean printDeaths) throws Exception
     {
         if (ur)
-            return forward_without_births_ur(p1937, p1939, mt);
+            return forward_without_births_ur(p1937, p1939, mt, printDeaths);
         else
-            return forward_without_births_t(p1937, p1939, mt);
+            return forward_without_births_t(p1937, p1939, mt, printDeaths);
     }
 
     private PopulationContext forward_without_births_ur(
             final PopulationContext p1937,
             final PopulationContext p1939,
-            final CombinedMortalityTable mt) throws Exception
+            final CombinedMortalityTable mt,
+            boolean printDeaths) throws Exception
     {
         double urban_male_fraction_1937 = urban_fraction(p1937, Gender.MALE);
         double urban_male_fraction_1939 = urban_fraction(p1939, Gender.MALE);
@@ -220,24 +223,33 @@ public class ApplyTable
     private PopulationContext forward_without_births_t(
             final PopulationContext p1937,
             final PopulationContext p1939,
-            final CombinedMortalityTable mt) throws Exception
+            final CombinedMortalityTable mt,
+            boolean printDeaths) throws Exception
     {
         PopulationContext p = p1937.clone();
+        
+        double deaths = 0;
 
         /* 1937 -> 1938 */
         ForwardPopulationT fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         fw.forward(p, mt, 1.0);
+        deaths += fw.getObservedDeaths();
 
         /* 1938 -> 1939 */
         fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         fw.forward(p, mt, 1.0);
+        deaths += fw.getObservedDeaths();
 
         /* последний отрезок в 11 дней */
         fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         fw.forward(p, mt, 0.03);
+        deaths += fw.getObservedDeaths();
+        
+        if (printDeaths)
+            Util.out(String.format("Число смертей: %,d тыс. чел.", (int) Math.round(deaths / 1000)));
 
         return p;
     }
