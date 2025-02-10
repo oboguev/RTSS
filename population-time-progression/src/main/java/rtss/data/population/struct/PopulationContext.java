@@ -1314,6 +1314,6 @@ public class PopulationContext
 
     public void display(String title) throws Exception
     {
-        PopulationChart.display(title, this, "1");
+        PopulationChart.display(title, this, "");
     }
 }

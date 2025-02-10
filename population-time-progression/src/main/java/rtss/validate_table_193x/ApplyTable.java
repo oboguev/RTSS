@@ -48,25 +48,11 @@ public class ApplyTable
         final boolean DoSmoothPopulation = true;
 
         final PopulationByLocality p1937_original = PopulationByLocality.census(Area.USSR, 1937).smooth(DoSmoothPopulation);
+        // final PopulationContext p1937 = p1937_original.toPopulationContext();
         final PopulationContext p1937 = new Adjust_1937().adjust(p1937_original).toPopulationContext();
 
         final PopulationByLocality p1939_original = PopulationByLocality.census(Area.USSR, 1939).smooth(DoSmoothPopulation);
         final PopulationContext p1939 = new Adjust_1939().adjust(Area.USSR, p1939_original).toPopulationContext();
-
-        CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
-
-        double multiplier_ur = find_multiplier(p1937, p1939, mt, true);
-        double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false);
-        Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
-        Util.out("к численности по переписи января 1939 года:");
-        Util.out(String.format("для раздельной передвижки городского и сельского населения: %.4f", multiplier_ur));
-        Util.out(String.format("для передвижки без разбивки населения по типу местности: %.4f", multiplier_t));
-
-        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
-        p = p.selectByAgeYears(3, Population.MAX_AGE);
-        p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
-
-        p.display("Расхождение между передвижкой и переписью 1939 года");
 
         /*
          * Сдвинуть структуру населения по переписи 1939 года вниз по возрасту 
@@ -77,6 +63,27 @@ public class ApplyTable
                 .show("1937", p1937.toTotal())
                 .show("1939", p1939_down)
                 .display();
+
+        CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
+
+        double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false);
+        double multiplier_ur = find_multiplier(p1937, p1939, mt, true);
+        Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
+        Util.out("к численности по переписи января 1939 года:");
+        Util.out(String.format("для раздельной передвижки городского и сельского населения: %.4f", multiplier_ur));
+        Util.out(String.format("для передвижки без разбивки населения по типу местности: %.4f", multiplier_t));
+        
+        if (Util.False)
+        {
+            double diff_t = difference(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
+            double diff_ur = difference(p1937, p1939, mt, multiplier_ur, true);
+        }
+
+        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
+        p = p.selectByAgeYears(3, Population.MAX_AGE);
+        p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
+
+        p.display("Расхождение между передвижкой и переписью 1939 года");
 
         Util.noop();
     }
