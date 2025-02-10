@@ -2,8 +2,6 @@ package rtss.data.population.projection;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.EvalMortalityRate;
-import rtss.data.population.projection.ForwardPopulationT;
-import rtss.data.population.projection.ForwardPopulationUR;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;

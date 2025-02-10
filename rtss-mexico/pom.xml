@@ -29,7 +29,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>rtss</groupId>
-			<artifactId>population-time-progression</artifactId>
+			<artifactId>population-projection</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
