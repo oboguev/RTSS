@@ -1,5 +1,7 @@
 package rtss.validate_table_193x;
 
+import static rtss.data.population.forward.ForwardPopulation.years2days;
+
 import rtss.data.ValueConstraint;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
@@ -47,15 +49,12 @@ public class ApplyTable
 
         final PopulationByLocality p1937_original = PopulationByLocality.census(Area.USSR, 1937).smooth(DoSmoothPopulation);
         final PopulationContext p1937 = new Adjust_1937().adjust(p1937_original).toPopulationContext();
-        
+
         final PopulationByLocality p1939_original = PopulationByLocality.census(Area.USSR, 1939).smooth(DoSmoothPopulation);
         final PopulationContext p1939 = new Adjust_1939().adjust(Area.USSR, p1939_original).toPopulationContext();
 
-        // p1937.display("1937");
-
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
-        // PopulationContext p = forward_without_births(p1937, p1939, mt, true);
         double multiplier_ur = find_multiplier(p1937, p1939, mt, true);
         double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false);
         Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
@@ -67,8 +66,16 @@ public class ApplyTable
         p = p.selectByAgeYears(3, Population.MAX_AGE);
         p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
 
-        new PopulationChart("Расхождение между передвижкой и переписью 1939 года")
-                .show("", p)
+        p.display("Расхождение между передвижкой и переписью 1939 года");
+
+        /*
+         * Сдвинуть структуру населения по переписи 1939 года вниз по возрасту 
+         * на размер промежутка между периписями 
+         */
+        PopulationContext p1939_down = move_down_1939(p1939.toTotal());
+        PopulationChart.chart("Сравнение возрастных слоёв по переписям 1937 и 1939 гг.")
+                .show("1937", p1937.toTotal())
+                .show("1939", p1939_down)
                 .display();
 
         Util.noop();
@@ -286,5 +293,56 @@ public class ApplyTable
          */
         if (Util.differ(target_urban_level, urban_fraction(p, gender), 0.4 * 0.01))
             throw new Exception("Miscalculated urbanization");
+    }
+
+    /* ================================================================================================================== */
+
+    /*
+     * Сдвинуть структуру населения по переписи 1939 года вниз по возрасту 
+     * на размер промежутка между периписями 1937 и 1939 гг. 
+     */
+    private PopulationContext move_down_1939(final PopulationContext p1939) throws Exception
+    {
+        PopulationContext p1939_down = p1939.moveDownByDays(2 * 365 + 11);
+        fill_upper_ages(p1939_down, p1939, Gender.MALE);
+        fill_upper_ages(p1939_down, p1939, Gender.FEMALE);
+        return p1939_down;
+    }
+
+    private void fill_upper_ages(PopulationContext p1939_down, final PopulationContext p1939, Gender gender) throws Exception
+    {
+        double v97 = p1939.sumAge(Locality.TOTAL, gender, 97);
+        double v98 = p1939.sumAge(Locality.TOTAL, gender, 98);
+        double v99 = p1939.sumAge(Locality.TOTAL, gender, 99);
+        double v100 = p1939.sumAge(Locality.TOTAL, gender, 100);
+
+        double f98 = within_range(v98 / v97, 0.3, 0.9, 0.7);
+        double f99 = within_range(v99 / v97, 0.3, 0.9, 0.6);
+        double f100 = within_range(v100 / v97, 0.3, 0.9, 0.5);
+
+        fill_upper_ages(p1939_down, gender, 97, 98, f98);
+        fill_upper_ages(p1939_down, gender, 97, 99, f99);
+        fill_upper_ages(p1939_down, gender, 97, 100, f100);
+    }
+
+    private void fill_upper_ages(PopulationContext p1939_down, Gender gender, int year_age_from, int year_age_to, double f) throws Exception
+    {
+        int from_nd1 = years2days(year_age_from);
+        int from_nd2 = from_nd1 + 365 - 1;
+        int to_nd1 = years2days(year_age_to);
+
+        for (int nd = from_nd1; nd <= from_nd2; nd++)
+        {
+            double v = p1939_down.getDay(Locality.TOTAL, gender, nd);
+            p1939_down.setDay(Locality.TOTAL, gender, to_nd1 + (nd - from_nd1), v * f);
+        }
+    }
+
+    private double within_range(double f, double fmin, double fmax, double fallback)
+    {
+        if (f > fmin && f < fmax)
+            return f;
+        else
+            return fallback;
     }
 }

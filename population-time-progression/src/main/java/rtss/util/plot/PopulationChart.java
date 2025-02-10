@@ -40,6 +40,12 @@ public class PopulationChart extends ApplicationFrame
         super(title);
         this.xLabel = "Age";
         this.yLabel = "Population";
+
+    }
+
+    public static PopulationChart chart(String title)
+    {
+        return new PopulationChart(title);
     }
 
     public static void display(String title, Population p, String name) throws Exception
