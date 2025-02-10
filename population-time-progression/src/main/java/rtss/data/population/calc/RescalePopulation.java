@@ -85,6 +85,8 @@ public class RescalePopulation
         pto.makeBoth(Locality.TOTAL);
         return pto;
     }
+    
+    /* ================================================================================================================= */
 
     /*
      * Перемасштабировать городское, сельское и суммарное население пропорционально имеющемуся таким образом,
@@ -159,5 +161,50 @@ public class RescalePopulation
             return null;
         else
             return p.scaleAllBy(scale);
+    }
+
+    /* ================================================================================================================= */
+    
+    /*
+     * Для одного указанного года возраста
+     */
+    public static PopulationByLocality scaleYearAgeAllTo(PopulationByLocality p, int age, double target) throws Exception
+    {
+        double scale = target / p.sum(Locality.TOTAL, Gender.BOTH, age, age);
+        return scaleYearAgeAllBy(p, age, scale);
+    }
+
+    public static Population scaleYearAgeAllTo(Population p, int age, double target) throws Exception
+    {
+        double scale = target / p.sum(Gender.BOTH, age, age);
+        return scaleYearAgeBy(p, age, scale);
+    }
+
+    public static PopulationByLocality scaleYearAgeAllBy(PopulationByLocality p, int age, double scale) throws Exception
+    {
+        Population rural = scaleYearAgeBy(p.forLocality(Locality.RURAL), age, scale);
+        Population urban = scaleYearAgeBy(p.forLocality(Locality.URBAN), age, scale);
+        Population total = scaleYearAgeBy(p.forLocality(Locality.TOTAL), age, scale);
+
+        return new PopulationByLocality(total, urban, rural);
+    }
+
+    public static Population scaleYearAgeBy(Population p, int age, double scale) throws Exception
+    {
+        if (p == null)
+            return null;
+
+        double[] m = p.asArray(Gender.MALE);
+        m[age] *= scale;
+
+        double[] f = p.asArray(Gender.FEMALE);
+        f[age] *= scale;
+
+        double m_unknown = p.getUnknown(Gender.MALE);
+        double f_unknown = p.getUnknown(Gender.FEMALE);
+
+        return new Population(p.locality(),
+                              m, m_unknown, p.valueConstraint(Gender.MALE),
+                              f, f_unknown, p.valueConstraint(Gender.FEMALE));
     }
 }

@@ -48,11 +48,10 @@ public class ApplyTable
         final PopulationByLocality p1937_original = PopulationByLocality.census(Area.USSR, 1937).smooth(DoSmoothPopulation);
         final PopulationContext p1937 = new Adjust_1937().adjust(p1937_original).toPopulationContext();
         
-        // ###
-        p1937.display("1937");
-
         final PopulationByLocality p1939_original = PopulationByLocality.census(Area.USSR, 1939).smooth(DoSmoothPopulation);
         final PopulationContext p1939 = new Adjust_1939().adjust(Area.USSR, p1939_original).toPopulationContext();
+
+        // p1937.display("1937");
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
