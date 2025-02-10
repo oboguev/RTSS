@@ -38,7 +38,7 @@
 	<modules>
 	    <module>rtss-runtime</module>
 	    <module>rtss-math-tools</module>
-	    <module>population-time-progression</module>
+	    <module>population-projection</module>
 	    <module>rtss-server</module>
 	    <module>rtss-tools</module>
 	    <module>ww2-losses</module>
