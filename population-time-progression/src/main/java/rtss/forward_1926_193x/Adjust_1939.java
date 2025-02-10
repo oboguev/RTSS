@@ -101,7 +101,7 @@ public class Adjust_1939
         }
 
         /* Население в возрастах 0-3 лет (АДХ-СССР, стр. 35) */
-        setYoungAges(p, 5792, 4856, 4063, 3543);
+        setChildren(p, 5792, 4856, 4063, 3543);
 
         double u = p.sum(Locality.URBAN, Gender.BOTH, 0, Population.MAX_AGE);
         if (u / t > correctUrbanlPopulation / correctTotalPopulation)
@@ -111,11 +111,13 @@ public class Adjust_1939
 
         if (p == p0)
             p = p.clone();
+        
+        p.validate();
 
         return p;
     }
 
-    private void setYoungAges(PopulationByLocality p, double... yp) throws Exception
+    private void setChildren(PopulationByLocality p, double... yp) throws Exception
     {
         yp = Util.multiply(yp, 1000.0);
         double psum_initial = p.sum();

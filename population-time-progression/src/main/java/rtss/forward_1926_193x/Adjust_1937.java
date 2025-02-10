@@ -1,8 +1,10 @@
 package rtss.forward_1926_193x;
 
+import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 /** **************************************************************
 
@@ -79,6 +81,9 @@ import rtss.data.selectors.Locality;
 ИРИ РАН, М. 1994, стр. 36-37).
 Используемые материалы не содержат этой приписки.
 
+Численность возрастов 0 и 1 мы исправляем соответственно взаимоувязке переписей 1937 и 1939 гг. (АДХ-СССР, стр. 35),
+перераспределяя избыток или нехватку в возрасты 4 и 5. 
+
 *********************************************************************/
 
 public class Adjust_1937
@@ -92,9 +97,13 @@ public class Adjust_1937
         
         adjust_younger(pto, total_adjustment * 0.85);
         adjust_older(pto, total_adjustment * 0.15);
-
+        
         pto.recalcTotalForEveryLocality();
         pto.recalcTotalLocalityFromUrbanRural();
+        pto.validate();
+
+        /* Население в возрастах 0-1 лет (АДХ-СССР, стр. 35) */
+        setChildren(pto, 4933, 3811);
         pto.validate();
         
         return pto;
@@ -172,4 +181,22 @@ public class Adjust_1937
             adjust_for_age(p, age, amount * s / s_all);
         }
     }
-}
+
+    /* ================================================================================================= */
+
+    private void setChildren(PopulationByLocality p, double... yp) throws Exception
+    {
+        yp = Util.multiply(yp, 1000.0);
+        double psum_initial = p.sum();
+
+        // распределить diff в возрасты 2-4
+        double diff = p.sum(0, 1) - Util.sum(yp);
+        
+        p = RescalePopulation.scaleYearAgeAllTo(p, 0, yp[0]);
+        p = RescalePopulation.scaleYearAgeAllTo(p, 1, yp[1]);
+        p = RescalePopulation.scaleYearAgeAllTo(p, 2, p.get(Locality.TOTAL, Gender.BOTH, 2) + diff / 3);
+        p = RescalePopulation.scaleYearAgeAllTo(p, 3, p.get(Locality.TOTAL, Gender.BOTH, 3) + diff / 3);
+        p = RescalePopulation.scaleYearAgeAllTo(p, 4, p.get(Locality.TOTAL, Gender.BOTH, 4) + diff / 3);
+
+        Util.assertion(Util.same(psum_initial, p.sum()));
+    }}
