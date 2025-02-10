@@ -71,6 +71,11 @@ public class AnalyzeTable
     }
 
     /* ========================================================================================================================= */
+    
+    /*
+     * Последний десятичный знак в опубликованных коэффициентах
+     */
+    private final double precision = 0.00001;
 
     private String key(int age, Locality locality)
     {
@@ -83,7 +88,7 @@ public class AnalyzeTable
         double[] qx_male = mt.getSingleTable(locality, Gender.MALE).qx();
         double[] qx_female = mt.getSingleTable(locality, Gender.FEMALE).qx();
 
-        double[] male_fraction = male_fraction(qx_both, qx_male, qx_female);
+        Double[] male_fraction = male_fraction(qx_both, qx_male, qx_female);
 
         for (int age = 0; age <= Population.MAX_AGE; age++)
             ratios.put(key(age, locality), male_fraction[age]);
@@ -92,19 +97,25 @@ public class AnalyzeTable
     /*
      * Вычислить долю мужского населения, по годам возраста, использованную при составлении таблицы
      */
-    private static double[] male_fraction(double[] qx_both, double[] qx_male, double[] qx_female) throws Exception
+    private static Double[] male_fraction(double[] qx_both, double[] qx_male, double[] qx_female) throws Exception
     {
         Util.assertion(qx_both.length == qx_male.length);
         Util.assertion(qx_both.length == qx_female.length);
 
-        double[] male_fraction = new double[qx_both.length];
+        Double[] male_fraction = new Double[qx_both.length];
 
         for (int age = 0; age < qx_both.length; age++)
         {
             // если мужская и женская смертности точно совпадают, пропорции следует определять из данных о населении
             // или интерполяцией соседних значений пропорции
-            Util.assertion(qx_male[age] != qx_female[age]);
-            male_fraction[age] = (qx_both[age] - qx_female[age]) / (qx_male[age] - qx_female[age]);
+            if (qx_male[age] == qx_female[age])
+            {
+                male_fraction[age] = null;
+            }
+            else
+            {
+                male_fraction[age] = (qx_both[age] - qx_female[age]) / (qx_male[age] - qx_female[age]);
+            }
         }
 
         // проверка мниимальной разумности значений
