@@ -94,10 +94,33 @@ public class Adjust_1937
     {
         PopulationByLocality pto = p.clone();
         pto.resetUnknownForEveryLocality();
-        
-        adjust_younger(pto, total_adjustment * 0.85);
-        adjust_older(pto, total_adjustment * 0.15);
-        
+
+        if (Util.False)
+        {
+            adjust_younger(pto, total_adjustment * 0.85);
+            adjust_older(pto, total_adjustment * 0.15);
+        }
+        else
+        {
+            double basic = total_adjustment / 7.0;
+            double[] ma = {
+                           0, // age 19
+                           0, // age 20
+                           0, // age 21
+                           0, // age 22
+                           0, // age 23
+                           0, // age 24
+                           0, // age 25
+            };
+            
+            for (int age = 19; age <= 25; age++)
+            {
+                pto = add(pto, Gender.MALE, age, basic + ma[age - 19]);
+            }
+            
+            // ###
+        }
+
         pto.recalcTotalForEveryLocality();
         pto.recalcTotalLocalityFromUrbanRural();
         pto.validate();
@@ -105,10 +128,10 @@ public class Adjust_1937
         /* Население в возрастах 0-1 лет (АДХ-СССР, стр. 35) */
         setChildren(pto, 4933, 3811);
         pto.validate();
-        
+
         return pto;
     }
-    
+
     /* ================================================================================================= */
 
     /*
@@ -126,7 +149,7 @@ public class Adjust_1937
         double s20 = w20 * p.get(Locality.TOTAL, Gender.BOTH, 20);
         double s21 = w21 * p.get(Locality.TOTAL, Gender.BOTH, 21);
         double s_all = s18 + s19 + s20 + s21;
-        
+
         adjust_for_age(p, 18, amount * s18 / s_all);
         adjust_for_age(p, 19, amount * s19 / s_all);
         adjust_for_age(p, 20, amount * s20 / s_all);
@@ -149,16 +172,16 @@ public class Adjust_1937
      */
     private void adjust_for_age(PopulationByLocality p, int age, Gender gender, double amount) throws Exception
     {
-        double rural = p.get(Locality.RURAL, gender, age); 
+        double rural = p.get(Locality.RURAL, gender, age);
         double urban = p.get(Locality.URBAN, gender, age);
-        
+
         p.add(Locality.RURAL, gender, age, amount * rural / (rural + urban));
         p.add(Locality.URBAN, gender, age, amount * urban / (rural + urban));
-                
+
         p.makeBoth(Locality.RURAL);
         p.makeBoth(Locality.URBAN);
     }
-    
+
     /* ================================================================================================= */
 
     /*
@@ -191,7 +214,7 @@ public class Adjust_1937
 
         // распределить diff в возрасты 2-4
         double diff = p.sum(0, 1) - Util.sum(yp);
-        
+
         p = RescalePopulation.scaleYearAgeAllTo(p, 0, yp[0]);
         p = RescalePopulation.scaleYearAgeAllTo(p, 1, yp[1]);
         p = RescalePopulation.scaleYearAgeAllTo(p, 2, p.get(Locality.TOTAL, Gender.BOTH, 2) + diff / 3);
@@ -199,4 +222,11 @@ public class Adjust_1937
         p = RescalePopulation.scaleYearAgeAllTo(p, 4, p.get(Locality.TOTAL, Gender.BOTH, 4) + diff / 3);
 
         Util.assertion(Util.same(psum_initial, p.sum()));
-    }}
+    }
+
+    private PopulationByLocality add(PopulationByLocality p, Gender gender, int age, double amount) throws Exception
+    {
+        double v = p.get(Locality.TOTAL, gender, age);
+        return RescalePopulation.scaleYearAgeAllTo(p, gender, age, v + amount);
+    }
+}

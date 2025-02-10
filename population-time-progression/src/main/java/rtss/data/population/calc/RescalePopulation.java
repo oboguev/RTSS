@@ -170,35 +170,68 @@ public class RescalePopulation
      */
     public static PopulationByLocality scaleYearAgeAllTo(PopulationByLocality p, int age, double target) throws Exception
     {
-        double scale = target / p.sum(Locality.TOTAL, Gender.BOTH, age, age);
-        return scaleYearAgeAllBy(p, age, scale);
+        return scaleYearAgeAllTo(p, Gender.BOTH, age, target);
+    }
+    
+    public static PopulationByLocality scaleYearAgeAllTo(PopulationByLocality p, Gender gender, int age, double target) throws Exception
+    {
+        double scale = target / p.sum(Locality.TOTAL, gender, age, age);
+        return scaleYearAgeAllBy(p, gender, age, scale);
     }
 
     public static Population scaleYearAgeAllTo(Population p, int age, double target) throws Exception
     {
-        double scale = target / p.sum(Gender.BOTH, age, age);
-        return scaleYearAgeBy(p, age, scale);
+        return scaleYearAgeAllTo(p, Gender.BOTH, age, target);
+    }
+
+    public static Population scaleYearAgeAllTo(Population p, Gender gender, int age, double target) throws Exception
+    {
+        double scale = target / p.sum(gender, age, age);
+        return scaleYearAgeBy(p, gender, age, scale);
     }
 
     public static PopulationByLocality scaleYearAgeAllBy(PopulationByLocality p, int age, double scale) throws Exception
     {
-        Population rural = scaleYearAgeBy(p.forLocality(Locality.RURAL), age, scale);
-        Population urban = scaleYearAgeBy(p.forLocality(Locality.URBAN), age, scale);
-        Population total = scaleYearAgeBy(p.forLocality(Locality.TOTAL), age, scale);
+        return scaleYearAgeAllBy(p, Gender.BOTH, age, scale);
+    }
+    
+    public static PopulationByLocality scaleYearAgeAllBy(PopulationByLocality p, Gender gender, int age, double scale) throws Exception
+    {
+        Population rural = scaleYearAgeBy(p.forLocality(Locality.RURAL), gender, age, scale);
+        Population urban = scaleYearAgeBy(p.forLocality(Locality.URBAN), gender, age, scale);
+        Population total = scaleYearAgeBy(p.forLocality(Locality.TOTAL), gender, age, scale);
 
         return new PopulationByLocality(total, urban, rural);
     }
 
     public static Population scaleYearAgeBy(Population p, int age, double scale) throws Exception
     {
+        return scaleYearAgeBy(p, Gender.BOTH, age, scale);
+    }
+
+    public static Population scaleYearAgeBy(Population p, Gender gender, int age, double scale) throws Exception
+    {
         if (p == null)
             return null;
 
         double[] m = p.asArray(Gender.MALE);
-        m[age] *= scale;
-
         double[] f = p.asArray(Gender.FEMALE);
-        f[age] *= scale;
+        
+        switch (gender)
+        {
+        case MALE:
+            m[age] *= scale;
+            break;
+
+        case FEMALE:
+            f[age] *= scale;
+            break;
+        
+        case BOTH:
+            m[age] *= scale;
+            f[age] *= scale;
+            break;
+        }
 
         double m_unknown = p.getUnknown(Gender.MALE);
         double f_unknown = p.getUnknown(Gender.FEMALE);

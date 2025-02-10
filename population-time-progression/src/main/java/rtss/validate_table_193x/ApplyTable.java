@@ -63,6 +63,11 @@ public class ApplyTable
                 .show("1937", p1937.toTotal())
                 .show("1939", p1939_down)
                 .display();
+        
+        for (int age = 18; age <= 25; age++)
+        {
+            // ###
+        }
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
@@ -72,7 +77,7 @@ public class ApplyTable
         Util.out("к численности по переписи января 1939 года:");
         Util.out(String.format("для раздельной передвижки городского и сельского населения: %.4f", multiplier_ur));
         Util.out(String.format("для передвижки без разбивки населения по типу местности: %.4f", multiplier_t));
-        
+
         if (Util.False)
         {
             double diff_t = difference(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
