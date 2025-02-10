@@ -102,23 +102,44 @@ public class Adjust_1937
         }
         else
         {
-            double basic = total_adjustment / 7.0;
-            double[] ma = {
-                           0, // age 19
-                           0, // age 20
-                           0, // age 21
-                           0, // age 22
-                           0, // age 23
-                           0, // age 24
-                           0, // age 25
+            /*
+             * Значения нехватки распечатаны функцией
+             * rtss.validate_table_193x.ApplyTable.print_difference
+             * сравненивающей с переписью 1939 года сдвинутой на 2.03 года вниз.
+             * 
+             * Результаты затем подстроены вручную чтобы добиться примерно равного отстояния
+             * от кривой 1939 года.
+             */
+            double[] male_adjustements = {
+                                           0, // age 18, было 0, добавлено вручную для отстояния линии графиков 1937 и 1939
+                                           10_000, // age 19, было 0, добавлено вручную для отстояния линии графиков 1937 и 1939
+                                           185_403, // age 20, было 135_403
+                                           344_148, // age 21
+                                           375_345, // age 22
+                                           385_240 - 15_000, // age 23, было 385_240
+                                           231_193 - 10_000, // age 24
+                                           65_340 + 7_000, // age 25
+                                           24_026 + 2_000, // age 26, было 4_026
+                                           0, // age 27
+                                           0, // age 28
+                                           15_822 + 11_000, // age 29, было 15_822
+                                           45_675 + 8_000, // age 30, было 45_675
+                                           31_746 + 5_000, // age 31, было 31_746 
+                                           31_000, // age 32
+                                           31_000, // age 33 
+                                           20_000, // age 34
+                                           20_000 // age 35
+
             };
-            
-            for (int age = 19; age <= 25; age++)
-            {
-                pto = add(pto, Gender.MALE, age, basic + ma[age - 19]);
-            }
-            
-            // ###
+
+            // male_adjustements = Util.multiply(male_adjustements, 1.1);
+            male_adjustements = Util.multiply(Util.normalize(male_adjustements), total_adjustment);
+
+            // Util.out(String.format("1937 remainder: %,d", (int) Math.ceil(remainder)));
+            Util.noop();
+
+            for (int age = 18; age <= 35; age++)
+                pto = add(pto, Gender.MALE, age, male_adjustements[age - 18]);
         }
 
         pto.recalcTotalForEveryLocality();

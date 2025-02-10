@@ -64,10 +64,7 @@ public class ApplyTable
                 .show("1939", p1939_down)
                 .display();
         
-        for (int age = 18; age <= 25; age++)
-        {
-            // ###
-        }
+        // print_difference(p1939_down, p1937.toTotal());
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
@@ -82,6 +79,7 @@ public class ApplyTable
         {
             double diff_t = difference(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
             double diff_ur = difference(p1937, p1939, mt, multiplier_ur, true);
+            Util.unused(diff_t, diff_ur);
         }
 
         PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false);
@@ -356,5 +354,24 @@ public class ApplyTable
             return f;
         else
             return fallback;
+    }
+    
+    /* ====================================================================================================== */
+
+    @SuppressWarnings("unused")
+    private void print_difference(PopulationContext p1939_down, PopulationContext p1937) throws Exception
+    {
+        for (Gender gender : Gender.TwoGenders)
+        {
+            Util.out("");
+            Util.out("Нехватка в переписи 1937 года для пола " + gender);
+            for (int age = 16; age <= 32; age++)
+            {
+                double v39 = p1939_down.getYearValue(gender, age); 
+                double v37 = p1937.getYearValue(gender, age);
+                double v = Math.max(0, v39 - v37);
+                Util.out(String.format("%d %,d", age, (int) Math.ceil(v)));
+            }
+        }
     }
 }
