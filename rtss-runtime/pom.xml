@@ -33,7 +33,6 @@
 		<dependency>
 			<groupId>com.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
-			<version>5.9</version>
 		</dependency>
 
 		<!-- charts -->
