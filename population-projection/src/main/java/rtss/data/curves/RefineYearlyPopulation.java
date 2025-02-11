@@ -22,19 +22,37 @@ public class RefineYearlyPopulation
      *     1958 = 64.474, 17.232,  8.530, 5.790, 3.974
      *     
      */
-    private static final double[] attrition_1926 = { 8706, 3667, 1802, 1173, 891 };
-    private static final double[] attrition_1938 = { 10963, 3606, 1616, 932, 550 };
-    private static final double[] attrition_1958 = { 1882, 503, 249, 169, 116 };
-    private static final double[] attrition = attrition_1938;
+    private static final double[] attrition04_1926 = { 8706, 3667, 1802, 1173, 891 };
+    private static final double[] attrition04_1938 = { 10963, 3606, 1616, 932, 550 };
+    private static final double[] attrition04_1958 = { 1882, 503, 249, 169, 116 };
+    private static final double[] attrition04 = attrition04_1938;
+    
+    /*
+     * То же для убыли в возрастах 5-9:
+     * 
+     *     1926 = 31.194, 23.981, 18.735, 14.801, 11.288
+     *     1938 = 30.145, 23.602, 18.736, 15.045, 12.472
+     *     1958 = 23.622, 21.850, 20.276, 17.913, 16.339
+     */
+    private static final double[] attrition59_1926 = { 666, 512, 400, 316, 241 };
+    private static final double[] attrition59_1938 = { 539, 422, 335, 269, 223 };
+    private static final double[] attrition59_1958 = { 120, 111, 103, 91, 83 };
+    private static final double[] attrition59 = attrition59_1938;
 
     public static double[] refine(Bin[] bins, String title, double[] p) throws Exception
     {
-        Util.unused(attrition_1926, attrition_1938, attrition_1958);
+        if (Util.True)
+            return p;
+        
+        Util.unused(attrition04_1926, attrition04_1938, attrition04_1958);
+        Util.unused(attrition59_1926, attrition59_1938, attrition59_1958);
         
         if (bins[0].widths_in_years != 5 || p[0] <= p[5])
             return p;
 
         double original_sum04 = Util.sum(Util.splice(p, 0, 4));
+        if (original_sum04/5 <= p[5])
+            return p;
 
         double a1 = 0;
         double a2 = 2 * original_sum04;
@@ -45,7 +63,7 @@ public class RefineYearlyPopulation
                 throw new Exception("RefineYearlyPopulation не сходится");
             
             double a = (a1 + a2) / 2;
-            double[] p05 = calc04(Util.splice(p, 0, 5), Util.normalize(attrition, a));
+            double[] p05 = calc04(Util.splice(p, 0, 5), Util.normalize(attrition04, a));
             double sum04 = Util.sum(Util.splice(p05, 0, 4));
 
             if (Util.same(sum04, original_sum04))

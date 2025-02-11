@@ -14,13 +14,13 @@ import rtss.util.Util;
 
 public class PopulationADH
 {
-    static public boolean UsePrecomputedFiles = true;
+    static public boolean UsePrecomputedFiles = false; // ###
     static public boolean UseCache = true;
 
     private static Map<String, Population> cache = new HashMap<>();
-    
-    private static int[] ageBinWidths = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16};
-    
+
+    private static int[] ageBinWidths = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16 };
+
     public static int[] AgeBinWidthsYears()
     {
         return Util.dup(ageBinWidths);
@@ -39,6 +39,7 @@ public class PopulationADH
     public static Population getPopulation(Area area, String year) throws Exception
     {
         Population p = null;
+        Integer yearHint = yearHint(year);
 
         String cacheKey = area.name() + "-" + year;
         if (UseCache)
@@ -69,18 +70,18 @@ public class PopulationADH
             String excel_path = String.format("population_data/%s/%s-population-ADH.xlsx", area.name(), area.name());
 
             MutableDouble m_unknown = new MutableDouble();
-            double[] m = PopulationFromExcel.loadCounts(excel_path, Gender.MALE, year, m_unknown);
+            double[] m = PopulationFromExcel.loadCounts(excel_path, Gender.MALE, year, m_unknown, yearHint);
             /* population data in AHD books (and Excel file) is in thousands */
             m = Util.multiply(m, 1000);
             round(m);
 
             MutableDouble f_unknown = new MutableDouble();
-            double[] f = PopulationFromExcel.loadCounts(excel_path, Gender.FEMALE, year, f_unknown);
+            double[] f = PopulationFromExcel.loadCounts(excel_path, Gender.FEMALE, year, f_unknown, yearHint);
             f = Util.multiply(f, 1000);
             round(f);
 
-            p = new Population(Locality.TOTAL, 
-                               m, m_unknown.doubleValue(), null, 
+            p = new Population(Locality.TOTAL,
+                               m, m_unknown.doubleValue(), null,
                                f, f_unknown.doubleValue(), null);
         }
 
@@ -92,11 +93,22 @@ public class PopulationADH
 
         return p;
     }
-    
+
     private static void round(double[] x)
     {
         for (int age = 0; age < x.length; age++)
             x[age] = Math.round(x[age]);
+    }
+
+    private static Integer yearHint(String year)
+    {
+        if (year.contains("-"))
+        {
+            String[] sa = year.split("-");
+            year = sa[0];
+        }
+        
+        return Integer.parseInt(year);
     }
 
     /* ========================================================================== */

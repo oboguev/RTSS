@@ -71,7 +71,7 @@ public class PopulationByLocality
             p.urban = urban.clone();
         if (total != null)
             p.total = total.clone();
-        
+
         p.title = title;
 
         return p;
@@ -98,7 +98,7 @@ public class PopulationByLocality
     {
         return total != null;
     }
-    
+
     public String title()
     {
         return title;
@@ -108,7 +108,35 @@ public class PopulationByLocality
     {
         this.title = title;
     }
-    
+
+    public Integer yearHint()
+    {
+        Integer yearHint = null;
+
+        if (yearHint == null && this.total != null)
+            yearHint = this.total.yearHint();
+
+        if (yearHint == null && this.urban != null)
+            yearHint = this.urban.yearHint();
+
+        if (yearHint == null && this.rural != null)
+            yearHint = this.rural.yearHint();
+
+        return yearHint;
+    }
+
+    public void setYearHint(Integer yearHint)
+    {
+        if (this.total != null)
+            this.total.setYearHint(yearHint);
+
+        if (this.urban != null)
+            this.urban.setYearHint(yearHint);
+
+        if (this.rural != null)
+            this.rural.setYearHint(yearHint);
+    }
+
     /****************************************************************************************************/
 
     public double get(Locality locality, Gender gender, int age) throws Exception
@@ -125,12 +153,12 @@ public class PopulationByLocality
     {
         return sum(Locality.TOTAL, gender, age1, age2);
     }
-    
+
     public double sum(int age1, int age2) throws Exception
     {
         return sum(Locality.TOTAL, Gender.BOTH, age1, age2);
     }
-    
+
     public double sum(Locality locality) throws Exception
     {
         return sum(locality, Gender.BOTH, 0, MAX_AGE);
@@ -255,6 +283,7 @@ public class PopulationByLocality
             return new PopulationByLocality(x_total);
         }
     }
+
     /*
      * Вернуть результат вычитания @this - @p
      */
@@ -262,7 +291,7 @@ public class PopulationByLocality
     {
         return sub(p, null);
     }
-    
+
     public PopulationByLocality sub(PopulationByLocality p, ValueConstraint rvc) throws Exception
     {
         if ((rural != null) != (p.rural != null))
@@ -295,7 +324,7 @@ public class PopulationByLocality
     {
         return add(p, null);
     }
-    
+
     public PopulationByLocality add(PopulationByLocality p, ValueConstraint rvc) throws Exception
     {
         if ((rural != null) != (p.rural != null))
@@ -328,7 +357,7 @@ public class PopulationByLocality
     {
         return avg(p, null);
     }
-    
+
     public PopulationByLocality avg(PopulationByLocality p, ValueConstraint rvc) throws Exception
     {
         PopulationByLocality p2 = this.add(p, rvc);
@@ -676,7 +705,7 @@ public class PopulationByLocality
     public String dump(boolean rounded) throws Exception
     {
         StringBuilder sb = new StringBuilder();
-        
+
         if (total != null)
         {
             sb.append("TOTAL:");
@@ -684,7 +713,7 @@ public class PopulationByLocality
             sb.append(total.dump(rounded));
             sb.append("");
         }
- 
+
         if (urban != null)
         {
             sb.append("URBAN:");
@@ -700,7 +729,7 @@ public class PopulationByLocality
             sb.append(rural.dump(rounded));
             sb.append("");
         }
-        
+
         return sb.toString();
     }
 
@@ -708,19 +737,19 @@ public class PopulationByLocality
     {
         if (total != null)
             total.validateBMF();
- 
+
         if (urban != null)
             urban.validateBMF();
 
         if (rural != null)
             rural.validateBMF();
     }
-    
+
     public void zero() throws Exception
     {
         if (total != null)
             total.zero();
- 
+
         if (urban != null)
             urban.zero();
 

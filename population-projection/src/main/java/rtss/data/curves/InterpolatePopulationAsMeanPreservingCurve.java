@@ -25,7 +25,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 {
     public static final int MAX_AGE = Population.MAX_AGE;
 
-    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
+    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint) throws Exception
     {
         // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);
@@ -33,30 +33,53 @@ public class InterpolatePopulationAsMeanPreservingCurve
         Exception ex = null;
         double[] curve = null;
 
-        try
+        if (Util.False)
         {
-            curve = curve_csasra(bins, title, targetResolution);
-        }
-        catch (Exception e2)
-        {
-            Util.err("CSASRA disaggregation failed for " + title);
-            ex = e2;
+            try
+            {
+                curve = curve_csasra(bins, title, targetResolution);
+            }
+            catch (Exception e2)
+            {
+                Util.err("CSASRA disaggregation failed for " + title);
+                ex = e2;
+            }
         }
 
-        try
+        if (Util.True)
         {
-            if (curve == null)
-                curve = curve_spline(bins, title, targetResolution);
-        }
-        catch (Exception e2)
-        {
-            Util.err("Spline disaggregation failed for " + title);
-            // ex = e2;
+            try
+            {
+                if (curve == null)
+                    curve = curve_spline(bins, title, targetResolution);
+            }
+            catch (Exception e2)
+            {
+                Util.err("Spline disaggregation failed for " + title);
+                if (ex == null)
+                ex = e2;
+            }
         }
 
         if (curve == null)
-            throw ex;
+        {
+            if (ex != null)
+                throw ex;
+            else
+                throw new Exception("Unable to build the curve");
+        }
         
+        if (Util.True)
+        {
+            int ppy = 1;
+            double[] xxx = Bins.ppy_x(bins, ppy);
+            ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
+            chart.addSeries("curve", xxx, curve);
+            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.display();
+            Util.noop();
+        }
+
         return curve;
     }
 
@@ -119,7 +142,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new Exception("Error calculating curve (negative value)");
 
         CurveVerifier.validate_means(yy, bins);
-        
+
         if (targetResolution == TargetResolution.YEARLY)
         {
             /* уточнить разбивку на возраста 0-4 */
@@ -264,7 +287,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new Exception("Error calculating curve (negative value)");
 
         CurveVerifier.validate_means(yy, bins);
-        
+
         if (targetResolution == TargetResolution.YEARLY)
         {
             /* уточнить разбивку на возраста 0-4 */

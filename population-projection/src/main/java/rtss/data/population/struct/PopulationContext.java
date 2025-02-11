@@ -108,6 +108,7 @@ public class PopulationContext
     private LocalityGenderToDoubleArray m;
     private ValueConstraint valueConstraint;
     private String title;
+    private Integer yearHint;
 
     /*
      * Total number of births during forwarding
@@ -140,6 +141,7 @@ public class PopulationContext
         cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
         cx.title = title;
+        cx.yearHint = yearHint; 
         return cx;
     }
 
@@ -163,6 +165,16 @@ public class PopulationContext
         return valueConstraint;
     }
 
+    public Integer yearHint()
+    {
+        return yearHint;
+    }
+
+    public void setYearHint(Integer yearHint)
+    {
+        this.yearHint = yearHint;
+    }
+    
     public double getDay(Locality locality, Gender gender, int day) throws Exception
     {
         checkAccess(locality, gender, day);
@@ -513,7 +525,7 @@ public class PopulationContext
         String curve_title = String.format("[PopulationContext.begin] %s %s %s",
                                            title != null ? title : "unnamed",
                                            locality.name(), gender.name());
-        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, curve_title, TargetResolution.DAILY);
+        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, curve_title, TargetResolution.DAILY, yearHint());
 
         for (int age = 0; age < NYEARS; age++)
         {
@@ -1298,6 +1310,7 @@ public class PopulationContext
         cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
         cx.title = title;
+        cx.yearHint = yearHint;
 
         for (Gender gender : Gender.TwoGenders)
         {

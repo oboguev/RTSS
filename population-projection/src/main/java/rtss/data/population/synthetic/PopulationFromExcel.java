@@ -18,12 +18,12 @@ public class PopulationFromExcel extends ExcelLoader
 {
     private static final double MAX_DIFF = 3;
 
-    public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown) throws Exception
+    public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown, Integer yearHint) throws Exception
     {
-        return loadCounts(path, gender, "" + year, v_unknown);
+        return loadCounts(path, gender, "" + year, v_unknown, yearHint);
     }
     
-    public static double[] loadCounts(String path, Gender gender, String year, MutableDouble v_unknown) throws Exception
+    public static double[] loadCounts(String path, Gender gender, String year, MutableDouble v_unknown, Integer yearHint) throws Exception
     {
         /*
          * parse excel rows and fill them into the bins
@@ -145,7 +145,7 @@ public class PopulationFromExcel extends ExcelLoader
             throw new Exception("Invalid population age range");
 
         String title = "Population " + gender.toString() + year;
-        double[] counts = bins2yearly(bins, title);
+        double[] counts = bins2yearly(bins, title, yearHint);
         
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);
@@ -156,7 +156,7 @@ public class PopulationFromExcel extends ExcelLoader
         return counts;
     }
 
-    private static double[] bins2yearly(Bin[] bins, String title) throws Exception
+    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint) throws Exception
     {
         boolean interpolate = false;
 
@@ -174,6 +174,6 @@ public class PopulationFromExcel extends ExcelLoader
             return v;
         }
         
-        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY);
+        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint);
     }
 }

@@ -28,6 +28,7 @@ public class Population
     DoubleArray female = newDoubleArray();
     DoubleArray both = newDoubleArray();
     Locality locality;
+    Integer yearHint;
 
     double male_unknown = 0;
     double male_total = 0;
@@ -105,6 +106,16 @@ public class Population
     {
         return locality;
     }
+    
+    public Integer yearHint()
+    {
+        return yearHint;
+    }
+
+    public void setYearHint(Integer yearHint)
+    {
+        this.yearHint = yearHint;
+    }
 
     public Population(Locality locality,
             double[] m, double m_unknown, ValueConstraint mvc,
@@ -159,6 +170,7 @@ public class Population
         p.female_total = female_total;
         p.both_unknown = both_unknown;
         p.both_total = both_total;
+        p.yearHint = yearHint;
 
         if (male != null)
             p.male = new DoubleArray(male);
@@ -1282,27 +1294,27 @@ public class Population
 
     /*****************************************************************************************************/
 
-    public Population(Bin[] maleBins, Bin[] femaleBins) throws Exception
+    public Population(Bin[] maleBins, Bin[] femaleBins, Integer yearHint) throws Exception
     {
-        this(Locality.TOTAL, maleBins, femaleBins);
+        this(Locality.TOTAL, maleBins, femaleBins, yearHint);
     }
 
-    public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins) throws Exception
+    public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins, Integer yearHint) throws Exception
     {
         this(locality,
-             bin2array(maleBins), 0, null,
-             bin2array(femaleBins), 0, null);
+             bin2array(maleBins, yearHint), 0, null,
+             bin2array(femaleBins, yearHint), 0, null);
     }
 
-    private static double[] bin2array(Bin[] bins) throws Exception
+    private static double[] bin2array(Bin[] bins, Integer yearHint) throws Exception
     {
         bins = Bins.bins(bins);
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.widths_in_years(bins) != MAX_AGE + 1)
             throw new IllegalArgumentException("invalid bins layout");
-        return bins2yearly(bins, "dynamic");
+        return bins2yearly(bins, "dynamic", yearHint);
     }
 
-    private static double[] bins2yearly(Bin[] bins, String title) throws Exception
+    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint) throws Exception
     {
         boolean interpolate = false;
 
@@ -1324,7 +1336,7 @@ public class Population
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY);
+        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint);
 
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);

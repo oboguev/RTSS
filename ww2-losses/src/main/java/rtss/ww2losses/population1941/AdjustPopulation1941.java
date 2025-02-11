@@ -64,7 +64,7 @@ public class AdjustPopulation1941 extends AdjustPopulation
 
         Bin[] male = p.binSumByAge(Gender.MALE, rebin(ADH_binning, isolateAgesMale));
         Bin[] female = p.binSumByAge(Gender.FEMALE, rebin(ADH_binning, isolateAgesFemale));
-        p = new Population(male, female);
+        p = new Population(male, female, 1941);
 
         if (Util.False)
         {
