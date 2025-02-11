@@ -13,12 +13,24 @@ public class RefineYearlyPopulation
     /* 
      * Характерное соотношение убыли среднегодового населения для возрастов 0-4,
      * при переходе от возраста (x) к возрасту (x + 1), где x = [0...4].
-     * Взято по таблице смертности ГКС для СССР 1939-1939 гг.
+     * Взяты по таблицам смертности ГКС для СССР 1926-1927, 1939-1939 и 1958-1959 гг.
+     * 
+     * Распределение весьма близко между годами:
+     * 
+     *     1926 = 53.612, 22.581, 11.097, 7.223, 5.487 
+     *     1938 = 62.054, 20.411,  9.147, 5.275, 3.113
+     *     1958 = 64.474, 17.232,  8.530, 5.790, 3.974
+     *     
      */
-    private static final double[] attrition = { 10963, 3606, 1616, 932, 550 };
+    private static final double[] attrition_1926 = { 8706, 3667, 1802, 1173, 891 };
+    private static final double[] attrition_1938 = { 10963, 3606, 1616, 932, 550 };
+    private static final double[] attrition_1958 = { 1882, 503, 249, 169, 116 };
+    private static final double[] attrition = attrition_1938;
 
     public static double[] refine(Bin[] bins, String title, double[] p) throws Exception
     {
+        Util.unused(attrition_1926, attrition_1938, attrition_1958);
+        
         if (bins[0].widths_in_years != 5 || p[0] <= p[5])
             return p;
 
