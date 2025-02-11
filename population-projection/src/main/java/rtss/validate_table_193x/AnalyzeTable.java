@@ -28,7 +28,8 @@ public class AnalyzeTable
         }
     }
 
-    private Map<String, Double> ratios = new HashMap<>();
+    private Map<String, String> ratios = new HashMap<>();
+    private final String nbsp = "" + (char) 0xA0;
 
     private void analyze(String tablePath) throws Exception
     {
@@ -40,10 +41,10 @@ public class AnalyzeTable
         Util.out("% мужского населения в совокупном, городском, сельском и год рождения");
         for (int age = 0; age <= Population.MAX_AGE; age++)
         {
-            double t = 100.0 * ratios.get(key(age, Locality.TOTAL));
-            double u = 100.0 * ratios.get(key(age, Locality.URBAN));
-            double r = 100.0 * ratios.get(key(age, Locality.RURAL));
-            Util.out(String.format("%-3d %5.1f %5.1f %5.1f %4d", age, t, u, r, 1938 - age));
+            String t = ratios.get(key(age, Locality.TOTAL));
+            String u = ratios.get(key(age, Locality.URBAN));
+            String r = ratios.get(key(age, Locality.RURAL));
+            Util.out(String.format("%-3d %12s %12s %12s     %4d", age, t, u, r, 1938 - age));
         }
 
         ratios.clear();
@@ -55,28 +56,15 @@ public class AnalyzeTable
         Util.out("% городского населения в совокупном, мужском, женском и год рождения");
         for (int age = 0; age <= Population.MAX_AGE; age++)
         {
-            Double b = ratios.get(key(age, Gender.BOTH));
-            Double m = ratios.get(key(age, Gender.MALE));
-            Double f = ratios.get(key(age, Gender.FEMALE));
-            Util.out(String.format("%-3d %5s %5s %5s %4d", age, pct(b), pct(m), pct(f), 1938 - age));
+            String b = ratios.get(key(age, Gender.BOTH));
+            String m = ratios.get(key(age, Gender.MALE));
+            String f = ratios.get(key(age, Gender.FEMALE));
+            Util.out(String.format("%-3d %12s %12s %12s     %4d", age, b, m, f, 1938 - age));
         }
-    }
-
-    private String pct(Double ratio)
-    {
-        if (ratio == null)
-            return String.format("%5s", "????");
-        else
-            return String.format("%5.1f", 100 * ratio);
     }
 
     /* ========================================================================================================================= */
     
-    /*
-     * Последний десятичный знак в опубликованных коэффициентах
-     */
-    private final double precision = 0.00001;
-
     private String key(int age, Locality locality)
     {
         return locality.name() + "." + age;
@@ -91,7 +79,17 @@ public class AnalyzeTable
         Double[] male_fraction = male_fraction(qx_both, qx_male, qx_female);
 
         for (int age = 0; age <= Population.MAX_AGE; age++)
-            ratios.put(key(age, locality), male_fraction[age]);
+        {
+            Double v = male_fraction[age];
+            String s = "????";
+            if (v != null)
+            {
+                s = String.format("%5.1f", v * 100.0);
+                s = appendPrecision(s, qx_male[age], qx_female[age]);
+            }
+
+            ratios.put(key(age, locality), s);
+        }
     }
 
     /*
@@ -144,7 +142,17 @@ public class AnalyzeTable
         Double[] urban_fraction = urban_fraction(qx_total, qx_urban, qx_rural);
 
         for (int age = 0; age <= Population.MAX_AGE; age++)
-            ratios.put(key(age, gender), urban_fraction[age]);
+        {
+            Double v = urban_fraction[age];
+            String s = "????";
+            if (v != null)
+            {
+                s = String.format("%.1f", v * 100.0);
+                s = appendPrecision(s, qx_urban[age], qx_rural[age]);
+            }
+
+            ratios.put(key(age, gender), s);
+        }
     }
 
     private Double[] urban_fraction(double[] qx_total, double[] qx_urban, double[] qx_rural) throws Exception
@@ -176,5 +184,40 @@ public class AnalyzeTable
         }
 
         return urban_fraction;
+    }
+
+    /* ========================================================================================================================= */
+
+    /*
+     * Последний десятичный знак в опубликованных коэффициентах
+     */
+    private final double precision = 0.00001;
+    
+    private String appendPrecision(String s, double v1, double v2)
+    {
+        double dv = Math.abs(v1 - v2);
+        
+        int play = 0;
+        
+        if (dv <= precision * 1.01)
+        {
+            play = 100;
+        }
+        else if (dv <= precision * 20.01)
+        {
+            int n = (int) Math.round(dv / precision);
+            play = Math.round(100 / n);
+        }
+        else
+        {
+            // do nothing
+        }
+        
+        if (play != 0)
+        {
+            s = s + nbsp + "±" + nbsp + play;
+        }
+        
+        return s;
     }
 }
