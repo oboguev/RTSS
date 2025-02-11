@@ -7,6 +7,7 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveVerifier;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
@@ -180,21 +181,8 @@ public class InterpolateASFR
         if (!Util.isNonNegative(yy))
             throw new Exception("Error calculating curve (negative value)");
 
-        validate_means(yy, bins);
+        CurveVerifier.validate_means(yy, bins);
 
         return yyy;
-    }
-
-    /*
-     * Verify that the curve preserves mean values as indicated by the bins
-     */
-    static void validate_means(double[] yy, Bin... bins) throws Exception
-    {
-        for (Bin bin : bins)
-        {
-            double[] y = Util.splice(yy, bin.age_x1, bin.age_x2);
-            if (Util.differ(Util.average(y), bin.avg, 0.001))
-                throw new Exception("Curve does not preserve mean values of the bins");
-        }
     }
 }

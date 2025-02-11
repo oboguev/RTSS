@@ -8,9 +8,11 @@ import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunctio
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.optim.AbstractConvergenceChecker;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.SimpleVectorValueChecker;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +20,16 @@ import java.util.List;
 /*
  * DeepSeek prompts:
  * 
+ *    https://chat.deepseek.com/a/chat/s/b491ea79-ea38-4d00-8587-3c96f9ab3092
+ *    
  *    Are you familiar with the notion of demographic life tables and age mortality coefficients q(x)?
  * 
  *    ..................
-
+ *    
  *    Are you familiar with Heligman-Pollard mortality law?
  * 
  *    ..................
-
+ *    
  *    I have an array of binned data for mortality over age ranges.
  *    Each bin is a Java structure and represents an age range and has the following fields:
  *    
@@ -57,7 +61,8 @@ import java.util.List;
  *    Can you please also add a consistency check at the start of the algorithm?
  *    Verify that bins are continuous in age and there are no age gaps between the bins.
  *    Throw an exception if the check is not successful.
-
+ *    
+ *    https://stackoverflow.com/questions/79428960/updating-apache-math-optimization-code-for-3-6-1
  */
 public class HeligmanPollardFitter
 {
@@ -133,12 +138,12 @@ public class HeligmanPollardFitter
                 double predicted = model.value(x[i], params);
                 residuals.setEntry(i, Math.abs(predicted - y[i])); // Absolute deviation
             }
-            return new org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian(
-                                                                                             residuals, jacobianMatrix);
+            return new ModelFunctionJacobian(residuals, jacobianMatrix);
         };
 
         // Set up the optimizer
-        ConvergenceChecker<LeastSquaresOptimizer.Optimum> checker = new SimpleVectorValueChecker(1e-6, 1e-6);
+        // ConvergenceChecker<LeastSquaresOptimizer.Optimum> checker = new SimpleVectorValueChecker(1e-6, 1e-6);
+        AbstractConvergenceChecker<LeastSquaresOptimizer.Optimum> checker = new SimpleVectorValueChecker(1e-6, 1e-6);
         LeastSquaresProblem problem = new LeastSquaresBuilder()
                 .start(initialGuess)
                 .model(jacobian)

@@ -420,11 +420,13 @@ public class Util
     // extract a subsection [x1...x2] from am array of doubles
     public static double[] splice(final double[] y, int x1, int x2)
     {
-        double[] yy = new double[x2 - x1 + 1];
+        int size = x2 - x1 + 1;
+        if (size <= 0)
+            throw new IllegalArgumentException("array splice : negative size");
+        
+        double[] yy = new double[size];
         for (int x = x1; x <= x2; x++)
-        {
             yy[x - x1] = y[x];
-        }
         return yy;
     }
 

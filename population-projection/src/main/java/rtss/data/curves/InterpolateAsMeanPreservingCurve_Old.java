@@ -84,7 +84,7 @@ public class InterpolateAsMeanPreservingCurve_Old
         @SuppressWarnings("unused")
         double[] before_res_y = Util.dup(res_y);
         preserve_means(res_y, bins);
-        validate_means(res_y, bins);
+        CurveVerifier.validate_means(res_y, bins);
 
         if (Util.False)
         {
@@ -130,19 +130,6 @@ public class InterpolateAsMeanPreservingCurve_Old
                 // return spline.value(x);
                 return aspline.value(x);
             }
-        }
-    }
-
-    /*
-     * Check that the curve preserves mean values as indicated by the bins
-     */
-    static private void validate_means(double[] yy, Bin... bins) throws Exception
-    {
-        for (Bin bin : bins)
-        {
-            double[] y = Util.splice(yy, bin.age_x1, bin.age_x2);
-            if (Util.differ(Util.average(y), bin.avg))
-                throw new Exception("Curve does not preserve mean values of the bins");
         }
     }
 

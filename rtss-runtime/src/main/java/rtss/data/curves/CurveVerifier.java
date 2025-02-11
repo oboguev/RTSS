@@ -14,6 +14,11 @@ public class CurveVerifier
     /*
      * Verify that the curve preserves mean values as indicated by the bins
      */
+    public static void validate_means(Bin[] bins, double[] yy) throws Exception
+    {
+        validate_means(yy, bins);
+    }
+    
     public static void validate_means(double[] yy, Bin[] bins) throws Exception
     {
         int ppy = CurveUtil.ppy(yy, bins);
@@ -25,7 +30,7 @@ public class CurveVerifier
                 throw new Exception("Curve does not preserve mean values of the bins");
         }
     }
-
+    
     /*
      * Verify that the bins data is U-shaped
      */

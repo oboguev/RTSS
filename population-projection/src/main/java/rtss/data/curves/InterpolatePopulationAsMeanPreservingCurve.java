@@ -31,10 +31,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
         // return curve_pclm(bins, title);
 
         Exception ex = null;
+        double[] curve = null;
 
         try
         {
-            return curve_csasra(bins, title, targetResolution);
+            curve = curve_csasra(bins, title, targetResolution);
         }
         catch (Exception e2)
         {
@@ -44,7 +45,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         try
         {
-            return curve_spline(bins, title, targetResolution);
+            if (curve == null)
+                curve = curve_spline(bins, title, targetResolution);
         }
         catch (Exception e2)
         {
@@ -52,7 +54,18 @@ public class InterpolatePopulationAsMeanPreservingCurve
             // ex = e2;
         }
 
-        throw ex;
+        if (curve == null)
+            throw ex;
+        
+        if (targetResolution == TargetResolution.YEARLY && bins[0].widths_in_years == 5)
+        {
+            /*
+             * Уточнить разбивку на 0-4
+             */
+            // ###
+        }
+
+        return curve;
     }
 
     /* ================================================================================================ */
@@ -89,10 +102,10 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new IllegalArgumentException();
         }
 
-        double[] yyy = DisaggregateVariableWidthSeries.disaggregate(averages, 
-                                                                    intervalWidths, 
-                                                                    maxIterations, 
-                                                                    smoothingSigma, 
+        double[] yyy = DisaggregateVariableWidthSeries.disaggregate(averages,
+                                                                    intervalWidths,
+                                                                    maxIterations,
+                                                                    smoothingSigma,
                                                                     positivityThreshold,
                                                                     maxConvergenceDifference);
 
@@ -113,7 +126,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (!Util.isNonNegative(yy))
             throw new Exception("Error calculating curve (negative value)");
 
-        validate_means(yy, bins);
+        CurveVerifier.validate_means(yy, bins);
 
         return yy;
     }
@@ -251,7 +264,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (!Util.isNonNegative(yy))
             throw new Exception("Error calculating curve (negative value)");
 
-        validate_means(yy, bins);
+        CurveVerifier.validate_means(yy, bins);
 
         return yy;
     }
@@ -281,7 +294,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (!Util.isNonNegative(yy))
             throw new Exception("Error calculating curve (negative value)");
 
-        validate_means(yy, bins);
+        CurveVerifier.validate_means(yy, bins);
 
         return yy;
     }
@@ -302,18 +315,5 @@ public class InterpolatePopulationAsMeanPreservingCurve
         // will fail here
         // CurveVerifier.validate_means(y, bins);
         return y;
-    }
-
-    /*
-     * Verify that the curve preserves mean values as indicated by the bins
-     */
-    static void validate_means(double[] yy, Bin... bins) throws Exception
-    {
-        for (Bin bin : bins)
-        {
-            double[] y = Util.splice(yy, bin.age_x1, bin.age_x2);
-            if (Util.differ(Util.average(y), bin.avg, 0.001))
-                throw new Exception("Curve does not preserve mean values of the bins");
-        }
     }
 }
