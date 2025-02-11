@@ -57,14 +57,6 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (curve == null)
             throw ex;
         
-        if (targetResolution == TargetResolution.YEARLY && bins[0].widths_in_years == 5)
-        {
-            /*
-             * Уточнить разбивку на 0-4
-             */
-            // ###
-        }
-
         return curve;
     }
 
@@ -127,6 +119,13 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new Exception("Error calculating curve (negative value)");
 
         CurveVerifier.validate_means(yy, bins);
+        
+        if (targetResolution == TargetResolution.YEARLY)
+        {
+            /* уточнить разбивку на возраста 0-4 */
+            yy = RefineYearlyPopulation.refine(bins, title, yy);
+            CurveVerifier.validate_means(yy, bins);
+        }
 
         return yy;
     }
@@ -183,7 +182,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         int ppy = 12;
 
-        if (targetResolution == TargetResolution.DAILY) // ###
+        if (targetResolution == TargetResolution.DAILY)
             ppy = 1;
 
         double[] xxx = Bins.ppy_x(bins, ppy);
@@ -265,6 +264,13 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new Exception("Error calculating curve (negative value)");
 
         CurveVerifier.validate_means(yy, bins);
+        
+        if (targetResolution == TargetResolution.YEARLY)
+        {
+            /* уточнить разбивку на возраста 0-4 */
+            yy = RefineYearlyPopulation.refine(bins, title, yy);
+            CurveVerifier.validate_means(yy, bins);
+        }
 
         return yy;
     }
