@@ -1,0 +1,219 @@
+package rtss.data.mortality.laws;
+
+import org.apache.commons.math3.analysis.ParametricUnivariateFunction;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunction;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.SimpleVectorValueChecker;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/*
+ * DeepSeek prompts:
+ * 
+ *    Are you familiar with the notion of demographic life tables and age mortality coefficients q(x)?
+ * 
+ *    ..................
+
+ *    Are you familiar with Heligman-Pollard mortality law?
+ * 
+ *    ..................
+
+ *    I have an array of binned data for mortality over age ranges.
+ *    Each bin is a Java structure and represents an age range and has the following fields:
+ *    
+ *    1. Starting age in years (let's name it bin_starting_age).
+ *    
+ *    2. Width of age interval in years for this bin (let's name it bin_age_width).
+ *    
+ *    3. Average value for mortality coefficient q(x) over this range (let's name if average_qx).
+ *    
+ *    Bins are continuous for age in a sense that next bin in the array begins right after the end of the previous one.
+ *    
+ *    Can you develop an algorithm to fit the coefficients A-H of Heligman-Pollard Law to this mortality data?
+ *    Please write in Java.
+ *    
+ *    ..................
+ *    
+ *    When evaluating a fit (or misfit) criteria, can you please calculate the deviation of predicted Heligman-Pollard curve for the bin 
+ *    by taking into account the curve value at 100 points for every age year within the bin? 
+ *    
+ *    I.e. for every bin evaluate deviation of the Heligman-Pollard curve from the bin's average_qx at 100 * bin_age_width age points across the bin 
+ *    and use all of these points as a feedback for the fitting process, by taking a sum of absolute values of the deviations at each point.
+ *    
+ *    ..................
+ *    
+ *    Will the algorithm correctly handle the bins of different widths, not just of equal width?
+ *    
+ *    ..................
+ *    
+ *    Can you please also add a consistency check at the start of the algorithm?
+ *    Verify that bins are continuous in age and there are no age gaps between the bins.
+ *    Throw an exception if the check is not successful.
+
+ */
+public class HeligmanPollardFitter
+{
+    // Define the Heligman-Pollard function
+    static class HeligmanPollardFunction implements ParametricUnivariateFunction
+    {
+        @Override
+        public double value(double x, double... parameters)
+        {
+            double A = parameters[0];
+            double B = parameters[1];
+            double C = parameters[2];
+            double D = parameters[3];
+            double E = parameters[4];
+            double F = parameters[5];
+            double G = parameters[6];
+            double H = parameters[7];
+
+            double term1 = Math.pow(A, Math.pow(x + B, C));
+            double term2 = D * Math.exp(-E * Math.pow(Math.log(x) - Math.log(F), 2));
+            double term3 = G * Math.pow(H, x);
+
+            double qx = term1 + term2 + term3;
+            return qx / (1 + qx); // Convert to q(x)
+        }
+
+        @Override
+        public double[] gradient(double x, double... parameters)
+        {
+            // Implement the gradient if needed for optimization
+            // For simplicity, we'll let the optimizer approximate the gradient
+            return new double[8]; // Placeholder
+        }
+    }
+
+    // Fit the Heligman-Pollard model to the binned data
+    public static double[] fitHeligmanPollard(List<HPBin> bins, double[] initialGuess)
+    {
+        // Check for bin consistency
+        checkBinConsistency(bins);
+
+        // Prepare the data for optimization
+        int totalPoints = 0;
+        for (HPBin bin : bins)
+            totalPoints += 100 * bin.bin_age_width; // 100 points per year
+
+        double[] x = new double[totalPoints];
+        double[] y = new double[totalPoints];
+
+        int index = 0;
+        for (HPBin bin : bins)
+        {
+            double start = bin.bin_starting_age;
+            double end = start + bin.bin_age_width;
+            double step = 1.0 / 100; // Step size for 100 points per year
+
+            for (double age = start; age < end; age += step)
+            {
+                x[index] = age;
+                y[index] = bin.average_qx;
+                index++;
+            }
+        }
+
+        // Define the optimization problem
+        ParametricUnivariateFunction model = new HeligmanPollardFunction();
+        MultivariateJacobianFunction jacobian = (params) ->
+        {
+            RealVector residuals = new ArrayRealVector(totalPoints);
+            RealMatrix jacobianMatrix = null; // Approximated by the optimizer
+            for (int i = 0; i < totalPoints; i++)
+            {
+                double predicted = model.value(x[i], params);
+                residuals.setEntry(i, Math.abs(predicted - y[i])); // Absolute deviation
+            }
+            return new org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian(
+                                                                                             residuals, jacobianMatrix);
+        };
+
+        // Set up the optimizer
+        ConvergenceChecker<LeastSquaresOptimizer.Optimum> checker = new SimpleVectorValueChecker(1e-6, 1e-6);
+        LeastSquaresProblem problem = new LeastSquaresBuilder()
+                .start(initialGuess)
+                .model(jacobian)
+                .target(new ArrayRealVector(new double[totalPoints])) // Target is zero (minimize deviations)
+                .lazyEvaluation(false)
+                .maxEvaluations(1000)
+                .maxIterations(1000)
+                .checker(checker)
+                .build();
+
+        // Run the optimizer
+        LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
+        LeastSquaresOptimizer.Optimum optimum = optimizer.optimize(problem);
+
+        // Return the fitted parameters
+        return optimum.getPoint().toArray();
+    }
+
+    // Check bin consistency
+    private static void checkBinConsistency(List<HPBin> bins)
+    {
+        if (bins.isEmpty())
+            throw new IllegalArgumentException("The list of bins is empty.");
+
+        double previousEnd = bins.get(0).bin_starting_age;
+        for (int i = 1; i < bins.size(); i++)
+        {
+            HPBin currentBin = bins.get(i);
+
+            if (currentBin.bin_starting_age != previousEnd)
+                throw new IllegalArgumentException("Bins are not continuous. Gap between bin " + (i - 1) + " and bin " + i + ".");
+            
+            previousEnd = currentBin.bin_starting_age + currentBin.bin_age_width;
+        }
+    }
+
+    // Define the Bin structure
+    static class HPBin
+    {
+        double bin_starting_age;
+        double bin_age_width;
+        double average_qx;
+
+        HPBin(double bin_starting_age, double bin_age_width, double average_qx)
+        {
+            this.bin_starting_age = bin_starting_age;
+            this.bin_age_width = bin_age_width;
+            this.average_qx = average_qx;
+        }
+    }
+
+    // Example usage
+    public static void main(String[] args)
+    {
+        // Create some example binned data
+        List<HPBin> bins = new ArrayList<>();
+        bins.add(new HPBin(0, 1, 0.01)); // Bin 0-1 years
+        bins.add(new HPBin(1, 5, 0.005)); // Bin 1-6 years
+        bins.add(new HPBin(6, 0.5, 0.003)); // Bin 6-6.5 years
+
+        // Provide an initial guess for the parameters A-H
+        double[] initialGuess = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 };
+
+        // Fit the model
+        double[] fittedParameters = fitHeligmanPollard(bins, initialGuess);
+
+        // Print the fitted parameters
+        System.out.println("Fitted Parameters:");
+        System.out.println("A: " + fittedParameters[0]);
+        System.out.println("B: " + fittedParameters[1]);
+        System.out.println("C: " + fittedParameters[2]);
+        System.out.println("D: " + fittedParameters[3]);
+        System.out.println("E: " + fittedParameters[4]);
+        System.out.println("F: " + fittedParameters[5]);
+        System.out.println("G: " + fittedParameters[6]);
+        System.out.println("H: " + fittedParameters[7]);
+    }
+}
