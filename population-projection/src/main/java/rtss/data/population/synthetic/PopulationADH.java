@@ -70,13 +70,15 @@ public class PopulationADH
             String excel_path = String.format("population_data/%s/%s-population-ADH.xlsx", area.name(), area.name());
 
             MutableDouble m_unknown = new MutableDouble();
-            double[] m = PopulationFromExcel.loadCounts(excel_path, Gender.MALE, year, m_unknown, yearHint);
+            String m_title = "Population " + area.toString() + " " + Gender.MALE.toString() + " " + year;
+            double[] m = PopulationFromExcel.loadCounts(excel_path, Gender.MALE, year, m_unknown, yearHint, m_title);
             /* population data in AHD books (and Excel file) is in thousands */
             m = Util.multiply(m, 1000);
             round(m);
 
             MutableDouble f_unknown = new MutableDouble();
-            double[] f = PopulationFromExcel.loadCounts(excel_path, Gender.FEMALE, year, f_unknown, yearHint);
+            String f_title = "Population " + area.toString() + " " + Gender.FEMALE.toString() + " " + year;
+            double[] f = PopulationFromExcel.loadCounts(excel_path, Gender.FEMALE, year, f_unknown, yearHint, f_title);
             f = Util.multiply(f, 1000);
             round(f);
 

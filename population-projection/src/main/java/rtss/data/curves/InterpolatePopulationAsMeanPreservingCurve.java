@@ -37,7 +37,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         {
             try
             {
-                curve = curve_csasra(bins, title, targetResolution);
+                curve = curve_csasra(bins, title, targetResolution, yearHint);
             }
             catch (Exception e2)
             {
@@ -51,7 +51,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             try
             {
                 if (curve == null)
-                    curve = curve_spline(bins, title, targetResolution);
+                    curve = curve_spline(bins, title, targetResolution, yearHint);
             }
             catch (Exception e2)
             {
@@ -85,7 +85,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     /* ================================================================================================ */
 
-    private static double[] curve_csasra(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
+    private static double[] curve_csasra(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint) throws Exception
     {
         final int ppy = 1;
         double[] xxx = Bins.ppy_x(bins, ppy);
@@ -146,7 +146,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (targetResolution == TargetResolution.YEARLY)
         {
             /* уточнить разбивку на возраста 0-4 */
-            yy = RefineYearlyPopulation.refine(bins, title, yy);
+            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint);
             CurveVerifier.validate_means(yy, bins);
         }
 
@@ -189,7 +189,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
     /*
      * Spline implementation
      */
-    private static double[] curve_spline(Bin[] bins, String title, TargetResolution targetResolution) throws Exception
+    private static double[] curve_spline(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint) throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
@@ -291,7 +291,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (targetResolution == TargetResolution.YEARLY)
         {
             /* уточнить разбивку на возраста 0-4 */
-            yy = RefineYearlyPopulation.refine(bins, title, yy);
+            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint);
             CurveVerifier.validate_means(yy, bins);
         }
 

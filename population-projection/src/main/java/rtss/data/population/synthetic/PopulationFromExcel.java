@@ -18,12 +18,12 @@ public class PopulationFromExcel extends ExcelLoader
 {
     private static final double MAX_DIFF = 3;
 
-    public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown, Integer yearHint) throws Exception
+    public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown, Integer yearHint, String title) throws Exception
     {
-        return loadCounts(path, gender, "" + year, v_unknown, yearHint);
+        return loadCounts(path, gender, "" + year, v_unknown, yearHint, title);
     }
     
-    public static double[] loadCounts(String path, Gender gender, String year, MutableDouble v_unknown, Integer yearHint) throws Exception
+    public static double[] loadCounts(String path, Gender gender, String year, MutableDouble v_unknown, Integer yearHint, String title) throws Exception
     {
         /*
          * parse excel rows and fill them into the bins
@@ -144,7 +144,6 @@ public class PopulationFromExcel extends ExcelLoader
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        String title = "Population " + gender.toString() + year;
         double[] counts = bins2yearly(bins, title, yearHint);
         
         double sum1 = Util.sum(counts);

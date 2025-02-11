@@ -7,7 +7,6 @@ import rtss.util.Util;
  * Сделать ход годового распределения численности населения в возрастах 0-4
  * более напоминающим реалистический. 
  */
-// ################# TEST
 public class RefineYearlyPopulation
 {
     /* 
@@ -25,8 +24,7 @@ public class RefineYearlyPopulation
     private static final double[] attrition04_1926 = { 8706, 3667, 1802, 1173, 891 };
     private static final double[] attrition04_1938 = { 10963, 3606, 1616, 932, 550 };
     private static final double[] attrition04_1958 = { 1882, 503, 249, 169, 116 };
-    private static final double[] attrition04 = attrition04_1938;
-    
+
     /*
      * То же для убыли в возрастах 5-9:
      * 
@@ -37,50 +35,113 @@ public class RefineYearlyPopulation
     private static final double[] attrition59_1926 = { 666, 512, 400, 316, 241 };
     private static final double[] attrition59_1938 = { 539, 422, 335, 269, 223 };
     private static final double[] attrition59_1958 = { 120, 111, 103, 91, 83 };
-    private static final double[] attrition59 = attrition59_1938;
 
-    public static double[] refine(Bin[] bins, String title, double[] p) throws Exception
+    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint) throws Exception
     {
-        if (Util.True)
+        /*
+         * Не использовать, т.к. иногда вызывает надлом, напр. в РСФСР-MALE-1931,
+         * т.е. распределение 5-летних средних не соответствует картине возрастного убывания
+         */
+        if (Util.False) // ###
             return p;
-        
+
         Util.unused(attrition04_1926, attrition04_1938, attrition04_1958);
         Util.unused(attrition59_1926, attrition59_1938, attrition59_1958);
-        
+
+        double[] p0 = p;
+
         if (bins[0].widths_in_years != 5 || p[0] <= p[5])
             return p;
 
         double original_sum04 = Util.sum(Util.splice(p, 0, 4));
-        if (original_sum04/5 <= p[5])
+        if (original_sum04 / 5 <= p[5])
             return p;
 
-        double a1 = 0;
-        double a2 = 2 * original_sum04;
+        if (bins[1].widths_in_years != 5 || p[5] <= p[10])
+            return p;
 
-        for (int pass = 0;;)
+        double original_sum59 = Util.sum(Util.splice(p, 5, 9));
+        if (original_sum59 / 5 <= p[10])
+            return p;
+
+        final double[] attrition04 = select_attrition04(yearHint);
+        final double[] attrition59 = select_attrition59(yearHint);
+
+        /* ------------------------------------------------------------- */
+
+        if (Util.True)
         {
-            if (pass++ > 10_000)
-                throw new Exception("RefineYearlyPopulation не сходится");
-            
-            double a = (a1 + a2) / 2;
-            double[] p05 = calc04(Util.splice(p, 0, 5), Util.normalize(attrition04, a));
-            double sum04 = Util.sum(Util.splice(p05, 0, 4));
+            double a1 = 0;
+            double a2 = 2 * original_sum59;
 
-            if (Util.same(sum04, original_sum04))
+            for (int pass = 0;;)
             {
-                p = Util.dup(p);
-                Util.insert(p, p05, 0);
-                return p;
-            }
-            else if (sum04 > original_sum04)
-            {
-                a2 = a;
-            }
-            else
-            {
-                a1 = a;
+                if (pass++ > 10_000)
+                    throw new Exception("RefineYearlyPopulation не сходится [5-9]");
+
+                double a = (a1 + a2) / 2;
+                double[] p510 = calc59(Util.splice(p, 5, 10), Util.normalize(attrition59, a));
+                double sum59 = Util.sum(Util.splice(p510, 5 - 5, 9 - 5));
+
+                if (Util.same(sum59, original_sum59))
+                {
+                    if (p == p0)
+                        p = Util.dup(p);
+                    Util.insert(p, p510, 5);
+                    break;
+                }
+                else if (sum59 > original_sum59)
+                {
+                    a2 = a;
+                }
+                else
+                {
+                    a1 = a;
+                }
             }
         }
+
+        /* ------------------------------------------------------------- */
+
+        if (Util.True)
+        {
+            if (original_sum04 / 5 <= p[5])
+            {
+                // Util.err("RefineYearlyPopulation bail out: " + title);
+                return p0;
+            }
+
+            double a1 = 0;
+            double a2 = 2 * original_sum04;
+
+            for (int pass = 0;;)
+            {
+                if (pass++ > 10_000)
+                    throw new Exception("RefineYearlyPopulation не сходится [0-4]");
+
+                double a = (a1 + a2) / 2;
+                double[] p05 = calc04(Util.splice(p, 0, 5), Util.normalize(attrition04, a));
+                double sum04 = Util.sum(Util.splice(p05, 0, 4));
+
+                if (Util.same(sum04, original_sum04))
+                {
+                    if (p == p0)
+                        p = Util.dup(p);
+                    Util.insert(p, p05, 0);
+                    break;
+                }
+                else if (sum04 > original_sum04)
+                {
+                    a2 = a;
+                }
+                else
+                {
+                    a1 = a;
+                }
+            }
+        }
+
+        return p;
     }
 
     private static double[] calc04(double[] p05, double[] increments)
@@ -89,5 +150,39 @@ public class RefineYearlyPopulation
         for (int age = 4; age >= 0; age--)
             p05[age] = p05[age + 1] + increments[age];
         return p05;
+    }
+
+    private static double[] calc59(double[] p510, double[] increments)
+    {
+        p510 = Util.dup(p510);
+        for (int age = 9; age >= 5; age--)
+            p510[age - 5] = p510[age - 5 + 1] + increments[age - 5];
+        return p510;
+    }
+
+    private static double[] select_attrition04(Integer yearHint)
+    {
+        if (yearHint == null)
+            yearHint = 1938;
+
+        if (yearHint >= 1943)
+            return attrition04_1958;
+        else if (yearHint >= 1933)
+            return attrition04_1938;
+        else
+            return attrition04_1926;
+    }
+
+    private static double[] select_attrition59(Integer yearHint)
+    {
+        if (yearHint == null)
+            yearHint = 1938;
+
+        if (yearHint >= 1943)
+            return attrition59_1958;
+        else if (yearHint >= 1933)
+            return attrition59_1938;
+        else
+            return attrition59_1926;
     }
 }
