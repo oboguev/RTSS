@@ -30,7 +30,7 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         }
         else if (bins[0].avg > bins[1].avg && bins[1].avg < bins[2].avg)
         {
-            // ### locate minimum point
+            // ### locate minimum point in 2nd bin bin[1] 
             nTunablePoints = 10;  // ###
             nFixedPoints = 2;     // ###
         }
