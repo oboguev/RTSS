@@ -8,6 +8,8 @@ import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.ensure.EnsureMonotonicCurve;
+import rtss.data.curves.ensure.EnsurePositiveCurve;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;

@@ -1,7 +1,8 @@
-package rtss.data.curves;
+package rtss.data.curves.ensure;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveUtil;
 import rtss.util.Util;
 
 public class EnsurePositiveCurve

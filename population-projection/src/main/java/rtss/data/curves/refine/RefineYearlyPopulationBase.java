@@ -1,4 +1,4 @@
-package rtss.data.curves;
+package rtss.data.curves.refine;
 
 import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
@@ -106,7 +106,7 @@ import java.util.Arrays;
  *     
  */
 
-public class RefineYearlyPopulation
+public class RefineYearlyPopulationBase
 {
     private static double[] reconstructSeries(double[] p, double psum04, double psum59, double[] target_diff, double importance_smoothness,
             double importance_target_diff_matching)
@@ -120,7 +120,7 @@ public class RefineYearlyPopulation
         return optimizedP;
     }
 
-    private static double[] optimizeSeries(double[] p, double[] initialGuess, double psum04, double psum59, double[] target_diff,
+    protected static double[] optimizeSeries(double[] p, double[] initialGuess, double psum04, double psum59, double[] target_diff,
             double importance_smoothness, double importance_target_diff_matching)
     {
         // Define the objective function
