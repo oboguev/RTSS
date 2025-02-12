@@ -5,7 +5,7 @@ import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.ensure.EnsureNonNegativeCurve;
-import rtss.data.curves.refine.RefineYearlyPopulation_Naive;
+import rtss.data.curves.refine.RefineYearlyPopulation;
 import rtss.data.population.struct.Population;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
@@ -151,8 +151,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         if (targetResolution == TargetResolution.YEARLY)
         {
-            /* уточнить разбивку на возраста 0-4 */
-            yy = RefineYearlyPopulation_Naive.refine(bins, title, yy, yearHint);
+            /* уточнить разбивку на возраста 0-9 */
+            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint);
             CurveVerifier.validate_means(yy, bins);
         }
 
@@ -296,8 +296,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         if (targetResolution == TargetResolution.YEARLY)
         {
-            /* уточнить разбивку на возраста 0-4 */
-            yy = RefineYearlyPopulation_Naive.refine(bins, title, yy, yearHint);
+            /* уточнить разбивку на возраста 0-9 */
+            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint);
             CurveVerifier.validate_means(yy, bins);
         }
 

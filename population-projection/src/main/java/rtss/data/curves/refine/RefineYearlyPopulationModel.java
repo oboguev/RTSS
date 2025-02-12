@@ -1,5 +1,7 @@
 package rtss.data.curves.refine;
 
+import rtss.util.Util;
+
 public class RefineYearlyPopulationModel extends RefineYearlyPopulationBase
 {
     /* 
@@ -53,5 +55,10 @@ public class RefineYearlyPopulationModel extends RefineYearlyPopulationBase
             return attrition59_1938;
         else
             return attrition59_1926;
+    }
+
+    public static double[] select_attrition09(Integer yearHint)
+    {
+        return Util.concat(select_attrition04(yearHint), select_attrition59(yearHint));
     }
 }
