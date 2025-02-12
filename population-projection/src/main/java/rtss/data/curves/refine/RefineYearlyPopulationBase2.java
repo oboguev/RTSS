@@ -105,7 +105,6 @@ import java.util.Arrays;
  *     Please see https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/optim/nonlinear/scalar/MultivariateFunctionPenaltyAdapter.html     
  *     
  */
-
 public class RefineYearlyPopulationBase2
 {
     public static void main(String[] args)
@@ -173,7 +172,15 @@ public class RefineYearlyPopulationBase2
                 System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, nFixedPoints);
 
                 // Calculate the objective value
-                return calculateObjective(fullP, target_diff, importance_smoothness, importance_target_diff_matching);
+                double objective = calculateObjective(fullP, target_diff, importance_smoothness, importance_target_diff_matching);
+
+                // Add penalties for violating the sum constraints
+                double sum04 = Arrays.stream(fullP, 0, 5).sum(); // Sum of p(0) to p(4)
+                double sum59 = Arrays.stream(fullP, 5, 10).sum(); // Sum of p(5) to p(9)
+                double penalty04 = 1e6 * Math.pow(sum04 - psum04, 2); // Large penalty for violating psum04
+                double penalty59 = 1e6 * Math.pow(sum59 - psum59, 2); // Large penalty for violating psum59
+
+                return objective + penalty04 + penalty59;
             }
         };
 
