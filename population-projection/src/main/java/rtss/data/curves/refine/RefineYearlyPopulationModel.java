@@ -2,7 +2,7 @@ package rtss.data.curves.refine;
 
 import rtss.util.Util;
 
-public class RefineYearlyPopulationModel extends RefineYearlyPopulationBase
+public class RefineYearlyPopulationModel 
 {
     /* 
      * Характерное модельное соотношение убыли среднегодового населения для возрастов 0-4,

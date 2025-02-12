@@ -105,23 +105,62 @@ import java.util.Arrays;
  *     Please see https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/optim/nonlinear/scalar/MultivariateFunctionPenaltyAdapter.html     
  *     
  */
-
 public class RefineYearlyPopulationBase
 {
-    private static double[] reconstructSeries(double[] p, double psum04, double psum59, double[] target_diff, double importance_smoothness,
-            double importance_target_diff_matching)
+
+    public static void main(String[] args)
     {
-        // Use the initial guess from p(0) to p(9)
-        double[] initialGuess = Arrays.copyOfRange(p, 0, 10);
+        // Example input parameters
+        int nTunablePoints = 10; // Number of tunable points
+        int nFixedPoints = 2; // Number of fixed points
+
+        double[] p = new double[nTunablePoints + nFixedPoints];
+        p[0] = 15.0; // Initial guess for p(0)
+        p[1] = 14.0; // Initial guess for p(1)
+        p[2] = 13.0; // Initial guess for p(2)
+        p[3] = 12.0; // Initial guess for p(3)
+        p[4] = 11.0; // Initial guess for p(4)
+        p[5] = 10.0; // Initial guess for p(5)
+        p[6] = 9.0; // Initial guess for p(6)
+        p[7] = 8.0; // Initial guess for p(7)
+        p[8] = 7.0; // Initial guess for p(8)
+        p[9] = 6.0; // Initial guess for p(9)
+        p[10] = 5.0; // Known value
+        p[11] = 4.0; // Known value
+
+        double psum04 = 50.0; // Sum of p(0) to p(4)
+        double psum59 = 30.0; // Sum of p(5) to p(9)
+        double[] target_diff = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; // Target differences
+        double importance_smoothness = 0.5; // Weight for smoothness constraint
+        double importance_target_diff_matching = 0.5; // Weight for target difference matching
+
+        // Reconstruct the series
+        double[] reconstructedP = reconstructSeries(p, psum04, psum59, target_diff, importance_smoothness, importance_target_diff_matching,
+                                                    nTunablePoints, nFixedPoints);
+
+        // Output the reconstructed series
+        System.out.println("Reconstructed series p(0) to p(" + (nTunablePoints - 1) + "):");
+        for (int i = 0; i < nTunablePoints; i++)
+        {
+            System.out.println("p(" + i + ") = " + reconstructedP[i]);
+        }
+    }
+
+    public static double[] reconstructSeries(double[] p, double psum04, double psum59, double[] target_diff, double importance_smoothness,
+            double importance_target_diff_matching, int nTunablePoints, int nFixedPoints)
+    {
+        // Use the initial guess from p(0) to p(nTunablePoints - 1)
+        double[] initialGuess = Arrays.copyOfRange(p, 0, nTunablePoints);
 
         // Optimize the series
-        double[] optimizedP = optimizeSeries(p, initialGuess, psum04, psum59, target_diff, importance_smoothness, importance_target_diff_matching);
+        double[] optimizedP = optimizeSeries(p, initialGuess, psum04, psum59, target_diff, importance_smoothness, importance_target_diff_matching,
+                                             nTunablePoints, nFixedPoints);
 
         return optimizedP;
     }
 
     protected static double[] optimizeSeries(double[] p, double[] initialGuess, double psum04, double psum59, double[] target_diff,
-            double importance_smoothness, double importance_target_diff_matching)
+            double importance_smoothness, double importance_target_diff_matching, int nTunablePoints, int nFixedPoints)
     {
         // Define the objective function
         MultivariateFunction objectiveFunction = new MultivariateFunction()
@@ -129,24 +168,31 @@ public class RefineYearlyPopulationBase
             @Override
             public double value(double[] point)
             {
-                // Combine p(0) to p(9) with the fixed p(10) and p(11)
-                double[] fullP = Arrays.copyOf(point, 12);
-                fullP[10] = p[10];
-                fullP[11] = p[11];
+                // Combine p(0) to p(nTunablePoints - 1) with the fixed p(nTunablePoints) to p(nTunablePoints + nFixedPoints - 1)
+                double[] fullP = Arrays.copyOf(point, nTunablePoints + nFixedPoints);
+                System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, nFixedPoints);
 
                 // Calculate the objective value
-                return calculateObjective(fullP, target_diff, importance_smoothness, importance_target_diff_matching);
+                double objective = calculateObjective(fullP, target_diff, importance_smoothness, importance_target_diff_matching);
+
+                // Add penalties for violating the sum constraints
+                double sum04 = Arrays.stream(fullP, 0, 5).sum(); // Sum of p(0) to p(4)
+                double sum59 = Arrays.stream(fullP, 5, 10).sum(); // Sum of p(5) to p(9)
+                double penalty04 = 1e6 * Math.pow(sum04 - psum04, 2); // Large penalty for violating psum04
+                double penalty59 = 1e6 * Math.pow(sum59 - psum59, 2); // Large penalty for violating psum59
+
+                return objective + penalty04 + penalty59;
             }
         };
 
         // Define the constraints as penalty functions
-        double[] lowerBounds = new double[10];
-        double[] upperBounds = new double[10];
-        Arrays.fill(lowerBounds, Double.NEGATIVE_INFINITY); // No lower bounds
+        double[] lowerBounds = new double[nTunablePoints];
+        double[] upperBounds = new double[nTunablePoints];
+        Arrays.fill(lowerBounds, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBounds, Double.POSITIVE_INFINITY); // No upper bounds
 
         double offset = 0.0; // Offset for penalty
-        double[] scale = new double[10]; // Penalty weights for each variable
+        double[] scale = new double[nTunablePoints]; // Penalty weights for each variable
         Arrays.fill(scale, 1.0); // Uniform penalty weights
 
         MultivariateFunctionPenaltyAdapter constrainedObjective = new MultivariateFunctionPenaltyAdapter(
@@ -171,17 +217,17 @@ public class RefineYearlyPopulationBase
         );
 
         // Define the input sigma (step sizes for each variable)
-        double[] inputSigma = new double[10];
+        double[] inputSigma = new double[nTunablePoints];
         Arrays.fill(inputSigma, 1.0); // Initial step size for each variable
 
         // Define bounds for the variables
-        double[] lowerBoundsForOptimizer = new double[10];
-        double[] upperBoundsForOptimizer = new double[10];
-        Arrays.fill(lowerBoundsForOptimizer, Double.NEGATIVE_INFINITY); // No lower bounds
+        double[] lowerBoundsForOptimizer = new double[nTunablePoints];
+        double[] upperBoundsForOptimizer = new double[nTunablePoints];
+        Arrays.fill(lowerBoundsForOptimizer, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBoundsForOptimizer, Double.POSITIVE_INFINITY); // No upper bounds
 
         // Set the population size (lambda)
-        int lambda = 4 + (int) (3 * Math.log(10)); // Default formula for lambda
+        int lambda = 4 + (int) (3 * Math.log(nTunablePoints)); // Default formula for lambda
         PopulationSize populationSize = new PopulationSize(lambda);
 
         // Perform the optimization
@@ -192,7 +238,7 @@ public class RefineYearlyPopulationBase
                                                    new InitialGuess(initialGuess),
                                                    new Sigma(inputSigma), // Step sizes
                                                    populationSize, // Population size
-                                                   new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // No bounds
+                                                   new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // Bounds
         );
 
         // Return the optimized values
@@ -245,41 +291,5 @@ public class RefineYearlyPopulationBase
         }
 
         return targetDiffViolation;
-    }
-    
-    /* ========================================================== */
-
-    public static void example_main(String[] args)
-    {
-        // Example input parameters
-        double[] p = new double[12];
-        p[0] = 15.0; // Initial guess for p(0)
-        p[1] = 14.0; // Initial guess for p(1)
-        p[2] = 13.0; // Initial guess for p(2)
-        p[3] = 12.0; // Initial guess for p(3)
-        p[4] = 11.0; // Initial guess for p(4)
-        p[5] = 10.0; // Initial guess for p(5)
-        p[6] = 9.0; // Initial guess for p(6)
-        p[7] = 8.0; // Initial guess for p(7)
-        p[8] = 7.0; // Initial guess for p(8)
-        p[9] = 6.0; // Initial guess for p(9)
-        p[10] = 5.0; // Known value
-        p[11] = 4.0; // Known value
-
-        double psum04 = 50.0; // Sum of p(0) to p(4)
-        double psum59 = 30.0; // Sum of p(5) to p(9)
-        double[] target_diff = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; // Target differences
-        double importance_smoothness = 0.5; // Weight for smoothness constraint
-        double importance_target_diff_matching = 0.5; // Weight for target difference matching
-
-        // Reconstruct the series
-        double[] reconstructedP = reconstructSeries(p, psum04, psum59, target_diff, importance_smoothness, importance_target_diff_matching);
-
-        // Output the reconstructed series
-        System.out.println("Reconstructed series p(0) to p(9):");
-        for (int i = 0; i < 10; i++)
-        {
-            System.out.println("p(" + i + ") = " + reconstructedP[i]);
-        }
     }
 }

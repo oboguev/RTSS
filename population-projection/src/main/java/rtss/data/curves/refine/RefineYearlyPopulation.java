@@ -39,12 +39,15 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         {
             int nTunablePoints = 10;
             int nFixedPoints = 2;
+            
             double[] px = optimizeSeries(Util.dup(p), 
                                          Util.splice(p, 0, 9), 
                                          psum_04, psum_59, 
                                          attrition_09, 
                                          importance_smoothness, 
-                                         importance_target_diff_matching);
+                                         importance_target_diff_matching,
+                                         nTunablePoints, 
+                                         nFixedPoints);
             
             Util.noop();
             // ###
