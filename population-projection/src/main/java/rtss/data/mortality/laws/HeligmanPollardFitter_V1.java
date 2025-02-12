@@ -1,26 +1,24 @@
 package rtss.data.mortality.laws;
 
 import org.apache.commons.math4.legacy.analysis.ParametricUnivariateFunction;
+import org.apache.commons.math4.legacy.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math4.legacy.fitting.leastsquares.LeastSquaresOptimizer;
+import org.apache.commons.math4.legacy.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math4.legacy.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math4.legacy.fitting.leastsquares.MultivariateJacobianFunction;
+import org.apache.commons.math4.legacy.linear.ArrayRealVector;
+import org.apache.commons.math4.legacy.linear.RealMatrix;
+import org.apache.commons.math4.legacy.linear.RealVector;
 import org.apache.commons.math4.legacy.optim.ConvergenceChecker;
-import org.apache.commons.math4.legacy.optim.SimpleValueChecker;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.simple.RandomSource;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math4.legacy.optim.InitialGuess;
-import org.apache.commons.math4.legacy.optim.SimpleBounds;
-import org.apache.commons.math4.legacy.optim.MaxEval;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.MultivariateOptimizer;
+import org.apache.commons.math4.legacy.optim.SimpleVectorValueChecker;
+import org.apache.commons.math4.legacy.optim.PointVectorValuePair;
 import org.apache.commons.math4.legacy.core.Pair;
-import org.apache.commons.math4.legacy.optim.PointValuePair;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HeligmanPollardFitter
+public class HeligmanPollardFitter_V1
 {
-
     // Define the Heligman-Pollard function
     static class HeligmanPollardFunction implements ParametricUnivariateFunction
     {
@@ -64,9 +62,7 @@ public class HeligmanPollardFitter
         {
             int tempTotalPoints = 0;
             for (HPBin bin : bins)
-            {
                 tempTotalPoints += 100 * bin.bin_age_width; // 100 points per year
-            }
             totalPoints = tempTotalPoints;
         }
 
@@ -88,83 +84,69 @@ public class HeligmanPollardFitter
             }
         }
 
-        // Define the objective function
+        // Define the optimization problem
         ParametricUnivariateFunction model = new HeligmanPollardFunction();
-        ObjectiveFunction objective = new ObjectiveFunction(params ->
+        MultivariateJacobianFunction modelFunction = params ->
         {
-            double totalDeviation = 0.0;
+            RealVector residuals = new ArrayRealVector(totalPoints);
+            RealMatrix jacobian = null; // Approximated by the optimizer
 
-            // Iterate over bins
-            for (HPBin bin : bins)
+            for (int i = 0; i < totalPoints; i++)
             {
-                double start = bin.bin_starting_age;
-                double end = start + bin.bin_age_width;
-                double step = 1.0 / 100; // Step size for 100 points per year
-                double sumPredicted = 0.0;
-                int count = 0;
-
-                // Calculate the average predicted value for the bin
-                for (double age = start; age < end; age += step)
-                {
-                    sumPredicted += model.value(age, params);
-                    count++;
-                }
-
-                double averagePredicted = sumPredicted / count;
-                totalDeviation += Math.abs(averagePredicted - bin.average_qx);
+                double predicted = model.value(x[i], params.toArray());
+                residuals.setEntry(i, Math.abs(predicted - y[i])); // Absolute deviation
             }
 
-            return totalDeviation;
-        });
+            return new Pair<>(residuals, jacobian);
+        };
+
+        // Create a custom ConvergenceChecker for LeastSquaresProblem.Evaluation
+        ConvergenceChecker<LeastSquaresProblem.Evaluation> checker = new ConvergenceChecker<LeastSquaresProblem.Evaluation>()
+        {
+            private final SimpleVectorValueChecker delegate = new SimpleVectorValueChecker(1e-6, 1e-6);
+
+            @Override
+            public boolean converged(int iteration, LeastSquaresProblem.Evaluation previous, LeastSquaresProblem.Evaluation current)
+            {
+                // Convert Evaluation to PointVectorValuePair
+                PointVectorValuePair previousPair = new PointVectorValuePair(previous.getPoint().toArray(), previous.getResiduals().toArray(), true);
+                PointVectorValuePair currentPair = new PointVectorValuePair(current.getPoint().toArray(), current.getResiduals().toArray(), true);
+
+                return delegate.converged(iteration, previousPair, currentPair);
+            }
+        };
 
         // Set up the optimizer
-        UniformRandomProvider random = RandomSource.JDK.create(); // Use UniformRandomProvider
-        ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-6);
-        CMAESOptimizer optimizer = new CMAESOptimizer(
-                                                      10000, // Max iterations
-                                                      1e-6, // Stop fitness
-                                                      true, // Active CMA
-                                                      0, // Diagonal only (0 means full covariance)
-                                                      1, // Check feasible count
-                                                      random, // Random generator
-                                                      false, // No statistics
-                                                      checker // Convergence checker
-        );
-
-        // Define bounds for the parameters (optional but recommended)
-        double[] lowerBounds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        double[] upperBounds = { 1.0, 100.0, 10.0, 1.0, 10.0, 100.0, 1.0, 1.0 };
-        SimpleBounds bounds = new SimpleBounds(lowerBounds, upperBounds);
+        LeastSquaresProblem problem = new LeastSquaresBuilder()
+                .start(initialGuess)
+                .model(modelFunction)
+                .target(new ArrayRealVector(new double[totalPoints])) // Target is zero (minimize deviations)
+                .lazyEvaluation(false)
+                .maxEvaluations(1000)
+                .maxIterations(1000)
+                .checker(checker)
+                .build();
 
         // Run the optimizer
-        PointValuePair optimum = optimizer.optimize(
-                                                    objective,
-                                                    GoalType.MINIMIZE,
-                                                    new InitialGuess(initialGuess),
-                                                    bounds,
-                                                    new MaxEval(1000));
+        LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
+        LeastSquaresOptimizer.Optimum optimum = optimizer.optimize(problem);
 
         // Return the fitted parameters
-        return optimum.getPoint();
+        return optimum.getPoint().toArray();
     }
 
     // Check bin consistency
     private static void checkBinConsistency(List<HPBin> bins)
     {
         if (bins.isEmpty())
-        {
             throw new IllegalArgumentException("The list of bins is empty.");
-        }
 
         double previousEnd = bins.get(0).bin_starting_age;
         for (int i = 1; i < bins.size(); i++)
         {
             HPBin currentBin = bins.get(i);
             if (currentBin.bin_starting_age != previousEnd)
-            {
-                throw new IllegalArgumentException(
-                                                   "Bins are not continuous. Gap between bin " + (i - 1) + " and bin " + i + ".");
-            }
+                throw new IllegalArgumentException("Bins are not continuous. Gap between bin " + (i - 1) + " and bin " + i + ".");
             previousEnd = currentBin.bin_starting_age + currentBin.bin_age_width;
         }
     }
