@@ -9,16 +9,22 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
     {
         final double[] p0 = p;
         
-        if (Util.True)
+        if (Util.False)
             return p0;
 
-        if (bins.length < 2 || bins[0].widths_in_years != 5 || bins[1].widths_in_years != 5)
+        if (bins.length < 3 || 
+                bins[0].widths_in_years != 5 || 
+                bins[1].widths_in_years != 5 || 
+                bins[3].widths_in_years != 5)
+        {
             return p0;
+        }
 
-        p = Util.splice(p0, 0, 11);
-
-        if (!Util.isMonotonicallyDecreasing(p, false))
-            return p;
+        if (Util.False && !Util.isMonotonicallyDecreasing(p, false))
+            return p0;
+        
+        if (bins[0].avg <= bins[1].avg || bins[1].avg <= bins[2].avg)
+            return p0;
 
         double psum_04 = Util.sum(Util.splice(p0, 0, 4));
         double psum_59 = Util.sum(Util.splice(p0, 5, 9));
@@ -27,14 +33,25 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         double importance_smoothness = 0.7;
         double importance_target_diff_matching = 0.3;
 
-        double[] px = optimizeSeries(Util.dup(p), 
-                                     Util.dup(p), 
-                                     psum_04, psum_59, 
-                                     attrition_09, 
-                                     importance_smoothness, 
-                                     importance_target_diff_matching);
+        p = Util.splice(p0, 0, 11);
         
-        // ###
+        try 
+        {
+            double[] px = optimizeSeries(Util.dup(p), 
+                                         Util.splice(p, 0, 9), 
+                                         psum_04, psum_59, 
+                                         attrition_09, 
+                                         importance_smoothness, 
+                                         importance_target_diff_matching);
+            
+            Util.noop();
+            // ###
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            Util.noop();
+        }
 
         return p0;
     }

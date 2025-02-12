@@ -70,7 +70,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 throw new Exception("Unable to build the curve");
         }
 
-        if (Util.False)
+        if (Util.True)
         {
             int ppy = 1;
             double[] xxx = Bins.ppy_x(bins, ppy);
