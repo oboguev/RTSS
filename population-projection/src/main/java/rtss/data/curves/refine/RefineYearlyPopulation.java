@@ -20,16 +20,29 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
             return p0;
         }
 
-        if (Util.False && !Util.isMonotonicallyDecreasing(p, false))
-            return p0;
+        int nTunablePoints = 10;
+        int nFixedPoints = 2;
         
-        if (bins[0].avg <= bins[1].avg || bins[1].avg <= bins[2].avg)
+        if (bins[0].avg > bins[1].avg && bins[1].avg > bins[2].avg)
+        {
+            nTunablePoints = 10;  // ages 0-9
+            nFixedPoints = 2;     // ages 10-11
+        }
+        else if (bins[0].avg > bins[1].avg && bins[1].avg < bins[2].avg)
+        {
+            // ### locate minimum point
+            nTunablePoints = 10;  // ###
+            nFixedPoints = 2;     // ###
+        }
+        else
+        {
             return p0;
+        }
 
         double psum_04 = Util.sum(Util.splice(p0, 0, 4));
         double psum_59 = Util.sum(Util.splice(p0, 5, 9));
 
-        double[] attrition_09 = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
+        double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
         double importance_smoothness = 0.7;
         double importance_target_diff_matching = 0.3;
 
@@ -37,13 +50,10 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         
         try 
         {
-            int nTunablePoints = 10;
-            int nFixedPoints = 2;
-            
             double[] px = optimizeSeries(Util.dup(p), 
                                          Util.splice(p, 0, 9), 
                                          psum_04, psum_59, 
-                                         attrition_09, 
+                                         attrition, 
                                          importance_smoothness, 
                                          importance_target_diff_matching,
                                          nTunablePoints, 
