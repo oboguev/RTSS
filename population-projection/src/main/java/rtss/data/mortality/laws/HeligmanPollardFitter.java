@@ -11,6 +11,7 @@ import org.apache.commons.math4.legacy.linear.RealMatrix;
 import org.apache.commons.math4.legacy.linear.RealVector;
 import org.apache.commons.math4.legacy.optim.ConvergenceChecker;
 import org.apache.commons.math4.legacy.optim.SimpleVectorValueChecker;
+import org.apache.commons.math4.legacy.optim.PointVectorValuePair;
 import org.apache.commons.math4.legacy.core.Pair;
 
 import java.util.ArrayList;
@@ -58,10 +59,14 @@ public class HeligmanPollardFitter
         checkBinConsistency(bins);
 
         // Prepare the data for optimization
-        int totalPoints = 0;
-        for (HPBin bin : bins)
+        final int totalPoints; // Declare as final for use in lambda
         {
-            totalPoints += 100 * bin.bin_age_width; // 100 points per year
+            int tempTotalPoints = 0;
+            for (HPBin bin : bins)
+            {
+                tempTotalPoints += 100 * bin.bin_age_width; // 100 points per year
+            }
+            totalPoints = tempTotalPoints;
         }
 
         double[] x = new double[totalPoints];
@@ -106,10 +111,11 @@ public class HeligmanPollardFitter
             @Override
             public boolean converged(int iteration, LeastSquaresProblem.Evaluation previous, LeastSquaresProblem.Evaluation current)
             {
-                return delegate.converged(
-                                          iteration,
-                                          new ArrayRealVector(previous.getPoint()),
-                                          new ArrayRealVector(current.getPoint()));
+                // Convert Evaluation to PointVectorValuePair
+                PointVectorValuePair previousPair = new PointVectorValuePair(previous.getPoint().toArray(), previous.getResiduals().toArray(), true);
+                PointVectorValuePair currentPair = new PointVectorValuePair(current.getPoint().toArray(), current.getResiduals().toArray(), true);
+
+                return delegate.converged(iteration, previousPair, currentPair);
             }
         };
 
