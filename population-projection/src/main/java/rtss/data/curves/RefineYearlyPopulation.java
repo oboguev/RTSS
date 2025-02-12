@@ -1,17 +1,19 @@
 package rtss.data.curves;
 
-import org.apache.commons.math4.analysis.MultivariateFunction;
-import org.apache.commons.math4.optim.*;
-import org.apache.commons.math4.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math4.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math4.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math4.optim.nonlinear.scalar.MultivariateFunctionPenaltyAdapter;
-import org.apache.commons.math4.random.JDKRandomGenerator;
-import org.apache.commons.math4.random.RandomGenerator;
-import org.apache.commons.math4.optim.ConvergenceChecker;
-import org.apache.commons.math4.optim.SimpleValueChecker;
-import org.apache.commons.math4.optim.nonlinear.scalar.noderiv.CMAESOptimizer.PopulationSize;
-import org.apache.commons.math4.optim.nonlinear.scalar.noderiv.CMAESOptimizer.Sigma;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
+
+import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.MultivariateFunctionPenaltyAdapter;
+import org.apache.commons.math4.legacy.optim.ConvergenceChecker;
+import org.apache.commons.math4.legacy.optim.InitialGuess;
+import org.apache.commons.math4.legacy.optim.MaxEval;
+import org.apache.commons.math4.legacy.optim.PointValuePair;
+import org.apache.commons.math4.legacy.optim.SimpleBounds;
+import org.apache.commons.math4.legacy.optim.SimpleValueChecker;
 
 import java.util.Arrays;
 
@@ -217,7 +219,6 @@ public class RefineYearlyPopulation
                                                    new ObjectiveFunction(constrainedObjective),
                                                    GoalType.MINIMIZE,
                                                    new InitialGuess(initialGuess),
-                                                   new Sigma(inputSigma), // Step sizes
                                                    new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // No bounds
         );
 

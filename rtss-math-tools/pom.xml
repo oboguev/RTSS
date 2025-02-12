@@ -52,9 +52,34 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math-parent</artifactId>
-			<type>pom</type>
+			<artifactId>commons-math4-core</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math4-legacy</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math4-legacy-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math4-legacy-exception</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math4-neuralnet</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math4-transform</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>gov.nist.math</groupId>
 			<artifactId>jama</artifactId>
