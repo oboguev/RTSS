@@ -91,13 +91,19 @@ public class ApplyTable
                 final_multiplier_t = multiplier_t;
         }
 
-        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, final_multiplier_t, false, true);
+        show_divergence(p1937, p1939, mt, final_multiplier_t);
+        show_divergence(p1937, p1939, mt, 1.4);
+
+        Util.noop();
+    }
+    
+    private void show_divergence(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, double multiplier) throws Exception
+    {
+        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier, false, true);
         p = p.selectByAgeYears(3, Population.MAX_AGE);
         p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
 
-        p.display("Расхождение между передвижкой и переписью 1939 года");
-
-        Util.noop();
+        p.display("Расхождение между переписью 1939 года и передвижкой с множителем " + multiplier);
     }
 
     /* ================================================================================================================== */

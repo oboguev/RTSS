@@ -33,10 +33,14 @@ public class InterpolatePopulationAsMeanPreservingCurve
         Exception ex = null;
         double[] curve = null;
 
-        if (Util.False)
+        if (Util.True)
         {
             try
             {
+                /*
+                 * При интерполяции данных для TargetResolution.DAILY алгоритм CSASRA даёт гораздо
+                 * более гладкие данные, чем алгоритм сплайна.
+                 */
                 curve = curve_csasra(bins, title, targetResolution, yearHint);
             }
             catch (Exception e2)
@@ -69,7 +73,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 throw new Exception("Unable to build the curve");
         }
         
-        if (Util.True)
+        if (Util.False)
         {
             int ppy = 1;
             double[] xxx = Bins.ppy_x(bins, ppy);
@@ -146,7 +150,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (targetResolution == TargetResolution.YEARLY)
         {
             /* уточнить разбивку на возраста 0-4 */
-            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint);
+            yy = RefineYearlyPopulation_Naive.refine(bins, title, yy, yearHint);
             CurveVerifier.validate_means(yy, bins);
         }
 
@@ -291,7 +295,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         if (targetResolution == TargetResolution.YEARLY)
         {
             /* уточнить разбивку на возраста 0-4 */
-            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint);
+            yy = RefineYearlyPopulation_Naive.refine(bins, title, yy, yearHint);
             CurveVerifier.validate_means(yy, bins);
         }
 
