@@ -46,7 +46,7 @@
 				<artifactId>commons-math3</artifactId>
 				<version>3.6.1</version>
 			</dependency>
-			
+
 			<!-- Apache Commons Math 4 -->
 
 			<dependency>
@@ -85,6 +85,12 @@
 				<version>${apache.commons.math4.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-rng-simple</artifactId>
+				<version>1.6</version>
+			</dependency>
+			
 		</dependencies>
 	</dependencyManagement>
 
