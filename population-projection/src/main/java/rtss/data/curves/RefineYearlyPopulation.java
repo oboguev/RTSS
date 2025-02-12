@@ -1,7 +1,7 @@
 package rtss.data.curves;
 
-import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
 
 import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
@@ -190,7 +190,7 @@ public class RefineYearlyPopulation
                                                                                                          scale);
 
         // Set up the CMAESOptimizer
-        RandomGenerator random = new JDKRandomGenerator();
+        UniformRandomProvider random = RandomSource.JDK.create();
         ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-6);
         CMAESOptimizer optimizer = new CMAESOptimizer(
                                                       10000, // Max iterations
