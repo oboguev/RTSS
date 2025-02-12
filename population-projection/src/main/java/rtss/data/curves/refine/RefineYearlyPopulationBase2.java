@@ -107,6 +107,7 @@ import java.util.Arrays;
  */
 public class RefineYearlyPopulationBase2
 {
+
     public static void main(String[] args)
     {
         // Example input parameters
@@ -187,7 +188,7 @@ public class RefineYearlyPopulationBase2
         // Define the constraints as penalty functions
         double[] lowerBounds = new double[nTunablePoints];
         double[] upperBounds = new double[nTunablePoints];
-        Arrays.fill(lowerBounds, Double.NEGATIVE_INFINITY); // No lower bounds
+        Arrays.fill(lowerBounds, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBounds, Double.POSITIVE_INFINITY); // No upper bounds
 
         double offset = 0.0; // Offset for penalty
@@ -222,7 +223,7 @@ public class RefineYearlyPopulationBase2
         // Define bounds for the variables
         double[] lowerBoundsForOptimizer = new double[nTunablePoints];
         double[] upperBoundsForOptimizer = new double[nTunablePoints];
-        Arrays.fill(lowerBoundsForOptimizer, Double.NEGATIVE_INFINITY); // No lower bounds
+        Arrays.fill(lowerBoundsForOptimizer, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBoundsForOptimizer, Double.POSITIVE_INFINITY); // No upper bounds
 
         // Set the population size (lambda)
@@ -237,7 +238,7 @@ public class RefineYearlyPopulationBase2
                                                    new InitialGuess(initialGuess),
                                                    new Sigma(inputSigma), // Step sizes
                                                    populationSize, // Population size
-                                                   new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // No bounds
+                                                   new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // Bounds
         );
 
         // Return the optimized values
