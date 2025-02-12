@@ -1,17 +1,20 @@
 package rtss.data.curves;
 
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.optim.*;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionPenaltyAdapter;
-import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.optim.SimpleValueChecker;
+import org.apache.commons.math4.analysis.MultivariateFunction;
+import org.apache.commons.math4.optim.*;
+import org.apache.commons.math4.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math4.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math4.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math4.optim.nonlinear.scalar.MultivariateFunctionPenaltyAdapter;
+import org.apache.commons.math4.random.JDKRandomGenerator;
+import org.apache.commons.math4.random.RandomGenerator;
+import org.apache.commons.math4.optim.ConvergenceChecker;
+import org.apache.commons.math4.optim.SimpleValueChecker;
+import org.apache.commons.math4.optim.nonlinear.scalar.noderiv.CMAESOptimizer.PopulationSize;
+import org.apache.commons.math4.optim.nonlinear.scalar.noderiv.CMAESOptimizer.Sigma;
 
 import java.util.Arrays;
+
 /*
  * DeepSeek request:
  * 
@@ -99,27 +102,29 @@ import java.util.Arrays;
  *     
  */
 
-public class RefineYearlyPopulation {
+public class RefineYearlyPopulation
+{
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         // Example input parameters
         double[] p = new double[12];
-        p[0] = 15.0;  // Initial guess for p(0)
-        p[1] = 14.0;  // Initial guess for p(1)
-        p[2] = 13.0;  // Initial guess for p(2)
-        p[3] = 12.0;  // Initial guess for p(3)
-        p[4] = 11.0;  // Initial guess for p(4)
-        p[5] = 10.0;  // Initial guess for p(5)
-        p[6] = 9.0;   // Initial guess for p(6)
-        p[7] = 8.0;   // Initial guess for p(7)
-        p[8] = 7.0;   // Initial guess for p(8)
-        p[9] = 6.0;   // Initial guess for p(9)
-        p[10] = 5.0;  // Known value
-        p[11] = 4.0;  // Known value
+        p[0] = 15.0; // Initial guess for p(0)
+        p[1] = 14.0; // Initial guess for p(1)
+        p[2] = 13.0; // Initial guess for p(2)
+        p[3] = 12.0; // Initial guess for p(3)
+        p[4] = 11.0; // Initial guess for p(4)
+        p[5] = 10.0; // Initial guess for p(5)
+        p[6] = 9.0; // Initial guess for p(6)
+        p[7] = 8.0; // Initial guess for p(7)
+        p[8] = 7.0; // Initial guess for p(8)
+        p[9] = 6.0; // Initial guess for p(9)
+        p[10] = 5.0; // Known value
+        p[11] = 4.0; // Known value
 
         double psum04 = 50.0; // Sum of p(0) to p(4)
         double psum59 = 30.0; // Sum of p(5) to p(9)
-        double[] target_diff = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; // Target differences
+        double[] target_diff = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; // Target differences
         double importance_smoothness = 0.5; // Weight for smoothness constraint
         double importance_target_diff_matching = 0.5; // Weight for target difference matching
 
@@ -128,12 +133,15 @@ public class RefineYearlyPopulation {
 
         // Output the reconstructed series
         System.out.println("Reconstructed series p(0) to p(9):");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++)
+        {
             System.out.println("p(" + i + ") = " + reconstructedP[i]);
         }
     }
 
-    public static double[] reconstructSeries(double[] p, double psum04, double psum59, double[] target_diff, double importance_smoothness, double importance_target_diff_matching) {
+    public static double[] reconstructSeries(double[] p, double psum04, double psum59, double[] target_diff, double importance_smoothness,
+            double importance_target_diff_matching)
+    {
         // Use the initial guess from p(0) to p(9)
         double[] initialGuess = Arrays.copyOfRange(p, 0, 10);
 
@@ -143,11 +151,15 @@ public class RefineYearlyPopulation {
         return optimizedP;
     }
 
-    private static double[] optimizeSeries(double[] p, double[] initialGuess, double psum04, double psum59, double[] target_diff, double importance_smoothness, double importance_target_diff_matching) {
+    private static double[] optimizeSeries(double[] p, double[] initialGuess, double psum04, double psum59, double[] target_diff,
+            double importance_smoothness, double importance_target_diff_matching)
+    {
         // Define the objective function
-        MultivariateFunction objectiveFunction = new MultivariateFunction() {
+        MultivariateFunction objectiveFunction = new MultivariateFunction()
+        {
             @Override
-            public double value(double[] point) {
+            public double value(double[] point)
+            {
                 // Combine p(0) to p(9) with the fixed p(10) and p(11)
                 double[] fullP = Arrays.copyOf(point, 12);
                 fullP[10] = p[10];
@@ -169,46 +181,52 @@ public class RefineYearlyPopulation {
         Arrays.fill(scale, 1.0); // Uniform penalty weights
 
         MultivariateFunctionPenaltyAdapter constrainedObjective = new MultivariateFunctionPenaltyAdapter(
-                objectiveFunction,
-                lowerBounds,
-                upperBounds,
-                offset,
-                scale
-        );
+                                                                                                         objectiveFunction,
+                                                                                                         lowerBounds,
+                                                                                                         upperBounds,
+                                                                                                         offset,
+                                                                                                         scale);
 
         // Set up the CMAESOptimizer
         RandomGenerator random = new JDKRandomGenerator();
         ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-6);
         CMAESOptimizer optimizer = new CMAESOptimizer(
-                10000, // Max iterations
-                1e-6,  // Stop fitness
-                true,  // Active CMA
-                0,     // Diagonal only (0 means full covariance)
-                1,     // Check feasible count
-                random, // Random generator
-                false, // No statistics
-                checker // Convergence checker
+                                                      10000, // Max iterations
+                                                      1e-6, // Stop fitness
+                                                      true, // Active CMA
+                                                      0, // Diagonal only (0 means full covariance)
+                                                      1, // Check feasible count
+                                                      random, // Random generator
+                                                      false, // No statistics
+                                                      checker // Convergence checker
         );
 
         // Define the input sigma (step sizes for each variable)
         double[] inputSigma = new double[10];
         Arrays.fill(inputSigma, 1.0); // Initial step size for each variable
 
+        // Define bounds for the variables
+        double[] lowerBoundsForOptimizer = new double[10];
+        double[] upperBoundsForOptimizer = new double[10];
+        Arrays.fill(lowerBoundsForOptimizer, Double.NEGATIVE_INFINITY); // No lower bounds
+        Arrays.fill(upperBoundsForOptimizer, Double.POSITIVE_INFINITY); // No upper bounds
+
         // Perform the optimization
         PointValuePair result = optimizer.optimize(
-                new MaxEval(10000), // Maximum number of evaluations
-                new ObjectiveFunction(constrainedObjective),
-                GoalType.MINIMIZE,
-                new InitialGuess(initialGuess),
-                new CMAESOptimizer.Sigma(inputSigma), // Step sizes
-                new SimpleBounds(new double[10], new double[10]) // No bounds
+                                                   new MaxEval(10000), // Maximum number of evaluations
+                                                   new ObjectiveFunction(constrainedObjective),
+                                                   GoalType.MINIMIZE,
+                                                   new InitialGuess(initialGuess),
+                                                   new Sigma(inputSigma), // Step sizes
+                                                   new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // No bounds
         );
 
         // Return the optimized values
         return result.getPoint();
     }
 
-    private static double calculateObjective(double[] p, double[] target_diff, double importance_smoothness, double importance_target_diff_matching) {
+    private static double calculateObjective(double[] p, double[] target_diff, double importance_smoothness, double importance_target_diff_matching)
+    {
         // Calculate smoothness violation
         double smoothnessViolation = calculateSmoothnessViolation(p);
 
@@ -219,9 +237,11 @@ public class RefineYearlyPopulation {
         return importance_smoothness * smoothnessViolation + importance_target_diff_matching * targetDiffViolation;
     }
 
-    private static double calculateSmoothnessViolation(double[] p) {
+    private static double calculateSmoothnessViolation(double[] p)
+    {
         double smoothnessViolation = 0.0;
-        for (int i = 1; i < p.length - 1; i++) {
+        for (int i = 1; i < p.length - 1; i++)
+        {
             double derivative1 = p[i] - p[i - 1];
             double derivative2 = p[i + 1] - p[i];
             smoothnessViolation += Math.pow(derivative2 - derivative1, 2);
@@ -229,9 +249,11 @@ public class RefineYearlyPopulation {
         return smoothnessViolation;
     }
 
-    private static double calculateTargetDiffViolation(double[] p, double[] target_diff) {
+    private static double calculateTargetDiffViolation(double[] p, double[] target_diff)
+    {
         double[] actual_diff = new double[target_diff.length];
-        for (int i = 0; i < actual_diff.length; i++) {
+        for (int i = 0; i < actual_diff.length; i++)
+        {
             actual_diff[i] = p[i] - p[i + 1];
         }
 
@@ -243,7 +265,8 @@ public class RefineYearlyPopulation {
 
         // Calculate sum of absolute differences
         double targetDiffViolation = 0.0;
-        for (int i = 0; i < normalizedActualDiff.length; i++) {
+        for (int i = 0; i < normalizedActualDiff.length; i++)
+        {
             targetDiffViolation += Math.abs(normalizedActualDiff[i] - normalizedTargetDiff[i]);
         }
 
