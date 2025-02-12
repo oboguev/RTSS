@@ -35,36 +35,31 @@ public class InterpolatePopulationAsMeanPreservingCurve
         Exception ex = null;
         double[] curve = null;
 
-        if (Util.True)
+        try
         {
-            try
-            {
-                /*
-                 * При интерполяции данных для TargetResolution.DAILY алгоритм CSASRA даёт гораздо
-                 * более гладкие данные, чем алгоритм сплайна.
-                 */
+            /*
+             * При интерполяции данных для TargetResolution.DAILY алгоритм CSASRA даёт гораздо
+             * более гладкие данные, чем алгоритм сплайна.
+             */
+            if (curve == null && Util.True)
                 curve = curve_csasra(bins, title, targetResolution, yearHint);
-            }
-            catch (Exception e2)
-            {
-                Util.err("CSASRA disaggregation failed for " + title);
-                ex = e2;
-            }
+        }
+        catch (Exception e2)
+        {
+            Util.err("CSASRA disaggregation failed for " + title);
+            ex = e2;
         }
 
-        if (Util.True)
+        try
         {
-            try
-            {
-                if (curve == null)
-                    curve = curve_spline(bins, title, targetResolution, yearHint);
-            }
-            catch (Exception e2)
-            {
-                Util.err("Spline disaggregation failed for " + title);
-                if (ex == null)
+            if (curve == null && Util.True)
+                curve = curve_spline(bins, title, targetResolution, yearHint);
+        }
+        catch (Exception e2)
+        {
+            Util.err("Spline disaggregation failed for " + title);
+            if (ex == null)
                 ex = e2;
-            }
         }
 
         if (curve == null)
@@ -74,7 +69,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             else
                 throw new Exception("Unable to build the curve");
         }
-        
+
         if (Util.False)
         {
             int ppy = 1;
