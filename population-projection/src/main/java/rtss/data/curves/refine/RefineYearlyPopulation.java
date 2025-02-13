@@ -73,9 +73,6 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
                 break;
         }
 
-        double psum_04 = Util.sum(Util.splice(p0, 0, 4));
-        double psum_59 = Util.sum(Util.splice(p0, 5, 9));
-
         double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
         double importance_smoothness = 0.98;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
@@ -86,8 +83,6 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         try
         {
             double[] px = optimizeSeries(Util.dup(p),
-                                         Util.splice(p, 0, nTunablePoints - 1),
-                                         psum_04, psum_59,
                                          Util.splice(attrition, 0, nTunablePoints - 1),
                                          importance_smoothness,
                                          importance_target_diff_matching,

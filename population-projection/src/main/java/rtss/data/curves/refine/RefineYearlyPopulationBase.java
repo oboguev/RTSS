@@ -24,90 +24,47 @@ import rtss.util.Util;
 import java.util.Arrays;
 
 /*
- * DeepSeek request:
+ * This module/algirithm is a post-processing stage for decomposition of binned demographic population data
+ * from 5-year groups into individual years of age.
  * 
- *     https://chat.deepseek.com/a/chat/s/a33e89c2-254a-4536-b839-9d186ca1429a
- *     
- *     Please design an algorithm.
- *     
- *     There is a series p(x) where x is an integer ranging from 0 to 11.
- *     It is known that the series is monotonically decreasing.
- *     
- *     We also know values for p(10) and p(11).
- *     
- *     We also know the sum of values p(0) to p(4), lets designate it psum04, but not individual values of elements 0 to 4.
- *     
- *     We also know the sum of values p(5) to p(9), lets designate it psum59, but not individual values of elements 5 to 9.
- *     
- *     The goal is recover the values of p(0) to p(9) under the mentioned constraints that:
- *     
- *     Constraint 1. 
+ * First stage is a general-purpose disaggregator agnostic of actual mortality patterns.
+ * 
+ * This module receives the output of the first stage and tries to refine it so it conforms young-age mortality
+ * patterns characteristic for the era.
+ * 
+ * Input: array "p" contains the output of 1-st stage disaggegation, including age points for age bins 0...4 and 5...9. 
+ * 
+ * The size of "p" is max(10, nTunablePoints + nFixedPoints), as is explained latter.
+ * 
+ * Only first nTunablePoints at the start of "p" can be tweaked.
+ * But following nFixedPoints can be used to check for curve smoothness.
+ *   
+ * Typically, nTunablePoints does not exceed 10 (total size of first two bins), and then nFixedPoints is 2.
+ * These vales are used when bin sum values follow pattern X-DOWN-DOWN.
+ * 
+ * However for cases X-DOWN-UP (a flip in the 2nd bin) nTunablePoints is shorter: p[nTunablePoints] is a flip point.
+ * 
+ * In addition, target_diff(x) contains mortality pattern to match. 
+ * The values of differences in the adjusted series (p(x) - p(x+1)) should be proportional to the target_diff(x).
+ * Only relative values in target_diff matter, not absolute values.
+ * In other words, array target_diff describes a steepness of p(x) descent.
+ * We use adjusted p(x) to build an array of actual values (p(x) - p(x+1)), lets name it actual_diff(x), 
+ * normalize each of the arrays actual_diff and target_diff so that a sum of all elements in each of the diff arrays is 1.0, 
+ * then then the distance between these two normalized vectors should be minimized. 
+ * I.e. sum(abs(normalized actual_diff(x) - normalized target_diff(x))) should be minimized.
+ * 
+ * Other constraints:
+ *    
  *     The sum of p(0) to p(4) exactly equals psum04. This is a hard constraint.
- *     
- *     Constraint 2. 
  *     The sum of p(5) to p(9) exactly equals psum04. This is another hard constraint.
+ *     The curve should be monotonically descending from point p(0) to p(nTunablePoints). This is a hard constraint too. 
  *     
- *     Constraint 3. 
- *     Values of p(10) and p(11) are fixed and cannot be adjusted.
+ *     The chart for p(x) should look like a smooth curve, with continuous first derivative. This is a soft constraint.
  *     
- *     And also the following additional constraints:
- *     
- *     Constraint 4. 
- *     The chart for p(x) should look like a smooth curve, with continuous first derivative.
- *     
- *     Constraint 5. 
- *     There is also an array of 10 elements target_diff(x), with x ranging 0 to 9.
- *     The values of differences (p(x) - p(x+1)) should be proportional to the target_diff(x).
- *     Please note that only relative values in target_diff matter, not absolute values.
- *     In other words, array target_diff describes a steepness of p(x) descent.
- *     If you use p(x) to build an array of actual values (p(x) - p(x+1)), lets name it actual_diff(x), 
- *     normalize each of the arrays actual_diff and target_diff so that a sum of all elements in each of the diff arrays is 1.0, 
- *     then then the distance between these two normalized vectors should be minimized. 
- *     I.e. sum(abs(normalized actual_diff(x) - normalized target_diff(x))) should be minimized.
- *     I hope I explained constraint 4 clearly enough. If not, please ask me to clarify further.
- *     
- *     The task is obviously over-constrained. Constraints 4 and 5 cannot be met EXACTLY both.
- *     Let's assign relative importance weights to these two constraints.
- *     Let's designate these weights importance_smoothness and importance_target_diff_matching.
- *     The task then is to minimize a weighted sum of criteria 4 and 5 violations.
- *     
- *     Please design the algorithm and implement it in Java.
- *     
- *     Input parameters:
- *     - array p, only values of p(10) and p(11) matter
- *     - psum04
- *     - psum59
- *     - array target_diff
- *     
- *     .................
- *     
- *     Please implement method optimizeSeries using Apache Common Math.
- *      
- *     .................
-
- *     Please update the code for Apache Common Math 3.6.1.
- *    
- *     ...............
- *    
- *     Actually CMAESOptimizer is available in 3.6.1 but it uses a different constructor than you used in the code.
- *    
- *     ...............
- *    
- *     Sorry, the signature does not match again.
- *     Here is the signature for CMAESOptimizer in 3.6.1:
- *    
- *     CMAESOptimizer(int maxIterations, double stopFitness, boolean isActiveCMA, int diagonalOnly, int checkFeasableCount, RandomGenerator random, boolean generateStatistics, ConvergenceChecker<PointValuePair> checker) 
- *    
- *     According to https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/optim/nonlinear/scalar/noderiv/CMAESOptimizer.html
- *    
- *    .......................
- *    
- *     The signature for MultivariateFunctionPenaltyAdapter in 3.6.1 is
- *    
- *     MultivariateFunctionPenaltyAdapter(MultivariateFunction bounded, double[] lower, double[] upper, double offset, double[] scale)
- *    
- *     Please see https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/optim/nonlinear/scalar/MultivariateFunctionPenaltyAdapter.html     
- *     
+ * The task is over-constrained because constraints for target_diff and for curve smoothness cannot be met EXACTLY both.
+ * We assign relative importance weights to these two constraints, namded "importance_smoothness" and "importance_target_diff_matching".
+ * The task then is to minimize a weighted sum of violations for smoothness criteria and diff criteria.
+ * Whereas keeping bins sum value and curve descendance from point 0 to point nTunablePoints are hard constraint that should be maintained precisely.
  */
 public class RefineYearlyPopulationBase
 {
@@ -116,15 +73,16 @@ public class RefineYearlyPopulationBase
 
     protected static double[] optimizeSeries(
             final double[] p,
-            final double[] initialGuess,
-            final double psum04,
-            final double psum59,
             final double[] target_diff,
             final double arg_importance_smoothness,
             final double arg_importance_target_diff_matching,
             final int nTunablePoints,
             final int nFixedPoints)
     {
+        final double psum04 = util_sum(util_splice(p, 0, 4));
+        final double psum59 = util_sum(util_splice(p, 5, 9));
+        final double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
+
         final double importance_smoothness = arg_importance_smoothness * RegularPenalty;
         final double importance_target_diff_matching = arg_importance_target_diff_matching * RegularPenalty;
 
@@ -468,18 +426,10 @@ public class RefineYearlyPopulationBase
         double importance_smoothness = 0.98;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
-        double psum04 = util_sum(util_splice(p, 0, 4));
-        double psum59 = util_sum(util_splice(p, 5, 9));
-
         int nTunablePoints = 7;
         int nFixedPoints = 1;
 
-        double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
-
         double[] px = optimizeSeries(p,
-                                     initialGuess,
-                                     psum04,
-                                     psum59,
                                      target_diff,
                                      importance_smoothness,
                                      importance_target_diff_matching,
@@ -487,13 +437,21 @@ public class RefineYearlyPopulationBase
                                      nFixedPoints);
 
         util_out("Completed");
-        util_out("");
 
+        final double psum04 = util_sum(util_splice(p, 0, 4));
+        final double psum59 = util_sum(util_splice(p, 5, 9));
         int plength = Math.max(10, nTunablePoints + nFixedPoints);
         double[] fullP = Arrays.copyOf(px, plength);
         System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
+        util_out("");
         util_out("Objective values for the result:");
         calculateObjective(fullP, target_diff,
+                           importance_smoothness, importance_target_diff_matching,
+                           nTunablePoints, nFixedPoints, psum04, psum59);
+
+        util_out("");
+        util_out("Objective values for the intitial:");
+        calculateObjective(p, target_diff,
                            importance_smoothness, importance_target_diff_matching,
                            nTunablePoints, nFixedPoints, psum04, psum59);
         util_out("");
