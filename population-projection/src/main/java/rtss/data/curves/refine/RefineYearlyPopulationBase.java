@@ -468,7 +468,6 @@ public class RefineYearlyPopulationBase
         int nFixedPoints = 1;
         
         double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
-
  
         double[] px = optimizeSeries(
                 p,
