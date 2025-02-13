@@ -242,10 +242,16 @@ public class RefineYearlyPopulationBase
         // Calculate target difference violation
         double targetDiffViolation = calculateTargetDiffViolation(p, target_diff);
 
-        Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity= %9.4e", targetDiffViolation, smoothnessViolation, monotonicityViolation ));
-
         // Return weighted sum of violations
-        return monotonicityViolation + importance_smoothness * smoothnessViolation + importance_target_diff_matching * targetDiffViolation;
+        double objective = monotonicityViolation + importance_smoothness * smoothnessViolation + importance_target_diff_matching * targetDiffViolation;
+        
+        Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   objective = %9.4e", 
+                               targetDiffViolation, 
+                               smoothnessViolation, 
+                               monotonicityViolation, 
+                               objective));
+
+        return objective;
     }
 
     private static double calculateMonotonicityViolation(double[] p, int nTunablePoints)
