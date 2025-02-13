@@ -163,7 +163,7 @@ public class RefineYearlyPopulationBase
         UniformRandomProvider random = RandomSource.JDK.create(); // Use UniformRandomProvider
         ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-6);
 
-        CMAESOptimizer optimizer = new CMAESOptimizer(10_000, // Max iterations
+        CMAESOptimizer optimizer = new CMAESOptimizer(30_000, // Max iterations
                                                       1e-6, // Stop fitness
                                                       true, // Active CMA
                                                       0, // Diagonal only (0 means full covariance)
@@ -239,7 +239,7 @@ public class RefineYearlyPopulationBase
         return objective;
     }
 
-    final static double LargePenalty = 1e3;
+    final static double LargePenalty = 1e4;
 
     private static double calculateMonotonicityViolation(double[] p, int nTunablePoints)
     {
@@ -471,8 +471,7 @@ public class RefineYearlyPopulationBase
 
         double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
 
-        double[] px = optimizeSeries(
-                                     p,
+        double[] px = optimizeSeries(p,
                                      initialGuess,
                                      psum04,
                                      psum59,
@@ -484,5 +483,14 @@ public class RefineYearlyPopulationBase
 
         util_out("Completed");
         util_out("");
-    }
+
+        int plength = Math.max(10, nTunablePoints + nFixedPoints);
+        double[] fullP = Arrays.copyOf(px, plength);
+        System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
+        util_out("Objective values for the result:");
+        calculateObjective(fullP, target_diff,
+                           importance_smoothness, importance_target_diff_matching,
+                           nTunablePoints, psum04, psum59);
+        util_out("");
+   }
 }
