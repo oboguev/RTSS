@@ -19,6 +19,8 @@ import org.apache.commons.rng.simple.RandomSource;
 
 import rtss.util.Util;
 
+// import rtss.util.Util;
+
 import java.util.Arrays;
 
 /*
@@ -109,27 +111,6 @@ import java.util.Arrays;
  */
 public class RefineYearlyPopulationBase
 {
-    public static double[] reconstructSeries(
-            double[] p,
-            double psum04,
-            double psum59,
-            double[] target_diff,
-            double importance_smoothness,
-            double importance_target_diff_matching,
-            int nTunablePoints,
-            int nFixedPoints)
-    {
-        // Use the initial guess from p(0) to p(nTunablePoints - 1)
-        double[] initialGuess = Arrays.copyOfRange(p, 0, nTunablePoints);
-
-        // Optimize the series
-        double[] optimizedP = optimizeSeries(p, initialGuess, psum04, psum59, target_diff,
-                                             importance_smoothness, importance_target_diff_matching,
-                                             nTunablePoints, nFixedPoints);
-
-        return optimizedP;
-    }
-
     protected static double[] optimizeSeries(
             final double[] p,
             final double[] initialGuess,
@@ -153,15 +134,11 @@ public class RefineYearlyPopulationBase
                 System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
 
                 // Calculate the objective value
-                double objective = calculateObjective(fullP, target_diff, importance_smoothness, importance_target_diff_matching, nTunablePoints);
+                double objective = calculateObjective(fullP, target_diff,
+                                                      importance_smoothness, importance_target_diff_matching,
+                                                      nTunablePoints, psum04, psum59);
 
-                // Add penalties for violating the sum constraints
-                double sum04 = Arrays.stream(fullP, 0, 5).sum(); // Sum of p(0) to p(4)
-                double sum59 = Arrays.stream(fullP, 5, 10).sum(); // Sum of p(5) to p(9)
-                double penalty04 = 1e6 * Math.pow(sum04 - psum04, 2); // Large penalty for violating psum04
-                double penalty59 = 1e6 * Math.pow(sum59 - psum59, 2); // Large penalty for violating psum59
-
-                return objective + penalty04 + penalty59;
+                return objective;
             }
         };
 
@@ -232,23 +209,31 @@ public class RefineYearlyPopulationBase
             double[] target_diff,
             double importance_smoothness,
             double importance_target_diff_matching,
-            int nTunablePoints)
+            int nTunablePoints,
+            double psum04,
+            double psum59)
     {
         double monotonicityViolation = calculateMonotonicityViolation(p, nTunablePoints);
 
         // Calculate smoothness violation
         double smoothnessViolation = calculateSmoothnessViolation(p);
 
+        // Add penalties for violating the sum constraints
+        double sumViolation = calculateSumViolation(p, psum04, psum59);
+
         // Calculate target difference violation
         double targetDiffViolation = calculateTargetDiffViolation(p, target_diff);
 
         // Return weighted sum of violations
-        double objective = monotonicityViolation + importance_smoothness * smoothnessViolation + importance_target_diff_matching * targetDiffViolation;
-        
-        Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   objective = %9.4e", 
-                               targetDiffViolation, 
-                               smoothnessViolation, 
-                               monotonicityViolation, 
+        double objective = monotonicityViolation + sumViolation +
+                           importance_smoothness * smoothnessViolation +
+                           importance_target_diff_matching * targetDiffViolation;
+
+        util_out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
+                               targetDiffViolation,
+                               smoothnessViolation,
+                               monotonicityViolation,
+                               sumViolation,
                                objective));
 
         return objective;
@@ -258,7 +243,7 @@ public class RefineYearlyPopulationBase
     {
         double monotonicityViolation = 0.0;
 
-        p = Util.normalize(p);
+        p = util_normalize(p);
 
         for (int k = 0; k < nTunablePoints; k++)
         {
@@ -270,11 +255,20 @@ public class RefineYearlyPopulationBase
         return monotonicityViolation;
     }
 
+    private static double calculateSumViolation(double[] p, double psum04, double psum59)
+    {
+        double sum04 = Arrays.stream(p, 0, 5).sum(); // Sum of p(0) to p(4)
+        double sum59 = Arrays.stream(p, 5, 10).sum(); // Sum of p(5) to p(9)
+        double penalty04 = 1e6 * Math.abs(sum04 - psum04) / psum04; // Large penalty for violating psum04
+        double penalty59 = 1e6 * Math.abs(sum59 - psum59) / psum59; // Large penalty for violating psum59
+        return penalty04 + penalty59;
+    }
+
     private static double calculateSmoothnessViolation(double[] p)
     {
         double smoothnessViolation = 0.0;
 
-        p = Util.normalize(p);
+        p = util_normalize(p);
 
         for (int i = 1; i < p.length - 1; i++)
         {
@@ -290,7 +284,7 @@ public class RefineYearlyPopulationBase
     {
         double[] actual_diff = new double[target_diff.length];
 
-        p = Util.normalize(p);
+        p = util_normalize(p);
 
         for (int i = 0; i < actual_diff.length; i++)
             actual_diff[i] = p[i] - p[i + 1];
@@ -402,5 +396,92 @@ public class RefineYearlyPopulationBase
         lambda = Math.max(lambda, 15);
 
         return lambda;
+    }
+
+    /*==================================================================== */
+
+    // extract sub-array
+    public static double[] util_splice(final double[] y, int x1, int x2)
+    {
+        int size = x2 - x1 + 1;
+        if (size <= 0)
+            throw new IllegalArgumentException("array splice : negative size");
+
+        double[] yy = new double[size];
+        for (int x = x1; x <= x2; x++)
+            yy[x - x1] = y[x];
+        return yy;
+    }
+
+    // sum of array values
+    public static double util_sum(final double[] y)
+    {
+        double sum = 0;
+        for (int k = 0; k < y.length; k++)
+            sum += y[k];
+        return sum;
+    }
+
+    // normalize array so the sum of its elements is 1.0
+    public static double[] util_normalize(final double[] y)
+    {
+        return util_normalize(y, 1.0);
+    }
+
+    // normalize array so the sum of its elements is @sum
+    public static double[] util_normalize(final double[] y, double sum)
+    {
+        return util_multiply(y, sum / util_sum(y));
+    }
+
+    // return a new array with values representing y[] * f
+    public static double[] util_multiply(final double[] y, double f)
+    {
+        double[] yy = new double[y.length];
+        for (int x = 0; x < y.length; x++)
+            yy[x] = y[x] * f;
+        return yy;
+    }
+
+    public static void util_out(String s)
+    {
+        System.out.println(s);
+    }
+
+    /*==================================================================== */
+
+    public static void main(String[] args)
+    {
+        double p[] = { 3079.1064761352536, 2863.741162691683, 2648.375849248112, 2433.010535804541, 2217.645222360971, 2002.2799089174,
+                       1831.1316029723425, 1749.4931260194671, 1757.808507358823, 1852.286854731967 };
+
+        double target_diff[] = { 0.5635055255718324, 0.1853508095605243, 0.08306347982523773, 0.04790542277049602, 0.028270367514777694,
+                                 0.02770496016448214, 0.021691081984065795 };
+
+        double importance_smoothness = 0.7;
+        double importance_target_diff_matching = 0.3;
+ 
+        double psum04 = util_sum(util_splice(p, 0, 4));
+        double psum59 = util_sum(util_splice(p, 5, 9));
+        
+        int nTunablePoints = 7;
+        int nFixedPoints = 1;
+        
+        double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
+
+ 
+        double[] px = optimizeSeries(
+                p,
+                initialGuess,
+                psum04,
+                psum59,
+                target_diff,
+                importance_smoothness,
+                importance_target_diff_matching,
+                nTunablePoints,
+                nFixedPoints);
+        
+        util_out("Completed");
+        util_out("");
     }
 }
