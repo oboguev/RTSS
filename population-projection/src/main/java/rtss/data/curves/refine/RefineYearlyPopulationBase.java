@@ -153,7 +153,7 @@ public class RefineYearlyPopulationBase
                 System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
 
                 // Calculate the objective value
-                double objective = calculateObjective(fullP, target_diff, importance_smoothness, importance_target_diff_matching);
+                double objective = calculateObjective(fullP, target_diff, importance_smoothness, importance_target_diff_matching, nTunablePoints);
 
                 // Add penalties for violating the sum constraints
                 double sum04 = Arrays.stream(fullP, 0, 5).sum(); // Sum of p(0) to p(4)
@@ -227,20 +227,41 @@ public class RefineYearlyPopulationBase
         return result.getPoint();
     }
 
-    private static double calculateObjective(double[] p, double[] target_diff, double importance_smoothness, double importance_target_diff_matching)
+    private static double calculateObjective(
+            double[] p,
+            double[] target_diff,
+            double importance_smoothness,
+            double importance_target_diff_matching,
+            int nTunablePoints)
     {
-        // ### calculate monotonicity violatiion
-        
+        double monotonicityViolation = calculateMonotonicityViolation(p, nTunablePoints);
+
         // Calculate smoothness violation
         double smoothnessViolation = calculateSmoothnessViolation(p);
 
         // Calculate target difference violation
         double targetDiffViolation = calculateTargetDiffViolation(p, target_diff);
 
-        Util.out(String.format("diff = %7.4f   smooth = %7.4f", targetDiffViolation, smoothnessViolation));
+        Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity= %9.4e", targetDiffViolation, smoothnessViolation, monotonicityViolation ));
 
         // Return weighted sum of violations
-        return importance_smoothness * smoothnessViolation + importance_target_diff_matching * targetDiffViolation;
+        return monotonicityViolation + importance_smoothness * smoothnessViolation + importance_target_diff_matching * targetDiffViolation;
+    }
+
+    private static double calculateMonotonicityViolation(double[] p, int nTunablePoints)
+    {
+        double monotonicityViolation = 0.0;
+
+        p = Util.normalize(p);
+
+        for (int k = 0; k < nTunablePoints; k++)
+        {
+            double d = p[k] - p[k + 1];
+            if (d < 0)
+                monotonicityViolation += Math.abs(d) * 1e6;
+        }
+
+        return monotonicityViolation;
     }
 
     private static double calculateSmoothnessViolation(double[] p)
@@ -294,7 +315,7 @@ public class RefineYearlyPopulationBase
 
         for (int k = 5; k <= 9 && k < upperBounds.length; k++)
             upperBounds[k] = psum59;
-        
+
         for (int k = 0; k < lowerBounds.length; k++)
             lowerBounds[k] = p[lowerBounds.length];
     }
