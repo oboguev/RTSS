@@ -111,17 +111,23 @@ import java.util.Arrays;
  */
 public class RefineYearlyPopulationBase
 {
+    final static double RegularPenalty = 1e1;
+    final static double LargePenalty = 1e4;
+
     protected static double[] optimizeSeries(
             final double[] p,
             final double[] initialGuess,
             final double psum04,
             final double psum59,
             final double[] target_diff,
-            final double importance_smoothness,
-            final double importance_target_diff_matching,
+            final double arg_importance_smoothness,
+            final double arg_importance_target_diff_matching,
             final int nTunablePoints,
             final int nFixedPoints)
     {
+        final double importance_smoothness = arg_importance_smoothness * RegularPenalty;
+        final double importance_target_diff_matching = arg_importance_target_diff_matching * RegularPenalty;
+
         // Define the objective function
         MultivariateFunction objectiveFunction = new MultivariateFunction()
         {
@@ -136,7 +142,7 @@ public class RefineYearlyPopulationBase
                 // Calculate the objective value
                 double objective = calculateObjective(fullP, target_diff,
                                                       importance_smoothness, importance_target_diff_matching,
-                                                      nTunablePoints, psum04, psum59);
+                                                      nTunablePoints, nFixedPoints, psum04, psum59);
 
                 return objective;
             }
@@ -210,13 +216,14 @@ public class RefineYearlyPopulationBase
             double importance_smoothness,
             double importance_target_diff_matching,
             int nTunablePoints,
+            int nFixedPoints,
             double psum04,
             double psum59)
     {
         double monotonicityViolation = calculateMonotonicityViolation(p, nTunablePoints);
 
         // Calculate smoothness violation
-        double smoothnessViolation = calculateSmoothnessViolation(p);
+        double smoothnessViolation = calculateSmoothnessViolation(p, nTunablePoints, nFixedPoints);
 
         // Add penalties for violating the sum constraints
         double sumViolation = calculateSumViolation(p, psum04, psum59);
@@ -238,8 +245,6 @@ public class RefineYearlyPopulationBase
 
         return objective;
     }
-
-    final static double LargePenalty = 1e4;
 
     private static double calculateMonotonicityViolation(double[] p, int nTunablePoints)
     {
@@ -266,13 +271,13 @@ public class RefineYearlyPopulationBase
         return penalty04 + penalty59;
     }
 
-    private static double calculateSmoothnessViolation(double[] p)
+    private static double calculateSmoothnessViolation(double[] p, int nTunablePoints, int nFixedPoints)
     {
         double smoothnessViolation = 0.0;
 
         p = util_normalize(p);
 
-        for (int i = 1; i < p.length - 1; i++)
+        for (int i = 1; i < p.length - 1 && i + 1 <= nTunablePoints + nFixedPoints; i++)
         {
             double derivative1 = p[i] - p[i - 1];
             double derivative2 = p[i + 1] - p[i];
@@ -460,8 +465,8 @@ public class RefineYearlyPopulationBase
         double target_diff[] = { 0.5635055255718324, 0.1853508095605243, 0.08306347982523773, 0.04790542277049602, 0.028270367514777694,
                                  0.02770496016448214, 0.021691081984065795 };
 
-        double importance_smoothness = 0.7;
-        double importance_target_diff_matching = 0.3;
+        double importance_smoothness = 0.98;
+        double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         double psum04 = util_sum(util_splice(p, 0, 4));
         double psum59 = util_sum(util_splice(p, 5, 9));
@@ -490,7 +495,7 @@ public class RefineYearlyPopulationBase
         util_out("Objective values for the result:");
         calculateObjective(fullP, target_diff,
                            importance_smoothness, importance_target_diff_matching,
-                           nTunablePoints, psum04, psum59);
+                           nTunablePoints, nFixedPoints, psum04, psum59);
         util_out("");
-   }
+    }
 }

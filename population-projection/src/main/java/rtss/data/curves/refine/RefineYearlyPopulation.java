@@ -77,8 +77,8 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         double psum_59 = Util.sum(Util.splice(p0, 5, 9));
 
         double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
-        double importance_smoothness = 0.7;
-        double importance_target_diff_matching = 0.3;
+        double importance_smoothness = 0.98;
+        double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int plength = Math.max(10, nTunablePoints + nFixedPoints);
         p = Util.splice(p0, 0, plength - 1);

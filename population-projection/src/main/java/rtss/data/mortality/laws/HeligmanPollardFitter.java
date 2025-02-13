@@ -11,8 +11,8 @@ import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math4.legacy.optim.InitialGuess;
 import org.apache.commons.math4.legacy.optim.SimpleBounds;
 import org.apache.commons.math4.legacy.optim.MaxEval;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.MultivariateOptimizer;
-import org.apache.commons.math4.legacy.core.Pair;
+// import org.apache.commons.math4.legacy.optim.nonlinear.scalar.MultivariateOptimizer;
+//import org.apache.commons.math4.legacy.core.Pair;
 import org.apache.commons.math4.legacy.optim.PointValuePair;
 
 import java.util.ArrayList;
