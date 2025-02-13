@@ -17,6 +17,8 @@ import org.apache.commons.math4.legacy.optim.nonlinear.scalar.Sigma;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
 
+import rtss.util.Util;
+
 import java.util.Arrays;
 
 /*
@@ -216,6 +218,8 @@ public class RefineYearlyPopulationBase
 
         // Calculate target difference violation
         double targetDiffViolation = calculateTargetDiffViolation(p, target_diff);
+        
+        Util.out(String.format("diff = %7.4f   smooth = %7.4f", targetDiffViolation, smoothnessViolation));
 
         // Return weighted sum of violations
         return importance_smoothness * smoothnessViolation + importance_target_diff_matching * targetDiffViolation;
@@ -224,6 +228,8 @@ public class RefineYearlyPopulationBase
     private static double calculateSmoothnessViolation(double[] p)
     {
         double smoothnessViolation = 0.0;
+        
+        p = Util.normalize(p);
         
         for (int i = 1; i < p.length - 1; i++)
         {

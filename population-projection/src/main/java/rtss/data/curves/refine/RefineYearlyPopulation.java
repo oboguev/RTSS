@@ -99,7 +99,8 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
             if (Util.True)
             {
                 // ### даёт равномерное по годам падение ???
-                // ### потому что targetDiffViolation мало
+                // ### adjust sigma and lambda
+                // ### also adjust smoothness violation (not tiny) 
                 Util.out("RefineYearlyPopulation processed " + title);
                 p = Util.dup(p0);
                 Util.insert(p, px, 0);
