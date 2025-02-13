@@ -8,36 +8,69 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
     public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint) throws Exception
     {
         final double[] p0 = p;
-        
+
         if (Util.False)
             return p0;
 
-        if (bins.length < 3 || 
-                bins[0].widths_in_years != 5 || 
-                bins[1].widths_in_years != 5 || 
-                bins[3].widths_in_years != 5)
+        if (bins.length < 3 ||
+            bins[0].widths_in_years != 5 ||
+            bins[1].widths_in_years != 5 ||
+            bins[3].widths_in_years != 5)
         {
             return p0;
         }
 
         int nTunablePoints = 10;
         int nFixedPoints = 2;
-        
+
         if (bins[0].avg > bins[1].avg && bins[1].avg > bins[2].avg)
         {
-            nTunablePoints = 10;  // ages 0-9
-            nFixedPoints = 2;     // ages 10-11
+            /*
+             * Case:
+             *      _
+             *        _
+             *          _ 
+             */
+            nTunablePoints = 10; // ages 0-9
+            nFixedPoints = 2; // ages 10-11
         }
         else if (bins[0].avg > bins[1].avg && bins[1].avg < bins[2].avg)
         {
-            // ### locate minimum point in 2nd bin bin[1] 
-            // ### or rather, turn-over point
-            nTunablePoints = 10;  // ###
-            nFixedPoints = 2;     // ###
+            /*
+             * Case:
+             *      _   _  
+             *        _ 
+             */
+            int np = locateTurnpoint(bins, p);
+
+            if (np == 5 && p[5] > p[4])
+            {
+                nTunablePoints = 5; // ages 0-4
+                nFixedPoints = 0;
+            }
+            else
+            {
+                nTunablePoints = np;
+                nFixedPoints = 1;
+            }
         }
         else
         {
             return p0;
+        }
+
+        /*
+         * if points at the right margin keep trending down, extend nFixedPoints
+         */
+        for (;;)
+        {
+            int n = nTunablePoints + nFixedPoints;
+            if (n >= 20)
+                break;
+            if (p[n] < p[n - 1])
+                nFixedPoints++;
+            else
+                break;
         }
 
         double psum_04 = Util.sum(Util.splice(p0, 0, 4));
@@ -47,28 +80,56 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         double importance_smoothness = 0.7;
         double importance_target_diff_matching = 0.3;
 
-        p = Util.splice(p0, 0, 11);
-        
-        try 
+        int plength = Math.max(10, nTunablePoints + nFixedPoints);
+        p = Util.splice(p0, 0, plength - 1);
+
+        try
         {
-            double[] px = optimizeSeries(Util.dup(p), 
-                                         Util.splice(p, 0, 9), 
-                                         psum_04, psum_59, 
-                                         attrition, 
-                                         importance_smoothness, 
+            double[] px = optimizeSeries(Util.dup(p),
+                                         Util.splice(p, 0, nTunablePoints - 1),
+                                         psum_04, psum_59,
+                                         Util.splice(attrition, 0, nTunablePoints - 1),
+                                         importance_smoothness,
                                          importance_target_diff_matching,
-                                         nTunablePoints, 
+                                         nTunablePoints,
                                          nFixedPoints);
             
-            Util.noop();
-            // ###
+            Util.assertion(px.length == nTunablePoints);
+
+            if (Util.True)
+            {
+                // ### даёт равномерное по годам падение ???
+                // ### потому что targetDiffViolation мало
+                Util.out("RefineYearlyPopulation processed " + title);
+                p = Util.dup(p0);
+                Util.insert(p, px, 0);
+                return p;
+            }
+            else
+            {
+                return p0;
+            }
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
-            Util.noop();
+            throw ex;
+            // ex.printStackTrace();
+            // return p0;
         }
+    }
 
-        return p0;
+    /*
+     * Locate a turning point within bin[1].
+     * Turning point is a local minimum, and next point after it goes up.
+     * Or it is the last point in the bin. 
+     */
+    private static int locateTurnpoint(Bin[] bins, double[] p)
+    {
+        Bin bin = bins[1];
+        for (int age = bin.age_x1;; age++)
+        {
+            if (age == bin.age_x2 || p[age + 1] > p[age])
+                return age;
+        }
     }
 }
