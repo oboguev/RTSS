@@ -109,8 +109,15 @@ import java.util.Arrays;
  */
 public class RefineYearlyPopulationBase
 {
-    public static double[] reconstructSeries(double[] p, double psum04, double psum59, double[] target_diff, double importance_smoothness,
-            double importance_target_diff_matching, int nTunablePoints, int nFixedPoints)
+    public static double[] reconstructSeries(
+            double[] p,
+            double psum04,
+            double psum59,
+            double[] target_diff,
+            double importance_smoothness,
+            double importance_target_diff_matching,
+            int nTunablePoints,
+            int nFixedPoints)
     {
         // Use the initial guess from p(0) to p(nTunablePoints - 1)
         double[] initialGuess = Arrays.copyOfRange(p, 0, nTunablePoints);
@@ -123,11 +130,16 @@ public class RefineYearlyPopulationBase
         return optimizedP;
     }
 
-    protected static double[] optimizeSeries(double[] p, double[] initialGuess,
-            double psum04, double psum59,
-            double[] target_diff,
-            double importance_smoothness, double importance_target_diff_matching,
-            int nTunablePoints, int nFixedPoints)
+    protected static double[] optimizeSeries(
+            final double[] p,
+            final double[] initialGuess,
+            final double psum04,
+            final double psum59,
+            final double[] target_diff,
+            final double importance_smoothness,
+            final double importance_target_diff_matching,
+            final int nTunablePoints,
+            final int nFixedPoints)
     {
         // Define the objective function
         MultivariateFunction objectiveFunction = new MultivariateFunction()
@@ -158,6 +170,7 @@ public class RefineYearlyPopulationBase
         double[] upperBounds = new double[nTunablePoints];
         Arrays.fill(lowerBounds, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBounds, Double.POSITIVE_INFINITY); // No upper bounds
+        adjustBounds(lowerBounds, upperBounds, psum04, psum59);
 
         double offset = 0.0; // Offset for penalty
         double[] scale = new double[nTunablePoints]; // Penalty weights for each variable
@@ -186,16 +199,17 @@ public class RefineYearlyPopulationBase
         // Define the input sigma (step sizes for each variable)
         double[] inputSigma = new double[nTunablePoints];
         Arrays.fill(inputSigma, 1.0); // Initial step size for each variable
+        adjustInputSigma(inputSigma, psum04, psum59);
 
         // Define bounds for the variables
         double[] lowerBoundsForOptimizer = new double[nTunablePoints];
         double[] upperBoundsForOptimizer = new double[nTunablePoints];
         Arrays.fill(lowerBoundsForOptimizer, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBoundsForOptimizer, Double.POSITIVE_INFINITY); // No upper bounds
+        adjustBounds(lowerBounds, upperBounds, psum04, psum59);
 
         // Set the population size (lambda)
-        int lambda = 4 + (int) (3 * Math.log(nTunablePoints)); // Default formula for lambda
-        PopulationSize populationSize = new PopulationSize(lambda);
+        PopulationSize populationSize = new PopulationSize(chooseLambda(nTunablePoints));
 
         // Perform the optimization
         PointValuePair result = optimizer.optimize(new MaxEval(10_000), // Maximum number of evaluations
@@ -218,7 +232,7 @@ public class RefineYearlyPopulationBase
 
         // Calculate target difference violation
         double targetDiffViolation = calculateTargetDiffViolation(p, target_diff);
-        
+
         Util.out(String.format("diff = %7.4f   smooth = %7.4f", targetDiffViolation, smoothnessViolation));
 
         // Return weighted sum of violations
@@ -228,23 +242,25 @@ public class RefineYearlyPopulationBase
     private static double calculateSmoothnessViolation(double[] p)
     {
         double smoothnessViolation = 0.0;
-        
+
         p = Util.normalize(p);
-        
+
         for (int i = 1; i < p.length - 1; i++)
         {
             double derivative1 = p[i] - p[i - 1];
             double derivative2 = p[i + 1] - p[i];
             smoothnessViolation += Math.pow(derivative2 - derivative1, 2);
         }
-        
+
         return smoothnessViolation;
     }
 
     private static double calculateTargetDiffViolation(double[] p, double[] target_diff)
     {
         double[] actual_diff = new double[target_diff.length];
-        
+
+        p = Util.normalize(p);
+
         for (int i = 0; i < actual_diff.length; i++)
             actual_diff[i] = p[i] - p[i + 1];
 
@@ -260,5 +276,94 @@ public class RefineYearlyPopulationBase
             targetDiffViolation += Math.abs(normalizedActualDiff[i] - normalizedTargetDiff[i]);
 
         return targetDiffViolation;
+    }
+
+    /* ---------------------------------------------------------------------------------------- */
+
+    private static void adjustBounds(double[] lowerBounds, double[] upperBounds, double psum04, double psum59)
+    {
+        for (int k = 0; k <= 4 && k < upperBounds.length; k++)
+            upperBounds[k] = psum04;
+
+        for (int k = 5; k <= 9 && k < upperBounds.length; k++)
+            upperBounds[k] = psum59;
+    }
+
+    /*
+     * Sigma is the initial step size or standard deviation of the search distribution. 
+     * It controls the spread of the initial population of candidate solutions around the starting point.
+     * In CMA-ES, the search distribution is a multivariate Gaussian distribution, 
+     * and sigma scales the covariance matrix of this distribution.
+     * 
+     * Sigma determines how far the algorithm initially explores from the starting point. 
+     * A larger sigma means the algorithm will explore a wider area, 
+     * while a smaller sigma focuses the search closer to the starting point.
+     * Over time, the algorithm adapts sigma (and the covariance matrix) to improve the search direction and step size.
+     * 
+     * If sigma is too large, the algorithm may waste time exploring irrelevant regions of the search space.
+     * If sigma is too small, the algorithm may get stuck in a local optimum or converge too slowly.
+     * The choice of sigma is problem-dependent and should reflect the scale of the problem and the expected distance to the optimum.
+     * 
+     * A good rule of thumb is to set sigma to a fraction of the expected range of the variables. For example:
+     * If your variables are expected to vary between -10 and 10, a reasonable sigma might be 2–5.
+     * If you have no prior knowledge, you can start with sigma = 1 and adjust based on the algorithm’s performance. 
+     */
+    private static void adjustInputSigma(double[] inputSigma, double psum04, double psum59)
+    {
+        for (int k = 0; k <= 4 && k < inputSigma.length; k++)
+            inputSigma[k] = psum04 * 0.1;
+
+        for (int k = 5; k <= 9 && k < inputSigma.length; k++)
+            inputSigma[k] = psum59 * 0.1;
+    }
+
+    /*
+     * Lambda is the population size, i.e., the number of candidate solutions (offspring) generated in each iteration of the algorithm.
+     * In CMA-ES, lambda determines how many points are sampled from the search distribution at each step.
+     *
+     * A larger lambda means more candidate solutions are evaluated in each iteration, 
+     * which can improve the exploration of the search space.
+     * 
+     * A smaller lambda means fewer evaluations per iteration, 
+     * which can speed up the algorithm but may reduce the quality of the search.
+     *
+     * If lambda is too small, the algorithm may converge prematurely to a suboptimal solution.
+     * If lambda is too large, the algorithm may become computationally expensive, 
+     * as more function evaluations are required per iteration.
+     * The optimal value of lambda depends on the problem’s dimensionality and complexity.
+     *
+     * A common heuristic is to set lambda = 4 + floor(3 * log(n)), where n is the number of dimensions (variables) in the problem. 
+     * This ensures that the population size scales appropriately with the problem size.
+     * For small problems (e.g., n < 10), lambda can be smaller (e.g., 10–20).
+     * For larger problems, lambda should be increased to ensure sufficient exploration.     * 
+     * 
+     * ======== Relationship Between sigma and lambda:
+     * 
+     * Sigma and lambda are independent parameters, but they interact in the optimization process.
+     * sigma controls the initial step size and exploration range.
+     * Lambda controls the number of points sampled in each iteration.
+     * A larger lambda can compensate for a suboptimal sigma by exploring more points, 
+     * but at the cost of increased computational effort.
+     * 
+     * ======== Practical Tips for Using CMAESOptimizer
+     * 
+     * Tune sigma First: 
+     * Adjust sigma to ensure the initial search range is appropriate for your problem.
+     * 
+     * Scale lambda with Problem Size: 
+     * Use the heuristic lambda = 4 + floor(3 * log(n)) to set lambda based on the number of dimensions.
+     * 
+     * Monitor Convergence: 
+     * Run the algorithm with different parameter settings and monitor the convergence behavior to find the best configuration.
+     */
+    private static int chooseLambda(int nTunablePoints)
+    {
+        // Default formula for lambda
+        int lambda = 4 + (int) (3 * Math.log(nTunablePoints));
+
+        // impose mimimum
+        lambda = Math.max(lambda, 15);
+
+        return lambda;
     }
 }
