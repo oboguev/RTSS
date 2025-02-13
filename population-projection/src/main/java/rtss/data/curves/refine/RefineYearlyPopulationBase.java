@@ -239,6 +239,8 @@ public class RefineYearlyPopulationBase
         return objective;
     }
 
+    final static double LargePenalty = 1e3;
+
     private static double calculateMonotonicityViolation(double[] p, int nTunablePoints)
     {
         double monotonicityViolation = 0.0;
@@ -249,7 +251,7 @@ public class RefineYearlyPopulationBase
         {
             double d = p[k] - p[k + 1];
             if (d < 0)
-                monotonicityViolation += Math.abs(d) * 1e6;
+                monotonicityViolation += Math.abs(d) * LargePenalty;
         }
 
         return monotonicityViolation;
@@ -259,8 +261,8 @@ public class RefineYearlyPopulationBase
     {
         double sum04 = Arrays.stream(p, 0, 5).sum(); // Sum of p(0) to p(4)
         double sum59 = Arrays.stream(p, 5, 10).sum(); // Sum of p(5) to p(9)
-        double penalty04 = 1e6 * Math.abs(sum04 - psum04) / psum04; // Large penalty for violating psum04
-        double penalty59 = 1e6 * Math.abs(sum59 - psum59) / psum59; // Large penalty for violating psum59
+        double penalty04 = LargePenalty * Math.abs(sum04 - psum04) / psum04; // Large penalty for violating psum04
+        double penalty59 = LargePenalty * Math.abs(sum59 - psum59) / psum59; // Large penalty for violating psum59
         return penalty04 + penalty59;
     }
 
@@ -342,10 +344,10 @@ public class RefineYearlyPopulationBase
     private static void adjustInputSigma(double[] inputSigma, double psum04, double psum59)
     {
         for (int k = 0; k <= 4 && k < inputSigma.length; k++)
-            inputSigma[k] = psum04 * 0.1;
+            inputSigma[k] = psum04 * 0.001;
 
         for (int k = 5; k <= 9 && k < inputSigma.length; k++)
-            inputSigma[k] = psum59 * 0.1;
+            inputSigma[k] = psum59 * 0.001;
     }
 
     /*
@@ -393,7 +395,7 @@ public class RefineYearlyPopulationBase
         int lambda = 4 + (int) (3 * Math.log(nTunablePoints));
 
         // impose mimimum
-        lambda = Math.max(lambda, 15);
+        lambda = Math.max(lambda, 100);
 
         return lambda;
     }
@@ -460,26 +462,26 @@ public class RefineYearlyPopulationBase
 
         double importance_smoothness = 0.7;
         double importance_target_diff_matching = 0.3;
- 
+
         double psum04 = util_sum(util_splice(p, 0, 4));
         double psum59 = util_sum(util_splice(p, 5, 9));
-        
+
         int nTunablePoints = 7;
         int nFixedPoints = 1;
-        
+
         double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
- 
+
         double[] px = optimizeSeries(
-                p,
-                initialGuess,
-                psum04,
-                psum59,
-                target_diff,
-                importance_smoothness,
-                importance_target_diff_matching,
-                nTunablePoints,
-                nFixedPoints);
-        
+                                     p,
+                                     initialGuess,
+                                     psum04,
+                                     psum59,
+                                     target_diff,
+                                     importance_smoothness,
+                                     importance_target_diff_matching,
+                                     nTunablePoints,
+                                     nFixedPoints);
+
         util_out("Completed");
         util_out("");
     }
