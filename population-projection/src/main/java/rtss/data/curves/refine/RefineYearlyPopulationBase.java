@@ -170,7 +170,7 @@ public class RefineYearlyPopulationBase
         double[] upperBounds = new double[nTunablePoints];
         Arrays.fill(lowerBounds, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBounds, Double.POSITIVE_INFINITY); // No upper bounds
-        adjustBounds(lowerBounds, upperBounds, psum04, psum59);
+        adjustBounds(lowerBounds, upperBounds, psum04, psum59, p);
 
         double offset = 0.0; // Offset for penalty
         double[] scale = new double[nTunablePoints]; // Penalty weights for each variable
@@ -206,9 +206,11 @@ public class RefineYearlyPopulationBase
         double[] upperBoundsForOptimizer = new double[nTunablePoints];
         Arrays.fill(lowerBoundsForOptimizer, 0.0); // Lower bounds set to 0 (non-negative values)
         Arrays.fill(upperBoundsForOptimizer, Double.POSITIVE_INFINITY); // No upper bounds
-        adjustBounds(lowerBounds, upperBounds, psum04, psum59);
+        adjustBounds(lowerBounds, upperBounds, psum04, psum59, p);
 
-        // Set the population size (lambda)
+        // Set the population size (lambda).
+        // Note that it has nothing to do with demographic population, but rather is number of 
+        // candidate solutions generated in each iteration of the algorithm.
         PopulationSize populationSize = new PopulationSize(chooseLambda(nTunablePoints));
 
         // Perform the optimization
@@ -227,6 +229,8 @@ public class RefineYearlyPopulationBase
 
     private static double calculateObjective(double[] p, double[] target_diff, double importance_smoothness, double importance_target_diff_matching)
     {
+        // ### calculate monotonicity violatiion
+        
         // Calculate smoothness violation
         double smoothnessViolation = calculateSmoothnessViolation(p);
 
@@ -280,13 +284,19 @@ public class RefineYearlyPopulationBase
 
     /* ---------------------------------------------------------------------------------------- */
 
-    private static void adjustBounds(double[] lowerBounds, double[] upperBounds, double psum04, double psum59)
+    /*
+     * Arrays @lowerBounds and @upperBounds have size nTunablePoints. 
+     */
+    private static void adjustBounds(double[] lowerBounds, double[] upperBounds, double psum04, double psum59, final double[] p)
     {
         for (int k = 0; k <= 4 && k < upperBounds.length; k++)
             upperBounds[k] = psum04;
 
         for (int k = 5; k <= 9 && k < upperBounds.length; k++)
             upperBounds[k] = psum59;
+        
+        for (int k = 0; k < lowerBounds.length; k++)
+            lowerBounds[k] = p[lowerBounds.length];
     }
 
     /*
