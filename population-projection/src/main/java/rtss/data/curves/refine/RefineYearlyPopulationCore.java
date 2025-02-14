@@ -148,6 +148,8 @@ public class RefineYearlyPopulationCore
     private final double psum59;
     private OptimizerSettings optimizerSettings;
 
+    public boolean diagnostic = false;
+
     // track what we saw during the optimization scan
     private Objective min_seen_objective = null;
     private double[] min_seen_objective_p = null;
@@ -319,9 +321,12 @@ public class RefineYearlyPopulationCore
          */
         if (min_seen_objective != null && min_seen_objective.objective < resultObjective.objective)
         {
-            String msg = String.format("Seen better choice during optimization scan than was ultimately reported by the optimizer: %f < %f",
-                                       min_seen_objective.objective, resultObjective.objective);
-            Util.err(msg);
+            if (logLevel == Level.TRACE || logLevel == Level.ALL || logLevel == Level.DEBUG || diagnostic)
+            {
+                String msg = String.format("Seen better choice during optimization scan than was ultimately reported by the optimizer: %f < %f",
+                                           min_seen_objective.objective, resultObjective.objective);
+                Util.err(msg);
+            }
 
             // return it as the result
             if (Util.True)
@@ -713,9 +718,9 @@ public class RefineYearlyPopulationCore
                                                                        nTunablePoints,
                                                                        nFixedPoints,
                                                                        "example test_2",
-                                                                       null
+                                                                       null);
 
-        );
+        rc.diagnostic = true;
 
         if (iterative)
         {
@@ -754,6 +759,8 @@ public class RefineYearlyPopulationCore
                                                                        nFixedPoints,
                                                                        "example test_2",
                                                                        null);
+
+        rc.diagnostic = true;
 
         if (iterative)
         {
