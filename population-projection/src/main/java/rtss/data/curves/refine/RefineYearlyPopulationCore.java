@@ -128,7 +128,7 @@ public class RefineYearlyPopulationCore
         this.psum59 = Util.sum(Util.splice(p, 5, 9));
     }
 
-    public double[] optimizeSeries(final Level logLevel, final Objective initialObjective, final Objective resultObjective)
+    public double[] refineSeries(final Level logLevel, final Objective initialObjective, final Objective resultObjective)
     {
         final double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
 
@@ -489,7 +489,7 @@ public class RefineYearlyPopulationCore
 
         );
 
-        double[] px = rc.optimizeSeries(Level.TRACE, null, null);
+        double[] px = rc.refineSeries(Level.TRACE, null, null);
 
         Util.unused(px);
 
@@ -521,7 +521,7 @@ public class RefineYearlyPopulationCore
 
         );
 
-        double[] px = rc.optimizeSeries(Level.TRACE, null, null);
+        double[] px = rc.refineSeries(Level.TRACE, null, null);
 
         Util.unused(px);
 

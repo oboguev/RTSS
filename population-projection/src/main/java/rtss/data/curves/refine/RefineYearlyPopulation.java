@@ -97,7 +97,7 @@ public class RefineYearlyPopulation
                                                                            nFixedPoints,
                                                                            title);
 
-            double[] px = rc.optimizeSeries(logLevel, null, null);
+            double[] px = rc.refineSeries(logLevel, null, null);
 
             Util.assertion(px.length == nTunablePoints);
 
