@@ -49,11 +49,11 @@ import java.util.List;
  * 
  * In addition, target_diff(x) contains mortality pattern that the algorithm will try to match.
  * The size of "target_diff" array is nTunablePoints. 
- * The values of differences in the adjusted series (p(x) - p(x+1)) should be proportional to the target_diff(x).
+ * The values of differences in the adjusted series (p(x) - p(x+1)) should be made proportional to the target_diff(x).
  * Only relative values in target_diff matter, not absolute values.
  * In other words, array target_diff describes a steepness of p(x) descent.
  * We use adjusted p(x) to build an array of actual values (p(x) - p(x+1)), lets name it actual_diff(x), 
- * normalize each of the arrays actual_diff and target_diff so that a sum of all elements in each of the diff arrays is 1.0, 
+ * then normalize each of the arrays actual_diff and target_diff so that a sum of all elements in each of the diff arrays is 1.0, 
  * then the distance between these two normalized vectors should be minimized. 
  * I.e. sum(abs(normalized actual_diff(x) - normalized target_diff(x))) should be minimized.
  * 
@@ -62,21 +62,23 @@ import java.util.List;
  *     The sum of adjusted series elements p(0) to p(4) exactly equals psum04, just like for the original "p". 
  *     This is a hard constraint (value of age bin 0...4 should be maintained).
  *     
- *     The sum of adjusted series elements p(5) to p(9) exactly equals psum04, just like for the original "p".
+ *     The sum of adjusted series elements p(5) to p(9) exactly equals psum59, just like for the original "p".
  *     This is another hard constraint (value of age bin 5...9 should be maintained).
  *     
  *     The curve should be monotonically descending from point p(0) to p(nTunablePoints). 
  *     This is a hard constraint too. 
  *     
- *     The chart for p(x) should look like a smooth curve, with continuous first derivative. 
+ *     The chart for p(x) should be a smooth curve, with continuous first derivative. 
  *     This is a soft constraint.
- *     We take into account p''(x) at first nTunablePoints (except point 0, where it is impossible) and then at further (nFixedPoints - 1) points.
+ *     We take into account p''(x) at first nTunablePoints (except point 0, where it is impossible) 
+ *     and then at further (nFixedPoints - 1) points.
  *     
  * The task is over-constrained because constraints for target_diff and for curve smoothness cannot be met EXACTLY both.
- * Therefore we assign relative importance weights to these two constraints, namded "importance_smoothness" and "importance_target_diff_matching".
+ * Therefore we assign relative importance weights to these two constraints, namded "importance_smoothness" and 
+ * "importance_target_diff_matching".
  * 
  * The task then is to minimize a weighted sum of violations for smoothness criteria and for diff criteria;
- * while at the same to,e keeping bins sum value and curve descendance from point 0 to point nTunablePoints as hard constraints 
+ * while at the same time keeping bins sum value and curve descendance from point 0 to point nTunablePoints as hard constraints 
  * that should be maintained precisely.
  */
 public class RefineYearlyPopulationCore
@@ -242,7 +244,8 @@ public class RefineYearlyPopulationCore
         int lambda = chooseLambda();
 
         /*
-         * How many candidates in a batch of lamba are to be checked against lower/upper bounds.
+         * Parameter checkFeasableCount sets how many candidates in a batch of lamba 
+         * are to be checked against lower/upper bounds.
          * 
          * Value of 0 performs no checks of candidate feasibility (unbounded problems).
          * Value of 1 checks for feasibility only one candidate per batch of lambda).
@@ -254,7 +257,7 @@ public class RefineYearlyPopulationCore
 
         CMAESOptimizer optimizer = new CMAESOptimizer(1_000_000, // Max iterations
                                                       optimizerSettings.convergenceThreshold, // Stop fitness
-                                                      true, // Active CMA
+                                                      true, // Active CMA 
                                                       0, // Diagonal only (0 means full covariance)
                                                       checkFeasableCount, // Check feasible count
                                                       random, // Random generator
