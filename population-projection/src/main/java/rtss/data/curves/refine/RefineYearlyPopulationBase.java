@@ -30,41 +30,45 @@ import java.util.Arrays;
  * First stage is a general-purpose disaggregator agnostic of actual mortality patterns.
  * 
  * This module receives the output of the first stage and tries to refine it so it conforms young-age mortality
- * patterns characteristic for the era.
+ * pattern characteristic for the era.
  * 
  * Input: array "p" contains the output of 1-st stage disaggegation, including age points for age bins 0...4 and 5...9. 
  * 
- * The size of "p" is max(10, nTunablePoints + nFixedPoints), as is explained latter.
+ * The size of "p" is max(10, nTunablePoints + nFixedPoints), as is explained below.
  * 
  * Only first nTunablePoints at the start of "p" can be tweaked.
- * But following nFixedPoints can be used to check for curve smoothness.
+ * But following nFixedPoints can additionally be used to check for curve smoothness.
  *   
- * Typically, nTunablePoints does not exceed 10 (total size of first two bins), and then nFixedPoints is 2.
- * These vales are used when bin sum values follow pattern X-DOWN-DOWN.
+ * Typically, nTunablePoints does not exceed 10 (total size of two first age bins), and then nFixedPoints is 2.
+ * These are the values used when bin sum values follow pattern X-DOWN-DOWN (i.e. first three bins exhibit 
+ * population decreasing pattern).
  * 
  * However for cases X-DOWN-UP (a flip in the 2nd bin) nTunablePoints is shorter: p[nTunablePoints] is a flip point.
  * 
- * In addition, target_diff(x) contains mortality pattern to match. 
+ * In addition, target_diff(x) contains mortality pattern to match.
+ * The size of "target_diff" array is nTunablePoints. 
  * The values of differences in the adjusted series (p(x) - p(x+1)) should be proportional to the target_diff(x).
  * Only relative values in target_diff matter, not absolute values.
  * In other words, array target_diff describes a steepness of p(x) descent.
  * We use adjusted p(x) to build an array of actual values (p(x) - p(x+1)), lets name it actual_diff(x), 
  * normalize each of the arrays actual_diff and target_diff so that a sum of all elements in each of the diff arrays is 1.0, 
- * then then the distance between these two normalized vectors should be minimized. 
+ * then the distance between these two normalized vectors should be minimized. 
  * I.e. sum(abs(normalized actual_diff(x) - normalized target_diff(x))) should be minimized.
  * 
  * Other constraints:
  *    
- *     The sum of p(0) to p(4) exactly equals psum04. This is a hard constraint.
- *     The sum of p(5) to p(9) exactly equals psum04. This is another hard constraint.
+ *     The sum of p(0) to p(4) exactly equals psum04. This is a hard constraint (value of age bin 0...4 should be maintained).
+ *     The sum of p(5) to p(9) exactly equals psum04. This is another hard constraint (value of age bin 5...9 should be maintained)..
+ *     
  *     The curve should be monotonically descending from point p(0) to p(nTunablePoints). This is a hard constraint too. 
  *     
  *     The chart for p(x) should look like a smooth curve, with continuous first derivative. This is a soft constraint.
+ *     Take into account p''(x) at first nTunablePoints (except point 0, where it is impossible) and then at further (nFixedPoints - 1).
  *     
  * The task is over-constrained because constraints for target_diff and for curve smoothness cannot be met EXACTLY both.
  * We assign relative importance weights to these two constraints, namded "importance_smoothness" and "importance_target_diff_matching".
- * The task then is to minimize a weighted sum of violations for smoothness criteria and diff criteria.
- * Whereas keeping bins sum value and curve descendance from point 0 to point nTunablePoints are hard constraint that should be maintained precisely.
+ * The task then is to minimize a weighted sum of violations for smoothness criteria and diff criteria;
+ * while keeping bins sum value and curve descendance from point 0 to point nTunablePoints as hard constraint that should be maintained precisely.
  */
 public class RefineYearlyPopulationBase
 {
@@ -168,6 +172,8 @@ public class RefineYearlyPopulationBase
         return result.getPoint();
     }
 
+    /* ---------------------------------------------------------------------------------------- */
+
     private static double calculateObjective(
             double[] p,
             double[] target_diff,
@@ -183,8 +189,8 @@ public class RefineYearlyPopulationBase
         // Calculate smoothness violation
         double smoothnessViolation = calculateSmoothnessViolation(p, nTunablePoints, nFixedPoints);
 
-        // Add penalties for violating the sum constraints
-        double sumViolation = calculateSumViolation(p, psum04, psum59);
+        // Add penalties for violating the bin sum constraints
+        double sumViolation = calculateBinSumViolation(p, psum04, psum59);
 
         // Calculate target difference violation
         double targetDiffViolation = calculateTargetDiffViolation(p, target_diff);
@@ -220,7 +226,7 @@ public class RefineYearlyPopulationBase
         return monotonicityViolation;
     }
 
-    private static double calculateSumViolation(double[] p, double psum04, double psum59)
+    private static double calculateBinSumViolation(double[] p, double psum04, double psum59)
     {
         double sum04 = Arrays.stream(p, 0, 5).sum(); // Sum of p(0) to p(4)
         double sum59 = Arrays.stream(p, 5, 10).sum(); // Sum of p(5) to p(9)
@@ -235,14 +241,21 @@ public class RefineYearlyPopulationBase
 
         p = util_normalize(p);
 
-        for (int i = 1; i < p.length - 1 && i + 1 <= nTunablePoints + nFixedPoints; i++)
-        {
-            double derivative1 = p[i] - p[i - 1];
-            double derivative2 = p[i + 1] - p[i];
-            smoothnessViolation += Math.pow(derivative2 - derivative1, 2);
-        }
+        for (int i = 1; i < p.length - 1 && i <= nTunablePoints + nFixedPoints - 2; i++)
+            smoothnessViolation += Math.abs(d2(p, i));
 
         return smoothnessViolation;
+    }
+
+    // calculate second derivative at point p[i]
+    private static double d2(double[] p, int i)
+    {
+        if (i == 0)
+            return 0;
+
+        double derivative1 = p[i] - p[i - 1];
+        double derivative2 = p[i + 1] - p[i];
+        return derivative2 - derivative1;
     }
 
     private static double calculateTargetDiffViolation(double[] p, double[] target_diff)
@@ -336,20 +349,22 @@ public class RefineYearlyPopulationBase
      * ======== Relationship Between sigma and lambda:
      * 
      * Sigma and lambda are independent parameters, but they interact in the optimization process.
-     * sigma controls the initial step size and exploration range.
+     * Sigma controls the initial step size and exploration range.
      * Lambda controls the number of points sampled in each iteration.
      * A larger lambda can compensate for a suboptimal sigma by exploring more points, 
      * but at the cost of increased computational effort.
      * 
+     * Also see the explanation in https://en.wikipedia.org/wiki/CMA-ES
+     * 
      * ======== Practical Tips for Using CMAESOptimizer
      * 
-     * Tune sigma First: 
+     * Tune sigma first: 
      * Adjust sigma to ensure the initial search range is appropriate for your problem.
      * 
-     * Scale lambda with Problem Size: 
+     * Scale lambda with problem size: 
      * Use the heuristic lambda = 4 + floor(3 * log(n)) to set lambda based on the number of dimensions.
      * 
-     * Monitor Convergence: 
+     * Monitor convergence: 
      * Run the algorithm with different parameter settings and monitor the convergence behavior to find the best configuration.
      */
     private static int chooseLambda(int nTunablePoints)
@@ -423,7 +438,7 @@ public class RefineYearlyPopulationBase
         double target_diff[] = { 0.5635055255718324, 0.1853508095605243, 0.08306347982523773, 0.04790542277049602, 0.028270367514777694,
                                  0.02770496016448214, 0.021691081984065795 };
 
-        double importance_smoothness = 0.98;
+        double importance_smoothness = 0.60;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int nTunablePoints = 7;
@@ -440,20 +455,23 @@ public class RefineYearlyPopulationBase
 
         final double psum04 = util_sum(util_splice(p, 0, 4));
         final double psum59 = util_sum(util_splice(p, 5, 9));
-        int plength = Math.max(10, nTunablePoints + nFixedPoints);
-        double[] fullP = Arrays.copyOf(px, plength);
-        System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
-        util_out("");
-        util_out("Objective values for the result:");
-        calculateObjective(fullP, target_diff,
-                           importance_smoothness, importance_target_diff_matching,
-                           nTunablePoints, nFixedPoints, psum04, psum59);
 
         util_out("");
         util_out("Objective values for the intitial:");
         calculateObjective(p, target_diff,
                            importance_smoothness, importance_target_diff_matching,
                            nTunablePoints, nFixedPoints, psum04, psum59);
+
+        util_out("");
+        util_out("Objective values for the result:");
+        int plength = Math.max(10, nTunablePoints + nFixedPoints);
+        double[] fullP = Arrays.copyOf(px, plength);
+        System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
+        util_out("");
+        calculateObjective(fullP, target_diff,
+                           importance_smoothness, importance_target_diff_matching,
+                           nTunablePoints, nFixedPoints, psum04, psum59);
+
         util_out("");
     }
 }
