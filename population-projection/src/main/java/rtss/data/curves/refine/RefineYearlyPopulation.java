@@ -98,7 +98,7 @@ public class RefineYearlyPopulation
                                          nTunablePoints,
                                          nFixedPoints,
                                          logLevel, 
-                                         title);
+                                         title, null, null);
             
             Util.assertion(px.length == nTunablePoints);
             
@@ -151,5 +151,4 @@ public class RefineYearlyPopulation
                 throw new Exception("curve child segment is not monotonic");
         }
     }
-    
 }
