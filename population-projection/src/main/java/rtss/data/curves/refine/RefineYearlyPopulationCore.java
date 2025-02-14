@@ -225,16 +225,38 @@ public class RefineYearlyPopulationCore
                                                                                                          offset,
                                                                                                          scale);
 
-        // Set up the CMAESOptimizer
-        UniformRandomProvider random = RandomSource.JDK.create(); // Use UniformRandomProvider
+        /*
+         * Set up the CMAESOptimizer
+         * 
+         * May use checker = null to disable convergence checks
+         */
+        UniformRandomProvider random = RandomSource.JDK.create();
         ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(optimizerSettings.convergenceThreshold,
                                                                             optimizerSettings.convergenceThreshold);
+        
+        /*
+         * Choose the population size (lambda).
+         * Note that it has nothing to do with demographic population, but rather is number of 
+         * candidate solutions generated in each iteration of the algorithm.
+         */
+        int lambda = chooseLambda();
+
+        /*
+         * How many candidates in a batch of lamba are to be checked against lower/upper bounds.
+         * 
+         * Value of 0 performs no checks of candidate feasibility (unbounded problems).
+         * Value of 1 checks for feasibility only one candidate per batch of lambda).
+         * Value of lambda checks all candidates for feasibility (strict bounds).
+         * 
+         * Values less then lambda can be used if infeasible solutions are occasionally acceptable.
+         */
+        int checkFeasableCount = lambda;
 
         CMAESOptimizer optimizer = new CMAESOptimizer(1_000_000, // Max iterations
                                                       optimizerSettings.convergenceThreshold, // Stop fitness
                                                       true, // Active CMA
                                                       0, // Diagonal only (0 means full covariance)
-                                                      1, // Check feasible count
+                                                      checkFeasableCount, // Check feasible count
                                                       random, // Random generator
                                                       false, // No statistics
                                                       checker // Convergence checker
@@ -252,18 +274,13 @@ public class RefineYearlyPopulationCore
         Arrays.fill(upperBoundsForOptimizer, Double.POSITIVE_INFINITY); // No upper bounds
         adjustBounds(lowerBounds, upperBounds, p);
 
-        // Set the population size (lambda).
-        // Note that it has nothing to do with demographic population, but rather is number of 
-        // candidate solutions generated in each iteration of the algorithm.
-        PopulationSize populationSize = new PopulationSize(chooseLambda());
-
         // Perform the optimization
         PointValuePair result = optimizer.optimize(MaxEval.unlimited(), // Maximum number of evaluations
                                                    new ObjectiveFunction(constrainedObjective),
                                                    GoalType.MINIMIZE,
                                                    new InitialGuess(initialGuess),
                                                    new Sigma(inputSigma), // Step sizes
-                                                   populationSize, // Population size
+                                                   new PopulationSize(chooseLambda()), // Population size
                                                    new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // Bounds
         );
 
