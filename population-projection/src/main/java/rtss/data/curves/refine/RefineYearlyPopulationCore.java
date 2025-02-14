@@ -755,14 +755,13 @@ public class RefineYearlyPopulationCore
 
         if (iterative)
         {
-            rc.refineSeriesIterative(Level.TRACE, Level.INFO);
+            double[] px = rc.refineSeriesIterative(Level.TRACE, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_1");
         }
         else
         {
             double[] px = rc.refineSeries(null, Level.TRACE, null, null);
-            Util.unused(px);
             Util.out("Finished test_1");
         }
     }
@@ -795,14 +794,13 @@ public class RefineYearlyPopulationCore
 
         if (iterative)
         {
-            rc.refineSeriesIterative(Level.TRACE, Level.INFO);
+            double[] px = rc.refineSeriesIterative(Level.TRACE, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_2");
         }
         else
         {
             double[] px = rc.refineSeries(null, Level.TRACE, null, null);
-            Util.unused(px);
             Util.out("Finished test_2");
         }
     }

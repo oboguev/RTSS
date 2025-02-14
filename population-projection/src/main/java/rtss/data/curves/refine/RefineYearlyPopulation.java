@@ -83,10 +83,6 @@ public class RefineYearlyPopulation
         int plength = Math.max(10, nTunablePoints + nFixedPoints);
         p = Util.splice(p0, 0, plength - 1);
 
-        // Level logLevel = Level.INFO;
-        Level logLevel = Level.DEBUG;
-        // Level logLevel = Level.TRACE;
-
         try
         {
             RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore(Util.dup(p),
@@ -98,7 +94,10 @@ public class RefineYearlyPopulation
                                                                            title,
                                                                            null);
 
-            double[] px = rc.refineSeries(null, logLevel, null, null);
+            Level outerLogLevel = Level.INFO;
+            Level innerLogLevel = Level.INFO;
+
+            double[] px = rc.refineSeriesIterative(outerLogLevel, innerLogLevel);
 
             Util.assertion(px.length == nTunablePoints);
 
