@@ -3,6 +3,8 @@ package rtss.data.curves.refine;
 import rtss.data.bin.Bin;
 import rtss.util.Util;
 
+import ch.qos.logback.classic.Level;
+
 public class RefineYearlyPopulation extends RefineYearlyPopulationBase
 {
     public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint) throws Exception
@@ -74,11 +76,15 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         }
 
         double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
-        double importance_smoothness = 0.98;
+        double importance_smoothness = 0.8;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int plength = Math.max(10, nTunablePoints + nFixedPoints);
         p = Util.splice(p0, 0, plength - 1);
+        
+        Level logLevel = Level.INFO;
+        // Level logLevel = Level.DEBUG;
+        // Level logLevel = Level.TRACE;
 
         try
         {
@@ -87,16 +93,15 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
                                          importance_smoothness,
                                          importance_target_diff_matching,
                                          nTunablePoints,
-                                         nFixedPoints);
+                                         nFixedPoints,
+                                         logLevel, 
+                                         title);
             
             Util.assertion(px.length == nTunablePoints);
 
             if (Util.True)
             {
-                // ### даёт равномерное по годам падение ???
-                // ### adjust sigma and lambda
-                // ### also adjust smoothness violation (not tiny) 
-                Util.out("RefineYearlyPopulation processed " + title);
+                // Util.out("RefineYearlyPopulation processed " + title);
                 p = Util.dup(p0);
                 Util.insert(p, px, 0);
                 return p;
@@ -108,9 +113,10 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         }
         catch (Exception ex)
         {
-            throw ex;
+            Util.err("RefineYearlyPopulation failed for " + title+ ", error: " + ex.getLocalizedMessage());
             // ex.printStackTrace();
-            // return p0;
+            // throw ex;
+            return p0;
         }
     }
 

@@ -19,6 +19,8 @@ import org.apache.commons.rng.simple.RandomSource;
 
 import rtss.util.Util;
 
+import ch.qos.logback.classic.Level;
+
 // import rtss.util.Util;
 
 import java.util.Arrays;
@@ -81,15 +83,17 @@ public class RefineYearlyPopulationBase
             final double arg_importance_smoothness,
             final double arg_importance_target_diff_matching,
             final int nTunablePoints,
-            final int nFixedPoints)
+            final int nFixedPoints,
+            final Level logLevel,
+            final String title)
     {
-        final double psum04 = util_sum(util_splice(p, 0, 4));
-        final double psum59 = util_sum(util_splice(p, 5, 9));
+        final double psum04 = Util.sum(Util.splice(p, 0, 4));
+        final double psum59 = Util.sum(Util.splice(p, 5, 9));
         final double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
 
         final double importance_smoothness = arg_importance_smoothness * RegularPenalty;
         final double importance_target_diff_matching = arg_importance_target_diff_matching * RegularPenalty;
-
+        
         // Define the objective function
         MultivariateFunction objectiveFunction = new MultivariateFunction()
         {
@@ -104,7 +108,7 @@ public class RefineYearlyPopulationBase
                 // Calculate the objective value
                 double objective = calculateObjective(fullP, target_diff,
                                                       importance_smoothness, importance_target_diff_matching,
-                                                      nTunablePoints, nFixedPoints, psum04, psum59);
+                                                      nTunablePoints, nFixedPoints, psum04, psum59, logLevel);
 
                 return objective;
             }
@@ -167,22 +171,47 @@ public class RefineYearlyPopulationBase
                                                    populationSize, // Population size
                                                    new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // Bounds
         );
+        
+        // result
+        double[] px = result.getPoint(); 
+        
+        // debugging output
+        if (logLevel == Level.TRACE || logLevel == Level.ALL || logLevel == Level.DEBUG)
+        {
+            Util.out("");
+            Util.out("RefineYearlyPopulationBase completed for " + title);
+            Util.out("");
+            Util.out("Objective values for the intitial curve:");
+            calculateObjective(p, target_diff,
+                               importance_smoothness, importance_target_diff_matching,
+                               nTunablePoints, nFixedPoints, psum04, psum59, logLevel);
+
+            Util.out("");
+            Util.out("Objective values for the result curve:");
+            int plength = Math.max(10, nTunablePoints + nFixedPoints);
+            double[] fullP = Arrays.copyOf(px, plength);
+            System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
+            calculateObjective(fullP, target_diff,
+                               importance_smoothness, importance_target_diff_matching,
+                               nTunablePoints, nFixedPoints, psum04, psum59, logLevel);
+        }
 
         // Return the optimized values
-        return result.getPoint();
+        return px;
     }
 
     /* ---------------------------------------------------------------------------------------- */
 
     private static double calculateObjective(
-            double[] p,
-            double[] target_diff,
-            double importance_smoothness,
-            double importance_target_diff_matching,
-            int nTunablePoints,
-            int nFixedPoints,
-            double psum04,
-            double psum59)
+            final double[] p,
+            final double[] target_diff,
+            final double importance_smoothness,
+            final double importance_target_diff_matching,
+            final int nTunablePoints,
+            final int nFixedPoints,
+            final double psum04,
+            final double psum59,
+            final Level logLevel)
     {
         double monotonicityViolation = calculateMonotonicityViolation(p, nTunablePoints);
 
@@ -200,12 +229,15 @@ public class RefineYearlyPopulationBase
                            importance_smoothness * smoothnessViolation +
                            importance_target_diff_matching * targetDiffViolation;
 
-        util_out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
-                               targetDiffViolation,
-                               smoothnessViolation,
-                               monotonicityViolation,
-                               sumViolation,
-                               objective));
+        if (logLevel == Level.TRACE || logLevel == Level.ALL)
+        {
+            Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
+                                   targetDiffViolation,
+                                   smoothnessViolation,
+                                   monotonicityViolation,
+                                   sumViolation,
+                                   objective));
+        }
 
         return objective;
     }
@@ -214,7 +246,7 @@ public class RefineYearlyPopulationBase
     {
         double monotonicityViolation = 0.0;
 
-        p = util_normalize(p);
+        p = Util.normalize(p);
 
         for (int k = 0; k < nTunablePoints; k++)
         {
@@ -239,7 +271,7 @@ public class RefineYearlyPopulationBase
     {
         double smoothnessViolation = 0.0;
 
-        p = util_normalize(p);
+        p = Util.normalize(p);
 
         for (int i = 1; i < p.length - 1 && i <= nTunablePoints + nFixedPoints - 2; i++)
             smoothnessViolation += Math.abs(d2(p, i));
@@ -262,7 +294,7 @@ public class RefineYearlyPopulationBase
     {
         double[] actual_diff = new double[target_diff.length];
 
-        p = util_normalize(p);
+        p = Util.normalize(p);
 
         for (int i = 0; i < actual_diff.length; i++)
             actual_diff[i] = p[i] - p[i + 1];
@@ -380,56 +412,6 @@ public class RefineYearlyPopulationBase
 
     /*==================================================================== */
 
-    // extract sub-array
-    public static double[] util_splice(final double[] y, int x1, int x2)
-    {
-        int size = x2 - x1 + 1;
-        if (size <= 0)
-            throw new IllegalArgumentException("array splice : negative size");
-
-        double[] yy = new double[size];
-        for (int x = x1; x <= x2; x++)
-            yy[x - x1] = y[x];
-        return yy;
-    }
-
-    // sum of array values
-    public static double util_sum(final double[] y)
-    {
-        double sum = 0;
-        for (int k = 0; k < y.length; k++)
-            sum += y[k];
-        return sum;
-    }
-
-    // normalize array so the sum of its elements is 1.0
-    public static double[] util_normalize(final double[] y)
-    {
-        return util_normalize(y, 1.0);
-    }
-
-    // normalize array so the sum of its elements is @sum
-    public static double[] util_normalize(final double[] y, double sum)
-    {
-        return util_multiply(y, sum / util_sum(y));
-    }
-
-    // return a new array with values representing y[] * f
-    public static double[] util_multiply(final double[] y, double f)
-    {
-        double[] yy = new double[y.length];
-        for (int x = 0; x < y.length; x++)
-            yy[x] = y[x] * f;
-        return yy;
-    }
-
-    public static void util_out(String s)
-    {
-        System.out.println(s);
-    }
-
-    /*==================================================================== */
-
     public static void main(String[] args)
     {
         double p[] = { 3079.1064761352536, 2863.741162691683, 2648.375849248112, 2433.010535804541, 2217.645222360971, 2002.2799089174,
@@ -438,40 +420,23 @@ public class RefineYearlyPopulationBase
         double target_diff[] = { 0.5635055255718324, 0.1853508095605243, 0.08306347982523773, 0.04790542277049602, 0.028270367514777694,
                                  0.02770496016448214, 0.021691081984065795 };
 
-        double importance_smoothness = 0.60;
+        double importance_smoothness = 0.80;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int nTunablePoints = 7;
         int nFixedPoints = 1;
+        
+        Level logLevel = Level.TRACE;
 
         double[] px = optimizeSeries(p,
                                      target_diff,
                                      importance_smoothness,
                                      importance_target_diff_matching,
                                      nTunablePoints,
-                                     nFixedPoints);
+                                     nFixedPoints,
+                                     logLevel,
+                                     "Example");
 
-        util_out("Completed");
-
-        final double psum04 = util_sum(util_splice(p, 0, 4));
-        final double psum59 = util_sum(util_splice(p, 5, 9));
-
-        util_out("");
-        util_out("Objective values for the intitial:");
-        calculateObjective(p, target_diff,
-                           importance_smoothness, importance_target_diff_matching,
-                           nTunablePoints, nFixedPoints, psum04, psum59);
-
-        util_out("");
-        util_out("Objective values for the result:");
-        int plength = Math.max(10, nTunablePoints + nFixedPoints);
-        double[] fullP = Arrays.copyOf(px, plength);
-        System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
-        util_out("");
-        calculateObjective(fullP, target_diff,
-                           importance_smoothness, importance_target_diff_matching,
-                           nTunablePoints, nFixedPoints, psum04, psum59);
-
-        util_out("");
+        Util.out("Finished.");
     }
 }
