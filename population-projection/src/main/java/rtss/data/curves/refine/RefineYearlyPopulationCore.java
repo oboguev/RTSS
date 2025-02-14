@@ -571,7 +571,7 @@ public class RefineYearlyPopulationCore
     /*
      * Try to solve the problem using various settings for the optimizer 
      */
-    public void refineSeriesIterative(Level outerLogLevel, Level innerLogLevel)
+    public double[] refineSeriesIterative(Level outerLogLevel, Level innerLogLevel)
     {
         /*
          * From lambda 4,000 and above it gets really slow
@@ -579,9 +579,8 @@ public class RefineYearlyPopulationCore
         final int lambdas[] = { 200, 500, 1000, 2000 };
         final double sigmas[] = { 0.000001, 0.00001, 0.0001, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0 };
 
-        Objective initialObjective = null;
-
         List<OptimizationResult> results = new ArrayList<>();
+        OptimizationResult very_initial = null;
 
         for (int lambda : lambdas)
         {
@@ -597,18 +596,15 @@ public class RefineYearlyPopulationCore
                 OptimizationResult result = new OptimizationResult();
                 result.optimizerSettings = optimizerSettings;
 
-                if (initialObjective == null)
-                {
-                    initialObjective = new Objective();
-                    result.px = refineSeries(optimizerSettings, innerLogLevel, initialObjective, result);
+                OptimizationResult initialObjective = new OptimizationResult();
+                initialObjective.optimizerSettings = optimizerSettings;
 
-                    Util.out(String.format("initial guess objective = %12.7e", initialObjective.objective));
-                    Util.out("");
-                }
-                else
-                {
-                    result.px = refineSeries(optimizerSettings, innerLogLevel, null, result);
-                }
+                result.px = refineSeries(optimizerSettings, innerLogLevel, initialObjective, result);
+
+                initialObjective.px = Util.splice(p, 0, nTunablePoints - 1);
+                results.add(initialObjective);
+                if (very_initial == null)
+                    very_initial = initialObjective;
 
                 double[] fullP = fullP(result.px);
 
@@ -629,11 +625,12 @@ public class RefineYearlyPopulationCore
                 if (Util.differ(sum04, psum04, 0.001) || Util.differ(sum59, psum59, 0.001))
                     preserves = "  non-sum-preserving";
 
-                if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL || outerLogLevel == Level.DEBUG)
+                if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL)
                 {
-                    Util.out(String.format("lambda=%-4d  sigma=%8.6f  result objective = %12.7e%s%s%s",
+                    Util.out(String.format("lambda=%-4d  sigma=%8.6f  initial objective = %12.7e  result objective = %12.7e%s%s%s",
                                            lambda,
                                            sigma,
+                                           initialObjective.objective,
                                            result.objective,
                                            same,
                                            nonmonotnic,
@@ -649,7 +646,24 @@ public class RefineYearlyPopulationCore
             }
         }
 
-        Util.noop();
+        OptimizationResult min_result = null;
+
+        for (OptimizationResult r : results)
+        {
+            if (min_result == null || r.objective < min_result.objective)
+                min_result = r;
+        }
+
+        if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL || outerLogLevel == Level.DEBUG)
+        {
+            Util.out("");
+            Util.out("Objective values for the initial curve (" + title + "):");
+            very_initial.print();
+            Util.out("Objective values for the final itervative result curve (" + title + "):");
+            min_result.print();
+        }
+
+        return min_result.px;
     }
 
     private boolean verifyMonotonicity(double[] p)
@@ -705,7 +719,7 @@ public class RefineYearlyPopulationCore
 
         if (iterative)
         {
-            rc.refineSeriesIterative(Level.DEBUG, Level.INFO);
+            rc.refineSeriesIterative(Level.TRACE, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_1");
         }
@@ -743,7 +757,7 @@ public class RefineYearlyPopulationCore
 
         if (iterative)
         {
-            rc.refineSeriesIterative(Level.DEBUG, Level.INFO);
+            rc.refineSeriesIterative(Level.TRACE, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_2");
         }
