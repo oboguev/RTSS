@@ -323,6 +323,36 @@ public class RefineYearlyPopulationCore
         {
             if (logLevel == Level.TRACE || logLevel == Level.ALL || logLevel == Level.DEBUG || diagnostic)
             {
+                /*
+                 * This is not a bug of CMAESOptimizer, but rather its "feature".
+                 * 
+                 * It is a common characteristic of the Covariance Matrix Adaptation Evolution Strategy (CMA-ES) algorithm.
+                 * 
+                 * CMA-ES is a stochastic algorithm, meaning it relies on random sampling of candidate solutions.
+                 * Due to this randomness, the algorithm may not always return the absolute best point it has evaluated.
+                 * 
+                 * The algorithm is designed to return the mean of the final search distribution, which is its best estimate 
+                 * of the optimal solution based on the information gathered during the optimization process. 
+                 * The best-evaluated point is not guaranteed to be the same as the mean, especially in noisy or complex optimization landscapes.
+                 * 
+                 * CMA-ES Focuses on the Mean of the Distribution:
+                 * 
+                 * CMA-ES maintains a search distribution (a multivariate Gaussian distribution) over the search space.
+                 * The algorithm updates the mean of this distribution iteratively, based on the best-performing candidate solutions (offspring).
+                 * The point returned by CMAESOptimizer is typically the mean of the final search distribution, 
+                 * not necessarily the best point ever evaluated.
+                 * 
+                 * During the optimization process, CMA-ES evaluates many candidate solutions (offspring) and tracks their objective function values.
+                 * The best-evaluated point (the one with the lowest objective function value) is not always the same as the mean 
+                 * of the final search distribution. The mean represents the algorithm’s current "best estimate" of the optimal solution, 
+                 * but it may not correspond to the best point ever evaluated.
+                 * 
+                 * CMA-ES balances exploration (searching new regions of the search space) and exploitation (refining the search around promising regions).
+                 * The algorithm may explore points that are better than the current mean but do not immediately update the mean to those points. 
+                 * Instead, it uses information from those points to adapt the search distribution.
+                 * 
+                 * To retrieve the best-evaluated point, we need to track it manually during the optimization process, as we do here.                 
+                 */
                 String msg = String.format("Seen better choice during optimization scan than was ultimately reported by the optimizer: %f < %f",
                                            min_seen_objective.objective, resultObjective.objective);
                 Util.err(msg);
@@ -333,6 +363,7 @@ public class RefineYearlyPopulationCore
             {
                 px = Util.splice(min_seen_objective_p, 0, nTunablePoints - 1);
                 resultObjective.copyFrom(min_seen_objective);
+                
                 if (logLevel == Level.TRACE || logLevel == Level.ALL || logLevel == Level.DEBUG)
                 {
                     Util.out("Objective values for the result override curve (" + title + "):");
