@@ -9,7 +9,8 @@ public class TestPopulationADH
     {
         try
         {
-            PopulationADH.getPopulationByLocality(Area.USSR, 1941);
+            // PopulationADH.getPopulationByLocality(Area.USSR, 1941);
+            PopulationADH.getPopulationByLocality(Area.USSR, 1926);
             Util.noop();
 
             PopulationADH.getPopulationByLocality(Area.USSR, 1926);

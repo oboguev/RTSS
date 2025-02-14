@@ -1,6 +1,7 @@
 package rtss.data.curves.refine;
 
 import rtss.data.bin.Bin;
+import rtss.data.curves.CurveVerifier;
 import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
@@ -76,7 +77,7 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         }
 
         double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
-        double importance_smoothness = 0.8;
+        double importance_smoothness = 0.95;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int plength = Math.max(10, nTunablePoints + nFixedPoints);
@@ -98,12 +99,17 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
                                          title);
             
             Util.assertion(px.length == nTunablePoints);
+            
+
+            p = Util.dup(p0);
+            Util.insert(p, px, 0);
+            
+            verifyMonotonicity(p, nTunablePoints);
+            CurveVerifier.validate_means(p, bins);
 
             if (Util.True)
             {
                 // Util.out("RefineYearlyPopulation processed " + title);
-                p = Util.dup(p0);
-                Util.insert(p, px, 0);
                 return p;
             }
             else
@@ -134,4 +140,14 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
                 return age;
         }
     }
+    
+    private static void verifyMonotonicity(double[] p, int nTunablePoints) throws Exception
+    {
+        for (int k = 0; k < nTunablePoints; k++)
+        {
+            if (p[k] < p[k + 1])
+                throw new Exception("curve child segment is not monotonic");
+        }
+    }
+    
 }

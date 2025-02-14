@@ -76,6 +76,7 @@ public class RefineYearlyPopulationBase
 {
     final static double RegularPenalty = 1e1;
     final static double LargePenalty = 1e4;
+    final static double VeryLargePenalty = 1e5;
 
     protected static double[] optimizeSeries(
             final double[] p,
