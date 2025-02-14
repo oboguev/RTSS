@@ -21,33 +21,31 @@ import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
 
-// import rtss.util.Util;
-
 import java.util.Arrays;
 
 /*
  * This module/algirithm is a post-processing stage for decomposition of binned demographic population data
  * from 5-year groups into individual years of age.
  * 
- * First stage is a general-purpose disaggregator agnostic of actual mortality patterns.
+ * First stage (not contained here) is a general-purpose disaggregator agnostic of actual mortality patterns.
  * 
- * This module receives the output of the first stage and tries to refine it so it conforms young-age mortality
+ * This module receives the output of the first stage and tries to refine it to make it conform young-age mortality
  * pattern characteristic for the era.
  * 
  * Input: array "p" contains the output of 1-st stage disaggegation, including age points for age bins 0...4 and 5...9. 
  * 
  * The size of "p" is max(10, nTunablePoints + nFixedPoints), as is explained below.
  * 
- * Only first nTunablePoints at the start of "p" can be tweaked.
- * But following nFixedPoints can additionally be used to check for curve smoothness.
+ * Only first nTunablePoints at the start of "p" can be tweaked, i.e. ages 0 to (nTunablePoints - 1). 
+ * But subseqeunt nFixedPoints can additionally be used to check for curve smoothness.
  *   
  * Typically, nTunablePoints does not exceed 10 (total size of two first age bins), and then nFixedPoints is 2.
- * These are the values used when bin sum values follow pattern X-DOWN-DOWN (i.e. first three bins exhibit 
- * population decreasing pattern).
+ * These are the values used when bin sum values follow pattern X-DOWN-DOWN (i.e. first three bins exhibit the 
+ * pattern of population decrease with age).
  * 
  * However for cases X-DOWN-UP (a flip in the 2nd bin) nTunablePoints is shorter: p[nTunablePoints] is a flip point.
  * 
- * In addition, target_diff(x) contains mortality pattern to match.
+ * In addition, target_diff(x) contains mortality pattern that the algorithm will try to match.
  * The size of "target_diff" array is nTunablePoints. 
  * The values of differences in the adjusted series (p(x) - p(x+1)) should be proportional to the target_diff(x).
  * Only relative values in target_diff matter, not absolute values.
@@ -59,24 +57,30 @@ import java.util.Arrays;
  * 
  * Other constraints:
  *    
- *     The sum of p(0) to p(4) exactly equals psum04. This is a hard constraint (value of age bin 0...4 should be maintained).
- *     The sum of p(5) to p(9) exactly equals psum04. This is another hard constraint (value of age bin 5...9 should be maintained)..
+ *     The sum of adjusted series elements p(0) to p(4) exactly equals psum04, just like for the original "p". 
+ *     This is a hard constraint (value of age bin 0...4 should be maintained).
  *     
- *     The curve should be monotonically descending from point p(0) to p(nTunablePoints). This is a hard constraint too. 
+ *     The sum of adjusted series elements p(5) to p(9) exactly equals psum04, just like for the original "p".
+ *     This is another hard constraint (value of age bin 5...9 should be maintained).
  *     
- *     The chart for p(x) should look like a smooth curve, with continuous first derivative. This is a soft constraint.
- *     Take into account p''(x) at first nTunablePoints (except point 0, where it is impossible) and then at further (nFixedPoints - 1).
+ *     The curve should be monotonically descending from point p(0) to p(nTunablePoints). 
+ *     This is a hard constraint too. 
+ *     
+ *     The chart for p(x) should look like a smooth curve, with continuous first derivative. 
+ *     This is a soft constraint.
+ *     We take into account p''(x) at first nTunablePoints (except point 0, where it is impossible) and then at further (nFixedPoints - 1) points.
  *     
  * The task is over-constrained because constraints for target_diff and for curve smoothness cannot be met EXACTLY both.
- * We assign relative importance weights to these two constraints, namded "importance_smoothness" and "importance_target_diff_matching".
- * The task then is to minimize a weighted sum of violations for smoothness criteria and diff criteria;
- * while keeping bins sum value and curve descendance from point 0 to point nTunablePoints as hard constraint that should be maintained precisely.
+ * Therefore we assign relative importance weights to these two constraints, namded "importance_smoothness" and "importance_target_diff_matching".
+ * 
+ * The task then is to minimize a weighted sum of violations for smoothness criteria and for diff criteria;
+ * while at the same to,e keeping bins sum value and curve descendance from point 0 to point nTunablePoints as hard constraints 
+ * that should be maintained precisely.
  */
 public class RefineYearlyPopulationCore
 {
     final static double RegularPenalty = 1e1;
     final static double LargePenalty = 1e4;
-    final static double VeryLargePenalty = 1e5;
 
     public double[] optimizeSeries(
             final double[] p,
@@ -136,7 +140,7 @@ public class RefineYearlyPopulationCore
         UniformRandomProvider random = RandomSource.JDK.create(); // Use UniformRandomProvider
         ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-6);
 
-        CMAESOptimizer optimizer = new CMAESOptimizer(30_000, // Max iterations
+        CMAESOptimizer optimizer = new CMAESOptimizer(500_000, // Max iterations
                                                       1e-6, // Stop fitness
                                                       true, // Active CMA
                                                       0, // Diagonal only (0 means full covariance)
@@ -164,7 +168,7 @@ public class RefineYearlyPopulationCore
         PopulationSize populationSize = new PopulationSize(chooseLambda(nTunablePoints));
 
         // Perform the optimization
-        PointValuePair result = optimizer.optimize(new MaxEval(10_000), // Maximum number of evaluations
+        PointValuePair result = optimizer.optimize(MaxEval.unlimited(), // Maximum number of evaluations
                                                    new ObjectiveFunction(constrainedObjective),
                                                    GoalType.MINIMIZE,
                                                    new InitialGuess(initialGuess),
@@ -173,7 +177,7 @@ public class RefineYearlyPopulationCore
                                                    new SimpleBounds(lowerBoundsForOptimizer, upperBoundsForOptimizer) // Bounds
         );
 
-        // result
+        // result of the optimization
         double[] px = result.getPoint();
 
         // debugging output
@@ -201,6 +205,7 @@ public class RefineYearlyPopulationCore
 
     /* ---------------------------------------------------------------------------------------- */
 
+    // objectibe function
     private double calculateObjective(
             final double[] p,
             final double[] target_diff,
@@ -404,14 +409,24 @@ public class RefineYearlyPopulationCore
         int lambda = 4 + (int) (3 * Math.log(nTunablePoints));
 
         // impose mimimum
-        lambda = Math.max(lambda, 100);
+        lambda = Math.max(lambda, 2000);
 
         return lambda;
     }
 
     /*==================================================================== */
 
+    /*
+     * Example/test code
+     */
     public static void main(String[] args)
+    {
+        // test_1();
+        test_2();
+    }
+
+    @SuppressWarnings("unused")
+    private static void test_1()
     {
         double p[] = { 3079.1064761352536, 2863.741162691683, 2648.375849248112, 2433.010535804541, 2217.645222360971, 2002.2799089174,
                        1831.1316029723425, 1749.4931260194671, 1757.808507358823, 1852.286854731967 };
@@ -425,7 +440,36 @@ public class RefineYearlyPopulationCore
         int nTunablePoints = 7;
         int nFixedPoints = 1;
 
-        Level logLevel = Level.TRACE;
+        RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore();
+
+        double[] px = rc.optimizeSeries(p,
+                                        target_diff,
+                                        importance_smoothness,
+                                        importance_target_diff_matching,
+                                        nTunablePoints,
+                                        nFixedPoints,
+                                        Level.TRACE,
+                                        "example test_1");
+
+        Util.unused(px);
+
+        Util.out("Finished test_1");
+    }
+
+    @SuppressWarnings("unused")
+    private static void test_2()
+    {
+        double p[] = { 2758.9111513137814, 2540.455070553185, 2321.998989792589, 2103.5429090319926, 1885.0868282713964, 1666.6307475108001,
+                       1487.948517512541, 1392.6120548630918, 1379.5241192732535, 1444.2845608403145 };
+
+        double target_diff[] = { 0.47382170458256234, 0.19957548710133885, 0.09807336453684555, 0.0638402089909655, 0.048492434962446936,
+                                 0.03624687057799064, 0.027865462065962774, 0.021769892239033417 };
+
+        double importance_smoothness = 0.95;
+        double importance_target_diff_matching = 1.0 - importance_smoothness;
+
+        int nTunablePoints = 8;
+        int nFixedPoints = 1;
 
         RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore();
 
@@ -435,11 +479,11 @@ public class RefineYearlyPopulationCore
                                         importance_target_diff_matching,
                                         nTunablePoints,
                                         nFixedPoints,
-                                        logLevel,
-                                        "Example");
-        
+                                        Level.TRACE,
+                                        "example test_2");
+
         Util.unused(px);
 
-        Util.out("Finished.");
+        Util.out("Finished test_2");
     }
 }
