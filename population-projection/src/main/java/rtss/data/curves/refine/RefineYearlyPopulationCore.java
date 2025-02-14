@@ -93,8 +93,8 @@ public class RefineYearlyPopulationCore
         public double smoothnessViolation;
         public double binSumViolation;
         public double targetDiffViolation;
-        
-        public void copyFrom(Objective x )
+
+        public void copyFrom(Objective x)
         {
             this.objective = x.objective;
             this.monotonicityViolation = x.monotonicityViolation;
@@ -115,7 +115,7 @@ public class RefineYearlyPopulationCore
         {
             return String.format("objective = %12.7e", objective);
         }
-        
+
         public void print()
         {
             Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
@@ -235,7 +235,7 @@ public class RefineYearlyPopulationCore
         UniformRandomProvider random = RandomSource.JDK.create();
         ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(optimizerSettings.convergenceThreshold,
                                                                             optimizerSettings.convergenceThreshold);
-        
+
         /*
          * Choose the population size (lambda).
          * Note that it has nothing to do with demographic population, but rather is number of 
@@ -319,10 +319,10 @@ public class RefineYearlyPopulationCore
          */
         if (min_seen_objective != null && min_seen_objective.objective < resultObjective.objective)
         {
-            String msg = String.format("Seen better choice during optimization scan than was ultimately reported by the optimizer: %f < %f", 
+            String msg = String.format("Seen better choice during optimization scan than was ultimately reported by the optimizer: %f < %f",
                                        min_seen_objective.objective, resultObjective.objective);
             Util.err(msg);
-            
+
             // return it as the result
             if (Util.True)
             {
@@ -573,6 +573,9 @@ public class RefineYearlyPopulationCore
      */
     public void refineSeriesIterative()
     {
+        /*
+         * From lambda 4,000 and above it gets really slow
+         */
         final int lambdas[] = { 200, 500, 1000, 2000 };
         final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0 };
 
@@ -656,13 +659,15 @@ public class RefineYearlyPopulationCore
      */
     public static void main(String[] args)
     {
-        // test_1();
-        // test_2();
-        iterative_test_2();
+        // test_1(false);
+        // test_1(true);
+
+        // test_2(false);
+        test_2(true);
     }
 
     @SuppressWarnings("unused")
-    private static void test_1()
+    private static void test_1(boolean iterative)
     {
         double p[] = { 3079.1064761352536, 2863.741162691683, 2648.375849248112, 2433.010535804541, 2217.645222360971, 2002.2799089174,
                        1831.1316029723425, 1749.4931260194671, 1757.808507358823, 1852.286854731967 };
@@ -687,15 +692,22 @@ public class RefineYearlyPopulationCore
 
         );
 
-        double[] px = rc.refineSeries(null, Level.TRACE, null, null);
-
-        Util.unused(px);
-
-        Util.out("Finished test_1");
+        if (iterative)
+        {
+            rc.refineSeriesIterative();
+            Util.out("");
+            Util.out("Finished iterative_test_1");
+        }
+        else
+        {
+            double[] px = rc.refineSeries(null, Level.TRACE, null, null);
+            Util.unused(px);
+            Util.out("Finished test_1");
+        }
     }
 
     @SuppressWarnings("unused")
-    private static void test_2()
+    private static void test_2(boolean iterative)
     {
         double p[] = { 2758.9111513137814, 2540.455070553185, 2321.998989792589, 2103.5429090319926, 1885.0868282713964, 1666.6307475108001,
                        1487.948517512541, 1392.6120548630918, 1379.5241192732535, 1444.2845608403145 };
@@ -718,42 +730,17 @@ public class RefineYearlyPopulationCore
                                                                        "example test_2",
                                                                        null);
 
-        double[] px = rc.refineSeries(null, Level.TRACE, null, null);
-
-        Util.unused(px);
-
-        Util.out("Finished test_2");
-    }
-
-    @SuppressWarnings("unused")
-    private static void iterative_test_2()
-    {
-        double p[] = { 2758.9111513137814, 2540.455070553185, 2321.998989792589, 2103.5429090319926, 1885.0868282713964, 1666.6307475108001,
-                       1487.948517512541, 1392.6120548630918, 1379.5241192732535, 1444.2845608403145 };
-
-        double target_diff[] = { 0.47382170458256234, 0.19957548710133885, 0.09807336453684555, 0.0638402089909655, 0.048492434962446936,
-                                 0.03624687057799064, 0.027865462065962774, 0.021769892239033417 };
-
-        double importance_smoothness = 0.95;
-        double importance_target_diff_matching = 1.0 - importance_smoothness;
-
-        int nTunablePoints = 8;
-        int nFixedPoints = 1;
-
-        RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore(p,
-                                                                       target_diff,
-                                                                       importance_smoothness,
-                                                                       importance_target_diff_matching,
-                                                                       nTunablePoints,
-                                                                       nFixedPoints,
-                                                                       "example test_2",
-                                                                       null);
-
-        rc.refineSeriesIterative();
-
-        // Util.unused(px);
-
-        Util.out("");
-        Util.out("Finished iterative_test_2");
+        if (iterative)
+        {
+            rc.refineSeriesIterative();
+            Util.out("");
+            Util.out("Finished iterative_test_2");
+        }
+        else
+        {
+            double[] px = rc.refineSeries(null, Level.TRACE, null, null);
+            Util.unused(px);
+            Util.out("Finished test_2");
+        }
     }
 }
