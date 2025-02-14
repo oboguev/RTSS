@@ -6,7 +6,7 @@ import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
 
-public class RefineYearlyPopulation 
+public class RefineYearlyPopulation
 {
     public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint) throws Exception
     {
@@ -82,30 +82,28 @@ public class RefineYearlyPopulation
 
         int plength = Math.max(10, nTunablePoints + nFixedPoints);
         p = Util.splice(p0, 0, plength - 1);
-        
+
         // Level logLevel = Level.INFO;
         Level logLevel = Level.DEBUG;
         // Level logLevel = Level.TRACE;
 
         try
         {
-            RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore(); 
+            RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore(Util.dup(p),
+                                                                           Util.splice(attrition, 0, nTunablePoints - 1),
+                                                                           importance_smoothness,
+                                                                           importance_target_diff_matching,
+                                                                           nTunablePoints,
+                                                                           nFixedPoints,
+                                                                           title);
 
-            double[] px = rc.optimizeSeries(Util.dup(p),
-                                         Util.splice(attrition, 0, nTunablePoints - 1),
-                                         importance_smoothness,
-                                         importance_target_diff_matching,
-                                         nTunablePoints,
-                                         nFixedPoints,
-                                         logLevel, 
-                                         title, null, null);
-            
+            double[] px = rc.optimizeSeries(logLevel, null, null);
+
             Util.assertion(px.length == nTunablePoints);
-            
 
             p = Util.dup(p0);
             Util.insert(p, px, 0);
-            
+
             verifyMonotonicity(p, nTunablePoints);
             CurveVerifier.validate_means(p, bins);
 
@@ -121,7 +119,7 @@ public class RefineYearlyPopulation
         }
         catch (Exception ex)
         {
-            Util.err("RefineYearlyPopulation failed for " + title+ ", error: " + ex.getLocalizedMessage());
+            Util.err("RefineYearlyPopulation failed for " + title + ", error: " + ex.getLocalizedMessage());
             // ex.printStackTrace();
             // throw ex;
             return p0;
@@ -142,7 +140,7 @@ public class RefineYearlyPopulation
                 return age;
         }
     }
-    
+
     private static void verifyMonotonicity(double[] p, int nTunablePoints) throws Exception
     {
         for (int k = 0; k < nTunablePoints; k++)
