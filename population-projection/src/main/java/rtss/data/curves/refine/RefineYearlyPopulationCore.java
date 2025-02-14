@@ -129,9 +129,9 @@ public class RefineYearlyPopulationCore
 
     public static class OptimizerSettings
     {
-        public double convergenceThreshold = 1e-6; // can range from 1e-6 to 1e-8 
-        public double sigmaFraction = 0.001; // can range from 0.001 to 0.01 to 0.1
-        public int minimumLambda = 2000; // can be large
+        public double convergenceThreshold = 1e-8; // can range from 1e-6 to 1e-8 
+        public double sigmaFraction = 0.001; // can range from 0.001 to 1.0
+        public int minimumLambda = 2000; // from 4000 and beyond it gets very slow
     }
 
     final static double RegularPenalty = 1e1;
@@ -571,13 +571,13 @@ public class RefineYearlyPopulationCore
     /*
      * Try to solve the problem using various settings for the optimizer 
      */
-    public void refineSeriesIterative()
+    public void refineSeriesIterative(Level outerLogLevel, Level innerLogLevel)
     {
         /*
          * From lambda 4,000 and above it gets really slow
          */
         final int lambdas[] = { 200, 500, 1000, 2000 };
-        final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0 };
+        final double sigmas[] = { 0.000001, 0.00001, 0.0001, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0 };
 
         Objective initialObjective = null;
 
@@ -593,9 +593,6 @@ public class RefineYearlyPopulationCore
                 optimizerSettings.sigmaFraction = sigma;
                 optimizerSettings.minimumLambda = lambda;
                 optimizerSettings.convergenceThreshold = 1e-8;
-                // ### convergenceThreshold 
-                // ### LargePenalty (but measure initial & result with std)
-                // ### RegularPenalty (but measure initial & result with std)
 
                 OptimizationResult result = new OptimizationResult();
                 result.optimizerSettings = optimizerSettings;
@@ -603,38 +600,52 @@ public class RefineYearlyPopulationCore
                 if (initialObjective == null)
                 {
                     initialObjective = new Objective();
-                    result.px = refineSeries(optimizerSettings, Level.INFO, initialObjective, result);
+                    result.px = refineSeries(optimizerSettings, innerLogLevel, initialObjective, result);
 
                     Util.out(String.format("initial guess objective = %12.7e", initialObjective.objective));
                     Util.out("");
                 }
                 else
                 {
-                    result.px = refineSeries(optimizerSettings, Level.INFO, null, result);
+                    result.px = refineSeries(optimizerSettings, innerLogLevel, null, result);
                 }
 
                 double[] fullP = fullP(result.px);
 
+                // check if it is the same as the initial curve
                 String same = "";
                 if (Util.same(fullP, p))
                     same = "  same-as-initial";
 
+                // check if the returned curve is monotonically decreasing
                 String nonmonotnic = "";
                 if (!verifyMonotonicity(fullP))
                     nonmonotnic = "  non-monotonic";
 
+                // check if the returned curve presverves bins sums
                 String preserves = "";
                 double sum04 = Util.sum(Util.splice(fullP, 0, 4));
                 double sum59 = Util.sum(Util.splice(fullP, 5, 9));
                 if (Util.differ(sum04, psum04, 0.001) || Util.differ(sum59, psum59, 0.001))
                     preserves = "  non-sum-preserving";
 
-                Util.out(String.format("lambda=%-4d  sigma=%5.3f  result objective = %12.7e%s%s%s", lambda, sigma, result.objective, same,
-                                       nonmonotnic,
-                                       preserves));
+                if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL || outerLogLevel == Level.DEBUG)
+                {
+                    Util.out(String.format("lambda=%-4d  sigma=%8.6f  result objective = %12.7e%s%s%s",
+                                           lambda,
+                                           sigma,
+                                           result.objective,
+                                           same,
+                                           nonmonotnic,
+                                           preserves));
+                }
 
-                if (same.length() == 0 && nonmonotnic.length() == 0 && preserves.length() == 0)
+                if (same.isEmpty() &&
+                    nonmonotnic.isEmpty() &&
+                    preserves.isEmpty())
+                {
                     results.add(result);
+                }
             }
         }
 
@@ -694,7 +705,7 @@ public class RefineYearlyPopulationCore
 
         if (iterative)
         {
-            rc.refineSeriesIterative();
+            rc.refineSeriesIterative(Level.DEBUG, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_1");
         }
@@ -732,7 +743,7 @@ public class RefineYearlyPopulationCore
 
         if (iterative)
         {
-            rc.refineSeriesIterative();
+            rc.refineSeriesIterative(Level.DEBUG, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_2");
         }
