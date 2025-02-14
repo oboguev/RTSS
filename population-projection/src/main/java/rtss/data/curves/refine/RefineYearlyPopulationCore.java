@@ -489,7 +489,7 @@ public class RefineYearlyPopulationCore
      */
     public void refineSeriesIterative()
     {
-        final int lambdas[] = { 200, 500, 1000, 2000, 4000 };
+        final int lambdas[] = { 200, 500, 1000, 2000 };
         final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2 };
         
         Objective initialObjective = null;
@@ -506,6 +506,9 @@ public class RefineYearlyPopulationCore
                 optimizerSettings.sigmaFraction = sigma;
                 optimizerSettings.minimumLambda = lambda;
                 optimizerSettings.convergenceThreshold = 1e-8;
+                // ### convergenceThreshold 
+                // ### LargePenalty (but measure final with std)
+                // ### RegularPenalty (but measure final with std)
                 
                 OptimizationResult result = new OptimizationResult();
                 result.optimizerSettings = optimizerSettings;
@@ -647,6 +650,7 @@ public class RefineYearlyPopulationCore
 
         // Util.unused(px);
 
-        Util.out("Finished test_2");
+        Util.out("");
+        Util.out("Finished iterative_test_2");
     }
 }
