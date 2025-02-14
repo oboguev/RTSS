@@ -6,7 +6,7 @@ import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
 
-public class RefineYearlyPopulation extends RefineYearlyPopulationBase
+public class RefineYearlyPopulation 
 {
     public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint) throws Exception
     {
@@ -89,7 +89,9 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
 
         try
         {
-            double[] px = optimizeSeries(Util.dup(p),
+            RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore(); 
+
+            double[] px = rc.optimizeSeries(Util.dup(p),
                                          Util.splice(attrition, 0, nTunablePoints - 1),
                                          importance_smoothness,
                                          importance_target_diff_matching,
