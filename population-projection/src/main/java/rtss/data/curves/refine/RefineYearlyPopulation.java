@@ -95,9 +95,10 @@ public class RefineYearlyPopulation
                                                                            importance_target_diff_matching,
                                                                            nTunablePoints,
                                                                            nFixedPoints,
-                                                                           title);
+                                                                           title,
+                                                                           null);
 
-            double[] px = rc.refineSeries(logLevel, null, null);
+            double[] px = rc.refineSeries(null, logLevel, null, null);
 
             Util.assertion(px.length == nTunablePoints);
 

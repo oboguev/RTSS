@@ -21,7 +21,9 @@ import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /*
  * This module/algirithm is a post-processing stage for decomposition of binned demographic population data
@@ -89,14 +91,23 @@ public class RefineYearlyPopulationCore
         public double smoothnessViolation;
         public double binSumViolation;
         public double targetDiffViolation;
+
+        @Override
+        public String toString()
+        {
+            return String.format("objective = %12.7e", objective);
+        }
+    }
+
+    public static class OptimizerSettings
+    {
+        public double convergenceThreshold = 1e-6; // can range from 1e-6 to 1e-8 
+        public double sigmaFraction = 0.001; // can range from 0.001 to 0.01 to 0.1
+        public int minimumLambda = 2000; // can be large
     }
 
     final static double RegularPenalty = 1e1;
     final static double LargePenalty = 1e4;
-
-    public double convergenceThreshold = 1e-6; // can range from 1e-6 to 1e-8 
-    public double sigmaFraction = 0.001; // can range from 0.001 to 0.01 to 0.1
-    public int minimumLambda = 2000; // can be large
 
     private final double[] p;
     private final double[] target_diff;
@@ -107,6 +118,7 @@ public class RefineYearlyPopulationCore
     private final String title;
     private final double psum04;
     private final double psum59;
+    private OptimizerSettings optimizerSettings;
 
     public RefineYearlyPopulationCore(
             final double[] p,
@@ -115,7 +127,8 @@ public class RefineYearlyPopulationCore
             final double arg_importance_target_diff_matching,
             final int nTunablePoints,
             final int nFixedPoints,
-            final String title)
+            final String title,
+            OptimizerSettings optimizerSettings)
     {
         this.p = Util.dup(p);
         this.target_diff = Util.dup(target_diff);
@@ -126,10 +139,19 @@ public class RefineYearlyPopulationCore
         this.title = title;
         this.psum04 = Util.sum(Util.splice(p, 0, 4));
         this.psum59 = Util.sum(Util.splice(p, 5, 9));
+
+        if (optimizerSettings != null)
+            this.optimizerSettings = optimizerSettings;
+        else
+            this.optimizerSettings = new OptimizerSettings();
     }
 
-    public double[] refineSeries(final Level logLevel, final Objective initialObjective, final Objective resultObjective)
+    public double[] refineSeries(OptimizerSettings argOptimizerSettings, final Level logLevel, final Objective initialObjective,
+            final Objective resultObjective)
     {
+        if (argOptimizerSettings != null)
+            this.optimizerSettings = argOptimizerSettings;
+
         final double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
 
         // Define the objective function
@@ -167,10 +189,11 @@ public class RefineYearlyPopulationCore
 
         // Set up the CMAESOptimizer
         UniformRandomProvider random = RandomSource.JDK.create(); // Use UniformRandomProvider
-        ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(convergenceThreshold, convergenceThreshold);
+        ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(optimizerSettings.convergenceThreshold,
+                                                                            optimizerSettings.convergenceThreshold);
 
         CMAESOptimizer optimizer = new CMAESOptimizer(1_000_000, // Max iterations
-                                                      convergenceThreshold, // Stop fitness
+                                                      optimizerSettings.convergenceThreshold, // Stop fitness
                                                       true, // Active CMA
                                                       0, // Diagonal only (0 means full covariance)
                                                       1, // Check feasible count
@@ -395,10 +418,10 @@ public class RefineYearlyPopulationCore
     private void adjustInputSigma(double[] inputSigma)
     {
         for (int k = 0; k <= 4 && k < inputSigma.length; k++)
-            inputSigma[k] = psum04 * sigmaFraction;
+            inputSigma[k] = psum04 * optimizerSettings.sigmaFraction;
 
         for (int k = 5; k <= 9 && k < inputSigma.length; k++)
-            inputSigma[k] = psum59 * sigmaFraction;
+            inputSigma[k] = psum59 * optimizerSettings.sigmaFraction;
     }
 
     /*
@@ -448,9 +471,76 @@ public class RefineYearlyPopulationCore
         int lambda = 4 + (int) (3 * Math.log(nTunablePoints));
 
         // impose mimimum
-        lambda = Math.max(lambda, minimumLambda);
+        lambda = Math.max(lambda, optimizerSettings.minimumLambda);
 
         return lambda;
+    }
+
+    /*======================================================================================================== */
+
+    public class OptimizationResult extends Objective
+    {
+        public double[] px;
+        public OptimizerSettings optimizerSettings ;
+    }
+
+    /*
+     * Try to solve the problem using various settings for the optimizer 
+     */
+    public void refineSeriesIterative()
+    {
+        final int lambdas[] = { 200, 500, 1000, 2000, 4000 };
+        final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2 };
+        
+        Objective initialObjective = null;
+        
+        List<OptimizationResult> results = new ArrayList<>(); 
+
+        for (int lambda : lambdas)
+        {
+            Util.out("");
+
+            for (double sigma : sigmas)
+            {
+                OptimizerSettings optimizerSettings = new OptimizerSettings();
+                optimizerSettings.sigmaFraction = sigma;
+                optimizerSettings.minimumLambda = lambda;
+                optimizerSettings.convergenceThreshold = 1e-8;
+                
+                OptimizationResult result = new OptimizationResult();
+                result.optimizerSettings = optimizerSettings;
+                
+                if (initialObjective == null)
+                {
+                    initialObjective = new Objective();
+                    result.px = refineSeries(optimizerSettings, Level.INFO, initialObjective, result);
+                    
+                    Util.out(String.format("initial guess objective = %12.7e", initialObjective.objective));
+                    Util.out("");
+                }
+                else
+                {
+                    result.px = refineSeries(optimizerSettings, Level.INFO, null, result);
+                }
+                
+                results.add(result);
+                
+                Util.out(String.format("lambda=%d sigma=%5.3f result objective = %12.7e", lambda, sigma, result.objective));
+            }
+        }
+        
+        Util.noop();
+    }
+
+    private boolean verifyMonotonicity(double[] p)
+    {
+        for (int k = 0; k < nTunablePoints; k++)
+        {
+            if (p[k] < p[k + 1])
+                return false;
+        }
+
+        return true;
     }
 
     /*======================================================================================================== */
@@ -461,7 +551,8 @@ public class RefineYearlyPopulationCore
     public static void main(String[] args)
     {
         // test_1();
-        test_2();
+        // test_2();
+        iterative_test_2();
     }
 
     @SuppressWarnings("unused")
@@ -485,11 +576,12 @@ public class RefineYearlyPopulationCore
                                                                        importance_target_diff_matching,
                                                                        nTunablePoints,
                                                                        nFixedPoints,
-                                                                       "example test_2"
+                                                                       "example test_2",
+                                                                       null
 
         );
 
-        double[] px = rc.refineSeries(Level.TRACE, null, null);
+        double[] px = rc.refineSeries(null, Level.TRACE, null, null);
 
         Util.unused(px);
 
@@ -517,13 +609,43 @@ public class RefineYearlyPopulationCore
                                                                        importance_target_diff_matching,
                                                                        nTunablePoints,
                                                                        nFixedPoints,
-                                                                       "example test_2"
+                                                                       "example test_2",
+                                                                       null);
 
-        );
-
-        double[] px = rc.refineSeries(Level.TRACE, null, null);
+        double[] px = rc.refineSeries(null, Level.TRACE, null, null);
 
         Util.unused(px);
+
+        Util.out("Finished test_2");
+    }
+
+    @SuppressWarnings("unused")
+    private static void iterative_test_2()
+    {
+        double p[] = { 2758.9111513137814, 2540.455070553185, 2321.998989792589, 2103.5429090319926, 1885.0868282713964, 1666.6307475108001,
+                       1487.948517512541, 1392.6120548630918, 1379.5241192732535, 1444.2845608403145 };
+
+        double target_diff[] = { 0.47382170458256234, 0.19957548710133885, 0.09807336453684555, 0.0638402089909655, 0.048492434962446936,
+                                 0.03624687057799064, 0.027865462065962774, 0.021769892239033417 };
+
+        double importance_smoothness = 0.95;
+        double importance_target_diff_matching = 1.0 - importance_smoothness;
+
+        int nTunablePoints = 8;
+        int nFixedPoints = 1;
+
+        RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore(p,
+                                                                       target_diff,
+                                                                       importance_smoothness,
+                                                                       importance_target_diff_matching,
+                                                                       nTunablePoints,
+                                                                       nFixedPoints,
+                                                                       "example test_2",
+                                                                       null);
+
+        rc.refineSeriesIterative();
+
+        // Util.unused(px);
 
         Util.out("Finished test_2");
     }
