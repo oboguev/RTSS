@@ -81,6 +81,10 @@ public class RefineYearlyPopulationCore
 {
     final static double RegularPenalty = 1e1;
     final static double LargePenalty = 1e4;
+    
+    public double convergenceThreshold = 1e-6;     // can range from 1e-6 to 1e-8 
+    public double sigmaFraction = 0.001;  // can range from 0.001 to 0.01 to 0.1
+    public int minimumLambda = 2000;      // can be large
 
     public double[] optimizeSeries(
             final double[] p,
@@ -138,10 +142,10 @@ public class RefineYearlyPopulationCore
 
         // Set up the CMAESOptimizer
         UniformRandomProvider random = RandomSource.JDK.create(); // Use UniformRandomProvider
-        ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-6);
+        ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(convergenceThreshold, convergenceThreshold);
 
-        CMAESOptimizer optimizer = new CMAESOptimizer(500_000, // Max iterations
-                                                      1e-6, // Stop fitness
+        CMAESOptimizer optimizer = new CMAESOptimizer(1_000_000, // Max iterations
+                                                      convergenceThreshold, // Stop fitness
                                                       true, // Active CMA
                                                       0, // Diagonal only (0 means full covariance)
                                                       1, // Check feasible count
@@ -356,10 +360,10 @@ public class RefineYearlyPopulationCore
     private void adjustInputSigma(double[] inputSigma, double psum04, double psum59)
     {
         for (int k = 0; k <= 4 && k < inputSigma.length; k++)
-            inputSigma[k] = psum04 * 0.001;
+            inputSigma[k] = psum04 * sigmaFraction;
 
         for (int k = 5; k <= 9 && k < inputSigma.length; k++)
-            inputSigma[k] = psum59 * 0.001;
+            inputSigma[k] = psum59 * sigmaFraction;
     }
 
     /*
@@ -409,7 +413,7 @@ public class RefineYearlyPopulationCore
         int lambda = 4 + (int) (3 * Math.log(nTunablePoints));
 
         // impose mimimum
-        lambda = Math.max(lambda, 2000);
+        lambda = Math.max(lambda, minimumLambda);
 
         return lambda;
     }
