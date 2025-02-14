@@ -91,11 +91,37 @@ public class RefineYearlyPopulationCore
         public double smoothnessViolation;
         public double binSumViolation;
         public double targetDiffViolation;
+        
+        public void copyFrom(Objective x )
+        {
+            this.objective = x.objective;
+            this.monotonicityViolation = x.monotonicityViolation;
+            this.smoothnessViolation = x.smoothnessViolation;
+            this.binSumViolation = x.binSumViolation;
+            this.targetDiffViolation = x.targetDiffViolation;
+        }
+
+        public Objective clone()
+        {
+            Objective x = new Objective();
+            x.copyFrom(this);
+            return x;
+        }
 
         @Override
         public String toString()
         {
             return String.format("objective = %12.7e", objective);
+        }
+        
+        public void print()
+        {
+            Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
+                                   targetDiffViolation,
+                                   smoothnessViolation,
+                                   monotonicityViolation,
+                                   binSumViolation,
+                                   objective));
         }
     }
 
@@ -119,6 +145,10 @@ public class RefineYearlyPopulationCore
     private final double psum04;
     private final double psum59;
     private OptimizerSettings optimizerSettings;
+
+    // track what we saw during the optimization scan
+    private Objective min_seen_objective = null;
+    private double[] min_seen_objective_p = null;
 
     public RefineYearlyPopulationCore(
             final double[] p,
@@ -146,11 +176,21 @@ public class RefineYearlyPopulationCore
             this.optimizerSettings = new OptimizerSettings();
     }
 
-    public double[] refineSeries(OptimizerSettings argOptimizerSettings, final Level logLevel, final Objective initialObjective,
-            final Objective resultObjective)
+    public double[] refineSeries(
+            OptimizerSettings argOptimizerSettings,
+            final Level logLevel,
+            final Objective initialObjective,
+            Objective resultObjective)
     {
+        // reset observed minimum
+        min_seen_objective = null;
+        min_seen_objective_p = null;
+
         if (argOptimizerSettings != null)
             this.optimizerSettings = argOptimizerSettings;
+
+        if (resultObjective == null)
+            resultObjective = new Objective();
 
         final double[] initialGuess = Util.splice(p, 0, nTunablePoints - 1);
 
@@ -247,13 +287,32 @@ public class RefineYearlyPopulationCore
         {
             // caclculate objective values for the caller's use
             if (initialObjective != null)
-            {
                 calculateObjective(p, Level.INFO, initialObjective);
-            }
 
             if (resultObjective != null)
-            {
                 calculateObjective(fullP, Level.INFO, resultObjective);
+        }
+
+        /*
+         * Did we observe a better value vector during optimization scan 
+         * than the result returned by the optimizer?
+         */
+        if (min_seen_objective != null && min_seen_objective.objective < resultObjective.objective)
+        {
+            String msg = String.format("Seen better choice during optimization scan than was ultimately reported by the optimizer: %f < %f", 
+                                       min_seen_objective.objective, resultObjective.objective);
+            Util.err(msg);
+            
+            // return it as the result
+            if (Util.True)
+            {
+                px = Util.splice(min_seen_objective_p, 0, nTunablePoints - 1);
+                resultObjective.copyFrom(min_seen_objective);
+                if (logLevel == Level.TRACE || logLevel == Level.ALL || logLevel == Level.DEBUG)
+                {
+                    Util.out("Objective values for the result override curve (" + title + "):");
+                    resultObjective.print();
+                }
             }
         }
 
@@ -291,23 +350,23 @@ public class RefineYearlyPopulationCore
                            importance_smoothness * smoothnessViolation +
                            importance_target_diff_matching * targetDiffViolation;
 
-        if (logLevel == Level.TRACE || logLevel == Level.ALL)
-        {
-            Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
-                                   targetDiffViolation,
-                                   smoothnessViolation,
-                                   monotonicityViolation,
-                                   binSumViolation,
-                                   objective));
-        }
+        if (ov == null)
+            ov = new Objective();
 
-        if (ov != null)
+        ov.objective = objective;
+        ov.binSumViolation = binSumViolation;
+        ov.monotonicityViolation = monotonicityViolation;
+        ov.targetDiffViolation = targetDiffViolation;
+        ov.smoothnessViolation = smoothnessViolation;
+
+        if (logLevel == Level.TRACE || logLevel == Level.ALL)
+            ov.print();
+
+        // capture minimum seen state
+        if (min_seen_objective == null || objective < min_seen_objective.objective)
         {
-            ov.objective = objective;
-            ov.binSumViolation = binSumViolation;
-            ov.monotonicityViolation = monotonicityViolation;
-            ov.targetDiffViolation = targetDiffViolation;
-            ov.smoothnessViolation = smoothnessViolation;
+            min_seen_objective = ov.clone();
+            min_seen_objective_p = Util.dup(p);
         }
 
         return objective;
@@ -495,7 +554,7 @@ public class RefineYearlyPopulationCore
     public void refineSeriesIterative()
     {
         final int lambdas[] = { 200, 500, 1000, 2000 };
-        final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3};
+        final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0 };
 
         Objective initialObjective = null;
 
@@ -547,7 +606,8 @@ public class RefineYearlyPopulationCore
                 if (Util.differ(sum04, psum04, 0.001) || Util.differ(sum59, psum59, 0.001))
                     preserves = "  non-sum-preserving";
 
-                Util.out(String.format("lambda=%-4d  sigma=%5.3f  result objective = %12.7e%s%s%s", lambda, sigma, result.objective, same, nonmonotnic,
+                Util.out(String.format("lambda=%-4d  sigma=%5.3f  result objective = %12.7e%s%s%s", lambda, sigma, result.objective, same,
+                                       nonmonotnic,
                                        preserves));
 
                 if (same.length() == 0 && nonmonotnic.length() == 0 && preserves.length() == 0)
