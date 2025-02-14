@@ -161,9 +161,7 @@ public class RefineYearlyPopulationCore
             public double value(double[] point)
             {
                 // Combine p(0) to p(nTunablePoints - 1) with the fixed p(nTunablePoints) to p(nTunablePoints + nFixedPoints - 1)
-                int plength = Math.max(10, nTunablePoints + nFixedPoints);
-                double[] fullP = Arrays.copyOf(point, plength);
-                System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
+                double[] fullP = fullP(point);
 
                 // Calculate the objective value
                 return calculateObjective(fullP, logLevel, null);
@@ -232,9 +230,7 @@ public class RefineYearlyPopulationCore
         // result of the optimization
         double[] px = result.getPoint();
 
-        int plength = Math.max(10, nTunablePoints + nFixedPoints);
-        double[] fullP = Arrays.copyOf(px, plength);
-        System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
+        double[] fullP = fullP(px);
 
         if (logLevel == Level.TRACE || logLevel == Level.ALL || logLevel == Level.DEBUG)
         {
@@ -263,6 +259,15 @@ public class RefineYearlyPopulationCore
 
         // Return the optimized values
         return px;
+    }
+
+    // Combine p(0) to p(nTunablePoints - 1) with the fixed p(nTunablePoints) to p(nTunablePoints + nFixedPoints - 1)
+    private double[] fullP(final double[] points)
+    {
+        int plength = Math.max(10, nTunablePoints + nFixedPoints);
+        double[] fullP = Arrays.copyOf(points, plength);
+        System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
+        return fullP;
     }
 
     /* ---------------------------------------------------------------------------------------- */
@@ -481,7 +486,7 @@ public class RefineYearlyPopulationCore
     public class OptimizationResult extends Objective
     {
         public double[] px;
-        public OptimizerSettings optimizerSettings ;
+        public OptimizerSettings optimizerSettings;
     }
 
     /*
@@ -491,10 +496,10 @@ public class RefineYearlyPopulationCore
     {
         final int lambdas[] = { 200, 500, 1000, 2000 };
         final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2 };
-        
+
         Objective initialObjective = null;
-        
-        List<OptimizationResult> results = new ArrayList<>(); 
+
+        List<OptimizationResult> results = new ArrayList<>();
 
         for (int lambda : lambdas)
         {
@@ -509,15 +514,15 @@ public class RefineYearlyPopulationCore
                 // ### convergenceThreshold 
                 // ### LargePenalty (but measure final with std)
                 // ### RegularPenalty (but measure final with std)
-                
+
                 OptimizationResult result = new OptimizationResult();
                 result.optimizerSettings = optimizerSettings;
-                
+
                 if (initialObjective == null)
                 {
                     initialObjective = new Objective();
                     result.px = refineSeries(optimizerSettings, Level.INFO, initialObjective, result);
-                    
+
                     Util.out(String.format("initial guess objective = %12.7e", initialObjective.objective));
                     Util.out("");
                 }
@@ -525,13 +530,17 @@ public class RefineYearlyPopulationCore
                 {
                     result.px = refineSeries(optimizerSettings, Level.INFO, null, result);
                 }
-                
+
+                // ### reject if identical
+                // ### reject if not monotonic
+                // ### reject if not preserving
+
                 results.add(result);
-                
+
                 Util.out(String.format("lambda=%d sigma=%5.3f result objective = %12.7e", lambda, sigma, result.objective));
             }
         }
-        
+
         Util.noop();
     }
 
