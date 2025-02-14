@@ -82,8 +82,8 @@ public class RefineYearlyPopulation extends RefineYearlyPopulationBase
         int plength = Math.max(10, nTunablePoints + nFixedPoints);
         p = Util.splice(p0, 0, plength - 1);
         
-        Level logLevel = Level.INFO;
-        // Level logLevel = Level.DEBUG;
+        // Level logLevel = Level.INFO;
+        Level logLevel = Level.DEBUG;
         // Level logLevel = Level.TRACE;
 
         try

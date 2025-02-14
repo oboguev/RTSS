@@ -180,20 +180,18 @@ public class RefineYearlyPopulationBase
         {
             Util.out("");
             Util.out("RefineYearlyPopulationBase completed for " + title);
-            Util.out("");
-            Util.out("Objective values for the intitial curve:");
+            Util.out("Objective values for the intitial curve (" + title + "):");
             calculateObjective(p, target_diff,
                                importance_smoothness, importance_target_diff_matching,
-                               nTunablePoints, nFixedPoints, psum04, psum59, logLevel);
+                               nTunablePoints, nFixedPoints, psum04, psum59, Level.TRACE);
 
-            Util.out("");
-            Util.out("Objective values for the result curve:");
+            Util.out("Objective values for the result curve (" + title + "):");
             int plength = Math.max(10, nTunablePoints + nFixedPoints);
             double[] fullP = Arrays.copyOf(px, plength);
             System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
             calculateObjective(fullP, target_diff,
                                importance_smoothness, importance_target_diff_matching,
-                               nTunablePoints, nFixedPoints, psum04, psum59, logLevel);
+                               nTunablePoints, nFixedPoints, psum04, psum59, Level.TRACE);
         }
 
         // Return the optimized values
