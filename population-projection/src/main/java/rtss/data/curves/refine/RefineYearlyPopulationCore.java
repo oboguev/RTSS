@@ -495,7 +495,7 @@ public class RefineYearlyPopulationCore
     public void refineSeriesIterative()
     {
         final int lambdas[] = { 200, 500, 1000, 2000 };
-        final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2 };
+        final double sigmas[] = { 0.001, 0.005, 0.01, 0.05, 0.1, 0.2};
 
         Objective initialObjective = null;
 
@@ -510,7 +510,7 @@ public class RefineYearlyPopulationCore
                 OptimizerSettings optimizerSettings = new OptimizerSettings();
                 optimizerSettings.sigmaFraction = sigma;
                 optimizerSettings.minimumLambda = lambda;
-                optimizerSettings.convergenceThreshold = 1e-8;
+                optimizerSettings.convergenceThreshold = 1e-2;
                 // ### convergenceThreshold 
                 // ### LargePenalty (but measure final with std)
                 // ### RegularPenalty (but measure final with std)
@@ -531,13 +531,27 @@ public class RefineYearlyPopulationCore
                     result.px = refineSeries(optimizerSettings, Level.INFO, null, result);
                 }
 
-                // ### reject if identical
-                // ### reject if not monotonic
-                // ### reject if not preserving
+                double[] fullP = fullP(result.px);
 
-                results.add(result);
+                String same = "";
+                if (Util.same(fullP, p))
+                    same = "  same-as-initial";
 
-                Util.out(String.format("lambda=%d sigma=%5.3f result objective = %12.7e", lambda, sigma, result.objective));
+                String nonmonotnic = "";
+                if (!verifyMonotonicity(fullP))
+                    nonmonotnic = "  non-monotonic";
+
+                String preserves = "";
+                double sum04 = Util.sum(Util.splice(fullP, 0, 4));
+                double sum59 = Util.sum(Util.splice(fullP, 5, 9));
+                if (Util.differ(sum04, psum04, 0.001) || Util.differ(sum59, psum59, 0.001))
+                    preserves = "  non-sum-preserving";
+
+                Util.out(String.format("lambda=%-4d  sigma=%5.3f  result objective = %12.7e%s%s%s", lambda, sigma, result.objective, same, nonmonotnic,
+                                       preserves));
+
+                if (same.length() == 0 && nonmonotnic.length() == 0 && preserves.length() == 0)
+                    results.add(result);
             }
         }
 

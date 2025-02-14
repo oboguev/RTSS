@@ -184,13 +184,42 @@ public class Util
             return true;
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
+    
+    public static boolean differ(double[] a, double[] b)
+    {
+        return differ(a, b, 0.00001);
+    }
+
+    public static boolean differ(double[] a, double[] b, double diff)
+    {
+        if (a.length != b.length)
+            throw new IllegalArgumentException("array dimensions differ");
+        
+        for (int k = 0; k < a.length; k++)
+        {
+            if (differ(a[k], b[k], diff))
+                return true;
+        }
+        
+        return false;
+    }
 
     public static boolean same(double a, double b)
     {
         return !differ(a, b);
     }
 
+    public static boolean same(double[] a, double[] b)
+    {
+        return !differ(a, b);
+    }
+
     public static boolean same(double a, double b, double diff)
+    {
+        return !differ(a, b, diff);
+    }
+
+    public static boolean same(double[] a, double[] b, double diff)
     {
         return !differ(a, b, diff);
     }
