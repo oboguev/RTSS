@@ -32,7 +32,8 @@ public class RefineYearlyPopulation
         /*
          * Attrition array describes
          */
-        double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint, gender));
+        AttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
+        double[] attrition = model.attrition09();
 
         /*
          * Number of age points to tune.
@@ -112,7 +113,7 @@ public class RefineYearlyPopulation
         try
         {
             RefineYearlyPopulationCore rc = new RefineYearlyPopulationCore(Util.dup(p),
-                                                                           Util.splice(attrition, 0, nTunablePoints - 1),
+                                                                           Util.normalize(Util.splice(attrition, 0, nTunablePoints - 1)),
                                                                            importance_smoothness,
                                                                            importance_target_diff_matching,
                                                                            nTunablePoints,

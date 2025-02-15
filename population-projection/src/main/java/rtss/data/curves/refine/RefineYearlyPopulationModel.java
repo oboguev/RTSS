@@ -1,6 +1,9 @@
 package rtss.data.curves.refine;
 
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
 public class RefineYearlyPopulationModel
@@ -37,39 +40,64 @@ public class RefineYearlyPopulationModel
             // comes from mortality table Lx(ageyear + 1) - Lx(ageyear)
             this.attrition = attrition;
         }
+
+        public double[] attrition04()
+        {
+            return Util.splice(attrition, 0, 4);
+        }
+
+        public double[] attrition59()
+        {
+            return Util.splice(attrition, 5, 9);
+        }
+
+        public double[] attrition09()
+        {
+            return Util.splice(attrition, 0, 9);
+        }
+
+        public double[] attrition014()
+        {
+            return Util.splice(attrition, 0, 14);
+        }
+
+        static AttritionModel forMortalityTable(String tablePath, Gender gender) throws Exception
+        {
+            CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
+            SingleMortalityTable smt = mt.getSingleTable(Locality.TOTAL, gender);
+            
+            double L0 = smt.get(0).Lx;
+            double[] dLx = new double[15];
+            for (int age = 0; age <= 14; age++)
+                dLx[age] = smt.get(age).Lx - smt.get(age + 1).Lx ;
+            
+            AttritionModel model = new AttritionModel(L0, dLx);
+            return model;
+        }
     }
-
-    private static double[] array(double... v)
+    
+    static class AllModels
     {
-        return v;
+        AllModels() throws Exception
+        {
+        }
+        
+        final AttritionModel model_m_1926 = AttritionModel.forMortalityTable("mortality_tables/USSR/1926-1927", Gender.MALE);
+        final AttritionModel model_m_1938 = AttritionModel.forMortalityTable("mortality_tables/USSR/1938-1939", Gender.MALE);
+        final AttritionModel model_m_1958 = AttritionModel.forMortalityTable("mortality_tables/USSR/1958-1959", Gender.MALE);
+
+        final AttritionModel model_f_1926 = AttritionModel.forMortalityTable("mortality_tables/USSR/1926-1927", Gender.FEMALE);
+        final AttritionModel model_f_1938 = AttritionModel.forMortalityTable("mortality_tables/USSR/1938-1939", Gender.FEMALE);
+        final AttritionModel model_f_1958 = AttritionModel.forMortalityTable("mortality_tables/USSR/1958-1959", Gender.FEMALE);
     }
+    
+    private static AllModels allModels = null;
 
-    private static final AttritionModel model_m_1926 = new AttritionModel(86009, array(9092, 3742, 1807, 1165, 888,
-                                                                                       670, 518, 410, 325, 248,
-                                                                                       196, 170, 169, 184, 201));
-
-    private static final AttritionModel model_m_1938 = new AttritionModel(89314, array(11376, 3652, 1620, 926, 550,
-                                                                                       550, 438, 352, 283, 234,
-                                                                                       202, 183, 175, 174, 182));
-
-    private static final AttritionModel model_m_1958 = new AttritionModel(97001, array(1984, 502, 251, 180, 123,
-                                                                                       131, 127, 119, 108, 100,
-                                                                                       92, 89, 90, 90, 101));
-
-    private static final AttritionModel model_f_1926 = new AttritionModel(88270, array(8296, 3589, 1795, 1180, 894,
-                                                                                       667, 504, 391, 306, 234,
-                                                                                       188, 169, 179, 202, 217));
-
-    private static final AttritionModel model_f_1938 = new AttritionModel(90920, array(10525, 3557, 1614, 938, 552,
-                                                                                       534, 416, 324, 257, 210,
-                                                                                       182, 167, 164, 173, 185));
-
-    private static final AttritionModel model_f_1958 = new AttritionModel(97558, array(1776, 502, 249, 158, 107,
-                                                                                       106, 97, 84, 73, 69,
-                                                                                       64, 63, 64, 67, 71));
-
-    public static AttritionModel select_model(Integer yearHint, Gender gender)
+    public static AttritionModel select_model(Integer yearHint, Gender gender) throws Exception
     {
+        if (allModels == null)
+            allModels = new AllModels();
+
         if (yearHint == null)
             yearHint = 1938;
 
@@ -77,46 +105,25 @@ public class RefineYearlyPopulationModel
         {
             // ### interpolate
             if (yearHint >= 1943)
-                return model_m_1958;
+                return allModels.model_m_1958;
             else if (yearHint >= 1933)
-                return model_m_1938;
+                return allModels.model_m_1938;
             else
-                return model_m_1926;
+                return allModels.model_m_1926;
         }
         else if (gender == Gender.FEMALE)
         {
             // ### interpolate
             if (yearHint >= 1943)
-                return model_f_1958;
+                return allModels.model_f_1958;
             else if (yearHint >= 1933)
-                return model_f_1938;
+                return allModels.model_f_1938;
             else
-                return model_f_1926;
+                return allModels.model_f_1926;
         }
         else
         {
             throw new IllegalArgumentException("неверный указатель пола");
         }
-    }
-
-    public static double[] select_attrition014(Integer yearHint, Gender gender)
-    {
-        AttritionModel model = select_model(yearHint, gender);
-        return model.attrition;
-    }
-
-    public static double[] select_attrition04(Integer yearHint, Gender gender)
-    {
-        return Util.splice(select_attrition014(yearHint, gender), 0, 4);
-    }
-
-    public static double[] select_attrition59(Integer yearHint, Gender gender)
-    {
-        return Util.splice(select_attrition014(yearHint, gender), 5, 9);
-    }
-
-    public static double[] select_attrition09(Integer yearHint, Gender gender)
-    {
-        return Util.splice(select_attrition014(yearHint, gender), 0, 9);
     }
 }
