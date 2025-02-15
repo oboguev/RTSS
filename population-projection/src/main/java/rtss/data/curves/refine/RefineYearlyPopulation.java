@@ -2,7 +2,7 @@ package rtss.data.curves.refine;
 
 import rtss.data.bin.Bin;
 import rtss.data.curves.CurveVerifier;
-import rtss.data.curves.refine.RefineYearlyPopulationModel.AttritionModel;
+import rtss.data.curves.refine.RefineYearlyPopulationModel.ChildAttritionModel;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 
@@ -32,7 +32,7 @@ public class RefineYearlyPopulation
         /*
          * Attrition array describes
          */
-        AttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
+        ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
         double[] attrition = null;
 
         /*
@@ -184,7 +184,7 @@ public class RefineYearlyPopulation
      * Корректировать кривую ожидаемого падения населения с учётом не только смертности,
      * но и падения рождений в предшествующие годы
      */
-    private static double[] adjustedAttrition(Bin[] bins, AttritionModel model, int nTurnAge) throws Exception
+    private static double[] adjustedAttrition(Bin[] bins, ChildAttritionModel model, int nTurnAge) throws Exception
     {
         /*
          * build the curve of expected model population progress for ages 0...14 

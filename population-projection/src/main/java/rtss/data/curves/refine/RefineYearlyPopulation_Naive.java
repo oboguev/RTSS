@@ -1,7 +1,7 @@
 package rtss.data.curves.refine;
 
 import rtss.data.bin.Bin;
-import rtss.data.curves.refine.RefineYearlyPopulationModel.AttritionModel;
+import rtss.data.curves.refine.RefineYearlyPopulationModel.ChildAttritionModel;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 
@@ -43,7 +43,7 @@ public class RefineYearlyPopulation_Naive
         if (original_sum59 / 5 <= p[10])
             return p;
 
-        AttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
+        ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
         final double[] attrition04 = model.attrition04();
         final double[] attrition59 = model.attrition59();
 
