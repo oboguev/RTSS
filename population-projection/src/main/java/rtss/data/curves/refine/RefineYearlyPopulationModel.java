@@ -27,18 +27,26 @@ public class RefineYearlyPopulationModel
      */
     public static class AttritionModel
     {
+        public int acutalYear;
         public final double L0;
         public final double[] attrition;
 
-        public AttritionModel(double L0, double[] attrition)
+        public AttritionModel(int acutalYear, double L0, double[] attrition)
         {
+            this.acutalYear = acutalYear;
+
             // average yearly population in age year 0 (assuming initial population at year start 100_000),
             // comes from mortality table Lx(0)
             this.L0 = L0;
 
             // yearly drops in average yearly population from year to year
             // comes from mortality table Lx(ageyear + 1) - Lx(ageyear)
-            this.attrition = attrition;
+            this.attrition = Util.dup(attrition);
+        }
+
+        public AttritionModel clone()
+        {
+            return new AttritionModel(acutalYear, L0, attrition);
         }
 
         public double[] attrition04()
@@ -61,36 +69,35 @@ public class RefineYearlyPopulationModel
             return Util.splice(attrition, 0, 14);
         }
 
-        static AttritionModel forMortalityTable(String tablePath, Gender gender) throws Exception
+        static AttritionModel forMortalityTable(int year, String tablePath, Gender gender) throws Exception
         {
             CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
             SingleMortalityTable smt = mt.getSingleTable(Locality.TOTAL, gender);
-            
+
             double L0 = smt.get(0).Lx;
             double[] dLx = new double[15];
             for (int age = 0; age < dLx.length; age++)
-                dLx[age] = smt.get(age).Lx - smt.get(age + 1).Lx ;
-            
-            AttritionModel model = new AttritionModel(L0, dLx);
-            return model;
+                dLx[age] = smt.get(age).Lx - smt.get(age + 1).Lx;
+
+            return new AttritionModel(year, L0, dLx);
         }
     }
-    
+
     static class AllModels
     {
         AllModels() throws Exception
         {
         }
-        
-        final AttritionModel model_m_1926 = AttritionModel.forMortalityTable("mortality_tables/USSR/1926-1927", Gender.MALE);
-        final AttritionModel model_m_1938 = AttritionModel.forMortalityTable("mortality_tables/USSR/1938-1939", Gender.MALE);
-        final AttritionModel model_m_1958 = AttritionModel.forMortalityTable("mortality_tables/USSR/1958-1959", Gender.MALE);
 
-        final AttritionModel model_f_1926 = AttritionModel.forMortalityTable("mortality_tables/USSR/1926-1927", Gender.FEMALE);
-        final AttritionModel model_f_1938 = AttritionModel.forMortalityTable("mortality_tables/USSR/1938-1939", Gender.FEMALE);
-        final AttritionModel model_f_1958 = AttritionModel.forMortalityTable("mortality_tables/USSR/1958-1959", Gender.FEMALE);
+        final AttritionModel model_m_1926 = AttritionModel.forMortalityTable(1926, "mortality_tables/USSR/1926-1927", Gender.MALE);
+        final AttritionModel model_m_1938 = AttritionModel.forMortalityTable(1938, "mortality_tables/USSR/1938-1939", Gender.MALE);
+        final AttritionModel model_m_1958 = AttritionModel.forMortalityTable(1958, "mortality_tables/USSR/1958-1959", Gender.MALE);
+
+        final AttritionModel model_f_1926 = AttritionModel.forMortalityTable(1926, "mortality_tables/USSR/1926-1927", Gender.FEMALE);
+        final AttritionModel model_f_1938 = AttritionModel.forMortalityTable(1938, "mortality_tables/USSR/1938-1939", Gender.FEMALE);
+        final AttritionModel model_f_1958 = AttritionModel.forMortalityTable(1958, "mortality_tables/USSR/1958-1959", Gender.FEMALE);
     }
-    
+
     private static AllModels allModels = null;
 
     public static AttritionModel select_model(Integer yearHint, Gender gender) throws Exception
@@ -101,29 +108,36 @@ public class RefineYearlyPopulationModel
         if (yearHint == null)
             yearHint = 1938;
 
+        AttritionModel model = null;
+
         if (gender == Gender.MALE)
         {
             // ### interpolate
             if (yearHint >= 1943)
-                return allModels.model_m_1958;
+                model = allModels.model_m_1958;
             else if (yearHint >= 1933)
-                return allModels.model_m_1938;
+                model = allModels.model_m_1938;
             else
-                return allModels.model_m_1926;
+                model = allModels.model_m_1926;
         }
         else if (gender == Gender.FEMALE)
         {
             // ### interpolate
             if (yearHint >= 1943)
-                return allModels.model_f_1958;
+                model = allModels.model_f_1958;
             else if (yearHint >= 1933)
-                return allModels.model_f_1938;
+                model = allModels.model_f_1938;
             else
-                return allModels.model_f_1926;
+                model = allModels.model_f_1926;
         }
         else
         {
             throw new IllegalArgumentException("неверный указатель пола");
         }
+
+        model = model.clone();
+        model.acutalYear = yearHint;
+
+        return model;
     }
 }

@@ -33,7 +33,7 @@ public class RefineYearlyPopulation
          * Attrition array describes
          */
         AttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
-        double[] attrition = model.attrition09();
+        double[] attrition = null;
 
         /*
          * Number of age points to tune.
@@ -56,6 +56,7 @@ public class RefineYearlyPopulation
              */
             nTunablePoints = 10; // ages 0-9
             nFixedPoints = 2; // ages 10-11
+            attrition = model.attrition09();
         }
         else if (bins[0].avg > bins[1].avg &&
                  bins[1].avg < bins[2].avg &&
@@ -83,7 +84,7 @@ public class RefineYearlyPopulation
                 nFixedPoints = 1;
             }
 
-            adjustedAttrition(bins, yearHint, gender);
+            attrition = adjustedAttrition(bins, model, nTunablePoints);
         }
         else
         {
@@ -179,13 +180,17 @@ public class RefineYearlyPopulation
 
     /* ====================================================================================== */
 
-    private static void adjustedAttrition(Bin[] bins, Integer yearHint, Gender gender) throws Exception
+    /*
+     * Корректировать кривую ожидаемого падения населения с учётом не только смертности,
+     * но и падения рождений в предшествующие годы
+     */
+    private static double[] adjustedAttrition(Bin[] bins, AttritionModel model, int nTurnAge) throws Exception
     {
         /*
-         * build the curve of expected model population progress for ages 0...14 under given mortality pattern 
+         * build the curve of expected model population progress for ages 0...14 
+         * under regular natural mortality pattern for the era, 
+         * assuming steady year-to-year births  
          */
-        AttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
-
         double[] p = new double[15];
         p[0] = model.L0;
         for (int age = 1; age <= 14; age++)
@@ -201,19 +206,80 @@ public class RefineYearlyPopulation
         b1 = bins[1].avg;
         b2 = bins[2].avg;
         double v1 = a * b0 + (1 - a) * b2;
-        
+
         /*
-         * @v1 is expected population in bins[s] if there were no drop in birth rates 
+         * @v1 is expected population in bins[1] if there were no drop in birth rates 
          * 
          * (b0 - v1) = relative weight of regular natural attrition
          * (v1 - b1) = relative weight of births drop in previous years
          */
         Util.assertion(b0 > b2);
         Util.assertion(b0 > b1 && b1 <= b2);
-        
+
         Util.assertion(v1 >= b1);
         Util.assertion(b0 > v1 && v1 > b2);
 
+        /*
+         * Кривая падения численности населения из-за естественной сметности
+         */
+        double[] naturalAttrition = model.attrition09();
+        naturalAttrition = Util.normalize(Util.splice(naturalAttrition, 0, nTurnAge - 1));
+
+        /*
+         * Создать кривую распределения влияиния падения рождений  
+         */
+        double[] birthDrop = new double[naturalAttrition.length];
+        fillBirthDrop(birthDrop, model.acutalYear);
+        Util.assertion(nTurnAge >= 6 && nTurnAge <= 10);
+
+        double[] result = wsum(b0 - v1, naturalAttrition, v1 - b1, birthDrop);
+
         Util.noop();
+
+        return result;
+    }
+
+    private static void fillBirthDrop(double[] birthDrop, int calendarYear) throws Exception
+    {
+        // ### take into account calendarYear
+
+        switch (birthDrop.length)
+        {
+        // fill the tail of birthDrop
+        case 6: fillBirthDrop(birthDrop, 0.25, 0.75, 1); break;
+        case 7: fillBirthDrop(birthDrop, 0.25, 0.75, 1); break;
+        case 8: fillBirthDrop(birthDrop, 0.25, 0.75, 1); break;
+        case 9: fillBirthDrop(birthDrop, 0.5, 1, 1); break;
+        case 10: fillBirthDrop(birthDrop, 0.5, 1, 1); break;
+        default: Util.assertion(false);
+        }
+    }
+    
+    private static void fillBirthDrop(double[] birthDrop, double... values)
+    {
+        for (int k = 0; k < values.length; k++)
+            birthDrop[birthDrop.length - 1 - k] = values[values.length - 1 - k];
+    }
+    
+    /*
+     * Взвешенная сумма w1*ww1 + w2*ww2
+     * 
+     * Массивы ww1 и ww2 предварительно нормализуются по сумме всех членов на 1.0
+     * (без изменения начальных копий).
+     * 
+     * Возвращаемый результат также нормализуется. 
+     */
+    private static double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
+    {
+        ww1 = Util.normalize(ww1);
+        ww2 = Util.normalize(ww2);
+
+        ww1 = Util.multiply(ww1, w1);
+        ww2 = Util.multiply(ww2, w2);
+
+        double[] ww = Util.add(ww1, ww2);
+        ww = Util.normalize(ww);
+
+        return ww;
     }
 }
