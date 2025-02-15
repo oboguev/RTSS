@@ -232,7 +232,7 @@ public class RefineYearlyPopulation
         fillBirthDrop(birthDrop, model.acutalYear);
         Util.assertion(nTurnAge >= 6 && nTurnAge <= 10);
 
-        double[] result = wsum(b0 - v1, naturalAttrition, v1 - b1, birthDrop);
+        double[] result = Util.sumWeightedNormalized(b0 - v1, naturalAttrition, v1 - b1, birthDrop);
 
         Util.noop();
 
@@ -259,27 +259,5 @@ public class RefineYearlyPopulation
     {
         for (int k = 0; k < values.length; k++)
             birthDrop[birthDrop.length - 1 - k] = values[values.length - 1 - k];
-    }
-    
-    /*
-     * Взвешенная сумма w1*ww1 + w2*ww2
-     * 
-     * Массивы ww1 и ww2 предварительно нормализуются по сумме всех членов на 1.0
-     * (без изменения начальных копий).
-     * 
-     * Возвращаемый результат также нормализуется. 
-     */
-    private static double[] wsum(double w1, double[] ww1, double w2, double[] ww2) throws Exception
-    {
-        ww1 = Util.normalize(ww1);
-        ww2 = Util.normalize(ww2);
-
-        ww1 = Util.multiply(ww1, w1);
-        ww2 = Util.multiply(ww2, w2);
-
-        double[] ww = Util.add(ww1, ww2);
-        ww = Util.normalize(ww);
-
-        return ww;
     }
 }

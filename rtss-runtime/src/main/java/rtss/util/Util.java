@@ -392,6 +392,28 @@ public class Util
     {
         return multiply(y, sum / sum(y));
     }
+    
+    /*
+     * Взвешенная сумма w1*ww1 + w2*ww2
+     * 
+     * Массивы ww1 и ww2 предварительно нормализуются по сумме всех членов на 1.0
+     * (без изменения начальных копий).
+     * 
+     * Возвращаемый результат также нормализуется. 
+     */
+    public static double[] sumWeightedNormalized(double w1, double[] ww1, double w2, double[] ww2) throws Exception
+    {
+        ww1 = Util.normalize(ww1);
+        ww2 = Util.normalize(ww2);
+
+        ww1 = Util.multiply(ww1, w1);
+        ww2 = Util.multiply(ww2, w2);
+
+        double[] ww = Util.add(ww1, ww2);
+        ww = Util.normalize(ww);
+
+        return ww;
+    }
 
     // sign of the value
     public static int sign(double d)
