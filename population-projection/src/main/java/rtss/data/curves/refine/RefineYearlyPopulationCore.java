@@ -39,7 +39,7 @@ import java.util.List;
  * The size of "p" is max(10, nTunablePoints + nFixedPoints), as is explained below.
  * 
  * Only first nTunablePoints at the start of "p" can be tweaked, i.e. ages 0 to (nTunablePoints - 1). 
- * But subseqeunt nFixedPoints can additionally be used to check for curve smoothness.
+ * But subseqeunt nFixedPoints can additionally be used to check for curve smoothness (under rare conditions nFixedPoints can be zero).
  *   
  * Typically, nTunablePoints does not exceed 10 (total size of two first age bins), and then nFixedPoints is 2.
  * These are the values used when bin sum values follow pattern X-DOWN-DOWN (i.e. first three bins exhibit the 
@@ -71,7 +71,7 @@ import java.util.List;
  *     The chart for p(x) should be a smooth curve, with continuous first derivative. 
  *     This is a soft constraint.
  *     We take into account p''(x) at first nTunablePoints (except point 0, where it is impossible) 
- *     and then at further (nFixedPoints - 1) points.
+ *     and then at further max(0, nFixedPoints - 1) points.
  *     
  * The task is over-constrained because constraints for target_diff and for curve smoothness cannot be met EXACTLY both.
  * Therefore we assign relative importance weights to these two constraints, namded "importance_smoothness" and 
@@ -459,7 +459,8 @@ public class RefineYearlyPopulationCore
 
         p = Util.normalize(p);
 
-        for (int i = 1; i < p.length - 1 && i <= nTunablePoints + nFixedPoints - 2; i++)
+        // under rare conditions nFixedPoints can be zero
+        for (int i = 1; i < p.length - 1 && i <= nTunablePoints - 1 + Math.max(0, nFixedPoints - 1); i++)
             smoothnessViolation += Math.abs(d2(p, i));
 
         return smoothnessViolation;

@@ -64,12 +64,13 @@ public class RefineYearlyPopulation
         {
             /*
              * Case:
-             *      _   _  
+             *      _   
+             *          _  
              *        _ 
              *        
              * U-shaped population. 
              * There was a drop in births during second bin birth years.
-             * Should adjust attrition to account for it.           
+             * We should adjust attrition weights to account for it.           
              */
             int np = locateTurnpoint(bins, p);
 
