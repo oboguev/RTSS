@@ -87,7 +87,7 @@ public class RefineYearlyPopulationModel
         }
     }
 
-    public static double[] select_attrition04(Integer yearHint)
+    public static double[] select_attrition04(Integer yearHint, Gender gender)
     {
         if (yearHint == null)
             yearHint = 1938;
@@ -100,7 +100,7 @@ public class RefineYearlyPopulationModel
             return attrition04_1926;
     }
 
-    public static double[] select_attrition59(Integer yearHint)
+    public static double[] select_attrition59(Integer yearHint, Gender gender)
     {
         if (yearHint == null)
             yearHint = 1938;
@@ -113,8 +113,8 @@ public class RefineYearlyPopulationModel
             return attrition59_1926;
     }
 
-    public static double[] select_attrition09(Integer yearHint)
+    public static double[] select_attrition09(Integer yearHint, Gender gender)
     {
-        return Util.concat(select_attrition04(yearHint), select_attrition59(yearHint));
+        return Util.concat(select_attrition04(yearHint, gender), select_attrition59(yearHint, gender));
     }
 }

@@ -2,13 +2,14 @@ package rtss.data.curves.refine;
 
 import rtss.data.bin.Bin;
 import rtss.data.curves.CurveVerifier;
+import rtss.data.selectors.Gender;
 import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
 
 public class RefineYearlyPopulation
 {
-    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint) throws Exception
+    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint, Gender gender) throws Exception
     {
         final double[] p0 = p;
 
@@ -76,7 +77,7 @@ public class RefineYearlyPopulation
                 break;
         }
 
-        double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
+        double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint, gender));
         double importance_smoothness = 0.94;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 

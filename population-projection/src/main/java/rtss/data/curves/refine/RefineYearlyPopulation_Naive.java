@@ -1,6 +1,7 @@
 package rtss.data.curves.refine;
 
 import rtss.data.bin.Bin;
+import rtss.data.selectors.Gender;
 import rtss.util.Util;
 
 /*
@@ -15,7 +16,7 @@ import rtss.util.Util;
  */
 public class RefineYearlyPopulation_Naive
 {
-    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint) throws Exception
+    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint, Gender gender) throws Exception
     {
         /*
          * Не использовать, т.к. иногда вызывает надлом, напр. в случае РСФСР-MALE-1931,
@@ -41,8 +42,8 @@ public class RefineYearlyPopulation_Naive
         if (original_sum59 / 5 <= p[10])
             return p;
 
-        final double[] attrition04 = RefineYearlyPopulationModel.select_attrition04(yearHint);
-        final double[] attrition59 = RefineYearlyPopulationModel.select_attrition59(yearHint);
+        final double[] attrition04 = RefineYearlyPopulationModel.select_attrition04(yearHint, gender);
+        final double[] attrition59 = RefineYearlyPopulationModel.select_attrition59(yearHint, gender);
 
         /* ------------------------------------------------------------- */
 
