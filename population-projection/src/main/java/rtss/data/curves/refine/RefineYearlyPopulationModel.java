@@ -68,7 +68,7 @@ public class RefineYearlyPopulationModel
             
             double L0 = smt.get(0).Lx;
             double[] dLx = new double[15];
-            for (int age = 0; age <= 14; age++)
+            for (int age = 0; age < dLx.length; age++)
                 dLx[age] = smt.get(age).Lx - smt.get(age + 1).Lx ;
             
             AttritionModel model = new AttritionModel(L0, dLx);
