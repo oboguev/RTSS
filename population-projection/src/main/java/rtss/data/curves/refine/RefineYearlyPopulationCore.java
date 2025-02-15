@@ -171,8 +171,8 @@ public class RefineYearlyPopulationCore
         this.nTunablePoints = nTunablePoints;
         this.nFixedPoints = nFixedPoints;
         this.title = title;
-        this.psum04 = Util.sum(Util.splice(p, 0, 4));
-        this.psum59 = Util.sum(Util.splice(p, 5, 9));
+        this.psum04 = Util.sum_range(p, 0, 4);
+        this.psum59 = Util.sum_range(p, 5, 9);
 
         if (optimizerSettings != null)
             this.optimizerSettings = optimizerSettings;
@@ -656,8 +656,8 @@ public class RefineYearlyPopulationCore
 
                 // check if the returned curve presverves bins sums
                 String preserves = "";
-                double sum04 = Util.sum(Util.splice(fullP, 0, 4));
-                double sum59 = Util.sum(Util.splice(fullP, 5, 9));
+                double sum04 = Util.sum_range(fullP, 0, 4);
+                double sum59 = Util.sum_range(fullP, 5, 9);
                 if (Util.differ(sum04, psum04, 0.001) || Util.differ(sum59, psum59, 0.001))
                     preserves = "  non-sum-preserving";
 

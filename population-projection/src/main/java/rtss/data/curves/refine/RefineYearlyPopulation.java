@@ -77,7 +77,7 @@ public class RefineYearlyPopulation
         }
 
         double[] attrition = Util.normalize(RefineYearlyPopulationModel.select_attrition09(yearHint));
-        double importance_smoothness = 0.95;
+        double importance_smoothness = 0.94;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int plength = Math.max(10, nTunablePoints + nFixedPoints);

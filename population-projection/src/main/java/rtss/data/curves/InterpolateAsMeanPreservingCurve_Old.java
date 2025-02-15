@@ -196,7 +196,7 @@ public class InterpolateAsMeanPreservingCurve_Old
             y[ixLeft] = leftConstraint.apply(y[ixLeft] * scale);
 
             // move right endpoint as much as we can
-            double sum = Util.sum(Util.splice(y, ixLeft + 1, ixRight));
+            double sum = Util.sum_range(y, ixLeft + 1, ixRight);
             scale = (bin.avg * bin.widths_in_years - y[ixLeft]) / sum;
             y[ixRight] = rightConstraint.apply(y[ixRight] * scale);
 
@@ -237,7 +237,7 @@ public class InterpolateAsMeanPreservingCurve_Old
         if (fixRight) 
             range_x2--;
 
-        double range_sum = Util.sum(Util.splice(y, range_x1, range_x2));
+        double range_sum = Util.sum_range(y, range_x1, range_x2);
         
         double target_sum = bin.avg * bin.widths_in_years;
         if (fixLeft)

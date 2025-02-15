@@ -333,6 +333,18 @@ public class Util
         return sum;
     }
 
+    public static double sum_range(final double[] y, int x1, int x2)
+    {
+        int size = x2 - x1 + 1;
+        if (size <= 0)
+            throw new IllegalArgumentException("array sum_range : negative or empty size");
+
+        double sum = 0;
+        for (int x = x1; x <= x2; x++)
+            sum += y[x];
+        return sum;
+    }
+
     public static double sum(Collection<Double> y)
     {
         double sum = 0;

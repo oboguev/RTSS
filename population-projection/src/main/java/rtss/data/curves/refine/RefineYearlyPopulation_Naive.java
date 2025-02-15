@@ -30,14 +30,14 @@ public class RefineYearlyPopulation_Naive
         if (bins[0].widths_in_years != 5 || p[0] <= p[5])
             return p;
 
-        double original_sum04 = Util.sum(Util.splice(p, 0, 4));
+        double original_sum04 = Util.sum_range(p, 0, 4);
         if (original_sum04 / 5 <= p[5])
             return p;
 
         if (bins[1].widths_in_years != 5 || p[5] <= p[10])
             return p;
 
-        double original_sum59 = Util.sum(Util.splice(p, 5, 9));
+        double original_sum59 = Util.sum_range(p, 5, 9);
         if (original_sum59 / 5 <= p[10])
             return p;
 
@@ -58,7 +58,7 @@ public class RefineYearlyPopulation_Naive
 
                 double a = (a1 + a2) / 2;
                 double[] p510 = calc59(Util.splice(p, 5, 10), Util.normalize(attrition59, a));
-                double sum59 = Util.sum(Util.splice(p510, 5 - 5, 9 - 5));
+                double sum59 = Util.sum_range(p510, 5 - 5, 9 - 5);
 
                 if (Util.same(sum59, original_sum59))
                 {
@@ -98,7 +98,7 @@ public class RefineYearlyPopulation_Naive
 
                 double a = (a1 + a2) / 2;
                 double[] p05 = calc04(Util.splice(p, 0, 5), Util.normalize(attrition04, a));
-                double sum04 = Util.sum(Util.splice(p05, 0, 4));
+                double sum04 = Util.sum_range(p05, 0, 4);
 
                 if (Util.same(sum04, original_sum04))
                 {
