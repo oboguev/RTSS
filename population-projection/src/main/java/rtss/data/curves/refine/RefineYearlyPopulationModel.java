@@ -29,12 +29,12 @@ public class RefineYearlyPopulationModel
 
         public AttritionModel(double L0, double[] attrition)
         {
-            // average yearly population in year 0
+            // average yearly population in age year 0 (assuming initial population at year start 100_000),
             // comes from mortality table Lx(0)
             this.L0 = L0;
 
             // yearly drops in average yearly population from year to year
-            // comes from mortality table Lx(year + 1) - Lx(year)
+            // comes from mortality table Lx(ageyear + 1) - Lx(ageyear)
             this.attrition = attrition;
         }
     }
