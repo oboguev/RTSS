@@ -525,7 +525,7 @@ public class PopulationContext
         String curve_title = String.format("[PopulationContext.begin] %s %s %s",
                                            title != null ? title : "unnamed",
                                            locality.name(), gender.name());
-        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, curve_title, TargetResolution.DAILY, yearHint());
+        double[] v_days = InterpolatePopulationAsMeanPreservingCurve.curve(bins, curve_title, TargetResolution.DAILY, yearHint(), gender);
 
         for (int age = 0; age < NYEARS; age++)
         {

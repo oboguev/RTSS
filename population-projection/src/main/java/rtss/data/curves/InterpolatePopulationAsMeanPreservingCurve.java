@@ -7,6 +7,7 @@ import rtss.data.bin.Bins;
 import rtss.data.curves.ensure.EnsureNonNegativeCurve;
 import rtss.data.curves.refine.RefineYearlyPopulation;
 import rtss.data.population.struct.Population;
+import rtss.data.selectors.Gender;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
@@ -27,7 +28,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 {
     public static final int MAX_AGE = Population.MAX_AGE;
 
-    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint) throws Exception
+    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender) throws Exception
     {
         // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);

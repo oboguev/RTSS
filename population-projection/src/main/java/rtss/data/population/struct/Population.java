@@ -1302,19 +1302,19 @@ public class Population
     public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins, Integer yearHint) throws Exception
     {
         this(locality,
-             bin2array(maleBins, yearHint), 0, null,
-             bin2array(femaleBins, yearHint), 0, null);
+             bin2array(maleBins, yearHint, Gender.MALE), 0, null,
+             bin2array(femaleBins, yearHint, Gender.FEMALE), 0, null);
     }
 
-    private static double[] bin2array(Bin[] bins, Integer yearHint) throws Exception
+    private static double[] bin2array(Bin[] bins, Integer yearHint, Gender gender) throws Exception
     {
         bins = Bins.bins(bins);
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.widths_in_years(bins) != MAX_AGE + 1)
             throw new IllegalArgumentException("invalid bins layout");
-        return bins2yearly(bins, "dynamic", yearHint);
+        return bins2yearly(bins, "dynamic", yearHint, gender);
     }
 
-    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint) throws Exception
+    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint, Gender gender) throws Exception
     {
         boolean interpolate = false;
 
@@ -1336,7 +1336,7 @@ public class Population
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint);
+        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint, gender);
 
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);

@@ -144,7 +144,7 @@ public class PopulationFromExcel extends ExcelLoader
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        double[] counts = bins2yearly(bins, title, yearHint);
+        double[] counts = bins2yearly(bins, title, yearHint, gender);
         
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);
@@ -155,7 +155,7 @@ public class PopulationFromExcel extends ExcelLoader
         return counts;
     }
 
-    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint) throws Exception
+    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint, Gender gender) throws Exception
     {
         boolean interpolate = false;
 
@@ -173,6 +173,6 @@ public class PopulationFromExcel extends ExcelLoader
             return v;
         }
         
-        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint);
+        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint, gender);
     }
 }
