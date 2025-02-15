@@ -241,7 +241,14 @@ public class RefineYearlyPopulation
 
     private static void fillBirthDrop(double[] birthDrop, int calendarYear) throws Exception
     {
-        // TODO: take into account calendarYear
+        /*
+         * TODO: take into account calendarYear to calclate the echo from known birth drops.
+         * 
+         * Specific birth drops were caused by 1915-1922, 1932-1934, 1941-1945 
+         * and to a lesser extent by 1946-1947.
+         * 
+         * Right now we use a simplified model.
+         */
 
         switch (birthDrop.length)
         {
