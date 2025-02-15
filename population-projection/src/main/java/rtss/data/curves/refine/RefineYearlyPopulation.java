@@ -204,8 +204,15 @@ public class RefineYearlyPopulation
         
         /*
          * @v1 is expected population in bins[s] if there were no drop in birth rates 
+         * 
+         * (b0 - v1) = relative weight of regular natural attrition
+         * (v1 - b1) = relative weight of births drop in previous years
          */
+        Util.assertion(b0 > b2);
+        Util.assertion(b0 > b1 && b1 <= b2);
+        
         Util.assertion(v1 >= b1);
+        Util.assertion(b0 > v1 && v1 > b2);
 
         Util.noop();
     }
