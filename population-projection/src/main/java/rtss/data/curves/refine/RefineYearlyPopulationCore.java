@@ -24,6 +24,11 @@ import ch.qos.logback.classic.Level;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /*
  * This module/algirithm is a post-processing stage for decomposition of binned demographic population data
@@ -136,13 +141,13 @@ public class RefineYearlyPopulationCore
         public OptimizerSettings clone()
         {
             OptimizerSettings c = new OptimizerSettings();
-            c.convergenceThreshold = convergenceThreshold ;
-            c.sigmaFraction = sigmaFraction ;
+            c.convergenceThreshold = convergenceThreshold;
+            c.sigmaFraction = sigmaFraction;
             c.minimumLambda = minimumLambda;
             return c;
         }
     }
-    
+
     /* ============================================================================== */
 
     final static double RegularPenalty = 1e1;
@@ -192,7 +197,7 @@ public class RefineYearlyPopulationCore
         else
             this.optimizerSettings = new OptimizerSettings();
     }
-    
+
     public RefineYearlyPopulationCore clone()
     {
         RefineYearlyPopulationCore c = new RefineYearlyPopulationCore(p,
@@ -203,9 +208,9 @@ public class RefineYearlyPopulationCore
                                                                       nFixedPoints,
                                                                       title,
                                                                       optimizerSettings == null ? null : optimizerSettings.clone());
-        
+
         c.diagnostic = diagnostic;
-        
+
         return c;
     }
 
@@ -219,9 +224,9 @@ public class RefineYearlyPopulationCore
                                                                       nFixedPoints,
                                                                       title,
                                                                       optimizerSettings == null ? null : optimizerSettings.clone());
-        
+
         c.diagnostic = diagnostic;
-        
+
         return c;
     }
 
@@ -646,7 +651,7 @@ public class RefineYearlyPopulationCore
 
     /*======================================================================================================== */
 
-    public class OptimizationResult extends Objective
+    public static class OptimizationResult extends Objective
     {
         public double[] px;
         public OptimizerSettings optimizerSettings;
@@ -660,6 +665,7 @@ public class RefineYearlyPopulationCore
         return refineSeriesIterativeSequential(outerLogLevel, innerLogLevel);
     }
 
+    @SuppressWarnings("unused")
     private double[] refineSeriesIterativeSequential(Level outerLogLevel, Level innerLogLevel)
     {
         /*
@@ -769,16 +775,15 @@ public class RefineYearlyPopulationCore
 
     /*======================================================================================================== */
 
-    public static class ParallelTask
-    {
-        public OptimizerSettings optimizerSettings;
-    }
-
     /*
      * Parallel implementation for refineSeriesIterative 
      */
-    private double[] refineSeriesIterativeParallel(Level outerLogLevel, Level innerLogLevel)
+    @SuppressWarnings("unused")
+    private double[] refineSeriesIterativeParallel(Level outerLogLevel, Level innerLogLevel) throws Exception
     {
+        ExecutorService executor = Executors.newFixedThreadPool(Util.availableProcessors());
+        List<ParallelTask> tasks = new ArrayList<>();
+
         /*
          * From lambda 4,000 and above it gets really slow
          */
@@ -794,12 +799,145 @@ public class RefineYearlyPopulationCore
                 optimizerSettings.minimumLambda = lambda;
                 optimizerSettings.convergenceThreshold = 1e-8;
 
-                // ###
+                ParallelTask task = new ParallelTask(optimizerSettings, this.clone(), innerLogLevel, outerLogLevel);
+                task.future = executor.submit(task);
+                tasks.add(task);
             }
         }
 
-        // ##
-        return null;
+        /*
+         * wait fot the spawned tasks to complete
+         */
+        Exception taskException = null;
+
+        for (ParallelTask task : tasks)
+        {
+            try
+            {
+                task.future.get();
+            }
+            catch (Exception ex)
+            {
+                if (taskException == null)
+                    taskException = ex;
+            }
+        }
+
+        executor.shutdownNow();
+        if (!executor.awaitTermination(20, TimeUnit.SECONDS) || !executor.isTerminated())
+            throw new Exception("Executor did not terminate");
+
+        if (taskException != null)
+            throw taskException;
+
+        /*
+         * collect results
+         */
+        List<OptimizationResult> results = new ArrayList<>();
+        OptimizationResult very_initial = null;
+
+        for (ParallelTask task : tasks)
+        {
+            if (very_initial == null)
+                very_initial = task.initialObjective;
+            
+            results.addAll(task.results);
+        }
+        
+        /*
+         * process results
+         */
+        OptimizationResult min_result = null;
+
+        for (OptimizationResult r : results)
+        {
+            if (min_result == null || r.objective < min_result.objective)
+                min_result = r;
+        }
+
+        if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL || outerLogLevel == Level.DEBUG)
+        {
+            Util.out("");
+            Util.out("Objective values for the initial curve (" + title + "):");
+            very_initial.print();
+            Util.out("Objective values for the final itervative result curve (" + title + "):");
+            min_result.print();
+        }
+
+        return min_result.px;
+    }
+
+    public static class ParallelTask implements Callable<Boolean>
+    {
+        public final OptimizerSettings optimizerSettings;
+        public final RefineYearlyPopulationCore clone;
+        public final Level innerLogLevel;
+        public final Level outerLogLevel;
+        public Future<?> future;
+
+        // output
+        public OptimizationResult initialObjective = new OptimizationResult();
+        public List<OptimizationResult> results = new ArrayList<>();
+
+        public ParallelTask(OptimizerSettings optimizerSettings, RefineYearlyPopulationCore clone, Level innerLogLevel, Level outerLogLevel)
+        {
+            this.optimizerSettings = optimizerSettings;
+            this.clone = clone;
+            this.innerLogLevel = innerLogLevel;
+            this.outerLogLevel = outerLogLevel;
+        }
+
+        @Override
+        public Boolean call() throws Exception
+        {
+            OptimizationResult result = new OptimizationResult();
+            result.optimizerSettings = optimizerSettings;
+
+            initialObjective.optimizerSettings = optimizerSettings;
+            initialObjective.px = Util.splice(clone.p, 0, clone.nTunablePoints - 1);
+
+            result.px = clone.refineSeries(optimizerSettings, innerLogLevel, initialObjective, result);
+            
+            double[] fullP = clone.fullP(result.px);
+
+            // check if it is the same as the initial curve
+            String same = "";
+            if (Util.same(fullP, clone.p))
+                same = "  same-as-initial";
+
+            // check if the returned curve is monotonically decreasing
+            String nonmonotnic = "";
+            if (!clone.verifyMonotonicity(fullP))
+                nonmonotnic = "  non-monotonic";
+
+            // check if the returned curve presverves bins sums
+            String preserves = "";
+            double sum04 = Util.sum_range(fullP, 0, 4);
+            double sum59 = Util.sum_range(fullP, 5, 9);
+            if (Util.differ(sum04, clone.psum04, 0.001) || Util.differ(sum59, clone.psum59, 0.001))
+                preserves = "  non-sum-preserving";
+
+            if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL)
+            {
+                Util.out(String.format("lambda=%-4d  sigma=%8.6f  initial objective = %12.7e  result objective = %12.7e%s%s%s",
+                                       optimizerSettings.minimumLambda,
+                                       optimizerSettings.sigmaFraction,
+                                       initialObjective.objective,
+                                       result.objective,
+                                       same,
+                                       nonmonotnic,
+                                       preserves));
+            }
+
+            if (same.isEmpty() &&
+                nonmonotnic.isEmpty() &&
+                preserves.isEmpty())
+            {
+                results.add(result);
+            }
+
+            return true;
+        }
     }
 
     /*======================================================================================================== */
@@ -809,15 +947,24 @@ public class RefineYearlyPopulationCore
      */
     public static void main(String[] args)
     {
-        // test_1(false);
-        // test_1(true);
+        test_1(TestMode.SINGLE);
+        test_1(TestMode.ITERATIVE_SEQUENTIAL);
+        test_1(TestMode.ITERATIVE_PARALLEL);
 
-        // test_2(false);
-        test_2(true);
+        test_2(TestMode.SINGLE);
+        test_2(TestMode.ITERATIVE_SEQUENTIAL);
+        test_1(TestMode.ITERATIVE_PARALLEL);
+    }
+    
+    public enum TestMode
+    {
+        SINGLE,
+        ITERATIVE_SEQUENTIAL,
+        ITERATIVE_PARALLEL
     }
 
     @SuppressWarnings("unused")
-    private static void test_1(boolean iterative)
+    private static void test_1(TestMode testMode)
     {
         double p[] = { 3079.1064761352536, 2863.741162691683, 2648.375849248112, 2433.010535804541, 2217.645222360971, 2002.2799089174,
                        1831.1316029723425, 1749.4931260194671, 1757.808507358823, 1852.286854731967 };
@@ -842,13 +989,13 @@ public class RefineYearlyPopulationCore
 
         rc.diagnostic = true;
 
-        if (iterative)
+        if (testMode == TestMode.ITERATIVE_SEQUENTIAL)
         {
-            double[] px = rc.refineSeriesIterative(Level.TRACE, Level.INFO);
+            double[] px = rc.refineSeriesIterativeSequential(Level.TRACE, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_1");
         }
-        else
+        else if (testMode == TestMode.SINGLE)
         {
             double[] px = rc.refineSeries(null, Level.TRACE, null, null);
             Util.out("Finished test_1");
@@ -856,7 +1003,7 @@ public class RefineYearlyPopulationCore
     }
 
     @SuppressWarnings("unused")
-    private static void test_2(boolean iterative)
+    private static void test_2(TestMode testMode)
     {
         double p[] = { 2758.9111513137814, 2540.455070553185, 2321.998989792589, 2103.5429090319926, 1885.0868282713964, 1666.6307475108001,
                        1487.948517512541, 1392.6120548630918, 1379.5241192732535, 1444.2845608403145 };
@@ -881,13 +1028,13 @@ public class RefineYearlyPopulationCore
 
         rc.diagnostic = true;
 
-        if (iterative)
+        if (testMode == TestMode.ITERATIVE_SEQUENTIAL)
         {
-            double[] px = rc.refineSeriesIterative(Level.TRACE, Level.INFO);
+            double[] px = rc.refineSeriesIterativeSequential(Level.TRACE, Level.INFO);
             Util.out("");
             Util.out("Finished iterative_test_2");
         }
-        else
+        else if (testMode == TestMode.SINGLE)
         {
             double[] px = rc.refineSeries(null, Level.TRACE, null, null);
             Util.out("Finished test_2");
