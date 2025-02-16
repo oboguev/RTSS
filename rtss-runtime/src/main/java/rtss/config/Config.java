@@ -61,6 +61,11 @@ public class Config
         // return PropertyUtils.getProperty(config(), path);
         return config().get(path);
     }
+    
+    public static boolean hasProperty(String path) throws Exception
+    {
+        return getProperty(path) != null;
+    }
 
     /* =========================================== */
 
@@ -199,6 +204,16 @@ public class Config
             o = defval;
         if (o == null)
             throw missing(path);
+        return toUnsignedInteger(path, o);
+    }
+
+    public static Integer asOptionalUnsignedInteger(String path, Integer defval) throws Exception
+    {
+        Object o = asObject(path);
+        if (o == null)
+            o = defval;
+        if (o == null)
+            return null;
         return toUnsignedInteger(path, o);
     }
 

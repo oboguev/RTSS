@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import rtss.config.Config;
+
 public class Util
 {
     public static boolean True = true;
@@ -765,6 +767,21 @@ public class Util
         }
     }
 
+    public static int availableProcessors() throws Exception
+    {
+        int cores = Runtime.getRuntime().availableProcessors();
+        
+        Integer minp = Config.asOptionalUnsignedInteger("cpus.min", null);
+        if (minp != null)
+            cores = Math.max(minp, cores);
+
+        Integer maxp = Config.asOptionalUnsignedInteger("cpus.max", null);
+        if (maxp != null)
+            cores = Math.min(maxp, cores);
+        
+        return cores;
+    }
+    
     public static void sleep(long ms)
     {
         try
@@ -776,7 +793,7 @@ public class Util
             noop();
         }
     }
-
+    
     public static void unused(Object... o)
     {
     }

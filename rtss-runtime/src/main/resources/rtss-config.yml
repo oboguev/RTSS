@@ -1,24 +1,34 @@
-# used by server only to configure its port
-# RTSS client uses R.server.endpoint and Osier.server.endpoint  
+## used by server only to configure its port
+## RTSS client uses R.server.endpoint and Osier.server.endpoint  
+
 server.endpoint: http://localhost:5577
 
 ################################################################################
 
-# shell command to launch R 
+## shell command to launch R 
 R.executable: R --vanilla --quiet
 
-# R can optionally be hosted on a remote machine
+## R can optionally be hosted on a remote machine
 R.server.endpoint: http://ub22a.local:5577
-#R.server.endpoint: http://localhost:5577
+
+##R.server.endpoint: http://localhost:5577
 R.server.log: true
 
 ################################################################################
 
-# Edit Osier OSR.XLA file in Excel VB editor to disable Willow menu activation
+## Edit Osier OSR.XLA file in Excel VB editor to disable Willow menu activation
 
-# Osier can optionally be hosted on a remote machine
-#Osier.server.endpoint: http://ub22a.local:5577
+## Osier can optionally be hosted on a remote machine
+##Osier.server.endpoint: http://ub22a.local:5577
 Osier.server.log: false
 
-# configures whether Excel is ran as visible or hidden 
+## configures whether Excel is ran as visible or hidden 
 Osier.excel.visible: true
+
+################################################################################
+
+## multiprocessing
+## minimum and maximum number of CPUs to use
+
+cpus.min = 2
+cpus.max = 4
