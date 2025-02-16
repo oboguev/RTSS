@@ -16,7 +16,6 @@ import rtss.math.interpolate.disaggregate.DisaggregateVariableWidthSeries;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
-import rtss.util.DoubleArrayHolder;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -96,7 +95,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             double[] xxx = Bins.ppy_x(bins, ppy);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
             
-            chart.addSeries("curve", xxx, curve.curve);
+            chart.addSeries("final", xxx, curve.curve);
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
                 chart.addSeries("raw", xxx, curve.raw);
