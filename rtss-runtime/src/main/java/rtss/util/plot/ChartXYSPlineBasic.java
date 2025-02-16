@@ -1,6 +1,7 @@
 package rtss.util.plot;
 
 import java.awt.Color;
+import java.io.ByteArrayOutputStream;
 
 import javax.swing.JPanel;
 
@@ -15,6 +16,8 @@ import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.chart.ui.UIUtils;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+
+import rtss.util.Util;
 
 public class ChartXYSPlineBasic extends ApplicationFrame
 {
@@ -83,29 +86,47 @@ public class ChartXYSPlineBasic extends ApplicationFrame
         pack();
         UIUtils.centerFrameOnScreen(this);
         setVisible(true);
-    }    
+    }   
     
     private JPanel createPanel()
     {
-        // create plot
+        JFreeChart chart = createChart();
+        ChartPanel chartPanel = new ChartPanel(chart);
+        return chartPanel;
+    }    
+    
+    private JFreeChart createChart()
+    {
         NumberAxis xAxis = new NumberAxis(xLabel);
         xAxis.setAutoRangeIncludesZero(false);
+
         NumberAxis yAxis = new NumberAxis(yLabel);
         yAxis.setAutoRangeIncludesZero(false);
 
-        XYSplineRenderer renderer1 = new XYSplineRenderer();
-        renderer1.setDefaultShapesVisible(false);
-        XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer1);
+        XYSplineRenderer renderer = new XYSplineRenderer();
+        renderer.setDefaultShapesVisible(false);
+        XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
         plot.setBackgroundPaint(Color.LIGHT_GRAY);
         plot.setDomainGridlinePaint(Color.WHITE);
         plot.setRangeGridlinePaint(Color.WHITE);
         plot.setAxisOffset(new RectangleInsets(4, 4, 4, 4));
 
-        // create and return the chart panel
         JFreeChart chart = new JFreeChart(getTitle(),
-                                          JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+                                          JFreeChart.DEFAULT_TITLE_FONT, 
+                                          plot, 
+                                          true);
         ChartUtils.applyCurrentTheme(chart);
-        ChartPanel chartPanel = new ChartPanel(chart);
-        return chartPanel;
+        
+        return chart;
+    }
+
+    public ChartXYSPlineBasic exportImage(int cx, int cy, String fn) throws Exception
+    {
+        JFreeChart chart = createChart();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ChartUtils.writeChartAsPNG(baos, chart, cx, cy);
+        Util.writeAsFile(fn, baos.toByteArray());
+
+        return this;
     }
 }
