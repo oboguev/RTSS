@@ -30,7 +30,9 @@ public class RefineYearlyPopulation
         }
 
         /*
-         * Attrition array describes how population dereases over years
+         * Attrition array describes how population normally dereases over years
+         * under typical mortality pattern of the era. Also accounts for the drop
+         * in births (in U-shaped population case).
          */
         double[] attrition = null;
 
@@ -236,13 +238,12 @@ public class RefineYearlyPopulation
         fillBirthDrop(birthDrop, yearHint);
         Util.assertion(nTurnAge >= 6 && nTurnAge <= 10);
 
-        double[] result = Util.sumWeightedNormalized(b0 - v1, naturalAttrition, v1 - b1, birthDrop);
-
-        Util.noop();
-
-        return result;
+        return Util.sumWeightedNormalized(b0 - v1, naturalAttrition, v1 - b1, birthDrop);
     }
 
+    /*
+     * Распределение интенсивности падений рождения
+     */
     private static void fillBirthDrop(double[] birthDrop, int calendarYear) throws Exception
     {
         /*
@@ -251,7 +252,7 @@ public class RefineYearlyPopulation
          * Specific birth drops were caused by 1915-1922, 1932-1934, 1941-1945 
          * and to a lesser extent by 1946-1947.
          * 
-         * Right now we use a simplified model.
+         * Right now we use a very simplified model.
          */
 
         switch (birthDrop.length)
@@ -266,6 +267,9 @@ public class RefineYearlyPopulation
         }
     }
     
+    /*
+     * Заполнить хвост массива @birthDrop значениями @values
+     */
     private static void fillBirthDrop(double[] birthDrop, double... values)
     {
         for (int k = 0; k < values.length; k++)
