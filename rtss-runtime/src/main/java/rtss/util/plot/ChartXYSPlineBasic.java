@@ -2,6 +2,8 @@ package rtss.util.plot;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -9,7 +11,9 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.ui.ApplicationFrame;
 import org.jfree.chart.ui.RectangleInsets;
@@ -37,7 +41,8 @@ public class ChartXYSPlineBasic extends ApplicationFrame
 
     public static final long serialVersionUID = 1;
 
-    private XYSeriesCollection dataset = new XYSeriesCollection();
+    private List<XYSeries> splineSeries = new ArrayList<>();
+    private List<XYSeries> lineSeries = new ArrayList<>();
     private String xLabel;
     private String yLabel;
 
@@ -73,10 +78,29 @@ public class ChartXYSPlineBasic extends ApplicationFrame
         for (int k = 0; k < x.length; k++)
             series.add(x[k], y[k]);
         
-        dataset.addSeries(series);
+        splineSeries.add(series);
         return this;
     }
     
+    public ChartXYSPlineBasic addLineSeries(String name, double[] y)
+    {
+        double[] x = new double[y.length];
+        for (int k = 0; k < y.length; k++)
+            x[k] = k;
+        return addLineSeries(name, x, y);
+    }
+
+    public ChartXYSPlineBasic addLineSeries(String name, double[] x, double[] y)
+    {
+        XYSeries series = new XYSeries(name);
+        
+        for (int k = 0; k < x.length; k++)
+            series.add(x[k], y[k]);
+        
+        lineSeries.add(series);
+        return this;
+    }
+
     public void display() 
     {
         JPanel content = createPanel();
@@ -97,19 +121,31 @@ public class ChartXYSPlineBasic extends ApplicationFrame
     
     private JFreeChart createChart()
     {
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        for (XYSeries series : lineSeries)
+            dataset.addSeries(series);
+        for (XYSeries series : splineSeries)
+            dataset.addSeries(series);
+
         NumberAxis xAxis = new NumberAxis(xLabel);
         xAxis.setAutoRangeIncludesZero(false);
 
         NumberAxis yAxis = new NumberAxis(yLabel);
         yAxis.setAutoRangeIncludesZero(false);
 
-        XYSplineRenderer renderer = new XYSplineRenderer();
-        renderer.setDefaultShapesVisible(false);
-        XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
+        XYSplineRenderer splineRenderer = new XYSplineRenderer();
+        splineRenderer.setDefaultShapesVisible(false);
+        XYPlot plot = new XYPlot(dataset, xAxis, yAxis, splineRenderer);
         plot.setBackgroundPaint(Color.LIGHT_GRAY);
         plot.setDomainGridlinePaint(Color.WHITE);
         plot.setRangeGridlinePaint(Color.WHITE);
         plot.setAxisOffset(new RectangleInsets(4, 4, 4, 4));
+        
+        XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
+        lineRenderer.setDefaultShapesVisible(false);
+        
+        for (int k = 0; k < lineSeries.size(); k++)
+            plot.setRenderer(k, lineRenderer, true);
 
         JFreeChart chart = new JFreeChart(getTitle(),
                                           JFreeChart.DEFAULT_TITLE_FONT, 

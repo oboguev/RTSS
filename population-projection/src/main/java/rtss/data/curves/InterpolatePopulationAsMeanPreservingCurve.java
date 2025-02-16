@@ -102,7 +102,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
                 chart.addSeries("raw", xxx, curve.raw);
             
-            chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            chart.addLineSeries("bins", Bins.ppy_x(bins, 100), Bins.ppy_y(bins, 100));
             chart.display();
             
             // ###
