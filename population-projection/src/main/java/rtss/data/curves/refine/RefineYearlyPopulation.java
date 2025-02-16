@@ -5,6 +5,7 @@ import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.refine.RefineYearlyPopulationModel.ChildAttritionModel;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
+import rtss.util.ValuesMatter;
 
 import ch.qos.logback.classic.Level;
 
@@ -57,7 +58,7 @@ public class RefineYearlyPopulation
              */
             nTunablePoints = 10; // ages 0-9
             nFixedPoints = 2; // ages 10-11
-            ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, nTunablePoints, gender);
+            ChildAttritionModel model = RefineYearlyPopulationModel.selectModel(yearHint, nTunablePoints, gender, ValuesMatter.RELATIVE);
             attrition = model.attrition09();
         }
         else if (bins[0].avg > bins[1].avg &&
@@ -196,7 +197,7 @@ public class RefineYearlyPopulation
          *   
          * TODO: учесть нерввномерность и падение детской смертности со второй половины 1940-х
          */
-        ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, 15, gender);
+        ChildAttritionModel model = RefineYearlyPopulationModel.selectModel(yearHint, 15, gender, ValuesMatter.ABSOLUTE);
         double[] p = new double[15];
         p[0] = model.L0;
         for (int age = 1; age <= 14; age++)
