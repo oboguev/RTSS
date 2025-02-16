@@ -363,7 +363,7 @@ public class RefineYearlyPopulationCore
             {
                 px = Util.splice(min_seen_objective_p, 0, nTunablePoints - 1);
                 resultObjective.copyFrom(min_seen_objective);
-                
+
                 if (logLevel == Level.TRACE || logLevel == Level.ALL || logLevel == Level.DEBUG)
                 {
                     Util.out("Objective values for the result override curve (" + title + "):");
@@ -621,7 +621,8 @@ public class RefineYearlyPopulationCore
 
         for (int lambda : lambdas)
         {
-            Util.out("");
+            if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL)
+                Util.out("");
 
             for (double sigma : sigmas)
             {

@@ -16,6 +16,7 @@ import rtss.math.interpolate.disaggregate.DisaggregateVariableWidthSeries;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
+import rtss.util.DoubleArrayHolder;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -27,6 +28,24 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 public class InterpolatePopulationAsMeanPreservingCurve
 {
     public static final int MAX_AGE = Population.MAX_AGE;
+    
+    public static class CurveResult
+    {
+        public final double[] curve;
+        public final double[] raw;
+        
+        public CurveResult(double[] curve)
+        {
+            this.curve = curve;
+            this.raw = null;
+        }
+
+        public CurveResult(double[] curve, double[] raw)
+        {
+            this.curve = curve;
+            this.raw = raw;
+        }
+    }
 
     public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender) throws Exception
     {
@@ -34,7 +53,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         // return curve_pclm(bins, title);
 
         Exception ex = null;
-        double[] curve = null;
+        CurveResult curve = null;
 
         try
         {
@@ -76,18 +95,25 @@ public class InterpolatePopulationAsMeanPreservingCurve
             int ppy = 1;
             double[] xxx = Bins.ppy_x(bins, ppy);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            chart.addSeries("curve", xxx, curve);
+            
+            chart.addSeries("curve", xxx, curve.curve);
+
+            if (curve.raw != null && Util.differ(curve.curve, curve.raw))
+                chart.addSeries("raw", xxx, curve.raw);
+            
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+            
             chart.display();
             Util.noop();
         }
 
-        return curve;
+        return curve.curve;
     }
 
     /* ================================================================================================ */
 
-    private static double[] curve_csasra(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender) throws Exception
+    private static CurveResult curve_csasra(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender)
+            throws Exception
     {
         final int ppy = 1;
         double[] xxx = Bins.ppy_x(bins, ppy);
@@ -144,15 +170,19 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new Exception("Error calculating curve (negative value)");
 
         CurveVerifier.validate_means(yy, bins);
-
+        
         if (targetResolution == TargetResolution.YEARLY)
         {
             /* уточнить разбивку на возраста 0-9 */
+            double[] raw = Util.dup(yy);
             yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender);
             CurveVerifier.validate_means(yy, bins);
+            return new CurveResult(yy, raw);
         }
-
-        return yy;
+        else
+        {
+            return new CurveResult(yy);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -191,7 +221,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
     /*
      * Spline implementation
      */
-    private static double[] curve_spline(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender) throws Exception
+    private static CurveResult curve_spline(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender)
+            throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
         MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
@@ -292,12 +323,16 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         if (targetResolution == TargetResolution.YEARLY)
         {
+            double[] raw = Util.dup(yy);
             /* уточнить разбивку на возраста 0-9 */
             yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender);
             CurveVerifier.validate_means(yy, bins);
+            return new CurveResult(yy, raw);
         }
-
-        return yy;
+        else
+        {
+            return new CurveResult(yy);
+        }
     }
 
     /*
