@@ -132,7 +132,18 @@ public class RefineYearlyPopulationCore
         public double convergenceThreshold = 1e-8; // can range from 1e-6 to 1e-8 
         public double sigmaFraction = 0.001; // can range from 0.001 to 1.0
         public int minimumLambda = 2000; // from 4000 and beyond it gets very slow
+
+        public OptimizerSettings clone()
+        {
+            OptimizerSettings c = new OptimizerSettings();
+            c.convergenceThreshold = convergenceThreshold ;
+            c.sigmaFraction = sigmaFraction ;
+            c.minimumLambda = minimumLambda;
+            return c;
+        }
     }
+    
+    /* ============================================================================== */
 
     final static double RegularPenalty = 1e1;
     final static double LargePenalty = 1e4;
@@ -153,6 +164,8 @@ public class RefineYearlyPopulationCore
     // track what we saw during the optimization scan
     private Objective min_seen_objective = null;
     private double[] min_seen_objective_p = null;
+
+    /* ============================================================================== */
 
     public RefineYearlyPopulationCore(
             final double[] p,
@@ -179,6 +192,40 @@ public class RefineYearlyPopulationCore
         else
             this.optimizerSettings = new OptimizerSettings();
     }
+    
+    public RefineYearlyPopulationCore clone()
+    {
+        RefineYearlyPopulationCore c = new RefineYearlyPopulationCore(p,
+                                                                      target_diff,
+                                                                      importance_smoothness / RegularPenalty,
+                                                                      importance_target_diff_matching / RegularPenalty,
+                                                                      nTunablePoints,
+                                                                      nFixedPoints,
+                                                                      title,
+                                                                      optimizerSettings == null ? null : optimizerSettings.clone());
+        
+        c.diagnostic = diagnostic;
+        
+        return c;
+    }
+
+    public RefineYearlyPopulationCore clone(OptimizerSettings optimizerSettings)
+    {
+        RefineYearlyPopulationCore c = new RefineYearlyPopulationCore(p,
+                                                                      target_diff,
+                                                                      importance_smoothness / RegularPenalty,
+                                                                      importance_target_diff_matching / RegularPenalty,
+                                                                      nTunablePoints,
+                                                                      nFixedPoints,
+                                                                      title,
+                                                                      optimizerSettings == null ? null : optimizerSettings.clone());
+        
+        c.diagnostic = diagnostic;
+        
+        return c;
+    }
+
+    /* ============================================================================== */
 
     public double[] refineSeries(
             OptimizerSettings argOptimizerSettings,
@@ -610,6 +657,11 @@ public class RefineYearlyPopulationCore
      */
     public double[] refineSeriesIterative(Level outerLogLevel, Level innerLogLevel)
     {
+        return refineSeriesIterativeSequential(outerLogLevel, innerLogLevel);
+    }
+
+    private double[] refineSeriesIterativeSequential(Level outerLogLevel, Level innerLogLevel)
+    {
         /*
          * From lambda 4,000 and above it gets really slow
          */
@@ -713,6 +765,41 @@ public class RefineYearlyPopulationCore
         }
 
         return true;
+    }
+
+    /*======================================================================================================== */
+
+    public static class ParallelTask
+    {
+        public OptimizerSettings optimizerSettings;
+    }
+
+    /*
+     * Parallel implementation for refineSeriesIterative 
+     */
+    private double[] refineSeriesIterativeParallel(Level outerLogLevel, Level innerLogLevel)
+    {
+        /*
+         * From lambda 4,000 and above it gets really slow
+         */
+        final int lambdas[] = { 200, 500, 1000, 2000 };
+        final double sigmas[] = { 0.000001, 0.00001, 0.0001, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0 };
+
+        for (int lambda : lambdas)
+        {
+            for (double sigma : sigmas)
+            {
+                OptimizerSettings optimizerSettings = new OptimizerSettings();
+                optimizerSettings.sigmaFraction = sigma;
+                optimizerSettings.minimumLambda = lambda;
+                optimizerSettings.convergenceThreshold = 1e-8;
+
+                // ###
+            }
+        }
+
+        // ##
+        return null;
     }
 
     /*======================================================================================================== */
