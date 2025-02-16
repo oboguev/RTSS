@@ -771,6 +771,8 @@ public class Util
     {
         int cores = Runtime.getRuntime().availableProcessors();
         
+        cores = (int) Math.round(cores * 0.75);
+        
         Integer minp = Config.asOptionalUnsignedInteger("cpus.min", null);
         if (minp != null)
             cores = Math.max(minp, cores);

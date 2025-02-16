@@ -660,9 +660,12 @@ public class RefineYearlyPopulationCore
     /*
      * Try to solve the problem using various settings for the optimizer 
      */
-    public double[] refineSeriesIterative(Level outerLogLevel, Level innerLogLevel)
+    public double[] refineSeriesIterative(Level outerLogLevel, Level innerLogLevel) throws Exception
     {
-        return refineSeriesIterativeSequential(outerLogLevel, innerLogLevel);
+        if (Util.availableProcessors() == 1)
+            return refineSeriesIterativeSequential(outerLogLevel, innerLogLevel);
+        else
+            return refineSeriesIterativeParallel(outerLogLevel, innerLogLevel);
     }
 
     @SuppressWarnings("unused")
@@ -840,10 +843,10 @@ public class RefineYearlyPopulationCore
         {
             if (very_initial == null)
                 very_initial = task.initialObjective;
-            
+
             results.addAll(task.results);
         }
-        
+
         /*
          * process results
          */
@@ -897,7 +900,7 @@ public class RefineYearlyPopulationCore
             initialObjective.px = Util.splice(clone.p, 0, clone.nTunablePoints - 1);
 
             result.px = clone.refineSeries(optimizerSettings, innerLogLevel, initialObjective, result);
-            
+
             double[] fullP = clone.fullP(result.px);
 
             // check if it is the same as the initial curve
@@ -947,24 +950,30 @@ public class RefineYearlyPopulationCore
      */
     public static void main(String[] args)
     {
-        test_1(TestMode.SINGLE);
-        test_1(TestMode.ITERATIVE_SEQUENTIAL);
-        test_1(TestMode.ITERATIVE_PARALLEL);
+        try
+        {
+            // test_1(TestMode.SINGLE);
+            // test_1(TestMode.ITERATIVE_SEQUENTIAL);
+            // test_1(TestMode.ITERATIVE_PARALLEL);
 
-        test_2(TestMode.SINGLE);
-        test_2(TestMode.ITERATIVE_SEQUENTIAL);
-        test_1(TestMode.ITERATIVE_PARALLEL);
+            // test_2(TestMode.SINGLE);
+            // test_2(TestMode.ITERATIVE_SEQUENTIAL);
+            test_2(TestMode.ITERATIVE_PARALLEL);
+        }
+        catch (Exception ex)
+        {
+            Util.err("** Excption: " + ex.getLocalizedMessage());
+            ex.printStackTrace();
+        }
     }
-    
+
     public enum TestMode
     {
-        SINGLE,
-        ITERATIVE_SEQUENTIAL,
-        ITERATIVE_PARALLEL
+        SINGLE, ITERATIVE_SEQUENTIAL, ITERATIVE_PARALLEL
     }
 
     @SuppressWarnings("unused")
-    private static void test_1(TestMode testMode)
+    private static void test_1(TestMode testMode) throws Exception
     {
         double p[] = { 3079.1064761352536, 2863.741162691683, 2648.375849248112, 2433.010535804541, 2217.645222360971, 2002.2799089174,
                        1831.1316029723425, 1749.4931260194671, 1757.808507358823, 1852.286854731967 };
@@ -989,11 +998,17 @@ public class RefineYearlyPopulationCore
 
         rc.diagnostic = true;
 
-        if (testMode == TestMode.ITERATIVE_SEQUENTIAL)
+        if (testMode == TestMode.ITERATIVE_PARALLEL)
+        {
+            double[] px = rc.refineSeriesIterativeParallel(Level.DEBUG, Level.INFO);
+            Util.out("");
+            Util.out("Finished parallel iterative test_1");
+        }
+        else if (testMode == TestMode.ITERATIVE_SEQUENTIAL)
         {
             double[] px = rc.refineSeriesIterativeSequential(Level.TRACE, Level.INFO);
             Util.out("");
-            Util.out("Finished iterative_test_1");
+            Util.out("Finished sequential iterative test_1");
         }
         else if (testMode == TestMode.SINGLE)
         {
@@ -1003,7 +1018,7 @@ public class RefineYearlyPopulationCore
     }
 
     @SuppressWarnings("unused")
-    private static void test_2(TestMode testMode)
+    private static void test_2(TestMode testMode) throws Exception
     {
         double p[] = { 2758.9111513137814, 2540.455070553185, 2321.998989792589, 2103.5429090319926, 1885.0868282713964, 1666.6307475108001,
                        1487.948517512541, 1392.6120548630918, 1379.5241192732535, 1444.2845608403145 };
@@ -1028,11 +1043,17 @@ public class RefineYearlyPopulationCore
 
         rc.diagnostic = true;
 
-        if (testMode == TestMode.ITERATIVE_SEQUENTIAL)
+        if (testMode == TestMode.ITERATIVE_PARALLEL)
+        {
+            double[] px = rc.refineSeriesIterativeParallel(Level.DEBUG, Level.INFO);
+            Util.out("");
+            Util.out("Finished parallel iterative test_2");
+        }
+        else if (testMode == TestMode.ITERATIVE_SEQUENTIAL)
         {
             double[] px = rc.refineSeriesIterativeSequential(Level.TRACE, Level.INFO);
             Util.out("");
-            Util.out("Finished iterative_test_2");
+            Util.out("Finished sequential iterative test_2");
         }
         else if (testMode == TestMode.SINGLE)
         {

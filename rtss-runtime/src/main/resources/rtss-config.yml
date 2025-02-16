@@ -30,5 +30,5 @@ Osier.excel.visible: true
 ## multiprocessing
 ## minimum and maximum number of CPUs to use
 
-cpus.min = 2
-cpus.max = 4
+cpus.min: 2
+cpus.max: 8
