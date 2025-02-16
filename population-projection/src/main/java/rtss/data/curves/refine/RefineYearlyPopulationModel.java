@@ -34,10 +34,10 @@ public class RefineYearlyPopulationModel
      */
     public static class ChildAttritionModel
     {
-        public final double L0;
+        public final Double L0;
         public final double[] attrition;
 
-        public ChildAttritionModel(double L0, double[] attrition)
+        public ChildAttritionModel(Double L0, double[] attrition)
         {
             // average yearly population in age year 0 (assuming initial population at year start 100_000),
             // comes from mortality table Lx(0)
@@ -184,6 +184,10 @@ public class RefineYearlyPopulationModel
         else if (modelYear > 1939 && modelYear <= 1944)
         {
             return m1938;
+        }
+        else if (modelYear >= 1945 && modelYear <= 1959 && valuesMatter == ValuesMatter.RELATIVE)
+        {
+            return new ChildAttritionModel(null, m1958.attrition);
         }
         else
         {

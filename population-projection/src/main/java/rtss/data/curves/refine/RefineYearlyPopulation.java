@@ -195,7 +195,7 @@ public class RefineYearlyPopulation
          * under regular natural mortality pattern for the era, 
          * assuming steady year-to-year births
          *   
-         * TODO: учесть нерввномерность и падение детской смертности со второй половины 1940-х
+         * TODO: учесть неравномерность и падение детской смертности со второй половины 1940-х
          */
         ChildAttritionModel model = RefineYearlyPopulationModel.selectModel(yearHint, 15, gender, ValuesMatter.ABSOLUTE);
         double[] p = new double[15];
@@ -248,7 +248,7 @@ public class RefineYearlyPopulation
     private static void fillBirthDrop(double[] birthDrop, int calendarYear) throws Exception
     {
         /*
-         * TODO: take into account calendarYear to calclate the echo from known birth drops.
+         * TODO: использовать calendarYear для вычисления "эха" известных провалов числа рождений. 
          * 
          * Specific birth drops were caused by 1915-1922, 1932-1934, 1941-1945 
          * and to a lesser extent by 1946-1947.
