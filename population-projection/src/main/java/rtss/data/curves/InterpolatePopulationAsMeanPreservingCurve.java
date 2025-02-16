@@ -17,6 +17,7 @@ import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
 import rtss.util.Util;
+import rtss.util.plot.CaptureImages;
 import rtss.util.plot.ChartXYSPlineBasic;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
@@ -90,7 +91,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 throw new Exception("Unable to build the curve");
         }
         
-        if (Util.True)
+        if (CaptureImages.get() != null)
         {
             int ppy = 1;
             double[] xxx = Bins.ppy_x(bins, ppy);
@@ -105,8 +106,9 @@ public class InterpolatePopulationAsMeanPreservingCurve
             chart.addLineSeries("bins", Bins.ppy_x(bins, 100), Bins.ppy_y(bins, 100));
             chart.display();
             
-            // ###
-            // chart.exportImage(1280, 600, "qq.jpg");
+            CaptureImages ci = CaptureImages.get(); 
+            String fn = yearHint + " " + gender.name() + " " + title;
+            chart.exportImage(ci.cx, ci.cy, ci.path(fn + ".png"));
         }
 
         if (Util.False)

@@ -2,6 +2,7 @@ package rtss.data.population.synthetic;
 
 import rtss.data.selectors.Area;
 import rtss.util.Util;
+import rtss.util.plot.CaptureImages;
 
 public class TestPopulationADH
 {
@@ -9,8 +10,10 @@ public class TestPopulationADH
     {
         try
         {
-            if (Util.False)
+            if (Util.True)
             {
+                CaptureImages.capture("c:\\@@\\capture", "USSR - ", 2400, 1500);
+                
                 PopulationADH.getPopulationByLocality(Area.USSR, 1926);
                 PopulationADH.getPopulationByLocality(Area.USSR, 1927);
                 PopulationADH.getPopulationByLocality(Area.USSR, 1937);
@@ -21,16 +24,22 @@ public class TestPopulationADH
                 PopulationADH.getPopulationByLocality(Area.USSR, 1941);
                 PopulationADH.getPopulationByLocality(Area.USSR, 1946);
                 PopulationADH.getPopulationByLocality(Area.USSR, 1947);
+
+                CaptureImages.stop();
             }
 
             if (Util.True)
             {
+                CaptureImages.capture("c:\\@@\\capture", "RSFSR - ", 2400, 1500);
+
                 for (int year = 1927; year <= 1959; year++)
                 {
                     if (year >= 1942 && year <= 1945)
                         continue;
                     PopulationADH.getPopulationByLocality(Area.RSFSR, year);
                 }
+                
+                CaptureImages.stop();
             }
 
             Util.out("*** Completed");
