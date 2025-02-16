@@ -43,7 +43,7 @@ public class RefineYearlyPopulation_Naive
         if (original_sum59 / 5 <= p[10])
             return p;
 
-        ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
+        ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, 10, gender);
         final double[] attrition04 = model.attrition04();
         final double[] attrition59 = model.attrition59();
 

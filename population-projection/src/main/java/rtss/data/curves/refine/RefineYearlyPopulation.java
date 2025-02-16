@@ -30,9 +30,8 @@ public class RefineYearlyPopulation
         }
 
         /*
-         * Attrition array describes
+         * Attrition array describes how population dereases over years
          */
-        ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, gender);
         double[] attrition = null;
 
         /*
@@ -56,6 +55,7 @@ public class RefineYearlyPopulation
              */
             nTunablePoints = 10; // ages 0-9
             nFixedPoints = 2; // ages 10-11
+            ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, nTunablePoints, gender);
             attrition = model.attrition09();
         }
         else if (bins[0].avg > bins[1].avg &&
@@ -85,7 +85,7 @@ public class RefineYearlyPopulation
                 nFixedPoints = 1;
             }
 
-            attrition = adjustedAttrition(bins, model, nTunablePoints);
+            attrition = adjustedAttrition(bins, gender, yearHint, nTunablePoints);
         }
         else
         {
@@ -185,13 +185,16 @@ public class RefineYearlyPopulation
      * Корректировать кривую ожидаемого падения населения с учётом не только смертности,
      * но и падения рождений в предшествующие годы
      */
-    private static double[] adjustedAttrition(Bin[] bins, ChildAttritionModel model, int nTurnAge) throws Exception
+    private static double[] adjustedAttrition(Bin[] bins, Gender gender, Integer yearHint, int nTurnAge) throws Exception
     {
         /*
          * build the curve of expected model population progress for ages 0...14 
          * under regular natural mortality pattern for the era, 
-         * assuming steady year-to-year births  
+         * assuming steady year-to-year births
+         *   
+         * TODO: учесть нерввномерность и падение детской смертности со второй половины 1940-х
          */
+        ChildAttritionModel model = RefineYearlyPopulationModel.select_model(yearHint, 15, gender);
         double[] p = new double[15];
         p[0] = model.L0;
         for (int age = 1; age <= 14; age++)
@@ -227,10 +230,10 @@ public class RefineYearlyPopulation
         naturalAttrition = Util.normalize(Util.splice(naturalAttrition, 0, nTurnAge - 1));
 
         /*
-         * Создать кривую распределения влияиния падения рождений  
+         * Создать кривую распределения влияния падения рождений  
          */
         double[] birthDrop = new double[naturalAttrition.length];
-        fillBirthDrop(birthDrop, model.acutalYear);
+        fillBirthDrop(birthDrop, yearHint);
         Util.assertion(nTurnAge >= 6 && nTurnAge <= 10);
 
         double[] result = Util.sumWeightedNormalized(b0 - v1, naturalAttrition, v1 - b1, birthDrop);

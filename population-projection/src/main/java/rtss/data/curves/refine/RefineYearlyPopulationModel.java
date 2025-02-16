@@ -27,14 +27,11 @@ public class RefineYearlyPopulationModel
      */
     public static class ChildAttritionModel
     {
-        public int acutalYear;
         public final double L0;
         public final double[] attrition;
 
-        public ChildAttritionModel(int acutalYear, double L0, double[] attrition)
+        public ChildAttritionModel(double L0, double[] attrition)
         {
-            this.acutalYear = acutalYear;
-
             // average yearly population in age year 0 (assuming initial population at year start 100_000),
             // comes from mortality table Lx(0)
             this.L0 = L0;
@@ -46,7 +43,7 @@ public class RefineYearlyPopulationModel
 
         public ChildAttritionModel clone()
         {
-            return new ChildAttritionModel(acutalYear, L0, attrition);
+            return new ChildAttritionModel(L0, attrition);
         }
 
         public double[] attrition04()
@@ -69,7 +66,7 @@ public class RefineYearlyPopulationModel
             return Util.splice(attrition, 0, 14);
         }
 
-        static ChildAttritionModel forMortalityTable(int year, String tablePath, Gender gender) throws Exception
+        static ChildAttritionModel forMortalityTable(String tablePath, Gender gender) throws Exception
         {
             CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
             SingleMortalityTable smt = mt.getSingleTable(Locality.TOTAL, gender);
@@ -79,7 +76,29 @@ public class RefineYearlyPopulationModel
             for (int age = 0; age < dLx.length; age++)
                 dLx[age] = smt.get(age).Lx - smt.get(age + 1).Lx;
 
-            return new ChildAttritionModel(year, L0, dLx);
+            return new ChildAttritionModel(L0, dLx);
+        }
+
+        static ChildAttritionModel interpolate(int year, int y1, ChildAttritionModel m1, int y2, ChildAttritionModel m2) throws Exception
+        {
+            Util.assertion(year >= y1 && year <= y2);
+
+            double a1 = (y2 - (double) year) / (y2 - y1);
+            return interpolate(a1, m1, m2);
+        }
+
+        static ChildAttritionModel interpolate(double a1, ChildAttritionModel m1, ChildAttritionModel m2) throws Exception
+        {
+            Util.assertion(a1 >= 0 && a1 <= 1);
+            Util.assertion(m1.attrition.length == m2.attrition.length);
+
+            double L0 = a1 * m1.L0 + (1 - a1) * m2.L0;
+            double attrition[] = new double[m1.attrition.length];
+
+            for (int age = 0; age < m1.attrition.length; age++)
+                attrition[age] = a1 * m1.attrition[age] + (1 - a1) * m2.attrition[age];
+
+            return new ChildAttritionModel(L0, attrition);
         }
     }
 
@@ -89,46 +108,42 @@ public class RefineYearlyPopulationModel
         {
         }
 
-        final ChildAttritionModel model_m_1926 = ChildAttritionModel.forMortalityTable(1926, "mortality_tables/USSR/1926-1927", Gender.MALE);
-        final ChildAttritionModel model_m_1938 = ChildAttritionModel.forMortalityTable(1938, "mortality_tables/USSR/1938-1939", Gender.MALE);
-        final ChildAttritionModel model_m_1958 = ChildAttritionModel.forMortalityTable(1958, "mortality_tables/USSR/1958-1959", Gender.MALE);
+        final ChildAttritionModel model_m_1926 = ChildAttritionModel.forMortalityTable("mortality_tables/USSR/1926-1927", Gender.MALE);
+        final ChildAttritionModel model_m_1938 = ChildAttritionModel.forMortalityTable("mortality_tables/USSR/1938-1939", Gender.MALE);
+        final ChildAttritionModel model_m_1958 = ChildAttritionModel.forMortalityTable("mortality_tables/USSR/1958-1959", Gender.MALE);
 
-        final ChildAttritionModel model_f_1926 = ChildAttritionModel.forMortalityTable(1926, "mortality_tables/USSR/1926-1927", Gender.FEMALE);
-        final ChildAttritionModel model_f_1938 = ChildAttritionModel.forMortalityTable(1938, "mortality_tables/USSR/1938-1939", Gender.FEMALE);
-        final ChildAttritionModel model_f_1958 = ChildAttritionModel.forMortalityTable(1958, "mortality_tables/USSR/1958-1959", Gender.FEMALE);
+        final ChildAttritionModel model_f_1926 = ChildAttritionModel.forMortalityTable("mortality_tables/USSR/1926-1927", Gender.FEMALE);
+        final ChildAttritionModel model_f_1938 = ChildAttritionModel.forMortalityTable("mortality_tables/USSR/1938-1939", Gender.FEMALE);
+        final ChildAttritionModel model_f_1958 = ChildAttritionModel.forMortalityTable("mortality_tables/USSR/1958-1959", Gender.FEMALE);
     }
 
     private static AllModels allModels = null;
 
-    public static ChildAttritionModel select_model(Integer yearHint, Gender gender) throws Exception
+    public static ChildAttritionModel select_model(Integer yearHint, int backoffYears, Gender gender) throws Exception
     {
         if (allModels == null)
             allModels = new AllModels();
 
+        int modelYear;
+
         if (yearHint == null)
-            yearHint = 1938;
+        {
+            modelYear = 1926;
+        }
+        else
+        {
+            modelYear = yearHint - backoffYears;
+        }
 
         ChildAttritionModel model = null;
 
         if (gender == Gender.MALE)
         {
-            // ### interpolate
-            if (yearHint >= 1943)
-                model = allModels.model_m_1958;
-            else if (yearHint >= 1933)
-                model = allModels.model_m_1938;
-            else
-                model = allModels.model_m_1926;
+            model = selectModel(modelYear, allModels.model_m_1926, allModels.model_m_1938, allModels.model_m_1958);
         }
         else if (gender == Gender.FEMALE)
         {
-            // ### interpolate
-            if (yearHint >= 1943)
-                model = allModels.model_f_1958;
-            else if (yearHint >= 1933)
-                model = allModels.model_f_1938;
-            else
-                model = allModels.model_f_1926;
+            model = selectModel(modelYear, allModels.model_f_1926, allModels.model_f_1938, allModels.model_f_1958);
         }
         else
         {
@@ -136,8 +151,28 @@ public class RefineYearlyPopulationModel
         }
 
         model = model.clone();
-        model.acutalYear = yearHint;
 
         return model;
+    }
+
+    private static ChildAttritionModel selectModel(int modelYear, ChildAttritionModel m1926, ChildAttritionModel m1938, ChildAttritionModel m1958)
+            throws Exception
+    {
+        if (modelYear <= 1927)
+        {
+            return m1926;
+        }
+        else if (modelYear > 1927 && modelYear <= 1939)
+        {
+            return ChildAttritionModel.interpolate(modelYear, 1927, m1926, 1939, m1938);
+        }
+        else if (modelYear > 1939 && modelYear <= 1944)
+        {
+            return m1938;
+        }
+        else
+        {
+            throw new Exception("ChildAttritionModel не реализована для года " + modelYear);
+        }
     }
 }
