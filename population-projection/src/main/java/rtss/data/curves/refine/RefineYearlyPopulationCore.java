@@ -42,9 +42,11 @@ import java.util.concurrent.TimeUnit;
  * Input: array "p" contains the output of 1-st stage disaggegation, including age points for age bins 0...4 and 5...9. 
  * 
  * The size of "p" is max(10, nTunablePoints + nFixedPoints), as is explained below.
+ * However it helps to add a couple of further points for calculating 2nd and 3rd serivatives. 
  * 
  * Only first nTunablePoints at the start of "p" can be tweaked, i.e. ages 0 to (nTunablePoints - 1). 
- * But subseqeunt nFixedPoints can additionally be used to check for curve smoothness (under rare conditions nFixedPoints can be zero).
+ * But subseqeunt nFixedPoints can additionally be used to check for curve smoothness.
+ * Under rare conditions nFixedPoints can be zero, when next point after tunables goes upward, rather than continues downward.
  *   
  * Typically, nTunablePoints does not exceed 10 (total size of two first age bins), and then nFixedPoints is 2.
  * These are the values used when bin sum values follow pattern X-DOWN-DOWN (i.e. first three bins exhibit the 
@@ -159,6 +161,7 @@ public class RefineYearlyPopulationCore
     private final double importance_target_diff_matching;
     private final int nTunablePoints;
     private final int nFixedPoints;
+    private final int nTotalPoints;
     private final String title;
     private final double psum04;
     private final double psum59;
@@ -169,6 +172,8 @@ public class RefineYearlyPopulationCore
     // track what we saw during the optimization scan
     private Objective min_seen_objective = null;
     private double[] min_seen_objective_p = null;
+
+    private static boolean EnableParallelExecution = Util.True;
 
     /* ============================================================================== */
 
@@ -188,12 +193,13 @@ public class RefineYearlyPopulationCore
         this.importance_target_diff_matching = arg_importance_target_diff_matching * RegularPenalty;
         this.nTunablePoints = nTunablePoints;
         this.nFixedPoints = nFixedPoints;
+        this.nTotalPoints = nTunablePoints + Math.max(0, nFixedPoints - 1);
         this.title = title;
         this.psum04 = Util.sum_range(p, 0, 4);
         this.psum59 = Util.sum_range(p, 5, 9);
 
         if (optimizerSettings != null)
-            this.optimizerSettings = optimizerSettings;
+            this.optimizerSettings = optimizerSettings.clone();
         else
             this.optimizerSettings = new OptimizerSettings();
     }
@@ -429,9 +435,10 @@ public class RefineYearlyPopulationCore
     }
 
     // Combine p(0) to p(nTunablePoints - 1) with the fixed p(nTunablePoints) to p(nTunablePoints + nFixedPoints - 1)
+    // and any extra fixed points that may be there
     private double[] fullP(final double[] points)
     {
-        int plength = Math.max(10, nTunablePoints + nFixedPoints);
+        int plength = p.length;
         double[] fullP = Arrays.copyOf(points, plength);
         System.arraycopy(p, nTunablePoints, fullP, nTunablePoints, plength - nTunablePoints);
         return fullP;
@@ -483,8 +490,8 @@ public class RefineYearlyPopulationCore
     private double calculateMonotonicityViolation(double[] p)
     {
         double monotonicityViolation = 0.0;
-
-        p = Util.normalize(p);
+        
+        p = Util.normalize(Util.splice(p, 0, nTunablePoints));
 
         for (int k = 0; k < nTunablePoints; k++)
         {
@@ -508,32 +515,67 @@ public class RefineYearlyPopulationCore
     private double calculateSmoothnessViolation(double[] p)
     {
         double smoothnessViolation = 0.0;
+        
+        int npoints = nTotalPoints;
 
-        p = Util.normalize(p);
+        if (Util.True)
+        {
+            if (nFixedPoints >= 2)
+            {
+                /* not an inflection point */
+                npoints++; // for 2nd derivative
+                npoints++; // for 3rd derivative
+            }
 
-        // under rare conditions nFixedPoints can be zero
-        for (int i = 1; i < p.length - 1 && i <= nTunablePoints - 1 + Math.max(0, nFixedPoints - 1); i++)
-            smoothnessViolation += Math.abs(d2(p, i));
+            p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
+            p = Util.normalize(p);
+            for (double v : d3(p))
+                smoothnessViolation += Math.abs(v);
+        }
+        else
+        {
+            if (nFixedPoints >= 2)
+            {
+                /* not an inflection point */
+                npoints++; // for 2nd derivative
+            }
+
+            p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
+            p = Util.normalize(p);
+
+            for (double v : d2(p))
+                smoothnessViolation += Math.abs(v);
+        }
 
         return smoothnessViolation;
     }
 
-    // calculate second derivative at point p[i]
-    private double d2(double[] p, int i)
+    private double[] derivative(double[] p)
     {
-        if (i == 0)
-            return 0;
+        if (p.length <= 1)
+            return new double[0];
 
-        double derivative1 = p[i] - p[i - 1];
-        double derivative2 = p[i + 1] - p[i];
-        return derivative2 - derivative1;
+        double[] d = new double[p.length - 1];
+        for (int i = 0; i <= p.length - 2; i++)
+            d[i] = p[i + 1] - p[i];
+        return d;
+    }
+
+    private double[] d2(double[] p)
+    {
+        return derivative(derivative(p));
+    }
+
+    private double[] d3(double[] p)
+    {
+        return derivative(d2(p));
     }
 
     private double calculateTargetDiffViolation(double[] p)
     {
         double[] actual_diff = new double[target_diff.length];
 
-        p = Util.normalize(p);
+        p = Util.normalize(Util.splice(p, 0, target_diff.length));
 
         for (int i = 0; i < actual_diff.length; i++)
             actual_diff[i] = p[i] - p[i + 1];
@@ -662,7 +704,7 @@ public class RefineYearlyPopulationCore
      */
     public double[] refineSeriesIterative(Level outerLogLevel, Level innerLogLevel) throws Exception
     {
-        if (Util.availableProcessors() == 1)
+        if (Util.availableProcessors() == 1 || !EnableParallelExecution)
             return refineSeriesIterativeSequential(outerLogLevel, innerLogLevel);
         else
             return refineSeriesIterativeParallel(outerLogLevel, innerLogLevel);

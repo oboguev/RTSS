@@ -186,7 +186,7 @@ public class Util
             return true;
         return Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) > diff;
     }
-    
+
     public static boolean differ(double[] a, double[] b)
     {
         return differ(a, b, 0.00001);
@@ -196,13 +196,13 @@ public class Util
     {
         if (a.length != b.length)
             throw new IllegalArgumentException("array dimensions differ");
-        
+
         for (int k = 0; k < a.length; k++)
         {
             if (differ(a[k], b[k], diff))
                 return true;
         }
-        
+
         return false;
     }
 
@@ -394,7 +394,7 @@ public class Util
     {
         return multiply(y, sum / sum(y));
     }
-    
+
     /*
      * Взвешенная сумма w1*ww1 + w2*ww2
      * 
@@ -488,7 +488,7 @@ public class Util
         int size = x2 - x1 + 1;
         if (size <= 0)
             throw new IllegalArgumentException("array splice : negative size");
-        
+
         double[] yy = new double[size];
         for (int x = x1; x <= x2; x++)
             yy[x - x1] = y[x];
@@ -516,7 +516,7 @@ public class Util
     {
         int[] r = new int[y.length];
         for (int k = 0; k < y.length; k++)
-            r[k]  = y[k];
+            r[k] = y[k];
         return r;
     }
 
@@ -767,12 +767,17 @@ public class Util
         }
     }
 
-    public static int availableProcessors() throws Exception
+    private static int availableProcessors = 0;
+
+    public static synchronized int availableProcessors() throws Exception
     {
-        int cores = Runtime.getRuntime().availableProcessors();
-        
-        cores = (int) Math.round(cores * 0.75);
-        
+        if (availableProcessors != 0)
+            return availableProcessors;
+
+        int physicalCores = Runtime.getRuntime().availableProcessors();
+
+        int cores = (int) Math.round(physicalCores * 0.75);
+
         Integer minp = Config.asOptionalUnsignedInteger("cpus.min", null);
         if (minp != null)
             cores = Math.max(minp, cores);
@@ -780,10 +785,16 @@ public class Util
         Integer maxp = Config.asOptionalUnsignedInteger("cpus.max", null);
         if (maxp != null)
             cores = Math.min(maxp, cores);
-        
+
+        availableProcessors = cores;
+
+        Util.out(String.format("Using %d processors (parallel threads) out of available %d physcical cores",
+                               availableProcessors,
+                               physicalCores));
+
         return cores;
     }
-    
+
     public static void sleep(long ms)
     {
         try
@@ -795,7 +806,7 @@ public class Util
             noop();
         }
     }
-    
+
     public static void unused(Object... o)
     {
     }

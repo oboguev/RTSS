@@ -31,4 +31,4 @@ Osier.excel.visible: true
 ## minimum and maximum number of CPUs to use
 
 cpus.min: 2
-cpus.max: 8
+cpus.max: 12

@@ -111,7 +111,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             chart.exportImage(ci.cx, ci.cy, ci.path(fn + ".png"));
         }
 
-        if (Util.False)
+        if (Util.True)
         {
             int ppy = 1;
             double[] xxx = Bins.ppy_x(bins, ppy);

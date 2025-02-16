@@ -112,7 +112,8 @@ public class RefineYearlyPopulation
         double importance_smoothness = 0.94;
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
-        int plength = Math.max(10, nTunablePoints + nFixedPoints);
+        int extraPoints = 3; // for derivatives
+        int plength = Math.max(10, nTunablePoints + nFixedPoints + extraPoints);
         p = Util.splice(p0, 0, plength - 1);
 
         try
