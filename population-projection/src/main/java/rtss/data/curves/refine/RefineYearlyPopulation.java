@@ -16,7 +16,8 @@ import ch.qos.logback.classic.Level;
  */
 public class RefineYearlyPopulation
 {
-    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint, Gender gender, InterpolationOptions options) throws Exception
+    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint, Gender gender, InterpolationOptions options)
+            throws Exception
     {
         final double[] p0 = p;
 
@@ -61,6 +62,27 @@ public class RefineYearlyPopulation
             nFixedPoints = 2; // ages 10-11
             ChildAttritionModel model = RefineYearlyPopulationModel.selectModel(yearHint, nTunablePoints, gender, ValuesMatter.RELATIVE);
             attrition = model.attrition09();
+
+            if (p[9] <= p[10])
+            {
+                /*
+                 * Перегиб наступает в bins[1], в p[9].
+                 * Симулировать для rc.refineSeriesIterative выход на равнину, 
+                 * дабы синтезировать более плавную кривую до этой точки.   
+                 */
+                p = Util.splice(p, 0, nTunablePoints + nFixedPoints - 1);
+                p[11] = p[10] = p[9];
+            }
+            else if (p[11] > p[10])
+            {
+                /*
+                 * Перегиб наступает в p[10] наступает перегиб.
+                 * Симулировать для rc.refineSeriesIterative выход на равнину, 
+                 * дабы синтезировать более плавную кривую до этой точки.   
+                 */
+                p = Util.splice(p, 0, nTunablePoints + nFixedPoints - 1);
+                p[11] = p[10];
+            }
         }
         else if (bins[0].avg > bins[1].avg &&
                  bins[1].avg < bins[2].avg &&
@@ -102,7 +124,7 @@ public class RefineYearlyPopulation
         for (;;)
         {
             int n = nTunablePoints + nFixedPoints;
-            if (n >= 20)
+            if (n >= 20 || n >= p.length)
                 break;
             if (p[n] < p[n - 1])
                 nFixedPoints++;
@@ -115,7 +137,7 @@ public class RefineYearlyPopulation
         if (options.secondaryRefineYearlyAgesSmoothness() != null)
             importance_smoothness = options.secondaryRefineYearlyAgesSmoothness();
         Util.assertion(importance_smoothness >= 0.001 && importance_smoothness <= 0.999);
-        
+
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int extraPoints = 3; // for derivatives
@@ -135,7 +157,7 @@ public class RefineYearlyPopulation
 
             Level outerLogLevel = Level.INFO;
             Level innerLogLevel = Level.INFO;
-            
+
             if (options.debugSecondaryRefineYearlyAges())
                 outerLogLevel = Level.DEBUG;
 
@@ -269,15 +291,26 @@ public class RefineYearlyPopulation
         switch (birthDrop.length)
         {
         // fill the tail of birthDrop
-        case 6: fillBirthDrop(birthDrop, 0.25, 0.75, 1); break;
-        case 7: fillBirthDrop(birthDrop, 0.25, 0.75, 1); break;
-        case 8: fillBirthDrop(birthDrop, 0.25, 0.75, 1); break;
-        case 9: fillBirthDrop(birthDrop, 0.5, 1, 1); break;
-        case 10: fillBirthDrop(birthDrop, 0.5, 1, 1); break;
-        default: Util.assertion(false);
+        case 6:
+            fillBirthDrop(birthDrop, 0.25, 0.75, 1);
+            break;
+        case 7:
+            fillBirthDrop(birthDrop, 0.25, 0.75, 1);
+            break;
+        case 8:
+            fillBirthDrop(birthDrop, 0.25, 0.75, 1);
+            break;
+        case 9:
+            fillBirthDrop(birthDrop, 0.5, 1, 1);
+            break;
+        case 10:
+            fillBirthDrop(birthDrop, 0.5, 1, 1);
+            break;
+        default:
+            Util.assertion(false);
         }
     }
-    
+
     /*
      * Заполнить хвост массива @birthDrop значениями @values
      */

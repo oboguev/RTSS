@@ -41,13 +41,13 @@ import java.util.concurrent.TimeUnit;
  * 
  * Input: array "p" contains the output of 1-st stage disaggegation, including age points for age bins 0...4 and 5...9. 
  * 
- * The size of "p" is max(10, nTunablePoints + nFixedPoints), as is explained below.
- * However it helps to add a couple of further points for calculating 2nd and 3rd serivatives. 
- * 
  * Only first nTunablePoints at the start of "p" can be tweaked, i.e. ages 0 to (nTunablePoints - 1). 
  * But subseqeunt nFixedPoints can additionally be used to check for curve smoothness.
  * Under rare conditions nFixedPoints can be zero, when next point after tunables goes upward, rather than continues downward.
  *   
+ * Thus the size of "p" is max(10, nTunablePoints + Math.max(0, nFixedPoints - 1)).
+ * However it helps to add a couple of further points for calculating 2nd and 3rd serivatives. 
+ * 
  * Typically, nTunablePoints does not exceed 10 (total size of two first age bins), and then nFixedPoints is 2.
  * These are the values used when bin sum values follow pattern X-DOWN-DOWN (i.e. first three bins exhibit the 
  * pattern of population decrease with age).
