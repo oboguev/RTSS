@@ -516,7 +516,7 @@ public class RefineYearlyPopulationCore
     private double calculateSmoothnessViolation(double[] p)
     {
         double smoothnessViolation = 0.0;
-        
+
         /*
          * Первоначальная версия функционала пыталась минимизировать sum(abs(d2)).
          * Однако это вело к спрямлению кривой в прямую, т.к. фукнционал пытался выравнять значения d1 на промежутке.
@@ -532,17 +532,36 @@ public class RefineYearlyPopulationCore
 
         if (nFixedPoints >= 2)
         {
-            /* not an inflection point */
+            /* 
+             * not an inflection point, кривая продолжит нисхождение 
+             */
             npoints++; // for 2nd derivative
             npoints++; // for 3rd derivative
+            p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
         }
         else
         {
             /* inflection point */
             npoints++; // for 2nd and 3rd derivatives
+            p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
+            
+            /*
+             * При вычислении 2-й и 3-й производной мы теряем значения для граничных точек.
+             * Когда точка не является точкой перегиба (nFixedPoints >= 2), нас выручают значения из fullP.
+             * Когда же точка является точкой перегиба, мы не может расширить p за счёт значений из fullP,
+             * т.к. краевой перегиб возмутит значение функционала гладкости кривой и может оттолкнуть 
+             * отптимизатор от схождения к оптимуму.
+             * 
+             * С другой стороны, неохват точек близких к краю проверкой функционала оставляет их вне
+             * контроля гладкости.
+             * 
+             * Мы решаем эту проблему добавление виртуальной точки вычисляемой по последнему значению
+             * первой производной. 
+             */
+            p = extendWithVirtualPoint(p);
+            npoints++; // for 2nd and 3rd derivatives
         }
 
-        p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
         p = Util.normalize(p);
         for (double v : d3(p))
             smoothnessViolation += Math.abs(v);
@@ -569,6 +588,17 @@ public class RefineYearlyPopulationCore
     private double[] d3(double[] p)
     {
         return derivative(d2(p));
+    }
+
+    private double[] extendWithVirtualPoint(double[] p)
+    {
+        // value of first derivative at the end of the segment
+        double firstDerivative = Util.lastElement(derivative(p));
+
+        // estimate the virtual point extending the segment based on the first derivative
+        double virtualPoint = Util.lastElement(p) + firstDerivative;
+
+        return Util.concat(p, virtualPoint);
     }
 
     private double calculateTargetDiffViolation(double[] p)

@@ -355,6 +355,16 @@ public class Util
         return sum;
     }
 
+    public static double lastElement(double[] a)
+    {
+        return a[a.length - 1];
+    }
+
+    public static double preLastElement(double[] a)
+    {
+        return a[a.length - 2];
+    }
+
     // per-element array addition
     public static double[] add(final double[] a, final double[] b) throws Exception
     {
@@ -547,7 +557,7 @@ public class Util
     }
 
     // concatenate arrays a and d
-    public static double[] concat(double[] a, double[] b)
+    public static double[] concat(double[] a, double... b)
     {
         double[] r = new double[a.length + b.length];
         int ix = 0;
