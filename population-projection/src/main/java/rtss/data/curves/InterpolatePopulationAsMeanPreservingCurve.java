@@ -37,6 +37,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         private Double secondaryRefineYearlyAgesSmoothness = null;
         private String subtitle = null;
         private boolean displayChart = false;
+        private boolean allowChartMinorClipping = false;
 
         public InterpolationOptions usePrimaryCSASRA(boolean usePrimaryCSASRA)
         {
@@ -79,6 +80,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
             this.displayChart = displayChart;
             return this;
         }
+        
+        public InterpolationOptions allowChartMinorClipping(boolean allowChartMinorClipping)
+        {
+            this.allowChartMinorClipping = allowChartMinorClipping;
+            return this;
+        }
 
         /* --------------------------------------------------------------------- */
 
@@ -116,6 +123,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
         {
             return displayChart;
         }
+
+        public boolean allowChartMinorClipping()
+        {
+            return allowChartMinorClipping;
+        }
     }
 
     public static class InterpolationOptionsByGender
@@ -123,6 +135,18 @@ public class InterpolatePopulationAsMeanPreservingCurve
         private InterpolationOptions both;
         private InterpolationOptions male;
         private InterpolationOptions female;
+        private boolean allowCache = false;
+
+        public InterpolationOptionsByGender allowCache(boolean allowCache)
+        {
+            this.allowCache = allowCache;
+            return this;
+        }
+
+        public boolean allowCache()
+        {
+            return allowCache;
+        }
 
         public InterpolationOptions both()
         {
@@ -144,7 +168,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 female = new InterpolationOptions();
             return female;
         }
-
+        
         public InterpolationOptions getForGender(Gender gender)
         {
             if (gender == Gender.MALE && male != null)
@@ -321,7 +345,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         double excess = v - nq * scaleQuant;
 
-        if (excess <= 70 && Util.False)
+        if (excess <= 70 && options.allowChartMinorClipping())
             return nq * scaleQuant;
         else
             return (nq + 1) * scaleQuant;

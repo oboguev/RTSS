@@ -15,8 +15,8 @@ import rtss.util.Util;
 
 public class PopulationADH
 {
-    static public boolean UsePrecomputedFiles = false; // ###
-    static public boolean UseCache = false; // ###
+    static public boolean UsePrecomputedFiles = true;
+    static public boolean UseCache = true;
 
     private static Map<String, Population> cache = new HashMap<>();
 
@@ -53,7 +53,8 @@ public class PopulationADH
         Integer yearHint = yearHint(year);
 
         String cacheKey = area.name() + "-" + year;
-        if (UseCache)
+
+        if (UseCache && mayUseCache(options))
         {
             p = cache.get(cacheKey);
             if (p != null)
@@ -61,7 +62,7 @@ public class PopulationADH
         }
 
         // try loading from resource
-        if (UsePrecomputedFiles)
+        if (UsePrecomputedFiles && mayUseCache(options))
         {
             try
             {
@@ -98,7 +99,7 @@ public class PopulationADH
                                f, f_unknown.doubleValue(), null);
         }
 
-        if (UseCache)
+        if (UseCache && mayUseCache(options))
         {
             p.seal();
             cache.put(cacheKey, p);
@@ -122,6 +123,11 @@ public class PopulationADH
         }
         
         return Integer.parseInt(year);
+    }
+    
+    private static boolean mayUseCache(InterpolationOptionsByGender options)
+    {
+        return options == null || options.allowCache() == true;
     }
 
     /* ========================================================================== */

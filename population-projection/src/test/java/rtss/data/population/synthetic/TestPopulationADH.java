@@ -11,11 +11,11 @@ public class TestPopulationADH
     {
         try
         {
-            InterpolationOptionsByGender options = new InterpolationOptionsByGender();
+            InterpolationOptionsByGender options = new InterpolationOptionsByGender().allowCache(false);
 
             if (Util.False)
             {
-                options.both().displayChart(true).debugSecondaryRefineYearlyAges(true);
+                options.both().displayChart(true).debugSecondaryRefineYearlyAges(true).allowChartMinorClipping(true);
                 
                 options.both().secondaryRefineYearlyAgesSmoothness(0.70).subtitle("0.70");
                 PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
@@ -34,12 +34,12 @@ public class TestPopulationADH
                 Util.noop();
             }
 
-            options = new InterpolationOptionsByGender();
-            options.both().secondaryRefineYearlyAgesSmoothness(0.95);
+            options = new InterpolationOptionsByGender().allowCache(false);
+            options.both().secondaryRefineYearlyAgesSmoothness(0.70).allowChartMinorClipping(true);
 
             if (Util.True)
             {
-                CaptureImages.capture("c:\\@@capture\\xxx", "USSR - ", " 0.95", 2400, 1500);
+                CaptureImages.capture("c:\\@@capture\\xxx", "USSR - ", " 0.70", 2400, 1500);
 
                 PopulationADH.getPopulationByLocality(Area.USSR, 1926, options);
                 PopulationADH.getPopulationByLocality(Area.USSR, 1927, options);
@@ -57,7 +57,7 @@ public class TestPopulationADH
 
             if (Util.True)
             {
-                CaptureImages.capture("c:\\@@capture\\xxx", "RSFSR - ", " 0.95", 2400, 1500);
+                CaptureImages.capture("c:\\@@capture\\xxx", "RSFSR - ", " 0.70", 2400, 1500);
 
                 for (int year = 1927; year <= 1959; year++)
                 {

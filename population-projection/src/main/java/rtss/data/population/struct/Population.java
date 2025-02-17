@@ -11,7 +11,6 @@ import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.curves.TargetResolution;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptions;
-import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptionsByGender;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.calc.SmoothPopulation;
 import rtss.data.selectors.Gender;

@@ -559,7 +559,6 @@ public class RefineYearlyPopulationCore
              * первой производной. 
              */
             p = extendWithVirtualPoint(p);
-            npoints++; // for 2nd and 3rd derivatives
         }
 
         p = Util.normalize(p);
@@ -592,13 +591,21 @@ public class RefineYearlyPopulationCore
 
     private double[] extendWithVirtualPoint(double[] p)
     {
-        // value of first derivative at the end of the segment
-        double firstDerivative = Util.lastElement(derivative(p));
+        if (Util.False)
+        {
+            // value of first derivative at the end of the segment
+            double firstDerivative = Util.lastElement(derivative(p));
 
-        // estimate the virtual point extending the segment based on the first derivative
-        double virtualPoint = Util.lastElement(p) + firstDerivative;
+            // estimate the virtual point extending the segment based on the first derivative
+            double virtualPoint = Util.lastElement(p) + firstDerivative;
 
-        return Util.concat(p, virtualPoint);
+            return Util.concat(p, virtualPoint);
+        }
+        else
+        {
+            double v = Util.lastElement(p);
+            return Util.concat(p, v, v);
+        }
     }
 
     private double calculateTargetDiffViolation(double[] p)
