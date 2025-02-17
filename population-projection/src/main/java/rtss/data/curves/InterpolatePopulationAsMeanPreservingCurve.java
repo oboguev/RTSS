@@ -325,7 +325,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
             ChartXYSPlineBasic chart = new ChartXYSPlineBasic(title, "x", "y");
 
-            chart.addSeries("final", xxx, curve.curve);
+            chart.addSeries("final " + curve.method, xxx, curve.curve);
             double maxY = Util.max(curve.curve);
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
@@ -340,7 +340,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             if (options.hasExtra("chart-spline") && !curve.method.equals("spline"))
             {
                 double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options); 
-                chart.addSeries("spline", xxx, ss);
+                chart.addSeries("raw spline", xxx, ss);
                 maxY = Math.max(maxY, Util.max(ss));
             }
 
@@ -362,7 +362,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             double[] xxx = Bins.ppy_x(bins, ppy);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
 
-            chart.addSeries("final", xxx, curve.curve);
+            chart.addSeries("final " + curve.method, xxx, curve.curve);
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
                 chart.addSeries("raw " + curve.method, xxx, curve.raw);
@@ -372,7 +372,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             if (options.hasExtra("chart-spline") && !curve.method.equals("spline"))
             {
                 double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options); 
-                chart.addSeries("spline", xxx, ss);
+                chart.addSeries("raw spline", xxx, ss);
             }
 
             chart.display();
