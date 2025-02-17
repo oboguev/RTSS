@@ -44,6 +44,8 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  * *************************************************************************************     
  * 
  * В случае DAILY используеся алгоритм CSASRA.
+ * При интерполяции данных для TargetResolution.DAILY алгоритм CSASRA даёт гораздо более гладкие данные, 
+ * чем алгоритм сплайна.
  * 
  * *************************************************************************************
  *      
@@ -74,11 +76,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
         private boolean displayChart = false;
         private boolean allowChartMinorClipping = false;
         private Set<String> extras = new HashSet<>();
-        
+
         public InterpolationOptions clone()
         {
             InterpolationOptions c = new InterpolationOptions();
-            
+
             c.usePrimaryCSASRA = usePrimaryCSASRA;
             c.usePrimarySPLINE = usePrimarySPLINE;
             c.useSecondaryRefineYearlyAges = useSecondaryRefineYearlyAges;
@@ -88,7 +90,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             c.displayChart = displayChart;
             c.allowChartMinorClipping = allowChartMinorClipping;
             c.extras.addAll(extras);
-            
+
             return c;
         }
 
@@ -133,13 +135,13 @@ public class InterpolatePopulationAsMeanPreservingCurve
             this.displayChart = displayChart;
             return this;
         }
-        
+
         public InterpolationOptions allowChartMinorClipping(boolean allowChartMinorClipping)
         {
             this.allowChartMinorClipping = allowChartMinorClipping;
             return this;
         }
-        
+
         public InterpolationOptions extra(String extra)
         {
             this.extras.add(extra);
@@ -232,7 +234,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 female = new InterpolationOptions();
             return female;
         }
-        
+
         public InterpolationOptions getForGender(Gender gender)
         {
             if (gender == Gender.MALE && male != null)
@@ -289,6 +291,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     public static final int MAX_AGE = Population.MAX_AGE;
 
+    public static enum FirstStageAlgorithm
+    {
+        CSASRA, SPLINE
+    }
+
     /* =========================================================================================================== */
 
     public static double[] curve(
@@ -311,6 +318,17 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         Exception ex = null;
         CurveResult curve = null;
+        
+        FirstStageAlgorithm preferredAlgorithm = FirstStageAlgorithm.CSASRA;
+        
+        if (options.usePrimaryCSASRA() && !options.usePrimarySPLINE())
+            preferredAlgorithm = FirstStageAlgorithm.CSASRA;
+        else if (!options.usePrimaryCSASRA() && options.usePrimarySPLINE())
+            preferredAlgorithm = FirstStageAlgorithm.SPLINE;
+        else if (targetResolution == TargetResolution.YEARLY && yearHint >= 1956)
+            preferredAlgorithm = FirstStageAlgorithm.SPLINE;
+        else
+            preferredAlgorithm = FirstStageAlgorithm.CSASRA;
 
         try
         {
@@ -368,17 +386,17 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
             chart.addLineSeries("bins", Bins.ppy_x(bins, 100), Bins.ppy_y(bins, 100));
             maxY = Math.max(maxY, Util.max(Bins.ppy_y(bins, 100)));
-            
+
             if (options.hasExtra("chart-spline") && !curve.method.equals("spline"))
             {
-                double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options); 
+                double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options);
                 chart.addSeries("raw spline", xxx, ss);
                 maxY = Math.max(maxY, Util.max(ss));
             }
 
             if (options.hasExtra("chart-csasra") && !curve.method.equals("csasra"))
             {
-                double[] cc = rawCSASRA(bins, title, targetResolution, yearHint, gender, options); 
+                double[] cc = rawCSASRA(bins, title, targetResolution, yearHint, gender, options);
                 chart.addSeries("raw csasra", xxx, cc);
                 maxY = Math.max(maxY, Util.max(cc));
             }
@@ -410,13 +428,13 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
             if (options.hasExtra("chart-spline") && !curve.method.equals("spline"))
             {
-                double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options); 
+                double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options);
                 chart.addSeries("raw spline", xxx, ss);
             }
 
             if (options.hasExtra("chart-csasra") && !curve.method.equals("csasra"))
             {
-                double[] ss = rawCSASRA(bins, title, targetResolution, yearHint, gender, options); 
+                double[] ss = rawCSASRA(bins, title, targetResolution, yearHint, gender, options);
                 chart.addSeries("raw csasra", xxx, ss);
             }
 
@@ -452,7 +470,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         long scale = Math.round(Math.pow(10, n));
         return scale / 20;
     }
-    
+
     private static double[] rawSpline(
             Bin[] bins,
             String title,
