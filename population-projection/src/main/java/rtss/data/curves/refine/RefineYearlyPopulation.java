@@ -2,6 +2,7 @@ package rtss.data.curves.refine;
 
 import rtss.data.bin.Bin;
 import rtss.data.curves.CurveVerifier;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptions;
 import rtss.data.curves.refine.RefineYearlyPopulationModel.ChildAttritionModel;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
@@ -15,7 +16,7 @@ import ch.qos.logback.classic.Level;
  */
 public class RefineYearlyPopulation
 {
-    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint, Gender gender) throws Exception
+    public static double[] refine(Bin[] bins, String title, double[] p, Integer yearHint, Gender gender, InterpolationOptions options) throws Exception
     {
         final double[] p0 = p;
 
@@ -129,6 +130,9 @@ public class RefineYearlyPopulation
 
             Level outerLogLevel = Level.INFO;
             Level innerLogLevel = Level.INFO;
+            
+            if (options.debugSecondaryRefineYearlyAges())
+                outerLogLevel = Level.DEBUG;
 
             double[] px = rc.refineSeriesIterative(outerLogLevel, innerLogLevel);
 

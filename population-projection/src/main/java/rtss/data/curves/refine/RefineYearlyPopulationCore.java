@@ -173,7 +173,8 @@ public class RefineYearlyPopulationCore
     private Objective min_seen_objective = null;
     private double[] min_seen_objective_p = null;
 
-    private static boolean EnableParallelExecution = Util.True;
+    // enable parallel execution
+    private static boolean EnableParallelTasks = Util.True;
 
     /* ============================================================================== */
 
@@ -704,7 +705,7 @@ public class RefineYearlyPopulationCore
      */
     public double[] refineSeriesIterative(Level outerLogLevel, Level innerLogLevel) throws Exception
     {
-        if (Util.availableProcessors() == 1 || !EnableParallelExecution)
+        if (Util.availableProcessors() == 1 || !EnableParallelTasks)
             return refineSeriesIterativeSequential(outerLogLevel, innerLogLevel);
         else
             return refineSeriesIterativeParallel(outerLogLevel, innerLogLevel);

@@ -1,5 +1,6 @@
 package rtss.data.population.synthetic;
 
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptionsByGender;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.util.plot.CaptureImages;
@@ -12,8 +13,11 @@ public class TestPopulationADH
         {
             if (Util.True)
             {
-                PopulationADH.getPopulationByLocality(Area.USSR, 1926);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1941);
+                InterpolationOptionsByGender options = new InterpolationOptionsByGender();
+                options.both().debugSecondaryRefineYearlyAges(true);
+                
+                PopulationADH.getPopulationByLocality(Area.USSR, 1926, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1941, options);
                 Util.noop();
             }
 

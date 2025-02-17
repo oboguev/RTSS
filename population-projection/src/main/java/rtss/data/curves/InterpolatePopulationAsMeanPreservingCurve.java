@@ -30,9 +30,10 @@ public class InterpolatePopulationAsMeanPreservingCurve
 {
     public static class InterpolationOptions
     {
-        public boolean usePrimaryCSASRA = true;
-        public boolean usePrimarySPLINE = true;
-        public boolean useSecondaryRefineYearlyAges = true;
+        private boolean usePrimaryCSASRA = true;
+        private boolean usePrimarySPLINE = true;
+        private boolean useSecondaryRefineYearlyAges = true;
+        private boolean debugSecondaryRefineYearlyAges = false;
 
         public InterpolationOptions usePrimaryCSASRA(boolean usePrimaryCSASRA)
         {
@@ -50,6 +51,34 @@ public class InterpolatePopulationAsMeanPreservingCurve
         {
             this.useSecondaryRefineYearlyAges = useSecondaryRefineYearlyAges;
             return this;
+        }
+
+        public InterpolationOptions debugSecondaryRefineYearlyAges(boolean debugSecondaryRefineYearlyAges)
+        {
+            this.debugSecondaryRefineYearlyAges = debugSecondaryRefineYearlyAges;
+            return this;
+        }
+        
+        /* --------------------------------------------------------------------- */
+        
+        public boolean usePrimaryCSASRA()
+        {
+            return usePrimaryCSASRA;
+        }
+
+        public boolean usePrimarySPLINE()
+        {
+            return usePrimarySPLINE;
+        }
+
+        public boolean useSecondaryRefineYearlyAges()
+        {
+            return useSecondaryRefineYearlyAges;
+        }
+
+        public boolean debugSecondaryRefineYearlyAges()
+        {
+            return debugSecondaryRefineYearlyAges;
         }
     }
 
@@ -154,7 +183,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
              * При интерполяции данных для TargetResolution.DAILY алгоритм CSASRA даёт гораздо
              * более гладкие данные, чем алгоритм сплайна.
              */
-            if (curve == null && Util.True && options.usePrimaryCSASRA)
+            if (curve == null && Util.True && options.usePrimaryCSASRA())
                 curve = curve_csasra(bins, title, targetResolution, yearHint, gender, options);
         }
         catch (Exception e2)
@@ -165,7 +194,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         try
         {
-            if (curve == null && Util.True && options.usePrimarySPLINE)
+            if (curve == null && Util.True && options.usePrimarySPLINE())
                 curve = curve_spline(bins, title, targetResolution, yearHint, gender, options);
         }
         catch (Exception e2)
@@ -224,7 +253,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     /* ================================================================================================ */
 
-    private static CurveResult curve_csasra(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender,
+    private static CurveResult curve_csasra(
+            Bin[] bins,
+            String title,
+            TargetResolution targetResolution,
+            Integer yearHint,
+            Gender gender,
             InterpolationOptions options)
             throws Exception
     {
@@ -288,7 +322,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         {
             /* уточнить разбивку на возраста 0-9 */
             double[] raw = Util.dup(yy);
-            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender);
+            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender, options);
             CurveVerifier.validate_means(yy, bins);
             return new CurveResult(yy, raw);
         }
@@ -439,7 +473,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         {
             double[] raw = Util.dup(yy);
             /* уточнить разбивку на возраста 0-9 */
-            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender);
+            yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender, options);
             CurveVerifier.validate_means(yy, bins);
             return new CurveResult(yy, raw);
         }
