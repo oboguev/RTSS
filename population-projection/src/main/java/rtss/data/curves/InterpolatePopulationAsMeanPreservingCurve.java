@@ -376,6 +376,13 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 maxY = Math.max(maxY, Util.max(ss));
             }
 
+            if (options.hasExtra("chart-csasra") && !curve.method.equals("csasra"))
+            {
+                double[] cc = rawCSASRA(bins, title, targetResolution, yearHint, gender, options); 
+                chart.addSeries("raw csasra", xxx, cc);
+                maxY = Math.max(maxY, Util.max(cc));
+            }
+
             chart.maxY(clipMaxY(maxY, options));
 
             // chart.display();
@@ -405,6 +412,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
             {
                 double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options); 
                 chart.addSeries("raw spline", xxx, ss);
+            }
+
+            if (options.hasExtra("chart-csasra") && !curve.method.equals("csasra"))
+            {
+                double[] ss = rawCSASRA(bins, title, targetResolution, yearHint, gender, options); 
+                chart.addSeries("raw csasra", xxx, ss);
             }
 
             chart.display();
@@ -451,6 +464,20 @@ public class InterpolatePopulationAsMeanPreservingCurve
         options = options.clone();
         options.useSecondaryRefineYearlyAges = false;
         CurveResult curve = curve_spline(bins, title, targetResolution, yearHint, gender, options);
+        return curve.curve;
+    }
+
+    private static double[] rawCSASRA(
+            Bin[] bins,
+            String title,
+            TargetResolution targetResolution,
+            Integer yearHint,
+            Gender gender,
+            InterpolationOptions options) throws Exception
+    {
+        options = options.clone();
+        options.useSecondaryRefineYearlyAges = false;
+        CurveResult curve = curve_csasra(bins, title, targetResolution, yearHint, gender, options);
         return curve.curve;
     }
 

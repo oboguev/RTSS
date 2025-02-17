@@ -15,7 +15,7 @@ public class TestPopulationADH
 
             if (Util.False)
             {
-                options.both().displayChart(true).debugSecondaryRefineYearlyAges(true).allowChartMinorClipping(true).extra("chart-spline");
+                options.both().displayChart(true).debugSecondaryRefineYearlyAges(true).allowChartMinorClipping(true).extra("chart-spline").extra("chart-csasra");
                 
                 options.both().secondaryRefineYearlyAgesSmoothness(0.70).subtitle("0.70");
                 PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
@@ -35,7 +35,7 @@ public class TestPopulationADH
             }
 
             options = new InterpolationOptionsByGender().allowCache(false);
-            options.both().secondaryRefineYearlyAgesSmoothness(0.95).allowChartMinorClipping(true).extra("chart-spline");
+            options.both().secondaryRefineYearlyAgesSmoothness(0.95).allowChartMinorClipping(true).extra("chart-spline").extra("chart-csasra");
 
             if (Util.True)
             {
