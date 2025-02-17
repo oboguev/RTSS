@@ -38,7 +38,7 @@ public class TestPopulationADH
 
             if (Util.True)
             {
-                CaptureImages.capture("c:\\@@capture\\xxx", "USSR - ", 2400, 1500);
+                CaptureImages.capture("c:\\@@capture\\xxx", "USSR - ", null, 2400, 1500);
 
                 PopulationADH.getPopulationByLocality(Area.USSR, 1926, options);
                 PopulationADH.getPopulationByLocality(Area.USSR, 1927, options);
@@ -56,7 +56,7 @@ public class TestPopulationADH
 
             if (Util.True)
             {
-                CaptureImages.capture("c:\\@@capture\\xxx", "RSFSR - ", 2400, 1500);
+                CaptureImages.capture("c:\\@@capture\\xxx", "RSFSR - ", null, 2400, 1500);
 
                 for (int year = 1927; year <= 1959; year++)
                 {
