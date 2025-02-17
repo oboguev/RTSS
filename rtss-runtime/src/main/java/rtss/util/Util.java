@@ -788,7 +788,7 @@ public class Util
 
         availableProcessors = cores;
 
-        Util.out(String.format("Using %d processors (parallel threads) out of available %d physcical cores",
+        Util.out(String.format("Using %d processors (parallel threads) out of available %d physical cores",
                                availableProcessors,
                                physicalCores));
 

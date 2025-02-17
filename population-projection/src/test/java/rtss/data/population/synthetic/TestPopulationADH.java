@@ -12,8 +12,8 @@ public class TestPopulationADH
         {
             if (Util.True)
             {
-                // PopulationADH.getPopulationByLocality(Area.USSR, 1926);
-                // PopulationADH.getPopulationByLocality(Area.USSR, 1941);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1926);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1941);
                 Util.noop();
             }
 

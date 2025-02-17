@@ -28,13 +28,96 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  */
 public class InterpolatePopulationAsMeanPreservingCurve
 {
-    public static final int MAX_AGE = Population.MAX_AGE;
-    
-    public static class CurveResult
+    public static class InterpolationOptions
+    {
+        public boolean usePrimaryCSASRA = true;
+        public boolean usePrimarySPLINE = true;
+        public boolean useSecondaryRefineYearlyAges = true;
+
+        public InterpolationOptions usePrimaryCSASRA(boolean usePrimaryCSASRA)
+        {
+            this.usePrimaryCSASRA = usePrimaryCSASRA;
+            return this;
+        }
+
+        public InterpolationOptions usePrimarySPLINE(boolean usePrimarySPLINE)
+        {
+            this.usePrimarySPLINE = usePrimarySPLINE;
+            return this;
+        }
+
+        public InterpolationOptions useSecondaryRefineYearlyAges(boolean useSecondaryRefineYearlyAges)
+        {
+            this.useSecondaryRefineYearlyAges = useSecondaryRefineYearlyAges;
+            return this;
+        }
+    }
+
+    public static class InterpolationOptionsByGender
+    {
+        private InterpolationOptions both;
+        private InterpolationOptions male;
+        private InterpolationOptions female;
+
+        public InterpolationOptions both()
+        {
+            if (both == null)
+                both = new InterpolationOptions();
+            return both;
+        }
+
+        public InterpolationOptions male()
+        {
+            if (male == null)
+                male = new InterpolationOptions();
+            return male;
+        }
+
+        public InterpolationOptions female()
+        {
+            if (female == null)
+                female = new InterpolationOptions();
+            return female;
+        }
+
+        public InterpolationOptions getForGender(Gender gender)
+        {
+            if (gender == Gender.MALE && male != null)
+                return male;
+            else if (gender == Gender.FEMALE && female != null)
+                return female;
+            else
+                return both;
+        }
+
+        public InterpolationOptions createForGender(Gender gender)
+        {
+            if (gender == Gender.MALE)
+            {
+                if (male == null)
+                    male = new InterpolationOptions();
+                return male;
+            }
+            else if (gender == Gender.FEMALE)
+            {
+                if (female == null)
+                    female = new InterpolationOptions();
+                return female;
+            }
+            else
+            {
+                if (both == null)
+                    both = new InterpolationOptions();
+                return both;
+            }
+        }
+    }
+
+    private static class CurveResult
     {
         public final double[] curve;
         public final double[] raw;
-        
+
         public CurveResult(double[] curve)
         {
             this.curve = curve;
@@ -48,8 +131,17 @@ public class InterpolatePopulationAsMeanPreservingCurve
         }
     }
 
-    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender) throws Exception
+    public static final int MAX_AGE = Population.MAX_AGE;
+
+    /* =========================================================================================================== */
+
+    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender,
+            InterpolationOptions options)
+            throws Exception
     {
+        if (options == null)
+            options = new InterpolationOptions();
+
         // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);
 
@@ -62,8 +154,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
              * При интерполяции данных для TargetResolution.DAILY алгоритм CSASRA даёт гораздо
              * более гладкие данные, чем алгоритм сплайна.
              */
-            if (curve == null && Util.True)
-                curve = curve_csasra(bins, title, targetResolution, yearHint, gender);
+            if (curve == null && Util.True && options.usePrimaryCSASRA)
+                curve = curve_csasra(bins, title, targetResolution, yearHint, gender, options);
         }
         catch (Exception e2)
         {
@@ -73,8 +165,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         try
         {
-            if (curve == null && Util.True)
-                curve = curve_spline(bins, title, targetResolution, yearHint, gender);
+            if (curve == null && Util.True && options.usePrimarySPLINE)
+                curve = curve_spline(bins, title, targetResolution, yearHint, gender, options);
         }
         catch (Exception e2)
         {
@@ -90,7 +182,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             else
                 throw new Exception("Unable to build the curve");
         }
-        
+
         if (CaptureImages.get() != null)
         {
             int ppy = 1;
@@ -102,11 +194,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
                 chart.addSeries("raw", xxx, curve.raw);
-            
+
             chart.addLineSeries("bins", Bins.ppy_x(bins, 100), Bins.ppy_y(bins, 100));
             chart.display();
-            
-            CaptureImages ci = CaptureImages.get(); 
+
+            CaptureImages ci = CaptureImages.get();
             String fn = yearHint + " " + gender.name() + " " + title;
             chart.exportImage(ci.cx, ci.cy, ci.path(fn + ".png"));
         }
@@ -116,14 +208,14 @@ public class InterpolatePopulationAsMeanPreservingCurve
             int ppy = 1;
             double[] xxx = Bins.ppy_x(bins, ppy);
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(title, "x", "y").showSplinePane(false);
-            
+
             chart.addSeries("final", xxx, curve.curve);
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
                 chart.addSeries("raw", xxx, curve.raw);
-            
+
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
-            
+
             chart.display();
         }
 
@@ -132,7 +224,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     /* ================================================================================================ */
 
-    private static CurveResult curve_csasra(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender)
+    private static CurveResult curve_csasra(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender,
+            InterpolationOptions options)
             throws Exception
     {
         final int ppy = 1;
@@ -190,8 +283,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
             throw new Exception("Error calculating curve (negative value)");
 
         CurveVerifier.validate_means(yy, bins);
-        
-        if (targetResolution == TargetResolution.YEARLY)
+
+        if (targetResolution == TargetResolution.YEARLY && options.useSecondaryRefineYearlyAges)
         {
             /* уточнить разбивку на возраста 0-9 */
             double[] raw = Util.dup(yy);
@@ -241,11 +334,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
     /*
      * Spline implementation
      */
-    private static CurveResult curve_spline(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender)
+    private static CurveResult curve_spline(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender,
+            InterpolationOptions options)
             throws Exception
     {
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
-        MeanPreservingIterativeSpline.Options options = new MeanPreservingIterativeSpline.Options()
+        MeanPreservingIterativeSpline.Options splineOptions = new MeanPreservingIterativeSpline.Options()
                 .checkPositive(false);
 
         if (Util.True)
@@ -253,7 +347,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             /*
              * Helps to avoid the last segment of the curve dive down too much
              */
-            options = options.placeLastBinKnotAtRightmostPoint();
+            splineOptions = splineOptions.placeLastBinKnotAtRightmostPoint();
         }
 
         int ppy = 12;
@@ -270,20 +364,20 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         if (Util.False)
         {
-            options.basicSplineType(SteffenSplineInterpolator.class);
-            yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            splineOptions.basicSplineType(SteffenSplineInterpolator.class);
+            yyy1 = MeanPreservingIterativeSpline.eval(bins, ppy, splineOptions, precision);
         }
 
         if (Util.False)
         {
-            options.basicSplineType(AkimaSplineInterpolator.class);
-            yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            splineOptions.basicSplineType(AkimaSplineInterpolator.class);
+            yyy2 = MeanPreservingIterativeSpline.eval(bins, ppy, splineOptions, precision);
         }
 
         if (Util.True)
         {
-            options.basicSplineType(ConstrainedCubicSplineInterpolator.class);
-            yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, options, precision);
+            splineOptions.basicSplineType(ConstrainedCubicSplineInterpolator.class);
+            yyy3 = MeanPreservingIterativeSpline.eval(bins, ppy, splineOptions, precision);
         }
 
         if (Util.False)
@@ -341,7 +435,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
         CurveVerifier.validate_means(yy, bins);
 
-        if (targetResolution == TargetResolution.YEARLY)
+        if (targetResolution == TargetResolution.YEARLY && options.useSecondaryRefineYearlyAges)
         {
             double[] raw = Util.dup(yy);
             /* уточнить разбивку на возраста 0-9 */

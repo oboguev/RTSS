@@ -10,6 +10,8 @@ import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.curves.TargetResolution;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptions;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptionsByGender;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.calc.SmoothPopulation;
 import rtss.data.selectors.Gender;
@@ -1294,27 +1296,27 @@ public class Population
 
     /*****************************************************************************************************/
 
-    public Population(Bin[] maleBins, Bin[] femaleBins, Integer yearHint) throws Exception
+    public Population(Bin[] maleBins, Bin[] femaleBins, Integer yearHint, InterpolationOptions maleOptions, InterpolationOptions femaleOptions) throws Exception
     {
-        this(Locality.TOTAL, maleBins, femaleBins, yearHint);
+        this(Locality.TOTAL, maleBins, femaleBins, yearHint, maleOptions, femaleOptions);
     }
 
-    public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins, Integer yearHint) throws Exception
+    public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins, Integer yearHint, InterpolationOptions maleOptions, InterpolationOptions femaleOptions) throws Exception
     {
         this(locality,
-             bin2array(maleBins, yearHint, Gender.MALE), 0, null,
-             bin2array(femaleBins, yearHint, Gender.FEMALE), 0, null);
+             bin2array(maleBins, yearHint, Gender.MALE, maleOptions), 0, null,
+             bin2array(femaleBins, yearHint, Gender.FEMALE, femaleOptions), 0, null);
     }
 
-    private static double[] bin2array(Bin[] bins, Integer yearHint, Gender gender) throws Exception
+    private static double[] bin2array(Bin[] bins, Integer yearHint, Gender gender, InterpolationOptions options) throws Exception
     {
         bins = Bins.bins(bins);
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.widths_in_years(bins) != MAX_AGE + 1)
             throw new IllegalArgumentException("invalid bins layout");
-        return bins2yearly(bins, "dynamic", yearHint, gender);
+        return bins2yearly(bins, "dynamic", yearHint, gender, options);
     }
 
-    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint, Gender gender) throws Exception
+    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint, Gender gender, InterpolationOptions options) throws Exception
     {
         boolean interpolate = false;
 
@@ -1336,7 +1338,7 @@ public class Population
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint, gender);
+        double[] counts = InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint, gender, options);
 
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);

@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptionsByGender;
 import rtss.data.curves.TargetResolution;
 import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
@@ -18,13 +19,16 @@ public class PopulationFromExcel extends ExcelLoader
 {
     private static final double MAX_DIFF = 3;
 
-    public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown, Integer yearHint, String title) throws Exception
+    public static double[] loadCounts(String path, Gender gender, int year, MutableDouble v_unknown, Integer yearHint, String title, InterpolationOptionsByGender options) throws Exception
     {
-        return loadCounts(path, gender, "" + year, v_unknown, yearHint, title);
+        return loadCounts(path, gender, "" + year, v_unknown, yearHint, title, options);
     }
     
-    public static double[] loadCounts(String path, Gender gender, String year, MutableDouble v_unknown, Integer yearHint, String title) throws Exception
+    public static double[] loadCounts(String path, Gender gender, String year, MutableDouble v_unknown, Integer yearHint, String title, InterpolationOptionsByGender options) throws Exception
     {
+        if (options == null)
+            options = new InterpolationOptionsByGender();
+        
         /*
          * parse excel rows and fill them into the bins
          */
@@ -144,7 +148,7 @@ public class PopulationFromExcel extends ExcelLoader
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
 
-        double[] counts = bins2yearly(bins, title, yearHint, gender);
+        double[] counts = bins2yearly(bins, title, yearHint, gender, options);
         
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);
@@ -155,7 +159,7 @@ public class PopulationFromExcel extends ExcelLoader
         return counts;
     }
 
-    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint, Gender gender) throws Exception
+    private static double[] bins2yearly(Bin[] bins, String title, Integer yearHint, Gender gender, InterpolationOptionsByGender options) throws Exception
     {
         boolean interpolate = false;
 
@@ -173,6 +177,6 @@ public class PopulationFromExcel extends ExcelLoader
             return v;
         }
         
-        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint, gender);
+        return InterpolatePopulationAsMeanPreservingCurve.curve(bins, title, TargetResolution.YEARLY, yearHint, gender, options.getForGender(gender));
     }
 }

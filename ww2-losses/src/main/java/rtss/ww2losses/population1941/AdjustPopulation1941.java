@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rtss.data.bin.Bin;
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptions;
 import rtss.data.population.struct.Population;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
@@ -64,7 +65,7 @@ public class AdjustPopulation1941 extends AdjustPopulation
 
         Bin[] male = p.binSumByAge(Gender.MALE, rebin(ADH_binning, isolateAgesMale));
         Bin[] female = p.binSumByAge(Gender.FEMALE, rebin(ADH_binning, isolateAgesFemale));
-        p = new Population(male, female, 1941);
+        p = new Population(male, female, 1941, new InterpolationOptions(), new InterpolationOptions());
 
         if (Util.False)
         {

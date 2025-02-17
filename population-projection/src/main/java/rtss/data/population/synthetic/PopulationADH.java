@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptionsByGender;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
@@ -33,10 +34,20 @@ public class PopulationADH
 
     public static Population getPopulation(Area area, int year) throws Exception
     {
-        return getPopulation(area, "" + year);
+        return getPopulation(area, year, null);
+    }
+
+    public static Population getPopulation(Area area, int year, InterpolationOptionsByGender options) throws Exception
+    {
+        return getPopulation(area, "" + year, options);
     }
 
     public static Population getPopulation(Area area, String year) throws Exception
+    {
+        return getPopulation(area, year, null);
+    }
+    
+    public static Population getPopulation(Area area, String year, InterpolationOptionsByGender options) throws Exception
     {
         Population p = null;
         Integer yearHint = yearHint(year);
@@ -71,14 +82,14 @@ public class PopulationADH
 
             MutableDouble m_unknown = new MutableDouble();
             String m_title = "Population " + area.toString() + " " + Gender.MALE.toString() + " " + year;
-            double[] m = PopulationFromExcel.loadCounts(excel_path, Gender.MALE, year, m_unknown, yearHint, m_title);
+            double[] m = PopulationFromExcel.loadCounts(excel_path, Gender.MALE, year, m_unknown, yearHint, m_title, options);
             /* population data in AHD books (and Excel file) is in thousands */
             m = Util.multiply(m, 1000);
             round(m);
 
             MutableDouble f_unknown = new MutableDouble();
             String f_title = "Population " + area.toString() + " " + Gender.FEMALE.toString() + " " + year;
-            double[] f = PopulationFromExcel.loadCounts(excel_path, Gender.FEMALE, year, f_unknown, yearHint, f_title);
+            double[] f = PopulationFromExcel.loadCounts(excel_path, Gender.FEMALE, year, f_unknown, yearHint, f_title, options);
             f = Util.multiply(f, 1000);
             round(f);
 
@@ -115,13 +126,23 @@ public class PopulationADH
 
     /* ========================================================================== */
 
+    public static PopulationByLocality getPopulationByLocality(Area area, int year, InterpolationOptionsByGender options) throws Exception
+    {
+        return getPopulationByLocality(area, "" + year, options);
+    }
+
+    public static PopulationByLocality getPopulationByLocality(Area area, String year, InterpolationOptionsByGender options) throws Exception
+    {
+        return new PopulationByLocality(getPopulation(area, year, options));
+    }
+
     public static PopulationByLocality getPopulationByLocality(Area area, int year) throws Exception
     {
-        return getPopulationByLocality(area, "" + year);
+        return getPopulationByLocality(area, year, null);
     }
 
     public static PopulationByLocality getPopulationByLocality(Area area, String year) throws Exception
     {
-        return new PopulationByLocality(getPopulation(area, year));
+        return getPopulationByLocality(area, year, null);
     }
 }
