@@ -39,17 +39,17 @@
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>
-			<version>1.5.2</version>
+			<version>1.5.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.orsonpdf</groupId>
 			<artifactId>orsonpdf</artifactId>
-			<version>1.9</version>
+			<version>1.9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jfree</groupId>
-			<artifactId>jfreesvg</artifactId>
-			<version>3.4</version>
+			<artifactId>org.jfree.svg</artifactId>
+			<version>5.0.6</version>
 		</dependency>
 
 		<!-- Excel file reader -->

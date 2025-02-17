@@ -61,7 +61,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             this.debugSecondaryRefineYearlyAges = debugSecondaryRefineYearlyAges;
             return this;
         }
-        
+
         public InterpolationOptions secondaryRefineYearlyAgesSmoothness(double secondaryRefineYearlyAgesSmoothness)
         {
             this.secondaryRefineYearlyAgesSmoothness = secondaryRefineYearlyAgesSmoothness;
@@ -81,7 +81,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         }
 
         /* --------------------------------------------------------------------- */
-        
+
         public boolean usePrimaryCSASRA()
         {
             return usePrimaryCSASRA;
@@ -111,7 +111,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         {
             return subtitle;
         }
-        
+
         public boolean displayChart()
         {
             return displayChart;
@@ -200,7 +200,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     /* =========================================================================================================== */
 
-    public static double[] curve(Bin[] bins, String title, TargetResolution targetResolution, Integer yearHint, Gender gender,
+    public static double[] curve(Bin[] bins,
+            String title,
+            TargetResolution targetResolution,
+            Integer yearHint,
+            Gender gender,
             InterpolationOptions options)
             throws Exception
     {
@@ -251,6 +255,9 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 throw new Exception("Unable to build the curve");
         }
 
+        /*
+         * Export chart image
+         */
         if (CaptureImages.get() != null)
         {
             int ppy = 1;
@@ -259,11 +266,19 @@ public class InterpolatePopulationAsMeanPreservingCurve
             ChartXYSPlineBasic chart = new ChartXYSPlineBasic(title, "x", "y");
 
             chart.addSeries("final", xxx, curve.curve);
+            double maxY = Util.max(curve.curve);
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
+            {
                 chart.addSeries("raw", xxx, curve.raw);
+                maxY = Math.max(maxY, Util.max(curve.raw));
+            }
 
             chart.addLineSeries("bins", Bins.ppy_x(bins, 100), Bins.ppy_y(bins, 100));
+            maxY = Math.max(maxY, Util.max(Bins.ppy_y(bins, 100)));
+
+            chart.maxY(clipMaxY(maxY, options));
+
             // chart.display();
 
             CaptureImages ci = CaptureImages.get();
@@ -271,6 +286,9 @@ public class InterpolatePopulationAsMeanPreservingCurve
             chart.exportImage(ci.cx, ci.cy, ci.path(fn + ".png"));
         }
 
+        /*
+         * Display chart
+         */
         if (Util.False || options.displayChart())
         {
             int ppy = 1;
@@ -288,6 +306,33 @@ public class InterpolatePopulationAsMeanPreservingCurve
         }
 
         return curve.curve;
+    }
+
+    private static double clipMaxY(double v, InterpolationOptions options)
+    {
+        /*
+         * 1_000 => 50
+         * 10_000 => 500
+         * 100_000 => 500
+         */
+        long scaleQuant = scaleQuant(v);
+
+        long nq = Math.round(Math.floor(v)) / scaleQuant;
+
+        double excess = v - nq * scaleQuant;
+
+        if (excess <= 70 && Util.False)
+            return nq * scaleQuant;
+        else
+            return (nq + 1) * scaleQuant;
+    }
+
+    private static long scaleQuant(double v)
+    {
+        // round up to next power of 10
+        int n = (int) Math.ceil(Math.log10(v));
+        long scale = Math.round(Math.pow(10, n));
+        return scale / 20;
     }
 
     /* ================================================================================================ */

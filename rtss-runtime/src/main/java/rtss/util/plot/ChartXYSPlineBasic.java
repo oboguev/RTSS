@@ -1,9 +1,12 @@
 package rtss.util.plot;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 
 import javax.swing.JPanel;
 
@@ -28,15 +31,15 @@ public class ChartXYSPlineBasic extends ApplicationFrame
     public static void display(String title, double[] y)
     {
         new ChartXYSPlineBasic(title, "x", "y")
-            .addSeries(title, y)
-            .display();        
+                .addSeries(title, y)
+                .display();
     }
-    
+
     public static void display(String title, double[] x, double[] y)
     {
         new ChartXYSPlineBasic(title, "x", "y")
-            .addSeries(title, x, y)
-            .display();        
+                .addSeries(title, x, y)
+                .display();
     }
 
     public static final long serialVersionUID = 1;
@@ -45,6 +48,7 @@ public class ChartXYSPlineBasic extends ApplicationFrame
     private List<XYSeries> lineSeries = new ArrayList<>();
     private String xLabel;
     private String yLabel;
+    private Double maxY;
 
     public ChartXYSPlineBasic()
     {
@@ -55,14 +59,14 @@ public class ChartXYSPlineBasic extends ApplicationFrame
     {
         this(title, "", "");
     }
-    
+
     public ChartXYSPlineBasic(String title, String xLabel, String yLabel)
     {
         super(title);
         this.xLabel = xLabel;
         this.yLabel = yLabel;
     }
-    
+
     public ChartXYSPlineBasic addSeries(String name, double[] y)
     {
         double[] x = new double[y.length];
@@ -74,14 +78,14 @@ public class ChartXYSPlineBasic extends ApplicationFrame
     public ChartXYSPlineBasic addSeries(String name, double[] x, double[] y)
     {
         XYSeries series = new XYSeries(name);
-        
+
         for (int k = 0; k < x.length; k++)
             series.add(x[k], y[k]);
-        
+
         splineSeries.add(series);
         return this;
     }
-    
+
     public ChartXYSPlineBasic addLineSeries(String name, double[] y)
     {
         double[] x = new double[y.length];
@@ -93,15 +97,21 @@ public class ChartXYSPlineBasic extends ApplicationFrame
     public ChartXYSPlineBasic addLineSeries(String name, double[] x, double[] y)
     {
         XYSeries series = new XYSeries(name);
-        
+
         for (int k = 0; k < x.length; k++)
             series.add(x[k], y[k]);
-        
+
         lineSeries.add(series);
         return this;
     }
 
-    public void display() 
+    public ChartXYSPlineBasic maxY(Double maxY)
+    {
+        this.maxY = maxY;
+        return this;
+    }
+
+    public void display()
     {
         JPanel content = createPanel();
         content.setPreferredSize(new java.awt.Dimension(800, 600));
@@ -110,18 +120,19 @@ public class ChartXYSPlineBasic extends ApplicationFrame
         pack();
         UIUtils.centerFrameOnScreen(this);
         setVisible(true);
-    }   
-    
+    }
+
     private JPanel createPanel()
     {
         JFreeChart chart = createChart();
         ChartPanel chartPanel = new ChartPanel(chart);
         return chartPanel;
-    }    
-    
+    }
+
     private JFreeChart createChart()
     {
         XYSeriesCollection dataset = new XYSeriesCollection();
+        
         for (XYSeries series : lineSeries)
             dataset.addSeries(series);
         for (XYSeries series : splineSeries)
@@ -133,26 +144,38 @@ public class ChartXYSPlineBasic extends ApplicationFrame
         NumberAxis yAxis = new NumberAxis(yLabel);
         yAxis.setAutoRangeIncludesZero(false);
 
+        if (maxY != null)
+            yAxis.setRange(0, maxY);
+
         XYSplineRenderer splineRenderer = new XYSplineRenderer();
-        splineRenderer.setDefaultShapesVisible(false);
+        splineRenderer.setDefaultShape(new Ellipse2D.Double(0,0,2,2));
+        splineRenderer.setDefaultShapesFilled(true);
+        splineRenderer.setDefaultShapesVisible(true);
+
         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, splineRenderer);
         plot.setBackgroundPaint(Color.LIGHT_GRAY);
         plot.setDomainGridlinePaint(Color.WHITE);
         plot.setRangeGridlinePaint(Color.WHITE);
         plot.setAxisOffset(new RectangleInsets(4, 4, 4, 4));
-        
+
         XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
-        lineRenderer.setDefaultShapesVisible(false);
+        lineRenderer.setDefaultShape(new Ellipse2D.Double(0,0,1,1));
+        lineRenderer.setDefaultShapesVisible(true);
+        lineRenderer.setDefaultStroke(new BasicStroke((float) 1.0));
+        lineRenderer.setAutoPopulateSeriesStroke(false);
         
         for (int k = 0; k < lineSeries.size(); k++)
+        {
             plot.setRenderer(k, lineRenderer, true);
+            lineRenderer.setSeriesShapesVisible(k, false);
+        }
 
         JFreeChart chart = new JFreeChart(getTitle(),
-                                          JFreeChart.DEFAULT_TITLE_FONT, 
-                                          plot, 
+                                          JFreeChart.DEFAULT_TITLE_FONT,
+                                          plot,
                                           true);
         ChartUtils.applyCurrentTheme(chart);
-        
+
         return chart;
     }
 
