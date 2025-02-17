@@ -330,33 +330,63 @@ public class InterpolatePopulationAsMeanPreservingCurve
         else
             preferredAlgorithm = FirstStageAlgorithm.CSASRA;
 
-        try
+        if (preferredAlgorithm == FirstStageAlgorithm.CSASRA)
         {
             /*
-             * При интерполяции данных для TargetResolution.DAILY алгоритм CSASRA даёт гораздо
-             * более гладкие данные, чем алгоритм сплайна.
+             * Try CSASRA first
              */
-            if (curve == null && Util.True && options.usePrimaryCSASRA())
-                curve = curve_csasra(bins, title, targetResolution, yearHint, gender, options);
-        }
-        catch (Exception e2)
-        {
-            Util.err("CSASRA disaggregation failed for " + title);
-            ex = e2;
-        }
-
-        try
-        {
-            if (curve == null && Util.True && options.usePrimarySPLINE())
-                curve = curve_spline(bins, title, targetResolution, yearHint, gender, options);
-        }
-        catch (Exception e2)
-        {
-            Util.err("Spline disaggregation failed for " + title);
-            if (ex == null)
+            try
+            {
+                if (curve == null && Util.True && options.usePrimaryCSASRA())
+                    curve = curve_csasra(bins, title, targetResolution, yearHint, gender, options);
+            }
+            catch (Exception e2)
+            {
+                Util.err("CSASRA disaggregation failed for " + title);
                 ex = e2;
-        }
+            }
 
+            try
+            {
+                if (curve == null && Util.True && options.usePrimarySPLINE())
+                    curve = curve_spline(bins, title, targetResolution, yearHint, gender, options);
+            }
+            catch (Exception e2)
+            {
+                Util.err("Spline disaggregation failed for " + title);
+                if (ex == null)
+                    ex = e2;
+            }
+        }
+        else
+        {
+            /*
+             * Try SPLINE first
+             */
+            try
+            {
+                if (curve == null && Util.True && options.usePrimarySPLINE())
+                    curve = curve_spline(bins, title, targetResolution, yearHint, gender, options);
+            }
+            catch (Exception e2)
+            {
+                Util.err("Spline disaggregation failed for " + title);
+                if (ex == null)
+                    ex = e2;
+            }
+            
+            try
+            {
+                if (curve == null && Util.True && options.usePrimaryCSASRA())
+                    curve = curve_csasra(bins, title, targetResolution, yearHint, gender, options);
+            }
+            catch (Exception e2)
+            {
+                Util.err("CSASRA disaggregation failed for " + title);
+                ex = e2;
+            }
+        }
+        
         if (curve == null)
         {
             if (ex != null)
