@@ -1,4 +1,4 @@
-package rtss.math.interpolate.disaggregate;
+package rtss.math.interpolate.disaggregate.csasra;
 
 import java.util.Arrays;
 

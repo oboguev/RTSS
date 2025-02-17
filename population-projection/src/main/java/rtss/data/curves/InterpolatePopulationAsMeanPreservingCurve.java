@@ -14,8 +14,8 @@ import rtss.data.selectors.Gender;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
-import rtss.math.interpolate.disaggregate.DisaggregateConstantWidthSeries;
-import rtss.math.interpolate.disaggregate.DisaggregateVariableWidthSeries;
+import rtss.math.interpolate.disaggregate.csasra.DisaggregateConstantWidthSeries;
+import rtss.math.interpolate.disaggregate.csasra.DisaggregateVariableWidthSeries;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
@@ -25,9 +25,41 @@ import rtss.util.plot.ChartXYSPlineBasic;
 import rtss.util.plot.ChartXYSplineAdvanced;
 
 /**
- * Interpolate aggregated bins to a smooth yearly curve, in a mean-preserving way.
- * Typically used to interpolate population from an aggregated multi-year data to a yearly resolution.
- * Or to a daily resolution, for use by PopulationContext.
+ * Interpolate population in aggregated bins to a smooth disaggregated curve, in a mean-preserving way.
+
+ * Интерпролировать население агрегированное в корзины плавной кривой, сохраняющей значение корзин.
+ * 
+ * Применяется в двух случая:
+ * 
+ *   1. targetResolution = YEARLY
+ *      Дезагрегация многолетних корозин с годовые значения.
+ *      Обычно это пятилетние группы (0-4 5-9 и т.д), иногда с 16-летней группой в конце (85-100).
+ *      Используется PopulationADH (PopulationFromExcel), 
+ *      а также конструктором Populaton из корзин (вызывается из AdjustPopulation1941). 
+ *      
+ *   2. targetResolution = DAILY 
+ *      Дезагрегация погодовых значений в дневные.
+ *      Используется PopulationContext. 
+ *      
+ * *************************************************************************************     
+ * 
+ * В случае DAILY используеся алгоритм CSASRA.
+ * 
+ * *************************************************************************************
+ *      
+ * В случае YEARLY обработка двухстепенчатая.
+ * 
+ * На первой ступени генерируется годовая кривая.
+ * Алгоритм первой ступени -- универсальный алгоритм распаковки, не знающий демографической специфики.
+ * 
+ * На второй ступени ход кривой в начальные годы возраста (0-9) корректируется для лучшего соответствия
+ * характеристикам раннедетской смертности в данную эпоху, а также провалам рождений в недавние годы.
+ * Это алгоритм RefineYearlyPopulation.
+ * 
+ * Для первой ступени применимы два алгоритма: CSASRA и SPLINE.
+ * Их результаты в большинстве случаев сходны.
+ * Однако SPLINE даёт лучший (на начальном участке возрастов) результат для 1956-1959 гг.,
+ * когда число рождений замедляется и кривая начального участка становится пологой.    
  */
 public class InterpolatePopulationAsMeanPreservingCurve
 {

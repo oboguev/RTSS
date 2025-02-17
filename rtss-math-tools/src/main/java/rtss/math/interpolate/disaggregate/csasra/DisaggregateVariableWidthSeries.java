@@ -1,4 +1,4 @@
-package rtss.math.interpolate.disaggregate;
+package rtss.math.interpolate.disaggregate.csasra;
 
 import java.util.Arrays;
 
@@ -8,6 +8,7 @@ import rtss.util.Util;
  * Дезагреггировать массив состоящий из агрегированных средних величин в исходные до-аггегированные значения.
  * Работает с участками (корзинами) аггрегации переменной длины.
  * В отличие от DisaggregateConstantWidthSeries, предполагающего одинаковость ширины корзин.
+ * Алгоритм предназначен для дезагрегации возрастных групп населения.        
  * 
  * Constrained Smooth Aggregated Series Reconstruction Algorithm (CSASRA).
  * 
@@ -40,7 +41,6 @@ import rtss.util.Util;
  *     Produce it again in Java. 
  *     
  * Мы дополнительно делаем первый участок линейным.
- * Алгоритм предназначен для дезагрегации возрастных групп населения.        
  */
 public class DisaggregateVariableWidthSeries
 {
@@ -265,23 +265,5 @@ public class DisaggregateVariableWidthSeries
             sum += a * x + b;
 
         return sum;
-    }
-
-    /* 
-     * Простая, но ошибочная версия.
-     * Понять потом, в чём ошибка. 
-     */
-    @SuppressWarnings("unused")
-    private static double[] linearize_first_segment_000(double[] y, int width, double sum) throws Exception
-    {
-        y = Util.dup(y);
-
-        double a = (2 * y[width] - sum) / (width + 1);
-        double b = y[width] - a * width;
-
-        for (int x = 0; x < width; x++)
-            y[x] = a * x + b;
-
-        return y;
     }
 }
