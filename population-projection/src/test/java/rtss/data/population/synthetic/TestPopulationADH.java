@@ -11,20 +11,22 @@ public class TestPopulationADH
     {
         try
         {
-            if (Util.True)
-            {
-                InterpolationOptionsByGender options = new InterpolationOptionsByGender();
+            InterpolationOptionsByGender options = new InterpolationOptionsByGender();
 
-                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.70).subtitle("0.70");
+            if (Util.False)
+            {
+                options.both().displayChart(true).debugSecondaryRefineYearlyAges(true);
+                
+                options.both().secondaryRefineYearlyAgesSmoothness(0.70).subtitle("0.70");
                 PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
 
-                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.90).subtitle("0.90");
+                options.both().secondaryRefineYearlyAgesSmoothness(0.90).subtitle("0.90");
                 // PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
 
-                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.94).subtitle("0.94");
+                options.both().secondaryRefineYearlyAgesSmoothness(0.94).subtitle("0.94");
                 // PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
 
-                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.98).subtitle("0.98");
+                options.both().secondaryRefineYearlyAgesSmoothness(0.98).subtitle("0.98");
                 //PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
 
                 // PopulationADH.getPopulationByLocality(Area.USSR, 1926, options);
@@ -32,20 +34,22 @@ public class TestPopulationADH
                 Util.noop();
             }
 
+            options = new InterpolationOptionsByGender();
+
             if (Util.True)
             {
                 CaptureImages.capture("c:\\@@capture\\xxx", "USSR - ", 2400, 1500);
 
-                PopulationADH.getPopulationByLocality(Area.USSR, 1926);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1927);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1937);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1938);
-                PopulationADH.getPopulationByLocality(Area.USSR, "1939-границы-1938");
-                PopulationADH.getPopulationByLocality(Area.USSR, "1939-границы-1946");
-                PopulationADH.getPopulationByLocality(Area.USSR, 1940);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1941);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1946);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1947);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1926, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1927, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1937, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1938, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, "1939-границы-1938", options);
+                PopulationADH.getPopulationByLocality(Area.USSR, "1939-границы-1946", options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1940, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1941, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1946, options);
+                PopulationADH.getPopulationByLocality(Area.USSR, 1947, options);
 
                 CaptureImages.stop();
             }
@@ -58,7 +62,7 @@ public class TestPopulationADH
                 {
                     if (year >= 1942 && year <= 1945)
                         continue;
-                    PopulationADH.getPopulationByLocality(Area.RSFSR, year);
+                    PopulationADH.getPopulationByLocality(Area.RSFSR, year, options);
                 }
 
                 CaptureImages.stop();

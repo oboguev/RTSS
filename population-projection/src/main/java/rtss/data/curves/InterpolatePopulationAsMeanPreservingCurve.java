@@ -36,6 +36,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
         private boolean debugSecondaryRefineYearlyAges = false;
         private Double secondaryRefineYearlyAgesSmoothness = null;
         private String subtitle = null;
+        private boolean displayChart = false;
 
         public InterpolationOptions usePrimaryCSASRA(boolean usePrimaryCSASRA)
         {
@@ -73,6 +74,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
             return this;
         }
 
+        public InterpolationOptions displayChart(boolean displayChart)
+        {
+            this.displayChart = displayChart;
+            return this;
+        }
+
         /* --------------------------------------------------------------------- */
         
         public boolean usePrimaryCSASRA()
@@ -103,6 +110,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
         public String subtitle()
         {
             return subtitle;
+        }
+        
+        public boolean displayChart()
+        {
+            return displayChart;
         }
     }
 
@@ -252,14 +264,14 @@ public class InterpolatePopulationAsMeanPreservingCurve
                 chart.addSeries("raw", xxx, curve.raw);
 
             chart.addLineSeries("bins", Bins.ppy_x(bins, 100), Bins.ppy_y(bins, 100));
-            chart.display();
+            // chart.display();
 
             CaptureImages ci = CaptureImages.get();
             String fn = yearHint + " " + gender.name() + " " + title;
             chart.exportImage(ci.cx, ci.cy, ci.path(fn + ".png"));
         }
 
-        if (Util.True)
+        if (Util.False || options.displayChart())
         {
             int ppy = 1;
             double[] xxx = Bins.ppy_x(bins, ppy);
