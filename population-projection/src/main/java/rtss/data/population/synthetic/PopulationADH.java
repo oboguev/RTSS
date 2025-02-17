@@ -16,7 +16,7 @@ import rtss.util.Util;
 public class PopulationADH
 {
     static public boolean UsePrecomputedFiles = false; // ###
-    static public boolean UseCache = true;
+    static public boolean UseCache = false; // ###
 
     private static Map<String, Population> cache = new HashMap<>();
 

@@ -111,6 +111,10 @@ public class RefineYearlyPopulation
         }
 
         double importance_smoothness = 0.94;
+        if (options.secondaryRefineYearlyAgesSmoothness() != null)
+            importance_smoothness = options.secondaryRefineYearlyAgesSmoothness();
+        Util.assertion(importance_smoothness >= 0.001 && importance_smoothness <= 0.999);
+        
         double importance_target_diff_matching = 1.0 - importance_smoothness;
 
         int extraPoints = 3; // for derivatives

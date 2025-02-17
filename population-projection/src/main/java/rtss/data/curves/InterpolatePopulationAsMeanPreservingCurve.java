@@ -34,6 +34,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
         private boolean usePrimarySPLINE = true;
         private boolean useSecondaryRefineYearlyAges = true;
         private boolean debugSecondaryRefineYearlyAges = false;
+        private Double secondaryRefineYearlyAgesSmoothness = null;
+        private String subtitle = null;
 
         public InterpolationOptions usePrimaryCSASRA(boolean usePrimaryCSASRA)
         {
@@ -59,6 +61,18 @@ public class InterpolatePopulationAsMeanPreservingCurve
             return this;
         }
         
+        public InterpolationOptions secondaryRefineYearlyAgesSmoothness(double secondaryRefineYearlyAgesSmoothness)
+        {
+            this.secondaryRefineYearlyAgesSmoothness = secondaryRefineYearlyAgesSmoothness;
+            return this;
+        }
+
+        public InterpolationOptions subtitle(String subtitle)
+        {
+            this.subtitle = subtitle;
+            return this;
+        }
+
         /* --------------------------------------------------------------------- */
         
         public boolean usePrimaryCSASRA()
@@ -79,6 +93,16 @@ public class InterpolatePopulationAsMeanPreservingCurve
         public boolean debugSecondaryRefineYearlyAges()
         {
             return debugSecondaryRefineYearlyAges;
+        }
+
+        public Double secondaryRefineYearlyAgesSmoothness()
+        {
+            return secondaryRefineYearlyAgesSmoothness;
+        }
+
+        public String subtitle()
+        {
+            return subtitle;
         }
     }
 
@@ -170,6 +194,9 @@ public class InterpolatePopulationAsMeanPreservingCurve
     {
         if (options == null)
             options = new InterpolationOptions();
+
+        if (options.subtitle() != null)
+            title = title + " " + options.subtitle();
 
         // curve_osier(bins, "method", "", title);
         // return curve_pclm(bins, title);

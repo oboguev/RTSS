@@ -14,10 +14,21 @@ public class TestPopulationADH
             if (Util.True)
             {
                 InterpolationOptionsByGender options = new InterpolationOptionsByGender();
-                options.both().debugSecondaryRefineYearlyAges(true);
-                
-                PopulationADH.getPopulationByLocality(Area.USSR, 1926, options);
-                PopulationADH.getPopulationByLocality(Area.USSR, 1941, options);
+
+                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.70).subtitle("0.70");
+                PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
+
+                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.90).subtitle("0.90");
+                // PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
+
+                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.94).subtitle("0.94");
+                // PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
+
+                options.both().debugSecondaryRefineYearlyAges(true).secondaryRefineYearlyAgesSmoothness(0.98).subtitle("0.98");
+                //PopulationADH.getPopulationByLocality(Area.RSFSR, 1927, options);
+
+                // PopulationADH.getPopulationByLocality(Area.USSR, 1926, options);
+                // PopulationADH.getPopulationByLocality(Area.USSR, 1941, options);
                 Util.noop();
             }
 
