@@ -1,5 +1,8 @@
 package rtss.data.curves;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
 import rtss.data.bin.Bin;
@@ -38,6 +41,24 @@ public class InterpolatePopulationAsMeanPreservingCurve
         private String subtitle = null;
         private boolean displayChart = false;
         private boolean allowChartMinorClipping = false;
+        private Set<String> extras = new HashSet<>();
+        
+        public InterpolationOptions clone()
+        {
+            InterpolationOptions c = new InterpolationOptions();
+            
+            c.usePrimaryCSASRA = usePrimaryCSASRA;
+            c.usePrimarySPLINE = usePrimarySPLINE;
+            c.useSecondaryRefineYearlyAges = useSecondaryRefineYearlyAges;
+            c.debugSecondaryRefineYearlyAges = debugSecondaryRefineYearlyAges;
+            c.secondaryRefineYearlyAgesSmoothness = secondaryRefineYearlyAgesSmoothness;
+            c.subtitle = subtitle;
+            c.displayChart = displayChart;
+            c.allowChartMinorClipping = allowChartMinorClipping;
+            c.extras.addAll(extras);
+            
+            return c;
+        }
 
         public InterpolationOptions usePrimaryCSASRA(boolean usePrimaryCSASRA)
         {
@@ -86,6 +107,12 @@ public class InterpolatePopulationAsMeanPreservingCurve
             this.allowChartMinorClipping = allowChartMinorClipping;
             return this;
         }
+        
+        public InterpolationOptions extra(String extra)
+        {
+            this.extras.add(extra);
+            return this;
+        }
 
         /* --------------------------------------------------------------------- */
 
@@ -127,6 +154,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
         public boolean allowChartMinorClipping()
         {
             return allowChartMinorClipping;
+        }
+
+        public boolean hasExtra(String extra)
+        {
+            return extras.contains(extra);
         }
     }
 
@@ -204,17 +236,20 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     private static class CurveResult
     {
+        public final String method;
         public final double[] curve;
         public final double[] raw;
 
-        public CurveResult(double[] curve)
+        public CurveResult(String method, double[] curve)
         {
+            this.method = method;
             this.curve = curve;
             this.raw = null;
         }
 
-        public CurveResult(double[] curve, double[] raw)
+        public CurveResult(String method, double[] curve, double[] raw)
         {
+            this.method = method;
             this.curve = curve;
             this.raw = raw;
         }
@@ -224,7 +259,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
     /* =========================================================================================================== */
 
-    public static double[] curve(Bin[] bins,
+    public static double[] curve(
+            Bin[] bins,
             String title,
             TargetResolution targetResolution,
             Integer yearHint,
@@ -294,12 +330,19 @@ public class InterpolatePopulationAsMeanPreservingCurve
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
             {
-                chart.addSeries("raw", xxx, curve.raw);
+                chart.addSeries("raw " + curve.method, xxx, curve.raw);
                 maxY = Math.max(maxY, Util.max(curve.raw));
             }
 
             chart.addLineSeries("bins", Bins.ppy_x(bins, 100), Bins.ppy_y(bins, 100));
             maxY = Math.max(maxY, Util.max(Bins.ppy_y(bins, 100)));
+            
+            if (options.hasExtra("chart-spline") && !curve.method.equals("spline"))
+            {
+                double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options); 
+                chart.addSeries("spline", xxx, ss);
+                maxY = Math.max(maxY, Util.max(ss));
+            }
 
             chart.maxY(clipMaxY(maxY, options));
 
@@ -322,9 +365,15 @@ public class InterpolatePopulationAsMeanPreservingCurve
             chart.addSeries("final", xxx, curve.curve);
 
             if (curve.raw != null && Util.differ(curve.curve, curve.raw))
-                chart.addSeries("raw", xxx, curve.raw);
+                chart.addSeries("raw " + curve.method, xxx, curve.raw);
 
             chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
+
+            if (options.hasExtra("chart-spline") && !curve.method.equals("spline"))
+            {
+                double[] ss = rawSpline(bins, title, targetResolution, yearHint, gender, options); 
+                chart.addSeries("spline", xxx, ss);
+            }
 
             chart.display();
         }
@@ -357,6 +406,20 @@ public class InterpolatePopulationAsMeanPreservingCurve
         int n = (int) Math.ceil(Math.log10(v));
         long scale = Math.round(Math.pow(10, n));
         return scale / 20;
+    }
+    
+    private static double[] rawSpline(
+            Bin[] bins,
+            String title,
+            TargetResolution targetResolution,
+            Integer yearHint,
+            Gender gender,
+            InterpolationOptions options) throws Exception
+    {
+        options = options.clone();
+        options.useSecondaryRefineYearlyAges = false;
+        CurveResult curve = curve_spline(bins, title, targetResolution, yearHint, gender, options);
+        return curve.curve;
     }
 
     /* ================================================================================================ */
@@ -432,11 +495,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
             double[] raw = Util.dup(yy);
             yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender, options);
             CurveVerifier.validate_means(yy, bins);
-            return new CurveResult(yy, raw);
+            return new CurveResult("csasra", yy, raw);
         }
         else
         {
-            return new CurveResult(yy);
+            return new CurveResult("csasra", yy);
         }
     }
 
@@ -583,11 +646,11 @@ public class InterpolatePopulationAsMeanPreservingCurve
             /* уточнить разбивку на возраста 0-9 */
             yy = RefineYearlyPopulation.refine(bins, title, yy, yearHint, gender, options);
             CurveVerifier.validate_means(yy, bins);
-            return new CurveResult(yy, raw);
+            return new CurveResult("spline", yy, raw);
         }
         else
         {
-            return new CurveResult(yy);
+            return new CurveResult("spline", yy);
         }
     }
 
