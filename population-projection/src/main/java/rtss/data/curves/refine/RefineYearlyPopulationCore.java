@@ -491,7 +491,7 @@ public class RefineYearlyPopulationCore
     private double calculateMonotonicityViolation(double[] p)
     {
         double monotonicityViolation = 0.0;
-        
+
         p = Util.normalize(Util.splice(p, 0, nTunablePoints));
 
         for (int k = 0; k < nTunablePoints; k++)
@@ -517,36 +517,35 @@ public class RefineYearlyPopulationCore
     {
         double smoothnessViolation = 0.0;
         
+        /*
+         * Первоначальная версия функционала пыталась минимизировать sum(abs(d2)).
+         * Однако это вело к спрямлению кривой в прямую, т.к. фукнционал пытался выравнять значения d1 на промежутке.
+         * 
+         * Цель же состоит в том, чтобы штрафовать только резкие изломы линии, позволяя однако гладкие вогнутые или выпуклые линии (похожие на параболу),
+         * обладающие ненулевой (но невысокой) второй производной.
+         * 
+         * Третья производная измеряет изменение второй производной. Если вторая производная резко меняется (указывая на зубчатый край), 
+         * третья производная будет большой. Налагая штраф на большие абсолютные значения третьей производной, мы препятствуем зубчатым краям, 
+         * допуская при этом плавные кривые.
+         */
         int npoints = nTotalPoints;
 
-        if (Util.True)
+        if (nFixedPoints >= 2)
         {
-            if (nFixedPoints >= 2)
-            {
-                /* not an inflection point */
-                npoints++; // for 2nd derivative
-                npoints++; // for 3rd derivative
-            }
-
-            p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
-            p = Util.normalize(p);
-            for (double v : d3(p))
-                smoothnessViolation += Math.abs(v);
+            /* not an inflection point */
+            npoints++; // for 2nd derivative
+            npoints++; // for 3rd derivative
         }
         else
         {
-            if (nFixedPoints >= 2)
-            {
-                /* not an inflection point */
-                npoints++; // for 2nd derivative
-            }
-
-            p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
-            p = Util.normalize(p);
-
-            for (double v : d2(p))
-                smoothnessViolation += Math.abs(v);
+            /* inflection point */
+            npoints++; // for 2nd and 3rd derivatives
         }
+
+        p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
+        p = Util.normalize(p);
+        for (double v : d3(p))
+            smoothnessViolation += Math.abs(v);
 
         return smoothnessViolation;
     }
