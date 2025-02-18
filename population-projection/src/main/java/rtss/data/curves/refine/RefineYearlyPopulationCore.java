@@ -17,6 +17,7 @@ import org.apache.commons.math4.legacy.optim.nonlinear.scalar.Sigma;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
 
+import rtss.math.algorithms.Entropy;
 import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
@@ -573,6 +574,10 @@ public class RefineYearlyPopulationCore
         // double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
 
         double smoothnessViolation = ov.smoothnessMagnitutePenalty + ov.smoothnessGini + Math.sqrt(ov.smoothnessMagnitutePenalty * ov.smoothnessGini);
+        
+        // ###
+        double z = Entropy.concentration(rebasePositive(d2));
+        
 
         return smoothnessViolation;
     }
