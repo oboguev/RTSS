@@ -24,6 +24,13 @@ public class RefineYearlyPopulation
         if (Util.False)
             return p0;
 
+        /*
+         * Модели детской смертности обычных лет неприложимы в 1932 и 1933 гг., 
+         * с глубоким падением рождаемости и одновременно ростом детской смертности
+         */
+        if (yearHint == 1932 || yearHint == 1933)
+            return p0;
+
         if (bins.length < 3 ||
             bins[0].widths_in_years != 5 ||
             bins[1].widths_in_years != 5 ||
@@ -86,7 +93,7 @@ public class RefineYearlyPopulation
         }
         else if (bins[0].avg > bins[1].avg &&
                  bins[1].avg < bins[2].avg &&
-                 bins[0].avg > bins[2].avg)
+                 bins[0].avg > bins[2].avg * 1.05)
         {
             /*
              * Case:
@@ -95,7 +102,7 @@ public class RefineYearlyPopulation
              *        _ 
              *        
              * U-shaped population. 
-             * There was a drop in births during second bin birth years.
+             * There was a drop in births during birth years in the second bin.
              * We should adjust attrition weights to account for it.           
              */
             int np = locateTurnpoint(bins, p);

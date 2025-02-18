@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -631,6 +632,92 @@ public class Util
         }
 
         return b;
+    }
+
+    // absolute values of the array
+    public static double[] abs(double[] y)
+    {
+        double[] yy = new double[y.length];
+        for (int k = 0; k < y.length; k++)
+            yy[k] = Math.abs(y[k]);
+        return yy;
+    }
+
+    // variance of the array
+    public static double averageDeviation(double[] y)
+    {
+        if (y.length == 0)
+            return 0;
+
+        // mean of array values
+        double mean = sum(y) / y.length;
+
+        // variance
+        double variance = 0.0;
+        for (double v : y)
+            variance += Math.abs(v - mean);
+
+        return variance / y.length;
+    }
+
+    // Gini coefficient (a measure of concentration), ranges 0 to 1
+    public static double gini(double[] y)
+    {
+        // Sort the array in ascending order
+        Arrays.sort(y);
+
+        double n = y.length;
+        double sum = 0;
+
+        // Calculate the sum of the weighted values
+        for (int i = 0; i < n; i++)
+            sum += (i + 1) * y[i];
+
+        // Calculate the Gini coefficient
+        double gini = (2 * sum) / (n * Arrays.stream(y).sum()) - (n + 1) / n;
+
+        return gini;
+    }
+
+    // Gini coefficient (a measure of concentration), ranges 0 to 1
+    // another version
+    public static double gini2(double[] y)
+    {
+        if (y.length == 0)
+            return 0;
+
+        // Sort the values in ascending order
+        y = dup(y);
+        Arrays.sort(y);
+
+        // Compute the cumulative sum of the sorted values
+        double[] cumulativeSum = new double[y.length];
+        cumulativeSum[0] = y[0];
+        for (int i = 1; i < y.length; i++)
+            cumulativeSum[i] = cumulativeSum[i - 1] + y[i];
+
+        // calculate the total sum of the absolute values
+        double totalSum = cumulativeSum[cumulativeSum.length - 1];
+
+        // if all values are zero, return 0 (no concentration)
+        if (totalSum == 0)
+            return 0;
+
+        // Normalize the cumulative sum by dividing by the total sum
+        double[] normalizedCumulativeSum = new double[cumulativeSum.length];
+        for (int i = 0; i < cumulativeSum.length; i++)
+            normalizedCumulativeSum[i] = cumulativeSum[i] / totalSum;
+
+        // Calculate the area under the Lorenz curve
+        double lorenzArea = 0.0;
+        for (int i = 1; i < normalizedCumulativeSum.length; i++)
+            lorenzArea += (normalizedCumulativeSum[i - 1] + normalizedCumulativeSum[i]) / 2.0;
+        lorenzArea /= normalizedCumulativeSum.length;
+
+        // calculate the Gini coefficient
+        double giniCoefficient = 1.0 - 2.0 * lorenzArea;
+
+        return giniCoefficient;
     }
 
     public static void print(String title, final double[] y, int start_year)

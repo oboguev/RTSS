@@ -101,6 +101,10 @@ public class RefineYearlyPopulationCore
         public double binSumViolation;
         public double targetDiffViolation;
 
+        // subsections
+        public double smoothnessMagnitutePenalty;
+        public double smoothnessVariancePenalty;
+
         public void copyFrom(Objective x)
         {
             this.objective = x.objective;
@@ -125,9 +129,11 @@ public class RefineYearlyPopulationCore
 
         public void print()
         {
-            Util.out(String.format("diff = %9.4f   smoothness = %9.4f   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
+            Util.out(String.format("diff = %9.4f   smoothness = %9.4f (%9.4f + %9.4f)   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
                                    targetDiffViolation,
                                    smoothnessViolation,
+                                   smoothnessMagnitutePenalty,
+                                   smoothnessVariancePenalty * SmoothnessVariancePenaltyWeight,
                                    monotonicityViolation,
                                    binSumViolation,
                                    objective));
@@ -154,6 +160,8 @@ public class RefineYearlyPopulationCore
 
     final static double RegularPenalty = 1e1;
     final static double LargePenalty = 1e4;
+
+    final static double SmoothnessVariancePenaltyWeight = 200;
 
     private final double[] p;
     private final double[] target_diff;
@@ -450,42 +458,36 @@ public class RefineYearlyPopulationCore
     // objectibe function
     private double calculateObjective(final double[] p, final Level logLevel, Objective ov)
     {
-        double monotonicityViolation = calculateMonotonicityViolation(p);
-
-        // Calculate smoothness violation
-        double smoothnessViolation = calculateSmoothnessViolation(p);
-
-        // Add penalties for violating the bin sum constraints
-        double binSumViolation = calculateBinSumViolation(p);
-
-        // Calculate target difference violation
-        double targetDiffViolation = calculateTargetDiffViolation(p);
-
-        // Return weighted sum of violations
-        double objective = monotonicityViolation + binSumViolation +
-                           importance_smoothness * smoothnessViolation +
-                           importance_target_diff_matching * targetDiffViolation;
-
         if (ov == null)
             ov = new Objective();
 
-        ov.objective = objective;
-        ov.binSumViolation = binSumViolation;
-        ov.monotonicityViolation = monotonicityViolation;
-        ov.targetDiffViolation = targetDiffViolation;
-        ov.smoothnessViolation = smoothnessViolation;
+        ov.monotonicityViolation = calculateMonotonicityViolation(p);
+
+        // Calculate smoothness violation
+        ov.smoothnessViolation = calculateSmoothnessViolation(p, ov);
+
+        // Add penalties for violating the bin sum constraints
+        ov.binSumViolation = calculateBinSumViolation(p);
+
+        // Calculate target difference violation
+        ov.targetDiffViolation = calculateTargetDiffViolation(p);
+
+        // Return weighted sum of violations
+        ov.objective = ov.monotonicityViolation + ov.binSumViolation +
+                       importance_smoothness * ov.smoothnessViolation +
+                       importance_target_diff_matching * ov.targetDiffViolation;
 
         if (logLevel == Level.TRACE || logLevel == Level.ALL)
             ov.print();
 
         // capture minimum seen state
-        if (min_seen_objective == null || objective < min_seen_objective.objective)
+        if (min_seen_objective == null || ov.objective < min_seen_objective.objective)
         {
             min_seen_objective = ov.clone();
             min_seen_objective_p = Util.dup(p);
         }
 
-        return objective;
+        return ov.objective;
     }
 
     private double calculateMonotonicityViolation(double[] p)
@@ -513,10 +515,8 @@ public class RefineYearlyPopulationCore
         return penalty04 + penalty59;
     }
 
-    private double calculateSmoothnessViolation(double[] p)
+    private double calculateSmoothnessViolation(double[] p, Objective ov)
     {
-        double smoothnessViolation = 0.0;
-
         /*
          * Первоначальная версия функционала пыталась минимизировать sum(abs(d2)).
          * Однако это вело к спрямлению кривой в прямую, т.к. фукнционал пытался выравнять значения d1 на промежутке.
@@ -544,7 +544,7 @@ public class RefineYearlyPopulationCore
             /* inflection point */
             npoints++; // for 2nd and 3rd derivatives
             p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
-            
+
             /*
              * При вычислении 2-й и 3-й производной мы теряем значения для граничных точек.
              * Когда точка не является точкой перегиба (nFixedPoints >= 2), нас выручают значения из fullP.
@@ -562,8 +562,13 @@ public class RefineYearlyPopulationCore
         }
 
         p = Util.normalize(p);
-        for (double v : d3(p))
-            smoothnessViolation += Math.abs(v);
+        double[] d3 = d3(p);
+        double[] ad3 = Util.abs(d3);
+
+        ov.smoothnessMagnitutePenalty = Util.sum(ad3);
+        ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
+
+        double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
 
         return smoothnessViolation;
     }
@@ -944,6 +949,16 @@ public class RefineYearlyPopulationCore
             very_initial.print();
             Util.out("Objective values for the final itervative result curve (" + title + "):");
             min_result.print();
+        }
+
+        if (Util.True)
+        {
+            /*
+             * нефункицональный код для отладки критериев
+             */
+            double[] fpx = fullP(min_result.px);
+            Objective objective = new Objective();
+            calculateObjective(fpx, Level.INFO, objective);
         }
 
         return min_result.px;
