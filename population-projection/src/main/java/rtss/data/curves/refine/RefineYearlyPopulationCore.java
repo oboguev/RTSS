@@ -857,6 +857,8 @@ public class RefineYearlyPopulationCore
             Util.out("Objective values for the final itervative result curve (" + title + "):");
             min_result.print();
         }
+        
+        debugResult(min_result.px);
 
         return min_result.px;
     }
@@ -870,6 +872,22 @@ public class RefineYearlyPopulationCore
         }
 
         return true;
+    }
+    
+    private void debugResult(double[] px)
+    {
+        if (Util.True)
+        {
+            /*
+             * debugging: нефункциональный код для отладки критериев
+             */
+            Objective objective1 = new Objective();
+            calculateObjective(p, Level.INFO, objective1);
+
+            double[] fpx = fullP(px);
+            Objective objective2 = new Objective();
+            calculateObjective(fpx, Level.INFO, objective2);
+        }
     }
 
     /*======================================================================================================== */
@@ -963,15 +981,7 @@ public class RefineYearlyPopulationCore
             min_result.print();
         }
 
-        if (Util.True)
-        {
-            /*
-             * нефункицональный код для отладки критериев
-             */
-            double[] fpx = fullP(min_result.px);
-            Objective objective = new Objective();
-            calculateObjective(fpx, Level.INFO, objective);
-        }
+        debugResult(min_result.px);
 
         return min_result.px;
     }
