@@ -518,23 +518,12 @@ public class RefineYearlyPopulationCore
 
     private double calculateSmoothnessViolation(double[] p, Objective ov)
     {
-        /*
-         * Первоначальная версия функционала пыталась минимизировать sum(abs(d2)).
-         * Однако это вело к спрямлению кривой в прямую, т.к. фукнционал пытался выравнять значения d1 на промежутке.
-         * 
-         * Цель же состоит в том, чтобы штрафовать только резкие изломы линии, позволяя однако гладкие вогнутые или выпуклые линии (похожие на параболу),
-         * обладающие ненулевой (но невысокой) второй производной.
-         * 
-         * Третья производная измеряет изменение второй производной. Если вторая производная резко меняется (указывая на зубчатый край), 
-         * третья производная будет большой. Налагая штраф на большие абсолютные значения третьей производной, мы препятствуем зубчатым краям, 
-         * допуская при этом плавные кривые.
-         */
         int npoints = nTotalPoints;
 
         if (nFixedPoints >= 2)
         {
             /* 
-             * not an inflection point, кривая продолжит нисхождение 
+             * не точка перегиба, кривая продолжит нисхождение 
              */
             npoints++; // for 2nd derivative
             npoints++; // for 3rd derivative
@@ -542,7 +531,7 @@ public class RefineYearlyPopulationCore
         }
         else
         {
-            /* inflection point */
+            /* точка перегиба */
             npoints++; // for 2nd and 3rd derivatives
             p = Util.splice(p, 0, Math.min(npoints, p.length) - 1);
 
@@ -556,30 +545,13 @@ public class RefineYearlyPopulationCore
              * С другой стороны, неохват точек близких к краю проверкой функционала оставляет их вне
              * контроля гладкости.
              * 
-             * Мы решаем эту проблему добавление виртуальной точки вычисляемой по последнему значению
+             * Мы решаем эту проблему добавлением виртуальной точки вычисляемой по последнему значению
              * первой производной. 
              */
             p = extendWithVirtualPoint(p);
         }
-
-        p = Util.normalize(p);
-        double[] d2 = d2(p);
-        double[] d3 = derivative(d2);
-        double[] ad3 = Util.abs(d3);
-
-        ov.smoothnessMagnitutePenalty = Util.sum(ad3);
-        ov.smoothnessGini = Util.gini(rebasePositive(d2));
-
-        // ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
-        // double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
-
-        double smoothnessViolation = ov.smoothnessMagnitutePenalty + ov.smoothnessGini + Math.sqrt(ov.smoothnessMagnitutePenalty * ov.smoothnessGini);
         
-        // ###
-        double z = Entropy.concentration(rebasePositive(d2));
-        
-
-        return smoothnessViolation;
+        return new MeasureUnsmoothness().calculateSmoothnessViolation(p, ov);
     }
 
     private double[] derivative(double[] p)
@@ -591,25 +563,6 @@ public class RefineYearlyPopulationCore
         for (int i = 0; i <= p.length - 2; i++)
             d[i] = p[i + 1] - p[i];
         return d;
-    }
-
-    private double[] d2(double[] p)
-    {
-        return derivative(derivative(p));
-    }
-
-    private double[] d3(double[] p)
-    {
-        return derivative(d2(p));
-    }
-    
-    private double[] rebasePositive(double[] p)
-    {
-        double v = Util.min(p);
-        if (v >= 0)
-            return p;
-        else
-            return Util.add(p, -v);
     }
 
     private double[] extendWithVirtualPoint(double[] p)

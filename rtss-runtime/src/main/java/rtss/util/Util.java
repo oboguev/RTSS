@@ -673,7 +673,7 @@ public class Util
     public static double gini(double[] y)
     {
         checkValidNonNegative(y);
-        
+
         // Sort the array in ascending order
         y = dup(y);
         Arrays.sort(y);
@@ -685,8 +685,14 @@ public class Util
         for (int i = 0; i < n; i++)
             sum += (i + 1) * y[i];
 
-        // Calculate the Gini coefficient
-        double gini = (2 * sum) / (n * sum(y)) - (n + 1) / n;
+        // double gini = (2 * sum) / (n * sum(y)) - (n + 1) / n;
+
+        sum /= sum(y);
+
+        // sum ranges from (n + 1) / 2 to n
+        double gini = (2 * sum - n - 1) / (n - 1);
+        
+        Util.assertion(gini >= 0 && gini <= 1);
 
         return gini;
     }
@@ -814,24 +820,24 @@ public class Util
         return "";
     }
 
-    public static void assertion(boolean b) throws Exception
+    public static void assertion(boolean b)
     {
         assertion(b, null);
     }
 
-    public static void assertion(String msg, boolean b) throws Exception
+    public static void assertion(String msg, boolean b)
     {
         assertion(b, msg);
     }
 
-    public static void assertion(boolean b, String msg) throws Exception
+    public static void assertion(boolean b, String msg)
     {
         if (!b)
         {
             if (msg != null && msg.length() != 0)
-                throw new Exception("внутренняя ошибка: " + msg);
+                throw new RuntimeException("внутренняя ошибка: " + msg);
             else
-                throw new Exception("внутренняя ошибка");
+                throw new RuntimeException("внутренняя ошибка");
         }
     }
 
