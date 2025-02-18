@@ -232,32 +232,32 @@ public class Util
         return Double.isFinite(v);
     }
 
-    public static void checkValid(double v) throws Exception
+    public static void checkValid(double v) throws ArithmeticException
     {
         if (!isValid(v))
             throw new ArithmeticException("Not a valid number");
     }
 
-    public static void checkNonNegative(double v) throws Exception
+    public static void checkNonNegative(double v) throws ArithmeticException
     {
         if (v < 0)
             throw new ArithmeticException("Unexpected negative number");
     }
 
-    public static void checkValidNonNegative(double v) throws Exception
+    public static void checkValidNonNegative(double v) throws ArithmeticException
     {
         checkValid(v);
         checkNonNegative(v);
     }
 
-    public static double validate(double v) throws Exception
+    public static double validate(double v) throws ArithmeticException
     {
         if (!isValid(v))
             throw new ArithmeticException("Not a valid number");
         return v;
     }
 
-    public static void checkValid(double[] v) throws Exception
+    public static void checkValid(double[] v) throws ArithmeticException
     {
         for (double vv : v)
         {
@@ -266,7 +266,7 @@ public class Util
         }
     }
 
-    public static void checkNonNegative(double[] v) throws Exception
+    public static void checkNonNegative(double[] v) throws ArithmeticException
     {
         for (double vv : v)
         {
@@ -275,7 +275,7 @@ public class Util
         }
     }
 
-    public static void checkValidNonNegative(double[] v) throws Exception
+    public static void checkValidNonNegative(double[] v) throws ArithmeticException
     {
         for (double vv : v)
         {
@@ -284,7 +284,7 @@ public class Util
         }
     }
 
-    public static double[] validate(double[] v) throws Exception
+    public static double[] validate(double[] v) throws ArithmeticException
     {
         for (double vv : v)
         {
@@ -385,6 +385,15 @@ public class Util
         double[] v = new double[a.length];
         for (int k = 0; k < a.length; k++)
             v[k] = a[k] - b[k];
+        return v;
+    }
+
+    // add b to each element of input array
+    public static double[] add(final double[] a, final double b)
+    {
+        double[] v = new double[a.length];
+        for (int k = 0; k < a.length; k++)
+            v[k] = a[k] + b;
         return v;
     }
 
@@ -663,6 +672,8 @@ public class Util
     // Gini coefficient (a measure of concentration), ranges 0 to 1
     public static double gini(double[] y)
     {
+        checkValidNonNegative(y);
+        
         // Sort the array in ascending order
         y = dup(y);
         Arrays.sort(y);
@@ -675,50 +686,9 @@ public class Util
             sum += (i + 1) * y[i];
 
         // Calculate the Gini coefficient
-        double gini = (2 * sum) / (n * Arrays.stream(y).sum()) - (n + 1) / n;
+        double gini = (2 * sum) / (n * sum(y)) - (n + 1) / n;
 
         return gini;
-    }
-
-    // Gini coefficient (a measure of concentration), ranges 0 to 1
-    // another version
-    public static double gini2(double[] y)
-    {
-        if (y.length == 0)
-            return 0;
-
-        // Sort the array in ascending order
-        y = dup(y);
-        Arrays.sort(y);
-
-        // Compute the cumulative sum of the sorted values
-        double[] cumulativeSum = new double[y.length];
-        cumulativeSum[0] = y[0];
-        for (int i = 1; i < y.length; i++)
-            cumulativeSum[i] = cumulativeSum[i - 1] + y[i];
-
-        // calculate the total sum of the absolute values
-        double totalSum = cumulativeSum[cumulativeSum.length - 1];
-
-        // if all values are zero, return 0 (no concentration)
-        if (totalSum == 0)
-            return 0;
-
-        // Normalize the cumulative sum by dividing by the total sum
-        double[] normalizedCumulativeSum = new double[cumulativeSum.length];
-        for (int i = 0; i < cumulativeSum.length; i++)
-            normalizedCumulativeSum[i] = cumulativeSum[i] / totalSum;
-
-        // Calculate the area under the Lorenz curve
-        double lorenzArea = 0.0;
-        for (int i = 1; i < normalizedCumulativeSum.length; i++)
-            lorenzArea += (normalizedCumulativeSum[i - 1] + normalizedCumulativeSum[i]) / 2.0;
-        lorenzArea /= normalizedCumulativeSum.length;
-
-        // calculate the Gini coefficient
-        double giniCoefficient = 1.0 - 2.0 * lorenzArea;
-
-        return giniCoefficient;
     }
 
     public static void print(String title, final double[] y, int start_year)

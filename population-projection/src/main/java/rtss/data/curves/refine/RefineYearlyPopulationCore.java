@@ -102,8 +102,8 @@ public class RefineYearlyPopulationCore
         public double targetDiffViolation;
 
         // subsections
-        public double smoothnessMagnitutePenalty;
-        public double smoothnessVariancePenalty;
+        public double smoothnessMagnitutePenalty; 
+        public double smoothnessGini;
 
         public void copyFrom(Objective x)
         {
@@ -129,11 +129,11 @@ public class RefineYearlyPopulationCore
 
         public void print()
         {
-            Util.out(String.format("diff = %9.4f   smoothness = %9.4f (%9.4f + %9.4f)   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
+            Util.out(String.format("diff = %9.4f   smoothness = %9.4f (m = %9.4f  g = %9.4f)   monotonicity = %9.4e   sum = %9.4e   objective = %12.7e",
                                    targetDiffViolation,
                                    smoothnessViolation,
                                    smoothnessMagnitutePenalty,
-                                   smoothnessVariancePenalty * SmoothnessVariancePenaltyWeight,
+                                   smoothnessGini,
                                    monotonicityViolation,
                                    binSumViolation,
                                    objective));
@@ -566,9 +566,12 @@ public class RefineYearlyPopulationCore
         double[] ad3 = Util.abs(d3);
 
         ov.smoothnessMagnitutePenalty = Util.sum(ad3);
-        ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
+        ov.smoothnessGini = Util.gini(rebasePositive(d3));
 
-        double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
+        // ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
+        // double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
+
+        double smoothnessViolation = ov.smoothnessMagnitutePenalty + ov.smoothnessGini + Math.sqrt(ov.smoothnessMagnitutePenalty * ov.smoothnessGini);
 
         return smoothnessViolation;
     }
@@ -592,6 +595,15 @@ public class RefineYearlyPopulationCore
     private double[] d3(double[] p)
     {
         return derivative(d2(p));
+    }
+    
+    private double[] rebasePositive(double[] p)
+    {
+        double v = Util.min(p);
+        if (v >= 0)
+            return p;
+        else
+            return Util.add(p, -v);
     }
 
     private double[] extendWithVirtualPoint(double[] p)
