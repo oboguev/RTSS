@@ -664,6 +664,7 @@ public class Util
     public static double gini(double[] y)
     {
         // Sort the array in ascending order
+        y = dup(y);
         Arrays.sort(y);
 
         double n = y.length;
@@ -686,7 +687,7 @@ public class Util
         if (y.length == 0)
             return 0;
 
-        // Sort the values in ascending order
+        // Sort the array in ascending order
         y = dup(y);
         Arrays.sort(y);
 
