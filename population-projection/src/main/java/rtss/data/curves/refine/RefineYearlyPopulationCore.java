@@ -562,11 +562,12 @@ public class RefineYearlyPopulationCore
         }
 
         p = Util.normalize(p);
-        double[] d3 = d3(p);
+        double[] d2 = d2(p);
+        double[] d3 = derivative(d2);
         double[] ad3 = Util.abs(d3);
 
         ov.smoothnessMagnitutePenalty = Util.sum(ad3);
-        ov.smoothnessGini = Util.gini(rebasePositive(d3));
+        ov.smoothnessGini = Util.gini(rebasePositive(d2));
 
         // ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
         // double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
