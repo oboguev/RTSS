@@ -1,5 +1,7 @@
 package rtss.data.curves.refine;
 
+import java.util.Arrays;
+
 import rtss.data.curves.refine.RefineYearlyPopulationCore.Objective;
 import rtss.math.algorithms.Entropy;
 import rtss.util.Util;
@@ -28,19 +30,21 @@ class MeasureUnsmoothness
         double[] ad3 = Util.abs(d3);
 
         ov.smoothnessMagnitutePenalty = Util.sum(ad3);
-        ov.smoothnessGini = Util.gini(rebasePositive(d2));
+        // ov.smoothnessGini = Util.gini(rebasePositive(d2));
+        // ov.smoothnessGini = differentness_1(d2);
+        ov.smoothnessGini = 50_000 * differentness_2(d2);
 
         // ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
         // double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
 
         double smoothnessViolation = ov.smoothnessMagnitutePenalty + ov.smoothnessGini + Math.sqrt(ov.smoothnessMagnitutePenalty * ov.smoothnessGini);
-        
+
         // ### penalize uneven distribution of d2
         double z = Entropy.concentration(rebasePositive(d2));
-    
+
         return smoothnessViolation;
     }
-    
+
     private double[] derivative(double[] p)
     {
         if (p.length <= 1)
@@ -62,7 +66,7 @@ class MeasureUnsmoothness
     {
         return derivative(d2(p));
     }
-    
+
     private double[] rebasePositive(double[] p)
     {
         double v = Util.min(p);
@@ -70,5 +74,57 @@ class MeasureUnsmoothness
             return p;
         else
             return Util.add(p, -v);
+    }
+
+    /* 
+     * Normalized dispersion measure that accounts for relative differences between elements. 
+     * 
+     * Absolute Pairwise Differences: Compute all pairwise absolute differences in the dataset.
+     * Normalize Differences: Normalize by the total sum of absolute values to keep the result between 0 and 1.
+     * Adjust for Negative Values: Since values can be negative, we shift the data so the dispersion metric remains meaningful.
+     * 
+     * Near 0 when values are similar.
+     * Close to 1 when there are large outliers.
+    */
+    public static double differentness_1(double[] p)
+    {
+        int n = p.length;
+        if (n == 0)
+            return 0; // Edge case: empty array
+
+        // Compute sum of absolute values
+        double sumAbs = Util.sum(Util.abs(p));
+        if (sumAbs == 0)
+            return 0; // Edge case: all zeros
+
+        // Compute sum of absolute pairwise differences
+        double sumDiffs = 0.0;
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                sumDiffs += Math.abs(p[i] - p[j]);
+            }
+        }
+
+        // Compute and return differentness metric
+        return (sumDiffs / (2.0 * n * sumAbs));
+    }
+
+    public static double differentness_2(double[] d2)
+    {
+        if (d2.length < 1)
+            throw new IllegalArgumentException("Series must have at least 3 points");
+
+        // Compute mean of second derivative
+        double mean = Arrays.stream(d2).average().orElse(0.0);
+
+        // Compute variance of second derivative
+        double variance = Arrays.stream(d2)
+                .map(v -> (v - mean) * (v - mean))
+                .average()
+                .orElse(0.0);
+
+        return variance;
     }
 }
