@@ -25,8 +25,8 @@ public class RefineYearlyPopulation
             return p0;
 
         /*
-         * Модели детской смертности обычных лет неприложимы в 1932 и 1933 гг., 
-         * с глубоким падением рождаемости и одновременно ростом детской смертности
+         * Модели детской смертности обычных лет неприложимы в 1932 и 1933 годах 
+         * с их глубоким падением рождаемости и одновременно ростом детской смертности
          */
         if (yearHint == 1932 || yearHint == 1933)
             return p0;
@@ -57,13 +57,16 @@ public class RefineYearlyPopulation
             bins[1].avg > bins[2].avg)
         {
             /*
-             * Case:
+             * Случай:
              *      _
              *        _
              *          _
              *          
-             * Gradually decreasing population, normal case. 
-             * Assume approximately steady births through recent 10 years           
+             * Gradually decreasing population for initial three bins (i.e. normal case). 
+             * Assume approximately steady births through recent 10 years.
+             * 
+             * Настраивать первые 10 точек (возраста 0-9), а следующие две использовать для контроля гладкости
+             * совокупной получаемой кривой.           
              */
             nTunablePoints = 10; // ages 0-9
             nFixedPoints = 2; // ages 10-11
@@ -74,7 +77,8 @@ public class RefineYearlyPopulation
             {
                 /*
                  * Перегиб наступает в bins[1], в p[9].
-                 * Симулировать для rc.refineSeriesIterative выход на равнину, 
+                 * Возраст 9 -- точка перегиба, а дальше от неё идёт возрастание.
+                 * Симулировать для rc.refineSeriesIterative выход на равнину после точки 9 (начиная с 10), 
                  * дабы синтезировать более плавную кривую до этой точки.   
                  */
                 p = Util.splice(p, 0, nTunablePoints + nFixedPoints - 1);
@@ -83,7 +87,7 @@ public class RefineYearlyPopulation
             else if (p[11] > p[10])
             {
                 /*
-                 * Перегиб наступает в p[10] наступает перегиб.
+                 * Перегиб наступает в p[10].
                  * Симулировать для rc.refineSeriesIterative выход на равнину, 
                  * дабы синтезировать более плавную кривую до этой точки.   
                  */
@@ -96,26 +100,34 @@ public class RefineYearlyPopulation
                  bins[0].avg > bins[2].avg * 1.05)
         {
             /*
-             * Case:
+             * Случай:
              *      _   
              *          _  
              *        _ 
              *        
              * U-shaped population. 
-             * There was a drop in births during birth years in the second bin.
+             * This means there was a drop in births during birth years in the second bin.
              * We should adjust attrition weights to account for it.           
              */
             int np = locateTurnpoint(bins, p);
 
             if (np == 5 && p[5] > p[4])
             {
+                /*
+                 * Нижняя точка -- в возрасте 4 года (или даже ранее, но это необычно).
+                 * Возрасты 5 и 6 нарастают от неё. 
+                 */
                 nTunablePoints = 5; // ages 0-4
                 nFixedPoints = 0;
             }
             else
             {
+                /*
+                 * Нижняя точка -- в возрасте 9 лет или старше.
+                 */
                 nTunablePoints = np;
                 nFixedPoints = 1;
+                // ###
             }
 
             attrition = adjustedAttrition(bins, gender, yearHint, nTunablePoints);
