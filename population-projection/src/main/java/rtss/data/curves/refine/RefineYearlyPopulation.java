@@ -40,17 +40,21 @@ public class RefineYearlyPopulation
         }
 
         /*
-         * Attrition array describes how population normally dereases over years
-         * under typical mortality pattern of the era. Also accounts for the drop
-         * in births (in U-shaped population case).
+         * Attrition array describes how population normally decreases (from age 0) over age years
+         * under typical mortality pattern of the era. 
+         * It also accounts for the drop in births (in the U-shaped population case).
          */
         double[] attrition = null;
 
         /*
          * Number of age points to tune.
-         * And number of subsequent age points to use for curve smoothness evaluation; actually this is (nFixedPoints - 1) points.  
          */
         int nTunablePoints = 10;
+
+        /*
+         * The number of subsequent age points to use for curve smoothness evaluation; 
+         * actually this is max(0, nFixedPoints - 1) points.  
+         */
         int nFixedPoints = 2;
 
         if (bins[0].avg > bins[1].avg &&
@@ -62,7 +66,7 @@ public class RefineYearlyPopulation
              *        _
              *          _
              *          
-             * Gradually decreasing population for initial three bins (i.e. normal case). 
+             * Gradually decreasing population for the initial three bins (i.e. normal case). 
              * Assume approximately steady births through recent 10 years.
              * 
              * Настраивать первые 10 точек (возраста 0-9), а следующие две использовать для контроля гладкости
