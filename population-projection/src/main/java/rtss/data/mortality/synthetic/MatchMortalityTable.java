@@ -28,33 +28,40 @@ public class MatchMortalityTable
             String addComment) throws Exception
     {
         final double cdr_tolerance = cdr / 5000;
-        
+
         if (instructions.size() < 1)
             throw new IllegalArgumentException("instructions size is 0");
         PatchInstruction instruction = instructions.get(instructions.size() - 1);
         if (Util.False && instruction.opcode != PatchOpcode.Multiply)
             throw new IllegalArgumentException("laast instruction is not Multiply");
-        
-        double scale1 = 1.0; 
+
+        double scale1 = 1.0;
         instruction.scale = scale1;
-        
+
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instructions, addComment);
         double xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
         if (Math.abs(xcdr - cdr) < cdr_tolerance)
             return xmt;
-        
+
         if (xcdr < cdr)
         {
             /*
              * Повышать смертность
              */
-            for (;;)
+            if (Util.True)
             {
-                instruction.scale *= 2;
-                xmt = PatchMortalityTable.patch(mt, instructions, addComment);
-                xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
-                if (xcdr > cdr)
-                    break;
+                elevateMortalityBeyondCDR(p, mt, instructions, instruction, addComment, cbr, cdr);
+            }
+            else
+            {
+                for (;;)
+                {
+                    instruction.scale *= 2;
+                    xmt = PatchMortalityTable.patch(mt, instructions, addComment);
+                    xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
+                    if (xcdr > cdr)
+                        break;
+                }
             }
         }
         else // if (xcdr > cdr) 
@@ -62,7 +69,7 @@ public class MatchMortalityTable
             /*
              * Понижать смертность
              */
-            
+
             for (;;)
             {
                 instruction.scale /= 2;
@@ -72,7 +79,7 @@ public class MatchMortalityTable
                     break;
             }
         }
-        
+
         /*
          * Упорядочить scale1 и scale2
          */
@@ -83,7 +90,7 @@ public class MatchMortalityTable
             scale1 = scale2;
             scale2 = x;
         }
-        
+
         /*
          * Двоичный поиск между scale1 и scale2
          */
@@ -97,7 +104,7 @@ public class MatchMortalityTable
 
             if (Math.abs(xcdr - cdr) < cdr_tolerance)
                 return xmt;
-            
+
             if (xcdr > cdr)
             {
                 scale2 = scalex;
@@ -106,6 +113,25 @@ public class MatchMortalityTable
             {
                 scale1 = scalex;
             }
+        }
+    }
+
+    private static void elevateMortalityBeyondCDR(
+            final PopulationByLocality p,
+            final CombinedMortalityTable mt,
+            List<PatchInstruction> instructions,
+            PatchInstruction instruction,
+            String addComment,
+            double cbr,
+            double cdr) throws Exception
+    {
+        for (;;)
+        {
+            instruction.scale *= 2;
+            CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instructions, addComment);
+            double xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
+            if (xcdr >= cdr)
+                break;
         }
     }
 }
