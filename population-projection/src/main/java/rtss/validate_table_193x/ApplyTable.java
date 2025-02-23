@@ -452,9 +452,13 @@ public class ApplyTable
         for_adh_population(mt, 1939, 40.0, 20.1, 168);
         for_adh_population(mt, 1940, 36.1, 21.7, 184);
     }
+    
+    final private static double PROMILLE = 1000;
 
     private void for_adh_population(CombinedMortalityTable mt, int year, double cbr_middle, double cdr_middle, double imr) throws Exception
     {
+        imr /= PROMILLE;
+        
         PopulationByLocality p = null;
         if (year == 1939)
             p = PopulationADH.getPopulationByLocality(Area.USSR, "1939-in-borders-of-1938");

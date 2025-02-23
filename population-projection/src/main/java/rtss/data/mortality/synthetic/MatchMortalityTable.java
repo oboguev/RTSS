@@ -7,6 +7,7 @@ import rtss.data.mortality.EvalMortalityRate;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.struct.PopulationByLocality;
+import rtss.util.ArithmeticValidationException;
 import rtss.util.Util;
 
 /*
@@ -125,13 +126,39 @@ public class MatchMortalityTable
             double cbr,
             double cdr) throws Exception
     {
+        double min_scale = instruction.scale;
+        Double excessive_scale = null;
+
         for (;;)
         {
-            instruction.scale *= 2;
-            CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instructions, addComment);
-            double xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
-            if (xcdr >= cdr)
-                break;
+            if (excessive_scale == null)
+            {
+                instruction.scale *= 2;
+            }
+            else if (Math.abs(min_scale - excessive_scale) < 0.0001)
+            {
+                throw new Exception("Мсходная таблица не может быть повышена до требуемого значения смертности");
+            }
+            else
+            {
+                instruction.scale = (min_scale + excessive_scale) / 2;
+            }
+
+            try
+            {
+                CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instructions, addComment);
+                double xcdr = new EvalMortalityRate().eval(xmt, p, null, cbr);
+                if (xcdr >= cdr)
+                    break;
+                min_scale = instruction.scale;
+            }
+            catch (ArithmeticValidationException ex)
+            {
+                if (excessive_scale == null)
+                    excessive_scale = instruction.scale;
+                else
+                    excessive_scale = Math.min(excessive_scale, instruction.scale);
+            }
         }
     }
 }
