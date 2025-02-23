@@ -108,7 +108,7 @@ public class MortalityTable_1940 extends UtilBase_194x
             
             /*
              * Рабочий дескриптор для MatchMortalityTable.match.
-             * Равномерно повысить коэффициенты смертности в возрастах 5-100 так, чтобы в наседении p1940 
+             * Равномерно повысить коэффициенты смертности в возрастах 5-100 так, чтобы в населении p1940 
              * при рождаемости CBR_1940 достигалась смертность CDR_1940.
              */
             instruction = new PatchInstruction(PatchOpcode.Multiply, 5, Population.MAX_AGE, 1.0);

@@ -60,7 +60,7 @@ public class MatchMortalityTable
         else // if (xcdr > cdr) 
         {
             /*
-             * Понижаать смертность
+             * Понижать смертность
              */
             
             for (;;)

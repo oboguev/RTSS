@@ -232,16 +232,16 @@ public class Util
         return Double.isFinite(v);
     }
 
-    public static void checkValid(double v) throws ArithmeticException
+    public static void checkValid(double v) throws ArithmeticValidationException
     {
         if (!isValid(v))
-            throw new ArithmeticException("Not a valid number");
+            throw new ArithmeticValidationException("Not a valid number");
     }
 
-    public static void checkNonNegative(double v) throws ArithmeticException
+    public static void checkNonNegative(double v) throws ArithmeticValidationException
     {
         if (v < 0)
-            throw new ArithmeticException("Unexpected negative number");
+            throw new ArithmeticValidationException("Unexpected negative number");
     }
 
     public static void checkValidNonNegative(double v) throws ArithmeticException
@@ -250,32 +250,32 @@ public class Util
         checkNonNegative(v);
     }
 
-    public static double validate(double v) throws ArithmeticException
+    public static double validate(double v) throws ArithmeticValidationException
     {
         if (!isValid(v))
-            throw new ArithmeticException("Not a valid number");
+            throw new ArithmeticValidationException("Not a valid number");
         return v;
     }
 
-    public static void checkValid(double[] v) throws ArithmeticException
+    public static void checkValid(double[] v) throws ArithmeticValidationException
     {
         for (double vv : v)
         {
             if (!isValid(vv))
-                throw new ArithmeticException("Not a valid number");
+                throw new ArithmeticValidationException("Not a valid number");
         }
     }
 
-    public static void checkNonNegative(double[] v) throws ArithmeticException
+    public static void checkNonNegative(double[] v) throws ArithmeticValidationException
     {
         for (double vv : v)
         {
             if (vv < 0)
-                throw new ArithmeticException("Unexpected negative number");
+                throw new ArithmeticValidationException("Unexpected negative number");
         }
     }
 
-    public static void checkValidNonNegative(double[] v) throws ArithmeticException
+    public static void checkValidNonNegative(double[] v) throws ArithmeticValidationException
     {
         for (double vv : v)
         {
@@ -284,12 +284,12 @@ public class Util
         }
     }
 
-    public static double[] validate(double[] v) throws ArithmeticException
+    public static double[] validate(double[] v) throws ArithmeticValidationException
     {
         for (double vv : v)
         {
             if (!isValid(vv))
-                throw new ArithmeticException("Not a valid number");
+                throw new ArithmeticValidationException("Not a valid number");
         }
 
         return v;

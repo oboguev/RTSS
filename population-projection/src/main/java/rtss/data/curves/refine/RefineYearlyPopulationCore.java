@@ -17,7 +17,7 @@ import org.apache.commons.math4.legacy.optim.nonlinear.scalar.Sigma;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
 
-import rtss.math.algorithms.Entropy;
+//import rtss.math.algorithms.Entropy;
 import rtss.util.Util;
 
 import ch.qos.logback.classic.Level;
