@@ -91,7 +91,12 @@ public class ApplyTable
                 final_multiplier_t = multiplier_t;
         }
 
+        Util.out("");
+        Util.out(String.format("При множителе %.4f", final_multiplier_t));
         show_divergence(p1937, p1939, mt, final_multiplier_t);
+
+        Util.out("");
+        Util.out(String.format("При множителе %.4f", 1.4));
         show_divergence(p1937, p1939, mt, 1.4);
 
         Util.noop();
@@ -285,7 +290,7 @@ public class ApplyTable
         deaths += fw.getObservedDeaths();
         
         if (printDeaths)
-            Util.out(String.format("Число смертей: %,d тыс. чел.", (int) Math.round(deaths / 1000)));
+            Util.out(String.format("Общее число смертей во всех возрастах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.", (int) Math.round(deaths / 1000)));
 
         return p;
     }
