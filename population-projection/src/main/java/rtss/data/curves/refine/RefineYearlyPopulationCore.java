@@ -410,7 +410,7 @@ public class RefineYearlyPopulationCore
                  * The point returned by CMAESOptimizer is typically the mean of the final search distribution, 
                  * not necessarily the best point ever evaluated.
                  * 
-                 * During the optimization process, CMA-ES evaluates many candidate solutions (offspring) and tracks their objective function values.
+                 * During the optimization process, CMA-ES evaluates many candidate solutions (offsprings) and tracks their objective function values.
                  * The best-evaluated point (the one with the lowest objective function value) is not always the same as the mean 
                  * of the final search distribution. The mean represents the algorithm’s current "best estimate" of the optimal solution, 
                  * but it may not correspond to the best point ever evaluated.
@@ -462,10 +462,8 @@ public class RefineYearlyPopulationCore
         if (ov == null)
             ov = new Objective();
 
+        // Calculate monotonicity violation
         ov.monotonicityViolation = calculateMonotonicityViolation(p);
-
-        // Calculate smoothness violation
-        ov.smoothnessViolation = calculateSmoothnessViolation(p, ov);
 
         // Add penalties for violating the bin sum constraints
         ov.binSumViolation = calculateBinSumViolation(p);
@@ -473,7 +471,10 @@ public class RefineYearlyPopulationCore
         // Calculate target difference violation
         ov.targetDiffViolation = calculateTargetDiffViolation(p);
 
-        // Return weighted sum of violations
+        // Calculate smoothness violation
+        ov.smoothnessViolation = calculateSmoothnessViolation(p, ov);
+
+        // Return weighted sum of the violations
         ov.objective = ov.monotonicityViolation + ov.binSumViolation +
                        importance_smoothness * ov.smoothnessViolation +
                        importance_target_diff_matching * ov.targetDiffViolation;
@@ -516,6 +517,29 @@ public class RefineYearlyPopulationCore
         return penalty04 + penalty59;
     }
 
+    private double calculateTargetDiffViolation(double[] p)
+    {
+        double[] actual_diff = new double[target_diff.length];
+
+        p = Util.normalize(Util.splice(p, 0, target_diff.length));
+
+        for (int i = 0; i < actual_diff.length; i++)
+            actual_diff[i] = p[i] - p[i + 1];
+
+        // Normalize actual_diff and target_diff
+        double sumActualDiff = Arrays.stream(actual_diff).sum();
+        double sumTargetDiff = Arrays.stream(target_diff).sum();
+        double[] normalizedActualDiff = Arrays.stream(actual_diff).map(d -> d / sumActualDiff).toArray();
+        double[] normalizedTargetDiff = Arrays.stream(target_diff).map(d -> d / sumTargetDiff).toArray();
+
+        // Calculate sum of absolute differences
+        double targetDiffViolation = 0.0;
+        for (int i = 0; i < normalizedActualDiff.length; i++)
+            targetDiffViolation += Math.abs(normalizedActualDiff[i] - normalizedTargetDiff[i]);
+
+        return targetDiffViolation;
+    }
+    
     private double calculateSmoothnessViolation(double[] p, Objective ov)
     {
         int npoints = nTotalPoints;
@@ -538,7 +562,7 @@ public class RefineYearlyPopulationCore
             /*
              * При вычислении 2-й и 3-й производной мы теряем значения для граничных точек.
              * Когда точка не является точкой перегиба (nFixedPoints >= 2), нас выручают значения из fullP.
-             * Когда же точка является точкой перегиба, мы не может расширить p за счёт значений из fullP,
+             * Когда же точка является точкой перегиба, мы не можем расширить p за счёт значений из fullP,
              * т.к. краевой перегиб возмутит значение функционала гладкости кривой и может оттолкнуть 
              * отптимизатор от схождения к оптимуму.
              * 
@@ -582,29 +606,6 @@ public class RefineYearlyPopulationCore
             double v = Util.lastElement(p);
             return Util.concat(p, v, v);
         }
-    }
-
-    private double calculateTargetDiffViolation(double[] p)
-    {
-        double[] actual_diff = new double[target_diff.length];
-
-        p = Util.normalize(Util.splice(p, 0, target_diff.length));
-
-        for (int i = 0; i < actual_diff.length; i++)
-            actual_diff[i] = p[i] - p[i + 1];
-
-        // Normalize actual_diff and target_diff
-        double sumActualDiff = Arrays.stream(actual_diff).sum();
-        double sumTargetDiff = Arrays.stream(target_diff).sum();
-        double[] normalizedActualDiff = Arrays.stream(actual_diff).map(d -> d / sumActualDiff).toArray();
-        double[] normalizedTargetDiff = Arrays.stream(target_diff).map(d -> d / sumTargetDiff).toArray();
-
-        // Calculate sum of absolute differences
-        double targetDiffViolation = 0.0;
-        for (int i = 0; i < normalizedActualDiff.length; i++)
-            targetDiffViolation += Math.abs(normalizedActualDiff[i] - normalizedTargetDiff[i]);
-
-        return targetDiffViolation;
     }
 
     /* ---------------------------------------------------------------------------------------- */
@@ -835,7 +836,7 @@ public class RefineYearlyPopulationCore
     
     private void debugResult(double[] px)
     {
-        if (Util.True)
+        if (Util.False)
         {
             /*
              * debugging: нефункциональный код для отладки критериев

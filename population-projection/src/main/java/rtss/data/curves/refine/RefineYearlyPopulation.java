@@ -131,7 +131,6 @@ public class RefineYearlyPopulation
                  */
                 nTunablePoints = np;
                 nFixedPoints = 1;
-                // ###
             }
 
             attrition = adjustedAttrition(bins, gender, yearHint, nTunablePoints);

@@ -2,6 +2,7 @@ package rtss.data.population.synthetic;
 
 import java.io.File;
 
+import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptionsByGender;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
@@ -60,11 +61,14 @@ public class TestSavePopulationADH
 
     private void main(Area area, String year) throws Exception
     {
-        PopulationByLocality p = PopulationADH.getPopulationByLocality(area, year);
+        InterpolationOptionsByGender options = new InterpolationOptionsByGender().allowCache(false);
+        options.both().secondaryRefineYearlyAgesSmoothness(0.50);
+
+        PopulationByLocality p = PopulationADH.getPopulationByLocality(area, year, options);
         
         if (Util.True)
         {
-            File rootDir = new File("P:\\@@\\ADH-population-" + area);
+            File rootDir = new File("c:\\@@capture\\ADH-population-" + area);
             String en_year = year.replace("-границы-", "-in-borders-of-");
             File dir = new File(rootDir, "" + en_year);
             dir.mkdirs();

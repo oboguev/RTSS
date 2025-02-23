@@ -3,7 +3,7 @@ package rtss.data.curves.refine;
 import java.util.Arrays;
 
 import rtss.data.curves.refine.RefineYearlyPopulationCore.Objective;
-import rtss.math.algorithms.Entropy;
+// import rtss.math.algorithms.Entropy;
 import rtss.util.Util;
 
 /*
@@ -15,7 +15,7 @@ class MeasureUnsmoothness
     {
         /*
          * Первоначальная версия функционала пыталась минимизировать sum(abs(d2)).
-         * Однако это вело к спрямлению кривой в прямую, т.к. фукнционал пытался выравнять значения d1 на промежутке.
+         * Однако это вело к спрямлению кривой в прямую, т.к. функнционал пытался выравнять значения d1 на промежутке.
          * 
          * Цель же состоит в том, чтобы штрафовать только резкие изломы линии, позволяя однако гладкие вогнутые или выпуклые линии (похожие на параболу),
          * обладающие ненулевой (но невысокой) второй производной.
@@ -30,17 +30,17 @@ class MeasureUnsmoothness
         double[] ad3 = Util.abs(d3);
 
         ov.smoothnessMagnitutePenalty = Util.sum(ad3);
-        // ov.smoothnessGini = Util.gini(rebasePositive(d2));
+
+        /*
+         * penalize uneven distribution of d2
+         */
+        // ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
+        // ov.smoothnessGini = 0;
         // ov.smoothnessGini = differentness_1(d2);
+        // ov.smoothnessGini = Entropy.concentration(rebasePositive(d2));
         ov.smoothnessGini = 50_000 * differentness_2(d2);
 
-        // ov.smoothnessVariancePenalty = Util.averageDeviation(ad3);
-        // double smoothnessViolation = ov.smoothnessMagnitutePenalty + SmoothnessVariancePenaltyWeight * ov.smoothnessVariancePenalty;
-
         double smoothnessViolation = ov.smoothnessMagnitutePenalty + ov.smoothnessGini + Math.sqrt(ov.smoothnessMagnitutePenalty * ov.smoothnessGini);
-
-        // ### penalize uneven distribution of d2
-        double z = Entropy.concentration(rebasePositive(d2));
 
         return smoothnessViolation;
     }
@@ -67,6 +67,7 @@ class MeasureUnsmoothness
         return derivative(d2(p));
     }
 
+    @SuppressWarnings("unused")
     private double[] rebasePositive(double[] p)
     {
         double v = Util.min(p);
@@ -86,7 +87,8 @@ class MeasureUnsmoothness
      * Near 0 when values are similar.
      * Close to 1 when there are large outliers.
     */
-    public static double differentness_1(double[] p)
+    @SuppressWarnings("unused")
+    private double differentness_1(double[] p)
     {
         int n = p.length;
         if (n == 0)
@@ -111,19 +113,22 @@ class MeasureUnsmoothness
         return (sumDiffs / (2.0 * n * sumAbs));
     }
 
-    public static double differentness_2(double[] d2)
+    /*
+     * Compute variance of second derivative
+     */
+    private double differentness_2(double[] d2)
     {
         if (d2.length < 1)
             throw new IllegalArgumentException("Series must have at least 3 points");
 
         // Compute mean of second derivative
-        double mean = Arrays.stream(d2).average().orElse(0.0);
+        double mean = Arrays.stream(d2).average().getAsDouble();
 
         // Compute variance of second derivative
         double variance = Arrays.stream(d2)
                 .map(v -> (v - mean) * (v - mean))
                 .average()
-                .orElse(0.0);
+                .getAsDouble();
 
         return variance;
     }
