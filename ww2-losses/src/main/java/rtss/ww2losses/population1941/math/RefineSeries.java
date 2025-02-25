@@ -1,5 +1,7 @@
 package rtss.ww2losses.population1941.math;
 
+import rtss.util.Util;
+
 /*
  *     
  * Developed by DeepSeek using request:     
@@ -63,11 +65,11 @@ package rtss.ww2losses.population1941.math;
  */
 public class RefineSeries
 {
-    public double minRelativeLevel = 0.1; 
+    public double minRelativeLevel = 0.1;
     public double sigma = 1.0;
     public int gaussianKernelWindow = 3;
 
-    public double[] modifySeries(double[] f, int[] intervalLengths, int XMAX)
+    public double[] modifySeries(double[] f, int[] intervalLengths, int XMAX) throws Exception
     {
         int numIntervals = intervalLengths.length;
         double[] f2 = new double[XMAX + 1];
@@ -82,9 +84,10 @@ public class RefineSeries
             // Calculate the sum of f(x) in the current interval
             for (int x = start; x < end; x++)
                 sum += f[x];
+            Util.assertion(sum > 0);
 
             // Calculate the average value of f2(x) in the current interval
-            double average = sum / intervalLengths[i];
+            double average = Util.validate(sum / intervalLengths[i]); 
             double minValue = minRelativeLevel * average; // Minimum value constraint
 
             // Modify the values in the current interval to satisfy the constraints
@@ -102,6 +105,7 @@ public class RefineSeries
                 sumF2 += f2[x];
 
             double adjustmentFactor = sum / sumF2;
+            Util.checkValid(adjustmentFactor);
             for (int x = start; x < end; x++)
                 f2[x] *= adjustmentFactor;
 
@@ -127,7 +131,7 @@ public class RefineSeries
             double originalSum = 0.0;
             for (int x = start; x < end; x++)
                 originalSum += f2[x];
-            double average = originalSum / intervalLengths[i];
+            double average = Util.validate(originalSum / intervalLengths[i]);
             double minValue = minRelativeLevel * average; // Minimum value constraint
 
             // Create a temporary array to store smoothed values for the current interval
@@ -151,7 +155,7 @@ public class RefineSeries
                     }
                 }
 
-                smoothedInterval[x - start] = sum / weightSum; // Normalize by the sum of weights
+                smoothedInterval[x - start] = Util.validate(sum / weightSum); // Normalize by the sum of weights
             }
 
             // Calculate the sum of the smoothed interval
@@ -160,7 +164,7 @@ public class RefineSeries
                 smoothedSum += value;
 
             // Normalize the smoothed interval to match the original sum
-            double normalizationFactor = originalSum / smoothedSum;
+            double normalizationFactor = Util.validate(originalSum / smoothedSum);
             for (int x = start; x < end; x++)
                 f2[x] = smoothedInterval[x - start] * normalizationFactor;
 
@@ -201,6 +205,7 @@ public class RefineSeries
             {
                 // Use a gradual scaling function to approach the minimum value
                 double scale = Math.sqrt((currentValue - minValue) / (0 - minValue)); // Gradual scaling
+                Util.checkValid(scale);
                 f2[x] = minValue + (currentValue - minValue) * scale;
             }
         }
@@ -209,7 +214,7 @@ public class RefineSeries
         double finalSum = 0.0;
         for (int x = start; x < end; x++)
             finalSum += f2[x];
-        double finalAdjustmentFactor = originalSum / finalSum;
+        double finalAdjustmentFactor = Util.validate(originalSum / finalSum);
         for (int x = start; x < end; x++)
             f2[x] *= finalAdjustmentFactor;
     }

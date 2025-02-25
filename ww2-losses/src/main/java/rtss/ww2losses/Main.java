@@ -68,6 +68,8 @@ public class Main
     {
         try
         {
+            PopulationADH.setFilesVersion("ADH.v1"); // ###
+            
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
             Util.out("");

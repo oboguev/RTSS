@@ -15,8 +15,9 @@ import rtss.util.Util;
 
 public class PopulationADH
 {
-    static public boolean UsePrecomputedFiles = true;
-    static public boolean UseCache = true;
+    static private boolean UsePrecomputedFiles = Util.True;
+    static private boolean UseCache = Util.True;
+    static private String FilesVersion = "ADH";
 
     private static Map<String, Population> cache = new HashMap<>();
 
@@ -30,6 +31,11 @@ public class PopulationADH
     public static int[] AgeBinWidthsDays()
     {
         return Util.multiply(ageBinWidths, 365);
+    }
+
+    public static void setFilesVersion(String filesVersion)
+    {
+        FilesVersion = filesVersion;
     }
 
     public static Population getPopulation(Area area, int year) throws Exception
@@ -46,13 +52,13 @@ public class PopulationADH
     {
         return getPopulation(area, year, null);
     }
-    
+
     public static Population getPopulation(Area area, String year, InterpolationOptionsByGender options) throws Exception
     {
         Population p = null;
         Integer yearHint = yearHint(year);
 
-        String cacheKey = area.name() + "-" + year;
+        String cacheKey = FilesVersion + "---" + area.name() + "---" + year;
 
         if (UseCache && mayUseCache(options))
         {
@@ -67,7 +73,7 @@ public class PopulationADH
             try
             {
                 String en_year = year.replace("-границы-", "-in-borders-of-");
-                String path = String.format("population_data/%s/ADH/%s/total.txt", area.name(), en_year);
+                String path = String.format("population_data/%s/%s/%s/total.txt", area.name(), FilesVersion, en_year);
                 p = Population.load(path, Locality.TOTAL);
             }
             catch (Exception ex)
@@ -121,10 +127,10 @@ public class PopulationADH
             String[] sa = year.split("-");
             year = sa[0];
         }
-        
+
         return Integer.parseInt(year);
     }
-    
+
     private static boolean mayUseCache(InterpolationOptionsByGender options)
     {
         return options == null || options.allowCache() == true;
