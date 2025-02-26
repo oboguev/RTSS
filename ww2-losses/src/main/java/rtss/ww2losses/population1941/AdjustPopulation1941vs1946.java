@@ -69,13 +69,16 @@ public class AdjustPopulation1941vs1946
 
         // check if we need to adjust it
         Set<Gender> do_adjust = new HashSet<>();
-        final double min_margin = 0.005;
+        final double min_margin = 0.01;
         final int cutoff_age = 80;
         for (Gender gender : Gender.TwoGenders)
         {
+            double[] minValues = pmin.asArray(Locality.TOTAL, gender);
+            minValues = Util.multiply(minValues, min_margin);
+
             // population excess over minimum
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
-            if (checkNegativeRegions(a_excess, pmin, gender, min_margin, cutoff_age, true))
+            if (checkNegativeRegions(a_excess, minValues, gender, cutoff_age, true))
                 do_adjust.add(gender);
         }
 
@@ -95,7 +98,7 @@ public class AdjustPopulation1941vs1946
             // population excess over minimum
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
             
-            double[] minValues = p_start1941.asArray(Locality.TOTAL, gender);
+            double[] minValues = pmin.asArray(Locality.TOTAL, gender);
             minValues = Util.multiply(minValues, min_margin);
 
             // redistribute the excess
@@ -139,10 +142,10 @@ public class AdjustPopulation1941vs1946
 
     /* =============================================================================================== */
 
-    private boolean checkNegativeRegions(double[] a, PopulationContext p_start1941, Gender gender, double amin, int cutoff_age, boolean print)
+    private boolean checkNegativeRegions(double[] a, double[] minValues, Gender gender, int cutoff_age, boolean print)
             throws Exception
     {
-        List<Region> list = negativeRegions(a, p_start1941, gender, amin);
+        List<Region> list = negativeRegions(a, minValues);
 
         if (print)
             Util.err("Отрицательные районы в населении 1941 года " + gender.name());
@@ -180,13 +183,13 @@ public class AdjustPopulation1941vs1946
         double sum;
     }
 
-    public List<Region> negativeRegions(double[] a, PopulationContext p_start1941, Gender gender, double amin) throws Exception
+    public List<Region> negativeRegions(double[] a, double[] minValues) throws Exception
     {
         List<Region> list = new ArrayList<>();
 
         for (int nd = 0; nd < a.length;)
         {
-            double vmin = amin * p_start1941.getDay(Locality.TOTAL, gender, nd);
+            double vmin = minValues[nd];
 
             // find first negative point
             while (nd < a.length && a[nd] >= vmin)
