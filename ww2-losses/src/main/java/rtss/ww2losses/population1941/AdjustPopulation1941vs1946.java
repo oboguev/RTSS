@@ -131,6 +131,8 @@ public class AdjustPopulation1941vs1946
                 Util.assertion(Util.same(v1, v2));
             }
         }
+        
+        showDifferences(p_new1941, p_start1941);
 
         return p_new1941;
     }
@@ -245,13 +247,34 @@ public class AdjustPopulation1941vs1946
         
         Util.assertion(can_distribute >= must_distribute);
         
-        if (must_distribute == 0)
+        if (Util.False)
         {
-            Util.out(String.format("%s %d-%d no-distr", gender.name(), nd1 / 365, nd2 / 365));
+            
+            if (must_distribute == 0)
+            {
+                Util.out(String.format("%s %d-%d no-distr", gender.name(), nd1 / 365, nd2 / 365));
+            }
+            else
+            {
+                Util.out(String.format("%s %d-%d %f", gender.name(), nd1 / 365, nd2 / 365, can_distribute / must_distribute));
+            }
         }
-        else
+    }
+
+    /* =============================================================================================== */
+
+    private void showDifferences(PopulationContext p_new, PopulationContext p_start) throws Exception
+    {
+        Gender gender = Gender.MALE;
+        for (int nd = 0; nd <= p_new.MAX_DAY; nd++)
         {
-            Util.out(String.format("%s %d-%d %f", gender.name(), nd1 / 365, nd2 / 365, can_distribute / must_distribute));
+            double vn = p_new.getDay(Locality.TOTAL, gender, nd);
+            double vs = p_start.getDay(Locality.TOTAL, gender, nd);
+            if (Util.same(vn, vs))
+                continue;
+            double vdiff = vn - vs;
+            
+            Util.out(String.format("%s.%d.%d %f -> %f (diff: %f)", gender.name(), nd/365, nd % 365, vs, vn, vdiff));
         }
     }
 }
