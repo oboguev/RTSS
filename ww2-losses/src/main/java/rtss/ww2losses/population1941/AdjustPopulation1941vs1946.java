@@ -33,25 +33,34 @@ public class AdjustPopulation1941vs1946
     final PeacetimeMortalityTables peacetimeMortalityTables;
     final WarAttritionModel wam;
     final PopulationContext p1946_actual;
+    final double min_margin;
 
     final int DAYS_PER_YEAR = 365;
 
-    public AdjustPopulation1941vs1946(AreaParameters ap, PeacetimeMortalityTables peacetimeMortalityTables, WarAttritionModel wam,
-            final PopulationContext p1946_actual)
+    public AdjustPopulation1941vs1946(
+            AreaParameters ap, 
+            PeacetimeMortalityTables peacetimeMortalityTables, 
+            WarAttritionModel wam,
+            final PopulationContext p1946_actual,
+            final double min_margin)
     {
         this.ap = ap;
         this.peacetimeMortalityTables = peacetimeMortalityTables;
         this.wam = wam;
         this.p1946_actual = p1946_actual;
+        this.min_margin = min_margin; 
     }
-    
-    private static PopulationContext last_pmin; 
 
     /*
      * Если требуется перераспределение, возвращает перераспределённое население на начало 1941 года.
      * Если перераспределения не требуется, возвращает null.
      */
     public PopulationContext refine(PopulationContext p_start1941) throws Exception
+    {
+        return refine(p_start1941, false);
+    }
+
+    public PopulationContext refine(PopulationContext p_start1941, boolean recur) throws Exception
     {
         /* требуется учёт миграции */
         if (ap.area == Area.RSFSR)
@@ -65,18 +74,12 @@ public class AdjustPopulation1941vs1946
          * (в данном случае нулевом) уровне военных потерь.
          */
         PopulationContext pmin = backtrack.population_1946_to_early1941(null);
-        if (last_pmin != null)
-        {
-            pmin.checkSame(last_pmin, 0.00001);
-        }
-        last_pmin = pmin;
 
         // population excess over minimum
         PopulationContext p_excess = p_start1941.sub(pmin, ValueConstraint.NONE);
 
         // check if we need to adjust it
         Set<Gender> do_adjust = new HashSet<>();
-        final double min_margin = 0.01;
         final int cutoff_age = 80;
         for (Gender gender : Gender.TwoGenders)
         {
@@ -85,14 +88,12 @@ public class AdjustPopulation1941vs1946
 
             // population excess over minimum
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
-            if (checkNegativeRegions(a_excess, minValues, gender, cutoff_age, true))
+            if (checkNegativeRegions(a_excess, minValues, gender, cutoff_age, recur, true))
                 do_adjust.add(gender);
         }
 
         if (do_adjust.isEmpty())
             return null;
-
-        Util.err("");
 
         // will adjust and collect the adjusted excess here 
         PopulationContext p_excess2 = p_excess.clone();
@@ -115,20 +116,17 @@ public class AdjustPopulation1941vs1946
             rs.gaussianKernelWindow = 50;
             checkCanAdjust(rs, gender, a_excess, minValues, Bins.forWidths(PopulationADH.AgeBinWidthsDays()));
             double[] a_excess2 = rs.modifySeries(a_excess, minValues, PopulationADH.AgeBinWidthsDays(), a_excess.length - 1);
+            p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
 
+            // проверки
             Util.checkSame(Util.sum(a_excess), Util.sum(a_excess2));
             for (int nd = 0; nd < a_excess.length; nd++)
                 Util.assertion(a_excess2[nd] >= minValues[nd]);
-
-            p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
-
-            if (checkNegativeRegions(a_excess2, minValues, gender, cutoff_age, false))
+            if (checkNegativeRegions(a_excess2, minValues, gender, cutoff_age, recur, false))
                 throw new Exception("внутренний сбой");
 
             if (Util.False)
-            {
                 ChartXYSplineAdvanced.display2("Refinement " + gender.name(), a_excess, a_excess2);
-            }
         }
 
         PopulationContext p_new1941 = pmin.add(p_excess2);
@@ -150,8 +148,6 @@ public class AdjustPopulation1941vs1946
 
         if (Util.True)
         {
-            Util.noop();
-
             for (Gender gender : Gender.TwoGenders)
             {
                 double[] minValues = pmin.asArray(Locality.TOTAL, gender);
@@ -159,23 +155,25 @@ public class AdjustPopulation1941vs1946
 
                 // population excess over minimum
                 double[] a_excess2 = p_excess2.asArray(Locality.TOTAL, gender);
-                if (checkNegativeRegions(a_excess2, minValues, gender, cutoff_age, false))
+                if (checkNegativeRegions(a_excess2, minValues, gender, cutoff_age, recur, false))
                     throw new Exception("внутренний сбой");
             }
-
-            refine(p_new1941); // ###
-            Util.noop();
         }
 
+        if (Util.False)
+            refine(p_new1941, true);
+        
+        Util.err("Отрицательные районы перераспределены");
+        
         return p_new1941;
     }
 
     /* =============================================================================================== */
 
-    private boolean checkNegativeRegions(double[] a, double[] minValues, Gender gender, int cutoff_age, boolean print)
+    private boolean checkNegativeRegions(double[] a, double[] minValues, Gender gender, int cutoff_age, boolean recur, boolean print)
             throws Exception
     {
-        List<Region> list = negativeRegions(a, minValues);
+        List<Region> list = negativeRegions(a, minValues, recur);
 
         if (print)
             Util.err("Отрицательные районы в населении 1941 года " + gender.name());
@@ -213,14 +211,16 @@ public class AdjustPopulation1941vs1946
         double sum;
     }
 
-    public List<Region> negativeRegions(double[] a, double[] minValues) throws Exception
+    public List<Region> negativeRegions(double[] a, double[] minValues, boolean recur) throws Exception
     {
         List<Region> list = new ArrayList<>();
+
+        double margin = recur ? 0.999 : 1.0;
 
         for (int nd = 0; nd < a.length;)
         {
             // find first negative point
-            while (nd < a.length && a[nd] >= minValues[nd])
+            while (nd < a.length && a[nd] >= margin * minValues[nd])
                 nd++;
             if (nd == a.length)
                 break;
@@ -229,7 +229,7 @@ public class AdjustPopulation1941vs1946
             r.nd1 = nd;
 
             // find first positive point
-            while (nd < a.length && a[nd] < minValues[nd])
+            while (nd < a.length && a[nd] < margin * minValues[nd])
                 nd++;
             r.nd2 = nd - 1;
             list.add(r);

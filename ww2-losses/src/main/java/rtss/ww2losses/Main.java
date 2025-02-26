@@ -285,7 +285,7 @@ public class Main
              * Нужно ли перераспрелелить население внутри 5-летних групп?
              */
             WarAttritionModel wam = new WarAttritionModel(p_mid1941_wam, p1946_actual, wamp);
-            AdjustPopulation1941vs1946 rp = new AdjustPopulation1941vs1946(ap, peacetimeMortalityTables, wam, p1946_actual);
+            AdjustPopulation1941vs1946 rp = new AdjustPopulation1941vs1946(ap, peacetimeMortalityTables, wam, p1946_actual, 0.01);
             PopulationContext p = rp.refine(p_start1941);
             if (p == null)
                 break;
@@ -295,6 +295,7 @@ public class Main
 
             Util.assertion(Util.same(p.sum(), p_start1941.sum()));
             p_start1941 = p;
+            break;
         }
 
         if (Util.False)
