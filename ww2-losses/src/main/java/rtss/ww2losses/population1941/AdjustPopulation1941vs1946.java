@@ -19,7 +19,8 @@ import rtss.ww2losses.ageline.BacktrackPopulation;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.params.AreaParameters;
-import rtss.ww2losses.population1941.math.RefineSeries;
+// import rtss.ww2losses.population1941.math.RefineSeries;
+import rtss.ww2losses.population1941.math.RefineSeriesX;
 
 /* 
  * Перераспределить население на начало 1941 года внутри 5-летних групп аггреграции
@@ -84,7 +85,7 @@ public class AdjustPopulation1941vs1946
         Util.err("");
 
         // will adjust and collect the adjusted excess here 
-        PopulationContext p_excess2 = PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
+        PopulationContext p_excess2 = p_excess.clone();
 
         for (Gender gender : Gender.TwoGenders)
         {
@@ -93,26 +94,27 @@ public class AdjustPopulation1941vs1946
 
             // population excess over minimum
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
-
-            // ### must_reduce
-            // ### may_increase
+            
+            double[] minValues = p_start1941.asArray(Locality.TOTAL, gender);
+            minValues = Util.multiply(minValues, min_margin);
 
             // redistribute the excess
-            RefineSeries rs = new RefineSeries();
+            RefineSeriesX rs = new RefineSeriesX();
             rs.minRelativeLevel = 0.3;
             rs.sigma = 10.0;
             rs.gaussianKernelWindow = 50;
-            double[] a_excess2 = rs.modifySeries(a_excess, PopulationADH.AgeBinWidthsDays(), a_excess.length - 1);
+            checkCanAdjust(rs, gender, a_excess, minValues, Bins.forWidths(PopulationADH.AgeBinWidthsDays()));
+            double[] a_excess2 = rs.modifySeries(a_excess, minValues, PopulationADH.AgeBinWidthsDays(), a_excess.length - 1);
             
             Util.checkSame(Util.sum(a_excess), Util.sum(a_excess2));
+            for (int nd = 0; nd < a_excess.length; nd++)
+                Util.assertion(a_excess2[nd] >= minValues[nd]);
             
             p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
             if (Util.False)
             {
                 ChartXYSplineAdvanced.display2("Refinement " + gender.name(), a_excess, a_excess2);
             }
-
-            Util.noop();
         }
 
         PopulationContext p_new1941 = pmin.add(p_excess2);
@@ -208,5 +210,48 @@ public class AdjustPopulation1941vs1946
     private double day2year(int nd)
     {
         return nd / 365.0;
+    }
+
+    /* =============================================================================================== */
+
+    private void checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, Bin[] bins)
+    {
+        for (Bin bin : bins)
+            checkCanAdjust(rs, gender, a, minValues, bin);
+    }
+
+    private void checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, Bin bin)
+    {
+        int nd1 = bin.age_x1;
+        int nd2 = bin.age_x2;
+        double avg = Util.average(Util.splice(a, nd1, nd2));
+        
+        double can_distribute = 0;
+        double must_distribute = 0;
+        
+        for (int nd = nd1; nd <= nd2; nd++)
+        {
+            double minv = minValues[nd];
+            minv = Math.max(minv, rs.minRelativeLevel * avg);
+            if (a[nd] >= minv)
+            {
+                can_distribute += a[nd] - minv; 
+            }
+            else
+            {
+                must_distribute += minv - a[nd]; 
+            }
+        }
+        
+        Util.assertion(can_distribute >= must_distribute);
+        
+        if (must_distribute == 0)
+        {
+            Util.out(String.format("%s %d-%d no-distr", gender.name(), nd1 / 365, nd2 / 365));
+        }
+        else
+        {
+            Util.out(String.format("%s %d-%d %f", gender.name(), nd1 / 365, nd2 / 365, can_distribute / must_distribute));
+        }
     }
 }
