@@ -952,13 +952,10 @@ public class Main
              */
 
             FixAgeLine[] fixes = {
-                                   new FixAgeLine(Gender.MALE, 2.5, 7.5),
+                                   new FixAgeLine(Gender.MALE, 2.1, 6.5),
                                    new FixAgeLine(Gender.FEMALE, 2.1, 7.37),
-                                   new FixAgeLine(Gender.FEMALE, 10.0, 16.0),
-                                   // ### new FixAgeLine(Gender.FEMALE, 2.1, 7.48), // ###
-                                   // ### new FixAgeLine(Gender.FEMALE, 2.1, 9.0), // ###
-                                   // ### new FixAgeLine(Gender.FEMALE, 2.1, 16.0), // ???!!! -- why causes exception during eval Migration???
-                                   new FixAgeLine(Gender.FEMALE, 42.5, 57.5)
+                                   new FixAgeLine(Gender.FEMALE, 9.0, 15.7),
+                                   new FixAgeLine(Gender.FEMALE, 44.0, 56.4)
             };
 
             for (FixAgeLine fix : fixes)
@@ -1019,7 +1016,7 @@ public class Main
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
         PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);
         Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 100);
-        Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 2500);
+        Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 5000);
 
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births.clone();

@@ -101,7 +101,7 @@ public class AgeLineFactorIntensities
     public void display(String title) throws Exception
     {
         new PopulationChart(title)
-                .show("loss intensity", toPopulationContext().toPopulation())
+                .show("loss intensity", toPopulationContext())
                 .display();
 
     }
