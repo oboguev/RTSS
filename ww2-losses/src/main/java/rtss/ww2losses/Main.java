@@ -69,7 +69,7 @@ public class Main
         try
         {
             PopulationADH.setFilesVersion("ADH.v1");
-            
+
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
             Util.out("");
@@ -262,6 +262,7 @@ public class Main
          * для некоторых возрастных линий.
          */
         PopulationContext p_mid1941;
+        PopulationContext p_mid1941_wam = null;
         PopulationContext deaths_1941_1st_halfyear;
         double births_1941_1st_halfyear;
         for (int npass = 0;;)
@@ -275,18 +276,20 @@ public class Main
                                                asfr_calibration,
                                                halfyearly_asfrs.getForTimepoint("1941.0"));
             p_mid1941 = fr.p_mid1941;
+            if (p_mid1941_wam == null)
+                p_mid1941_wam = fr.p_mid1941;
             deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
             births_1941_1st_halfyear = fr.observed_births;
 
             /*
              * Нужно ли перераспрелелить население внутри 5-летних групп?
              */
-            WarAttritionModel wam = new WarAttritionModel(p_mid1941, p1946_actual, wamp);
+            WarAttritionModel wam = new WarAttritionModel(p_mid1941_wam, p1946_actual, wamp);
             AdjustPopulation1941vs1946 rp = new AdjustPopulation1941vs1946(ap, peacetimeMortalityTables, wam, p1946_actual);
             PopulationContext p = rp.refine(p_start1941);
             if (p == null)
                 break;
-            
+
             if (npass++ > 10)
                 throw new Exception("Коррекция населения на начало 1941 года не сходится");
 

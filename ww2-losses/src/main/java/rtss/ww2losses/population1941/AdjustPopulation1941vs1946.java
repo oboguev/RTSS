@@ -132,7 +132,7 @@ public class AdjustPopulation1941vs1946
             }
         }
         
-        showDifferences(p_new1941, p_start1941);
+        // showDifferences(p_new1941, p_start1941);
 
         return p_new1941;
     }
@@ -263,6 +263,7 @@ public class AdjustPopulation1941vs1946
 
     /* =============================================================================================== */
 
+    @SuppressWarnings("unused")
     private void showDifferences(PopulationContext p_new, PopulationContext p_start) throws Exception
     {
         Gender gender = Gender.MALE;
