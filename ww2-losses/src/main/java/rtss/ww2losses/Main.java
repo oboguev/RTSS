@@ -68,7 +68,7 @@ public class Main
     {
         try
         {
-            PopulationADH.setFilesVersion("ADH.v1"); // ###
+            PopulationADH.setFilesVersion("ADH.v1");
             
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
@@ -141,11 +141,11 @@ public class Main
     private CombinedMortalityTable mt1940;
     private PeacetimeMortalityTables peacetimeMortalityTables;
 
-    /*  весовые коэффциенты для факторов распределяющих потери по категориям */
+    /* весовые коэффциенты для факторов распределяющих потери по категориям */
     WarAttritionModelParameters wamp = new WarAttritionModelParameters()
-            // Доля потерь мужчин призывного возраста связанная с интенсивностью военных потерь РККА 
+            // доля потерь мужчин призывного возраста связанная с интенсивностью военных потерь РККА 
             .aw_conscript_combat(0.7)
-            // Доля потерь остальных групп (гражданского населения) связанная с интенсивностью военных потерь РККА
+            // доля потерь остальных групп (гражданского населения) связанная с интенсивностью военных потерь РККА
             .aw_civil_combat(0.2);
 
     /* 
@@ -191,6 +191,9 @@ public class Main
 
         if (model != null)
         {
+            /*
+             * значения модели заданы внешним драйвером
+             */
             this.wamp = model.params.wamp;
             this.PrintDiagnostics = model.params.PrintDiagnostics;
             this.exportDirectory = model.params.exportDirectory;
@@ -271,7 +274,6 @@ public class Main
                                                peacetimeMortalityTables,
                                                asfr_calibration,
                                                halfyearly_asfrs.getForTimepoint("1941.0"));
-            p_start1941 = fr.p_start1941;
             p_mid1941 = fr.p_mid1941;
             deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
             births_1941_1st_halfyear = fr.observed_births;
@@ -425,13 +427,6 @@ public class Main
 
         evalDeficit1946(immigration_halves);
         evalAgeLines();
-    }
-
-    /* ================================================================================== */
-
-    public void xxx() throws Exception
-    {
-        // ###
     }
 
     /* ================================================================================== */

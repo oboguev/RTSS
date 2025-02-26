@@ -17,7 +17,6 @@ public class PopulationMiddle1941 extends UtilBase_194x
 {
     public static class PopulationForwardingResult1941
     {
-        public PopulationContext p_start1941;
         public PopulationContext p_mid1941;
         public PopulationContext observed_deaths_byGenderAge;
         public double observed_births;
@@ -31,10 +30,10 @@ public class PopulationMiddle1941 extends UtilBase_194x
     }
 
     public PopulationForwardingResult1941 forward_1941_1st_halfyear(
-            PopulationContext p_start1941,
-            PeacetimeMortalityTables peacetimeMortalityTables,
-            double asfr_calibration,
-            AgeSpecificFertilityRates asfrs) throws Exception
+            final PopulationContext p_start1941,
+            final PeacetimeMortalityTables peacetimeMortalityTables,
+            final double asfr_calibration,
+            final AgeSpecificFertilityRates asfrs) throws Exception
     {
         final CombinedMortalityTable mt1941_1 = peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
         PopulationContext p = p_start1941.clone();
@@ -42,15 +41,16 @@ public class PopulationMiddle1941 extends UtilBase_194x
         /*
          * Первая передвижка с начала 1941 до середины 1941 года с использованием CBR_1940.
          * Её назначение -- дать предварительную оценку населения в середине 1941 года,
-         * которая будет использована для исчисления средней за полугодие численности женских фертильных групп.
+         * которая затем будет использована для исчисления средней за полугодие численности женских фертильных групп.
          */
         ForwardPopulationT fw = new ForwardPopulationT();
         fw.setBirthRateTotal(ap.CBR_1940);
         fw.forward(p, mt1941_1, 0.5);
-        p = rescaleToADH(p, ap);
+        // p = rescaleToADH(p, ap);
         
         /*
-         * Передвижка от начала до середины 1941 года с использованием ASFR для расчёта числа рождений
+         * Вторая передвижка от начала до середины 1941 года, на этот раз
+         * с использованием ASFR для расчёта числа рождений
          */
         if (asfrs != null)
         {
@@ -68,7 +68,6 @@ public class PopulationMiddle1941 extends UtilBase_194x
         }
 
         PopulationForwardingResult1941 fr = new PopulationForwardingResult1941();
-        fr.p_start1941 = p_start1941;
         fr.p_mid1941 = p;
         fr.observed_deaths_byGenderAge = fw.deathsByGenderAge();
         fr.observed_births = fw.getObservedBirths();
@@ -78,10 +77,10 @@ public class PopulationMiddle1941 extends UtilBase_194x
     
     /*
      * Перемасштабировать для точного совпадения общей численности полов с расчётом АДХ
-     */
+    */
+    @SuppressWarnings("unused")
     private PopulationContext rescaleToADH(PopulationContext p_mid1941, AreaParameters ap) throws Exception
     {
-        // ### ????
         if (ap.area == Area.USSR && Util.False)
         {
             final double USSR_1941_START = 195_392_000; // АДХ, "Население Советского Союза", стр. 77, 118, 126

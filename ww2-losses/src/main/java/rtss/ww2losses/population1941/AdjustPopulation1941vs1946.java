@@ -1,7 +1,9 @@
 package rtss.ww2losses.population1941;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rtss.data.ValueConstraint;
 import rtss.data.bin.Bin;
@@ -30,7 +32,7 @@ public class AdjustPopulation1941vs1946
     final PeacetimeMortalityTables peacetimeMortalityTables;
     final WarAttritionModel wam;
     final PopulationContext p1946_actual;
-    
+
     final int DAYS_PER_YEAR = 365;
 
     public AdjustPopulation1941vs1946(AreaParameters ap, PeacetimeMortalityTables peacetimeMortalityTables, WarAttritionModel wam,
@@ -64,8 +66,8 @@ public class AdjustPopulation1941vs1946
         // population excess over minimum
         PopulationContext p_excess = p_start1941.sub(pmin, ValueConstraint.NONE);
 
-        // check if need to adjust it
-        boolean do_adjust = false;
+        // check if we need to adjust it
+        Set<Gender> do_adjust = new HashSet<>();
         final double min_margin = 0.005;
         final int cutoff_age = 80;
         for (Gender gender : Gender.TwoGenders)
@@ -73,17 +75,22 @@ public class AdjustPopulation1941vs1946
             // population excess over minimum
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
             if (checkNegativeRegions(a_excess, pmin, gender, min_margin, cutoff_age, true))
-                do_adjust = true;
+                do_adjust.add(gender);
         }
 
-        if (!do_adjust)
+        if (do_adjust.isEmpty())
             return null;
+        
+        Util.err("");
 
         // will adjust and collect the adjusted excess here 
         PopulationContext p_excess2 = PopulationContext.newTotalPopulationContext(ValueConstraint.NONE);
 
         for (Gender gender : Gender.TwoGenders)
         {
+            if (!do_adjust.contains(gender))
+                continue;
+
             // population excess over minimum
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
 
@@ -96,13 +103,21 @@ public class AdjustPopulation1941vs1946
             rs.sigma = 10.0;
             rs.gaussianKernelWindow = 50;
             double[] a_excess2 = rs.modifySeries(a_excess, PopulationADH.AgeBinWidthsDays(), a_excess.length - 1);
+            
+            Util.checkSame(Util.sum(a_excess), Util.sum(a_excess2));
+            
             p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
-            ChartXYSplineAdvanced.display2("Refinement " + gender.name(), a_excess, a_excess2);
+            if (Util.False)
+            {
+                ChartXYSplineAdvanced.display2("Refinement " + gender.name(), a_excess, a_excess2);
+            }
+
             Util.noop();
         }
 
         PopulationContext p_new1941 = pmin.add(p_excess2);
 
+        /* self-check */
         for (Gender gender : Gender.TwoGenders)
         {
             Util.assertion(Util.same(p_new1941.sum(gender), p_start1941.sum(gender)));
@@ -135,18 +150,18 @@ public class AdjustPopulation1941vs1946
 
             return false;
         }
-        
+
         boolean hasNegativeRegions = false;
 
         for (Region r : list)
         {
             if (print)
             {
-                Util.err(String.format("    %5d - %5d  [%5d] =  %7.3f - %7.3f",
+                Util.err(String.format("    %5d - %5d  [%5d] =  %7.3f - %7.3f  [нехватка %.0f]",
                                        r.nd1, r.nd2, r.nd2 - r.nd1 + 1,
-                                       day2year(r.nd1), day2year(r.nd2)));
+                                       day2year(r.nd1), day2year(r.nd2), (double) Math.round(r.sum)));
             }
-            
+
             if (r.nd1 < cutoff_age * DAYS_PER_YEAR)
                 hasNegativeRegions = true;
         }
@@ -158,6 +173,7 @@ public class AdjustPopulation1941vs1946
     {
         public int nd1;
         public int nd2;
+        double sum;
     }
 
     public List<Region> negativeRegions(double[] a, PopulationContext p_start1941, Gender gender, double amin) throws Exception
@@ -182,6 +198,8 @@ public class AdjustPopulation1941vs1946
                 nd++;
             r.nd2 = nd - 1;
             list.add(r);
+            
+            r.sum = Util.sum(Util.splice(a, r.nd1, r.nd2));
         }
 
         return list;

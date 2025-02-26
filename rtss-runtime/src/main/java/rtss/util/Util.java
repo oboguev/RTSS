@@ -227,6 +227,30 @@ public class Util
         return !differ(a, b, diff);
     }
 
+    public static void checkSame(double a, double b) throws ArithmeticValidationException
+    {
+        if (!same(a, b))
+            throw new ArithmeticValidationException("Values differ");
+    }
+
+    public static void checkSame(double[] a, double[] b) throws ArithmeticValidationException
+    {
+        if (!same(a, b))
+            throw new ArithmeticValidationException("Values differ");
+    }
+
+    public static void checkSame(double a, double b, double diff) throws ArithmeticValidationException
+    {
+        if (!same(a, b, diff))
+            throw new ArithmeticValidationException("Values differ");
+    }
+
+    public static void checkSame(double[] a, double[] b, double diff) throws ArithmeticValidationException
+    {
+        if (!same(a, b, diff))
+            throw new ArithmeticValidationException("Values differ");
+    }
+
     public static boolean isValid(double v)
     {
         return Double.isFinite(v);
@@ -691,7 +715,7 @@ public class Util
 
         // sum ranges from (n + 1) / 2 to n
         double gini = (2 * sum - n - 1) / (n - 1);
-        
+
         Util.assertion(gini >= 0 && gini <= 1);
 
         return gini;
