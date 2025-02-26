@@ -280,6 +280,9 @@ public class Main
                 p_mid1941_wam = fr.p_mid1941;
             deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
             births_1941_1st_halfyear = fr.observed_births;
+            
+            if (npass == 1)
+                break;
 
             /*
              * Нужно ли перераспрелелить население внутри 5-летних групп?
@@ -295,7 +298,6 @@ public class Main
 
             Util.assertion(Util.same(p.sum(), p_start1941.sum()));
             p_start1941 = p;
-            break;
         }
 
         if (Util.False)
