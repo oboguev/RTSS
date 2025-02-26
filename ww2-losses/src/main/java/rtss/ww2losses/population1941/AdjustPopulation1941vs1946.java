@@ -44,6 +44,8 @@ public class AdjustPopulation1941vs1946
         this.wam = wam;
         this.p1946_actual = p1946_actual;
     }
+    
+    private static PopulationContext last_pmin; 
 
     /*
      * Если требуется перераспределение, возвращает перераспределённое население на начало 1941 года.
@@ -63,6 +65,11 @@ public class AdjustPopulation1941vs1946
          * (в данном случае нулевом) уровне военных потерь.
          */
         PopulationContext pmin = backtrack.population_1946_to_early1941(null);
+        if (last_pmin != null)
+        {
+            pmin.checkSame(last_pmin, 0.00001);
+        }
+        last_pmin = pmin;
 
         // population excess over minimum
         PopulationContext p_excess = p_start1941.sub(pmin, ValueConstraint.NONE);
@@ -84,7 +91,7 @@ public class AdjustPopulation1941vs1946
 
         if (do_adjust.isEmpty())
             return null;
-        
+
         Util.err("");
 
         // will adjust and collect the adjusted excess here 
@@ -97,7 +104,7 @@ public class AdjustPopulation1941vs1946
 
             // population excess over minimum
             double[] a_excess = p_excess.asArray(Locality.TOTAL, gender);
-            
+
             double[] minValues = pmin.asArray(Locality.TOTAL, gender);
             minValues = Util.multiply(minValues, min_margin);
 
@@ -108,12 +115,16 @@ public class AdjustPopulation1941vs1946
             rs.gaussianKernelWindow = 50;
             checkCanAdjust(rs, gender, a_excess, minValues, Bins.forWidths(PopulationADH.AgeBinWidthsDays()));
             double[] a_excess2 = rs.modifySeries(a_excess, minValues, PopulationADH.AgeBinWidthsDays(), a_excess.length - 1);
-            
+
             Util.checkSame(Util.sum(a_excess), Util.sum(a_excess2));
             for (int nd = 0; nd < a_excess.length; nd++)
                 Util.assertion(a_excess2[nd] >= minValues[nd]);
-            
+
             p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
+
+            if (checkNegativeRegions(a_excess2, minValues, gender, cutoff_age, false))
+                throw new Exception("внутренний сбой");
+
             if (Util.False)
             {
                 ChartXYSplineAdvanced.display2("Refinement " + gender.name(), a_excess, a_excess2);
@@ -134,8 +145,27 @@ public class AdjustPopulation1941vs1946
                 Util.assertion(Util.same(v1, v2));
             }
         }
-        
+
         // showDifferences(p_new1941, p_start1941);
+
+        if (Util.True)
+        {
+            Util.noop();
+
+            for (Gender gender : Gender.TwoGenders)
+            {
+                double[] minValues = pmin.asArray(Locality.TOTAL, gender);
+                minValues = Util.multiply(minValues, min_margin);
+
+                // population excess over minimum
+                double[] a_excess2 = p_excess2.asArray(Locality.TOTAL, gender);
+                if (checkNegativeRegions(a_excess2, minValues, gender, cutoff_age, false))
+                    throw new Exception("внутренний сбой");
+            }
+
+            refine(p_new1941); // ###
+            Util.noop();
+        }
 
         return p_new1941;
     }
@@ -189,10 +219,8 @@ public class AdjustPopulation1941vs1946
 
         for (int nd = 0; nd < a.length;)
         {
-            double vmin = minValues[nd];
-
             // find first negative point
-            while (nd < a.length && a[nd] >= vmin)
+            while (nd < a.length && a[nd] >= minValues[nd])
                 nd++;
             if (nd == a.length)
                 break;
@@ -201,11 +229,11 @@ public class AdjustPopulation1941vs1946
             r.nd1 = nd;
 
             // find first positive point
-            while (nd < a.length && a[nd] < vmin)
+            while (nd < a.length && a[nd] < minValues[nd])
                 nd++;
             r.nd2 = nd - 1;
             list.add(r);
-            
+
             r.sum = Util.sum(Util.splice(a, r.nd1, r.nd2));
         }
 
@@ -230,29 +258,29 @@ public class AdjustPopulation1941vs1946
         int nd1 = bin.age_x1;
         int nd2 = bin.age_x2;
         double avg = Util.average(Util.splice(a, nd1, nd2));
-        
+
         double can_distribute = 0;
         double must_distribute = 0;
-        
+
         for (int nd = nd1; nd <= nd2; nd++)
         {
             double minv = minValues[nd];
             minv = Math.max(minv, rs.minRelativeLevel * avg);
             if (a[nd] >= minv)
             {
-                can_distribute += a[nd] - minv; 
+                can_distribute += a[nd] - minv;
             }
             else
             {
-                must_distribute += minv - a[nd]; 
+                must_distribute += minv - a[nd];
             }
         }
-        
+
         Util.assertion(can_distribute >= must_distribute);
-        
+
         if (Util.False)
         {
-            
+
             if (must_distribute == 0)
             {
                 Util.out(String.format("%s %d-%d no-distr", gender.name(), nd1 / 365, nd2 / 365));
@@ -277,8 +305,8 @@ public class AdjustPopulation1941vs1946
             if (Util.same(vn, vs))
                 continue;
             double vdiff = vn - vs;
-            
-            Util.out(String.format("%s.%d.%d %f -> %f (diff: %f)", gender.name(), nd/365, nd % 365, vs, vn, vdiff));
+
+            Util.out(String.format("%s.%d.%d %f -> %f (diff: %f)", gender.name(), nd / 365, nd % 365, vs, vn, vdiff));
         }
     }
 }

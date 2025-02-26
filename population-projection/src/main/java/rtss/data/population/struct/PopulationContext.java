@@ -1329,4 +1329,35 @@ public class PopulationContext
     {
         PopulationChart.display(title, this, "");
     }
+
+    /* ---------------------------------------------------------------------------- */
+    
+    public void checkSame(PopulationContext cx, double diff) throws Exception
+    {
+        if (hasRuralUrban != cx.hasRuralUrban || MAX_DAY != cx.MAX_DAY)
+            throw new Exception("contexts differ");
+        
+        if (hasRuralUrban)
+        {
+            checkSame(cx, diff, Locality.RURAL);
+            checkSame(cx, diff, Locality.URBAN);
+        }
+        else
+        {
+            checkSame(cx, diff, Locality.TOTAL);
+        }
+    }
+
+    private void checkSame(PopulationContext cx, double diff, Locality locality) throws Exception
+    {
+        for (Gender gender : Gender.TwoGenders)
+        {
+            for (int nd = 0; nd <= MAX_DAY; nd ++)
+            {
+                double v1 = getDay(locality, gender, nd);
+                double v2 = getDay(locality, gender, nd);
+                Util.checkSame(v1, v2, diff);
+            }
+        }
+    }
 }
