@@ -53,12 +53,15 @@ import java.util.List;
 
 public class Main
 {
+    static
+    {
+        PopulationADH.setFilesVersion("ADH.v1");
+    }
+    
     public static void main(String[] args)
     {
         try
         {
-            PopulationADH.setFilesVersion("ADH.v1");
-
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
             Util.out("");

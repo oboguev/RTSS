@@ -43,7 +43,7 @@ public class MultiModelMain
 
     private void main() throws Exception
     {
-        warmupCaches();
+        // warmupCaches();
         
         for (double aw_conscript_combat = 0.6; aw_conscript_combat <= 0.8; aw_conscript_combat += 0.1)
         {
@@ -90,6 +90,7 @@ public class MultiModelMain
         return model.results;
     }
     
+    @SuppressWarnings("unused")
     private void warmupCaches() throws Exception
     {
         ModelParameters params = new ModelParameters();
