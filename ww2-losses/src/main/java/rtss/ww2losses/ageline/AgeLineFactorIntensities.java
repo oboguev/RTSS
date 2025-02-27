@@ -8,6 +8,7 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
+import rtss.ww2losses.util.UnnegLossIntensity;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 
@@ -27,6 +28,14 @@ public class AgeLineFactorIntensities
 
     private DoubleArray male = newDoubleArray(ValueConstraint.NONE);
     private DoubleArray female = newDoubleArray(ValueConstraint.NONE);
+    
+    public AgeLineFactorIntensities clone()
+    {
+        AgeLineFactorIntensities c = new AgeLineFactorIntensities();
+        c.male = male.clone();
+        c.female = female.clone();
+        return c;
+    }
 
     private DoubleArray newDoubleArray(ValueConstraint vc)
     {
@@ -162,6 +171,30 @@ public class AgeLineFactorIntensities
             a[nd] = a1 + (nd - nd1) * (a2 - a1) / (nd2 - nd1);
     }
 
+    /* ========================================================== */
+    
+    public void unneg(double thresholdFactor) throws Exception
+    {
+        unneg(Gender.MALE, thresholdFactor);
+        unneg(Gender.FEMALE, thresholdFactor);
+    }
+
+    private void unneg(Gender gender, double thresholdFactor) throws Exception
+    {
+        Double[] ax = forGender(gender).get();
+        double[] a = forGender(gender).asUnboxedArray(0.0);
+
+        double[] a2 = UnnegLossIntensity.unneg(a, 80 * DAYS_PER_YEAR, thresholdFactor, gender);
+        Util.checkNonNegative(Util.splice(a2, 0, 80 * DAYS_PER_YEAR));
+        Double[] ax2 = Util.boxArray(a2);
+        for (int nd = 0; nd < a.length; nd++)
+        {
+            if (ax[nd] == null)
+                ax2[nd] = null;
+        }
+        forGender(gender).fromArray(ax2);
+    }
+    
     /* ========================================================== */
 
     public String dumpYear(Gender gender, int year) throws Exception

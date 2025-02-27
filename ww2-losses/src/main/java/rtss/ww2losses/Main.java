@@ -280,7 +280,7 @@ public class Main
                 p_mid1941_wam = fr.p_mid1941;
             deaths_1941_1st_halfyear = fr.observed_deaths_byGenderAge;
             births_1941_1st_halfyear = fr.observed_births;
-            
+
             if (npass == 1)
                 break;
 
@@ -926,17 +926,17 @@ public class Main
                 /*
                  * Диагностика
                  */
-                Util.err("");
-                Util.err("Участки отрицательной интенсивности потерь MALE:");
-                Util.err(alis.dumpNegRegions(Gender.MALE));
+                // Util.err("");
+                // Util.err("Участки отрицательной интенсивности потерь MALE:");
+                // Util.err(alis.dumpNegRegions(Gender.MALE));
 
-                Util.err("");
-                Util.err("Участки отрицательной интенсивности потерь FEMALE:");
-                Util.err(alis.dumpNegRegions(Gender.FEMALE));
+                // Util.err("");
+                // Util.err("Участки отрицательной интенсивности потерь FEMALE:");
+                // Util.err(alis.dumpNegRegions(Gender.FEMALE));
 
-                alis.display("Интенсивность военных потерь " + area);
-                PopulationContext p = alis.toPopulationContext();
-                Util.noop();
+                // alis.display("Интенсивность военных потерь " + area);
+                // PopulationContext p = alis.toPopulationContext();
+                // Util.noop();
             }
 
             /*
@@ -951,31 +951,52 @@ public class Main
              * Возраст указывается на середину 1941 года.
              */
 
-            FixAgeLine[] fixes = {
-                                   new FixAgeLine(Gender.MALE, 2.1, 6.5),
-                                   new FixAgeLine(Gender.FEMALE, 2.1, 7.37),
-                                   new FixAgeLine(Gender.FEMALE, 9.0, 15.7),
-                                   new FixAgeLine(Gender.FEMALE, 44.0, 56.4)
-            };
+            if (Util.False)
+            {
+                FixAgeLine[] fixes = {
+                                       new FixAgeLine(Gender.MALE, 2.1, 6.5),
+                                       new FixAgeLine(Gender.FEMALE, 2.1, 7.37),
+                                       new FixAgeLine(Gender.FEMALE, 9.0, 15.7),
+                                       new FixAgeLine(Gender.FEMALE, 44.0, 56.4)
+                };
 
-            for (FixAgeLine fix : fixes)
-                alis.unnegInterpolateYears(fix.gender, fix.age1, fix.age2);
+                for (FixAgeLine fix : fixes)
+                    alis.unnegInterpolateYears(fix.gender, fix.age1, fix.age2);
 
-            // alis.display("Исправленная интенсивность военных потерь " + area);
-            // PopulationContext p_alis = alis.toPopulationContext();
+                // alis.display("Исправленная интенсивность военных потерь " + area);
+                // PopulationContext p_alis = alis.toPopulationContext();
 
-            /* нормализованный полугодовой коэффициент интенсивности иммиграции в РСФСР */
-            double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
+                /* нормализованный полугодовой коэффициент интенсивности иммиграции в РСФСР */
+                double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
 
-            /* вычислить интенсивность иммиграции */
-            eval.setImmigration(ac_rsfsr_immigration);
-            amig = new AgeLineFactorIntensities();
-            for (FixAgeLine fix : fixes)
-                eval.evalMigration(p1946_actual, amig, alis, fix.gender, fix.age1, fix.age2);
+                /* вычислить интенсивность иммиграции */
+                eval.setImmigration(ac_rsfsr_immigration);
+                amig = new AgeLineFactorIntensities();
+                for (FixAgeLine fix : fixes)
+                    eval.evalMigration(p1946_actual, amig, alis, null, fix.gender, fix.age1, fix.age2);
+            }
+            else
+            {
+                AgeLineFactorIntensities alis_initial = alis.clone(); 
+                final double thresholdFactor = 0.4;
+                alis.unneg(thresholdFactor);
 
-            // amig.display("Интенсивность иммиграции" + area);
-            // PopulationContext p_amig = amig.toPopulationContext();
-            // Util.noop();
+                // alis.display("Исправленная интенсивность военных потерь " + area);
+                // PopulationContext p_alis = alis.toPopulationContext();
+
+                /* нормализованный полугодовой коэффициент интенсивности иммиграции в РСФСР */
+                double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
+
+                /* вычислить интенсивность иммиграции */
+                eval.setImmigration(ac_rsfsr_immigration);
+                amig = new AgeLineFactorIntensities();
+                eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.MALE, 0, 80);
+                eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.FEMALE, 0, 80);
+            }
+
+            amig.display("Интенсивность иммиграции" + area);
+            PopulationContext p_amig = amig.toPopulationContext();
+            Util.noop();
         }
 
         if (phase == Phase.ACTUAL)

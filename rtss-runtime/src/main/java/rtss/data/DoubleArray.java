@@ -159,7 +159,7 @@ public class DoubleArray
     {
         return sub(p, null);
     }
-    
+
     public DoubleArray sub(DoubleArray p, ValueConstraint rvc) throws Exception
     {
         if (vc != p.vc && rvc == null)
@@ -188,7 +188,7 @@ public class DoubleArray
     {
         return add(p, null);
     }
-    
+
     public DoubleArray add(DoubleArray p, ValueConstraint rvc) throws Exception
     {
         if (vc != p.vc && rvc == null)
@@ -236,7 +236,7 @@ public class DoubleArray
     {
         return asUnboxedArray(null);
     }
-    
+
     public double[] asUnboxedArray(Double defaultValue) throws Exception
     {
         double[] d = new double[values.length];
@@ -250,6 +250,35 @@ public class DoubleArray
             d[age] = v;
         }
         return d;
+    }
+
+    public void fromArray(final double[] a) throws Exception
+    {
+        Util.assertion(a.length == values.length);
+
+        for (int age = 0; age < a.length; age++)
+        {
+            values[age] = Util.validate(a[age]);
+            checkValueRange(values[age]);
+        }
+    }
+
+    public void fromArray(final Double[] a) throws Exception
+    {
+        Util.assertion(a.length == values.length);
+
+        for (int age = 0; age < a.length; age++)
+        {
+            if (a[age] == null)
+            {
+                values[age] = null;
+            }
+            else
+            {
+                values[age] = Util.validate(a[age]);
+                checkValueRange(values[age]);
+            }
+        }
     }
 
     public void fill(double v)
@@ -291,7 +320,7 @@ public class DoubleArray
             xv[0] = (1 - dy) * values[0];
             for (int y = 1; y <= maxage; y++)
                 xv[y] = (1 - dy) * values[y] + dy * values[y - 1];
-            
+
             res.values = xv;
         }
 
@@ -331,7 +360,7 @@ public class DoubleArray
             for (int y = 0; y < maxage; y++)
                 xv[y] = (1 - dy) * values[y] + dy * values[y + 1];
             xv[maxage] = (1 - dy) * values[maxage];
-            
+
             res.values = xv;
         }
 

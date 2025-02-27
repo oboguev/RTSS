@@ -174,7 +174,7 @@ public class EvalAgeLinelLossIntensity
             double loss_intensity) throws Exception
     {
 
-        final double tolerance = 1.0e-5;
+        final double tolerance = 1.0e-6;
         
         Util.assertion(initial_population >= 0 && final_population >= 0);
         

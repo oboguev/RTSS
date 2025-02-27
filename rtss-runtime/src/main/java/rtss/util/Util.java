@@ -292,9 +292,9 @@ public class Util
 
     public static void checkNonNegative(double[] v) throws ArithmeticValidationException
     {
-        for (double vv : v)
+        for (int k = 0; k < v.length; k++)
         {
-            if (vv < 0)
+            if (v[k] < 0)
                 throw new ArithmeticValidationException("Unexpected negative number");
         }
     }
@@ -842,6 +842,14 @@ public class Util
         }
 
         return "";
+    }
+    
+    public static Double[] boxArray(double[] a)
+    {
+        Double[] v = new Double[a.length];
+        for (int k = 0; k < a.length; k++)
+            v[k] = a[k];
+        return v;
     }
 
     public static void assertion(boolean b)

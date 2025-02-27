@@ -91,6 +91,7 @@ public class EvalAgeLineLossIntensities
             final PopulationContext p1946_actual,
             AgeLineFactorIntensities amig,
             final AgeLineFactorIntensities alis,
+            final AgeLineFactorIntensities alis_initial,
             final Gender gender, 
             final double age1, 
             final double age2) throws Exception
@@ -117,12 +118,16 @@ public class EvalAgeLineLossIntensities
             initial_population = p1941_2.getDay(Locality.TOTAL, gender, nd);
             final_population = p1946_actual.getDay(Locality.TOTAL, gender, nd + ndays);
             loss_intensity = alis.get(gender, nd);
+            
+            if (alis_initial != null && Util.same(loss_intensity, alis_initial.get(gender, nd), 1e-5))
+                continue;
+            
             v = eval.evalMigrationIntensity(nd, gender, initial_population, final_population, loss_intensity);
 
             if (v < 0)
             {
                 /*
-                 * Итерация может прерваться, дав маленькое отрицательное значение иммиграции.
+                 * Итерация в evalMigrationIntensity может прерваться, дав маленькое отрицательное значение иммиграции.
                  * Проверить, что оно мало и обнулить его.
                  */
                 min_v = Math.min(min_v, v);

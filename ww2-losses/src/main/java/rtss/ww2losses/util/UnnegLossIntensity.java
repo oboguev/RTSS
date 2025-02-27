@@ -1,17 +1,19 @@
 package rtss.ww2losses.util;
 
+import rtss.data.selectors.Gender;
+import rtss.util.Util;
+
 /*
  * Заменить отрицательные участки loss intensity на положительные, интерполировав
  * между точками близкими к крайним. 
  */
 public class UnnegLossIntensity
 {
-    public static double[] unneg(double[] f, int XMAX, double thresholdFactor)
+    public static double[] unneg(double[] f, int XMAX, double thresholdFactor, Gender gender)
     {
         double[] result = f.clone();
 
-        int x = 0;
-        while (x < XMAX)
+        for (int x = 0; x < XMAX; x++)
         {
             if (result[x] < 0)
             {
@@ -23,9 +25,9 @@ public class UnnegLossIntensity
 
                 // Find left positive range
                 int leftEnd = negStart - 1;
-                while (leftEnd >= 0 && result[leftEnd] >= 0)
-                    leftEnd--;
-                int leftStart = leftEnd + 1;
+                int leftStart = leftEnd;
+                while (leftStart > 0 && result[leftStart - 1] >= 0)
+                    leftStart--;
 
                 // Find right positive range
                 int rightStart = negEnd + 1;
@@ -36,19 +38,22 @@ public class UnnegLossIntensity
                     rightEnd++;
                 rightEnd--;
 
-                if (leftStart < leftEnd && rightStart < rightEnd)
-                {
-                    double leftAvg = average(result, leftStart, leftEnd);
-                    double rightAvg = average(result, rightStart, rightEnd);
+                if (leftEnd >= 0 || rightStart < rightEnd)
+                { 
+                    // Ensure at least one valid positive range
+                    double leftAvg = (leftEnd >= 0) ? average(result, leftStart, leftEnd) : result[rightStart];
+                    double rightAvg = (rightStart < rightEnd) ? average(result, rightStart, rightEnd) : result[leftEnd];
 
-                    int interpStart = findThresholdPoint(result, leftStart, negStart, leftAvg * thresholdFactor);
-                    int interpEnd = findThresholdPoint(result, negEnd, rightEnd, rightAvg * thresholdFactor);
+                    int interpStart = findThresholdPointLeft(result, leftStart, negStart, leftAvg * thresholdFactor);
+                    int interpEnd = findThresholdPointRight(result, negEnd, rightEnd, rightAvg * thresholdFactor);
 
                     linearInterpolation(result, interpStart, interpEnd);
+                    
+                    Util.out(String.format("UnnegLossIntensity %s %d-%d", gender.name(), interpStart, interpEnd));
                 }
             }
-            x++;
         }
+        
         return result;
     }
 
@@ -64,7 +69,19 @@ public class UnnegLossIntensity
         return count > 0 ? sum / count : 0;
     }
 
-    private static int findThresholdPoint(double[] f, int start, int end, double threshold)
+    private static int findThresholdPointLeft(double[] f, int start, int end, double threshold)
+    {
+        for (int i = end ; i >= start; i--)
+        {
+            if (f[i] >= threshold)
+            {
+                return i;
+            }
+        }
+        return start; // Fallback if no threshold point is found
+    }
+
+    private static int findThresholdPointRight(double[] f, int start, int end, double threshold)
     {
         for (int i = start; i <= end; i++)
         {
