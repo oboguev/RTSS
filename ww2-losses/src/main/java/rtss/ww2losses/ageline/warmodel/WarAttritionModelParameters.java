@@ -37,7 +37,7 @@ public class WarAttritionModelParameters
 
     public boolean equals(WarAttritionModelParameters wamp)
     {
-        return aw_conscript_combat == wamp.aw_conscript_combat &&
-               aw_civil_combat == wamp.aw_civil_combat;
+        return aw_conscript_combat.equals(wamp.aw_conscript_combat) &&
+               aw_civil_combat.equals(wamp.aw_civil_combat);
     }
 }

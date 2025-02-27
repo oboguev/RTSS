@@ -113,11 +113,26 @@ public class AdjustPopulation1941vs1946
             // redistribute the excess
             boolean strict = !Automation.isAutomated();
             RefineSeriesX rs = new RefineSeriesX();
-            rs.minRelativeLevel = Automation.isAutomated() ? 0.05 : 0.3;
             rs.sigma = 10.0;
             rs.gaussianKernelWindow = 50;
-            if (!checkCanAdjust(rs, gender, a_excess, minValues, strict, Bins.forWidths(PopulationADH.AgeBinWidthsDays())))
-                return null;
+            rs.minRelativeLevel = 0.3;
+            
+            if (Automation.isAutomated())
+            {
+                for (;;)
+                {
+                    if (checkCanAdjust(rs, gender, a_excess, minValues, strict, Bins.forWidths(PopulationADH.AgeBinWidthsDays())))
+                        break;
+                    rs.minRelativeLevel -= 0.05;
+                    if (rs.minRelativeLevel < 0.01)
+                        return null;
+                }
+            }
+            else
+            {
+                if (!checkCanAdjust(rs, gender, a_excess, minValues, strict, Bins.forWidths(PopulationADH.AgeBinWidthsDays())))
+                    return null;
+            }
             
             double[] a_excess2 = rs.modifySeries(a_excess, minValues, PopulationADH.AgeBinWidthsDays(), a_excess.length - 1);
             p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);

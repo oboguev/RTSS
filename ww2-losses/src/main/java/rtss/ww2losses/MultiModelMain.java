@@ -43,6 +43,8 @@ public class MultiModelMain
 
     private void main() throws Exception
     {
+        warmupCaches();
+        
         for (double aw_conscript_combat = 0.6; aw_conscript_combat <= 0.8; aw_conscript_combat += 0.1)
         {
             for (double aw_civil_combat = 0.1; aw_civil_combat <= 0.4; aw_civil_combat += 0.1)
@@ -86,6 +88,15 @@ public class MultiModelMain
         main.main();
         
         return model.results;
+    }
+    
+    private void warmupCaches() throws Exception
+    {
+        ModelParameters params = new ModelParameters();
+        params.wamp.aw_conscript_combat = 0.7;
+        params.wamp.aw_civil_combat = 0.2;
+        params.exportDirectory = null;
+        AreaModel am = run(params);
     }
 
     /* =================================================================================== */

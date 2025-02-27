@@ -183,6 +183,8 @@ public class Main
             /*
              * значения модели заданы внешним драйвером
              */
+            if (wamp.equals(model.params.wamp))
+                Automation.setAutomated(false);
             this.wamp = model.params.wamp;
             this.PrintDiagnostics = model.params.PrintDiagnostics;
             this.exportDirectory = model.params.exportDirectory;
