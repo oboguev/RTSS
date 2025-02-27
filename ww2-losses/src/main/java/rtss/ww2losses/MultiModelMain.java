@@ -5,6 +5,7 @@ import java.util.List;
 
 import rtss.data.selectors.Area;
 import rtss.util.Util;
+import rtss.ww2losses.model.Automated;
 import rtss.ww2losses.model.Model;
 import rtss.ww2losses.model.ModelParameters;
 import rtss.ww2losses.model.ModelResults;
@@ -77,6 +78,8 @@ public class MultiModelMain
 
         Main main = new Main(model);
         main.exportDirectory = null;
+        Util.out("Исполнение для параметров: " + model.params.toString());
+        Automated.setAutomated(true);
         main.main();
         return model.results;
     }

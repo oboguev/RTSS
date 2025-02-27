@@ -18,6 +18,7 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 import rtss.ww2losses.ageline.BacktrackPopulation;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
+import rtss.ww2losses.model.Automated;
 import rtss.ww2losses.params.AreaParameters;
 // import rtss.ww2losses.population1941.math.RefineSeries;
 import rtss.ww2losses.population1941.math.RefineSeriesX;
@@ -110,11 +111,14 @@ public class AdjustPopulation1941vs1946
             minValues = Util.multiply(minValues, min_margin);
 
             // redistribute the excess
+            boolean strict = !Automated.isAutomated();
             RefineSeriesX rs = new RefineSeriesX();
-            rs.minRelativeLevel = 0.3;
+            rs.minRelativeLevel = Automated.isAutomated() ? 0.05 : 0.3;
             rs.sigma = 10.0;
             rs.gaussianKernelWindow = 50;
-            checkCanAdjust(rs, gender, a_excess, minValues, Bins.forWidths(PopulationADH.AgeBinWidthsDays()));
+            if (!checkCanAdjust(rs, gender, a_excess, minValues, strict, Bins.forWidths(PopulationADH.AgeBinWidthsDays())))
+                return null;
+            
             double[] a_excess2 = rs.modifySeries(a_excess, minValues, PopulationADH.AgeBinWidthsDays(), a_excess.length - 1);
             p_excess2.fromArray(Locality.TOTAL, gender, a_excess2);
 
@@ -247,13 +251,18 @@ public class AdjustPopulation1941vs1946
 
     /* =============================================================================================== */
 
-    private void checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, Bin[] bins)
+    private boolean checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, boolean strict, Bin[] bins)
     {
         for (Bin bin : bins)
-            checkCanAdjust(rs, gender, a, minValues, bin);
+        {
+            if (!checkCanAdjust(rs, gender, a, minValues, strict, bin))
+                return false;
+        }
+        
+        return true;
     }
 
-    private void checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, Bin bin)
+    private boolean checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, boolean strict, Bin bin)
     {
         int nd1 = bin.age_x1;
         int nd2 = bin.age_x2;
@@ -275,9 +284,7 @@ public class AdjustPopulation1941vs1946
                 must_distribute += minv - a[nd];
             }
         }
-
-        Util.assertion(can_distribute >= must_distribute);
-
+        
         if (Util.False)
         {
 
@@ -289,6 +296,16 @@ public class AdjustPopulation1941vs1946
             {
                 Util.out(String.format("%s %d-%d %f", gender.name(), nd1 / 365, nd2 / 365, can_distribute / must_distribute));
             }
+        }
+
+        if (strict)
+        {
+            Util.assertion(can_distribute >= must_distribute);
+            return true;
+        }
+        else
+        {
+            return can_distribute >= must_distribute;
         }
     }
 
