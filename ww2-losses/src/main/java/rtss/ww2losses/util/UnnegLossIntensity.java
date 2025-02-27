@@ -49,7 +49,7 @@ public class UnnegLossIntensity
 
                     linearInterpolation(result, interpStart, interpEnd);
                     
-                    Util.out(String.format("UnnegLossIntensity %s %d-%d", gender.name(), interpStart, interpEnd));
+                    // Util.out(String.format("UnnegLossIntensity %s %d-%d", gender.name(), interpStart, interpEnd));
                 }
             }
         }

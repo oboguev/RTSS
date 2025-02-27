@@ -977,7 +977,7 @@ public class Main
             }
             else
             {
-                AgeLineFactorIntensities alis_initial = alis.clone(); 
+                AgeLineFactorIntensities alis_initial = alis.clone();
                 final double thresholdFactor = 0.4;
                 alis.unneg(thresholdFactor);
 
@@ -994,9 +994,9 @@ public class Main
                 eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.FEMALE, 0, 80);
             }
 
-            amig.display("Интенсивность иммиграции" + area);
-            PopulationContext p_amig = amig.toPopulationContext();
-            Util.noop();
+            // amig.display("Интенсивность иммиграции " + area);
+            // PopulationContext p_amig = amig.toPopulationContext();
+            // Util.noop();
         }
 
         if (phase == Phase.ACTUAL)

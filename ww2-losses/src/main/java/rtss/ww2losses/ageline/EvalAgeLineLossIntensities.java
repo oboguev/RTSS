@@ -139,8 +139,16 @@ public class EvalAgeLineLossIntensities
                 }
                 else
                 {
-                    Util.err(String.format("evalMigration: v = %f, vp = %f", v, v * initial_population));
+                    // Util.err(String.format("evalMigration: v = %f, vp = %f", v, v * initial_population));
                 }
+            }
+            
+            if (v < 0)
+            {
+                /*
+                 * Если по-прежнему отрицательное значение, значить миграция для данной линии не требуется 
+                 */
+                v = 0;
             }
 
             Util.assertion(v >= 0);
