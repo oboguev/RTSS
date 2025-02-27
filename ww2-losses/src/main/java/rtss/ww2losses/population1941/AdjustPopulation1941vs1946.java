@@ -163,7 +163,7 @@ public class AdjustPopulation1941vs1946
         if (Util.False)
             refine(p_new1941, true);
         
-        Util.err("Отрицательные районы перераспределены");
+        Util.err("Отрицательные районы перераспределены внутри 5-летних групп");
         
         return p_new1941;
     }

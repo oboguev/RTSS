@@ -1,11 +1,15 @@
 package rtss.ww2losses.util;
 
 import rtss.data.selectors.Gender;
-import rtss.util.Util;
+// import rtss.util.Util;
 
 /*
- * Заменить отрицательные участки loss intensity на положительные, интерполировав
- * между точками близкими к крайним. 
+ * Заменить отрицательные участки кривой loss intensity на положительные, 
+ * интерполировав между точками близкими к крайним.
+ * 
+ * @thresholdFactor может иметь значение ]0 ... 1[, обыкновенно 0.1-0.4
+ * и указывает высоту точек, межжу которыми ведётся интерполирование,
+ * взятых как (@thresholdFactor * среднее по соседнему положительному участку).   
  */
 public class UnnegLossIntensity
 {

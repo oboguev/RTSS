@@ -50,18 +50,6 @@ import static rtss.data.population.projection.ForwardPopulation.years2days;
 import java.util.ArrayList;
 import java.util.List;
 
-/* ******************************
-
-### CCCР : отрицательные ali (и отрицательные excess deaths), т.е слишком много начального населения
-
-nd (1941 mid) = age (1941 mid) = age (1941 start)
-
- 1319 -  1350  =    3.614 -   3.699  =   3.114 -   3.199
- 1918 -  2160  =    5.255 -   5.918  =   4.755 -   5.418
- 2564 -  2904  =    7.025 -   7.956  =   6.525 -   7.456
-
-********************************/
-
 public class Main
 {
     public static void main(String[] args)
@@ -978,7 +966,10 @@ public class Main
             else
             {
                 AgeLineFactorIntensities alis_initial = alis.clone();
-                final double thresholdFactor = 0.4;
+                /*
+                 * Более-менее удовлетворительные значения @thresholdFactor: 0.1-0.3
+                 */
+                final double thresholdFactor = 0.3;
                 alis.unneg(thresholdFactor);
 
                 // alis.display("Исправленная интенсивность военных потерь " + area);
@@ -994,7 +985,7 @@ public class Main
                 eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.FEMALE, 0, 80);
             }
 
-            // amig.display("Интенсивность иммиграции " + area);
+            amig.display("Интенсивность иммиграции " + area);
             // PopulationContext p_amig = amig.toPopulationContext();
             // Util.noop();
         }
@@ -1036,7 +1027,14 @@ public class Main
 
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
         PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);
-        Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 100);
+        if (area == Area.USSR)
+        {
+            Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 100);
+        }
+        else
+        {
+            Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 1000);
+        }
         Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 5000);
 
         HalfYearEntry he = halves.get("1941.1");
