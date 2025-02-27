@@ -2,6 +2,7 @@ package rtss.ww2losses.ageline;
 
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
+import rtss.ww2losses.model.Automation;
 
 /*
  * Найти величину loss_intensity, при которой проводка возрастной линии от середины 1941 года
@@ -83,6 +84,13 @@ public class EvalAgeLinelLossIntensity
         {
             double a2 = -2.0;
             double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+
+            if (div2 <= 0 && Automation.isAutomated())
+            {
+                a2 = -3.0;
+                div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+            }
+            
             if (div2 <= 0)
                 throw new Exception("внутренняя ошибка");
 

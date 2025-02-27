@@ -18,7 +18,7 @@ import rtss.util.plot.ChartXYSplineAdvanced;
 import rtss.ww2losses.ageline.BacktrackPopulation;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
-import rtss.ww2losses.model.Automated;
+import rtss.ww2losses.model.Automation;
 import rtss.ww2losses.params.AreaParameters;
 // import rtss.ww2losses.population1941.math.RefineSeries;
 import rtss.ww2losses.population1941.math.RefineSeriesX;
@@ -111,9 +111,9 @@ public class AdjustPopulation1941vs1946
             minValues = Util.multiply(minValues, min_margin);
 
             // redistribute the excess
-            boolean strict = !Automated.isAutomated();
+            boolean strict = !Automation.isAutomated();
             RefineSeriesX rs = new RefineSeriesX();
-            rs.minRelativeLevel = Automated.isAutomated() ? 0.05 : 0.3;
+            rs.minRelativeLevel = Automation.isAutomated() ? 0.05 : 0.3;
             rs.sigma = 10.0;
             rs.gaussianKernelWindow = 50;
             if (!checkCanAdjust(rs, gender, a_excess, minValues, strict, Bins.forWidths(PopulationADH.AgeBinWidthsDays())))

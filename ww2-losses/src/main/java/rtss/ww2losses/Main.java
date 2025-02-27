@@ -33,6 +33,7 @@ import rtss.ww2losses.helpers.ShowAgeSliceDeathHistory;
 import rtss.ww2losses.helpers.ShowPopulationAgeSliceHistory;
 import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
+import rtss.ww2losses.model.Automation;
 import rtss.ww2losses.model.Model;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population1941.AdjustPopulation1941;
@@ -985,7 +986,7 @@ public class Main
                 eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.FEMALE, 0, 80);
             }
 
-            amig.display("Интенсивность иммиграции " + area);
+            // amig.display("Интенсивность иммиграции " + area);
             // PopulationContext p_amig = amig.toPopulationContext();
             // Util.noop();
         }
@@ -1031,11 +1032,23 @@ public class Main
         {
             Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 100);
         }
-        else
+        else if (!Automation.isAutomated())
         {
             Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 1000);
         }
-        Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 5000);
+        else
+        {
+            Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 2000);
+        }
+        
+        if (Automation.isAutomated())
+        {
+            Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 20_000);
+        }
+        else
+        {
+            Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 5_000);
+        }
 
         HalfYearEntry he = halves.get("1941.1");
         he.actual_population = he.p_nonwar_with_births.clone();

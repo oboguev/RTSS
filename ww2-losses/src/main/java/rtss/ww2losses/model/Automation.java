@@ -1,6 +1,6 @@
 package rtss.ww2losses.model;
 
-public class Automated
+public class Automation
 {
     private static boolean isAutomated = false;
     

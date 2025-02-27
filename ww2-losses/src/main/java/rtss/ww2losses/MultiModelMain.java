@@ -5,7 +5,7 @@ import java.util.List;
 
 import rtss.data.selectors.Area;
 import rtss.util.Util;
-import rtss.ww2losses.model.Automated;
+import rtss.ww2losses.model.Automation;
 import rtss.ww2losses.model.Model;
 import rtss.ww2losses.model.ModelParameters;
 import rtss.ww2losses.model.ModelResults;
@@ -78,9 +78,13 @@ public class MultiModelMain
 
         Main main = new Main(model);
         main.exportDirectory = null;
+        
+        Util.out("");
         Util.out("Исполнение для параметров: " + model.params.toString());
-        Automated.setAutomated(true);
+        Automation.setAutomated(true);
+        
         main.main();
+        
         return model.results;
     }
 
@@ -91,9 +95,9 @@ public class MultiModelMain
         Util.out("");
         Util.out("Расчёт моделей (сумма с середины 1941 по конец 1945):");
         Util.out("");
-        Util.out("   с42 = смертност в 1942 году, промилле");
+        Util.out("   с42 = смертность в 1942 году, промилле");
         Util.out("");
-        
+
         printHeaders();
 
         for (AreaModel am : areaModels)
@@ -103,11 +107,11 @@ public class MultiModelMain
     private void printHeaders()
     {
         String a1 = "СССР                                         ";
-        String a2 = "РФССР                                        ";
+        String a2 = "РСФСР                                        ";
 
         String h1 = " с.изб   с.прз   с.инов  р.факт иммигр   с42 ";
         String h2 = "======= ======= ======= ======= =======  ====";
-        
+
         Util.out(String.format("        * %s * %s", a1, a2));
         Util.out(String.format("прз окк * %s * %s", h1, h1));
         Util.out(String.format("=== === * %s * %s", h2, h2));
@@ -117,7 +121,7 @@ public class MultiModelMain
     {
         String ussr = result2str(am.ussr);
         String rsfsr = result2str(am.rsfsr);
-        
+
         String s = String.format("%3.1f %3.1f * %s * %s",
                                  am.params.wamp.aw_conscript_combat,
                                  am.params.wamp.aw_civil_combat,
