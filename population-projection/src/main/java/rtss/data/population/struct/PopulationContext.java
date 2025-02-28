@@ -141,7 +141,7 @@ public class PopulationContext
         cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
         cx.title = title;
-        cx.yearHint = yearHint; 
+        cx.yearHint = yearHint;
         return cx;
     }
 
@@ -174,7 +174,7 @@ public class PopulationContext
     {
         this.yearHint = yearHint;
     }
-    
+
     public double getDay(Locality locality, Gender gender, int day) throws Exception
     {
         checkAccess(locality, gender, day);
@@ -1213,13 +1213,23 @@ public class PopulationContext
 
     public double getYearValue(Gender gender, int age) throws Exception
     {
-        return sumAge(Locality.TOTAL, gender, age);
+        return getYearValue(Locality.TOTAL, gender, age);
+    }
+
+    public double getYearValue(Locality locality, Gender gender, int age) throws Exception
+    {
+        return sumAge(locality, gender, age);
     }
 
     public double getYearValue(Gender gender, double age) throws Exception
     {
+        return getYearValue(Locality.TOTAL, gender, age);
+    }
+
+    public double getYearValue(Locality locality, Gender gender, double age) throws Exception
+    {
         int nd = years2days(age);
-        return sumDays(Locality.TOTAL, gender, nd, nd + this.DAYS_PER_YEAR - 1);
+        return sumDays(locality, gender, nd, nd + this.DAYS_PER_YEAR - 1);
     }
 
     public void setYearValue(Gender gender, int age, double v) throws Exception
@@ -1331,12 +1341,64 @@ public class PopulationContext
     }
 
     /* ---------------------------------------------------------------------------- */
+
+    /*
+     * Старшие возраста (более MAX_AGE) при передвижке аккумулируются в последнем дне,
+     * их эффективный (учитываемый) возраст и смертность после этого более не возрастают,
+     * что при последовательных передвижках приводит к избыточной аккумуляции в последнем дне.
+     * 
+     * Обрезать эту аккумуляцию.
+     * 
+     * Возвращает обрезанный объём, т.е. количество эффективно добавленных смертей.   
+     */
+    public double clipLastDayAccumulation() throws Exception
+    {
+        if (MAX_YEAR < MAX_AGE)
+            return 0;
+        
+        double deaths = 0;
+
+        for (LocalityGender lg : lgs())
+        {
+            double v1 = getYearValue(lg.locality, lg.gender, MAX_AGE) / DAYS_PER_YEAR;
+            double v2 = getDay(lg.locality, lg.gender, MAX_DAY);
+
+            if (v2 > v1)
+            {
+                deaths += v2 - v1;
+                setDay(lg.locality, lg.gender, MAX_DAY, v1);
+            }
+        }
+        
+        return deaths;
+    }
+
+    public void clipLastDayAccumulation(PopulationContext deathsByGenderAge) throws Exception
+    {
+        if (MAX_YEAR < MAX_AGE)
+            return;
+        
+        for (LocalityGender lg : lgs())
+        {
+            double v1 = getYearValue(lg.locality, lg.gender, MAX_AGE) / DAYS_PER_YEAR;
+            double v2 = getDay(lg.locality, lg.gender, MAX_DAY);
+
+            if (v2 > v1)
+            {
+                double deaths = v2 - v1;
+                setDay(lg.locality, lg.gender, MAX_DAY, v1);
+                deathsByGenderAge.addDay(lg.locality, lg.gender, MAX_DAY, deaths);
+            }
+        }
+    }
     
+    /* ---------------------------------------------------------------------------- */
+
     public void checkSame(PopulationContext cx, double diff) throws Exception
     {
         if (hasRuralUrban != cx.hasRuralUrban || MAX_DAY != cx.MAX_DAY)
             throw new Exception("contexts differ");
-        
+
         if (hasRuralUrban)
         {
             checkSame(cx, diff, Locality.RURAL);
@@ -1352,7 +1414,7 @@ public class PopulationContext
     {
         for (Gender gender : Gender.TwoGenders)
         {
-            for (int nd = 0; nd <= MAX_DAY; nd ++)
+            for (int nd = 0; nd <= MAX_DAY; nd++)
             {
                 double v1 = getDay(locality, gender, nd);
                 double v2 = getDay(locality, gender, nd);

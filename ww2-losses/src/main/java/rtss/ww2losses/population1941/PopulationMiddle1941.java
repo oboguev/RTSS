@@ -72,6 +72,8 @@ public class PopulationMiddle1941 extends UtilBase_194x
         fr.observed_deaths_byGenderAge = fw.deathsByGenderAge();
         fr.observed_births = fw.getObservedBirths();
         
+        fr.p_mid1941.clipLastDayAccumulation(fr.observed_deaths_byGenderAge);
+        
         return fr;
     }
     

@@ -57,7 +57,7 @@ public class Main
     {
         PopulationADH.setFilesVersion("ADH.v1");
     }
-    
+
     public static void main(String[] args)
     {
         try
@@ -499,27 +499,29 @@ public class Main
             curr.peace_mt = mt;
 
             /* передвижка на следующие полгода населения с учётом рождений */
-            ForwardPopulationT fw1 = new ForwardPopulationT();
-            fw1.setBirthRateTotal(ap.CBR_1940);
-            fw1.forward(pwb, mt, 0.5);
+            ForwardPopulationT f_wb = new ForwardPopulationT();
+            f_wb.setBirthRateTotal(ap.CBR_1940);
+            f_wb.forward(pwb, mt, 0.5);
             if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
             {
                 pwb = pwb.add(immigration_halves.get(year, half).prev.immigration, ValueConstraint.NON_NEGATIVE);
             }
 
             /* передвижка на следующие полгода населения без учёта рождений */
-            ForwardPopulationT fw2 = new ForwardPopulationT();
-            fw2.setBirthRateTotal(0);
-            fw2.forward(pxb, mt, 0.5);
+            ForwardPopulationT f_xb = new ForwardPopulationT();
+            f_xb.setBirthRateTotal(0);
+            f_xb.forward(pxb, mt, 0.5);
             if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
             {
                 pxb = pxb.add(immigration_halves.get(year, half).prev.immigration, ValueConstraint.NON_NEGATIVE);
             }
 
             /* сохранить результаты в полугодовой записи */
+            double extra_deaths_wb = pwb.clipLastDayAccumulation();
+            double extra_deaths_xb = pxb.clipLastDayAccumulation();
             curr = new HalfYearEntry(year, half, pwb.clone(), pxb.clone());
-            prev.expected_nonwar_births = fw1.getObservedBirths();
-            prev.expected_nonwar_deaths = fw2.getObservedDeaths();
+            prev.expected_nonwar_births = f_wb.getObservedBirths();
+            prev.expected_nonwar_deaths = f_xb.getObservedDeaths() + extra_deaths_xb;
 
             curr.prev = prev;
             prev.next = curr;
@@ -760,9 +762,25 @@ public class Main
         if (Util.False)
         {
             /* график сверхсмертности */
-            PopulationChart.display("Cверхсмертность населения " + area + " накопленная с середины 1941 по конец 1945 года",
+            PopulationChart.display("Cверхсмертный дефицит населения " + area + " накопленный с середины 1941 по конец 1945 года",
                                     deficit,
                                     "1");
+        }
+        
+        if (area == Area.USSR)
+        {
+            ExportResults.exportImage("Cверхсмертный дефицит населения " + area + " накопленный с середины 1941 по конец 1945 года",
+                                      deficit, ap, exportDirectory, "deficit-1946");
+        }
+        else if (phase == Phase.ACTUAL)
+        {
+            ExportResults.exportImage("Cверхсмертный дефицит населения " + area + " накопленный с середины 1941 по конец 1945 года  (с иммиграцией)",
+                                      deficit, ap, exportDirectory, "deficit-1946-with-immigration");
+        }
+        else
+        {
+            ExportResults.exportImage("Cверхсмертный дефицит населения " + area + " накопленный с середины 1941 по конец 1945 года (до иммиграции)",
+                                      deficit, ap, exportDirectory, "deficit-1946-without-immigration");
         }
 
         /*
@@ -1045,7 +1063,7 @@ public class Main
         {
             Util.assertion(Math.abs(diff.sum(0, MAX_AGE - 1)) < 2000);
         }
-        
+
         if (Automation.isAutomated())
         {
             Util.assertion(Math.abs(diff.getYearValue(Gender.BOTH, MAX_AGE)) < 20_000);
