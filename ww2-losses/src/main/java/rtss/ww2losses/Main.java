@@ -62,7 +62,11 @@ public class Main
     {
         try
         {
-            PrintAgeLine.traceAgeYear(Area.RSFSR, Gender.FEMALE, 10.0);
+            if (Util.False)
+            {
+                // Диагностика
+                PrintAgeLine.traceAgeYear(Area.RSFSR, Gender.FEMALE, 10.0);
+            }
             
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
@@ -943,7 +947,7 @@ public class Main
 
         if (ap.area == Area.RSFSR && phase == Phase.PRELIMINARY)
         {
-            boolean diag = Util.True;
+            boolean diag = Util.False;
             
             if (diag && Util.True)
             {
