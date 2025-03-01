@@ -931,9 +931,12 @@ public class Main
 
         AgeLineFactorIntensities amig = null;
 
+        // #### только в случае PRELIMIARY, но сохранять amig в this
         if (ap.area == Area.RSFSR)
         {
-            if (Util.False)
+            boolean diag = Util.True;
+            
+            if (diag && Util.True)
             {
                 /*
                  * Диагностика
@@ -970,7 +973,7 @@ public class Main
             final double thresholdFactor = 0.3;
             alis.unneg(thresholdFactor);
             
-            if (Util.True)
+            if (diag && Util.True)
             {
                 alis.display("Исправленная интенсивность военных потерь " + area);
                 PopulationContext p_alis = alis.toPopulationContext();
@@ -986,7 +989,7 @@ public class Main
             eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.MALE, 0, 80);
             eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.FEMALE, 0, 80);
             
-            if (Util.False)
+            if (diag && Util.True)
             {
                 amig.display("Интенсивность иммиграции " + area);
                 PopulationContext p_amig = amig.toPopulationContext();
