@@ -22,8 +22,9 @@ public class SteerAgeLine
     private final double[] ac_immigration;
 
     /*
-     * @halves  = данные для полугодий, от начала 1941 до начала 1946 года
-     * @wam     = модель военных потерь   
+     * @halves           = данные для полугодий, от начала 1941 до начала 1946 года
+     * @wam              = модель военных потерь
+     * @ac_immigration   = распределение иммиграционной интенсивность по полугодиям   
      */
     public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, double[] ac_immigration)
     {
@@ -33,12 +34,16 @@ public class SteerAgeLine
     }
 
     /*
-     * Вычислить остаток населения данного возраста к началу 1946 года.
+     * Вычислить остаток населения данного возраста и пола к началу 1946 года.
      * 
-     * initial_age_ndays = начальный возраст в середине 1941 года
-     * gender = пол
-     * initial_population = начальная численность населения в середине 1941 года
-     * loss_intensity = интенсивность военной сверхсмертности
+     * @initial_age_ndays        = начальный возраст линии в середине 1941 года
+     * @gender                   = пол
+     * @initial_population       = начальная численность населения линии в середине 1941 года
+     * @loss_intensity           = интенсивность военной сверхсмертности для данной линии
+     * @immigration_intensity    = интенсивность иммиграции для данной линии
+     * @immigration_halves       = численная величина иммиграции
+     * 
+     * Только один из параметров @immigration_intensity и @immigration_halves может быть указан как non-null.
      * 
      * Военные потери в полугодии вычисляются как ac_xxx * initial_population * loss_intensity.     
      */
