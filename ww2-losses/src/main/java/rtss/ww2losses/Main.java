@@ -64,10 +64,10 @@ public class Main
         {
             if (Util.False)
             {
-                // Диагностика
+                // Диагностика: распечатка хода указанной половозрастной линии
                 PrintAgeLine.traceAgeYear(Area.RSFSR, Gender.FEMALE, 10.0);
             }
-            
+
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
             Util.out("");
@@ -111,11 +111,6 @@ public class Main
      * Использовать если население на начало 1946 года уже не содержит эмигрантов
      */
     private boolean DeductEmigration = Util.False;
-
-    /*
-     * Заменить некоторые части отрицательного дефицита РФСР на нули 
-     */
-    private boolean CancelNegativeDeficit = Util.False;
 
     private Area area;
     private AreaParameters ap;
@@ -522,7 +517,7 @@ public class Main
 
             /* передвижка на следующие полгода населения без учёта рождений */
             PopulationContext pxb_before = pxb.clone();
-            
+
             ForwardPopulationT f_xb = new ForwardPopulationT();
             f_xb.setBirthRateTotal(0);
             f_xb.forward(pxb, mt, 0.5);
@@ -535,12 +530,12 @@ public class Main
             curr = new HalfYearEntry(year, half, pwb.clone(), pxb.clone());
             prev.expected_nonwar_births = f_wb.getObservedBirths();
             prev.expected_nonwar_deaths = f_xb.getObservedDeaths() + extra_deaths_xb;
-            
+
             curr.prev = prev;
             prev.next = curr;
             prev = curr;
             halves.add(curr);
-        
+
             PrintAgeLine.printEvalHalves(curr.prev, pxb_before, pxb, immigration);
         }
 
@@ -698,20 +693,6 @@ public class Main
                     .display();
         }
 
-        if (area == Area.RSFSR && CancelNegativeDeficit)
-        {
-            if (PrintDiagnostics && phase == Phase.ACTUAL)
-                WarHelpers.validateDeficit(deficit, "До эмиграции и отмены отрицательных женских значений:");
-
-            /*
-             * Для РСФСР отменить отрицательные значения дефицита женского населения
-             * в возрастах 15-60 лет как вызванные вероятно миграцией.
-             */
-            cancelNegativeDeficit(cancelDeficitRSFSR);
-            deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
-            deficit_wb_adjusted = p1946_expected_with_births.sub(p1946_actual, ValueConstraint.NONE);
-        }
-
         v = p1946_expected_with_births.sum();
         v -= p1946_actual.sum();
         double v_total = v;
@@ -759,19 +740,9 @@ public class Main
             }
         }
 
-        if (area == Area.RSFSR && CancelNegativeDeficit)
-        {
-            deficit = cancelNegativeDeficit(deficit, cancelDeficitRSFSR);
-            deficit_wb_raw = cancelNegativeDeficit(deficit_wb_raw, cancelDeficitRSFSR);
-            deficit_wb_adjusted = cancelNegativeDeficit(deficit_wb_adjusted, cancelDeficitRSFSR);
-        }
-
         if (PrintDiagnostics && phase == Phase.ACTUAL)
         {
-            if (area == Area.RSFSR && CancelNegativeDeficit)
-                WarHelpers.validateDeficit(deficit, "После эмиграции и отмены отрицательных женских значений:");
-            else
-                WarHelpers.validateDeficit(deficit);
+            WarHelpers.validateDeficit(deficit);
         }
 
         if (Util.False)
@@ -831,92 +802,6 @@ public class Main
     /* ======================================================================================================= */
 
     /*
-     * Более не используется
-     */
-    public static class CancelDeficit
-    {
-        public Gender gender;
-        public int age1;
-        public int age2;
-
-        public CancelDeficit(Gender gender, int age1, int age2)
-        {
-            this.gender = gender;
-            this.age1 = age1;
-            this.age2 = age2;
-        }
-    }
-
-    private static CancelDeficit[] cancelDeficitRSFSR = {
-                                                          new CancelDeficit(Gender.MALE, 7, 10),
-                                                          new CancelDeficit(Gender.FEMALE, 7, 11),
-                                                          new CancelDeficit(Gender.FEMALE, 15, 60)
-    };
-
-    private void cancelNegativeDeficit(CancelDeficit[] cancels) throws Exception
-    {
-        PopulationContext p1946_expected_without_births = halves.last().p_nonwar_without_births;
-        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
-
-        for (CancelDeficit cancel : cancels)
-        {
-            for (int age = cancel.age1; age <= cancel.age2; age++)
-            {
-                double v = deficit.getYearValue(cancel.gender, age);
-                if (v < 0)
-                {
-                    // p1946_actual.addYearValue(gender, age, v);
-                    unneg(p1946_actual, cancel.gender, age, deficit);
-                }
-            }
-        }
-
-        p1946_actual.makeBoth();
-        p1946_actual.recalcTotal();
-        split_p1946();
-    }
-
-    private PopulationContext cancelNegativeDeficit(PopulationContext deficit, CancelDeficit[] cancels) throws Exception
-    {
-        deficit.setValueConstraint(ValueConstraint.NONE);
-
-        for (CancelDeficit cancel : cancels)
-        {
-            for (int age = cancel.age1; age <= cancel.age2; age++)
-            {
-                double v = deficit.getYearValue(cancel.gender, age);
-                if (v < 0)
-                {
-                    // p1946_actual.addYearValue(gender, age, v);
-                    unneg(p1946_actual, cancel.gender, age, deficit);
-                    deficit.setYearValue(cancel.gender, age, 0);
-                }
-            }
-        }
-
-        deficit.makeBoth();
-        deficit.recalcTotal();
-
-        p1946_actual.makeBoth();
-        p1946_actual.recalcTotal();
-
-        split_p1946();
-
-        return deficit;
-    }
-
-    private void unneg(PopulationContext p, Gender gender, int age, PopulationContext deficit) throws Exception
-    {
-        for (int nd = p.firstDayForAge(age); nd <= p.lastDayForAge(age); nd++)
-        {
-            double v = deficit.getDay(Locality.TOTAL, gender, nd);
-            p.addDay(Locality.TOTAL, gender, nd, -v);
-        }
-    }
-
-    /* ======================================================================================================= */
-
-    /*
      * Обработать возрастные линии для наличного на середину 1941 года населения.
      * 
      * Для каждой линии определить интенсивность потерь, которая при данных весовых коэффициентах разбивки attrition 
@@ -948,7 +833,7 @@ public class Main
         if (ap.area == Area.RSFSR && phase == Phase.PRELIMINARY)
         {
             boolean diag = Util.False;
-            
+
             if (diag && Util.True)
             {
                 /*
@@ -985,7 +870,7 @@ public class Main
              */
             final double thresholdFactor = 0.3;
             alis.unneg(thresholdFactor);
-            
+
             if (diag && Util.True)
             {
                 alis.display("Исправленная интенсивность военных потерь " + area);
@@ -1001,7 +886,7 @@ public class Main
             immigration_intensity = new AgeLineFactorIntensities();
             eval.evalMigration(p1946_actual, immigration_intensity, alis, alis_initial, Gender.MALE, 0, 80);
             eval.evalMigration(p1946_actual, immigration_intensity, alis, alis_initial, Gender.FEMALE, 0, 80);
-            
+
             if (diag && Util.True)
             {
                 immigration_intensity.display("Интенсивность иммиграции " + area);
