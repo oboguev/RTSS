@@ -998,7 +998,6 @@ public class Main
         }
         else if (ap.area == Area.RSFSR && phase == Phase.ACTUAL)
         {
-            // ### проверить неотрицательность alis
             double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
             eval.setImmigration(ac_rsfsr_immigration);
         }
