@@ -163,6 +163,9 @@ public class Main
     private PopulationContext deficit1946_raw_postimmigration;
     private PopulationContext deficit1946_adjusted_postimmigration;
 
+    /* интенсивность иммиграции (ддя РСФСР) */
+    private AgeLineFactorIntensities immigration_intensity = null;
+
     public static enum Phase
     {
         PRELIMINARY, ACTUAL
@@ -929,10 +932,7 @@ public class Main
             Util.unused(p);
         }
 
-        AgeLineFactorIntensities amig = null;
-
-        // #### только в случае PRELIMIARY, но сохранять amig в this
-        if (ap.area == Area.RSFSR)
+        if (ap.area == Area.RSFSR && phase == Phase.PRELIMINARY)
         {
             boolean diag = Util.True;
             
@@ -985,16 +985,22 @@ public class Main
 
             /* вычислить интенсивность иммиграции */
             eval.setImmigration(ac_rsfsr_immigration);
-            amig = new AgeLineFactorIntensities();
-            eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.MALE, 0, 80);
-            eval.evalMigration(p1946_actual, amig, alis, alis_initial, Gender.FEMALE, 0, 80);
+            immigration_intensity = new AgeLineFactorIntensities();
+            eval.evalMigration(p1946_actual, immigration_intensity, alis, alis_initial, Gender.MALE, 0, 80);
+            eval.evalMigration(p1946_actual, immigration_intensity, alis, alis_initial, Gender.FEMALE, 0, 80);
             
             if (diag && Util.True)
             {
-                amig.display("Интенсивность иммиграции " + area);
-                PopulationContext p_amig = amig.toPopulationContext();
+                immigration_intensity.display("Интенсивность иммиграции " + area);
+                PopulationContext p_amig = immigration_intensity.toPopulationContext();
                 Util.unused(p_amig);
             }
+        }
+        else if (ap.area == Area.RSFSR && phase == Phase.ACTUAL)
+        {
+            // ### проверить неотрицательность alis
+            double[] ac_rsfsr_immigration = Util.normalize(rsfsr_immigration_intensity);
+            eval.setImmigration(ac_rsfsr_immigration);
         }
 
         if (phase == Phase.ACTUAL)
@@ -1030,7 +1036,7 @@ public class Main
          * расчёт (и действительное построение) возрастных линий с учётов найденных коэфициентов интенсивности потерь
          * и иммиграционной интенсивности 
          */
-        eval.processAgeLines(alis, amig, p1946_actual);
+        eval.processAgeLines(alis, immigration_intensity, p1946_actual);
 
         /* compare halves.last.actual_population vs. p1946_actual_born_prewar */
         PopulationContext diff = p1946_actual_born_prewar.sub(halves.last().actual_population, ValueConstraint.NONE);

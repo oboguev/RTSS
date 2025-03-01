@@ -80,7 +80,18 @@ public class SteerAgeLine
 
             double immigration = 0;
             if (ac_immigration != null && immigration_intensity != null)
+            {
                 immigration = ac_immigration[ac_index(he)] * initial_population * immigration_intensity;
+            }
+            else if (immigration_halves != null)
+            {
+                HalfYearEntry he_imm = immigration_halves.get(he.year, he.halfyear);
+                if (he_imm.immigration != null)
+                {
+                    setcap(he_imm.immigration);
+                    immigration = he_imm.immigration.getDay(Locality.TOTAL, gender, cap(nd1));
+                }
+            }
 
             population += immigration;
             population -= peace_deaths;
