@@ -185,6 +185,8 @@ public class SteerAgeLine
             int nd1 = nd_age;
             int nd2 = nd1 + span;
             int ndm = (nd1 + nd2) / 2;
+            
+            final double start_population = population;
 
             double peace_deaths = (population <= 0) ? 0 : population * deathRatio(he, gender, nd1, nd2);
 
@@ -214,6 +216,8 @@ public class SteerAgeLine
             he.actual_excess_wartime_deaths.addDay(Locality.TOTAL, gender, cap(nd1), excess_war_deaths);
             he.actual_deaths.addDay(Locality.TOTAL, gender, cap(nd1), peace_deaths + excess_war_deaths);
             he.immigration.addDay(Locality.TOTAL, gender, cap(nd1), immigration);
+            
+            PrintAgeLine.printSteerActual(gender, initial_age_ndays, he, nd1, nd2, start_population, population, peace_deaths, excess_war_deaths, immigration);
 
             nd_age += span;
         }

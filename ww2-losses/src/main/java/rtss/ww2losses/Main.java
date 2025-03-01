@@ -21,6 +21,7 @@ import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.ageline.AgeLineFactorIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
+import rtss.ww2losses.ageline.PrintAgeLine;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModelParameters;
 import rtss.ww2losses.helpers.ExportResults;
@@ -61,6 +62,8 @@ public class Main
     {
         try
         {
+            PrintAgeLine.traceAgeYear(Area.RSFSR, Gender.FEMALE, 10.0);
+            
             new Main(Area.USSR).main();
             new Main(Area.RSFSR).main();
             Util.out("");
@@ -408,6 +411,7 @@ public class Main
             HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         this.phase = phase;
+        PrintAgeLine.setAreaPhase(area, phase, p1946_actual);
 
         /* передвижка по полугодиям для мирных условий */
         halves = evalHalves_step_6mo(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
