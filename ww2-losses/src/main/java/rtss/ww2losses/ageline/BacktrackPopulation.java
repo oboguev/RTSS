@@ -115,7 +115,7 @@ public class BacktrackPopulation
         double initial_population = 1.0;
         Double immigration_intensity = null;
 
-        double v1946_steer = steer.steerPreliminary(initial_age_ndays, gender, initial_population, loss_intensity, immigration_intensity);
+        double v1946_steer = steer.steerPreliminary(initial_age_ndays, gender, initial_population, loss_intensity, immigration_intensity, null);
 
         double v1946_actual;
         if (nd_mid1941_to_1946(initial_age_ndays) >= p1946_actual.MAX_DAY)

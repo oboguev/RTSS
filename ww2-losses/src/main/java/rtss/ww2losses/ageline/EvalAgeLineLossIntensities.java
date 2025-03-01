@@ -46,7 +46,9 @@ public class EvalAgeLineLossIntensities
      * Для некоторых линий интенсивность может быть отрицательной (если исходное население линии слишком мало,
      * или конечное слишком велико). 
      */
-    public AgeLineFactorIntensities evalPreliminaryLossIntensity(final PopulationContext p1946_actual) throws Exception
+    public AgeLineFactorIntensities evalPreliminaryLossIntensity(
+            final PopulationContext p1946_actual, 
+            HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         AgeLineFactorIntensities intensities = new AgeLineFactorIntensities();
         HalfYearEntry he1941_2 = halves.get("1941.2");
@@ -63,16 +65,14 @@ public class EvalAgeLineLossIntensities
         {
             if (nd + ndays > p1946_actual.MAX_DAY)
                 break;
-
-            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.MALE, nd);
-            final_population = p1946_actual.getDay(Locality.TOTAL, Gender.MALE, nd + ndays);
-            v = eval.evalPreliminaryLossIntensity(nd, Gender.MALE, initial_population, final_population);
-            intensities.set(Gender.MALE, nd, v);
-
-            initial_population = p1941_2.getDay(Locality.TOTAL, Gender.FEMALE, nd);
-            final_population = p1946_actual.getDay(Locality.TOTAL, Gender.FEMALE, nd + ndays);
-            v = eval.evalPreliminaryLossIntensity(nd, Gender.FEMALE, initial_population, final_population);
-            intensities.set(Gender.FEMALE, nd, v);
+            
+            for (Gender gender : Gender.TwoGenders)
+            {
+                initial_population = p1941_2.getDay(Locality.TOTAL, gender, nd);
+                final_population = p1946_actual.getDay(Locality.TOTAL, gender, nd + ndays);
+                v = eval.evalPreliminaryLossIntensity(nd, gender, initial_population, final_population, immigration_halves);
+                intensities.set(gender, nd, v);
+            }
         }
 
         return intensities;

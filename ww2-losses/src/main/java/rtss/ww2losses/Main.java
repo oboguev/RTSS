@@ -425,7 +425,7 @@ public class Main
         }
 
         evalDeficit1946(immigration_halves);
-        evalAgeLines();
+        evalAgeLines(immigration_halves);
     }
 
     /* ================================================================================== */
@@ -909,7 +909,7 @@ public class Main
      * Затем с использованием найденной интенсивности потерь расчитать ход линии по полугодиям,
      * включая число смертей за каждое полугодие и численность населения в этой линии на каждое полугодие. 
      */
-    private void evalAgeLines() throws Exception
+    private void evalAgeLines(HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         /* 
          * вычислить коэфициенты интенсивности военных потерь для каждого возраста и пола,
@@ -920,7 +920,7 @@ public class Main
                                                       p1946_actual,
                                                       wamp);
         EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, wam);
-        AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual);
+        AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual, immigration_halves);
 
         if (Util.False)
         {

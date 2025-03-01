@@ -47,7 +47,8 @@ public class SteerAgeLine
             Gender gender,
             double initial_population,
             double loss_intensity,
-            Double immigration_intensity) throws Exception
+            Double immigration_intensity,
+            HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         if (ac_immigration == null)
         {
@@ -57,6 +58,8 @@ public class SteerAgeLine
         {
             Util.assertion(immigration_intensity != null);
         }
+        
+        Util.assertion(immigration_halves == null || immigration_intensity == null);
 
         Util.assertion(initial_population >= 0);
 

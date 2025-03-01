@@ -2,6 +2,8 @@ package rtss.ww2losses.ageline;
 
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
+import rtss.ww2losses.HalfYearEntries;
+import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.model.Automation;
 
 /*
@@ -33,21 +35,22 @@ public class EvalAgeLinelLossIntensity
             int initial_age_ndays,
             Gender gender,
             double initial_population,
-            double final_population) throws Exception
+            double final_population,
+            HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         final double tolerance = 1.0e-5;
-        
+
         Util.assertion(initial_population >= 0 && final_population >= 0);
-        
+
         double a1 = 0;
-        double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, a1);
+        double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, a1, immigration_halves);
         if (div1 == 0)
             return 0;
 
         if (div1 > 0)
         {
             double a2 = 2.0;
-            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2, immigration_halves);
             if (div2 >= 0)
                 throw new Exception("внутренняя ошибка");
 
@@ -59,8 +62,8 @@ public class EvalAgeLinelLossIntensity
                 double a = (a1 + a2) / 2;
                 if (Math.abs(div2 - div1) < final_population * tolerance)
                     return checksign(a, 1);
-                
-                double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);
+
+                double div = divergence(initial_age_ndays, gender, initial_population, final_population, a, immigration_halves);
                 if (div == 0)
                 {
                     return checksign(a, 1);
@@ -83,14 +86,14 @@ public class EvalAgeLinelLossIntensity
         else // if (div1 < 0)
         {
             double a2 = -2.0;
-            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+            double div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2, immigration_halves);
 
             if (div2 <= 0 && Automation.isAutomated())
             {
                 a2 = -3.0;
-                div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2);
+                div2 = divergence(initial_age_ndays, gender, initial_population, final_population, a2, immigration_halves);
             }
-            
+
             if (div2 <= 0)
                 throw new Exception("внутренняя ошибка");
 
@@ -102,8 +105,8 @@ public class EvalAgeLinelLossIntensity
                 double a = (a1 + a2) / 2;
                 if (Math.abs(div2 - div1) < final_population * tolerance)
                     return checksign(a, -1);
-                
-                double div = divergence(initial_age_ndays, gender, initial_population, final_population, a);
+
+                double div = divergence(initial_age_ndays, gender, initial_population, final_population, a, immigration_halves);
                 if (div == 0)
                 {
                     return checksign(a, -1);
@@ -130,23 +133,26 @@ public class EvalAgeLinelLossIntensity
             Gender gender,
             double initial_population,
             double final_population,
-            double loss_intensity) throws Exception
+            double loss_intensity,
+            HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
         double remainder = steer.steerPreliminary(
-                                       initial_age_ndays,
-                                       gender,
-                                       initial_population,
-                                       loss_intensity,
-                                       null);
+                                                  initial_age_ndays,
+                                                  gender,
+                                                  initial_population,
+                                                  loss_intensity,
+                                                  null,
+                                                  immigration_halves);
 
         return remainder - final_population;
     }
-    
+
     private double checksign(double a, int sign) throws Exception
     {
         if (sign > 0)
         {
-            Util.assertion(a > 0);;
+            Util.assertion(a > 0);
+            ;
         }
         else if (sign < 0)
         {
@@ -156,10 +162,10 @@ public class EvalAgeLinelLossIntensity
         {
             Util.assertion(a == 0);
         }
-        
+
         return a;
     }
-    
+
     /* ============================================================================================ */
 
     /*
@@ -175,17 +181,17 @@ public class EvalAgeLinelLossIntensity
      * Военные потери в полугодии вычисляются как ac_xxx * initial_population * loss_intensity.     
      */
     public double evalMigrationIntensity(
-            int initial_age_ndays, 
-            Gender gender, 
-            double initial_population, 
-            double final_population, 
+            int initial_age_ndays,
+            Gender gender,
+            double initial_population,
+            double final_population,
             double loss_intensity) throws Exception
     {
 
         final double tolerance = 1.0e-6;
-        
+
         Util.assertion(initial_population >= 0 && final_population >= 0);
-        
+
         double a1 = 0;
         double div1 = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a1);
         if (div1 == 0)
@@ -206,7 +212,7 @@ public class EvalAgeLinelLossIntensity
                 double a = (a1 + a2) / 2;
                 if (Math.abs(div2 - div1) < final_population * tolerance)
                     return checksign(a, 1);
-                
+
                 double div = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a);
                 if (div == 0)
                 {
@@ -242,7 +248,7 @@ public class EvalAgeLinelLossIntensity
                 double a = (a1 + a2) / 2;
                 if (Math.abs(div2 - div1) < final_population * tolerance)
                     return checksign(a, -1);
-                
+
                 double div = divergence(initial_age_ndays, gender, initial_population, final_population, loss_intensity, a);
                 if (div == 0)
                 {
@@ -274,11 +280,12 @@ public class EvalAgeLinelLossIntensity
             double immigration_intensity) throws Exception
     {
         double remainder = steer.steerPreliminary(
-                                       initial_age_ndays,
-                                       gender,
-                                       initial_population,
-                                       loss_intensity,
-                                       immigration_intensity);
+                                                  initial_age_ndays,
+                                                  gender,
+                                                  initial_population,
+                                                  loss_intensity,
+                                                  immigration_intensity,
+                                                  null);
 
         return final_population - remainder;
     }
