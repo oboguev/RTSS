@@ -11,6 +11,10 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
+/*
+ * Диагностическая распечатка проводки (передвижки) половозрастной линии.
+ * Применяется для отладки.
+ */
 public class PrintAgeLine
 {
     private static final int ndays = years2days(0.5);
@@ -63,19 +67,61 @@ public class PrintAgeLine
         {
             return;
         }
-        
+
         String heid = he.id();
+
         if (heid.equals("1941.2"))
         {
-            Util.out(String.format("Проводка линии %s возрасте nd.age=%d (years.age=%.3f) на начало 1941", gender.name(), traceAgeDay, traceAgeDay/365.0));
+            Util.out(String.format("Проводка SteerActual линии %s возрасте nd.age=%d (years.age=%.3f) на начало 1941", gender.name(), traceAgeDay,
+                                   traceAgeDay / 365.0));
             Util.out(String.format("    >>> halfyear p_start => p_end total_deaths immigration peace_deaths excess_war_deaths"));
         }
-        
-        Util.out(String.format("    >>> %s %.3f => %.3f  %.3f  %.3f  %.3f  %.3f", he.id(), start_population, end_population, peace_deaths + excess_war_deaths, immigration, peace_deaths, excess_war_deaths));
-        
+
+        Util.out(String.format("    >>> %s %.3f => %.3f  %.3f  %.3f  %.3f  %.3f", he.id(), start_population, end_population,
+                               peace_deaths + excess_war_deaths, immigration, peace_deaths, excess_war_deaths));
+
         if (heid.equals("1945.2"))
         {
             Util.out(String.format("    >>> %s %.3f", "1946", p1946_actual.getDay(Locality.TOTAL, gender, traceAgeDay + 10 * ndays)));
+        }
+    }
+
+    public static void printEvalHalves(HalfYearEntry he, PopulationContext pxb_before, PopulationContext pxb_after, PopulationContext p_immigration)
+            throws Exception
+    {
+        if (currentPhase == Phase.ACTUAL && currentArea == traceArea)
+        {
+            // below
+        }
+        else
+        {
+            return;
+        }
+
+        String heid = he.id();
+        int he_ix = he.index();
+        int nd1 = traceAgeDay + he_ix * ndays;
+        int nd2 = nd1 + ndays;
+
+        if (heid.equals("1941.2"))
+        {
+            Util.out(String.format("Передвижка мирных условий (EvalHalves) линии %s возрасте nd.age=%d (years.age=%.3f) на начало 1941",
+                                   traceGender.name(), traceAgeDay, traceAgeDay / 365.0));
+            Util.out(String.format("    >>> halfyear p_start => p_end total_deaths immigration peace_deaths excess_war_deaths"));
+        }
+
+        double start_population = pxb_before.getDay(Locality.TOTAL, traceGender, nd1);
+        double end_population = pxb_after.getDay(Locality.TOTAL, traceGender, nd2);
+        double immigration = p_immigration == null ? 0 : p_immigration.getDay(Locality.TOTAL, traceGender, nd2);
+        double excess_war_deaths = 0;
+        double peace_deaths = start_population - end_population + immigration;
+
+        Util.out(String.format("    >>> %s %.3f => %.3f  %.3f  %.3f  %.3f  %.3f", he.id(), start_population, end_population,
+                               peace_deaths + excess_war_deaths, immigration, peace_deaths, excess_war_deaths));
+
+        if (heid.equals("1945.2"))
+        {
+            Util.out(String.format("    >>> %s %.3f", "1946", p1946_actual.getDay(Locality.TOTAL, traceGender, traceAgeDay + 10 * ndays)));
         }
     }
 }

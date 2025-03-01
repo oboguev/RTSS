@@ -503,6 +503,7 @@ public class Main
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
             CombinedMortalityTable mt = peacetimeMortalityTables.getTable(current_year, current_half);
             curr.peace_mt = mt;
+            PopulationContext immigration = null;
 
             /* передвижка на следующие полгода населения с учётом рождений */
             ForwardPopulationT f_wb = new ForwardPopulationT();
@@ -510,17 +511,19 @@ public class Main
             f_wb.forward(pwb, mt, 0.5);
             if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
             {
-                pwb = pwb.add(immigration_halves.get(year, half).prev.immigration, ValueConstraint.NON_NEGATIVE);
+                immigration = immigration_halves.get(year, half).prev.immigration;
+                immigration = immigration.moveUpByDays(years2days(0.5));
+                pwb = pwb.add(immigration, ValueConstraint.NON_NEGATIVE);
             }
 
             /* передвижка на следующие полгода населения без учёта рождений */
+            PopulationContext pxb_before = pxb.clone();
+            
             ForwardPopulationT f_xb = new ForwardPopulationT();
             f_xb.setBirthRateTotal(0);
             f_xb.forward(pxb, mt, 0.5);
-            if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
-            {
-                pxb = pxb.add(immigration_halves.get(year, half).prev.immigration, ValueConstraint.NON_NEGATIVE);
-            }
+            if (immigration != null)
+                pxb = pxb.add(immigration, ValueConstraint.NON_NEGATIVE);
 
             /* сохранить результаты в полугодовой записи */
             double extra_deaths_wb = pwb.clipLastDayAccumulation();
@@ -528,11 +531,13 @@ public class Main
             curr = new HalfYearEntry(year, half, pwb.clone(), pxb.clone());
             prev.expected_nonwar_births = f_wb.getObservedBirths();
             prev.expected_nonwar_deaths = f_xb.getObservedDeaths() + extra_deaths_xb;
-
+            
             curr.prev = prev;
             prev.next = curr;
             prev = curr;
             halves.add(curr);
+        
+            PrintAgeLine.printEvalHalves(curr.prev, pxb_before, pxb, immigration);
         }
 
         for (HalfYearEntry he : halves)
