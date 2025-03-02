@@ -17,7 +17,6 @@ import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
-import rtss.util.plot.ChartXYSPlineBasic;
 import rtss.util.plot.ChartXYSplineAdvanced;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.HalfYearEntry;
@@ -202,13 +201,13 @@ public class PeacetimeMortalityTables
     /*
      * Диагностическая распечатка
      */
-    public void diagPrintFirst(int nyears) throws Exception
+    public void diagPrintFirstEntries(int nyears) throws Exception
     {
-        diagPrintFirst(Gender.MALE, nyears);
-        diagPrintFirst(Gender.FEMALE, nyears);
+        diagPrintFirstEntries(Gender.MALE, nyears);
+        diagPrintFirstEntries(Gender.FEMALE, nyears);
     }
 
-    public void diagPrintFirst(Gender gender, int nyears) throws Exception
+    public void diagPrintFirstEntries(Gender gender, int nyears) throws Exception
     {
         Util.out("");
         Util.out("Возрастные коэффиценты смертности для " + gender.name());
@@ -254,7 +253,5 @@ public class PeacetimeMortalityTables
             double[] f_lx = mt2lx(yhy.year, yhy.halfyear, cmt, Locality.TOTAL, Gender.FEMALE);
             new ChartXYSplineAdvanced(title, "возраст", "остаток lx").addSeries("male", m_lx).addSeries("femake", f_lx).display();
         }
-        
-        Util.noop();
     }
 }

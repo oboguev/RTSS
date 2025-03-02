@@ -247,7 +247,7 @@ public class Main
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
         if (Util.False)
         {
-            peacetimeMortalityTables.diagPrintFirst(10);
+            peacetimeMortalityTables.diagPrintFirstEntries(10);
             peacetimeMortalityTables.diag_display_lx();
         }
 
