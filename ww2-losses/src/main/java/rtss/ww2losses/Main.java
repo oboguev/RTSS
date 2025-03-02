@@ -35,6 +35,7 @@ import rtss.ww2losses.helpers.ShowAgeSliceDeathHistory;
 import rtss.ww2losses.helpers.ShowPopulationAgeSliceHistory;
 import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
+import rtss.ww2losses.helpers.diag.DiagHelper;
 import rtss.ww2losses.model.Automation;
 import rtss.ww2losses.model.Model;
 import rtss.ww2losses.params.AreaParameters;
@@ -690,11 +691,9 @@ public class Main
         if (Util.differ(v_sum_deaths - v_sum_immigration, v, 0.0001))
             Util.err("Несовпадение числа смертей");
 
-        if (Util.True)
+        if (Util.True && area == Area.USSR)
         {
-            double[] vx = p1946_expected_without_births.asArray(Locality.TOTAL, Gender.MALE);
-            vx = Util.splice(vx, 4 * 365, 8 * 365);
-            ChartXYSPlineBasic.display("Муж. население в возрасте 4-6 " + area, vx);
+            new DiagHelper(ap, halves).showEarlyAges();
         }
 
         if (Util.False)
