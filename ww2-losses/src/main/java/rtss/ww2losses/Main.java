@@ -245,6 +245,11 @@ public class Main
         mt1940 = new MortalityTable_1940(ap).evaluate();
         mt1940.seal();
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
+        if (Util.False)
+        {
+            peacetimeMortalityTables.diagPrintFirst(10);
+            peacetimeMortalityTables.diag_display_lx();
+        }
 
         /* 
          * Население на начало 1941 года.

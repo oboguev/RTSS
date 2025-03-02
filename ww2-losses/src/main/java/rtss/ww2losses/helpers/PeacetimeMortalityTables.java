@@ -17,6 +17,8 @@ import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
+import rtss.util.plot.ChartXYSPlineBasic;
+import rtss.util.plot.ChartXYSplineAdvanced;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.HalfYearEntry;
 
@@ -51,7 +53,7 @@ public class PeacetimeMortalityTables
     {
         if (!applyAntibiotics)
             return mt1940;
-        
+
         CombinedMortalityTable xmt = cacheTable.get(key(year, halfyear));
 
         if (xmt == null)
@@ -73,7 +75,7 @@ public class PeacetimeMortalityTables
 
         return xmt;
     }
-    
+
     /* ======================================================================================================= */
 
     public double[] mt2lx(int year, HalfYearSelector halfyear, CombinedMortalityTable mt, Locality locality, Gender gender) throws Exception
@@ -82,7 +84,7 @@ public class PeacetimeMortalityTables
         Util.assertion(mt == xmt);
 
         double[] lx = cacheLX.get(key(year, halfyear, locality, gender));
-        
+
         if (lx == null)
         {
             lx = mt.daily_lx(locality, gender);
@@ -93,13 +95,13 @@ public class PeacetimeMortalityTables
     }
 
     /* ======================================================================================= */
-    
+
     private Map<String, CombinedMortalityTable> cacheTable = new HashMap<>();
     private Map<String, double[]> cacheLX = new HashMap<>();
 
     private String key(int year, HalfYearSelector halfyear)
     {
-        return HalfYearEntry.id(year,  halfyear);
+        return HalfYearEntry.id(year, halfyear);
     }
 
     private String key(int year, HalfYearSelector halfyear, Locality locality, Gender gender)
@@ -170,5 +172,89 @@ public class PeacetimeMortalityTables
             if (Util.differ(Util.average(y), bin.avg, 0.001))
                 throw new Exception("Curve does not preserve mean values of the bins");
         }
+    }
+
+    /* ======================================================================================= */
+
+    public static class YearHalfYear
+    {
+        public int year;
+        public HalfYearSelector halfyear;
+
+        public YearHalfYear(int year, HalfYearSelector halfyear)
+        {
+            this.year = year;
+            this.halfyear = halfyear;
+        }
+    }
+
+    private List<YearHalfYear> allHalfYears() throws Exception
+    {
+        List<YearHalfYear> list = new ArrayList<>();
+        for (int year = 1940; year <= 1946; year++)
+        {
+            list.add(new YearHalfYear(year, HalfYearSelector.fromString("1")));
+            list.add(new YearHalfYear(year, HalfYearSelector.fromString("2")));
+        }
+        return list;
+    }
+
+    /*
+     * Диагностическая распечатка
+     */
+    public void diagPrintFirst(int nyears) throws Exception
+    {
+        diagPrintFirst(Gender.MALE, nyears);
+        diagPrintFirst(Gender.FEMALE, nyears);
+    }
+
+    public void diagPrintFirst(Gender gender, int nyears) throws Exception
+    {
+        Util.out("");
+        Util.out("Возрастные коэффиценты смертности для " + gender.name());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("  ");
+        for (YearHalfYear yhy : allHalfYears())
+            sb.append(String.format(" %d.%d", yhy.year, yhy.halfyear.seq(1)));
+        Util.out(sb.toString());
+
+        sb = new StringBuilder();
+        sb.append("==");
+        for (YearHalfYear yhy : allHalfYears())
+        {
+            sb.append(" ======");
+            Util.unused(yhy);
+        }
+        Util.out(sb.toString());
+
+        for (int age = 0; age < nyears; age++)
+        {
+            sb = new StringBuilder();
+            sb.append(String.format("%2d", age));
+
+            for (YearHalfYear yhy : allHalfYears())
+            {
+                CombinedMortalityTable cmt = getTable(yhy.year, yhy.halfyear);
+                double[] qx = cmt.getSingleTable(Locality.TOTAL, gender).qx();
+                sb.append(String.format("  %.3f", qx[age]));
+            }
+
+            Util.out(sb.toString());
+        }
+    }
+
+    public void diag_display_lx() throws Exception
+    {
+        for (YearHalfYear yhy : allHalfYears())
+        {
+            String title = String.format("%d.%d", yhy.year, yhy.halfyear.seq(1));
+            CombinedMortalityTable cmt = getTable(yhy.year, yhy.halfyear);
+            double[] m_lx = mt2lx(yhy.year, yhy.halfyear, cmt, Locality.TOTAL, Gender.MALE);
+            double[] f_lx = mt2lx(yhy.year, yhy.halfyear, cmt, Locality.TOTAL, Gender.FEMALE);
+            new ChartXYSplineAdvanced(title, "возраст", "остаток lx").addSeries("male", m_lx).addSeries("femake", f_lx).display();
+        }
+        
+        Util.noop();
     }
 }
