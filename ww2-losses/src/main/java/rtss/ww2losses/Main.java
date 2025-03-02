@@ -10,6 +10,7 @@ import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.projection.ForwardPopulationT;
+import rtss.data.population.projection.ForwardPopulationT.NewbornDeathRegistrationAge;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
@@ -45,6 +46,7 @@ import rtss.ww2losses.population194x.AdjustPopulation;
 import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.util.CalibrateASFR;
 import rtss.ww2losses.util.RebalanceASFR;
+import rtss.ww2losses.util.despike.DespikeZero;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 
@@ -378,14 +380,14 @@ public class Main
         if (Util.False)
         {
             new PopulationChart("Избыточные смерти " + area + " в 1941-1945 гг. по возрасту в момент смерти")
-                    .show("смерти", allExcessDeathsByDeathAge.toPopulation())
+                    .show("смерти", allExcessDeathsByDeathAge)
                     .display();
         }
 
         if (Util.False)
         {
             new PopulationChart("Избыточные смерти " + area + " в 1941-1945 гг. по возрасту на начало 1946")
-                    .show("смерти", allExcessDeathsByAgeAt1946.toPopulation())
+                    .show("смерти", allExcessDeathsByAgeAt1946)
                     .display();
         }
 
@@ -1186,6 +1188,8 @@ public class Main
             instructions.add(instruction);
             CombinedMortalityTable mt = PatchMortalityTable.patch(mt1940, instructions, "множитель смертности " + multiplier);
 
+            // fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.MIRROR_AGE);
+            fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
             fw.forward(p, mt, 0.5);
 
             if (record)
@@ -1391,7 +1395,16 @@ public class Main
 
             p = p.add(he.actual_excess_wartime_deaths, ValueConstraint.NONE);
         }
-
+        
+        /*
+         * API передвижки возвращает структуру смертей за период передвижки индексированную
+         * по возрасту населения на начало передвижки. Смерти новорожденных (родившихся уже
+         * после начала передвижки) возвращаются в возрасте 0 днeй, т.к. отрицательная индексация
+         * по возрасту не предусмотрена. Это создаёт ложный пик смертей в возрасте 0 дней. 
+         * Разгладить пик на полгода.
+         */
+        p = DespikeZero.despike(p, years2days(0.5));
+        
         return p;
     }
 

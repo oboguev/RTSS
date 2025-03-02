@@ -64,6 +64,45 @@ public class ForwardPopulationT extends ForwardPopulation
      * Для рождённых во время передвижки возраст = 0.
      */
     private PopulationContext deathsByGenderAge = PopulationContext.newTotalPopulationContext();
+    
+    /*
+     * Регистрация смертей в deathsByGenderAge индексируется по возрасту на момент НАЧАЛА передвижки,
+     * начиная с дня 0 для только что родившихся, т.е. характеризует население имевшееся на момент
+     * начала передвижки и даёт числа смертей для его возрастов.
+     * 
+     * Но младенцы родившиеся и затем умершие уже в период передвижки имеют отрицательный возраст 
+     * относительно начала передвижки.
+     * 
+     * Наша структура не поддерживает индексацию по отрицательным возрастам.
+     * 
+     * Мы поэтому можем либо отнести смерти новорожденных либо на возраст день 0,
+     * либо (чтобы избежать аккумуляции) на зеркально отражённый возраст.    
+     */
+    public static enum NewbornDeathRegistrationAge
+    {
+        AT_AGE_DAY0,
+        MIRROR_AGE
+    }
+    
+    private NewbornDeathRegistrationAge newbornDeathRegistrationAge = NewbornDeathRegistrationAge.AT_AGE_DAY0;
+    
+    public void setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge newbornDeathRegistrationAge)
+    {
+        this.newbornDeathRegistrationAge = newbornDeathRegistrationAge;
+    }
+    
+    private int newbornDeathDay(int nd)
+    {
+        switch (newbornDeathRegistrationAge)
+        {
+        case AT_AGE_DAY0:
+            return 0;
+        case MIRROR_AGE:
+            return nd;
+        default:
+            throw new IllegalArgumentException("неверная установка для newbornDeathRegistrationAge");
+        }
+    }
 
     /*
      * В настоящее время мы не используем эту функцию практически.
@@ -367,8 +406,10 @@ public class ForwardPopulationT extends ForwardPopulation
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
         {
+            int death_day = newbornDeathDay(ndays - 1 - nd);
+
             double deaths = day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
-            deathsByGenderAge.addDay(locality, gender, 0, deaths);
+            deathsByGenderAge.addDay(locality, gender, death_day, deaths);
 
             day_births[nd] *= day_lx[nd] / day_lx[0];
         }
@@ -427,8 +468,10 @@ public class ForwardPopulationT extends ForwardPopulation
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
         {
+            int death_day = newbornDeathDay(ndays - 1 - nd);
+            
             double deaths = day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
-            deathsByGenderAge.addDay(locality, gender, 0, deaths);
+            deathsByGenderAge.addDay(locality, gender, death_day, deaths);
 
             day_births[nd] *= day_lx[nd] / day_lx[0];
         }
@@ -500,6 +543,7 @@ public class ForwardPopulationT extends ForwardPopulation
             observed_deaths += deaths;
             sum_deaths += deaths;
 
+            // TODO: распределить по году
             deathsByGenderAge.addDay(locality, gender, age * DAYS_PER_YEAR, deaths);
 
             pto.add(locality, gender, age, staying);

@@ -42,9 +42,9 @@ public class VerifyHalfYears
         if (he.year == 1946)
             return;
 
-        PopulationContext p1 = he.actual_population;
-        PopulationContext p2 = he.next.actual_population;
-        int ndays = years2days(0.5);
+        final PopulationContext p1 = he.actual_population;
+        final PopulationContext p2 = he.next.actual_population;
+        final int ndays = years2days(0.5);
 
         if (Util.True)
         {
