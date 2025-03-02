@@ -18,6 +18,7 @@ import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.ChartXYSPlineBasic;
 import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.ageline.AgeLineFactorIntensities;
@@ -68,7 +69,7 @@ public class Main
             if (Util.False)
             {
                 // Диагностика: распечатка хода указанной половозрастной линии
-                PrintAgeLine.traceAgeYear(Area.RSFSR, Gender.FEMALE, 10.0);
+                PrintAgeLine.traceAgeYear(Area.USSR, Gender.MALE, 5.0);
             }
 
             new Main(Area.USSR).main();
@@ -259,12 +260,14 @@ public class Main
          * Разбивка по 5-летним группам не меняется, но значения для некоторых возрастов перераспределяются 
          * по годам внутри групп так, чтобы избежать артефакта отрицательной величины потерь в 1941-1945 гг.
          */
+        PopulationEarly1941 pe1941 = new PopulationEarly1941(ap);
         AdjustPopulation adjuster1941 = new AdjustPopulation1941(area);
-        PopulationContext p_start1941 = new PopulationEarly1941(ap).evaluate(adjuster1941);
+        PopulationContext p_start1941 = pe1941.evaluate(adjuster1941);
+        PopulationContext p_start1941_0 = p_start1941.clone();
 
         /* 
-         * Итеративно перераспределять население внутри 5-летних групп аггреграции,
-         * пока не устранены артефакты отрицательной величины потерь в 1941-1945 гг.
+         * Перераспределить население внутри 5-летних групп аггреграции,
+         * для устранения артефакты отрицательной величины потерь в 1941-1945 гг.
          * для некоторых возрастных линий.
          */
         PopulationContext p_mid1941;
@@ -309,9 +312,16 @@ public class Main
         if (Util.False)
         {
             /* отобразить график населения на середину 1941 года */
-            new PopulationChart("Население " + area + " на середину 1941 года")
-                    .show("", p_mid1941.toPopulation())
-                    .display();
+            PopulationChart.display("Население " + area + " на начало 1941 года",
+                                    pe1941.loaded(), "загруженное",
+                                    p_start1941_0, "промежуточное",
+                                    p_start1941, "конечное");
+        }
+
+        if (Util.False)
+        {
+            /* отобразить график населения на середину 1941 года */
+            PopulationChart.display("Население " + area + " на середину 1941 года", p_mid1941, "");
         }
 
         if (Util.False)
@@ -679,6 +689,20 @@ public class Main
         v -= p1946_expected_without_births.sum();
         if (Util.differ(v_sum_deaths - v_sum_immigration, v, 0.0001))
             Util.err("Несовпадение числа смертей");
+
+        if (Util.True)
+        {
+            double[] vx = p1946_expected_without_births.asArray(Locality.TOTAL, Gender.MALE);
+            vx = Util.splice(vx, 4 * 365, 8 * 365);
+            ChartXYSPlineBasic.display("Муж. население в возрасте 4-6 " + area, vx);
+        }
+
+        if (Util.False)
+        {
+            PopulationChart.display("Население " + area + " 1946 actual vs. expected w/o births",
+                                    p1946_actual, "actual",
+                                    p1946_expected_without_births, "expected");
+        }
 
         /* =================================================== */
 
@@ -1401,7 +1425,7 @@ public class Main
 
             p = p.add(he.actual_excess_wartime_deaths, ValueConstraint.NONE);
         }
-        
+
         /*
          * API передвижки возвращает структуру смертей за период передвижки индексированную
          * по возрасту населения на начало передвижки. Смерти новорожденных (родившихся уже
@@ -1410,7 +1434,7 @@ public class Main
          * Разгладить пик на полгода.
          */
         p = DespikeZero.despike(p, years2days(0.5));
-        
+
         return p;
     }
 
@@ -1441,7 +1465,7 @@ public class Main
          * Разгладить пик на предшетвуюшие полгода.
          */
         p = DespikeComb.despike(p, years2days(4.9));
-        
+
         return p;
     }
 

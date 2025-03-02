@@ -68,6 +68,16 @@ public class PopulationChart extends ApplicationFrame
         new PopulationChart(title).show(name1, p1).show(name2, p2).display();
     }
 
+    public static void display(String title, Population p1, String name1, Population p2, String name2, Population p3, String name3) throws Exception
+    {
+        new PopulationChart(title).show(name1, p1).show(name2, p2).show(name3, p3).display();
+    }
+
+    public static void display(String title, PopulationContext p1, String name1, PopulationContext p2, String name2, PopulationContext p3, String name3) throws Exception
+    {
+        new PopulationChart(title).show(name1, p1).show(name2, p2).show(name3, p3).display();
+    }
+    
     public static void displayToScale(String title, Population pScale, String nameScale, Population p1, String name1) throws Exception
     {
         new PopulationChart(title).scale(nameScale, pScale).show(name1, p1).display();

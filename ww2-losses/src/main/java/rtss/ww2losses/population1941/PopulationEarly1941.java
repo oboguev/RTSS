@@ -50,4 +50,9 @@ public class PopulationEarly1941 extends UtilBase_194x
             return null;
         }
     }
+    
+    public PopulationContext loaded() throws Exception
+    {
+        return PopulationADH.getPopulationByLocality(ap.area, 1941).toPopulationContext();
+    }
 }
