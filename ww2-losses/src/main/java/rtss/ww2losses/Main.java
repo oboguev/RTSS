@@ -1435,7 +1435,7 @@ public class Main
          * повторяющийся каждое военное полугодие. 
          * Разгладить пик на предшетвуюшие полгода.
          */
-        p = DespikeComb.despike(p, years2days(4.6));
+        p = DespikeComb.despike(p, years2days(4.9));
         
         return p;
     }
