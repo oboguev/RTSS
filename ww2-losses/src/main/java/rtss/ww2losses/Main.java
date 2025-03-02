@@ -46,6 +46,7 @@ import rtss.ww2losses.population194x.AdjustPopulation;
 import rtss.ww2losses.population194x.MortalityTable_1940;
 import rtss.ww2losses.util.CalibrateASFR;
 import rtss.ww2losses.util.RebalanceASFR;
+import rtss.ww2losses.util.despike.DespikeComb;
 import rtss.ww2losses.util.despike.DespikeZero;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
@@ -1426,6 +1427,16 @@ public class Main
             p = p.add(up, ValueConstraint.NONE);
         }
 
+        /*
+         * API передвижки возвращает структуру смертей за период передвижки индексированную
+         * по возрасту населения на начало передвижки. Смерти новорожденных (родившихся уже
+         * после начала передвижки) возвращаются в возрасте 0 днeй, т.к. отрицательная индексация
+         * по возрасту не предусмотрена. Это создаёт ложный пик смертей в возрасте 0 дней,
+         * повторяющийся каждое военное полугодие. 
+         * Разгладить пик на предшетвуюшие полгода.
+         */
+        p = DespikeComb.despike(p, years2days(4.6));
+        
         return p;
     }
 

@@ -22,7 +22,7 @@ public class DespikeZero
         return p2;
     }
     
-    public static double[] redistributeSpike(double[] f, int xmax)
+    private static double[] redistributeSpike(double[] f, int xmax)
     {
         if (f == null || xmax <= 0 || xmax >= f.length)
         {
