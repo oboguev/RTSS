@@ -24,7 +24,7 @@ public class SmoothBirths
     private AreaParameters ap;
     private List<Bin> bins;
 
-    public SmoothBirths init(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
+    public SmoothBirths init_nonwar(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
         this.ap = ap; 
         this.bins = new ArrayList<>();
@@ -46,6 +46,25 @@ public class SmoothBirths
         }
 
         return this;
+    }
+
+    public SmoothBirths init_actual(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
+    {
+        this.ap = ap; 
+        this.bins = new ArrayList<>();
+        int nd = 0;
+        
+        for (HalfYearEntry he : halves)
+        {
+            if (he.next == null)
+                break;
+
+            bins.add(new Bin(nd, nd + ndays - 1, he.actual_births / ndays));
+            nd += ndays;
+        }
+
+        return this;
+        
     }
 
     public void calc() throws Exception

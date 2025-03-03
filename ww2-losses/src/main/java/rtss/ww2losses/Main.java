@@ -500,7 +500,7 @@ public class Main
         evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
 
         /* сгладить число рождений по времени, сделав непрерывным */
-        new SmoothBirths().init(ap, halves).calc();
+        // ### new SmoothBirths().init_nonwar(ap, halves).calc();
 
         /*
          * Дополнительные данные для полугодий
@@ -1114,7 +1114,7 @@ public class Main
 
     /*
      * Вычислить фактическое число рождений в военное время
-     * по данным анамнеситического опроса 1960 года 
+     * по данным анамнестического опроса 1960 года 
      * и по числу женщин фертильного возраста согласно расчитанной ранее структуре остатка населения наличного в начале войны
      */
     private void evalNewBirths() throws Exception
@@ -1165,6 +1165,8 @@ public class Main
             he1.actual_births = he1.expected_nonwar_births;
             he2.actual_births += delta;
         }
+
+        // ### new SmoothBirths().init_actual(ap, halves).calc();
     }
 
     /* ======================================================================================================= */
