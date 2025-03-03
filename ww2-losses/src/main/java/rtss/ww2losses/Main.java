@@ -493,12 +493,7 @@ public class Main
         prev = curr;
         halves.add(curr);
 
-        if (Util.False)
-        {
-            evalHalves_without_births(halves, curr, p_mid1941, immigration_halves);
-            evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
-        }
-        else
+        if (Util.True)
         {
             /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
             PopulationContext pwb = p_mid1941.clone();
@@ -574,6 +569,12 @@ public class Main
             }
         }
 
+        if (Util.False)
+        {
+            evalHalves_without_births(halves, curr, p_mid1941, immigration_halves);
+            evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
+        }
+        
         /*
          * Дополнительные данные для полугодий
          */
