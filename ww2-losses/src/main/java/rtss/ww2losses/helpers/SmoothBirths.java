@@ -41,7 +41,7 @@ public class SmoothBirths
 
             double births = ap.CBR_1940_MIDYEAR * pavg / PROMILLE;
 
-            bins.add(new Bin(nd, nd + ndays - 1, births));
+            bins.add(new Bin(nd, nd + ndays - 1, births / ndays));
             nd += ndays;
         }
 
