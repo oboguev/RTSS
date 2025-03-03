@@ -34,6 +34,7 @@ import rtss.ww2losses.helpers.ShowAgeSliceDeathHistory;
 import rtss.ww2losses.helpers.ShowPopulationAgeSliceHistory;
 import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
+import rtss.ww2losses.helpers.diag.DiagHalves;
 import rtss.ww2losses.helpers.diag.DiagHelper;
 import rtss.ww2losses.model.Automation;
 import rtss.ww2losses.model.Model;
@@ -433,6 +434,17 @@ public class Main
         /* передвижка по полугодиям для мирных условий */
         halves = evalHalves(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, p_mid1941, immigration_halves);
 
+        if (Util.True)
+        {
+            HalfYearEntries<HalfYearEntry> halves2 = evalHalves_2(p_start1941, 
+                                                                  deaths_1941_1st_halfyear, 
+                                                                  births_1941_1st_halfyear, 
+                                                                  p_mid1941,
+                                                                  immigration_halves);
+            //
+            new DiagHalves().compare(halves, halves2);
+        }
+
         if (Util.False)
         {
             String point = "1946.1";
@@ -458,7 +470,6 @@ public class Main
      * Подготовить полугодовые сегменты.
      * Передвижка для мирного времени с шагом полгода от середины 1941 до начала 1946 года.
      */
-    @SuppressWarnings("unused")
     private HalfYearEntries<HalfYearEntry> evalHalves(
             PopulationContext p_start1941,
             PopulationContext deaths_1941_1st_halfyear,
@@ -574,7 +585,141 @@ public class Main
             evalHalves_without_births(halves, curr, p_mid1941, immigration_halves);
             evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
         }
-        
+
+        /*
+         * Дополнительные данные для полугодий
+         */
+        for (HalfYearEntry he : halves)
+        {
+            if (he.year == 1946)
+                break;
+
+            if (he.peace_mt == null)
+                he.peace_mt = peacetimeMortalityTables.getTable(he.year, he.halfyear);
+
+            he.peace_lx_male = peacetimeMortalityTables.mt2lx(he.year, he.halfyear, he.peace_mt, Locality.TOTAL, Gender.MALE);
+            he.peace_lx_female = peacetimeMortalityTables.mt2lx(he.year, he.halfyear, he.peace_mt, Locality.TOTAL, Gender.FEMALE);
+        }
+
+        return halves;
+    }
+
+    private HalfYearEntries<HalfYearEntry> evalHalves_2(
+            PopulationContext p_start1941,
+            PopulationContext deaths_1941_1st_halfyear,
+            double births_1941_1st_halfyear,
+            PopulationContext p_mid1941,
+            HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
+    {
+        HalfYearEntries<HalfYearEntry> halves = new HalfYearEntries<HalfYearEntry>();
+
+        HalfYearEntry curr, prev;
+        int year = 1941;
+
+        /* первое полугодие 1941 */
+        HalfYearSelector half = HalfYearSelector.FirstHalfYear;
+        prev = curr = new HalfYearEntry(year, half,
+                                        p_start1941.clone(),
+                                        p_start1941.clone());
+        curr.actual_deaths = deaths_1941_1st_halfyear.clone();
+        curr.actual_peace_deaths = deaths_1941_1st_halfyear.clone();
+        curr.actual_excess_wartime_deaths = newPopulationContext();
+        curr.expected_nonwar_deaths = curr.actual_deaths.sum();
+        curr.expected_nonwar_births = births_1941_1st_halfyear;
+
+        halves.add(curr);
+
+        /* второе полугодие 1941 */
+        half = HalfYearSelector.SecondHalfYear;
+        curr = new HalfYearEntry(year, half, p_mid1941.clone(), p_mid1941.clone());
+        curr.peace_mt = peacetimeMortalityTables.getTable(1941, HalfYearSelector.SecondHalfYear);
+        prev.next = curr;
+        curr.prev = prev;
+        prev = curr;
+        halves.add(curr);
+
+        if (Util.False)
+        {
+            /* подготовиться к передвижке населения с учётом рождений после середины 1941 года */
+            PopulationContext pwb = p_mid1941.clone();
+
+            /* подготовиться к передвижке населения без учёта рождений после середины 1941 года (только наличного на середину 1941 года) */
+            PopulationContext pxb = p_mid1941.clone();
+
+            /* продвигать с шагом по полгода до января 1946 */
+            for (;;)
+            {
+                int current_year = year;
+                HalfYearSelector current_half = half;
+
+                if (half == HalfYearSelector.FirstHalfYear)
+                {
+                    if (year == 1946)
+                        break;
+                    half = HalfYearSelector.SecondHalfYear;
+                }
+                else
+                {
+                    half = HalfYearSelector.FirstHalfYear;
+                    year++;
+                }
+
+                /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
+                CombinedMortalityTable mt = peacetimeMortalityTables.getTable(current_year, current_half);
+                curr.peace_mt = mt;
+
+                if (Util.False)
+                {
+                    Util.out(String.format("Передвижка with/without births %d.%d => %d.%d таблица %s",
+                                           current_year, current_half.seq(1),
+                                           year, half.seq(1),
+                                           mt.comment()));
+                }
+
+                PopulationContext immigration = null;
+
+                /* передвижка на следующие полгода населения с учётом рождений */
+                ForwardPopulationT f_wb = new ForwardPopulationT();
+                f_wb.setBirthRateTotal(ap.CBR_1940);
+                f_wb.forward(pwb, mt, 0.5);
+                if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
+                {
+                    immigration = immigration_halves.get(year, half).prev.immigration;
+                    immigration = immigration.moveUpByDays(years2days(0.5));
+                    pwb = pwb.add(immigration, ValueConstraint.NON_NEGATIVE);
+                }
+
+                /* передвижка на следующие полгода населения без учёта рождений */
+                PopulationContext pxb_before = pxb.clone();
+
+                ForwardPopulationT f_xb = new ForwardPopulationT();
+                f_xb.setBirthRateTotal(0);
+                f_xb.forward(pxb, mt, 0.5);
+                if (immigration != null)
+                    pxb = pxb.add(immigration, ValueConstraint.NON_NEGATIVE);
+
+                /* сохранить результаты в полугодовой записи */
+                double extra_deaths_wb = pwb.clipLastDayAccumulation();
+                double extra_deaths_xb = pxb.clipLastDayAccumulation();
+                curr = new HalfYearEntry(year, half, pwb.clone(), pxb.clone());
+                prev.expected_nonwar_births = f_wb.getObservedBirths();
+                prev.expected_nonwar_deaths = f_xb.getObservedDeaths() + extra_deaths_xb;
+
+                curr.prev = prev;
+                prev.next = curr;
+                prev = curr;
+                halves.add(curr);
+
+                PrintAgeLine.printEvalHalves(curr.prev, pxb_before, pxb, immigration);
+            }
+        }
+
+        if (Util.True)
+        {
+            evalHalves_without_births(halves, curr, p_mid1941, immigration_halves);
+            evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
+        }
+
         /*
          * Дополнительные данные для полугодий
          */
@@ -638,7 +783,6 @@ public class Main
 
             /* иммиграция */
             PopulationContext immigration = null;
-
             if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
             {
                 immigration = immigration_halves.get(year, half).prev.immigration;
@@ -691,7 +835,6 @@ public class Main
 
             /* иммиграция */
             PopulationContext immigration = null;
-
             if (immigration_halves != null && immigration_halves.get(year, half).prev.immigration != null)
             {
                 immigration = immigration_halves.get(year, half).prev.immigration;
@@ -702,6 +845,8 @@ public class Main
             ForwardPopulationT f_wb = new ForwardPopulationT();
             f_wb.setBirthRateTotal(ap.CBR_1940);
             f_wb.forward(pwb, prev.peace_mt, 0.5);
+            if (immigration != null)
+                pwb = pwb.add(immigration, ValueConstraint.NON_NEGATIVE);
 
             /* сохранить результаты в полугодовой записи */
             double extra_deaths_wb = pwb.clipLastDayAccumulation();
