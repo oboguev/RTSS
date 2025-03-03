@@ -32,6 +32,7 @@ import rtss.ww2losses.helpers.PrintHalfYears;
 import rtss.ww2losses.helpers.PrintYears;
 import rtss.ww2losses.helpers.ShowAgeSliceDeathHistory;
 import rtss.ww2losses.helpers.ShowPopulationAgeSliceHistory;
+import rtss.ww2losses.helpers.SmoothBirths;
 import rtss.ww2losses.helpers.VerifyHalfYears;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.helpers.diag.DiagHelper;
@@ -492,9 +493,14 @@ public class Main
         prev = curr;
         halves.add(curr);
 
-        /* остальные полугодия */
+        /* остальные полугодия: сначала без рождений */
         evalHalves_without_births(halves, curr, p_mid1941, immigration_halves);
+
+        /* остальные полугодия: с рождениями, предварительный расчёт их числа */
         evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
+
+        /* сгладить число рождений по времени, сделав непрерывным */
+        new SmoothBirths().init(ap, halves).calc();
 
         /*
          * Дополнительные данные для полугодий
