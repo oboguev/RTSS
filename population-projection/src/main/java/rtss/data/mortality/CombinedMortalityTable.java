@@ -280,6 +280,11 @@ public class CombinedMortalityTable
         this.comment = comment;
     }
 
+    public String toString()
+    {
+        return source;
+    }
+
     /*****************************************************************************************************/
 
     private String source;

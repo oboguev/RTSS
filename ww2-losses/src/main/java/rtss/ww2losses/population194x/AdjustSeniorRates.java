@@ -94,6 +94,7 @@ public class AdjustSeniorRates
         cmt.setTable(Locality.TOTAL, Gender.MALE, smt_male);
         cmt.setTable(Locality.TOTAL, Gender.FEMALE, smt_female);
         cmt.setTable(Locality.TOTAL, Gender.BOTH, smt_both);
+        cmt.comment(comment);
 
         return cmt;
     }

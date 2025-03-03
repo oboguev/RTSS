@@ -444,6 +444,11 @@ public class SingleMortalityTable
         if (sealed)
             throw new Exception("Table is sealed and cannot be modified");
     }
+    
+    public String toString()
+    {
+        return source;
+    }
 
     /*****************************************************************************************************/
     

@@ -67,7 +67,7 @@ public class PeacetimeMortalityTables
             List<PatchInstruction> instructions = new ArrayList<>();
             instructions.add(instruction);
 
-            xmt = PatchMortalityTable.patch(mt1940, instructions, "поправка антибиотиков для " + year);
+            xmt = PatchMortalityTable.patch(mt1940, instructions, "поправка антибиотиков для " + year + "." + halfyear.seq(1));
             xmt.seal();
             cacheTable.put(key(year, halfyear), xmt);
         }

@@ -492,8 +492,8 @@ public class Main
         curr.prev = prev;
         prev = curr;
         halves.add(curr);
-        
-        if (Util.True)
+
+        if (Util.False)
         {
             evalHalves_without_births(halves, curr, p_mid1941, immigration_halves);
             evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
@@ -527,6 +527,15 @@ public class Main
                 /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
                 CombinedMortalityTable mt = peacetimeMortalityTables.getTable(current_year, current_half);
                 curr.peace_mt = mt;
+
+                if (Util.False)
+                {
+                    Util.out(String.format("Передвижка with/without births %d.%d => %d.%d таблица %s",
+                                           current_year, current_half.seq(1),
+                                           year, half.seq(1),
+                                           mt.comment()));
+                }
+
                 PopulationContext immigration = null;
 
                 /* передвижка на следующие полгода населения с учётом рождений */
@@ -585,17 +594,17 @@ public class Main
 
     private void evalHalves_without_births(
             HalfYearEntries<HalfYearEntry> halves,
-            HalfYearEntry he_mid1941, 
+            HalfYearEntry he_mid1941,
             PopulationContext p_mid1941,
             HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
-        HalfYearEntry curr = he_mid1941; 
+        HalfYearEntry curr = he_mid1941;
         int year = he_mid1941.year;
         HalfYearSelector half = he_mid1941.halfyear;
         HalfYearEntry prev = he_mid1941;
 
         PopulationContext pxb = p_mid1941.clone();
-        
+
         /* продвигать с шагом по полгода до января 1946 */
         for (;;)
         {
@@ -617,6 +626,14 @@ public class Main
             /* определить таблицу смертности, с учётом падения детской смертности из-за введения антибиотиков */
             CombinedMortalityTable mt = peacetimeMortalityTables.getTable(current_year, current_half);
             curr.peace_mt = mt;
+
+            if (Util.False)
+            {
+                Util.out(String.format("Передвижка XB %d.%d => %d.%d таблица %s",
+                                       current_year, current_half.seq(1),
+                                       year, half.seq(1),
+                                       mt.comment()));
+            }
 
             /* иммиграция */
             PopulationContext immigration = null;
@@ -656,7 +673,7 @@ public class Main
             PopulationContext p_mid1941,
             HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
-        HalfYearEntry curr = he_mid1941.next; 
+        HalfYearEntry curr = he_mid1941.next;
         PopulationContext pwb = p_mid1941.clone();
 
         /* продвигать с шагом по полгода до января 1946 */
@@ -665,6 +682,11 @@ public class Main
             HalfYearEntry prev = curr.prev;
             int year = curr.year;
             HalfYearSelector half = curr.halfyear;
+
+            if (Util.False)
+            {
+                Util.out(String.format("Передвижка WB %s => %s таблица %s", prev.id(), curr.id(), prev.peace_mt.comment()));
+            }
 
             /* иммиграция */
             PopulationContext immigration = null;
@@ -685,11 +707,11 @@ public class Main
             Util.unused(extra_deaths_wb);
             curr.p_nonwar_with_births = pwb.clone();
             prev.expected_nonwar_births = f_wb.getObservedBirths();
-            
+
             curr = curr.next;
         }
     }
-    
+
     /* ================================================================================== */
 
     /* вычесть население Тувы из населения начала 1946 года */
