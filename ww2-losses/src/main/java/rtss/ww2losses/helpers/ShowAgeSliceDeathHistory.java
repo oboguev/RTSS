@@ -4,8 +4,8 @@ import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
-import rtss.ww2losses.HalfYearEntries;
-import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.struct.HalfYearEntries;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 /*
  * Печатать количество смертей в каждом полугодии для возрастных линий начинающихся с января 1941

@@ -8,10 +8,10 @@ import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
 import rtss.ww2losses.Constants;
-import rtss.ww2losses.HalfYearEntries;
-import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.model.ModelResults;
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.struct.HalfYearEntries;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 /*
  * Распечатать сводку данных для полугодий

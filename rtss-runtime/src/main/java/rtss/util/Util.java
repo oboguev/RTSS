@@ -692,6 +692,14 @@ public class Util
 
         return variance / y.length;
     }
+    
+    public static double[] repeat(int times, double v)
+    {
+        double[] y = new double[times];
+        for (int k = 0; k < times; k++)
+            y[k] = v;
+        return y;
+    }
 
     // Gini coefficient (a measure of concentration), ranges 0 to 1
     public static double gini(double[] y)

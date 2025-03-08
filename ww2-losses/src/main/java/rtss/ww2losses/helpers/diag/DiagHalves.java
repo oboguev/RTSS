@@ -2,8 +2,8 @@ package rtss.ww2losses.helpers.diag;
 
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
-import rtss.ww2losses.HalfYearEntries;
-import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.struct.HalfYearEntries;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 public class DiagHalves
 {

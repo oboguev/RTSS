@@ -7,9 +7,9 @@ import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
 import rtss.util.plot.PopulationChart;
-import rtss.ww2losses.HalfYearEntries;
-import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.struct.HalfYearEntries;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 public class ExportResults
 {

@@ -1,9 +1,9 @@
-package rtss.ww2losses;
+package rtss.ww2losses.struct;
 
 import rtss.data.ValueConstraint;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.struct.PopulationContext;
-import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
+import rtss.ww2losses.struct.HalfYearEntries.HalfYearSelector;
 
 public class HalfYearEntry
 {
@@ -38,6 +38,9 @@ public class HalfYearEntry
 
     /* ожидаемое в условиях мира число рождений за период (от начала до конца периода) */
     public double expected_nonwar_births;
+    
+    /* ожидаемое в условиях мира ежедневное число рождений за период (от начала до конца периода) */
+    public double[] expected_nonwar_births_byday;
 
     /** ============================ Иммиграция (в РСФСР) ============================ **/
 

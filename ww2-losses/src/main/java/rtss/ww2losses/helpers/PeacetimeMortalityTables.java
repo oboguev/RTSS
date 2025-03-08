@@ -18,8 +18,8 @@ import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
 import rtss.util.plot.ChartXYSplineAdvanced;
-import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
-import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.struct.HalfYearEntry;
+import rtss.ww2losses.struct.HalfYearEntries.HalfYearSelector;
 
 /*
  * Вычислить таблицу смертности для условий мирного времени с учётом антибиотиков

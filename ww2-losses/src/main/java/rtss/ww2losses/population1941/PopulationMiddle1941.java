@@ -7,11 +7,11 @@ import rtss.data.population.projection.ForwardPopulationT;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
-import rtss.ww2losses.HalfYearEntries.HalfYearSelector;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population194x.UtilBase_194x;
+import rtss.ww2losses.struct.HalfYearEntries.HalfYearSelector;
 
 public class PopulationMiddle1941 extends UtilBase_194x
 {
@@ -20,6 +20,7 @@ public class PopulationMiddle1941 extends UtilBase_194x
         public PopulationContext p_mid1941;
         public PopulationContext observed_deaths_byGenderAge;
         public double observed_births;
+        public double[] births_byday;
     }
     
     private final AreaParameters ap;
@@ -35,6 +36,8 @@ public class PopulationMiddle1941 extends UtilBase_194x
             final double asfr_calibration,
             final AgeSpecificFertilityRates asfrs) throws Exception
     {
+        PopulationForwardingResult1941 fr = new PopulationForwardingResult1941();
+
         final CombinedMortalityTable mt1941_1 = peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
         PopulationContext p = p_start1941.clone();
 
@@ -57,7 +60,17 @@ public class PopulationMiddle1941 extends UtilBase_194x
             PopulationContext pavg = p_start1941.avg(p);
             double nbirths = asfr_calibration * 0.5 * asfrs.births(pavg.toPopulation());
             final int ndays = fw.birthDays(0.5);
-            double[] births = WarHelpers.births(ndays, nbirths, nbirths, nbirths);
+            
+            /*
+             * Число рождений исходя из постоянства рождаемости и смертности должно возрастать,
+             * но на деле оно снижалось с 1940 года.
+             * 
+             * Не пытаясь реконструировать кривую хода числа рождений в первом полугодии 1941 года, 
+             * мы приближаем её плоской линией.
+             */
+            
+            // double[] births = WarHelpers.births(ndays, nbirths, nbirths, nbirths);
+            double[] births = Util.normalize(Util.repeat(ndays, 1), nbirths);
             double[] m_births = WarHelpers.male_births(births);
             double[] f_births = WarHelpers.female_births(births);
 
@@ -65,9 +78,10 @@ public class PopulationMiddle1941 extends UtilBase_194x
             fw.setBirthCount(m_births, f_births);
             p = p_start1941.clone();
             fw.forward(p, mt1941_1, 0.5);
+            
+            fr.births_byday = births;
         }
 
-        PopulationForwardingResult1941 fr = new PopulationForwardingResult1941();
         fr.p_mid1941 = p;
         fr.observed_deaths_byGenderAge = fw.deathsByGenderAge();
         fr.observed_births = fw.getObservedBirths();

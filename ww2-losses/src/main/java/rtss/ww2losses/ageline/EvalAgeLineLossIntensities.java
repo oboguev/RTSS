@@ -3,9 +3,9 @@ package rtss.ww2losses.ageline;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
-import rtss.ww2losses.HalfYearEntries;
-import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
+import rtss.ww2losses.struct.HalfYearEntries;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 

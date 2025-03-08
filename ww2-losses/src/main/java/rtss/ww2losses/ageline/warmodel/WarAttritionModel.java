@@ -4,7 +4,7 @@ import rtss.data.selectors.Gender;
 import rtss.math.interpolate.LinearInterpolator;
 import rtss.util.Util;
 import rtss.ww2losses.Constants;
-import rtss.ww2losses.HalfYearEntry;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 

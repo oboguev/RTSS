@@ -2,9 +2,9 @@ package rtss.ww2losses.ageline;
 
 import rtss.data.selectors.Gender;
 import rtss.util.Util;
-import rtss.ww2losses.HalfYearEntries;
-import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.model.Automation;
+import rtss.ww2losses.struct.HalfYearEntries;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 /*
  * Найти величину loss_intensity, при которой проводка возрастной линии от середины 1941 года

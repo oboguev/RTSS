@@ -1,7 +1,7 @@
 package rtss.ww2losses.ageline;
 
-import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.Main.Phase;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 

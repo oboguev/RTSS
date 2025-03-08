@@ -1,8 +1,8 @@
 package rtss.ww2losses.helpers.diag;
 
-import rtss.ww2losses.HalfYearEntries;
-import rtss.ww2losses.HalfYearEntry;
 import rtss.ww2losses.params.AreaParameters;
+import rtss.ww2losses.struct.HalfYearEntries;
+import rtss.ww2losses.struct.HalfYearEntry;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 
