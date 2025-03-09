@@ -18,6 +18,7 @@ import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.ChartXY;
 import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.ageline.AgeLineFactorIntensities;
 import rtss.ww2losses.ageline.EvalAgeLineLossIntensities;
@@ -349,7 +350,8 @@ public class Main
              * Предварительный расчёт без учёта иммиграции.
              * Вычисляет иммиграцию.
              */
-            stage_1(Phase.PRELIMINARY, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, births_1941_1st_halfyear_byday, p_mid1941, null);
+            stage_1(Phase.PRELIMINARY, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, births_1941_1st_halfyear_byday, p_mid1941,
+                    null);
 
             /*
              * Перерасчёт с учётом иммиграции.
@@ -357,7 +359,8 @@ public class Main
             HalfYearEntries<HalfYearEntry> immigration_halves = halves;
             halves = null;
 
-            stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, births_1941_1st_halfyear_byday, p_mid1941, immigration_halves);
+            stage_1(Phase.ACTUAL, p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, births_1941_1st_halfyear_byday, p_mid1941,
+                    immigration_halves);
 
             /*
              * Проверить, что новый расчёт иммиграции не отличается от начального.
@@ -429,7 +432,7 @@ public class Main
             PopulationContext p_start1941,
             PopulationContext deaths_1941_1st_halfyear,
             double births_1941_1st_halfyear,
-            double[] births_1941_1st_halfyear_byday, 
+            double[] births_1941_1st_halfyear_byday,
             PopulationContext p_mid1941,
             HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
@@ -437,7 +440,8 @@ public class Main
         PrintAgeLine.setAreaPhase(area, phase, p1946_actual);
 
         /* передвижка по полугодиям для мирных условий */
-        halves = evalHalves(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, births_1941_1st_halfyear_byday, p_mid1941, immigration_halves);
+        halves = evalHalves(p_start1941, deaths_1941_1st_halfyear, births_1941_1st_halfyear, births_1941_1st_halfyear_byday, p_mid1941,
+                            immigration_halves);
 
         if (Util.False)
         {
@@ -468,7 +472,7 @@ public class Main
             PopulationContext p_start1941,
             PopulationContext deaths_1941_1st_halfyear,
             double births_1941_1st_halfyear,
-            double[] births_1941_1st_halfyear_byday, 
+            double[] births_1941_1st_halfyear_byday,
             PopulationContext p_mid1941,
             HalfYearEntries<HalfYearEntry> immigration_halves) throws Exception
     {
@@ -787,6 +791,23 @@ public class Main
             PopulationChart.display("Население " + area + " 1946 actual vs. expected w/o births",
                                     p1946_actual, "actual",
                                     p1946_expected_without_births, "expected");
+        }
+
+        /* =================================================== */
+
+        if (Util.True && area == Area.USSR)
+        {
+            // ###
+            CombinedMortalityTable mt = this.peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
+            double[] lx = this.peacetimeMortalityTables.mt2lx(1941, HalfYearSelector.FirstHalfYear, mt, Locality.TOTAL, Gender.MALE);
+            ChartXY.display("Кривая lx для 1941.1 MALE", lx);
+            
+            // ###
+            for (HalfYearEntry he : halves)
+            {
+                if (he.year <= 1942)
+                    PopulationChart.display("Население " + area + " " + he.id(), he.p_nonwar_without_births, "1");
+            }
         }
 
         /* =================================================== */
