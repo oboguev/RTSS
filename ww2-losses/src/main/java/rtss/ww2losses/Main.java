@@ -781,7 +781,13 @@ public class Main
         if (Util.differ(v_sum_deaths - v_sum_immigration, v, 0.0001))
             Util.err("Несовпадение числа смертей");
 
-        if (Util.False && area == Area.USSR)
+        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
+        PopulationContext deficit_wb_raw = p1946_expected_with_births.sub(p1946_actual, ValueConstraint.NONE);
+        PopulationContext deficit_wb_adjusted = null;
+
+        /* =================================================== */
+
+        if (Util.True && area == Area.USSR)
         {
             new DiagHelper(ap, halves).showEarlyAges();
         }
@@ -793,28 +799,25 @@ public class Main
                                     p1946_expected_without_births, "expected");
         }
 
-        /* =================================================== */
-
-        if (Util.True && area == Area.USSR)
+        if (Util.False && area == Area.USSR)
         {
-            // ###
             CombinedMortalityTable mt = this.peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
             double[] lx = this.peacetimeMortalityTables.mt2lx(1941, HalfYearSelector.FirstHalfYear, mt, Locality.TOTAL, Gender.MALE);
             ChartXY.display("Кривая lx для 1941.1 MALE", lx);
             
-            // ###
+            int hydays = years2days(0.5);
+            double[] survival = DiagHelper.lx2survival(lx, hydays);
+            ChartXY.display("Кривая survival для 1941.1 MALE", survival);
+            
             for (HalfYearEntry he : halves)
             {
-                if (he.year <= 1942)
-                    PopulationChart.display("Население " + area + " " + he.id(), he.p_nonwar_without_births, "1");
+                if (he.index() <= 2)
+                    PopulationChart.display("Население " + area + " " + he.id() + " (без рождений после середины 1941) ", he.p_nonwar_without_births, "1");
             }
+            
+            double[] p = halves.get(1941, HalfYearSelector.FirstHalfYear).p_nonwar_without_births.asArray(Locality.TOTAL, Gender.MALE);
+            DiagHelper.viewProjection(p, survival, hydays);
         }
-
-        /* =================================================== */
-
-        PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
-        PopulationContext deficit_wb_raw = p1946_expected_with_births.sub(p1946_actual, ValueConstraint.NONE);
-        PopulationContext deficit_wb_adjusted = null;
 
         if (Util.False)
         {
@@ -830,6 +833,8 @@ public class Main
                     .show("дефицит", deficit.moveDown(5))
                     .display();
         }
+
+        /* =================================================== */
 
         v = p1946_expected_with_births.sum();
         v -= p1946_actual.sum();
