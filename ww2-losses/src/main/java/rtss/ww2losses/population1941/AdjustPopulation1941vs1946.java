@@ -21,7 +21,7 @@ import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.model.Automation;
 import rtss.ww2losses.params.AreaParameters;
 // import rtss.ww2losses.population1941.math.RefineSeries;
-import rtss.ww2losses.population1941.math.RefineSeriesX;
+import rtss.ww2losses.population1941.math.RefineSeries;
 
 /* 
  * Перераспределить население на начало 1941 года внутри 5-летних групп аггреграции
@@ -112,7 +112,7 @@ public class AdjustPopulation1941vs1946
 
             // redistribute the excess
             boolean strict = !Automation.isAutomated();
-            RefineSeriesX rs = new RefineSeriesX();
+            RefineSeries rs = new RefineSeries();
             rs.sigma = 10.0;
             rs.gaussianKernelWindow = 50;
             rs.minRelativeLevel = 0.3;
@@ -266,7 +266,7 @@ public class AdjustPopulation1941vs1946
 
     /* =============================================================================================== */
 
-    private boolean checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, boolean strict, Bin[] bins)
+    private boolean checkCanAdjust(RefineSeries rs, Gender gender, double[] a, double[] minValues, boolean strict, Bin[] bins)
     {
         for (Bin bin : bins)
         {
@@ -277,7 +277,7 @@ public class AdjustPopulation1941vs1946
         return true;
     }
 
-    private boolean checkCanAdjust(RefineSeriesX rs, Gender gender, double[] a, double[] minValues, boolean strict, Bin bin)
+    private boolean checkCanAdjust(RefineSeries rs, Gender gender, double[] a, double[] minValues, boolean strict, Bin bin)
     {
         int nd1 = bin.age_x1;
         int nd2 = bin.age_x2;
