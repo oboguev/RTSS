@@ -124,4 +124,21 @@ public class SmoothBirths
         
         Util.assertion(nd == births.length);
     }
+
+    public void to_actual(HalfYearEntries<HalfYearEntry> halves)
+    {
+        int nd = 0;
+
+        for (HalfYearEntry he : halves)
+        {
+            if (he.next == null)
+                break;
+            
+            he.actual_births_byday = Util.splice(births, nd, nd + ndays - 1);
+
+            nd += ndays;
+        }
+        
+        Util.assertion(nd == births.length);
+    }
 }

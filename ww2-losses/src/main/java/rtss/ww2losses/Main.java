@@ -1185,7 +1185,7 @@ public class Main
             he2.actual_births += delta;
         }
 
-        new SmoothBirths().init_actual(ap, halves).calc();
+        new SmoothBirths().init_actual(ap, halves).calc().to_actual(halves);
     }
 
     /* ======================================================================================================= */
@@ -1210,11 +1210,18 @@ public class Main
             int ndays = fw.birthDays(0.5);
 
             // добавить фактические рождения, распределив их по дням
-            // ###
-            double nb1 = he.prev.actual_births;
-            double nb2 = he.actual_births;
-            double nb3 = (he.next != null) ? he.next.actual_births : nb2;
-            double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            double[] births = null;
+            if (Util.False)
+            {
+                double nb1 = he.prev.actual_births;
+                double nb2 = he.actual_births;
+                double nb3 = (he.next != null) ? he.next.actual_births : nb2;
+                births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            }
+            else
+            {
+                births = he.actual_births_byday;
+            }
             double[] m_births = WarHelpers.male_births(births);
             double[] f_births = WarHelpers.female_births(births);
             fw.setBirthCount(m_births, f_births);
@@ -1292,11 +1299,18 @@ public class Main
             int ndays = fw.birthDays(0.5);
 
             // добавить фактические рождения, распределив их по дням
-            double nb1 = he.prev.actual_births;
-            double nb2 = he.actual_births;
-            double nb3 = (he.next != null) ? he.next.actual_births : nb2;
-            // ###
-            double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            double[] births = null;
+            if (Util.False)
+            {
+                double nb1 = he.prev.actual_births;
+                double nb2 = he.actual_births;
+                double nb3 = (he.next != null) ? he.next.actual_births : nb2;
+                births = WarHelpers.births(ndays, nb1, nb2, nb3);
+            }
+            else
+            {
+                births = he.actual_births_byday;
+            }
             double[] m_births = WarHelpers.male_births(births);
             double[] f_births = WarHelpers.female_births(births);
             fw.setBirthCount(m_births, f_births);
