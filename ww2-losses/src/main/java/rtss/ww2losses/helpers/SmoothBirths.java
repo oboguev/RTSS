@@ -24,6 +24,7 @@ public class SmoothBirths
     private AreaParameters ap;
     private List<Bin> bins;
     private double[] births_1941_1st_halfyear;
+    private double[] births;
 
     public SmoothBirths init_nonwar(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves) throws Exception
     {
@@ -71,7 +72,7 @@ public class SmoothBirths
         return this;
     }
 
-    public void calc() throws Exception
+    public SmoothBirths calc() throws Exception
     {
         Bin[] abins = Bins.bins(bins);
         double[] averages = Bins.midpoint_y(abins);
@@ -84,21 +85,43 @@ public class SmoothBirths
 
         abins[0].avg = averages[0] = Util.average(births_1941_1st_halfyear);
 
-        double[] births = DisaggregateVariableWidthSeriesWithStartValues.disaggregate(averages,
-                                                                              intervalWidths,
-                                                                              maxIterations,
-                                                                              smoothingSigma,
-                                                                              positivityThreshold,
-                                                                              maxConvergenceDifference,
-                                                                              births_1941_1st_halfyear);
+        births = DisaggregateVariableWidthSeriesWithStartValues.disaggregate(averages,
+                                                                             intervalWidths,
+                                                                             maxIterations,
+                                                                             smoothingSigma,
+                                                                             positivityThreshold,
+                                                                             maxConvergenceDifference,
+                                                                             births_1941_1st_halfyear);
 
         if (!Util.isNonNegative(births))
             throw new Exception("Error calculating curve (negative value)");
 
         CurveVerifier.validate_means(births, abins);
 
-        new ChartXY("Рождения " + ap.area, "x", "y")
-                .addSeries("b1", births)
-                .display();
+        if (Util.False)
+        {
+            new ChartXY("Рождения " + ap.area, "x", "y")
+                    .addSeries("b1", births)
+                    .display();
+        }
+        
+        return this;
+    }
+    
+    public void to_nonwar(HalfYearEntries<HalfYearEntry> halves)
+    {
+        int nd = 0;
+
+        for (HalfYearEntry he : halves)
+        {
+            if (he.next == null)
+                break;
+            
+            he.expected_nonwar_births_byday = Util.splice(births, nd, nd + ndays - 1);
+
+            nd += ndays;
+        }
+        
+        Util.assertion(nd == births.length);
     }
 }

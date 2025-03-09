@@ -507,7 +507,10 @@ public class Main
         evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
 
         /* сгладить число рождений по времени, сделав непрерывным */
-        new SmoothBirths().init_nonwar(ap, halves).calc();
+        new SmoothBirths().init_nonwar(ap, halves).calc().to_nonwar(halves);
+
+        /* остальные полугодия: с рождениями, конечный расчёт их числа */
+        evalHalves_with_births(halves, curr, p_mid1941, immigration_halves);
 
         /*
          * Дополнительные данные для полугодий
@@ -632,7 +635,16 @@ public class Main
 
             /* передвижка на следующие полгода населения с учётом рождений */
             ForwardPopulationT f_wb = new ForwardPopulationT();
-            f_wb.setBirthRateTotal(ap.CBR_1940);
+            if (prev.expected_nonwar_births_byday != null)
+            {
+                double[] m_births = WarHelpers.male_births(prev.expected_nonwar_births_byday);
+                double[] f_births = WarHelpers.female_births(prev.expected_nonwar_births_byday);
+                f_wb.setBirthCount(m_births, f_births);
+            }
+            else
+            {
+                f_wb.setBirthRateTotal(ap.CBR_1940);
+            }
             f_wb.forward(pwb, prev.peace_mt, 0.5);
             if (immigration != null)
                 pwb = pwb.add(immigration, ValueConstraint.NON_NEGATIVE);
@@ -1198,6 +1210,7 @@ public class Main
             int ndays = fw.birthDays(0.5);
 
             // добавить фактические рождения, распределив их по дням
+            // ###
             double nb1 = he.prev.actual_births;
             double nb2 = he.actual_births;
             double nb3 = (he.next != null) ? he.next.actual_births : nb2;
@@ -1282,6 +1295,7 @@ public class Main
             double nb1 = he.prev.actual_births;
             double nb2 = he.actual_births;
             double nb3 = (he.next != null) ? he.next.actual_births : nb2;
+            // ###
             double[] births = WarHelpers.births(ndays, nb1, nb2, nb3);
             double[] m_births = WarHelpers.male_births(births);
             double[] f_births = WarHelpers.female_births(births);

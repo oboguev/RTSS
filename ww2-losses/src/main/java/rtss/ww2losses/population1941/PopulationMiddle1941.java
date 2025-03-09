@@ -68,8 +68,6 @@ public class PopulationMiddle1941 extends UtilBase_194x
              * Не пытаясь реконструировать кривую хода числа рождений в первом полугодии 1941 года, 
              * мы приближаем её плоской линией.
              */
-            
-            // double[] births = WarHelpers.births(ndays, nbirths, nbirths, nbirths);
             double[] births = Util.normalize(Util.repeat(ndays, 1), nbirths);
             double[] m_births = WarHelpers.male_births(births);
             double[] f_births = WarHelpers.female_births(births);
