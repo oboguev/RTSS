@@ -6,10 +6,13 @@ import java.util.List;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
 import rtss.data.curves.TargetResolution;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve.InterpolationOptions;
 import rtss.data.selectors.Gender;
+import rtss.math.interpolate.disaggregate.csasra.DisaggregateVariableWidthSeries;
+import rtss.math.interpolate.disaggregate.csasra.DisaggregateVariableWidthSeriesWithStartValues;
 import rtss.util.Util;
 import rtss.util.plot.ChartXY;
 import rtss.ww2losses.params.AreaParameters;
@@ -69,6 +72,8 @@ public class SmoothBirths
             nd += ndays;
         }
 
+        births_1941_1st_halfyear = halves.get(1941, HalfYearSelector.FirstHalfYear).expected_nonwar_births_byday;
+
         return this;
     }
 
@@ -87,14 +92,46 @@ public class SmoothBirths
             Util.out(String.format("f[%d] = %.3f", k, births[k]));
         }
 
-        double[] births2 = smoothData(births, nd1, nd2, 50.0, 300);
+        double[] births2 = smoothData(births, nd1, nd2, 20.0, 300);
+        // double[] births3 = interpolateAndAdjust(births, nd1, nd2, Util.sum_range(births, nd1, nd2));
+
+        double[] births3 = null;
+        if (Util.True)
+        {
+            Bin[] abins = Bins.bins(bins);
+            final int ppy = 1;
+            double[] averages = Bins.midpoint_y(abins);
+
+            int[] intervalWidths = Bins.widths(abins);
+            int maxIterations = 5000;
+            double positivityThreshold = 1e-6;
+            double maxConvergenceDifference = 1e-3;
+
+            double smoothingSigma = 10.0;
+            
+            abins[0].avg = averages[0] = Util.average(births_1941_1st_halfyear);
+
+            births3 = DisaggregateVariableWidthSeriesWithStartValues.disaggregate(averages,
+                                                                                  intervalWidths,
+                                                                                  maxIterations,
+                                                                                  smoothingSigma,
+                                                                                  positivityThreshold,
+                                                                                  maxConvergenceDifference,
+                                                                                  births_1941_1st_halfyear);
+
+            if (!Util.isNonNegative(births3 ))
+                throw new Exception("Error calculating curve (negative value)");
+
+            CurveVerifier.validate_means(births3, abins);
+        }
 
         // ChartXY.display("Рождения " + ap.area, births);
         // ###
 
         new ChartXY("Рождения " + ap.area, "x", "y")
                 .addSeries("b1", births)
-                .addSeries("b2", births2)
+                // .addSeries("b2", births2)
+                .addSeries("b3", births3)
                 .display();
     }
 
@@ -223,5 +260,106 @@ public class SmoothBirths
                 smoothedValues[i] += correction;
             }
         }
+    }
+
+    /* ================================================================================================= */
+
+    public static double[] interpolateAndAdjust(double[] f, int x1, int x2, double xsum)
+    {
+        int n = f.length;
+        double[] f2 = Arrays.copyOf(f, n); // Clone original array
+
+        double x1Val = f[x1 - 1]; // Boundary value at x1
+        double x2Val = f[x2 + 1]; // Boundary value at x2
+
+        // Approximate derivatives using finite differences
+        double d1 = (f[x1 - 1] - f[x1 - 2]);
+        double d2 = (f[x2 + 1] - f[x2]);
+
+        // Solve for cubic polynomial: f(x) = ax^3 + bx^2 + cx + d
+        double[][] A = {
+                         { Math.pow(x1, 3), Math.pow(x1, 2), x1, 1 },
+                         { Math.pow(x2, 3), Math.pow(x2, 2), x2, 1 },
+                         { 3 * Math.pow(x1, 2), 2 * x1, 1, 0 },
+                         { 3 * Math.pow(x2, 2), 2 * x2, 1, 0 }
+        };
+        double[] B = { x1Val, x2Val, d1, d2 };
+        double[] coeffs = solveLinearSystem(A, B); // Solve for [a, b, c, d]
+
+        // Compute interpolated values for the missing region
+        double interpolatedSum = 0;
+        double[] interpolatedValues = new double[x2 - x1 - 1]; // Only inside points
+
+        for (int i = 0; i < interpolatedValues.length; i++)
+        {
+            int x = x1 + 1 + i;
+            interpolatedValues[i] = coeffs[0] * Math.pow(x, 3) + coeffs[1] * Math.pow(x, 2) + coeffs[2] * x + coeffs[3];
+            interpolatedSum += interpolatedValues[i];
+        }
+
+        // Compute necessary adjustment (excluding f(x1) and f(x2))
+        double requiredInternalSum = xsum - (x1Val + x2Val);
+        double scale = requiredInternalSum / interpolatedSum;
+
+        // Apply scaling only to internal points (x1+1 to x2-1)
+        for (int i = 0; i < interpolatedValues.length; i++)
+        {
+            f2[x1 + 1 + i] = interpolatedValues[i] * scale;
+        }
+
+        return f2;
+    }
+
+    // Solve a system of linear equations Ax = B using Gaussian elimination
+    private static double[] solveLinearSystem(double[][] A, double[] B)
+    {
+        int n = A.length;
+        double[] X = new double[n];
+
+        for (int i = 0; i < n; i++)
+        {
+            // Find pivot row
+            int maxRow = i;
+            for (int k = i + 1; k < n; k++)
+            {
+                if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i]))
+                {
+                    maxRow = k;
+                }
+            }
+
+            // Swap rows
+            double[] temp = A[i];
+            A[i] = A[maxRow];
+            A[maxRow] = temp;
+
+            double tempB = B[i];
+            B[i] = B[maxRow];
+            B[maxRow] = tempB;
+
+            // Normalize row
+            for (int k = i + 1; k < n; k++)
+            {
+                double factor = A[k][i] / A[i][i];
+                B[k] -= factor * B[i];
+                for (int j = i; j < n; j++)
+                {
+                    A[k][j] -= factor * A[i][j];
+                }
+            }
+        }
+
+        // Back-substitution
+        for (int i = n - 1; i >= 0; i--)
+        {
+            X[i] = B[i];
+            for (int j = i + 1; j < n; j++)
+            {
+                X[i] -= A[i][j] * X[j];
+            }
+            X[i] /= A[i][i];
+        }
+
+        return X;
     }
 }

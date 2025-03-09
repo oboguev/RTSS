@@ -1173,7 +1173,7 @@ public class Main
             he2.actual_births += delta;
         }
 
-        // ### new SmoothBirths().init_actual(ap, halves).calc();
+        new SmoothBirths().init_actual(ap, halves).calc();
     }
 
     /* ======================================================================================================= */

@@ -539,11 +539,11 @@ public class Util
         return yy;
     }
 
-    // insert y[] into yy[x ... x + yy.length - 1]
-    public static void insert(double[] yy, final double[] y, int x)
+    // insert src[] into dst[x ... x + yy.length - 1]
+    public static void insert(double[] dst, final double[] src, int x)
     {
-        for (int k = 0; k < y.length; k++)
-            yy[x + k] = y[k];
+        for (int k = 0; k < src.length; k++)
+            dst[x + k] = src[k];
     }
 
     // clone array of doubles
