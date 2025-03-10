@@ -18,7 +18,7 @@ public class CurveUtil
             throw new IllegalArgumentException();
         return ppy;
     }
-    
+
     /*
      * Get bin corresponding to x-point
      */
@@ -89,6 +89,81 @@ public class CurveUtil
     }
 
     /*
+     * Distort the curve to match the sum
+     */
+    public static double[] distort_matchsum(final double[] y, double ymin, double ymax, double targetSum) throws Exception
+    {
+        double[] v = y.clone();
+        double a1, a2;
+
+        if (Util.sum(y) < targetSum)
+        {
+            // keep decreasing a (and increasing sum)
+            double a = 1.0;
+
+            while (Util.sum(v) < targetSum)
+            {
+                a *= 0.7;
+                if (a < 1.0 / 200)
+                    throw new Exception("Unable distort the curve: a is out of range");
+                v = distort(y, ymin, ymax, a);
+            }
+            
+            a1 = a;
+            a2 = 1.0;
+        }
+        else if (Util.sum(y) > targetSum)
+        {
+            // keep increasing a (and decreasing sum)
+            double a = 1.0;
+
+            while (Util.sum(v) > targetSum)
+            {
+                a *= 1.5;
+                if (a >= 200)
+                    throw new Exception("Unable distort the curve: a is out of range");
+                v = distort(y, ymin, ymax, a);
+            }
+            
+            a1 = 1.0;
+            a2 = a;
+        }
+        else
+        {
+            return y.clone();
+        }
+        
+        for (;;)
+        {
+            double a = (a1 + a2) / 2;
+            
+            v = distort(y, ymin, ymax, a);
+            double vsum = Util.sum(v);
+            
+            if (Util.same(vsum, targetSum) && Math.abs(vsum - targetSum) < 0.5)
+                return v;
+            
+            if (Util.same(a1, a2))
+                throw new Exception("Unable distort the curve: out of cycles");
+            
+            if (vsum < targetSum)
+            {
+                // keep decreasing a (and increasing sum)
+                a2 = a;
+            }
+            else if (vsum > targetSum)
+            {
+                // keep increasing a (and decreasing sum)
+                a1 = a;
+            }
+            else
+            {
+                return v;
+            }
+        }
+    }
+
+    /*
      * Distort array values: y -> ymin + (ymax - ymin) * F((y - ymin)/(ymax - ymin), a).
      * Original array is unchanged, a modified copy is returned.
      * 
@@ -97,6 +172,8 @@ public class CurveUtil
      */
     public static double[] distort(final double[] y, double ymin, double ymax, double a) throws Exception
     {
+        Util.assertion(ymax >= ymin);
+
         if (ymin == ymax)
         {
             return y.clone();
@@ -160,6 +237,17 @@ public class CurveUtil
         return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
     }
 
+    public static double[] fill_linear(int x1, double y1, int x2, double y2) throws Exception
+    {
+        Util.assertion(x2 > x1 || x2 == x1 && y2 == y1);
+        double[] v = new double[x2 - x1 + 1];
+
+        for (int k = 0; k < v.length; k++)
+            v[k] = linear_interpol(x1 + k, x1, y1, x2, y2);
+
+        return v;
+    }
+
     public static void exportCurveSegmentToClipboard(final double[] curve, int year1, int year2, int ppy) throws Exception
     {
         int x1 = year1 * ppy;
@@ -176,7 +264,7 @@ public class CurveUtil
 
         Clipboard.put(sb.toString());
     }
-    
+
     /*
      * If bins are not U-shaped, throw an exception.
      * If bins are U-shaped, return trends for all segments.
@@ -206,7 +294,7 @@ public class CurveUtil
                 minBin2 = bin;
             }
         }
-        
+
         CurveSegmentTrend[] trends = new CurveSegmentTrend[bins.length];
         for (Bin bin : bins)
         {
@@ -221,7 +309,7 @@ public class CurveUtil
             else
                 trends[bin.index] = CurveSegmentTrend.UP;
         }
-        
+
         return trends;
     }
 }

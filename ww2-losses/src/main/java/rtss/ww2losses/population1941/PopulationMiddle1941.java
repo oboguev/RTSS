@@ -1,17 +1,22 @@
 package rtss.ww2losses.population1941;
 
 import rtss.data.asfr.AgeSpecificFertilityRates;
+import rtss.data.curves.CurveUtil;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.projection.ForwardPopulationT;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Gender;
+import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.WarHelpers;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population194x.UtilBase_194x;
 import rtss.ww2losses.struct.HalfYearEntries.HalfYearSelector;
+
+import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 public class PopulationMiddle1941 extends UtilBase_194x
 {
@@ -80,12 +85,28 @@ public class PopulationMiddle1941 extends UtilBase_194x
             fr.births_byday = births;
         }
 
-        fr.p_mid1941 = p;
         fr.observed_deaths_byGenderAge = fw.deathsByGenderAge();
         fr.observed_births = fw.getObservedBirths();
         
-        fr.p_mid1941.clipLastDayAccumulation(fr.observed_deaths_byGenderAge);
         
+        /*
+         * Во втором полугодии 1941 года происходит склейка двух разнородных видов данных:
+         * распаковки (дезагрегации) для старших возрастов и начинающегося учёта рождений.
+         * 
+         * Их разнородность приводит к тому, что в точке перехода (возраст 0.5 лет результата)
+         * возникает разрыв, затем сказывающийся зубчатосьтью всех структур.
+         * 
+         * Устранить разрыв таким образом, чтобы сохранить сумму населения в возрасте 0-0.5 лет,
+         * его численность в возрасте 0 дней и непрерывность кривой на возрастном участке 0-0.5 лет. 
+         * 
+         */
+        
+        fixDiscontinuity(p, Gender.MALE);
+        fixDiscontinuity(p, Gender.FEMALE);
+        
+        fr.p_mid1941 = p;
+        fr.p_mid1941.clipLastDayAccumulation(fr.observed_deaths_byGenderAge);
+
         return fr;
     }
     
@@ -112,5 +133,21 @@ public class PopulationMiddle1941 extends UtilBase_194x
         }
         
         return p_mid1941;
+    }
+    
+    private void fixDiscontinuity(PopulationContext p, Gender gender) throws Exception
+    {
+        int hydays = years2days(0.5);
+        double[] a = p.asArray(Locality.TOTAL, gender);
+        
+        double[] v = CurveUtil.fill_linear(0, a[0], hydays - 1, a[hydays]);
+        double[] vd = CurveUtil.distort_matchsum(v, a[hydays], a[0], Util.sum_range(a, 0, hydays - 1));
+        
+        Util.checkSame(Util.sum(vd), Util.sum_range(a, 0, hydays - 1));
+        double[] ad = a.clone();
+        Util.insert(ad, vd, 0);
+        Util.checkSame(Util.sum(ad), Util.sum(a));
+        
+        p.fromArray(Locality.TOTAL, gender, ad);
     }
 }
