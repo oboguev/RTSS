@@ -10,8 +10,10 @@ import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.WarHelpers;
+import rtss.ww2losses.helpers.diag.DiagHelper;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.population194x.UtilBase_194x;
 import rtss.ww2losses.struct.HalfYearEntries.HalfYearSelector;
@@ -44,15 +46,17 @@ public class PopulationMiddle1941 extends UtilBase_194x
         PopulationForwardingResult1941 fr = new PopulationForwardingResult1941();
 
         final CombinedMortalityTable mt1941_1 = peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
-        PopulationContext p = p_start1941.clone();
+        PopulationContext p;
+        ForwardPopulationT fw;
 
         /*
          * Первая передвижка с начала 1941 до середины 1941 года с использованием CBR_1940.
          * Её назначение -- дать предварительную оценку населения в середине 1941 года,
          * которая затем будет использована для исчисления средней за полугодие численности женских фертильных групп.
          */
-        ForwardPopulationT fw = new ForwardPopulationT();
+        fw = new ForwardPopulationT();
         fw.setBirthRateTotal(ap.CBR_1940);
+        p = p_start1941.clone();
         fw.forward(p, mt1941_1, 0.5);
         // p = rescaleToADH(p, ap);
         
@@ -76,6 +80,9 @@ public class PopulationMiddle1941 extends UtilBase_194x
             double[] births = Util.normalize(Util.repeat(ndays, 1), nbirths);
             double[] m_births = WarHelpers.male_births(births);
             double[] f_births = WarHelpers.female_births(births);
+            
+            if (Util.False)
+                DiagHelper.viewProjection(p_start1941.clone(), peacetimeMortalityTables, Gender.MALE, ndays);
 
             fw = new ForwardPopulationT();
             fw.setBirthCount(m_births, f_births);
@@ -83,6 +90,9 @@ public class PopulationMiddle1941 extends UtilBase_194x
             fw.forward(p, mt1941_1, 0.5);
             
             fr.births_byday = births;
+
+            if (Util.False)
+                DiagHelper.view_mid1941(p, Gender.MALE);
         }
 
         fr.observed_deaths_byGenderAge = fw.deathsByGenderAge();
@@ -98,11 +108,26 @@ public class PopulationMiddle1941 extends UtilBase_194x
          * 
          * Устранить разрыв таким образом, чтобы сохранить сумму населения в возрасте 0-0.5 лет,
          * его численность в возрасте 0 дней и непрерывность кривой на возрастном участке 0-0.5 лет. 
-         * 
          */
+        if (Util.False)
+        {
+            fixDiscontinuity(p, Gender.MALE, fr);
+            fixDiscontinuity(p, Gender.FEMALE, fr);
+        }
         
-        fixDiscontinuity(p, Gender.MALE);
-        fixDiscontinuity(p, Gender.FEMALE);
+        if (Util.False)
+            DiagHelper.view_mid1941(p, Gender.MALE);
+
+        if (Util.False)
+        {
+            /* отобразить график населения на начало 1941 года */
+            PopulationChart.display("Население " + ap.area + " на начало 1941 года", p_start1941, "");
+            
+            /* отобразить график населения на середину 1941 года */
+            PopulationChart.display("Население " + ap.area + " на середину 1941 года", p, "");
+            
+            Util.noop();
+        }
         
         fr.p_mid1941 = p;
         fr.p_mid1941.clipLastDayAccumulation(fr.observed_deaths_byGenderAge);
@@ -135,19 +160,32 @@ public class PopulationMiddle1941 extends UtilBase_194x
         return p_mid1941;
     }
     
-    private void fixDiscontinuity(PopulationContext p, Gender gender) throws Exception
+    @SuppressWarnings("unused")
+    private void fixDiscontinuity(PopulationContext p, Gender gender, PopulationForwardingResult1941 fr) throws Exception
     {
-        int hydays = years2days(0.5);
+        int ndays_05 = years2days(0.5);
+        int ndays_15 = years2days(1.5);
+
         double[] a = p.asArray(Locality.TOTAL, gender);
         
-        double[] v = CurveUtil.fill_linear(0, a[0], hydays - 1, a[hydays]);
-        double[] vd = CurveUtil.distort_matchsum(v, a[hydays], a[0], Util.sum_range(a, 0, hydays - 1));
+        double[] v = CurveUtil.fill_linear(0, a[0], ndays_15 - 1, a[ndays_15]);
+        double[] vd = CurveUtil.distort_matchsum(v, a[ndays_15], a[0], Util.sum_range(a, 0, ndays_15 - 1));
         
-        Util.checkSame(Util.sum(vd), Util.sum_range(a, 0, hydays - 1));
+        Util.checkSame(Util.sum(vd), Util.sum_range(a, 0, ndays_15 - 1));
         double[] ad = a.clone();
         Util.insert(ad, vd, 0);
         Util.checkSame(Util.sum(ad), Util.sum(a));
         
         p.fromArray(Locality.TOTAL, gender, ad);
+        
+        // adjust observedDeaths
+        for (int nd = ndays_05; nd < ndays_15; nd++)
+        {
+            fr.observed_deaths_byGenderAge.addDay(Locality.TOTAL, gender, nd - ndays_05, a[nd] - ad[nd]);
+        }
+
+        double va = Util.sum_range(a, 0, ndays_05 - 1);
+        double vad = Util.sum_range(ad, 0, ndays_05 - 1);
+        fr.observed_deaths_byGenderAge.addDay(Locality.TOTAL, gender, 0, va - vad);
     }
 }

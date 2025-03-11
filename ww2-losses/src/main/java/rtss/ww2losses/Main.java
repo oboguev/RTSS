@@ -108,7 +108,7 @@ public class Main
      * Корректировать младенческую и раннедетскую смертность в таблицах смертности
      * 1943-1945 гг. с учётом эффекта антибиотиков 
      */
-    private boolean ApplyAntibiotics = Util.True;
+    private boolean ApplyAntibiotics = Util.False; // ################
 
     /*
      * Распечатывать диагностический вывод
@@ -317,11 +317,11 @@ public class Main
 
         if (Util.False)
         {
-            /* отобразить график населения на середину 1941 года */
+            /* отобразить график населения на начало 1941 года */
             PopulationChart.display("Население " + area + " на начало 1941 года",
                                     pe1941.loaded(), "загруженное",
                                     p_start1941_0, "промежуточное",
-                                    p_start1941, "конечное");
+                                    p_start1941, "конечное");            
         }
 
         if (Util.False)
@@ -787,9 +787,15 @@ public class Main
 
         /* =================================================== */
 
-        if (Util.True && area == Area.USSR)
+        if (Util.False && area == Area.USSR)
         {
             new DiagHelper(ap, halves).showEarlyAges();
+        }
+
+        if (Util.False && area == Area.USSR)
+        {
+            new DiagHelper(ap, halves).showPopulationContext("p_nonwar_with_births");
+            // new DiagHelper(ap, halves).showPopulationContext("p_nonwar_without_births");
         }
 
         if (Util.False)
@@ -804,17 +810,18 @@ public class Main
             CombinedMortalityTable mt = this.peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
             double[] lx = this.peacetimeMortalityTables.mt2lx(1941, HalfYearSelector.FirstHalfYear, mt, Locality.TOTAL, Gender.MALE);
             ChartXY.display("Кривая lx для 1941.1 MALE", lx);
-            
+
             int hydays = years2days(0.5);
             double[] survival = DiagHelper.lx2survival(lx, hydays);
             ChartXY.display("Кривая survival для 1941.1 MALE", survival);
-            
+
             for (HalfYearEntry he : halves)
             {
                 if (he.index() <= 2)
-                    PopulationChart.display("Население " + area + " " + he.id() + " (без рождений после середины 1941) ", he.p_nonwar_without_births, "1");
+                    PopulationChart.display("Население " + area + " " + he.id() + " (без рождений после середины 1941) ", he.p_nonwar_without_births,
+                                            "1");
             }
-            
+
             double[] p = halves.get(1941, HalfYearSelector.FirstHalfYear).p_nonwar_without_births.asArray(Locality.TOTAL, Gender.MALE);
             DiagHelper.viewProjection(p, survival, hydays);
         }

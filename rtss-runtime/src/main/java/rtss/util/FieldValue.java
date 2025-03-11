@@ -7,6 +7,20 @@ import java.lang.reflect.Field;
  */
 public class FieldValue
 {
+    public static Object getObject(Object o, String selector) throws Exception
+    {
+        String[] sa = selector.split("\\.");
+        
+        for (String s : sa)
+        {
+            Field field = o.getClass().getDeclaredField(s);    
+            field.setAccessible(true);
+            o = field.get(o);            
+        }
+
+        return o;
+    }
+
     public static Long getLong(Object o, String selector) throws Exception
     {
         String[] sa = selector.split("\\.");
