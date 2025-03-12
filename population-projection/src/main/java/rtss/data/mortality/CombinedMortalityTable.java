@@ -331,4 +331,14 @@ public class CombinedMortalityTable
     {
         return getSingleTable(locality, gender).daily_lx();
     }
+
+    public double[] daily_lx(final Locality locality, final Gender gender, int maxage) throws Exception
+    {
+        return getSingleTable(locality, gender).daily_lx(maxage);
+    }
+
+    public void attach_daily_lx(final Locality locality, final Gender gender, double[] dlx) throws Exception
+    {
+        getSingleTable(locality, gender).attach_daily_lx(dlx);
+    }
 }
