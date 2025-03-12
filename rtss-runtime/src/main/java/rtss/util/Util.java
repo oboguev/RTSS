@@ -645,6 +645,17 @@ public class Util
         return true;
     }
 
+    public static boolean isNegative(final double[] yy)
+    {
+        for (double y : yy)
+        {
+            if (y >= 0)
+                return false;
+        }
+
+        return true;
+    }
+
     public static boolean isMonotonicallyDecreasing(final double[] y, boolean strict)
     {
         if (y.length == 0)

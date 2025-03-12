@@ -138,7 +138,6 @@ public class PopulationContext
         cx.began = began;
         cx.hasRuralUrban = hasRuralUrban;
         cx.m = new LocalityGenderToDoubleArray(m);
-        cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
         cx.title = title;
         cx.yearHint = yearHint;
@@ -334,48 +333,13 @@ public class PopulationContext
 
     /* =============================================================================================== */
 
-    private Map<String, double[]> m_lx = new HashMap<>();
-
     /*
      * Вычислить подневное значение "lx" их годовых значений в таблице смертности
      */
     public double[] get_daily_lx(final CombinedMortalityTable mt, final Locality locality, final Gender gender) throws Exception
     {
-        String key = String.format("%s-%s-%s-%d", mt.tableId(), locality.name(), gender.name(), NDAYS);
-        double[] daily_lx = m_lx.get(key);
-
-        if (daily_lx == null)
-        {
-            double[] yearly_lx = mt.getSingleTable(locality, gender).lx();
-            /* значения после MAX_YEAR + 1 не слишком важны */
-            yearly_lx = Util.splice(yearly_lx, 0, Math.min(MAX_YEAR + 5, Population.MAX_AGE));
-
-            /*
-             * Провести дневную кривую так что
-             *       daily_lx[0]         = yearly_lx[0]
-             *       daily_lx[365]       = yearly_lx[1]
-             *       daily_lx[365 * 2]   = yearly_lx[2]
-             *       etc.
-             */
-            daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
-
-            /*
-             * Базовая проверка правильности
-             */
-            if (Util.differ(daily_lx[0], yearly_lx[0]) ||
-                Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
-                Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
-                Util.differ(daily_lx[365 * 3], yearly_lx[3]))
-            {
-                throw new Exception("Ошибка в построении daily_lx");
-            }
-
-            m_lx.put(key, daily_lx);
-        }
-
-        Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
-
-        return daily_lx;
+        /* значения после MAX_YEAR + 1 не слишком важны */
+        return mt.getSingleTable(locality, gender).daily_lx(Math.min(MAX_YEAR + 5, Population.MAX_AGE));
     }
 
     /* =============================================================================================== */
@@ -1317,7 +1281,6 @@ public class PopulationContext
         cx.valueConstraint = valueConstraint;
         cx.began = began;
         cx.hasRuralUrban = false;
-        cx.m_lx = new HashMap<String, double[]>(m_lx);
         cx.totalBirths = new HashMap<>(totalBirths);
         cx.title = title;
         cx.yearHint = yearHint;

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
+import rtss.data.population.struct.Population;
 import rtss.util.FastUUID;
 import rtss.util.Util;
 
@@ -15,7 +16,8 @@ public class SingleMortalityTable
 {
     private Map<Integer, MortalityInfo> m = new HashMap<>();
     private boolean sealed = false;
-    public static final int MAX_AGE = 100;
+    public static final int MAX_AGE = Population.MAX_AGE;
+    public static final int DAYS_PER_YEAR = 365;
     
     private SingleMortalityTable()
     {
@@ -452,12 +454,67 @@ public class SingleMortalityTable
 
     /*****************************************************************************************************/
     
+    private Map<Integer, double[]> maxage2daily_lx = new HashMap<>();
+    
     /*
-     * Построить кривую l(x) интерполированную по дням
+     * Построить кривую l(x) интерполированную по дням с длиной до возраста MAX_AGE включительно 
      */
     public double[] daily_lx() throws Exception
     {
-        double[] yearly_lx = lx();
+        double[] daily_lx = maxage2daily_lx.get(MAX_AGE);
+
+        if (daily_lx == null)
+        {
+            double[] yearly_lx = lx();
+
+            /*
+             * Провести дневную кривую так что
+             *       daily_lx[0]         = yearly_lx[0]
+             *       daily_lx[365]       = yearly_lx[1]
+             *       daily_lx[365 * 2]   = yearly_lx[2]
+             *       etc.
+             */
+            daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
+
+            /*
+             * Базовая проверка правильности
+             */
+            if (Util.differ(daily_lx[0], yearly_lx[0]) ||
+                Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
+                Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
+                Util.differ(daily_lx[365 * 3], yearly_lx[3]))
+            {
+                throw new Exception("Ошибка в построении daily_lx");
+            }
+
+            // может не спадать, если для какого-то года смертность (qx) нулевая, но это было бы невозможным
+            Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
+
+            maxage2daily_lx.put(MAX_AGE, daily_lx);
+        }
+        
+        return daily_lx;
+    }
+
+    /*
+     * Построить кривую l(x) интерполированную по дням с длиной до возраста maxage включительно 
+     */
+    public double[] daily_lx(int maxage) throws Exception
+    {
+        if (maxage == MAX_AGE)
+            return daily_lx();
+        
+        double[] daily_lx = maxage2daily_lx.get(maxage);
+        if (daily_lx != null)
+            return daily_lx;
+
+        daily_lx = maxage2daily_lx.get(MAX_AGE);
+        if (daily_lx != null)
+        {
+            daily_lx = Util.splice(daily_lx, 0, DAYS_PER_YEAR * (maxage + 1) - 1);
+            maxage2daily_lx.put(maxage, daily_lx);
+            return daily_lx;
+        }
 
         /*
          * Провести дневную кривую так что
@@ -466,7 +523,8 @@ public class SingleMortalityTable
          *       daily_lx[365 * 2]   = yearly_lx[2]
          *       etc.
          */
-        double[] daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
+        double[] yearly_lx = Util.splice(lx(), 0, maxage);
+        daily_lx = InterpolateYearlyToDailyAsValuePreservingMonotoneCurve.yearly2daily(yearly_lx);
 
         /*
          * Базовая проверка правильности
@@ -482,6 +540,7 @@ public class SingleMortalityTable
         // может не спадать, если для какого-то года смертность (qx) нулевая, но это было бы невозможным
         Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
 
+        maxage2daily_lx.put(maxage, daily_lx);
         return daily_lx;
     }
 }

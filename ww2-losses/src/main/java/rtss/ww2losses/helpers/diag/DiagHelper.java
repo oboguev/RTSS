@@ -8,6 +8,7 @@ import rtss.ww2losses.struct.HalfYearEntry;
 
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 
+import rtss.data.curves.SculptDailyLX;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Gender;
@@ -112,6 +113,8 @@ public class DiagHelper
 
         CombinedMortalityTable cmt = peacetimeMortalityTables.getTable(1941, HalfYearSelector.FirstHalfYear);
         double[] lx = peacetimeMortalityTables.mt2lx(1941, HalfYearSelector.FirstHalfYear, cmt, Locality.TOTAL, gender);
+        // viewLX(lx);
+        Clipboard.put(lx);
         double[] survival = lx2survival(lx, ndays);
         viewProjection(a, survival, ndays);
     }
@@ -125,6 +128,21 @@ public class DiagHelper
             sb.append(String.format("%d %.4f\n", nd, a[nd]));
         }
         Clipboard.put(sb.toString());
+        Util.noop();
+    }
+    
+    @SuppressWarnings("unused")
+    private static void viewLX(double[] lx) throws Exception
+    {
+        ChartXY chart = new ChartXY("lx", "days", "lx");
+        chart.addSeries("original", lx);
+        
+        chart.addSeries("0", SculptDailyLX.scultDailyLX(lx, 0));
+        chart.addSeries("1e-6", SculptDailyLX.scultDailyLX(lx, 1e-6));
+        chart.addSeries("1.2e-6", SculptDailyLX.scultDailyLX(lx, 1.2e-6));
+
+        chart.display();
+        
         Util.noop();
     }
 }
