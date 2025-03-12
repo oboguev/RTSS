@@ -456,6 +456,17 @@ public class SingleMortalityTable
     
     private Map<Integer, double[]> maxage2daily_lx = new HashMap<>();
     
+    public void attach_daily_lx(double[] dlx) throws Exception
+    {
+        maxage2daily_lx.clear();
+        if (0 != (dlx.length % DAYS_PER_YEAR))
+            throw new Exception("Invalid length");
+        int maxage = (dlx.length / DAYS_PER_YEAR) - 1;
+        if (maxage <= 0 || maxage > MAX_AGE)
+            throw new Exception("Invalid length");
+        maxage2daily_lx.put(maxage, dlx);
+    }
+
     /*
      * Построить кривую l(x) интерполированную по дням с длиной до возраста MAX_AGE включительно 
      */
