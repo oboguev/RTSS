@@ -1389,15 +1389,16 @@ public class Main
 
                 he.actual_warborn_deaths = fw.getObservedDeaths();
                 add(fw.deathsByGenderAge(), he.actual_deaths);
-                add(he.actual_peace_deaths_from_newborn, he.actual_peace_deaths);
 
-                if (Util.True)
+                if (Util.False)
                 {
                     /*
                      * Количество избыточных детских смертей в полугодии вычисляется как разница с числом смертей в этом полугодии
-                     * при детской смертности мирных условий и при начальном детском населени полугодия по непрерывной мирной продвижке 
-                     * с середины 1941 года. 
+                     * при детской смертности (в данном полугодии) мирных условий и при начальном детском населении полугодия 
+                     * по непрерывной мирной продвижке с середины 1941 года, т.е. при мирной убыли в предыдущих полугодиях. 
                      */
+                    add(he.actual_peace_deaths_from_newborn, he.actual_peace_deaths);
+                    
                     PopulationContext excess = fw.deathsByGenderAge().sub(he.actual_peace_deaths_from_newborn, ValueConstraint.NONE);
                     // контроль положительности delta раздельно по полам, сумме и возрастным значениям
                     validateDeathsForNewBirths(excess, he.id());
@@ -1407,12 +1408,15 @@ public class Main
                 {
                     /*
                      * Количество избыточных детских смертей в полугодии вычисляется как разница с числом смертей в этом полугодии
-                     * при детской смертности мирных условий и при начальном детском населени полугодия по военной продвижке. 
+                     * при детской смертности (в данном полугодии) мирных условий и при начальном детском населении полугодия 
+                     * по фактической военной продвижке, т.е. при фактической военной убыли в предыдущих полугодиях.
                      */
                     ForwardPopulationT fw_peace = new ForwardPopulationT();
                     fw_peace.setBirthCount(m_births, f_births);
                     fw_peace.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
                     fw_peace.forward(p0, he.peace_mt, 0.5);
+                    
+                    add(fw_peace.deathsByGenderAge(), he.actual_peace_deaths);
 
                     PopulationContext excess = fw.deathsByGenderAge().sub(fw_peace.deathsByGenderAge(), ValueConstraint.NONE);
                     // контроль положительности delta раздельно по полам, сумме и возрастным значениям
