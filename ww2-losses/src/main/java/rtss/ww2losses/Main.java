@@ -1360,7 +1360,13 @@ public class Main
             // PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier * imr_fy_multiplier(he));
             instructions.add(instruction);
             CombinedMortalityTable mt = PatchMortalityTable.patch(mt1940, instructions, "множитель смертности " + multiplier);
-            
+
+            /*
+             * If computed mt is less lethal than peace_mt, then use peace_mt
+             */
+            if (compareTablesLethality(mt, he.peace_mt) == -1)
+                mt = he.peace_mt;
+
             // fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.MIRROR_AGE);
             fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
             fw.forward(p, mt, 0.5);
@@ -1383,9 +1389,10 @@ public class Main
                 add(fw.deathsByGenderAge(), he.actual_deaths);
                 add(he.actual_peace_deaths_from_newborn, he.actual_peace_deaths);
 
-                PopulationContext delta = fw.deathsByGenderAge().sub(he.actual_peace_deaths_from_newborn, ValueConstraint.NONE);
-                // ### контроль отрицательности delta раздельно по полам, сумма и возрастные значения
-                add(delta, he.actual_excess_wartime_deaths);
+                PopulationContext excess = fw.deathsByGenderAge().sub(he.actual_peace_deaths_from_newborn, ValueConstraint.NONE);
+                // контроль положительности delta раздельно по полам, сумме и возрастным значениям
+                validateDeathsForNewBirths(excess, he.id());
+                add(excess, he.actual_excess_wartime_deaths);
             }
         }
 
@@ -1446,6 +1453,16 @@ public class Main
         }
     }
 
+    /*
+     * Контроль положительности избытка детских смертей по полам, сумме и возрастным значениям
+     *     excess = newborn deathsByGenderAge() - actual_peace_deaths_from_newborn
+     */
+    private void validateDeathsForNewBirths(PopulationContext excess, String heid)
+    {
+        // ###
+        Util.noop();
+    }
+
     private void check_actual_deaths(HalfYearEntry he) throws Exception
     {
         check_actual_deaths(he, Gender.MALE);
@@ -1462,7 +1479,7 @@ public class Main
             Util.assertion(Util.same(peace + excess_wartime, total));
         }
     }
-    
+
     /*
      * Check that t1 is less lethal in children's age than t2
      */
@@ -1472,7 +1489,7 @@ public class Main
         {
             double[] qx1 = t1.getSingleTable(Locality.TOTAL, gender).qx();
             double[] qx2 = t2.getSingleTable(Locality.TOTAL, gender).qx();
-            
+
             for (int age = 0; age <= 5; age++)
             {
                 if (qx1[age] <= qx2[age])
@@ -1481,12 +1498,49 @@ public class Main
                 }
                 else
                 {
-                    Util.err(String.format("Peacetime table is more lethal than wartime table: %s %s %s %d : %.1f vs %.1f", 
+                    Util.err(String.format("Peacetime table is more lethal than wartime table: %s %s %s %d : %.1f vs %.1f",
                                            area.name(), heid, gender.name(), age, qx1[age] * 1000, qx2[age] * 1000));
-                    // ###
                 }
             }
         }
+    }
+
+    /*
+     * If @t1 is less lethal for ages 0-5 than @t2, return -1.
+     * If @t1 is more lethal for ages 0-5 than @t2, return 1.
+     * If they are the same, return 0;
+     */
+    private int compareTablesLethality(CombinedMortalityTable t1, CombinedMortalityTable t2) throws Exception
+    {
+        int result = 0;
+
+        for (Gender gender : Gender.TwoGenders)
+        {
+            double[] qx1 = t1.getSingleTable(Locality.TOTAL, gender).qx();
+            double[] qx2 = t2.getSingleTable(Locality.TOTAL, gender).qx();
+
+            for (int age = 0; age <= 5; age++)
+            {
+                if (qx1[age] == qx2[age])
+                {
+                    // ignore
+                }
+                else if (qx1[age] < qx2[age])
+                {
+                    if (result == 1)
+                        throw new Exception("различие таблиц неоднородно");
+                    result = -1;
+                }
+                else // if (qx1[age] > qx2[age])
+                {
+                    if (result == -1)
+                        throw new Exception("различие таблиц неоднородно");
+                    result = 1;
+                }
+            }
+        }
+
+        return result;
     }
 
     /* ======================================================================================================= */
