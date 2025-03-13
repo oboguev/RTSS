@@ -2,9 +2,11 @@ package rtss.ww2losses.ageline;
 
 import rtss.data.population.projection.ForwardPopulation;
 import rtss.data.population.struct.PopulationContext;
+import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.ww2losses.Main.Phase;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.struct.HalfYearEntries;
@@ -19,6 +21,7 @@ import rtss.ww2losses.struct.HalfYearEntry;
 public class SteerAgeLine
 {
     private final AreaParameters ap;
+    private final Phase phase;
     private final HalfYearEntries<HalfYearEntry> halves;
     private final WarAttritionModel wam;
     private final double[] ac_immigration;
@@ -28,9 +31,10 @@ public class SteerAgeLine
      * @wam              = модель военных потерь
      * @ac_immigration   = распределение иммиграционной интенсивность по полугодиям   
      */
-    public SteerAgeLine(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, double[] ac_immigration)
+    public SteerAgeLine(AreaParameters ap, Phase phase, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, double[] ac_immigration)
     {
         this.ap = ap;
+        this.phase = phase;
         this.halves = halves;
         this.wam = wam;
         this.ac_immigration = ac_immigration;
@@ -66,7 +70,7 @@ public class SteerAgeLine
         {
             Util.assertion(immigration_intensity != null);
         }
-        
+
         Util.assertion(immigration_halves == null || immigration_intensity == null);
 
         Util.assertion(initial_population >= 0);
@@ -193,16 +197,26 @@ public class SteerAgeLine
             int nd1 = nd_age;
             int nd2 = nd1 + span;
             int ndm = (nd1 + nd2) / 2;
-            
+
             final double start_population = population;
 
             double peace_deaths = (population <= 0) ? 0 : population * deathRatio(he, gender, nd1, nd2);
 
             double excess_war_deaths = loss_intensity * wam.excessWarDeaths(gender, ndm, he, initial_population);
-            
-            if (excess_war_deaths < 0)
+
+            if (excess_war_deaths < 0 && phase == Phase.ACTUAL)
             {
-                // ###
+                double age1941_2 = initial_age_ndays / 365;
+
+                if (ap.area == Area.RSFSR && age1941_2 >= 82.0 && age1941_2 <= 91.0)
+                {
+                    // ignore
+                }
+                else
+                {
+                    Util.err(String.format("SteerActual: Negative excess war deaths %s %s, возраст в 1941.2 %.2f",
+                                           ap.area.name(), he.id(), age1941_2));
+                }
             }
 
             double immigration = 0;
@@ -229,8 +243,9 @@ public class SteerAgeLine
             he.actual_excess_wartime_deaths.addDay(Locality.TOTAL, gender, cap(nd1), excess_war_deaths);
             he.actual_deaths.addDay(Locality.TOTAL, gender, cap(nd1), peace_deaths + excess_war_deaths);
             he.immigration.addDay(Locality.TOTAL, gender, cap(nd1), immigration);
-            
-            PrintAgeLine.printSteerActual(gender, initial_age_ndays, he, nd1, nd2, start_population, population, peace_deaths, excess_war_deaths, immigration);
+
+            PrintAgeLine.printSteerActual(gender, initial_age_ndays, he, nd1, nd2, start_population, population, peace_deaths, excess_war_deaths,
+                                          immigration);
 
             nd_age += span;
         }

@@ -114,7 +114,7 @@ public class BacktrackPopulation
 
         // Util.assertion(nd_mid_1941_to_1946(initial_age_ndays) <= p1946_actual.MAX_DAY);
 
-        SteerAgeLine steer = new SteerAgeLine(ap, halves, wam, null);
+        SteerAgeLine steer = new SteerAgeLine(ap, null, halves, wam, null);
 
         double initial_population = 1.0;
         Double immigration_intensity = null;

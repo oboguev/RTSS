@@ -3,6 +3,7 @@ package rtss.ww2losses.ageline;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.ww2losses.Main.Phase;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.struct.HalfYearEntries;
@@ -18,18 +19,20 @@ import rtss.data.population.struct.PopulationContext;
 public class EvalAgeLineLossIntensities
 {
     private final AreaParameters ap;
+    private final Phase phase; 
     private final HalfYearEntries<HalfYearEntry> halves;
     private final WarAttritionModel wam; 
     private double[] ac_immigration;
 
-    public EvalAgeLineLossIntensities(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam)
+    public EvalAgeLineLossIntensities(AreaParameters ap, Phase phase, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam)
     {
-        this(ap, halves, wam, null);
+        this(ap, phase, halves, wam, null);
     }
 
-    public EvalAgeLineLossIntensities(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam , double[] ac_immigration)
+    public EvalAgeLineLossIntensities(AreaParameters ap, Phase phase, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam , double[] ac_immigration)
     {
         this.ap = ap;
+        this.phase = phase;
         this.halves = halves;
         this.wam = wam;
         this.ac_immigration = ac_immigration;
@@ -57,7 +60,7 @@ public class EvalAgeLineLossIntensities
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
-        SteerAgeLine steer = new SteerAgeLine(ap, halves, wam, null);
+        SteerAgeLine steer = new SteerAgeLine(ap, phase, halves, wam, null);
         EvalAgeLinelLossIntensity eval = new EvalAgeLinelLossIntensity(steer);
 
         int ndays = 9 * years2days(0.5);
@@ -105,7 +108,7 @@ public class EvalAgeLineLossIntensities
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
-        SteerAgeLine steer = new SteerAgeLine(ap, halves, wam, ac_immigration);
+        SteerAgeLine steer = new SteerAgeLine(ap, phase, halves, wam, ac_immigration);
         EvalAgeLinelLossIntensity eval = new EvalAgeLinelLossIntensity(steer);
 
         int ndays = 9 * years2days(0.5);
@@ -181,7 +184,7 @@ public class EvalAgeLineLossIntensities
         HalfYearEntry he1941_2 = halves.get("1941.2");
         PopulationContext p1941_2 = he1941_2.p_nonwar_without_births;
 
-        SteerAgeLine steer = new SteerAgeLine(ap, halves, wam, ac_immigration);
+        SteerAgeLine steer = new SteerAgeLine(ap, phase, halves, wam, ac_immigration);
         int ndays = 9 * years2days(0.5);
 
         double initial_population;

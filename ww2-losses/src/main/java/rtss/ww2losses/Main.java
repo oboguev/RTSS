@@ -970,7 +970,7 @@ public class Main
         WarAttritionModel wam = new WarAttritionModel(halves.get("1941.2").p_nonwar_with_births,
                                                       p1946_actual,
                                                       wamp);
-        EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(ap, halves, wam);
+        EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(ap, phase, halves, wam);
         AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual, immigration_halves);
 
         if (Util.False)
