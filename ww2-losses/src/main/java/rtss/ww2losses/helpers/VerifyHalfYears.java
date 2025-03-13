@@ -52,7 +52,7 @@ public class VerifyHalfYears
             same(he.actual_deaths.sum(Gender.MALE), he.actual_peace_deaths.sum(Gender.MALE) + he.actual_excess_wartime_deaths.sum(Gender.MALE));
             same(he.actual_deaths.sum(Gender.FEMALE), he.actual_peace_deaths.sum(Gender.FEMALE) + he.actual_excess_wartime_deaths.sum(Gender.FEMALE));
 
-            same(he.actual_peace_deaths_from_newborn.sum(), he.actual_warborn_deaths_baseline);
+            same(he.actual_peace_deaths_from_newborn.sum(), he.actual_warborn_deaths_baseline_v1);
         }
 
         if (print)

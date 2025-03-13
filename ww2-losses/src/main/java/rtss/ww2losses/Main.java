@@ -1273,7 +1273,7 @@ public class Main
 
             // число смертей от рождений при мирной смертности
             Util.assertion(Util.same(fw.getObservedDeaths(), fw.deathsByGenderAge().sum()));
-            he.actual_warborn_deaths_baseline = fw.getObservedDeaths();
+            he.actual_warborn_deaths_baseline_v1 = fw.getObservedDeaths();
             he.actual_peace_deaths_from_newborn = fw.deathsByGenderAge().clone();
         }
 
@@ -1321,7 +1321,7 @@ public class Main
 
         double excess = 0;
         for (HalfYearEntry he = halves.get("1941.2"); he.year != 1946; he = he.next)
-            excess += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline;
+            excess += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline();
         outk("Сверхсмертность рождённых во время войны, фактическая к началу 1946 года, тыс. чел.", excess);
     }
 
@@ -1416,6 +1416,8 @@ public class Main
                     fw_peace.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
                     fw_peace.forward(p0, he.peace_mt, 0.5);
                     
+                    he.actual_warborn_deaths_baseline_v2 = fw_peace.getObservedDeaths();
+                    
                     add(fw_peace.deathsByGenderAge(), he.actual_peace_deaths);
 
                     PopulationContext excess = fw.deathsByGenderAge().sub(fw_peace.deathsByGenderAge(), ValueConstraint.NONE);
@@ -1485,12 +1487,18 @@ public class Main
 
     /*
      * Контроль положительности избытка детских смертей по полам, сумме и возрастным значениям
-     *     excess = newborn deathsByGenderAge() - actual_peace_deaths_from_newborn
+     *     excess = newborn actual wartime deathsByGenderAge() - newborn peacetime deathsByGenderAge() 
      */
-    private void validateDeathsForNewBirths(PopulationContext excess, String heid)
+    private void validateDeathsForNewBirths(PopulationContext excess, String heid) throws Exception
     {
-        // ###
-        Util.noop();
+        for (Gender gender : Gender.TwoGenders)
+        {
+            for (int nd = 0; nd <= excess.MAX_DAY; nd++)
+            {
+                double v = excess.getDay(Locality.TOTAL, gender, nd);
+                Util.assertion(v >= 0);
+            }
+        }
     }
 
     private void check_actual_deaths(HalfYearEntry he) throws Exception

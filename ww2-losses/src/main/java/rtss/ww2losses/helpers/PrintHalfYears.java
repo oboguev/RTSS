@@ -68,8 +68,8 @@ public class PrintHalfYears
         Util.out("    р.ожид   = ожидаемое число рождений в условиях мира (за полугодие)");
         Util.out("    р.факт   = фактическое число рождений (за полугодие)");
         Util.out("    р.нехв   = дефицит рождений за полугодие, тыс. новорожденных");
-        Util.out("    фcр.мир  = число смертей (в данном полугодии) от фактических рождений c начала войны, ожидаемое при смертности мирного времени");
-        Util.out("    фcр      = фактическое число смертей (в данном полугодии) от фактических рождений с начала войны, при фактической военной смертности");
+        Util.out("    фср.мир  = число смертей (в данном полугодии) от фактических рождений c начала войны, ожидаемое при смертности мирного времени");
+        Util.out("    фср      = фактическое число смертей (в данном полугодии) от фактических рождений с начала войны, при фактической военной смертности");
         Util.out("");
         Util.out("    од.мир   = остаток (на начало полугодия) детей фактически родившихся c середины 1941 года, ожидаемое при детской смертности мирного времени");
         Util.out("    од       = остаток (на начало полугодия) детей фактически родившихся c середины 1941 года, при фактической детской смертности военного времени");
@@ -135,11 +135,11 @@ public class PrintHalfYears
         sum_actual_deaths += he.actual_deaths.sum();
         sum_actual_excess_wartime_deaths += he.actual_excess_wartime_deaths.sum();
         sum_exd_conscripts += exd_conscripts;
-        sum_excess_warborn_deaths += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline;
+        sum_excess_warborn_deaths += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline();
         sum_expected_nonwar_births += he.expected_nonwar_births;
         sum_actual_births += he.actual_births;
         sum_birth_shortfall += he.expected_nonwar_births - he.actual_births;
-        sum_actual_warborn_deaths_baseline += he.actual_warborn_deaths_baseline;
+        sum_actual_warborn_deaths_baseline += he.actual_warborn_deaths_baseline();
         sum_actual_warborn_deaths += he.actual_warborn_deaths;
         sum_immigration += he.immigration.sum();
 
@@ -161,12 +161,12 @@ public class PrintHalfYears
                                  f2k(he.actual_deaths.sum()),
                                  f2k(he.actual_excess_wartime_deaths.sum()),
                                  f2k(exd_conscripts),
-                                 f2k(he.actual_warborn_deaths - he.actual_warborn_deaths_baseline),
+                                 f2k(he.actual_warborn_deaths - he.actual_warborn_deaths_baseline()),
                                  //
                                  f2k(he.expected_nonwar_births),
                                  f2k(he.actual_births),
                                  f2k(he.expected_nonwar_births - he.actual_births),
-                                 f2k(he.actual_warborn_deaths_baseline),
+                                 f2k(he.actual_warborn_deaths_baseline()),
                                  f2k(he.actual_warborn_deaths),
                                  //
                                  wartime_born_remainder_UnderPeacetimeChildMortality,
@@ -183,7 +183,7 @@ public class PrintHalfYears
         {
             results.actual_excess_wartime_deaths += he.actual_excess_wartime_deaths.sum();
             results.exd_conscripts += exd_conscripts;
-            results.excess_warborn_deaths += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline;
+            results.excess_warborn_deaths += he.actual_warborn_deaths - he.actual_warborn_deaths_baseline();
             results.actual_births += he.actual_births;
             results.immigration += he.immigration.sum();
         }
@@ -196,6 +196,8 @@ public class PrintHalfYears
         String s = String.format("%,15.0f", v);
         while (s.startsWith(" "))
             s = s.substring(1);
+        if (s.equals("-0"))
+            s = "0";
         return s;
     }
 

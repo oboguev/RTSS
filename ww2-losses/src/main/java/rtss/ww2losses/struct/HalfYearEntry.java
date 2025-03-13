@@ -110,9 +110,20 @@ public class HalfYearEntry
 
     /* 
      * число смертей в данном полугодии от фактического рождений во время войны
-     * ожидаемое при смертности мирного времени
+     * ожидаемое при детской смертности мирного времени на протяжении всех полугодий 
      */
-    public double actual_warborn_deaths_baseline;
+    public double actual_warborn_deaths_baseline_v1;
+
+    /* 
+     * число смертей в данном полугодии от фактического рождений во время войны
+     * ожидаемое при детской смертности мирного времени толбко в этом полугодии 
+     */
+    public double actual_warborn_deaths_baseline_v2;
+    
+    public double actual_warborn_deaths_baseline()
+    {
+        return actual_warborn_deaths_baseline_v2;
+    }
 
     /* 
      * фактическое число смертей в данном полугодии от фактических рождений во время войны
