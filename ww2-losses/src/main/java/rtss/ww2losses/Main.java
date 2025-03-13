@@ -1360,13 +1360,16 @@ public class Main
             // PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, 7, multiplier * imr_fy_multiplier(he));
             instructions.add(instruction);
             CombinedMortalityTable mt = PatchMortalityTable.patch(mt1940, instructions, "множитель смертности " + multiplier);
-
+            
             // fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.MIRROR_AGE);
             fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
             fw.forward(p, mt, 0.5);
 
             if (record)
             {
+                // check that peacetime table is less lethal than wartime table 
+                checkTableIsLessLethal(he.peace_mt, mt, he.id());
+
                 // остаток родившихся за время войны
                 he.next.wartime_born_remainder_UnderActualWartimeChildMortality = p.clone();
 
@@ -1457,6 +1460,32 @@ public class Main
             double excess_wartime = he.actual_excess_wartime_deaths.getDay(Locality.TOTAL, gender, nd);
             double peace = he.actual_peace_deaths.getDay(Locality.TOTAL, gender, nd);
             Util.assertion(Util.same(peace + excess_wartime, total));
+        }
+    }
+    
+    /*
+     * Check that t1 is less lethal in children's age than t2
+     */
+    private void checkTableIsLessLethal(CombinedMortalityTable t1, CombinedMortalityTable t2, String heid) throws Exception
+    {
+        for (Gender gender : Gender.TwoGenders)
+        {
+            double[] qx1 = t1.getSingleTable(Locality.TOTAL, gender).qx();
+            double[] qx2 = t2.getSingleTable(Locality.TOTAL, gender).qx();
+            
+            for (int age = 0; age <= 5; age++)
+            {
+                if (qx1[age] <= qx2[age])
+                {
+                    // ok
+                }
+                else
+                {
+                    Util.err(String.format("Peacetime table is more lethal than wartime table: %s %s %s %d : %.1f vs %.1f", 
+                                           area.name(), heid, gender.name(), age, qx1[age] * 1000, qx2[age] * 1000));
+                    // ###
+                }
+            }
         }
     }
 
