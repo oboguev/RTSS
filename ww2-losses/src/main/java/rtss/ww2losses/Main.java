@@ -1336,6 +1336,7 @@ public class Main
         for (HalfYearEntry he = halves.get("1941.2"); he.year != 1946; he = he.next)
         {
             ForwardPopulationT fw = new ForwardPopulationT();
+
             int ndays = fw.birthDays(0.5);
 
             // добавить фактические рождения, распределив их по дням
@@ -1367,6 +1368,7 @@ public class Main
             if (compareTablesLethality(mt, he.peace_mt) == -1)
                 mt = he.peace_mt;
 
+            PopulationContext p0 = p.clone();
             // fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.MIRROR_AGE);
             fw.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
             fw.forward(p, mt, 0.5);
@@ -1389,10 +1391,34 @@ public class Main
                 add(fw.deathsByGenderAge(), he.actual_deaths);
                 add(he.actual_peace_deaths_from_newborn, he.actual_peace_deaths);
 
-                PopulationContext excess = fw.deathsByGenderAge().sub(he.actual_peace_deaths_from_newborn, ValueConstraint.NONE);
-                // контроль положительности delta раздельно по полам, сумме и возрастным значениям
-                validateDeathsForNewBirths(excess, he.id());
-                add(excess, he.actual_excess_wartime_deaths);
+                if (Util.True)
+                {
+                    /*
+                     * Количество избыточных детских смертей в полугодии вычисляется как разница с числом смертей в этом полугодии
+                     * при детской смертности мирных условий и при начальном детском населени полугодия по непрерывной мирной продвижке 
+                     * с середины 1941 года. 
+                     */
+                    PopulationContext excess = fw.deathsByGenderAge().sub(he.actual_peace_deaths_from_newborn, ValueConstraint.NONE);
+                    // контроль положительности delta раздельно по полам, сумме и возрастным значениям
+                    validateDeathsForNewBirths(excess, he.id());
+                    add(excess, he.actual_excess_wartime_deaths);
+                }
+                else
+                {
+                    /*
+                     * Количество избыточных детских смертей в полугодии вычисляется как разница с числом смертей в этом полугодии
+                     * при детской смертности мирных условий и при начальном детском населени полугодия по военной продвижке. 
+                     */
+                    ForwardPopulationT fw_peace = new ForwardPopulationT();
+                    fw_peace.setBirthCount(m_births, f_births);
+                    fw_peace.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
+                    fw_peace.forward(p0, he.peace_mt, 0.5);
+
+                    PopulationContext excess = fw.deathsByGenderAge().sub(fw_peace.deathsByGenderAge(), ValueConstraint.NONE);
+                    // контроль положительности delta раздельно по полам, сумме и возрастным значениям
+                    validateDeathsForNewBirths(excess, he.id());
+                    add(excess, he.actual_excess_wartime_deaths);
+                }
             }
         }
 
