@@ -81,31 +81,16 @@ public class PeacetimeMortalityTables
     {
         CombinedMortalityTable xmt = getTable(year, halfyear);
         Util.assertion(mt == xmt);
-
-        double[] lx = cacheLX.get(key(year, halfyear, locality, gender));
-
-        if (lx == null)
-        {
-            lx = mt.daily_lx(locality, gender);
-            cacheLX.put(key(year, halfyear), lx);
-        }
-
-        return Util.dup(lx);
+        return Util.dup(mt.daily_lx(locality, gender));
     }
 
     /* ======================================================================================= */
 
     private Map<String, CombinedMortalityTable> cacheTable = new HashMap<>();
-    private Map<String, double[]> cacheLX = new HashMap<>();
 
     private String key(int year, HalfYearSelector halfyear)
     {
         return HalfYearEntry.id(year, halfyear);
-    }
-
-    private String key(int year, HalfYearSelector halfyear, Locality locality, Gender gender)
-    {
-        return key(year, halfyear) + "." + locality.name() + "." + gender.name();
     }
 
     /* ======================================================================================= */

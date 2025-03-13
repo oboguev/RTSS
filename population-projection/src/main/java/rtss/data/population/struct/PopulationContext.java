@@ -11,7 +11,6 @@ import rtss.data.ValueConstraint;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.InterpolatePopulationAsMeanPreservingCurve;
-import rtss.data.curves.InterpolateYearlyToDailyAsValuePreservingMonotoneCurve;
 import rtss.data.curves.TargetResolution;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.calc.RescalePopulation;

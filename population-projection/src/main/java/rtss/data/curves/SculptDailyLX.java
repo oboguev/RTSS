@@ -124,6 +124,7 @@ public class SculptDailyLX
         return d;
     }
 
+    @SuppressWarnings("unused")
     private static double[] d2(double[] p)
     {
         return derivative(derivative(p));
