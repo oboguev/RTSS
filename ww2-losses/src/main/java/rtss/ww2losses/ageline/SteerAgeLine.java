@@ -6,6 +6,7 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
+import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.struct.HalfYearEntries;
 import rtss.ww2losses.struct.HalfYearEntry;
 
@@ -17,6 +18,7 @@ import rtss.ww2losses.struct.HalfYearEntry;
  */
 public class SteerAgeLine
 {
+    private final AreaParameters ap;
     private final HalfYearEntries<HalfYearEntry> halves;
     private final WarAttritionModel wam;
     private final double[] ac_immigration;
@@ -26,8 +28,9 @@ public class SteerAgeLine
      * @wam              = модель военных потерь
      * @ac_immigration   = распределение иммиграционной интенсивность по полугодиям   
      */
-    public SteerAgeLine(HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, double[] ac_immigration)
+    public SteerAgeLine(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, double[] ac_immigration)
     {
+        this.ap = ap;
         this.halves = halves;
         this.wam = wam;
         this.ac_immigration = ac_immigration;
@@ -196,6 +199,11 @@ public class SteerAgeLine
             double peace_deaths = (population <= 0) ? 0 : population * deathRatio(he, gender, nd1, nd2);
 
             double excess_war_deaths = loss_intensity * wam.excessWarDeaths(gender, ndm, he, initial_population);
+            
+            if (excess_war_deaths < 0)
+            {
+                // ###
+            }
 
             double immigration = 0;
             if (ac_immigration != null)

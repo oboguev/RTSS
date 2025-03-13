@@ -7,6 +7,7 @@ import rtss.data.selectors.Locality;
 import rtss.util.Util;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
+import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.struct.HalfYearEntries;
 import rtss.ww2losses.struct.HalfYearEntry;
 import rtss.ww2losses.struct.HalfYearEntries.HalfYearSelector;
@@ -21,6 +22,7 @@ import rtss.data.ValueConstraint;
  */
 public class BacktrackPopulation
 {
+    private final AreaParameters ap;
     private final HalfYearEntries<HalfYearEntry> halves;
     private final WarAttritionModel wam;
     private final PopulationContext p1946_actual;
@@ -29,9 +31,10 @@ public class BacktrackPopulation
     private final int DAYS_PER_YEAR = 365;
     private final int MAX_DAY = DAYS_PER_YEAR * (Population.MAX_AGE + 1) - 1;
 
-    public BacktrackPopulation(PeacetimeMortalityTables peacetimeMortalityTables, WarAttritionModel wam, final PopulationContext p1946_actual)
+    public BacktrackPopulation(AreaParameters ap, PeacetimeMortalityTables peacetimeMortalityTables, WarAttritionModel wam, final PopulationContext p1946_actual)
             throws Exception
     {
+        this.ap = ap;
         this.halves = shellHalves(peacetimeMortalityTables);
         this.wam = wam;
         this.p1946_actual = p1946_actual;
@@ -45,8 +48,9 @@ public class BacktrackPopulation
      *     
      * Они могут быть созданы методом shellHalves.    
      */
-    public BacktrackPopulation(HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, final PopulationContext p1946_actual) throws Exception
+    public BacktrackPopulation(AreaParameters ap, HalfYearEntries<HalfYearEntry> halves, WarAttritionModel wam, final PopulationContext p1946_actual) throws Exception
     {
+        this.ap = ap;
         this.halves = halves;
         this.wam = wam;
         this.p1946_actual = p1946_actual;
@@ -110,7 +114,7 @@ public class BacktrackPopulation
 
         // Util.assertion(nd_mid_1941_to_1946(initial_age_ndays) <= p1946_actual.MAX_DAY);
 
-        SteerAgeLine steer = new SteerAgeLine(halves, wam, null);
+        SteerAgeLine steer = new SteerAgeLine(ap, halves, wam, null);
 
         double initial_population = 1.0;
         Double immigration_intensity = null;

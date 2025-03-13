@@ -109,7 +109,7 @@ public class PopulationMiddle1941 extends UtilBase_194x
          * Устранить разрыв таким образом, чтобы сохранить сумму населения в возрасте 0-0.5 лет,
          * его численность в возрасте 0 дней и непрерывность кривой на возрастном участке 0-0.5 лет. 
          */
-        if (Util.False)
+        if (Util.True)
         {
             fixDiscontinuity(p, Gender.MALE, fr);
             fixDiscontinuity(p, Gender.FEMALE, fr);

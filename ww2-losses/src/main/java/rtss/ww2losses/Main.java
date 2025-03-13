@@ -321,7 +321,7 @@ public class Main
             PopulationChart.display("Население " + area + " на начало 1941 года",
                                     pe1941.loaded(), "загруженное",
                                     p_start1941_0, "промежуточное",
-                                    p_start1941, "конечное");            
+                                    p_start1941, "конечное");
         }
 
         if (Util.False)
@@ -970,7 +970,7 @@ public class Main
         WarAttritionModel wam = new WarAttritionModel(halves.get("1941.2").p_nonwar_with_births,
                                                       p1946_actual,
                                                       wamp);
-        EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(halves, wam);
+        EvalAgeLineLossIntensities eval = new EvalAgeLineLossIntensities(ap, halves, wam);
         AgeLineFactorIntensities alis = eval.evalPreliminaryLossIntensity(p1946_actual, immigration_halves);
 
         if (Util.False)
@@ -1560,6 +1560,11 @@ public class Main
                 continue;
 
             p = p.add(he.actual_excess_wartime_deaths, ValueConstraint.NONE);
+
+            if (Util.False && area == Area.USSR)
+            {
+                PopulationChart.display("actual_excess_wartime_deaths " + he.id(), he.actual_excess_wartime_deaths, "");
+            }
         }
 
         /*

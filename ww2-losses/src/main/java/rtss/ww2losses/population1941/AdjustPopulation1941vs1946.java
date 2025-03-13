@@ -67,7 +67,7 @@ public class AdjustPopulation1941vs1946
         if (ap.area == Area.RSFSR)
             return null;
 
-        BacktrackPopulation backtrack = new BacktrackPopulation(peacetimeMortalityTables, wam, p1946_actual);
+        BacktrackPopulation backtrack = new BacktrackPopulation(ap, peacetimeMortalityTables, wam, p1946_actual);
 
         /* 
          * Для каждой возрастной линии вычислить требуемое минимальное население @pmin, 
