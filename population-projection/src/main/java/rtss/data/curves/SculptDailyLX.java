@@ -8,7 +8,7 @@ import rtss.util.Util;
  */
 public class SculptDailyLX
 {
-    public static double[] scultDailyLX(double[] f, double convexityControl) throws Exception
+    public static double[] scultDailyLX(double[] f, double convexity) throws Exception
     {
         int x1 = 365;
         
@@ -30,7 +30,7 @@ public class SculptDailyLX
         // 3. 12a*x1^2 + 6b*x1 + 2c = d2fx1
         // 4. a = convexityControl (extra condition to control convexity)
 
-        double a = convexityControl; // Control parameter for convexity
+        double a = convexity; // Control parameter for convexity
 
         // Substitute a into the equations and solve for b, c, d
         double[][] A = {
@@ -57,7 +57,7 @@ public class SculptDailyLX
             fClone[x] = a * x * x * x * x + b * x * x * x + c * x * x + d * x + e;
         }
         
-        validate(Util.splice(fClone, 0, x1 + 100));
+        validate(Util.splice(fClone, 0, x1 + 100), convexity);
 
         return fClone;
     }
@@ -98,7 +98,7 @@ public class SculptDailyLX
         return x;
     }
     
-    private static void validate(double[] f) throws Exception
+    private static void validate(double[] f, double convexity) throws Exception
     {
         double[] d1 = derivative(f);
         double[] d2 = derivative(d1);
@@ -109,7 +109,7 @@ public class SculptDailyLX
         if (!Util.isNegative(d1))
             throw new Exception("Improperly scuplted lx (non-negative d1)");
         
-        if (!Util.isPositive(d2))
+        if (convexity >= 0 && !Util.isPositive(d2))
             throw new Exception("Improperly scuplted lx (non-positive d2)");
     }
 

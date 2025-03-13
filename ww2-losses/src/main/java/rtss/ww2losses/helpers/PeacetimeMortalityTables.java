@@ -7,6 +7,7 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.SculptDailyLX;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
@@ -94,14 +95,17 @@ public class PeacetimeMortalityTables
     {
         CombinedMortalityTable xmt = getTable(year, halfyear);
         Util.assertion(mt == xmt);
-        if (mt.has_daily_lx(locality, gender))
+        if (Util.False && !mt.has_daily_lx(locality, gender))
             build_daily_lx(year, halfyear, mt, locality, gender);
         return Util.dup(mt.daily_lx(locality, gender));
     }
 
     private void build_daily_lx(int year, HalfYearSelector halfyear, CombinedMortalityTable mt, Locality locality, Gender gender) throws Exception
     {
-        // ###
+        final double convexity = -1e-6;
+        double[] dlx = mt.daily_lx(locality, gender);
+        double[] dlx2 = SculptDailyLX.scultDailyLX(dlx, convexity);
+        mt.attach_daily_lx(locality, gender, dlx2);
     }
 
     /* ======================================================================================= */
