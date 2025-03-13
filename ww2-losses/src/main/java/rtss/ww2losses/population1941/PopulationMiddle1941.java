@@ -81,7 +81,7 @@ public class PopulationMiddle1941 extends UtilBase_194x
             double[] m_births = WarHelpers.male_births(births);
             double[] f_births = WarHelpers.female_births(births);
             
-            if (Util.True)
+            if (Util.False)
                 DiagHelper.viewProjection(p_start1941.clone(), peacetimeMortalityTables, Gender.MALE, ndays);
 
             fw = new ForwardPopulationT();

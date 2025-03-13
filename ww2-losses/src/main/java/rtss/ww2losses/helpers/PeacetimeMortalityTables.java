@@ -46,6 +46,19 @@ public class PeacetimeMortalityTables
         /* интерполяция на полугодия, но для 1941 и 1941 оставить 1.0 */
         halfyearly_imr_multiplier = yearly2timepoints(yearly_imr_multiplier, 2, 100);
         halfyearly_imr_multiplier[0] = halfyearly_imr_multiplier[1] = halfyearly_imr_multiplier[2] = halfyearly_imr_multiplier[3] = 1.0;
+        
+        this.mt1940.clear_daily_lx();
+
+        for (int year = 1941; year <= 1945; year++)
+        {
+            CombinedMortalityTable cmt = getTable(year, HalfYearSelector.FirstHalfYear);
+            mt2lx(year, HalfYearSelector.FirstHalfYear, cmt, Locality.TOTAL, Gender.MALE);
+            mt2lx(year, HalfYearSelector.FirstHalfYear, cmt, Locality.TOTAL, Gender.FEMALE);
+
+            cmt = getTable(year, HalfYearSelector.SecondHalfYear);
+            mt2lx(year, HalfYearSelector.SecondHalfYear, cmt, Locality.TOTAL, Gender.MALE);
+            mt2lx(year, HalfYearSelector.SecondHalfYear, cmt, Locality.TOTAL, Gender.FEMALE);
+        }
     }
 
     public CombinedMortalityTable getTable(int year, HalfYearSelector halfyear) throws Exception
@@ -81,7 +94,14 @@ public class PeacetimeMortalityTables
     {
         CombinedMortalityTable xmt = getTable(year, halfyear);
         Util.assertion(mt == xmt);
+        if (mt.has_daily_lx(locality, gender))
+            build_daily_lx(year, halfyear, mt, locality, gender);
         return Util.dup(mt.daily_lx(locality, gender));
+    }
+
+    private void build_daily_lx(int year, HalfYearSelector halfyear, CombinedMortalityTable mt, Locality locality, Gender gender) throws Exception
+    {
+        // ###
     }
 
     /* ======================================================================================= */

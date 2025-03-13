@@ -341,4 +341,25 @@ public class CombinedMortalityTable
     {
         getSingleTable(locality, gender).attach_daily_lx(dlx);
     }
+
+    public boolean has_daily_lx(final Locality locality, final Gender gender) throws Exception
+    {
+        return getSingleTable(locality, gender).has_daily_lx();
+    }
+
+    public boolean has_daily_lx(final Locality locality, final Gender gender, int maxage) throws Exception
+    {
+        return getSingleTable(locality, gender).has_daily_lx(maxage);
+    }
+
+    public void clear_daily_lx(final Locality locality, final Gender gender) throws Exception
+    {
+        getSingleTable(locality, gender).clear_daily_lx();
+    }
+
+    public void clear_daily_lx() throws Exception
+    {
+        for (SingleMortalityTable smt : m.values())
+            smt.clear_daily_lx();
+    }
 }

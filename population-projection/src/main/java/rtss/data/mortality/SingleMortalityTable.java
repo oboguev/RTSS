@@ -456,6 +456,11 @@ public class SingleMortalityTable
     
     private Map<Integer, double[]> maxage2daily_lx = new HashMap<>();
     
+    public void clear_daily_lx() throws Exception
+    {
+        maxage2daily_lx.clear();
+    }
+
     public void attach_daily_lx(double[] dlx) throws Exception
     {
         maxage2daily_lx.clear();
@@ -465,6 +470,16 @@ public class SingleMortalityTable
         if (maxage <= 0 || maxage > MAX_AGE)
             throw new Exception("Invalid length");
         maxage2daily_lx.put(maxage, dlx);
+    }
+
+    public boolean has_daily_lx() throws Exception
+    {
+        return has_daily_lx(MAX_AGE);
+    }
+
+    public boolean has_daily_lx(int maxage) throws Exception
+    {
+        return null != maxage2daily_lx.get(maxage);
     }
 
     /*
