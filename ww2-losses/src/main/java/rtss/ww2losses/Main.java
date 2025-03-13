@@ -1569,7 +1569,11 @@ public class Main
          * по возрасту не предусмотрена. Это создаёт ложный пик смертей в возрасте 0 дней. 
          * Разгладить пик на полгода.
          */
-        p = DespikeZero.despike(p, years2days(0.5));
+        if (Util.False)
+        {
+            // ###
+            p = DespikeZero.despike(p, years2days(0.5));
+        }
 
         return p;
     }
@@ -1600,7 +1604,11 @@ public class Main
          * повторяющийся каждое военное полугодие. 
          * Разгладить пик на предшетвуюшие полгода.
          */
-        p = DespikeComb.despike(p, years2days(4.9));
+        if (Util.False)
+        {
+            // ###
+            p = DespikeComb.despike(p, years2days(4.9));
+        }
 
         return p;
     }
