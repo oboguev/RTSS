@@ -123,7 +123,7 @@ public class Main
     private Area area;
     private AreaParameters ap;
     private static int MAX_AGE = Population.MAX_AGE;
-    private static int DAYS_PER_YEAR = 365;
+    public static final int DAYS_PER_YEAR = 365;
 
     /* фактическое население на начало 1946 года */
     private PopulationContext p1946_actual;
@@ -426,7 +426,7 @@ public class Main
                                     allExcessDeathsByAgeAt1946,
                                     deficit1946_raw_preimmigration, deficit1946_adjusted_preimmigration,
                                     deficit1946_raw_postimmigration, deficit1946_adjusted_postimmigration);
-        
+
         evalWomanLoss(allExcessDeathsByAgeAt1946);
     }
 
@@ -950,7 +950,7 @@ public class Main
             if (this.deficit1946_adjusted_preimmigration == null)
                 this.deficit1946_adjusted_preimmigration = deficit_wb_adjusted;
         }
-        
+
         if (phase == Phase.ACTUAL)
         {
             v = deficit.sumDays(Gender.FEMALE, years2days(20.0), years2days(40.0));
@@ -1326,6 +1326,15 @@ public class Main
                 m1 = m;
             else
                 m2 = m;
+
+            if (Math.abs(m1 - m2) < 0.00001)
+            {
+                if (Util.same(m1, 0.5))
+                    m1 = 0.05;
+                else
+                    throw new Exception("Итерация fitDeathsForNewBirths не сходится");
+            }
+
         }
 
         double excess = 0;
@@ -1407,7 +1416,7 @@ public class Main
                      * по непрерывной мирной продвижке с середины 1941 года, т.е. при мирной убыли в предыдущих полугодиях. 
                      */
                     add(he.actual_peace_deaths_from_newborn, he.actual_peace_deaths);
-                    
+
                     PopulationContext excess = fw.deathsByGenderAge().sub(he.actual_peace_deaths_from_newborn, ValueConstraint.NONE);
                     // контроль положительности delta раздельно по полам, сумме и возрастным значениям
                     validateDeathsForNewBirths(excess, he.id());
@@ -1424,9 +1433,9 @@ public class Main
                     fw_peace.setBirthCount(m_births, f_births);
                     fw_peace.setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge.AT_AGE_DAY0);
                     fw_peace.forward(p0, he.peace_mt, 0.5);
-                    
+
                     he.actual_warborn_deaths_baseline_v2 = fw_peace.getObservedDeaths();
-                    
+
                     add(fw_peace.deathsByGenderAge(), he.actual_peace_deaths);
 
                     PopulationContext excess = fw.deathsByGenderAge().sub(fw_peace.deathsByGenderAge(), ValueConstraint.NONE);
@@ -1560,38 +1569,83 @@ public class Main
     private int compareTablesLethality(CombinedMortalityTable t1, CombinedMortalityTable t2) throws Exception
     {
         int result = 0;
+        boolean nonuniform = false;
 
         for (Gender gender : Gender.TwoGenders)
         {
+            if (nonuniform)
+                break;
+
             double[] qx1 = t1.getSingleTable(Locality.TOTAL, gender).qx();
             double[] qx2 = t2.getSingleTable(Locality.TOTAL, gender).qx();
 
             for (int age = 0; age <= 5; age++)
             {
-                if (qx1[age] == qx2[age])
+                if (Math.abs(qx1[age] - qx2[age]) < 0.0001)
                 {
                     // ignore
                 }
                 else if (qx1[age] < qx2[age])
                 {
                     if (result == 1)
-                        throw new Exception("различие таблиц неоднородно");
+                    {
+                        nonuniform = true;
+                        break;
+                    }
                     result = -1;
                 }
                 else // if (qx1[age] > qx2[age])
                 {
                     if (result == -1)
-                        throw new Exception("различие таблиц неоднородно");
+                    {
+                        nonuniform = true;
+                        break;
+                    }
                     result = 1;
                 }
             }
+        }
+
+        if (nonuniform)
+        {
+            Util.err("Различие таблиц неоднородно");
+            StringBuilder sb;
+
+            for (Gender gender : Gender.TwoGenders)
+            {
+                double[] qx1 = t1.getSingleTable(Locality.TOTAL, gender).qx();
+                double[] qx2 = t2.getSingleTable(Locality.TOTAL, gender).qx();
+
+                sb = new StringBuilder();
+                sb.append(String.format("%-6s", gender.name().toUpperCase()));
+                for (int age = 0; age <= 5; age++)
+                    sb.append(String.format("  %5d", age));
+                Util.out(sb.toString());
+
+                sb = new StringBuilder("      ");
+                for (int age = 0; age <= 5; age++)
+                    sb.append(String.format("  %.3f", qx1[age]));
+                Util.out(sb.toString());
+
+                sb = new StringBuilder("      ");
+                for (int age = 0; age <= 5; age++)
+                    sb.append(String.format("  %.3f", qx2[age]));
+                Util.out(sb.toString());
+
+                sb = new StringBuilder("      ");
+                for (int age = 0; age <= 5; age++)
+                    sb.append(String.format("  %.3f", qx1[age] - qx2[age]));
+                Util.out(sb.toString());
+            }
+
+            throw new Exception("различие таблиц неоднородно");
         }
 
         return result;
     }
 
     /* ======================================================================================================= */
-    
+
     /*
      * Потери женщин в возрасте 20-40 лет на 1946 год
      */
