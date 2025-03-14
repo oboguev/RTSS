@@ -54,14 +54,14 @@ public class DespikeComb
             double avg = (prev + next) / 2;
             if (avg != 0 && curr / avg > 3)
             {
-                int kk = (int) Math.round(k / (double) ndays);
-                if (Math.abs(kk * ndays - k) > 4)
+                int kr = (int) Math.round(k / (double) ndays);
+                if (Math.abs(kr * ndays - k) > 4)
                     throw new Exception("Misplaced spike");
                 list.add(k);
             }
         }
 
-        if (list.size() != 9)
+        if (list.size() > 9)
             throw new Exception("Misplaced spikes");
 
         return list;

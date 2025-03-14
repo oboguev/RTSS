@@ -1677,7 +1677,7 @@ public class Main
     /* ======================================================================================================= */
 
     /*
-     * Составить половозрастную стркутуру всех смертей по возрасту в момент смерти
+     * Составить половозрастную структуру всех смертей по возрасту в момент смерти
      */
     private PopulationContext allExcessDeathsByDeathAge() throws Exception
     {
@@ -1703,10 +1703,14 @@ public class Main
          * по возрасту не предусмотрена. Это создаёт ложный пик смертей в возрасте 0 дней. 
          * Разгладить пик на полгода.
          */
-        if (Util.False)
+        if (Util.True)
         {
-            // ###
-            p = DespikeZero.despike(p, years2days(0.5));
+            PopulationContext p2 = DespikeZero.despike(p, years2days(0.5));
+            if (Util.False && area == Area.USSR)
+            {
+                PopulationChart.display("DespikeZero " + area.name(), p, "before", p2, "after");
+            }
+            p = p2;
         }
 
         return p;
@@ -1736,12 +1740,16 @@ public class Main
          * после начала передвижки) возвращаются в возрасте 0 днeй, т.к. отрицательная индексация
          * по возрасту не предусмотрена. Это создаёт ложный пик смертей в возрасте 0 дней,
          * повторяющийся каждое военное полугодие. 
-         * Разгладить пик на предшетвуюшие полгода.
+         * Разгладить пик на предшествуюшие полгода.
          */
-        if (Util.False)
+        if (Util.True)
         {
-            // ###
-            p = DespikeComb.despike(p, years2days(4.9));
+            PopulationContext p2 = DespikeComb.despike(p, years2days(4.9));
+            if (Util.False && area == Area.USSR)
+            {
+                PopulationChart.display("DespikeComb " + area.name(), p, "before", p2, "after");
+            }
+            p = p2;
         }
 
         return p;

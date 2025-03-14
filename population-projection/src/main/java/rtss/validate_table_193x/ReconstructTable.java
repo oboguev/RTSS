@@ -84,7 +84,7 @@ public class ReconstructTable
             // Util.assertion(f >= 0 && f <= 1);
         }
 
-        // ### диффиузно распределить избыток
+        // TODO: диффиузно распределить избыток
     }
 
     private String f2s(double v)
