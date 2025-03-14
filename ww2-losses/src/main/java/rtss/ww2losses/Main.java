@@ -123,6 +123,7 @@ public class Main
     private Area area;
     private AreaParameters ap;
     private static int MAX_AGE = Population.MAX_AGE;
+    private static int DAYS_PER_YEAR = 365;
 
     /* фактическое население на начало 1946 года */
     private PopulationContext p1946_actual;
@@ -425,6 +426,8 @@ public class Main
                                     allExcessDeathsByAgeAt1946,
                                     deficit1946_raw_preimmigration, deficit1946_adjusted_preimmigration,
                                     deficit1946_raw_postimmigration, deficit1946_adjusted_postimmigration);
+        
+        evalWomanLoss(allExcessDeathsByAgeAt1946);
     }
 
     private void stage_1(
@@ -946,6 +949,12 @@ public class Main
 
             if (this.deficit1946_adjusted_preimmigration == null)
                 this.deficit1946_adjusted_preimmigration = deficit_wb_adjusted;
+        }
+        
+        if (phase == Phase.ACTUAL)
+        {
+            v = deficit.sumDays(Gender.FEMALE, years2days(20.0), years2days(40.0));
+            outk("Дефицит женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
         }
     }
 
@@ -1579,6 +1588,17 @@ public class Main
         }
 
         return result;
+    }
+
+    /* ======================================================================================================= */
+    
+    /*
+     * Потери женщин в возрасте 20-40 лет на 1946 год
+     */
+    private void evalWomanLoss(PopulationContext allExcessDeathsByAgeAt1946) throws Exception
+    {
+        double v = allExcessDeathsByAgeAt1946.sumDays(Gender.FEMALE, years2days(20.0), years2days(40.0));
+        outk("Сверхсмертность женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
     }
 
     /* ======================================================================================================= */
