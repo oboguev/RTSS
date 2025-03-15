@@ -68,6 +68,13 @@ public class WarAttritionModel
     {
         Util.assertion(wamp.aw_civil_combat >= 0 && wamp.aw_civil_combat <= 1);
         Util.assertion(wamp.aw_conscript_combat >= 0 && wamp.aw_conscript_combat <= 1);
+        Util.assertion(wamp.aw_loss_intensity_occupaion >= 0.5 && wamp.aw_loss_intensity_occupaion <= 2.0);
+
+        for (int k = 0; k < loss_intensity_occupation.length; k++)
+        {
+            if (loss_intensity_occupation[k] > 0.0001)
+                loss_intensity_occupation[k] = wamp.aw_loss_intensity_occupaion;
+        }
 
         double[] rkka_loss_intensity_normalized = Util.normalize(rkka_loss_intensity);
 

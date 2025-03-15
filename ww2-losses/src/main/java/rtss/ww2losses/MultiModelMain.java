@@ -45,19 +45,23 @@ public class MultiModelMain
     {
         // warmupCaches();
         
-        for (double aw_conscript_combat = 0.6; aw_conscript_combat <= 0.8; aw_conscript_combat += 0.1)
+        for (double aw_loss_intensity_occupaion = 0.8; aw_loss_intensity_occupaion <= 1.6; aw_loss_intensity_occupaion += 0.2)
         {
-            for (double aw_civil_combat = 0.1; aw_civil_combat <= 0.4; aw_civil_combat += 0.1)
+            for (double aw_conscript_combat = 0.6; aw_conscript_combat <= 0.8; aw_conscript_combat += 0.1)
             {
-                ModelParameters params = new ModelParameters();
-                params.wamp.aw_conscript_combat = aw_conscript_combat;
-                params.wamp.aw_civil_combat = aw_civil_combat;
-                params.exportDirectory = null;
-                AreaModel am = run(params);
-                areaModels.add(am);
+                for (double aw_civil_combat = 0.1; aw_civil_combat <= 0.4; aw_civil_combat += 0.1)
+                {
+                    ModelParameters params = new ModelParameters();
+                    params.wamp.aw_conscript_combat = aw_conscript_combat;
+                    params.wamp.aw_civil_combat = aw_civil_combat;
+                    params.wamp.aw_loss_intensity_occupaion = aw_loss_intensity_occupaion;
+                    params.exportDirectory = null;
+                    AreaModel am = run(params);
+                    areaModels.add(am);
+                }
             }
         }
-
+        
         print();
     }
 
@@ -96,6 +100,7 @@ public class MultiModelMain
         ModelParameters params = new ModelParameters();
         params.wamp.aw_conscript_combat = 0.7;
         params.wamp.aw_civil_combat = 0.2;
+        params.wamp.aw_loss_intensity_occupaion = 1.6;
         params.exportDirectory = null;
         AreaModel am = run(params);
     }
@@ -125,8 +130,8 @@ public class MultiModelMain
         String h2 = "======= ======= ======= ======= =======  ====";
 
         Util.out(String.format("        * %s * %s", a1, a2));
-        Util.out(String.format("прз окк * %s * %s", h1, h1));
-        Util.out(String.format("=== === * %s * %s", h2, h2));
+        Util.out(String.format("окк прз грж * %s * %s", h1, h1));
+        Util.out(String.format("=== === === * %s * %s", h2, h2));
     }
 
     private void print(AreaModel am)
@@ -134,7 +139,8 @@ public class MultiModelMain
         String ussr = result2str(am.ussr);
         String rsfsr = result2str(am.rsfsr);
 
-        String s = String.format("%3.1f %3.1f * %s * %s",
+        String s = String.format("%3.1f %3.1f %3.1f * %s * %s",
+                                 am.params.wamp.aw_loss_intensity_occupaion,
                                  am.params.wamp.aw_conscript_combat,
                                  am.params.wamp.aw_civil_combat,
                                  ussr, rsfsr);
