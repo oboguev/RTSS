@@ -428,6 +428,7 @@ public class Main
                                     deficit1946_raw_postimmigration, deficit1946_adjusted_postimmigration);
 
         evalWomanLoss(allExcessDeathsByAgeAt1946);
+        evalSummary(allExcessDeathsByAgeAt1946);
     }
 
     private void stage_1(
@@ -1653,6 +1654,24 @@ public class Main
     {
         double v = allExcessDeathsByAgeAt1946.sumDays(Gender.FEMALE, years2days(20.0), years2days(40.0));
         outk("Сверхсмертность женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
+    }
+
+    /* ======================================================================================================= */
+    
+    private void evalSummary(PopulationContext allExcessDeathsByAgeAt1946) throws Exception
+    {
+        int nd45 = years2days(4.5);
+        double v;
+
+        v = deficit1946_raw_postimmigration.sumDays(nd45, deficit1946_raw_postimmigration.MAX_DAY);
+        outk("Наличное на начало войны население, дефицит к концу 1945 года, тыс. чел.", v);
+
+        v = allExcessDeathsByAgeAt1946.sumDays(nd45, deficit1946_raw_postimmigration.MAX_DAY);
+        outk("Наличное на начало войны население, избыточное число смертей в 1941-1945 гг., тыс. чел.", v);
+        
+        // ###
+        outk("Рождённые во время войны, тыс. чел.", 0);
+        // ###
     }
 
     /* ======================================================================================================= */
