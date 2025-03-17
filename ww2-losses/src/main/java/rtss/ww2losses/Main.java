@@ -404,8 +404,8 @@ public class Main
         PrintHalfYears.print(ap, halves, model.results);
         PrintYears.print(ap, halves, model.results);
 
-        PopulationContext allExcessDeathsByDeathAge = allExcessDeathsByDeathAge();
-        PopulationContext allExcessDeathsByAgeAt1946 = allExcessDeathsByAgeAt1946();
+        PopulationContext allExcessDeathsByDeathAge = allExcessDeathsByDeathAge(true);
+        PopulationContext allExcessDeathsByAgeAt1946 = allExcessDeathsByAgeAt1946(true);
 
         if (Util.False)
         {
@@ -1651,7 +1651,7 @@ public class Main
     {
         int nd45 = 9 * years2days(0.5);
         double v, v1, v2, v3;
-        
+
         Util.out("");
         Util.out("Сводка:");
         Util.out("");
@@ -1673,6 +1673,11 @@ public class Main
         outk("Избыточное число смертей женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
 
         /*
+         * Потери детей в возрасте 0-5 лет на начало войны (4.5 - 9 лет на 1946 год)
+         */
+        // ###
+
+        /*
          * Потери рождённых во время войны
          */
         Util.out("");
@@ -1692,7 +1697,8 @@ public class Main
         outk("Ожидаемое число рождений за период войны (середина 1941 - конец 1945) в условиях мира, тыс. чел.", v2);
         outk("Фактическое число рождений за время войны (середина 1941 - конец 1945), тыс. чел.", v1);
         outk("Число несостоявшихся рождений за период войны (середина 1941 - конец 1945), тыс. рождений", v2 - v1);
-        outk("Дефицит фактически родившихся во время войны (середина 1941 - конец 1945) на конец 1945 года, тыс. чел.", summary.actual_warborn_deficit_at1946);
+        outk("Дефицит фактически родившихся во время войны (середина 1941 - конец 1945) на конец 1945 года, тыс. чел.",
+             summary.actual_warborn_deficit_at1946);
         outk("Число избыточных смертей фактически родившихся во время войны (середина 1941 - конец 1945) к концу 1945 года, тыс. чел.", v3);
 
         if (area == Area.RSFSR)
@@ -1800,7 +1806,7 @@ public class Main
     /*
      * Составить половозрастную структуру всех смертей по возрасту в момент смерти
      */
-    private PopulationContext allExcessDeathsByDeathAge() throws Exception
+    private PopulationContext allExcessDeathsByDeathAge(boolean despike) throws Exception
     {
         PopulationContext p = newPopulationContext();
 
@@ -1824,7 +1830,7 @@ public class Main
          * по возрасту не предусмотрена. Это создаёт ложный пик смертей в возрасте 0 дней. 
          * Разгладить пик на полгода.
          */
-        if (Util.True)
+        if (despike)
         {
             PopulationContext p2 = DespikeZero.despike(p, years2days(0.5));
             if (Util.False && area == Area.USSR)
@@ -1838,9 +1844,9 @@ public class Main
     }
 
     /*
-     * Составить половозрастную стркутуру всех смертей по возрасту на начало 1946 года
+     * Составить половозрастную стрктуру всех смертей по возрасту на начало 1946 года
      */
-    private PopulationContext allExcessDeathsByAgeAt1946() throws Exception
+    private PopulationContext allExcessDeathsByAgeAt1946(boolean despike) throws Exception
     {
         PopulationContext p = newPopulationContext();
 
@@ -1863,7 +1869,7 @@ public class Main
          * повторяющийся каждое военное полугодие. 
          * Разгладить пик на предшествуюшие полгода.
          */
-        if (Util.True)
+        if (despike)
         {
             PopulationContext p2 = DespikeComb.despike(p, years2days(4.9));
             if (Util.False && area == Area.USSR)
