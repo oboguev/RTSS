@@ -183,6 +183,13 @@ public class Main
     };
 
     private Phase phase;
+    
+    private Summary summary = new Summary();
+    
+    private static class Summary
+    {
+        
+    }
 
     void main() throws Exception
     {
