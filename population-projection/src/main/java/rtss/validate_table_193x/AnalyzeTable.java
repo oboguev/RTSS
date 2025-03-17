@@ -8,6 +8,8 @@ import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.ChartXY;
+import rtss.util.plot.ChartXYSPlineBasic;
 
 /*
  * Распечатать половые пропорции и пропорции городского и сельского населения 
@@ -34,6 +36,8 @@ public class AnalyzeTable
     private void analyze(String tablePath) throws Exception
     {
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
+
+        display(mt);
 
         for (Locality locality : Locality.AllLocalities)
             genderProportionForLocality(mt, locality);
@@ -64,7 +68,7 @@ public class AnalyzeTable
     }
 
     /* ========================================================================================================================= */
-    
+
     private String key(int age, Locality locality)
     {
         return locality.name() + "." + age;
@@ -192,13 +196,13 @@ public class AnalyzeTable
      * Последний десятичный знак в опубликованных коэффициентах
      */
     private final double precision = 0.00001;
-    
+
     private String appendPrecision(String s, double v1, double v2)
     {
         double dv = Math.abs(v1 - v2);
-        
+
         int play = 0;
-        
+
         if (dv <= precision * 1.01)
         {
             play = 100;
@@ -212,12 +216,36 @@ public class AnalyzeTable
         {
             // do nothing
         }
-        
+
         if (play != 0)
         {
             s = s + nbsp + "±" + nbsp + play;
         }
-        
+
         return s;
+    }
+
+    /* ========================================================================================================================= */
+
+    private void display(CombinedMortalityTable mt) throws Exception
+    {
+        for (Locality locality : Locality.AllLocalities)
+            display(mt, locality);
+        
+        Util.noop();
+    }
+
+    private void display(CombinedMortalityTable mt, Locality locality) throws Exception
+    {
+        double[] b = mt.getSingleTable(locality, Gender.BOTH).qx();
+        double[] f = mt.getSingleTable(locality, Gender.FEMALE).qx();
+        double[] m = mt.getSingleTable(locality, Gender.MALE).qx();
+
+        ChartXYSPlineBasic chart = new ChartXYSPlineBasic("Смертность (qx) для " + locality.name());
+        chart.addSeries("BOTH", b);
+        chart.addSeries("MALE", m);
+        chart.addSeries("FEMALE", f);
+        chart.defaultShapesVisible(false);
+        chart.display();
     }
 }

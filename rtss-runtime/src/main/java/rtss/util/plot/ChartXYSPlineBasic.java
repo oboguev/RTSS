@@ -47,7 +47,8 @@ public class ChartXYSPlineBasic extends ApplicationFrame
     private String xLabel;
     private String yLabel;
     private Double maxY;
-
+    private boolean defaultShapesVisible = true;
+    
     public ChartXYSPlineBasic()
     {
         this("");
@@ -103,6 +104,12 @@ public class ChartXYSPlineBasic extends ApplicationFrame
         return this;
     }
 
+    public ChartXYSPlineBasic defaultShapesVisible(boolean defaultShapesVisible)
+    {
+        this.defaultShapesVisible = defaultShapesVisible;
+        return this;
+    }
+
     public ChartXYSPlineBasic maxY(Double maxY)
     {
         this.maxY = maxY;
@@ -148,7 +155,7 @@ public class ChartXYSPlineBasic extends ApplicationFrame
         XYSplineRenderer splineRenderer = new XYSplineRenderer();
         splineRenderer.setDefaultShape(new Ellipse2D.Double(0,0,2,2));
         splineRenderer.setDefaultShapesFilled(true);
-        splineRenderer.setDefaultShapesVisible(true);
+        splineRenderer.setDefaultShapesVisible(defaultShapesVisible);
 
         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, splineRenderer);
         plot.setBackgroundPaint(Color.LIGHT_GRAY);
@@ -158,7 +165,7 @@ public class ChartXYSPlineBasic extends ApplicationFrame
 
         XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
         lineRenderer.setDefaultShape(new Ellipse2D.Double(0,0,1,1));
-        lineRenderer.setDefaultShapesVisible(true);
+        lineRenderer.setDefaultShapesVisible(defaultShapesVisible);
         lineRenderer.setDefaultStroke(new BasicStroke((float) 1.0));
         lineRenderer.setAutoPopulateSeriesStroke(false);
         
