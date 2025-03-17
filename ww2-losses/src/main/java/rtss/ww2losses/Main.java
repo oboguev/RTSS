@@ -57,7 +57,9 @@ import rtss.ww2losses.util.despike.DespikeZero;
 import static rtss.data.population.projection.ForwardPopulation.years2days;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main
 {
@@ -183,6 +185,8 @@ public class Main
     private Phase phase;
 
     private Summary summary = new Summary();
+    
+    private static Map<Area, double[]> area2births = new HashMap<>();
 
     private static class Summary
     {
@@ -431,6 +435,10 @@ public class Main
                                     allExcessDeathsByAgeAt1946,
                                     deficit1946_preimmigration,
                                     deficit1946_postimmigration);
+        
+        area2births.put(area, birthCurve(halves));
+        if (area2births.size() == 2)
+            ExportResults.exportBirths(exportDirectory, area2births.get(Area.USSR), area2births.get(Area.RSFSR));
 
         evalSummary(allExcessDeathsByAgeAt1946(false));
     }
@@ -1888,4 +1896,24 @@ public class Main
 
     /* ======================================================================================================= */
 
+    /*
+     * Кривая числа рождений 
+     */
+    private double[] birthCurve(HalfYearEntries<HalfYearEntry> halves)
+    {
+        double[] curve = null;
+        
+        for (HalfYearEntry he : halves)
+        {
+            if (he.year == 1946)
+                break;
+            
+            if (curve == null)
+                curve = Util.dup(he.actual_births_byday);
+            else
+                curve = Util.concat(curve, he.actual_births_byday);
+        }
+        
+        return curve;
+    }
 }

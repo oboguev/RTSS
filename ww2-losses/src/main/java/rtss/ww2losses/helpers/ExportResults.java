@@ -6,6 +6,7 @@ import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Area;
 import rtss.util.Util;
+import rtss.util.plot.ChartXY;
 import rtss.util.plot.PopulationChart;
 import rtss.ww2losses.params.AreaParameters;
 import rtss.ww2losses.struct.HalfYearEntries;
@@ -102,7 +103,7 @@ public class ExportResults
             // РСФСР, до и после поправок не иммиграцию
             title = "Дефицит населения " + areaname + " на начало 1946 года, без учёта иммиграции";
             Util.writeAsFile(fpath(fdir, ap, "deficit-1946-without-immigration"), dump(deficit1946_preimmigration, title));
-            
+
             title = "Дефицит населения " + areaname + " на начало 1946 года, с учётом иммиграции";
             fn = String.format("%s-deficit-1946-with-immigration.txt", ap.area.name());
             Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_postimmigration, title));
@@ -110,6 +111,24 @@ public class ExportResults
 
         Util.out("");
         Util.out("Файлы сохранены в директории " + exportDirectory);
+    }
+
+    /* ============================================================================================= */
+
+    public static void exportBirths(
+            String exportDirectory,
+            double[] ussr,
+            double[] rsfsr) throws Exception
+    {
+        final int cx = 900;
+        final int cy = 600;        
+        
+        ChartXY chart = new ChartXY("Число рождений в населениях СССР и РСФСР с начала 1941 по конец 1945 года, по дням");
+        chart.addSeries("СССР", ussr);
+        chart.addSeries("РСФСР", rsfsr);
+        chart.defaultShapesVisible(false);
+        chart.exportImage(cx, cy, imageFilename(exportDirectory, "USSR-RFSFR-births" + ".png"));
+        // chart.display();
     }
 
     /* ============================================================================================= */
@@ -155,6 +174,22 @@ public class ExportResults
         fdir.mkdirs();
 
         String fn = ap.area.name() + "-" + suffix;
+
+        return fpath(fdir, fn);
+    }
+
+    public static String imageFilename(String exportDirectory, String suffix) throws Exception
+    {
+        if (exportDirectory == null || exportDirectory.trim().length() == 0)
+            return null;
+
+        File fdir = new File(exportDirectory);
+        fdir.mkdirs();
+
+        fdir = new File(fdir, "images");
+        fdir.mkdirs();
+
+        String fn = suffix;
 
         return fpath(fdir, fn);
     }

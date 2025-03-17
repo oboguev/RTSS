@@ -1,9 +1,12 @@
 package rtss.util.plot;
 
+import java.io.ByteArrayOutputStream;
+
 import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
@@ -15,6 +18,8 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import rtss.util.Util;
+
 // F:\github\jfree-sponsor\jfreechart-demos-1.5.2\target
 // java -jar jfreechart-demo-1.5.2-jar-with-dependencies.jar
 // java -cp jfreechart-demo-1.5.2-jar-with-dependencies.jar org.jfree.chart.demo.LineChartDemo2
@@ -25,22 +30,23 @@ public class ChartXY extends ApplicationFrame
     public static void display(String title, double[] y)
     {
         new ChartXY(title, "x", "y")
-            .addSeries(title, y)
-            .display();        
+                .addSeries(title, y)
+                .display();
     }
-    
+
     public static void display(String title, double[] x, double[] y)
     {
         new ChartXY(title, "x", "y")
-            .addSeries(title, x, y)
-            .display();        
+                .addSeries(title, x, y)
+                .display();
     }
-    
+
     public static final long serialVersionUID = 1;
-    
+
     private XYSeriesCollection dataset = new XYSeriesCollection();
     private String xLabel;
     private String yLabel;
+    private boolean defaultShapesVisible = true;
 
     public ChartXY()
     {
@@ -51,14 +57,14 @@ public class ChartXY extends ApplicationFrame
     {
         this(title, "", "");
     }
-    
+
     public ChartXY(String title, String xLabel, String yLabel)
     {
         super(title);
         this.xLabel = xLabel;
         this.yLabel = yLabel;
     }
-    
+
     public ChartXY addSeries(String name, double[] y)
     {
         double[] x = new double[y.length];
@@ -70,15 +76,21 @@ public class ChartXY extends ApplicationFrame
     public ChartXY addSeries(String name, double[] x, double[] y)
     {
         XYSeries series = new XYSeries(name);
-        
+
         for (int k = 0; k < x.length; k++)
             series.add(x[k], y[k]);
-        
+
         dataset.addSeries(series);
         return this;
     }
-    
-    public void display() 
+
+    public ChartXY defaultShapesVisible(boolean defaultShapesVisible)
+    {
+        this.defaultShapesVisible = defaultShapesVisible;
+        return this;
+    }
+
+    public void display()
     {
         JPanel chartPanel = createPanel();
         chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
@@ -86,37 +98,35 @@ public class ChartXY extends ApplicationFrame
         pack();
         UIUtils.centerFrameOnScreen(this);
         setVisible(true);
-    }    
+    }
 
-    private JPanel createPanel() 
+    private JPanel createPanel()
     {
         JFreeChart chart = createChart(dataset);
         ChartPanel panel = new ChartPanel(chart);
         panel.setMouseWheelEnabled(true);
         return panel;
-    }    
+    }
 
-    private JFreeChart createChart(XYDataset dataset) 
+    private JFreeChart createChart(XYDataset dataset)
     {
         // create the chart
-        JFreeChart chart = ChartFactory.createXYLineChart(
-            getTitle(),                 // chart title
-            xLabel,                     // x axis label
-            yLabel,                     // y axis label
-            dataset,                    // data
-            PlotOrientation.VERTICAL,
-            true,                       // include legend
-            true,                       // tooltips
-            false                       // urls
+        JFreeChart chart = ChartFactory.createXYLineChart(getTitle(), // chart title
+                                                          xLabel, // x axis label
+                                                          yLabel, // y axis label
+                                                          dataset, // data
+                                                          PlotOrientation.VERTICAL,
+                                                          true, // include legend
+                                                          true, // tooltips
+                                                          false // urls
         );
 
         // get a reference to the plot for further customization
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
-        XYLineAndShapeRenderer renderer
-                = (XYLineAndShapeRenderer) plot.getRenderer();
-        renderer.setDefaultShapesVisible(true);
+        XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+        renderer.setDefaultShapesVisible(defaultShapesVisible);
         renderer.setDefaultShapesFilled(true);
 
         // change the auto tick unit selection to integer units only
@@ -124,5 +134,15 @@ public class ChartXY extends ApplicationFrame
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         return chart;
+    }
+
+    public ChartXY exportImage(int cx, int cy, String fn) throws Exception
+    {
+        JFreeChart chart = createChart(dataset);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ChartUtils.writeChartAsPNG(baos, chart, cx, cy);
+        Util.writeAsFile(fn, baos.toByteArray());
+
+        return this;
     }
 }
