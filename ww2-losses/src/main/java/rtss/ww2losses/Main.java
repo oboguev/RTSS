@@ -432,7 +432,7 @@ public class Main
                                     deficit1946_preimmigration,
                                     deficit1946_postimmigration);
 
-        evalSummary(allExcessDeathsByAgeAt1946);
+        evalSummary(allExcessDeathsByAgeAt1946(false));
     }
 
     private void stage_1(
@@ -1649,7 +1649,7 @@ public class Main
 
     private void evalSummary(PopulationContext allExcessDeathsByAgeAt1946) throws Exception
     {
-        int nd45 = 9 * years2days(0.5);
+        final int nd45 = 9 * years2days(0.5);
         double v, v1, v2, v3;
 
         Util.out("");
@@ -1673,9 +1673,13 @@ public class Main
         outk("Избыточное число смертей женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
 
         /*
-         * Потери детей в возрасте 0-5 лет на начало войны (4.5 - 9 лет на 1946 год)
+         * Потери детей в возрасте 0-5.999 лет на начало войны (4.5 - 9.999 лет на 1946 год)
          */
-        // ###
+        final int nd10y = years2days(10.0);
+        v = deficit1946_postimmigration.sumDays(nd45, nd10y - 1);
+        outk("Дефицит детей в возрасте 0-5.999 лет на начало войны, тыс. чел.", v);
+        v = allExcessDeathsByAgeAt1946.sumDays(nd45, nd10y - 1);
+        outk("Избыточные смерти детей в возрасте 0-5.999 лет на начало войны, тыс. чел.", v);
 
         /*
          * Потери рождённых во время войны
