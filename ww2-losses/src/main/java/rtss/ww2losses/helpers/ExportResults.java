@@ -32,10 +32,8 @@ public class ExportResults
             PopulationContext allExcessDeathsByDeathAge,
             PopulationContext allExcessDeathsByAgeAt1946,
 
-            PopulationContext deficit1946_raw_preimmigration,
-            PopulationContext deficit1946_adjusted_preimmigration,
-            PopulationContext deficit1946_raw_postimmigration,
-            PopulationContext deficit1946_adjusted_postimmigration) throws Exception
+            PopulationContext deficit1946_preimmigration,
+            PopulationContext deficit1946_postimmigration) throws Exception
     {
         if (exportDirectory == null || exportDirectory.trim().length() == 0)
             return;
@@ -80,7 +78,7 @@ public class ExportResults
                 }
             }
         }
-        
+
         /* ========================================================================================================= */
 
         title = "Избыточные смерти населения " + areaname + " в 1941-1945 гг. по возрасту в момент смерти";
@@ -93,58 +91,21 @@ public class ExportResults
 
         /* ========================================================================================================= */
 
-        if (deficit1946_raw_preimmigration == null && deficit1946_adjusted_preimmigration == null)
+        if (deficit1946_preimmigration == null)
         {
             // СССР, только "с иммиграцией" (нулевой)
-
-            if (deficit1946_adjusted_postimmigration != null)
-            {
-                title = "Дефицит населения " + areaname + " на начало 1946 года (неисправленный)";
-                Util.writeAsFile(fpath(fdir, ap, "deficit-1946.1-raw"), dump(deficit1946_raw_postimmigration, title));
-
-                title = "Дефицит населения " + areaname + " на начало 1946 года (исправленный)";
-                Util.writeAsFile(fpath(fdir, ap, "deficit-1946.1-adjusted"), dump(deficit1946_adjusted_postimmigration, title));
-            }
-            else
-            {
-                title = "Дефицит населения " + areaname + " на начало 1946 года";
-                Util.writeAsFile(fpath(fdir, ap, "deficit-1946.1"), dump(deficit1946_raw_postimmigration, title));
-            }
+            title = "Дефицит населения " + areaname + " на начало 1946 года";
+            Util.writeAsFile(fpath(fdir, ap, "deficit-1946.1"), dump(deficit1946_postimmigration, title));
         }
         else
         {
             // РСФСР, до и после поправок не иммиграцию
-
-            if (deficit1946_adjusted_preimmigration != null)
-            {
-                title = "Дефицит населения " + areaname + " на начало 1946 года (неисправленный), без учёта иммиграции";
-                Util.writeAsFile(fpath(fdir, ap, "deficit-1946.1-raw-without-immigration"), dump(deficit1946_raw_preimmigration, title));
-
-                title = "Дефицит населения " + areaname + " на начало 1946 года (исправленный), без учёта иммиграции";
-                Util.writeAsFile(fpath(fdir, ap, "deficit-1946.1-adjusted-without-immigration"), dump(deficit1946_adjusted_preimmigration, title));
-            }
-            else
-            {
-                title = "Дефицит населения " + areaname + " на начало 1946 года, без учёта иммиграции";
-                Util.writeAsFile(fpath(fdir, ap, "deficit-1946-without-immigration"), dump(deficit1946_raw_preimmigration, title));
-            }
-
-            if (deficit1946_adjusted_postimmigration != null)
-            {
-                title = "Дефицит населения " + areaname + " на начало 1946 года (неисправленный), с учётом иммиграции";
-                fn = String.format("%s-deficit-1946.1-raw-with-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_postimmigration, title));
-
-                title = "Дефицит населения " + areaname + " на начало 1946 года (исправленный), с учётом иммиграции";
-                fn = String.format("%s-deficit-1946.1-adjusted-with-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_adjusted_postimmigration, title));
-            }
-            else
-            {
-                title = "Дефицит населения " + areaname + " на начало 1946 года, с учётом иммиграции";
-                fn = String.format("%s-deficit-1946-with-immigration.txt", ap.area.name());
-                Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_raw_postimmigration, title));
-            }
+            title = "Дефицит населения " + areaname + " на начало 1946 года, без учёта иммиграции";
+            Util.writeAsFile(fpath(fdir, ap, "deficit-1946-without-immigration"), dump(deficit1946_preimmigration, title));
+            
+            title = "Дефицит населения " + areaname + " на начало 1946 года, с учётом иммиграции";
+            fn = String.format("%s-deficit-1946-with-immigration.txt", ap.area.name());
+            Util.writeAsFile(fpath(fdir, fn), dump(deficit1946_postimmigration, title));
         }
 
         Util.out("");

@@ -167,12 +167,10 @@ public class Main
     public String exportDirectory = "c:\\@ww2losses\\export";
 
     /* дефицит населения на начало 1946 года, до поправки на иммиграцию */
-    private PopulationContext deficit1946_raw_preimmigration;
-    private PopulationContext deficit1946_adjusted_preimmigration;
+    private PopulationContext deficit1946_preimmigration;
 
     /* дефицит населения  на начало 1946 года, после поправки на иммиграцию */
-    private PopulationContext deficit1946_raw_postimmigration;
-    private PopulationContext deficit1946_adjusted_postimmigration;
+    private PopulationContext deficit1946_postimmigration;
 
     /* интенсивность иммиграции (ддя РСФСР) */
     private AgeLineFactorIntensities immigration_intensity = null;
@@ -431,8 +429,8 @@ public class Main
         ExportResults.exportResults(exportDirectory, ap, halves,
                                     allExcessDeathsByDeathAge,
                                     allExcessDeathsByAgeAt1946,
-                                    deficit1946_raw_preimmigration, deficit1946_adjusted_preimmigration,
-                                    deficit1946_raw_postimmigration, deficit1946_adjusted_postimmigration);
+                                    deficit1946_preimmigration,
+                                    deficit1946_postimmigration);
 
         evalWomanLoss(allExcessDeathsByAgeAt1946);
         evalSummary(allExcessDeathsByAgeAt1946);
@@ -794,7 +792,6 @@ public class Main
 
         PopulationContext deficit = p1946_expected_without_births.sub(p1946_actual_born_prewar, ValueConstraint.NONE);
         PopulationContext deficit_wb_raw = p1946_expected_with_births.sub(p1946_actual, ValueConstraint.NONE);
-        PopulationContext deficit_wb_adjusted = null;
 
         /* =================================================== */
 
@@ -947,16 +944,12 @@ public class Main
             outk("    Сверхсмертность [по дефициту] женщин фертильного возраста", deficit_f_fertile);
             outk("    Сверхсмертность [по дефициту] остального наличного на середину 1941 года населения", deficit_other);
 
-            this.deficit1946_raw_postimmigration = deficit_wb_raw;
-            this.deficit1946_adjusted_postimmigration = deficit_wb_adjusted;
+            this.deficit1946_postimmigration = deficit_wb_raw;
         }
         else if (phase == Phase.PRELIMINARY)
         {
-            if (this.deficit1946_raw_preimmigration == null)
-                this.deficit1946_raw_preimmigration = deficit_wb_raw;
-
-            if (this.deficit1946_adjusted_preimmigration == null)
-                this.deficit1946_adjusted_preimmigration = deficit_wb_adjusted;
+            if (this.deficit1946_preimmigration == null)
+                this.deficit1946_preimmigration = deficit_wb_raw;
         }
 
         if (phase == Phase.ACTUAL)
@@ -1670,10 +1663,10 @@ public class Main
         int nd45 = years2days(4.5);
         double v;
 
-        v = deficit1946_raw_postimmigration.sumDays(nd45, deficit1946_raw_postimmigration.MAX_DAY);
+        v = deficit1946_postimmigration.sumDays(nd45, deficit1946_postimmigration.MAX_DAY);
         outk("Наличное на начало войны население, дефицит к концу 1945 года, тыс. чел.", v);
 
-        v = allExcessDeathsByAgeAt1946.sumDays(nd45, deficit1946_raw_postimmigration.MAX_DAY);
+        v = allExcessDeathsByAgeAt1946.sumDays(nd45, deficit1946_postimmigration.MAX_DAY);
         outk("Наличное на начало войны население, избыточное число смертей в 1941-1945 гг., тыс. чел.", v);
         
         // ###
