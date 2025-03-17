@@ -181,12 +181,12 @@ public class Main
     };
 
     private Phase phase;
-    
+
     private Summary summary = new Summary();
-    
+
     private static class Summary
     {
-        
+
     }
 
     void main() throws Exception
@@ -432,7 +432,6 @@ public class Main
                                     deficit1946_preimmigration,
                                     deficit1946_postimmigration);
 
-        evalWomanLoss(allExcessDeathsByAgeAt1946);
         evalSummary(allExcessDeathsByAgeAt1946);
     }
 
@@ -1647,31 +1646,50 @@ public class Main
 
     /* ======================================================================================================= */
 
-    /*
-     * Потери женщин в возрасте 20-40 лет на 1946 год
-     */
-    private void evalWomanLoss(PopulationContext allExcessDeathsByAgeAt1946) throws Exception
-    {
-        double v = allExcessDeathsByAgeAt1946.sumDays(Gender.FEMALE, years2days(20.0), years2days(40.0));
-        outk("Сверхсмертность женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
-    }
-
-    /* ======================================================================================================= */
-    
     private void evalSummary(PopulationContext allExcessDeathsByAgeAt1946) throws Exception
     {
-        int nd45 = years2days(4.5);
-        double v;
+        int nd45 = 9 * years2days(0.5);
+        double v, v1, v2;
+        
+        Util.out("");
+        Util.out("Сводка:");
+        Util.out("");
 
+        /*
+         * Потери наличного на начало войны населения
+         */
         v = deficit1946_postimmigration.sumDays(nd45, deficit1946_postimmigration.MAX_DAY);
         outk("Наличное на начало войны население, дефицит к концу 1945 года, тыс. чел.", v);
-
-        v = allExcessDeathsByAgeAt1946.sumDays(nd45, deficit1946_postimmigration.MAX_DAY);
+        v = allExcessDeathsByAgeAt1946.sumDays(nd45, allExcessDeathsByAgeAt1946.MAX_DAY);
         outk("Наличное на начало войны население, избыточное число смертей в 1941-1945 гг., тыс. чел.", v);
-        
-        // ###
-        outk("Рождённые во время войны, тыс. чел.", 0);
-        // ###
+
+        /*
+         * Потери женщин в возрасте 20-40 лет на 1946 год
+         */
+        Util.out("");
+        v = deficit1946_postimmigration.sumDays(Gender.FEMALE, years2days(20.0), years2days(40.0));
+        outk("Дефицит женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
+        v = allExcessDeathsByAgeAt1946.sumDays(Gender.FEMALE, years2days(20.0), years2days(40.0));
+        outk("Избыточное число смертей женщин в возрасте 20-40 лет на начало 1946 года, тыс. чел.", v);
+
+        /*
+         * Потери рождённых во время войны
+         */
+        v1 = v2 = 0;
+        for (HalfYearEntry he : halves)
+        {
+            if (!he.id().equals("1941.1"))
+            {
+                v1 += he.actual_births;
+                v2 += he.expected_nonwar_births;
+            }
+        }
+        Util.out("");
+        outk("Число рождений во время войны (середина 1941 - конец 1945), тыс. чел.", v1);
+        outk("Ожидаемое число рождений за период войны (середина 1941 - конец 1945) в условиях мира, тыс. чел.", v2);
+        outk("Число несостоявшихся рождений за период войны (середина 1941 - конец 1945), тыс. рождений.", v2 - v1);
+
+        // ### сверхсмертность рождённых во время войны (изб. смертей, дефицит в 1946)
     }
 
     /* ======================================================================================================= */
