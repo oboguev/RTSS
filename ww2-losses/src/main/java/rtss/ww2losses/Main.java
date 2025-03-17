@@ -26,6 +26,7 @@ import rtss.ww2losses.ageline.PrintAgeLine;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModel;
 import rtss.ww2losses.ageline.warmodel.WarAttritionModelParameters;
 import rtss.ww2losses.helpers.ExportResults;
+import rtss.ww2losses.helpers.MiscHelper;
 import rtss.ww2losses.helpers.PeacetimeMortalityTables;
 import rtss.ww2losses.helpers.PopulationContextCache;
 import rtss.ww2losses.helpers.PrintHalfYears;
@@ -278,6 +279,15 @@ public class Main
         AdjustPopulation adjuster1941 = new AdjustPopulation1941(area);
         PopulationContext p_start1941 = pe1941.evaluate(adjuster1941);
         PopulationContext p_start1941_0 = p_start1941.clone();
+        
+        if (Util.False)
+        {
+            /*
+             * Распечатать среднюю мирную смертность мужчин в возрастах 25-55 лет в населении в целом
+             * для сравнения со смертностью в ГУЛАГе в 1941-1943 гг.
+             */
+            MiscHelper.showAverageMortality(Gender.MALE, p_start1941.toPopulation(), mt1940, 25, 55);
+        }
 
         /* 
          * Перераспределить население внутри 5-летних групп аггреграции,
