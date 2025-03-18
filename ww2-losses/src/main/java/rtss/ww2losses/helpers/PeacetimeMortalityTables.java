@@ -18,6 +18,7 @@ import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
 import rtss.math.interpolate.mpspline.MeanPreservingIterativeSpline;
 import rtss.util.Util;
+import rtss.util.plot.ChartXYSPlineBasic;
 import rtss.util.plot.ChartXYSplineAdvanced;
 import rtss.ww2losses.struct.HalfYearEntry;
 import rtss.ww2losses.struct.HalfYearEntries.HalfYearSelector;
@@ -47,7 +48,7 @@ public class PeacetimeMortalityTables
         /* интерполяция на полугодия, но для 1941 и 1941 оставить 1.0 */
         halfyearly_imr_multiplier = yearly2timepoints(yearly_imr_multiplier, 2, 100);
         halfyearly_imr_multiplier[0] = halfyearly_imr_multiplier[1] = halfyearly_imr_multiplier[2] = halfyearly_imr_multiplier[3] = 1.0;
-        
+
         this.mt1940.clear_daily_lx();
 
         for (int year = 1941; year <= 1945; year++)
@@ -262,5 +263,16 @@ public class PeacetimeMortalityTables
             double[] f_lx = mt2lx(yhy.year, yhy.halfyear, cmt, Locality.TOTAL, Gender.FEMALE);
             new ChartXYSplineAdvanced(title, "возраст", "остаток lx").addSeries("male", m_lx).addSeries("femake", f_lx).display();
         }
+    }
+
+    /* ======================================================================================= */
+
+    public static void diagDisplay(CombinedMortalityTable cmt, Locality locality, Gender gender, String title) throws Exception
+    {
+        double[] qx = cmt.getSingleTable(locality, gender).qx();
+        ChartXYSPlineBasic chart = new ChartXYSPlineBasic(title);
+        chart.addSeries("", qx);
+        chart.defaultShapesVisible(false);
+        chart.display();
     }
 }

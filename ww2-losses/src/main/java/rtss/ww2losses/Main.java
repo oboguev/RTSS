@@ -263,6 +263,11 @@ public class Main
         peacetimeMortalityTables = new PeacetimeMortalityTables(mt1940, ApplyAntibiotics);
         if (Util.False)
         {
+            PeacetimeMortalityTables.diagDisplay(mt1940, Locality.TOTAL, Gender.BOTH, 
+                                                 "Возрастная смертность населения " + area.toString() + " в 1940 году, оба пола, все виды местностей");
+        }
+        if (Util.False)
+        {
             peacetimeMortalityTables.diagPrintFirstEntries(10);
             peacetimeMortalityTables.diag_display_lx();
         }
