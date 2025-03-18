@@ -22,6 +22,6 @@ public class MiscHelper
             deaths += v * qx[age];
         }
         
-        Util.out(String.format("Доля умирающих за год в мирных условиях %s %d-%d: %.2f%%", gender.name(), age1, age2, 100 * deaths / sum));
+        Util.out(String.format("Доля умирающих за год в мирных условиях %s %d-%d: %.1f промилле", gender.name(), age1, age2, 1000 * deaths / sum));
     }
 }

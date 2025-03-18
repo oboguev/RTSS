@@ -292,6 +292,14 @@ public class Main
              * для сравнения со смертностью в ГУЛАГе в 1941-1943 гг.
              */
             MiscHelper.showAverageMortality(Gender.MALE, p_start1941.toPopulation(), mt1940, 25, 55);
+
+            /*
+             * Распечатать среднюю мирную смертность населения в возрастах 18-45 лет в населении в целом
+             * для сравнения со смертностью остарбайтеров
+             */
+            MiscHelper.showAverageMortality(Gender.MALE, p_start1941.toPopulation(), mt1940, 18, 45);
+            MiscHelper.showAverageMortality(Gender.FEMALE, p_start1941.toPopulation(), mt1940, 18, 45);
+            MiscHelper.showAverageMortality(Gender.BOTH, p_start1941.toPopulation(), mt1940, 18, 45);
         }
 
         /* 
