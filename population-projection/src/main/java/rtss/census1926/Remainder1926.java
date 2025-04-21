@@ -1,4 +1,4 @@
-package rtss.un1926;
+package rtss.census1926;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.MortalityTableADH;
