@@ -8,7 +8,7 @@ import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
-import rtss.util.plot.ChartXY;
+// import rtss.util.plot.ChartXY;
 import rtss.util.plot.ChartXYSPlineBasic;
 
 /*
