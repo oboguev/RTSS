@@ -19,6 +19,7 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
 // import rtss.util.XY;
+import rtss.util.plot.ChartXYSplineAdvanced;
 
 /*
  * Загрузить поло-возрастные покаатели смертности (агреггированные по возрастным группам) из файла Excel
@@ -315,5 +316,17 @@ public class MortalityTableADH
         double deaths2 = m0.avg * p0.avg + m1.avg * p1.avg + m2.avg * p2.avg;
         if (Util.differ(deaths_012, deaths2))
             throw new Exception("Unable to correct inverted mortality rate at age 40-44");
+    }
+
+    @SuppressWarnings("unused")
+    private static void display(CombinedMortalityTable cmt, Locality locality, Gender gender) throws Exception
+    {
+        double[] qx = cmt.getSingleTable(locality, gender).qx();
+
+        Util.print(cmt.comment() + " qx", qx, 0);
+
+        new ChartXYSplineAdvanced(cmt.comment() + " qx", "age", "mortality").showSplinePane(false)
+                .addSeries("qx", qx)
+                .display();
     }
 }

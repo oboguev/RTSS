@@ -50,6 +50,13 @@ public class Util
         System.err.println(s);
     }
 
+    public static String properCase(String s)
+    {
+        if (s == null || s.isEmpty())
+            return s;
+        return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+    }
+
     public static String dirFile(String dir, String file) throws Exception
     {
         File f = new File(dir);
@@ -703,7 +710,7 @@ public class Util
 
         return variance / y.length;
     }
-    
+
     public static double[] repeat(int times, double v)
     {
         double[] y = new double[times];
@@ -862,7 +869,7 @@ public class Util
 
         return "";
     }
-    
+
     public static Double[] boxArray(double[] a)
     {
         Double[] v = new Double[a.length];

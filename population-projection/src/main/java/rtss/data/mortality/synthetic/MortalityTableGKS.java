@@ -3,6 +3,8 @@ package rtss.data.mortality.synthetic;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.bin.Bin;
+import rtss.data.bin.Bins;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.selectors.Area;
@@ -72,6 +74,12 @@ public class MortalityTableGKS
             compute(cmt, context, Locality.URBAN);
             compute(cmt, context, Locality.RURAL);
             cmt.comment(String.format("ГКС-%s-%s", context.area.name(), context.year));
+
+            if (Util.False)
+            {
+                String comment = "# Таблица построена модулем " + MortalityTableGKS.class.getCanonicalName() + " по данным в " + context.filepath;
+                cmt.saveTable("P:\\@\\zzzz", comment);
+            }
         }
 
         if (UseCache)
@@ -93,12 +101,15 @@ public class MortalityTableGKS
     private static void compute(CombinedMortalityTable cmt, Context context, Locality locality, Gender gender) throws Exception
     {
         SingleMortalityTable mt = getSingleTable(context, locality, gender);
-        cmt.setTable(Locality.TOTAL, Gender.BOTH, mt);
+        cmt.setTable(locality, gender, mt);
     }
 
-    private static SingleMortalityTable getSingleTable(Context context, Locality locality, Gender gender)
+    private static SingleMortalityTable getSingleTable(Context context, Locality locality, Gender gender) throws Exception
     {
-        // ###
-        return null;
+        Bin[] mortality_bins = MortalityRatesFromExcel.loadAgeQx(context.filepath, locality, gender);
+        mortality_bins = Bins.multiply(mortality_bins, 1000.0);
+        String title = String.format("ГКС-%s-%s %s %s", context.area.name(), context.year, locality.name(), gender.name());
+        SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, title);
+        return mt;
     }
 }

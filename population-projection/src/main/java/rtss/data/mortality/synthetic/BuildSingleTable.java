@@ -11,19 +11,15 @@ import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.curves.OsierTask;
 import rtss.data.curves.TuneCCS;
 import rtss.data.curves.ViewCurve;
-import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityUtil;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
-import rtss.data.selectors.Gender;
-import rtss.data.selectors.Locality;
 import rtss.external.Osier.OsierMortalityType;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
 import rtss.math.pclm.PCLM_Rizzi_2015;
 import rtss.util.Clipboard;
 import rtss.util.Util;
-import rtss.util.plot.ChartXYSplineAdvanced;
 
 public class BuildSingleTable
 {
@@ -411,18 +407,6 @@ public class BuildSingleTable
         CurveVerifier.verifyUShape(curve, bins, debug_title, false);
         CurveVerifier.validate_means(curve, bins);
         return curve;
-    }
-
-    @SuppressWarnings("unused")
-    private static void display(CombinedMortalityTable cmt, Locality locality, Gender gender) throws Exception
-    {
-        double[] qx = cmt.getSingleTable(locality, gender).qx();
-
-        Util.print(cmt.comment() + " qx", qx, 0);
-
-        new ChartXYSplineAdvanced(cmt.comment() + " qx", "age", "mortality").showSplinePane(false)
-                .addSeries("qx", qx)
-                .display();
     }
 
     /*
