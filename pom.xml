@@ -104,6 +104,7 @@
 		<module>rtss-mexico</module>
 		<module>rtss-pre1917</module>
 		<module>rtss-un-wpp</module>
+		<module>rtss-losses-199x</module>
 	</modules>
 
 </project>
