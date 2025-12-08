@@ -2,7 +2,10 @@
 
 Server endpoint is configured using file rtss-runtime/rtss-config.yml
 
-Baic server connection can be tested using module ``TestR.java`` 
+Server can be built with ``build-server.sh`` and launched with ``run-server.sh``
+Alternatively it can be launched from Eclipse as ``rtss-server/src/main/java/rtss.external.server/Server.java``
+
+Basic server connection can be tested from the client calling system using module ``TestR.java`` 
 
 ### Using R packages from RTSS
 
@@ -12,7 +15,7 @@ R can be installed either on the same machine as RTSS, or on a different machine
 
 R can also be installed within a virtual machine (such as VMWare or VirtualBox), running on the same (or different) physical host.
 
-Installation sequence for R (assuming Ubuntu):
+Installation sequence for R (assuming Ubuntu host):
 
 ```
 sudo apt update
