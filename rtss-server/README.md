@@ -2,6 +2,8 @@
 
 Server endpoint is configured using file rtss-runtime/rtss-config.yml
 
+Baic server connection can be tested using module ``TestR.java`` 
+
 ### Using R packages from RTSS
 
 RTSS uses R packages to disaggregate mortality curves and for other computations, and needs R installation it can invoke.
