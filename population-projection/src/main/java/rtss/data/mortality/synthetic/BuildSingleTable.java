@@ -135,6 +135,27 @@ public class BuildSingleTable
         if (Util.True)
         {
             /*
+             * For 1-year bins replace computed values with exact original bin value 
+             */
+            for (Bin bin : bins)
+            {
+                if (bin.widths_in_years == 1)
+                    yyy[bin.age_x1] = bin.avg;
+            }
+        }
+        
+        for (int age = 0; age < yyy.length; age++)
+        {
+            /*
+             * Clip mortality curve (usually at high ages) to 1000 promille
+             */
+            if (yyy[age] > 1000.0)
+                yyy[age] = 1000.0; 
+        }
+        
+        if (Util.True)
+        {
+            /*
              * Display yearly curve
              */
             String title = "PCLM yearly curve " + debug_title;
@@ -145,7 +166,7 @@ public class BuildSingleTable
 
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
-        CurveVerifier.validate_means(yy, bins);
+        CurveVerifier.validate_means_allow_last_beless(yy, bins);
         
         if (Util.False && bins[0].widths_in_years == 1)
         {

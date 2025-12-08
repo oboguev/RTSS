@@ -32,6 +32,27 @@ public class CurveVerifier
     }
     
     /*
+     * Validate curve mean values against the bins,
+     * but allow average curve values in the last bin years be less than bin average
+     * (if mortality curve is clipped at 1000 promille).
+     */
+    public static void validate_means_allow_last_beless(double[] yy, Bin[] bins) throws Exception
+    {
+        int ppy = CurveUtil.ppy(yy, bins);
+        
+        for (Bin bin : bins)
+        {
+            double[] y = Util.splice(yy, bin.x1(ppy), bin.x2(ppy));
+            
+            if (bin.next == null && Util.average(y) < bin.avg)
+                continue;
+            
+            if (Util.differ(Util.average(y), bin.avg, 0.001))
+                throw new Exception("Curve does not preserve mean values of the bins");
+        }
+    }
+    
+    /*
      * Verify that the bins data is U-shaped
      */
     public static boolean verifyUShape(Bin[] bins, boolean strict, String title, boolean doThrow) throws Exception
