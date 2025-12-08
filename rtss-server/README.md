@@ -1,3 +1,7 @@
+### RTSS client-server
+
+Server endpoint is configured using file rtss-runtime/rtss-config.yml
+
 ### Using R packages from RTSS
 
 RTSS uses R packages to disaggregate mortality curves and for other computations, and needs R installation it can invoke.
