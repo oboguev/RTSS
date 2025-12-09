@@ -1,5 +1,7 @@
 package rtss.losses199x;
 
+import rtss.data.asfr.AgeSpecificFertilityRates;
+import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.MortalityTableGKS;
 import rtss.data.population.struct.PopulationByLocality;
@@ -12,8 +14,9 @@ public class Losses199X
     {
         try
         {
-            PopulationByLocality p1989 = PopulationByLocality.census(Area.RSFSR, 1989);
-            CombinedMortalityTable cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987");
+            PopulationByLocality p1989 = LoadData.polulation1989();
+            CombinedMortalityTable cmt = LoadData.mortalityTable();
+            AgeSpecificFertilityRates asfr = LoadData.loadASFR();
             Util.noop();
         }
         catch (Exception ex)
