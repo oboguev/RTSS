@@ -73,7 +73,7 @@ public class Population
     {
         this.title = title;
     }
-    
+
     public String title()
     {
         return title;
@@ -107,7 +107,7 @@ public class Population
     {
         return locality;
     }
-    
+
     public Integer yearHint()
     {
         return yearHint;
@@ -897,6 +897,103 @@ public class Population
             mismatch();
     }
 
+    public void validate(double diff, int checkCutoffAge) throws Exception
+    {
+        double sum_m = 0;
+        double sum_f = 0;
+        double sum_b = 0;
+
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            if (!male.containsKey(age) || !female.containsKey(age) || !both.containsKey(age))
+                throw new Exception("Mising entry in population table");
+
+            double m = male.get(age);
+            double f = female.get(age);
+            double b = both.get(age);
+
+            Util.checkValid(m);
+            Util.checkValid(f);
+            Util.checkValid(b);
+
+            male.valueConstraint().validate(m);
+            female.valueConstraint().validate(f);
+            both.valueConstraint().validate(b);
+
+            // if (m < 0 || f < 0 || b < 0)
+            //     negative();
+
+            if (differ(m + f, b, age, diff, checkCutoffAge))
+                mismatch();
+
+            sum_m += m;
+            sum_f += f;
+            sum_b += b;
+        }
+
+        Util.checkValid(male_unknown);
+        Util.checkValid(female_unknown);
+        Util.checkValid(both_unknown);
+
+        Util.checkValid(male_total);
+        Util.checkValid(female_total);
+        Util.checkValid(both_total);
+
+        Util.checkValid(sum_m);
+        Util.checkValid(sum_f);
+        Util.checkValid(sum_b);
+
+        if (male_unknown < 0 || female_unknown < 0 || both_unknown < 0)
+            negative();
+
+        if (male_total == 0)
+            male_total = sum_m + male_unknown;
+
+        if (female_total == 0)
+            female_total = sum_f + female_unknown;
+
+        if (both_total == 0)
+            both_total = sum_b + both_unknown;
+
+        validateValue(male_total, male);
+        validateValue(female_total, female);
+        validateValue(both_total, both);
+
+        if (differ(male_unknown + female_unknown, both_unknown, 0, diff, -1))
+            mismatch();
+
+        if (differ(male_total + female_total, both_total, 0, diff, -1))
+            mismatch();
+
+        if (differ(sum_m + male_unknown, male_total, 0, diff, -1))
+            mismatch();
+
+        if (differ(sum_f + female_unknown, female_total, 0, diff, -1))
+            mismatch();
+
+        if (differ(sum_b + both_unknown, both_total, 0, diff, -1))
+            mismatch();
+    }
+
+    private static boolean differ(double a, double b, int age, double diff, int checkCutoffAge)
+    {
+        if (Math.abs(a - b) <= 1)
+            return false;
+
+        if (Util.same(a, b, diff))
+            return false;
+
+        if (checkCutoffAge >= 0 && age >= checkCutoffAge)
+        {
+            if (Util.same(a, b, 0.2))
+                return false;
+        }
+
+        return true;
+    }
+
+    /****************************************************************************************************/
+
     public void makeBoth() throws Exception
     {
         makeBoth(null);
@@ -1283,7 +1380,7 @@ public class Population
                 throw new Exception("BMF mismatch");
         }
     }
-    
+
     public void validateBMF(double diff) throws Exception
     {
         for (int age = 0; age <= MAX_AGE; age++)
@@ -1296,15 +1393,27 @@ public class Population
         }
     }
 
-    public void validateBMF(double diff, int maxage) throws Exception
+    public void validateBMF(double diff, int checkCutoffAge) throws Exception
     {
         for (int age = 0; age <= MAX_AGE; age++)
         {
             double m = male(age);
             double f = female(age);
             double b = both(age);
-            if (Util.differ(m + f, b, diff) && Math.abs(m + f - b) > 1 && age < maxage)
-                throw new Exception("BMF mismatch");
+
+            if (Math.abs(m + f - b) <= 1)
+                continue;
+
+            if (Util.same(m + f, b, diff))
+                continue;
+
+            if (checkCutoffAge >= 0 && age >= checkCutoffAge)
+            {
+                if (Util.same(m + f, b, 0.2))
+                    continue;
+            }
+
+            throw new Exception("BMF mismatch");
         }
     }
 
@@ -1319,12 +1428,14 @@ public class Population
 
     /*****************************************************************************************************/
 
-    public Population(Bin[] maleBins, Bin[] femaleBins, Integer yearHint, InterpolationOptions maleOptions, InterpolationOptions femaleOptions) throws Exception
+    public Population(Bin[] maleBins, Bin[] femaleBins, Integer yearHint, InterpolationOptions maleOptions, InterpolationOptions femaleOptions)
+            throws Exception
     {
         this(Locality.TOTAL, maleBins, femaleBins, yearHint, maleOptions, femaleOptions);
     }
 
-    public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins, Integer yearHint, InterpolationOptions maleOptions, InterpolationOptions femaleOptions) throws Exception
+    public Population(Locality locality, Bin[] maleBins, Bin[] femaleBins, Integer yearHint, InterpolationOptions maleOptions,
+            InterpolationOptions femaleOptions) throws Exception
     {
         this(locality,
              bin2array(maleBins, yearHint, Gender.MALE, maleOptions), 0, null,
@@ -1356,7 +1467,7 @@ public class Population
                 v[k] = bins[k].avg;
             return v;
         }
-        
+
         bins = Bins.sum2avg(bins);
         if (Bins.firstBin(bins).age_x1 != 0 || Bins.lastBin(bins).age_x2 != Population.MAX_AGE)
             throw new Exception("Invalid population age range");
@@ -1365,13 +1476,13 @@ public class Population
 
         double sum1 = Util.sum(counts);
         double sum2 = Bins.sum(bins);
-        
+
         if (Util.differ(sum1, sum2))
             throw new Exception("Curve count mismatches bin count");
-        
+
         return counts;
     }
-    
+
     public void display(String title) throws Exception
     {
         PopulationChart.display(title, this, "1");
