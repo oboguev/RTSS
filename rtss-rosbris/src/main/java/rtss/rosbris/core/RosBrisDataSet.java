@@ -138,14 +138,21 @@ public class RosBrisDataSet
         }
     }
 
+    public RosBrisDataSet selectEq(String key, long value) throws Exception
+    {
+        return selectEq(key, Long.toString(value));
+    }
+    
     public RosBrisDataSet selectEq(String key, String value) throws Exception
     {
         RosBrisDataSet ds = new RosBrisDataSet();
+        
         for (DataEntry de : values)
         {
             if (de.asString(key).equals(value))
                 ds.values.add(de);
         }
+        
         return ds;
     }
 

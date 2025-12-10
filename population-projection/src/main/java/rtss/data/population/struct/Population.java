@@ -819,7 +819,7 @@ public class Population
 
     /****************************************************************************************************/
 
-    void validate() throws Exception
+    public void validate() throws Exception
     {
         double sum_m = 0;
         double sum_f = 0;
@@ -1280,6 +1280,30 @@ public class Population
             double f = female(age);
             double b = both(age);
             if (Math.abs(m + f - b) > 0.001)
+                throw new Exception("BMF mismatch");
+        }
+    }
+    
+    public void validateBMF(double diff) throws Exception
+    {
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            double m = male(age);
+            double f = female(age);
+            double b = both(age);
+            if (Util.differ(m + f, b, diff) && Math.abs(m + f - b) > 1)
+                throw new Exception("BMF mismatch");
+        }
+    }
+
+    public void validateBMF(double diff, int maxage) throws Exception
+    {
+        for (int age = 0; age <= MAX_AGE; age++)
+        {
+            double m = male(age);
+            double f = female(age);
+            double b = both(age);
+            if (Util.differ(m + f, b, diff) && Math.abs(m + f - b) > 1 && age < maxage)
                 throw new Exception("BMF mismatch");
         }
     }
