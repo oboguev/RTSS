@@ -24,9 +24,7 @@ public class Losses199X
 
             for (int year = 1989; year <= 2022; year++)
             {
-                RosBrisPopulationMidyearForDeaths.getPopulation(RosBrisTerritories.RF_BEFORE_2014, year, Locality.TOTAL);
-                RosBrisPopulationMidyearForDeaths.getPopulation(RosBrisTerritories.RF_BEFORE_2014, year, Locality.URBAN);
-                RosBrisPopulationMidyearForDeaths.getPopulation(RosBrisTerritories.RF_BEFORE_2014, year, Locality.RURAL);
+                RosBrisPopulationMidyearForDeaths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, year);
             }
 
             Util.noop();

@@ -36,6 +36,14 @@ public class PopulationByLocality
         this.rural = rural;
         validate();
     }
+    
+    public PopulationByLocality(Population total, Population urban, Population rural, double diff, int checkCutoffAge) throws Exception
+    {
+        this.total = total;
+        this.urban = urban;
+        this.rural = rural;
+        validate(diff, checkCutoffAge);
+    }
 
     public PopulationByLocality(Population urban, Population rural) throws Exception
     {
@@ -504,6 +512,62 @@ public class PopulationByLocality
                     mismatch();
             }
         }
+    }
+    
+    public void validate(double diff, int checkCutoffAge) throws Exception
+    {
+        if (rural != null)
+        {
+            if (rural.locality != Locality.RURAL)
+                mismatch();
+            rural.validate(diff, checkCutoffAge);
+        }
+
+        if (urban != null)
+        {
+            if (urban.locality != Locality.URBAN)
+                mismatch();
+            urban.validate(diff, checkCutoffAge);
+        }
+
+        if (total != null)
+        {
+            if (total.locality != Locality.TOTAL)
+                mismatch();
+            total.validate(diff, checkCutoffAge);
+        }
+
+        if (rural != null && urban != null)
+        {
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                if (differ(rural.male(age) + urban.male(age), total.male(age), age, diff, checkCutoffAge))
+                    mismatch();
+
+                if (differ(rural.female(age) + urban.female(age), total.female(age), age, diff, checkCutoffAge))
+                    mismatch();
+
+                if (differ(rural.fm(age) + urban.fm(age), total.fm(age), age, diff, checkCutoffAge))
+                    mismatch();
+            }
+        }
+    }
+    
+    private static boolean differ(double a, double b, int age, double diff, int checkCutoffAge)
+    {
+        if (Math.abs(a - b) <= 1)
+            return false;
+
+        if (Util.same(a, b, diff))
+            return false;
+
+        if (checkCutoffAge >= 0 && age >= checkCutoffAge)
+        {
+            if (Util.same(a, b, 0.2))
+                return false;
+        }
+
+        return true;
     }
 
     static private Population calcTotal(Population rural, Population urban) throws Exception

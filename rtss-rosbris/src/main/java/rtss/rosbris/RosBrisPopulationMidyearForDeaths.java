@@ -1,6 +1,7 @@
 package rtss.rosbris;
 
 import rtss.data.population.struct.Population;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.core.RosBrisDataSet;
@@ -35,6 +36,16 @@ public class RosBrisPopulationMidyearForDeaths
         {
             throw new RuntimeException("Invalid year selector");
         }
+    }
+    
+    public static PopulationByLocality getPopulationByLocality(int territory, int year) throws Exception
+    {
+        Population total = getPopulation(territory, year, Locality.TOTAL);
+        Population urban = getPopulation(territory, year, Locality.URBAN);
+        Population rural = getPopulation(territory, year, Locality.RURAL);
+        
+        // allow minor diveregnce or divergence in senior ages
+        return new PopulationByLocality(total, urban, rural, 1.0 / 40_000, 96);
     }
     
     public static Population getPopulation(int territory, int year, Locality locality) throws Exception
