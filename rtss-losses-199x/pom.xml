@@ -37,6 +37,11 @@
 			<artifactId>rtss-math-tools</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>rtss</groupId>
+			<artifactId>rtss-rosbris</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>

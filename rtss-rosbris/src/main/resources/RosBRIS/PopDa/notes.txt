@@ -1,0 +1,18 @@
+Среднегодовое население по областям России для расчета показателей смертности по однолетним группам возраста 
+
+1989-2014 г.
+PopDa1989-2014.txt
+www.nes.ru/files/research/demogr/data-rus/03/005-1-PopDa1989-2014.zip
+www.nes.ru/files/research/demogr/data-rus/03/005-2-PopDa1989-2012-rus.pdf
+
+2015-2022 гг.
+PopDa2015-2022.txt
+www.nes.ru/files/research/demogr/data-rus/08/PopDa2015-2022.zip
+www.nes.ru/files/research/demogr/data-rus/03/006-2-PopDa2015-rus.pdf
+
+***********************
+
+Российская база данных по рождаемости и смертности. 
+Центр демографических исследований Российской экономической школы, Москва (Россия). 
+База данных доступна по адресу https://www.nes.ru/demogr-fermort-data.
+Данные загружены 2025-12-05.
