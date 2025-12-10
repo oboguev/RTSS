@@ -1,5 +1,8 @@
 package rtss.losses199x;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.bin.Bin;
@@ -7,10 +10,14 @@ import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.MortalityTableGKS;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
+import rtss.data.selectors.Locality;
+import rtss.rosbris.RosBrisPopulationMidyearForDeaths;
+import rtss.rosbris.RosBrisTerritories;
+import rtss.util.Util;
 
 public class LoadData
 {
-    public static PopulationByLocality polulation1989() throws Exception
+    public static PopulationByLocality populationCensus1989() throws Exception
     {
         PopulationByLocality p1989 = PopulationByLocality.census(Area.RSFSR, 1989);
         return p1989;
@@ -65,5 +72,30 @@ public class LoadData
         
         AgeSpecificFertilityRates asfr = new AgeSpecificFertilityRates(bins);
         return asfr;
+    }
+    
+    private static Map<Integer,PopulationByLocality> actualMidyearPopulation; 
+
+    public static PopulationByLocality actualPopulation(int year) throws Exception
+    {
+        if (actualMidyearPopulation == null)
+        {
+            Map<Integer,PopulationByLocality> m = new HashMap<>();
+            
+            for (int yy = 1989; yy <= 2022; yy++)
+            {
+                PopulationByLocality p = RosBrisPopulationMidyearForDeaths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, yy);
+                m.put(yy, p);
+                // double v = p.forLocality(Locality.TOTAL).sum();
+                // Util.out(String.format("%4d %,d", yy, (long) v));
+            }
+            
+            actualMidyearPopulation = m;
+        }
+        
+        PopulationByLocality p1 = actualMidyearPopulation.get(year - 1);
+        PopulationByLocality p2 = actualMidyearPopulation.get(year);
+        PopulationByLocality p = p1.avg(p2);
+        return p;
     }
 }

@@ -18,14 +18,18 @@ public class Losses199X
     {
         try
         {
-            PopulationByLocality p1989 = LoadData.polulation1989();
+            PopulationByLocality p1989 = LoadData.populationCensus1989();
             CombinedMortalityTable cmt = LoadData.mortalityTable();
             AgeSpecificFertilityRates asfr = LoadData.loadASFR();
 
-            for (int year = 1989; year <= 2022; year++)
+            for (int year = 1990; year <= 2016; year++)
             {
-                RosBrisPopulationMidyearForDeaths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, year);
+                PopulationByLocality p = LoadData.actualPopulation(year);
+                double v = p.forLocality(Locality.TOTAL).sum();
+                Util.out(String.format("%4d %,d", year, (long) v));
             }
+            
+            LoadData.actualPopulation(1990);
 
             Util.noop();
             Util.out("** Completed");
