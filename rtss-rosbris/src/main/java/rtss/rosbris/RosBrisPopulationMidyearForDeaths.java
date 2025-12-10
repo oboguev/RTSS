@@ -47,7 +47,7 @@ public class RosBrisPopulationMidyearForDeaths
         addGender(p, territory, year, locality, Gender.BOTH);
         
         p.validateBMF(1.0 / 50_000, 96);  // allow minor diveregnce or divergence in senior ages
-        // ### p.validate();
+        p.validate();
 
         return p;
     }
