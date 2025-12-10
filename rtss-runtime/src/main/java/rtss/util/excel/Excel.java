@@ -27,7 +27,7 @@ public class Excel
      * Get workbook sheet as a list of rows.
      * Each row has values for columns (c1, c2, c3 ...)
      */
-    public static List<List<Object>> readSheet(String path, boolean cached, String... matchingSheetNames) throws Exception
+    public static ExcelRC readSheet(String path, boolean cached, String... matchingSheetNames) throws Exception
     {
         XSSFWorkbook wb = null;
 

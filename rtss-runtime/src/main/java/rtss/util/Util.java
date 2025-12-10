@@ -138,7 +138,7 @@ public class Util
         return base + post;
     }
 
-    public static String despace(String text) throws Exception
+    public static String despace(String text)
     {
         if (text == null)
             return text;

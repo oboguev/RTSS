@@ -1,5 +1,7 @@
 package rtss.losses199x;
 
+import java.util.Map;
+
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.mortality.CombinedMortalityTable;
@@ -21,7 +23,10 @@ public class Losses199X
             PopulationByLocality p1989 = LoadData.populationCensus1989();
             CombinedMortalityTable cmt = LoadData.mortalityTable();
             AgeSpecificFertilityRates asfr = LoadData.loadASFR();
-
+            
+            Map<Integer,Double> mb = LoadData.actualBirths(1989, 2015);
+            Map<Integer,Double> md = LoadData.actualDeaths(1989, 2015);
+            
             for (int year = 1990; year <= 2016; year++)
             {
                 PopulationByLocality p = LoadData.actualPopulation(year);

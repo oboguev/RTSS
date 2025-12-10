@@ -24,7 +24,7 @@ public class ExcelRC extends ArrayList<List<Object>>
     }
 
     /* =================================================================== */
-    
+
     public boolean isEmpty(int nr, int nc) throws Exception
     {
         String s = asString(nr, nc);
@@ -33,12 +33,12 @@ public class ExcelRC extends ArrayList<List<Object>>
 
     /* =================================================================== */
 
-    public String asString(int nr, int nc) throws Exception
+    public String asString(int nr, int nc)
     {
         return asString(get(nr, nc));
     }
 
-    public static String asString(Object o) throws Exception
+    public static String asString(Object o)
     {
         if (o == null)
             return null;
@@ -46,11 +46,11 @@ public class ExcelRC extends ArrayList<List<Object>>
         s = Util.despace(s).trim();
         return s;
     }
-    
+
     public static boolean isBlank(Object o) throws Exception
     {
         String so = asString(o);
-        return so == null || so.length() == 0; 
+        return so == null || so.length() == 0;
     }
 
     /* =================================================================== */
@@ -157,7 +157,7 @@ public class ExcelRC extends ArrayList<List<Object>>
 
     public static long asRequiredLong(Object o) throws Exception
     {
-        Long v = asLong (o);
+        Long v = asLong(o);
         if (v == null)
             throw new Exception("Missing long cell value");
         return v;
@@ -224,7 +224,7 @@ public class ExcelRC extends ArrayList<List<Object>>
 
     public boolean isEndRow(int nr) throws Exception
     {
-        return isEndRow(nr, 0) || isEndRow(nr, 1); 
+        return isEndRow(nr, 0) || isEndRow(nr, 1);
     }
 
     public boolean isEndRow(int nr, int nc) throws Exception
@@ -238,7 +238,64 @@ public class ExcelRC extends ArrayList<List<Object>>
             if (s.contains("note") || s.contains("verify") || s.contains("verification"))
                 return true;
         }
-        
-        return false; 
+
+        return false;
+    }
+
+    /* =================================================================== */
+
+    public List<String> getColumnTitles()
+    {
+        return getColumnTitles(0);
+    }
+
+    public List<String> getColumnTitles(int titleRow)
+    {
+        List<String> titles = new ArrayList<String>();
+        List<Object> r = get(titleRow);
+        for (Object o : r)
+            titles.add(asString(o));
+        return titles;
+    }
+
+    public int columnTitleToIndex(String title)
+    {
+        int rnc = -1;
+
+        List<String> titles = getColumnTitles();
+        for (int nc = 0; nc < titles.size(); nc++)
+        {
+            String ct = titles.get(nc);
+            if (ct != null && ct.equals(title))
+            {
+                if (rnc >= 0)
+                    throw new RuntimeException("Non unique column title: " + title);
+                rnc = nc;
+            }
+        }
+
+        if (rnc < 0)
+            throw new RuntimeException("Non-existing column title: " + title);
+
+        return rnc;
+    }
+
+    public List<Object> columnValues(String columnTitle) throws Exception
+    {
+        int nc = columnTitleToIndex(columnTitle);
+
+        List<Object> list = new ArrayList<>();
+        list.add(null);
+
+        for (int nr = 1; nr < size() && !isEndRow(nr); nr++)
+            list.add(get(nr, nc));
+
+        return list;
+    }
+
+    public Object rowColumnValue(int nr, String columnTitle)
+    {
+        int nc = columnTitleToIndex(columnTitle);
+        return get(nr, nc);
     }
 }
