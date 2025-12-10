@@ -555,7 +555,7 @@ public class PopulationByLocality
     
     private static boolean differ(double a, double b, int age, double diff, int checkCutoffAge)
     {
-        if (Math.abs(a - b) <= 1)
+        if (Math.abs(a - b) <= 2)
             return false;
 
         if (Util.same(a, b, diff))

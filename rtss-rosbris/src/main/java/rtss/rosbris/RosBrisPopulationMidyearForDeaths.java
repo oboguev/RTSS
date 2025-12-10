@@ -45,7 +45,9 @@ public class RosBrisPopulationMidyearForDeaths
         Population rural = getPopulation(territory, year, Locality.RURAL);
         
         // allow minor diveregnce or divergence in senior ages
-        return new PopulationByLocality(total, urban, rural, 1.0 / 40_000, 96);
+        PopulationByLocality p = new PopulationByLocality(total, urban, rural, 1.0 / 40_000, 96);
+        p.recalcTotalLocalityFromUrbanRural();
+        return p;
     }
     
     public static Population getPopulation(int territory, int year, Locality locality) throws Exception
@@ -59,6 +61,7 @@ public class RosBrisPopulationMidyearForDeaths
         
         p.validateBMF(1.0 / 50_000, 96);  // allow minor diveregnce or divergence in senior ages
         p.validate(1.0 / 40_000, 96);
+        p.makeBoth();
 
         return p;
     }
