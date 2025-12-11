@@ -2,6 +2,7 @@ package rtss.data.selectors.holders;
 
 import rtss.data.ValueConstraint;
 import rtss.data.selectors.Gender;
+import rtss.util.Util;
 
 /*
  * Map gender to double array and operate its values
@@ -37,12 +38,12 @@ public class GenderToDoubleArray
         this.female = a.female.clone();
         this.both = a.both.clone();
     }
-    
+
     public GenderToDoubleArray clone()
     {
         return new GenderToDoubleArray(this);
     }
-    
+
     public Double[] get(Gender gender) throws Exception
     {
         switch (gender)
@@ -52,10 +53,10 @@ public class GenderToDoubleArray
 
         case FEMALE:
             return female;
-        
+
         case BOTH:
             return both;
-        
+
         default:
             throw new IllegalArgumentException();
         }
@@ -97,12 +98,12 @@ public class GenderToDoubleArray
         {
             v = -v;
         }
-        
+
         checkValueRange(v);
-        
+
         d[age] = v;
     }
-    
+
     private void checkValueRange(double v) throws Exception
     {
         switch (vc)
@@ -111,15 +112,52 @@ public class GenderToDoubleArray
             if (v <= 0)
                 throw new IllegalArgumentException("Value is negative or zero");
             break;
-            
+
         case NON_NEGATIVE:
             if (v < 0)
                 throw new IllegalArgumentException("Value is negative");
             break;
-            
+
         case NONE:
         default:
             break;
+        }
+    }
+
+    public void zero()
+    {
+        for (int age = 0; age <= maxage; age++)
+        {
+            male[age] = 0.0;
+            female[age] = 0.0;
+            both[age] = 0.0;
+        }
+    }
+
+    public void nullsToZero()
+    {
+        for (int age = 0; age <= maxage; age++)
+        {
+            if (male[age] == null)
+                male[age] = 0.0;
+
+            if (female[age] == null)
+                female[age] = 0.0;
+
+            if (both[age] == null)
+                both[age] = 0.0;
+        }
+    }
+
+    public void fillStartFrom(GenderToDoubleArray a)
+    {
+        Util.assertion(maxage >= a.maxage, "Trying to fill the start from a longer array");
+
+        for (int age = 0; age <= a.maxage; age++)
+        {
+            male[age] = a.male[age];
+            female[age] = a.female[age];
+            both[age] = a.both[age];
         }
     }
 }

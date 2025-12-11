@@ -143,6 +143,25 @@ public class PopulationContext
         return cx;
     }
 
+    public PopulationContext cloneToMaxAge()
+    {
+        PopulationContext cx = clone();
+
+        if (cx.NYEARS != ALL_AGES)
+        {
+            cx.NYEARS = ALL_AGES;
+            cx.MAX_YEAR = cx.NYEARS - 1;
+            cx.NDAYS = cx.NYEARS * DAYS_PER_YEAR;
+            cx.MAX_DAY = cx.NDAYS - 1;
+            cx.m = new LocalityGenderToDoubleArray(cx.MAX_DAY, ValueConstraint.NON_NEGATIVE);
+            cx.m.zero();
+            cx.m.fillStartFrom(m);
+            cx.m.nullsToZero();
+        }
+        
+        return cx;
+    }
+
     public void setTitle(String title)
     {
         this.title = title;

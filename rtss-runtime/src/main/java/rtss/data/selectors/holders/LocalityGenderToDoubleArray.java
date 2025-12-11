@@ -69,4 +69,25 @@ public class LocalityGenderToDoubleArray
     {
         forLocality(locality).set(gender, index, v);
     }
+    
+    public void zero()
+    {
+        rural.zero();
+        urban.zero();
+        total.zero();
+    }
+    
+    public void nullsToZero()
+    {
+        rural.nullsToZero();
+        urban.nullsToZero();
+        total.nullsToZero();
+    }
+
+    public void fillStartFrom(LocalityGenderToDoubleArray a)
+    {
+        rural.fillStartFrom(a.rural);
+        urban.fillStartFrom(a.urban);
+        total.fillStartFrom(a.total);
+    }
 }
