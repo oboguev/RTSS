@@ -3,6 +3,7 @@ package rtss.data.population.projection;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.population.struct.Population;
@@ -44,6 +45,9 @@ import rtss.util.Util;
  */
 public class ForwardPopulationUR extends ForwardPopulation
 {
+    protected AgeSpecificFertilityRates ageSpecificFertilityRatesRural;
+    protected AgeSpecificFertilityRates ageSpecificFertilityRatesUrban;
+
     protected double BirthRateRural;
     protected double BirthRateUrban;
 
@@ -61,6 +65,18 @@ public class ForwardPopulationUR extends ForwardPopulation
     private double fctx_r_male_deaths = 0;
     private double fctx_u_female_deaths = 0;
     private double fctx_r_female_deaths = 0;
+
+    public ForwardPopulationUR setBirthRateRural(AgeSpecificFertilityRates ageSpecificFertilityRates)
+    {
+        this.ageSpecificFertilityRatesRural = ageSpecificFertilityRates;
+        return this;
+    }
+
+    public ForwardPopulationUR setBirthRateUrban(AgeSpecificFertilityRates ageSpecificFertilityRates)
+    {
+        this.ageSpecificFertilityRatesUrban = ageSpecificFertilityRates;
+        return this;
+    }
 
     public void setBirthRateRural(double rate)
     {
