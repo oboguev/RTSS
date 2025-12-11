@@ -22,7 +22,12 @@ public class AgeSpecificFertilityRatesByYear
 
     private AgeSpecificFertilityRatesByYear(String path) throws Exception
     {
-        do_load(path);
+        do_load(path, null);
+    }
+
+    private AgeSpecificFertilityRatesByYear(String path, String sheetName) throws Exception
+    {
+        do_load(path, sheetName);
     }
 
     public void setForYear(int year, AgeSpecificFertilityRates asfr)
@@ -39,13 +44,23 @@ public class AgeSpecificFertilityRatesByYear
 
     public static AgeSpecificFertilityRatesByYear load(Area area) throws Exception
     {
+        return load(area, null);
+    }
+    
+    public static AgeSpecificFertilityRatesByYear load(Area area, String sheetName) throws Exception
+    {
         String path = String.format("age_specific_fertility_rates/%s/%s-ASFR.xlsx", area.name(), area.name());
         return load(path);
     }
 
     public static AgeSpecificFertilityRatesByYear load(String path) throws Exception
     {
-        return new AgeSpecificFertilityRatesByYear(path);
+        return load(path, null);
+    }
+
+    public static AgeSpecificFertilityRatesByYear load(String path, String sheetName) throws Exception
+    {
+        return new AgeSpecificFertilityRatesByYear(path, sheetName);
     }
 
     /*
@@ -79,12 +94,17 @@ public class AgeSpecificFertilityRatesByYear
     private int ncol;
     private int nrow;
     private String path;
+    private String sheetName;
 
-    private void do_load(String path) throws Exception
+    private void do_load(String path, String sheetName) throws Exception
     {
-        this.path = path;
+        if (sheetName == null)
+            sheetName = "Data";
 
-        List<List<Object>> rows = Excel.readSheet(path, false, "Data");
+        this.path = path;
+        this.sheetName = sheetName; 
+        
+        List<List<Object>> rows = Excel.readSheet(path, false, sheetName);
         Excel.stripTrailingNulls(rows);
 
         nrow = 0;
@@ -143,7 +163,7 @@ public class AgeSpecificFertilityRatesByYear
     {
         if (row.size() != age_x1.size() + 1)
         {
-            String msg = String.format("Invalid row in resource file %s, row=%d, incorrect length", path, nrow + 1);
+            String msg = String.format("Invalid row in resource file %s, sheet=%s, row=%d, incorrect length", path, sheetName, nrow + 1);
             throw new Exception(msg);
         }
 
@@ -157,7 +177,7 @@ public class AgeSpecificFertilityRatesByYear
 
         if (m.containsKey(year))
         {
-            String msg = String.format("Invalid row in resource file %s, row=%d, duplicate year", path, nrow + 1);
+            String msg = String.format("Invalid row in resource file %s, sheet=%s, row=%d, duplicate year", path, sheetName, nrow + 1);
             throw new Exception(msg);
         }
 

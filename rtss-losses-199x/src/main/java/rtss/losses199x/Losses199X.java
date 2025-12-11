@@ -22,7 +22,7 @@ public class Losses199X
         {
             PopulationByLocality p1989 = LoadData.populationCensus1989();
             CombinedMortalityTable cmt = LoadData.mortalityTable();
-            AgeSpecificFertilityRates asfr = LoadData.loadASFR();
+            AgeSpecificFertilityRates asfr = LoadData.loadASFR(Locality.TOTAL);
             
             Map<Integer,Double> mb = LoadData.actualBirths(1989, 2015);
             Map<Integer,Double> md = LoadData.actualDeaths(1989, 2015);

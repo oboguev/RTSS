@@ -33,9 +33,9 @@ public class LoadData
         return cmt;
     }
     
-    public static AgeSpecificFertilityRates loadASFR() throws Exception
+    public static AgeSpecificFertilityRates loadASFR(Locality locality) throws Exception
     {
-        AgeSpecificFertilityRatesByYear yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/RSFSR/RSFSR-ASFR.xlsx");
+        AgeSpecificFertilityRatesByYear yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/RSFSR/RSFSR-ASFR.xlsx", Util.properCase(locality.toString()));
         
         /* 
          * Take average for 1981-1989
