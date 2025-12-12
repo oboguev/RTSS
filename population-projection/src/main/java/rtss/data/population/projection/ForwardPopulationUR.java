@@ -345,6 +345,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         // #### интерполировать возрастные линии и для каждого дня (c учётом старения) добвавить в массив age_count[year} += ....
         // #### прииложить ASFR к массиву
         double[] day_births = new double[ndays];
+        // day_births = calcBirths(fctx1, fctx2, ndays, asfrForLocality) 
         
         double[] m_births = Util.multiply(Util.dup(day_births), MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio));
         double[] f_births = Util.multiply(Util.dup(day_births), 1.0 / (1 + MaleFemaleBirthRatio));
