@@ -339,8 +339,15 @@ public class ForwardPopulationUR extends ForwardPopulation
          * fctx2 - население после передвижки первой фазы
          */
 
+        int ndays = years2days(yfraction);
+        ndays = Math.max(1, ndays);
+        double[] day_births = new double[ndays];
+
         // #### интерполировать возрастные линии и для каждого дня (c учётом старения) добвавить в массив age_count[year} += ....
         // #### прииложить ASFR к массиву
+        
+        double[] m_births = Util.multiply(Util.dup(day_births), MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio));
+        double[] f_births = Util.multiply(Util.dup(day_births), 1.0 / (1 + MaleFemaleBirthRatio));
         // #### вторая фаза
         Util.noop();
     }
@@ -355,7 +362,6 @@ public class ForwardPopulationUR extends ForwardPopulation
     {
         double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE) + fctx_initial.sumAllAges(locality, Gender.BOTH);
         double births = sum * yfraction * birthRate / 1000;
-        observed_births += births;
         double m_births = births * MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio);
         double f_births = births * 1.0 / (1 + MaleFemaleBirthRatio);
 
@@ -373,8 +379,6 @@ public class ForwardPopulationUR extends ForwardPopulation
             final CombinedMortalityTable mt,
             final int ndays) throws Exception
     {
-        fctx.addTotalBirths(locality, gender, total_births);
-
         /*
          * распределить рождения по числу дней
          */
@@ -382,11 +386,26 @@ public class ForwardPopulationUR extends ForwardPopulation
         for (int nd = 0; nd < ndays; nd++)
             day_births[nd] = total_births / ndays;
 
+        add_births(fctx, locality, gender, day_births, mt, ndays);
+    }
+
+    private void add_births(PopulationContext fctx,
+            final Locality locality,
+            final Gender gender,
+            double[] day_births,
+            final CombinedMortalityTable mt,
+            final int ndays) throws Exception
+    {
+        double total_births = Util.sum(day_births);
+        observed_births += total_births;
+        fctx.addTotalBirths(locality, gender, total_births);
+
         /*
          * подвергнуть рождения смертности
          * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности,
          * таким образом day_lx[nd] / day_lx[0] представляет долю выживших к этому дню со дня рождения 
          */
+        day_births = Util.dup(day_births);
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
             day_births[nd] *= day_lx[nd] / day_lx[0];
