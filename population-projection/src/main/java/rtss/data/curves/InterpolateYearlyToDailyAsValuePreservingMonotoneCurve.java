@@ -19,14 +19,14 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  */
 public class InterpolateYearlyToDailyAsValuePreservingMonotoneCurve
 {
-    final static int DAYS_PER_YEAR = 365; 
-    
+    final static int DAYS_PER_YEAR = 365;
+
     public static double[] yearly2daily(final double[] y) throws Exception
     {
         final double[] x = new double[y.length];
         for (int k = 0; k < y.length; k++)
             x[k] = k;
-        
+
         double[] yyy1 = null;
         double[] yyy2 = null;
         double[] yyy3 = null;
@@ -49,7 +49,7 @@ public class InterpolateYearlyToDailyAsValuePreservingMonotoneCurve
             UnivariateFunction sp = makeSpline(x, y, ConstrainedCubicSplineInterpolator.class);
             yyy3 = interpol(sp, x);
         }
-        
+
         if (Util.False)
         {
             ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced("Make curve", "x", "y");
@@ -62,18 +62,38 @@ public class InterpolateYearlyToDailyAsValuePreservingMonotoneCurve
             chart.addSeriesAsDots("original", x, y);
             chart.display();
         }
-        
+
         double[] yyy = yyy1;
         if (yyy == null)
             yyy = yyy2;
         if (yyy == null)
             yyy = yyy3;
-        if (!Util.isPositive(yyy))
+
+        if (Util.False && !Util.isPositive(yyy))
             throw new Exception("Error calculating curve (negative or zero value)");
-        
+
+        for (int nd = 0; nd < yyy.length; nd++)
+        {
+            if (yyy[nd] < 0)
+            {
+                throw new Exception("Error calculating curve (negative or zero value)");
+            }
+            else if (yyy[nd] == 0)
+            {
+                if (y[nd / DAYS_PER_YEAR] == 0)
+                {
+                    // ok
+                }
+                else
+                {
+                    throw new Exception("Error calculating curve (negative or zero value)");
+                }
+            }
+        }
+
         return yyy;
     }
-    
+
     private static double[] interpol(UnivariateFunction sp, double[] x)
     {
         int ndays = (x.length - 1) * DAYS_PER_YEAR;

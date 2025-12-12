@@ -65,7 +65,7 @@ public class ForwardPopulationUR extends ForwardPopulation
     private double fctx_r_male_deaths = 0;
     private double fctx_u_female_deaths = 0;
     private double fctx_r_female_deaths = 0;
-    
+
     public ForwardPopulationUR setBirthRateRural(AgeSpecificFertilityRates ageSpecificFertilityRates)
     {
         this.ageSpecificFertilityRatesRural = ageSpecificFertilityRates;
@@ -77,7 +77,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         this.ageSpecificFertilityRatesUrban = ageSpecificFertilityRates;
         return this;
     }
-    
+
     private boolean usesASFR() throws Exception
     {
         if ((ageSpecificFertilityRatesUrban != null) != (ageSpecificFertilityRatesRural != null))
@@ -242,7 +242,7 @@ public class ForwardPopulationUR extends ForwardPopulation
             forwardWithASFR(pto, p, fctx, locality, mt, yfraction);
             return;
         }
-        
+
         PopulationContext fctx_initial = (fctx != null) ? fctx.clone() : null;
 
         /* передвижка мужского и женского населений по смертности из @p в @pto */
@@ -329,21 +329,22 @@ public class ForwardPopulationUR extends ForwardPopulation
         PopulationByLocality p1 = PopulationByLocality.newPopulationByLocality();
         p1.zero();
         PopulationByLocality pto1 = PopulationByLocality.newPopulationByLocality();
+        pto1.zero();
         ForwardPopulationUR fw = new ForwardPopulationUR();
         fw.forward(pto1, p1, fctx2, locality, mt, yfraction);
         Util.assertion(pto1.sum() == 0);
-        
+
         /*
          * fctx1 - население до передвижки первой фазы
          * fctx2 - население после передвижки первой фазы
          */
-        
+
         // #### интерполировать возрастные линии и для каждого дня (c учётом старения) добвавить в массив age_count[year} += ....
         // #### прииложить ASFR к массиву
         // #### вторая фаза
         Util.noop();
     }
-    
+
     private void add_births(PopulationContext fctx_initial,
             PopulationContext fctx,
             final PopulationByLocality p,
@@ -585,7 +586,10 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         if (nd2 < day_lx.length)
         {
-            rate = day_lx[nd2] / day_lx[nd];
+            if (day_lx[nd2] == 0 && day_lx[nd] == 0)
+                rate = 0;
+            else
+                rate = day_lx[nd2] / day_lx[nd];
         }
         else
         {
@@ -594,7 +598,10 @@ public class ForwardPopulationUR extends ForwardPopulation
 
             /* использовать коэффициент смертности последнего года */
             final int extra = 10;
-            rate = day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
+            if (day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] == 0 && day_lx[nd - fctx.DAYS_PER_YEAR - extra] == 0)
+                rate = 0;
+            else
+                rate = day_lx[nd2 - fctx.DAYS_PER_YEAR - extra] / day_lx[nd - fctx.DAYS_PER_YEAR - extra];
         }
 
         return check_range(rate, 0, 1);
@@ -602,7 +609,7 @@ public class ForwardPopulationUR extends ForwardPopulation
 
     private double check_range(double v, double v1, double v2) throws Exception
     {
-        if (v >= v1 && v <= v2)
+        if (Util.isValid(v) && v >= v1 && v <= v2)
             return v;
         else
             throw new Exception("Out of range");

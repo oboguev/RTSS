@@ -508,13 +508,14 @@ public class SingleMortalityTable
             if (Util.differ(daily_lx[0], yearly_lx[0]) ||
                 Util.differ(daily_lx[365 * 1], yearly_lx[1]) ||
                 Util.differ(daily_lx[365 * 2], yearly_lx[2]) ||
-                Util.differ(daily_lx[365 * 3], yearly_lx[3]))
+                Util.differ(daily_lx[365 * 3], yearly_lx[3]) ||
+                !Util.isNonNegative(daily_lx))
             {
                 throw new Exception("Ошибка в построении daily_lx");
             }
 
             // может не спадать, если для какого-то года смертность (qx) нулевая, но это было бы невозможным
-            Util.assertion(Util.isMonotonicallyDecreasing(daily_lx, true));
+            Util.assertion(Util.isMonotonicallyDecreasingTowardsZero(daily_lx, true));
 
             maxage2daily_lx.put(MAX_AGE, daily_lx);
         }

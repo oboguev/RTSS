@@ -685,6 +685,34 @@ public class Util
         return b;
     }
 
+    /*
+     * If reaches zero, can stay zero for next
+     */
+    public static boolean isMonotonicallyDecreasingTowardsZero(final double[] y, boolean strict)
+    {
+        if (y.length == 0)
+            return true;
+
+        boolean b = true;
+
+        for (int k = 0; k < y.length - 1; k++)
+        {
+            if (y[k] == 0 && y[k + 1] == 0)
+                continue;
+            
+            if (strict)
+            {
+                b = b && y[k] > y[k + 1];
+            }
+            else
+            {
+                b = b && y[k] >= y[k + 1];
+            }
+        }
+
+        return b;
+    }
+
     // absolute values of the array
     public static double[] abs(double[] y)
     {
