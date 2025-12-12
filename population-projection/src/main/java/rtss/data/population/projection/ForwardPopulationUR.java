@@ -65,7 +65,7 @@ public class ForwardPopulationUR extends ForwardPopulation
     private double fctx_r_male_deaths = 0;
     private double fctx_u_female_deaths = 0;
     private double fctx_r_female_deaths = 0;
-
+    
     public ForwardPopulationUR setBirthRateRural(AgeSpecificFertilityRates ageSpecificFertilityRates)
     {
         this.ageSpecificFertilityRatesRural = ageSpecificFertilityRates;
@@ -76,6 +76,13 @@ public class ForwardPopulationUR extends ForwardPopulation
     {
         this.ageSpecificFertilityRatesUrban = ageSpecificFertilityRates;
         return this;
+    }
+    
+    private boolean usesASFR() throws Exception
+    {
+        if ((ageSpecificFertilityRatesUrban != null) != (ageSpecificFertilityRatesRural != null))
+            throw new Exception("ASFR specified only for one locality");
+        return ageSpecificFertilityRatesUrban != null;
     }
 
     public void setBirthRateRural(double rate)
@@ -230,6 +237,12 @@ public class ForwardPopulationUR extends ForwardPopulation
             final double yfraction)
             throws Exception
     {
+        if (usesASFR())
+        {
+            forwardWithASFR(pto, p, fctx, locality, mt, yfraction);
+            return;
+        }
+        
         PopulationContext fctx_initial = (fctx != null) ? fctx.clone() : null;
 
         /* передвижка мужского и женского населений по смертности из @p в @pto */
@@ -284,6 +297,53 @@ public class ForwardPopulationUR extends ForwardPopulation
         pto.makeBoth(locality);
     }
 
+    private void forwardWithASFR(PopulationByLocality pto,
+            final PopulationByLocality p,
+            PopulationContext fctx,
+            final Locality locality,
+            final CombinedMortalityTable mt,
+            final double yfraction)
+            throws Exception
+    {
+        /*
+         * Мы делфем двухфазную передвижку:
+         * 
+         *   - в первой фазе делается передвижка наличного населения по таблице смертности (без добавления рождений), 
+         *     из чего устанавливается среднее за период население (его половозростная структура)
+         *     
+         *   - среднее население -- единствнный результат первой фазы, сугубо внутренней,
+         *     откуда определяется количество рождений на основе ASFR калиброванных относительно
+         *     среднего за период населения
+         *     
+         *   - вторая фаза проводит передвижку с данным количеством рождений, 
+         *     результат этой фазы и становится окончательным итогом  
+         */
+
+        /*
+         * Первая фаза
+         */
+        PopulationContext fctx1 = fctx.cloneToMaxAge();
+        fctx1.add(p.toPopulationContext());
+        PopulationContext fctx2 = fctx1.clone();
+
+        PopulationByLocality p1 = PopulationByLocality.newPopulationByLocality();
+        p1.zero();
+        PopulationByLocality pto1 = PopulationByLocality.newPopulationByLocality();
+        ForwardPopulationUR fw = new ForwardPopulationUR();
+        fw.forward(pto1, p1, fctx2, locality, mt, yfraction);
+        Util.assertion(pto1.sum() == 0);
+        
+        /*
+         * fctx1 - население до передвижки первой фазы
+         * fctx2 - население после передвижки первой фазы
+         */
+        
+        // #### интерполировать возрастные линии и для каждого дня (c учётом старения) добвавить в массив age_count[year} += ....
+        // #### прииложить ASFR к массиву
+        // #### вторая фаза
+        Util.noop();
+    }
+    
     private void add_births(PopulationContext fctx_initial,
             PopulationContext fctx,
             final PopulationByLocality p,

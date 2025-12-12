@@ -20,6 +20,9 @@ public class Losses199X
     {
         try
         {
+            new BirthsDeficit().eval();
+            
+            
             PopulationByLocality p1989 = LoadData.populationCensus1989();
             CombinedMortalityTable cmt = LoadData.mortalityTable();
             AgeSpecificFertilityRates asfr = LoadData.loadASFR(Locality.TOTAL);

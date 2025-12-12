@@ -6,6 +6,7 @@ import rtss.data.population.projection.ForwardPopulationUR;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Locality;
+import rtss.util.Util;
 
 public class BirthsDeficit
 {
@@ -23,9 +24,10 @@ public class BirthsDeficit
         PopulationContext p = p1989.toPopulationContext();
 
         ForwardPopulationUR fw = new ForwardPopulationUR();
-        // fw.setBirthRateUrban(0);
-        // fw.setBirthRateRural(0);
+        fw.setBirthRateUrban(asfr_urban);
+        fw.setBirthRateRural(asfr_rural);
         fw.forward(p, cmt, (365 - 11) / 365.0);
+        Util.noop();
 
         // ### передвижка от 12.1.1989 до 1.1.1990 с шагом 365-11
         // ### передвижка от 1.1.1990 до 1.1.2016 с шагом год
