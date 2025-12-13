@@ -16,10 +16,16 @@ public class RosBrisPopulationExposureForDeaths
     private static RosBrisDataSet ds_2012_2022;
     private static RosBrisDataSet ds_1989_2014;
     private static RosBrisDataSet ds_2015_2022;
+    private static boolean use2021census = true;
+    
+    public static void use2021census(boolean b)
+    {
+        use2021census = true;
+    }
 
     private static RosBrisDataSet forYear(int year) throws Exception
     {
-        if (year >= 2012 && year <= 2022)
+        if (year >= 2012 && year <= 2022 && use2021census)
         {
             if (ds_2012_2022 == null)
                 ds_2012_2022 = RosBrisDataSet.load("RosBRIS/PopDa/PopDa2012-2022.txt");

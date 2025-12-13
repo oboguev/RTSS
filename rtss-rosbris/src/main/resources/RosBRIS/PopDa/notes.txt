@@ -37,7 +37,7 @@ PopDa2012-2022.txt
 http://www.nes.ru/files/research/demogr/data-rus/06/PopDa2012-2022.zip
 http://www.nes.ru/files/research/demogr/data-rus/06/PopDa2012-rus.pdf
 
-Year (2015-2022)
+Year (2012-2022)
 Reg
 Group (T U R)
 Sex (M F B)

@@ -20,6 +20,8 @@ public class Losses199X
     {
         try
         {
+            // ### test load data PopBa and PopDa with census and without all years
+            
             new BirthsDeficit().eval();
             
             
