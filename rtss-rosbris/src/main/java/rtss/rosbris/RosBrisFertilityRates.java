@@ -4,14 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rtss.data.population.struct.Population;
-import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.core.RosBrisDataSet;
 import rtss.rosbris.core.RosBrisDataSet.DataEntry;
 
-public class RosBrisDeathRate
+public class RosBrisFertilityRates
 {
-    private static RosBrisDataSet ds_2012_2022;
+    private static RosBrisDataSet ds_2012_2023;
     private static RosBrisDataSet ds_1989_2014;
     private static RosBrisDataSet ds_2015_2022;
     private static boolean use2021census = true;
@@ -23,24 +22,24 @@ public class RosBrisDeathRate
 
     private static RosBrisDataSet forYear(int year) throws Exception
     {
-        if (year >= 2012 && year <= 2022 && use2021census)
+        if (year >= 2012 && year <= 2022 && use2021census || year == 2023)
         {
-            if (ds_2012_2022 == null)
-                ds_2012_2022 = RosBrisDataSet.load("RosBRIS/DRa/DRa2012-2022.txt");
+            if (ds_2012_2023 == null)
+                ds_2012_2023 = RosBrisDataSet.load("RosBRIS/BRa/BRa2012-2023.txt");
 
-            return ds_2012_2022.selectEq("Year", year);
+            return ds_2012_2023.selectEq("Year", year);
         }
         else if (year >= 1989 && year <= 2014)
         {
             if (ds_1989_2014 == null)
-                ds_1989_2014 = RosBrisDataSet.load("RosBRIS/DRa/DRa1989-2014.txt");
+                ds_1989_2014 = RosBrisDataSet.load("RosBRIS/BRa/BRa1989-2014.txt");
 
             return ds_1989_2014.selectEq("Year", year);
         }
         else if (year >= 2015 && year <= 2022)
         {
             if (ds_2015_2022 == null)
-                ds_2015_2022 = RosBrisDataSet.load("RosBRIS/DRa/DRa2015-2022.txt");
+                ds_2015_2022 = RosBrisDataSet.load("RosBRIS/BRa/BRa2015-2022.txt");
 
             return ds_2015_2022.selectEq("Year", year);
         }
@@ -50,19 +49,19 @@ public class RosBrisDeathRate
         }
     }
 
-    public static RosBrisDeathRate loadMXForTerritory(Integer territory) throws Exception
+    public static RosBrisFertilityRates loadFertilityRatesForTerritory(Integer territory) throws Exception
     {
-        return loadMX(territory, null);
+        return loadFertilityRates(territory, null);
     }
 
-    public static RosBrisDeathRate loadMXForYear(Integer year) throws Exception
+    public static RosBrisFertilityRates loadFertilityRatesForYear(Integer year) throws Exception
     {
-        return loadMX(null, year);
+        return loadFertilityRates(null, year);
     }
 
-    public static RosBrisDeathRate loadMX(Integer territory, Integer year) throws Exception
+    public static RosBrisFertilityRates loadFertilityRates(Integer territory, Integer year) throws Exception
     {
-        RosBrisDeathRate dr = new RosBrisDeathRate();
+        RosBrisFertilityRates dr = new RosBrisFertilityRates();
         dr.territory = territory;
         dr.year = year;
 
@@ -80,7 +79,6 @@ public class RosBrisDeathRate
             vk.territory = de.asInt("Reg");
             vk.year = de.asInt("Year");
             vk.locality = decodeLocality(de.asString("Group"));
-            vk.gender = decodeGender(de.asString("Sex"));
 
             Double[] values = new Double[Population.MAX_AGE + 1];
 
@@ -106,27 +104,27 @@ public class RosBrisDeathRate
     private Integer territory;
     private Integer year;
 
-    public Double mx(int territory, int year, Locality locality, Gender gender, int age)
+    public Double fertilityRate(int territory, int year, Locality locality, int age)
     {
-        Double[] va = map.get(new ValueKey(territory, year, locality, gender));
+        Double[] va = map.get(new ValueKey(territory, year, locality));
         return (va == null || age >= va.length) ? null : va[age];
     }
 
-    public Double mx(Locality locality, Gender gender, int age)
+    public Double fertilityRate(Locality locality, int age)
     {
-        Double[] va = map.get(new ValueKey(territory, year, locality, gender));
+        Double[] va = map.get(new ValueKey(territory, year, locality));
         return (va == null || age >= va.length) ? null : va[age];
     }
 
-    public Double mxForTerritory(int territory, Locality locality, Gender gender, int age)
+    public Double fertilityRateForTerritory(int territory, Locality locality, int age)
     {
-        Double[] va = map.get(new ValueKey(territory, year, locality, gender));
+        Double[] va = map.get(new ValueKey(territory, year, locality));
         return (va == null || age >= va.length) ? null : va[age];
     }
 
-    public Double mxForYear(int year, Locality locality, Gender gender, int age)
+    public Double fertilityRateForYear(int year, Locality locality, int age)
     {
-        Double[] va = map.get(new ValueKey(territory, year, locality, gender));
+        Double[] va = map.get(new ValueKey(territory, year, locality));
         return (va == null || age >= va.length) ? null : va[age];
     }
 
@@ -137,18 +135,16 @@ public class RosBrisDeathRate
         public int territory;
         public int year;
         public Locality locality;
-        public Gender gender;
 
         public ValueKey()
         {
         }
 
-        public ValueKey(int territory, int year, Locality locality, Gender gender)
+        public ValueKey(int territory, int year, Locality locality)
         {
             this.territory = territory;
             this.year = year;
             this.locality = locality;
-            this.gender = gender;
         }
 
         @Override
@@ -167,7 +163,7 @@ public class RosBrisDeathRate
                 return false;
             if (locality != that.locality)
                 return false;
-            return gender == that.gender;
+            return true;
         }
 
         @Override
@@ -176,7 +172,6 @@ public class RosBrisDeathRate
             int result = territory;
             result = 31 * result + year;
             result = 31 * result + (locality != null ? locality.hashCode() : 0);
-            result = 31 * result + (gender != null ? gender.hashCode() : 0);
             return result;
         }
     }
@@ -195,21 +190,6 @@ public class RosBrisDeathRate
             return Locality.RURAL;
         default:
             throw new RuntimeException("Invalid locality code " + code);
-        }
-    }
-
-    private static Gender decodeGender(String code)
-    {
-        switch (code)
-        {
-        case "M":
-            return Gender.MALE;
-        case "F":
-            return Gender.FEMALE;
-        case "B":
-            return Gender.BOTH;
-        default:
-            throw new RuntimeException("Invalid gender code " + code);
         }
     }
 }

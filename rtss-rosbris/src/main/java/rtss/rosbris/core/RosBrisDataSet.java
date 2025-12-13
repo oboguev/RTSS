@@ -124,8 +124,8 @@ public class RosBrisDataSet
 
             if (vals.length < keys.length)
             {
-                logger.warn("Partial data in file {}, line {}, expected: {}, actual: {}",
-                            path, n, keys.length, vals.length);
+                logger.warn("Partial data in file {}, line {}, expected: {}, actual: {}, content: {}",
+                            path, n, keys.length, vals.length, line);
             }
             else if (vals.length != keys.length)
             {
@@ -161,4 +161,32 @@ public class RosBrisDataSet
         values.addAll(ds.values);
         return this;
     }
+    
+
+ // #### year   
+ // 1135,R,B
+ // 1135,R,F
+ // 1135,R,M
+ // 1135,T,B
+ // 1135,T,F
+ // 1135,T,M
+ // 1135,U,B
+ // 1135,U,F
+ // 1135,U,M
+ // 1140,R,B
+ // 1140,R,F
+ // 1140,R,M
+ // 1145,R,B
+ // 1145,R,F
+ // 1145,R,M
+ // 1167,R,B
+ // 1167,R,F
+ // 1167,R,M
+ // 1167,T,B
+ // 1167,T,F
+ // 1167,T,M
+ // 1167,U,B
+ // 1167,U,F
+ // 1167,U,M
+    
 }
