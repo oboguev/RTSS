@@ -13,7 +13,12 @@ public class MortalityUtil
     private static boolean useMxTable = true;
     
     /*
-     * Convert mortality "qx" value to "mx"
+     * Convert mortality "qx" value to "mx".
+     * Подсчёт грубой вычислительной силой.
+     * 
+     * Аналитическая формула: mx = −ln(1 − qx).
+     * 
+     * double mx = -Math.log1p(-qx);
      */
     public static double qx2mx(double qx) throws Exception
     {
@@ -41,7 +46,13 @@ public class MortalityUtil
             return mx;
         }
     }
-
+    
+    /*
+     * Подсчёт грубой вычислительной силой.
+     * 
+     * Аналитическая формула: qx = 1 - exp(-mx).
+     * double qx = -Math.expm1(-mx); 
+     */
     public static double mx2qx(double mx) throws Exception
     {
         if (!useMxTable)
@@ -87,7 +98,14 @@ public class MortalityUtil
             {
                 double qx = (qx1 + qx2) / 2;
                 double v = qx2mx(qx);
-                if (Math.abs(mx - v) < 0.0001)
+                
+                /*
+                 * Если mx m маленький (например 1e-6), то условие abs(mx - v) < 0.0001 
+                 * выполнится почти сразу, и qx получится грубо (относительная ошибка 
+                 * может быть огромной)
+                 */
+                // if (Math.abs(mx - v) < 0.0001)
+                if (Math.abs(mx - v) < Math.max(1e-12, 1e-8*mx))
                     return qx;
                 else if (mx > v)
                     qx1 = qx;
@@ -95,6 +113,15 @@ public class MortalityUtil
                     qx2 = qx;
             }
         }
+        
+        /*
+         * Поведение при qx → 1.
+         * При qx = 1 экспоненциальная модель должна давать m=∞,
+         * а дискретная даст m ≈ N. 
+         * Мы частично обходим это тем, что validate_mx ограничивает максимум mx2qx_table_mx[length-2]. 
+         * Практически для реальных таблиц это не проблема (qx никогда не близко к 1 в однолетних возрастах), 
+         * но полезно иметь в виду: у нас искусственная “потолочная” смертность, заданная NPOINTS.
+         */
     }
     
     private static synchronized void build_qx2mx_table() throws Exception

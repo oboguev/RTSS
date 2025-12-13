@@ -9,7 +9,7 @@ import rtss.data.mortality.synthetic.MortalityTableGKS;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Locality;
-import rtss.rosbris.RosBrisPopulationMidyearForDeaths;
+import rtss.rosbris.RosBrisPopulationExposureForDeaths;
 import rtss.rosbris.RosBrisTerritories;
 import rtss.rosbris.core.RosBrisDataSet;
 import rtss.util.Util;
