@@ -1,11 +1,10 @@
-package rtss.losses199x;
+package rtss.losses199x.util;
 
 import java.util.Map;
 
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
-import rtss.losses199x.util.TableValues;
 import rtss.rosbris.RosBrisDeathRates;
 import rtss.rosbris.RosBrisPopulationExposureForDeaths;
 import rtss.util.Util;
@@ -85,7 +84,7 @@ public class ActualDeaths
         }
         
         Util.out("");
-        Util.out("Число смертей в России согласно Росстату (Демографический ежегодник России)");
+        Util.out("Число смертей в России согласно Росстату (Демографический ежегодник России), включая в 2014-2015 гг. Крым");
         Util.out("");
         Map<Integer,Double> actual = TableValues.actualDeaths(y1, y2);        
         for (int year = y1; year <= y2; year++)

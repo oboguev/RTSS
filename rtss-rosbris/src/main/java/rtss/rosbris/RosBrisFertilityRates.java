@@ -84,7 +84,7 @@ public class RosBrisFertilityRates
 
             for (int age = 0; age <= Population.MAX_AGE; age++)
             {
-                String key = "Dra" + age;
+                String key = "Bra" + age;
                 if (de.has(key))
                     values[age] = de.asDouble(key);
             }
@@ -103,29 +103,31 @@ public class RosBrisFertilityRates
     private Map<ValueKey, Double[]> map = new HashMap<>();
     private Integer territory;
     private Integer year;
+    
+    private double scale = 1e-6;
 
     public Double fertilityRate(int territory, int year, Locality locality, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length || va[age] == null) ? null : scale * va[age];
     }
 
     public Double fertilityRate(Locality locality, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length || va[age] == null) ? null : scale * va[age];
     }
 
     public Double fertilityRateForTerritory(int territory, Locality locality, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length || va[age] == null) ? null : scale * va[age];
     }
 
     public Double fertilityRateForYear(int year, Locality locality, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length || va[age] == null) ? null : scale * va[age];
     }
 
     /* =============================================================================================== */
