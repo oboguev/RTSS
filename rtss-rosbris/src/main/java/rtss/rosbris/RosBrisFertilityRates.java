@@ -7,6 +7,7 @@ import rtss.data.population.struct.Population;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.core.RosBrisDataSet;
 import rtss.rosbris.core.RosBrisDataSet.DataEntry;
+import rtss.util.Util;
 
 public class RosBrisFertilityRates
 {
@@ -85,6 +86,14 @@ public class RosBrisFertilityRates
             for (int age = 0; age <= Population.MAX_AGE; age++)
             {
                 String key = "Bra" + age;
+
+                /* 
+                 * наборы данных для численности женского населения и для возрастных коэффициентов плодовитости
+                 * обрываются возрастом 55 и охватывают возрасты 15-55  
+                 */
+                if (Util.False && age > 55)
+                    key = "Bra" + 55;
+                
                 if (de.has(key))
                     values[age] = de.asDouble(key);
             }
