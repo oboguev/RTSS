@@ -342,7 +342,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             }
             catch (Exception e2)
             {
-                Util.err("CSASRA disaggregation failed for " + title);
+                Util.err("CSASRA disaggregation failed for " + title + ", " + e2.getLocalizedMessage());
                 ex = e2;
             }
 
@@ -353,7 +353,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             }
             catch (Exception e2)
             {
-                Util.err("Spline disaggregation failed for " + title);
+                Util.err("Spline disaggregation failed for " + title + ", " + e2.getLocalizedMessage());
                 if (ex == null)
                     ex = e2;
             }
@@ -370,7 +370,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             }
             catch (Exception e2)
             {
-                Util.err("Spline disaggregation failed for " + title);
+                Util.err("Spline disaggregation failed for " + title + ", " + e2.getLocalizedMessage());
                 if (ex == null)
                     ex = e2;
             }
@@ -382,7 +382,7 @@ public class InterpolatePopulationAsMeanPreservingCurve
             }
             catch (Exception e2)
             {
-                Util.err("CSASRA disaggregation failed for " + title);
+                Util.err("CSASRA disaggregation failed for " + title + ", " + e2.getLocalizedMessage());
                 ex = e2;
             }
         }

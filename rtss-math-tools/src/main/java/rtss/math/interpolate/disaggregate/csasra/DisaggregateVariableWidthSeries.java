@@ -235,7 +235,7 @@ public class DisaggregateVariableWidthSeries
         for (int pass = 0 ;;)
         {
             if (pass++ > 10_000)
-                throw new Exception("не сходится");
+                throw new Exception("не сходится линеаризация первого сегмента");
             b = (b1 + b2) / 2;
             a = (y[width] - b) / width;
 
