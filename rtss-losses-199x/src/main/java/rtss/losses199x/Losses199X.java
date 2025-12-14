@@ -20,6 +20,7 @@ public class Losses199X
     {
         try
         {
+            new ActualDeaths().print(1989, 2015, RosBrisTerritories.RF_BEFORE_2014);
             // ### test load data PopBa and PopDa with census and without all years
             
             new BirthsDeficit().eval();

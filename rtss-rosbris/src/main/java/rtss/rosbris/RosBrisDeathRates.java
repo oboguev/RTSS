@@ -105,29 +105,31 @@ public class RosBrisDeathRates
     private Map<ValueKey, Double[]> map = new HashMap<>();
     private Integer territory;
     private Integer year;
+    
+    private double scale = 1e-6;
 
     public Double mx(int territory, int year, Locality locality, Gender gender, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality, gender));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length) ? null : scale * va[age];
     }
 
     public Double mx(Locality locality, Gender gender, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality, gender));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length) ? null : scale * va[age];
     }
 
     public Double mxForTerritory(int territory, Locality locality, Gender gender, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality, gender));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length) ? null : scale * va[age];
     }
 
     public Double mxForYear(int year, Locality locality, Gender gender, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality, gender));
-        return (va == null || age >= va.length) ? null : va[age];
+        return (va == null || age >= va.length) ? null : scale * va[age];
     }
 
     /* =============================================================================================== */

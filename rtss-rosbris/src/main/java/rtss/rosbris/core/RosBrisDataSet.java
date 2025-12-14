@@ -121,20 +121,23 @@ public class RosBrisDataSet
                 keys = vals;
                 continue;
             }
-
-            if (vals.length < keys.length)
-            {
-                logger.warn("Partial data in file {}, line {}, expected: {}, actual: {}, content: {}",
-                            path, n, keys.length, vals.length, line);
-            }
-            else if (vals.length != keys.length)
+            
+            if (vals.length > keys.length)
             {
                 logger.error("Unexpected number of entries in file {}, line {}, expected: {}, actual: {}",
                              path, n, keys.length, vals.length);
                 throw new Exception("Unexpected number of entries in file");
             }
 
-            values.add(new DataEntry(keys, vals));
+            DataEntry de = new DataEntry(keys, vals);
+
+            if (vals.length < keys.length && !ignorePartialLine(path, keys, vals))
+            {
+                logger.warn("Partial data in file {}, line {}, expected: {}, actual: {}, content: {}",
+                            path, n, keys.length, vals.length, line);
+            }
+
+            values.add(de);
         }
     }
 
@@ -162,31 +165,41 @@ public class RosBrisDataSet
         return this;
     }
     
-
- // #### year   
- // 1135,R,B
- // 1135,R,F
- // 1135,R,M
- // 1135,T,B
- // 1135,T,F
- // 1135,T,M
- // 1135,U,B
- // 1135,U,F
- // 1135,U,M
- // 1140,R,B
- // 1140,R,F
- // 1140,R,M
- // 1145,R,B
- // 1145,R,F
- // 1145,R,M
- // 1167,R,B
- // 1167,R,F
- // 1167,R,M
- // 1167,T,B
- // 1167,T,F
- // 1167,T,M
- // 1167,U,B
- // 1167,U,F
- // 1167,U,M
-    
+    private boolean ignorePartialLine(String path, String[] keys, String[] vals)
+    {
+        if (path.equals("RosBRIS/PopDa/PopDa2012-2022.txt") || path.equals("RosBRIS/PopDa/PopDa1989-2014.txt"))
+        {
+            if (keys.length == 105 && vals.length == 4)
+            {
+                // 1135,R,B
+                // 1135,R,F
+                // 1135,R,M
+                // 1135,T,B
+                // 1135,T,F
+                // 1135,T,M
+                // 1135,U,B
+                // 1135,U,F
+                // 1135,U,M
+                // 1140,R,B
+                // 1140,R,F
+                // 1140,R,M
+                // 1145,R,B
+                // 1145,R,F
+                // 1145,R,M
+                // 1167,R,B
+                // 1167,R,F
+                // 1167,R,M
+                // 1167,T,B
+                // 1167,T,F
+                // 1167,T,M
+                // 1167,U,B
+                // 1167,U,F
+                // 1167,U,M
+                   
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }
