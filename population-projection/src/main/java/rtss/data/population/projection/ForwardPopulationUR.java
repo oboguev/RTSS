@@ -6,6 +6,7 @@ import java.util.Map;
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
+import rtss.data.population.projection.helper.CalcBirths;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
@@ -346,11 +347,12 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         int ndays = years2days(yfraction);
         ndays = Math.max(1, ndays);
+        
+        AgeSpecificFertilityRates asfrForLocality = (locality == Locality.URBAN) ? ageSpecificFertilityRatesUrban : ageSpecificFertilityRatesRural;
 
-        // #### интерполировать возрастные линии и для каждого дня (c учётом старения) добвавить в массив age_count[year} += ....
-        // #### прииложить ASFR к массиву
-        double[] day_births = new double[ndays];
-        // day_births = calcBirths(fctx1, fctx2, ndays, asfrForLocality) 
+        // интерполировать возрастные линии и для каждого дня (c учётом старения) вычислить женское насееление, 
+        // приложить ASFR и получить число рождений в данный день 
+        double[] day_births = CalcBirths.eval_day_births(fctx1, fctx2, ndays, locality, asfrForLocality);
         
         double[] m_births = Util.multiply(Util.dup(day_births), MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio));
         double[] f_births = Util.multiply(Util.dup(day_births), 1.0 / (1 + MaleFemaleBirthRatio));
