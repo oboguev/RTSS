@@ -31,37 +31,37 @@ public class DataLoadTest
         /* population for deaths (exposure) */
         RosBrisPopulationExposureForDeaths.use2021census(true);
         for (int year = 2012; year <= 2022; year++)
-            p = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, year);
+            p = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, year);
 
         RosBrisPopulationExposureForDeaths.use2021census(false);
         for (int year = 2012; year <= 2022; year++)
-            p = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, year);
+            p = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, year);
 
         /* population for births */
         RosBrisFemalePopulationAverageForBirths.use2021census(true);
         for (int year = 2012; year <= 2022; year++)
-            p = RosBrisFemalePopulationAverageForBirths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, year);
+            p = RosBrisFemalePopulationAverageForBirths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, year);
 
         RosBrisFemalePopulationAverageForBirths.use2021census(false);
         for (int year = 2012; year <= 2022; year++)
-            p = RosBrisFemalePopulationAverageForBirths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, year);
+            p = RosBrisFemalePopulationAverageForBirths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, year);
 
         /* death rates (mx) */
         RosBrisDeathRates.use2021census(false);
         for (int year = 2012; year <= 2022; year++)
-            dr = RosBrisDeathRates.loadMX(RosBrisTerritories.RF_BEFORE_2014, year);
+            dr = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
 
         RosBrisDeathRates.use2021census(true);
         for (int year = 2012; year <= 2022; year++)
-            dr = RosBrisDeathRates.loadMX(RosBrisTerritories.RF_BEFORE_2014, year);
+            dr = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
 
         /* birth rates (mx) */
         RosBrisFertilityRates.use2021census(false);
         for (int year = 2012; year <= 2022; year++)
-            br = RosBrisFertilityRates.loadFertilityRates(RosBrisTerritories.RF_BEFORE_2014, year);
+            br = RosBrisFertilityRates.loadFertilityRates(RosBrisTerritory.RF_BEFORE_2014, year);
 
         RosBrisDeathRates.use2021census(true);
         for (int year = 2012; year <= 2023; year++)
-            br = RosBrisFertilityRates.loadFertilityRates(RosBrisTerritories.RF_BEFORE_2014, year);
+            br = RosBrisFertilityRates.loadFertilityRates(RosBrisTerritory.RF_BEFORE_2014, year);
     }
 }

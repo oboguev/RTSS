@@ -12,7 +12,7 @@ import rtss.data.selectors.Locality;
 import rtss.losses199x.util.ActualBirths;
 import rtss.losses199x.util.ActualDeaths;
 import rtss.rosbris.RosBrisPopulationExposureForDeaths;
-import rtss.rosbris.RosBrisTerritories;
+import rtss.rosbris.RosBrisTerritory;
 import rtss.rosbris.core.RosBrisDataSet;
 import rtss.util.Util;
 
@@ -22,8 +22,8 @@ public class Losses199X
     {
         try
         {
-            new ActualDeaths().print(1989, 2015, RosBrisTerritories.RF_BEFORE_2014);
-            new ActualBirths().print(1989, 2015, RosBrisTerritories.RF_BEFORE_2014);
+            new ActualDeaths().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
+            new ActualBirths().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
             // ### test load data PopBa and PopDa with census and without all years
             
             new BirthsDeficit().eval();

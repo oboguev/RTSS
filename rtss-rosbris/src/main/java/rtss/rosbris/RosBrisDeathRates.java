@@ -50,7 +50,7 @@ public class RosBrisDeathRates
         }
     }
 
-    public static RosBrisDeathRates loadMXForTerritory(Integer territory) throws Exception
+    public static RosBrisDeathRates loadMXForTerritory(RosBrisTerritory territory) throws Exception
     {
         return loadMX(territory, null);
     }
@@ -60,7 +60,7 @@ public class RosBrisDeathRates
         return loadMX(null, year);
     }
 
-    public static RosBrisDeathRates loadMX(Integer territory, Integer year) throws Exception
+    public static RosBrisDeathRates loadMX(RosBrisTerritory territory, Integer year) throws Exception
     {
         RosBrisDeathRates dr = new RosBrisDeathRates();
         dr.territory = territory;
@@ -69,7 +69,7 @@ public class RosBrisDeathRates
         RosBrisDataSet ds = forYear(year);
 
         if (territory != null)
-            ds = ds.selectEq("Reg", territory);
+            ds = ds.selectEq("Reg", territory.toString());
 
         if (year != null)
             ds = ds.selectEq("Year", year);
@@ -77,7 +77,7 @@ public class RosBrisDeathRates
         for (DataEntry de : ds.entries())
         {
             ValueKey vk = new ValueKey();
-            vk.territory = de.asInt("Reg");
+            vk.territory = new RosBrisTerritory(de.asInt("Reg"));
             vk.year = de.asInt("Year");
             vk.locality = decodeLocality(de.asString("Group"));
             vk.gender = decodeGender(de.asString("Sex"));
@@ -103,12 +103,12 @@ public class RosBrisDeathRates
     /* =============================================================================================== */
 
     private Map<ValueKey, Double[]> map = new HashMap<>();
-    private Integer territory;
+    private RosBrisTerritory territory;
     private Integer year;
     
     private double scale = 1e-6;
 
-    public Double mx(int territory, int year, Locality locality, Gender gender, int age)
+    public Double mx(RosBrisTerritory territory, int year, Locality locality, Gender gender, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality, gender));
         return (va == null || age >= va.length) ? null : scale * va[age];
@@ -120,7 +120,7 @@ public class RosBrisDeathRates
         return (va == null || age >= va.length) ? null : scale * va[age];
     }
 
-    public Double mxForTerritory(int territory, Locality locality, Gender gender, int age)
+    public Double mxForTerritory(RosBrisTerritory territory, Locality locality, Gender gender, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality, gender));
         return (va == null || age >= va.length) ? null : scale * va[age];
@@ -136,7 +136,7 @@ public class RosBrisDeathRates
 
     private static class ValueKey
     {
-        public int territory;
+        public RosBrisTerritory territory;
         public int year;
         public Locality locality;
         public Gender gender;
@@ -145,7 +145,7 @@ public class RosBrisDeathRates
         {
         }
 
-        public ValueKey(int territory, int year, Locality locality, Gender gender)
+        public ValueKey(RosBrisTerritory territory, int year, Locality locality, Gender gender)
         {
             this.territory = territory;
             this.year = year;
@@ -163,7 +163,7 @@ public class RosBrisDeathRates
 
             ValueKey that = (ValueKey) o;
 
-            if (territory != that.territory)
+            if (territory.code() != that.territory.code())
                 return false;
             if (year != that.year)
                 return false;
@@ -175,7 +175,7 @@ public class RosBrisDeathRates
         @Override
         public int hashCode()
         {
-            int result = territory;
+            int result = territory.code();
             result = 31 * result + year;
             result = 31 * result + (locality != null ? locality.hashCode() : 0);
             result = 31 * result + (gender != null ? gender.hashCode() : 0);

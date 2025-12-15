@@ -7,32 +7,33 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.RosBrisDeathRates;
 import rtss.rosbris.RosBrisPopulationExposureForDeaths;
+import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
 
 public class ActualDeaths
 {
-    public double[] getRosBrisActualDeaths(int y1, int y2, int territory, Gender gender) throws Exception
+    public double[] getRosBrisActualDeaths(int y1, int y2, RosBrisTerritory territory, Gender gender) throws Exception
     {
         double[] v1 = getRosBrisActualDeaths(y1, y2, territory, Locality.URBAN, gender);
         double[] v2 = getRosBrisActualDeaths(y1, y2, territory, Locality.RURAL, gender);
         return Util.add(v1, v2);
     }
 
-    public double[] getRosBrisActualDeaths(int y1, int y2, int territory, Locality locality) throws Exception
+    public double[] getRosBrisActualDeaths(int y1, int y2, RosBrisTerritory territory, Locality locality) throws Exception
     {
         double[] v1 = getRosBrisActualDeaths(y1, y2, territory, locality, Gender.MALE);
         double[] v2 = getRosBrisActualDeaths(y1, y2, territory, locality, Gender.FEMALE);
         return Util.add(v1, v2);
     }
 
-    public double[] getRosBrisActualDeaths(int y1, int y2, int territory) throws Exception
+    public double[] getRosBrisActualDeaths(int y1, int y2, RosBrisTerritory territory) throws Exception
     {
         double[] v1 = getRosBrisActualDeaths(y1, y2, territory, Locality.URBAN);
         double[] v2 = getRosBrisActualDeaths(y1, y2, territory, Locality.RURAL);
         return Util.add(v1, v2);
     }
 
-    public double[] getRosBrisActualDeaths(int y1, int y2, int territory, Locality locality, Gender gender) throws Exception
+    public double[] getRosBrisActualDeaths(int y1, int y2, RosBrisTerritory territory, Locality locality, Gender gender) throws Exception
     {
         double[] values = new double[y2 - y1 + 1];
 
@@ -63,7 +64,7 @@ public class ActualDeaths
         return v;
     }
 
-    public void print(int y1, int y2, int territory) throws Exception
+    public void print(int y1, int y2, RosBrisTerritory territory) throws Exception
     {
         double[] um = getRosBrisActualDeaths(y1, y2, territory, Locality.URBAN, Gender.MALE);
         double[] rm = getRosBrisActualDeaths(y1, y2, territory, Locality.RURAL, Gender.MALE);

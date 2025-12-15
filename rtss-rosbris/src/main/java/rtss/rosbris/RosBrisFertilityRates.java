@@ -50,7 +50,7 @@ public class RosBrisFertilityRates
         }
     }
 
-    public static RosBrisFertilityRates loadFertilityRatesForTerritory(Integer territory) throws Exception
+    public static RosBrisFertilityRates loadFertilityRatesForTerritory(RosBrisTerritory territory) throws Exception
     {
         return loadFertilityRates(territory, null);
     }
@@ -60,7 +60,7 @@ public class RosBrisFertilityRates
         return loadFertilityRates(null, year);
     }
 
-    public static RosBrisFertilityRates loadFertilityRates(Integer territory, Integer year) throws Exception
+    public static RosBrisFertilityRates loadFertilityRates(RosBrisTerritory territory, Integer year) throws Exception
     {
         RosBrisFertilityRates dr = new RosBrisFertilityRates();
         dr.territory = territory;
@@ -69,7 +69,7 @@ public class RosBrisFertilityRates
         RosBrisDataSet ds = forYear(year);
 
         if (territory != null)
-            ds = ds.selectEq("Reg", territory);
+            ds = ds.selectEq("Reg", territory.toString());
 
         if (year != null)
             ds = ds.selectEq("Year", year);
@@ -77,7 +77,7 @@ public class RosBrisFertilityRates
         for (DataEntry de : ds.entries())
         {
             ValueKey vk = new ValueKey();
-            vk.territory = de.asInt("Reg");
+            vk.territory = new RosBrisTerritory(de.asInt("Reg"));
             vk.year = de.asInt("Year");
             vk.locality = decodeLocality(de.asString("Group"));
 
@@ -93,7 +93,7 @@ public class RosBrisFertilityRates
                  */
                 if (Util.False && age > 55)
                     key = "Bra" + 55;
-                
+
                 if (de.has(key))
                     values[age] = de.asDouble(key);
             }
@@ -110,12 +110,12 @@ public class RosBrisFertilityRates
     /* =============================================================================================== */
 
     private Map<ValueKey, Double[]> map = new HashMap<>();
-    private Integer territory;
+    private RosBrisTerritory territory;
     private Integer year;
-    
+
     private double scale = 1e-6;
 
-    public Double fertilityRate(int territory, int year, Locality locality, int age)
+    public Double fertilityRate(RosBrisTerritory territory, int year, Locality locality, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality));
         return (va == null || age >= va.length || va[age] == null) ? null : scale * va[age];
@@ -127,7 +127,7 @@ public class RosBrisFertilityRates
         return (va == null || age >= va.length || va[age] == null) ? null : scale * va[age];
     }
 
-    public Double fertilityRateForTerritory(int territory, Locality locality, int age)
+    public Double fertilityRateForTerritory(RosBrisTerritory territory, Locality locality, int age)
     {
         Double[] va = map.get(new ValueKey(territory, year, locality));
         return (va == null || age >= va.length || va[age] == null) ? null : scale * va[age];
@@ -143,7 +143,7 @@ public class RosBrisFertilityRates
 
     private static class ValueKey
     {
-        public int territory;
+        public RosBrisTerritory territory;
         public int year;
         public Locality locality;
 
@@ -151,7 +151,7 @@ public class RosBrisFertilityRates
         {
         }
 
-        public ValueKey(int territory, int year, Locality locality)
+        public ValueKey(RosBrisTerritory territory, int year, Locality locality)
         {
             this.territory = territory;
             this.year = year;
@@ -168,7 +168,7 @@ public class RosBrisFertilityRates
 
             ValueKey that = (ValueKey) o;
 
-            if (territory != that.territory)
+            if (territory.code() != that.territory.code())
                 return false;
             if (year != that.year)
                 return false;
@@ -180,7 +180,7 @@ public class RosBrisFertilityRates
         @Override
         public int hashCode()
         {
-            int result = territory;
+            int result = territory.code();
             result = 31 * result + year;
             result = 31 * result + (locality != null ? locality.hashCode() : 0);
             return result;

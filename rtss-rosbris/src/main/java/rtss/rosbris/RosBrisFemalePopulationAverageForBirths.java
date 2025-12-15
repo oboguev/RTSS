@@ -52,7 +52,7 @@ public class RosBrisFemalePopulationAverageForBirths
         }
     }
     
-    public static PopulationByLocality getPopulationByLocality(int territory, int year) throws Exception
+    public static PopulationByLocality getPopulationByLocality(RosBrisTerritory territory, int year) throws Exception
     {
         Population total = getPopulation(territory, year, Locality.TOTAL);
         Population urban = getPopulation(territory, year, Locality.URBAN);
@@ -64,7 +64,7 @@ public class RosBrisFemalePopulationAverageForBirths
         return p;
     }
     
-    public static Population getPopulation(int territory, int year, Locality locality) throws Exception
+    public static Population getPopulation(RosBrisTerritory territory, int year, Locality locality) throws Exception
     {
         Population p = Population.newPopulation(locality);
         p.setYearHint(year);
@@ -80,10 +80,10 @@ public class RosBrisFemalePopulationAverageForBirths
         return p;
     }
 
-    private static void addGender(Population p, int territory, int year, Locality locality, Gender gender) throws Exception
+    private static void addGender(Population p, RosBrisTerritory territory, int year, Locality locality, Gender gender) throws Exception
     {
         RosBrisDataSet ds = forYear(year)
-                .selectEq("Reg", territory)
+                .selectEq("Reg", territory.toString())
                 .selectEq("Group", group(locality));
 
         int size = ds.entries().size();

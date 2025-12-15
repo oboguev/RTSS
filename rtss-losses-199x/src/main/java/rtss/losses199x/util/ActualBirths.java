@@ -7,11 +7,12 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.RosBrisFemalePopulationAverageForBirths;
 import rtss.rosbris.RosBrisFertilityRates;
+import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
 
 public class ActualBirths
 {
-    public double[] getRosBrisActualBirths(int y1, int y2, int territory, Locality locality) throws Exception
+    public double[] getRosBrisActualBirths(int y1, int y2, RosBrisTerritory territory, Locality locality) throws Exception
     {
         double[] values = new double[y2 - y1 + 1];
         
@@ -45,7 +46,7 @@ public class ActualBirths
         return v;
     }
 
-    public void print(int y1, int y2, int territory) throws Exception
+    public void print(int y1, int y2, RosBrisTerritory territory) throws Exception
     {
         double[] u = getRosBrisActualBirths(y1, y2, territory, Locality.URBAN);
         double[] r = getRosBrisActualBirths(y1, y2, territory, Locality.RURAL);

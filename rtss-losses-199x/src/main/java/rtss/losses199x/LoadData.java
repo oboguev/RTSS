@@ -14,7 +14,7 @@ import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.RosBrisPopulationExposureForDeaths;
-import rtss.rosbris.RosBrisTerritories;
+import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelRC;
@@ -88,7 +88,7 @@ public class LoadData
             
             for (int yy = 1989; yy <= 2022; yy++)
             {
-                PopulationByLocality p = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritories.RF_BEFORE_2014, yy);
+                PopulationByLocality p = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, yy);
                 m.put(yy, p);
                 // double v = p.forLocality(Locality.TOTAL).sum();
                 // Util.out(String.format("%4d %,d", yy, (long) v));
