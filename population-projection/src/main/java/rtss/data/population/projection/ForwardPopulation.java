@@ -27,4 +27,9 @@ public class ForwardPopulation extends Loggable
     {
         return (int) Math.round(years * DAYS_PER_YEAR);
     }
+    
+    public static int day2year(int nd)
+    {
+        return nd / DAYS_PER_YEAR;
+    }
 }

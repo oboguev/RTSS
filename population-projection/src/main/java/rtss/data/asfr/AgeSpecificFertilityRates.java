@@ -38,6 +38,16 @@ public class AgeSpecificFertilityRates
     {
         return bins;
     }
+    
+    public int minAge()
+    {
+        return bins[0].age_x1;
+    }
+
+    public int maxAge()
+    {
+        return bins[bins.length - 1].age_x2;
+    }
 
     public double forAge(int age)
     {

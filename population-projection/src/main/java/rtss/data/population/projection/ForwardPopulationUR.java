@@ -354,8 +354,8 @@ public class ForwardPopulationUR extends ForwardPopulation
         // приложить ASFR и получить число рождений в данный день 
         double[] day_births = CalcBirths.eval_day_births(fctx1, fctx2, ndays, locality, asfrForLocality);
         
-        double[] m_births = Util.multiply(Util.dup(day_births), MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio));
-        double[] f_births = Util.multiply(Util.dup(day_births), 1.0 / (1 + MaleFemaleBirthRatio));
+        double[] m_births = Util.multiply(day_births, MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio));
+        double[] f_births = Util.multiply(day_births, 1.0 / (1 + MaleFemaleBirthRatio));
         // #### вторая фаза
         Util.noop();
     }
