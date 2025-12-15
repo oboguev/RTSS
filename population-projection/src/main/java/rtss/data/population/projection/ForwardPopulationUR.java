@@ -330,15 +330,21 @@ public class ForwardPopulationUR extends ForwardPopulation
         /*
          * Первая фаза
          */
-        // ### what if fctx == null
-        PopulationContext fctx1 = fctx.cloneToMaxAge();
+        PopulationContext fctx1;
+        if (fctx == null)
+            fctx1 = new PopulationContext(PopulationContext.ALL_AGES);
+        else
+            fctx1 = fctx.cloneToMaxAge();
+
         fctx1.add(p.toPopulationContext());
         PopulationContext fctx2 = fctx1.clone();
 
         PopulationByLocality p1 = PopulationByLocality.newPopulationByLocality();
         p1.zero();
+        
         PopulationByLocality pto1 = PopulationByLocality.newPopulationByLocality();
         pto1.zero();
+        
         ForwardPopulationUR fw = new ForwardPopulationUR();
         fw.forward(pto1, p1, fctx2, locality, mt, yfraction);
         Util.assertion(pto1.sum() == 0);
@@ -350,17 +356,17 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         int ndays = years2days(yfraction);
         ndays = Math.max(1, ndays);
-        
+
         AgeSpecificFertilityRates asfrForLocality = (locality == Locality.URBAN) ? ageSpecificFertilityRatesUrban : ageSpecificFertilityRatesRural;
 
         // интерполировать возрастные линии и для каждого дня (c учётом старения) вычислить женское насееение, 
         // приложить ASFR и получить число рождений в данный день
-        MutableDouble fertile_female_population = new MutableDouble(); 
+        MutableDouble fertile_female_population = new MutableDouble();
         double[] day_births = CalcBirths.eval_day_births(fctx1, fctx2, ndays, locality, asfrForLocality, fertile_female_population);
-        
+
         double[] m_births = Util.multiply(day_births, MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio));
         double[] f_births = Util.multiply(day_births, 1.0 / (1 + MaleFemaleBirthRatio));
-        
+
         /*
          * Вторая фаза
          */
@@ -375,8 +381,6 @@ public class ForwardPopulationUR extends ForwardPopulation
         }
         else
         {
-            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
-
             observed_births += Util.sum(day_births);
 
             if (debug)
@@ -385,7 +389,7 @@ public class ForwardPopulationUR extends ForwardPopulation
                 log(String.format("Births %s-FEMALE = %s", locality.code(), f2s(Util.sum(f_births))));
             }
 
-            pto.add(locality, Gender.MALE, 0, Util.sum(m_births)); 
+            pto.add(locality, Gender.MALE, 0, Util.sum(m_births));
             pto.add(locality, Gender.FEMALE, 0, Util.sum(f_births));
 
             if (Util.True)
@@ -397,7 +401,7 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         /* вычислить графу "оба пола" из отдельных граф для мужчин и женщин */
         pto.makeBoth(locality);
-        
+
         Util.noop();
     }
 
