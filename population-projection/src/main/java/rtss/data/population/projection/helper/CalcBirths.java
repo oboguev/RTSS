@@ -1,5 +1,7 @@
 package rtss.data.population.projection.helper;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.population.projection.ForwardPopulation;
 import rtss.data.population.struct.PopulationContext;
@@ -14,9 +16,10 @@ public class CalcBirths
      * приложить ASFR и получить число рождений в данный день 
      */
     public static double[] eval_day_births(PopulationContext pctx1, PopulationContext pctx2, int ndays, Locality locality,
-            AgeSpecificFertilityRates asfr) throws Exception
+            AgeSpecificFertilityRates asfr, MutableDouble fertile_female_population) throws Exception
     {
         double[] day_births = new double[ndays];
+        fertile_female_population.setValue(0);
 
         for (int ndage = 0; ndage <= pctx1.MAX_DAY; ndage++)
         {
@@ -34,10 +37,13 @@ public class CalcBirths
             double[] fp = interpolate_population_ageline(pctx1.getDay(locality, Gender.FEMALE, ndage),
                                                          pctx2.getDay(locality, Gender.FEMALE, ndage2),
                                                          ndays);
+            fertile_female_population.add(Util.sum(fp));
 
             add_births(day_births, fp, ndays, asfr, ndage);
         }
-
+        
+        fertile_female_population.setValue(fertile_female_population.getValue() / ndays);
+        
         return day_births;
     }
 
@@ -75,7 +81,7 @@ public class CalcBirths
         for (int nd = 0; nd < ndays; nd++)
         {
             int age_years = ForwardPopulation.day2year(ndage0 + nd);
-            day_births[nd] += fp[nd] * asfr.forAge(age_years) / 1000.0;
+            day_births[nd] += fp[nd] * asfr.forAge(age_years) / (1000.0 * ForwardPopulation.DAYS_PER_YEAR);
         }
     }
 }

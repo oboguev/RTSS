@@ -3,6 +3,8 @@ package rtss.data.population.projection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import rtss.data.asfr.AgeSpecificFertilityRates;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
@@ -289,7 +291,7 @@ public class ForwardPopulationUR extends ForwardPopulation
 
             if (Util.True)
             {
-                // TODO: подвергнуь смертности
+                // TODO: подвергнуь рождеения смертности
                 throw new Exception("use fctx != null");
             }
         }
@@ -328,6 +330,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         /*
          * Первая фаза
          */
+        // ### what if fctx == null
         PopulationContext fctx1 = fctx.cloneToMaxAge();
         fctx1.add(p.toPopulationContext());
         PopulationContext fctx2 = fctx1.clone();
@@ -350,13 +353,51 @@ public class ForwardPopulationUR extends ForwardPopulation
         
         AgeSpecificFertilityRates asfrForLocality = (locality == Locality.URBAN) ? ageSpecificFertilityRatesUrban : ageSpecificFertilityRatesRural;
 
-        // интерполировать возрастные линии и для каждого дня (c учётом старения) вычислить женское насееление, 
-        // приложить ASFR и получить число рождений в данный день 
-        double[] day_births = CalcBirths.eval_day_births(fctx1, fctx2, ndays, locality, asfrForLocality);
+        // интерполировать возрастные линии и для каждого дня (c учётом старения) вычислить женское насееение, 
+        // приложить ASFR и получить число рождений в данный день
+        MutableDouble fertile_female_population = new MutableDouble(); 
+        double[] day_births = CalcBirths.eval_day_births(fctx1, fctx2, ndays, locality, asfrForLocality, fertile_female_population);
         
         double[] m_births = Util.multiply(day_births, MaleFemaleBirthRatio / (1 + MaleFemaleBirthRatio));
         double[] f_births = Util.multiply(day_births, 1.0 / (1 + MaleFemaleBirthRatio));
-        // #### вторая фаза
+        
+        /*
+         * Вторая фаза
+         */
+        /* передвижка мужского и женского населений по смертности из @p в @pto */
+        forward(pto, p, fctx, locality, Gender.MALE, mt, yfraction);
+        forward(pto, p, fctx, locality, Gender.FEMALE, mt, yfraction);
+
+        if (fctx != null)
+        {
+            add_births(fctx, locality, Gender.MALE, m_births, mt, ndays);
+            add_births(fctx, locality, Gender.FEMALE, f_births, mt, ndays);
+        }
+        else
+        {
+            double sum = p.sum(locality, Gender.BOTH, 0, MAX_AGE);
+
+            observed_births += Util.sum(day_births);
+
+            if (debug)
+            {
+                log(String.format("Births %s-MALE = %s", locality.code(), f2s(Util.sum(m_births))));
+                log(String.format("Births %s-FEMALE = %s", locality.code(), f2s(Util.sum(f_births))));
+            }
+
+            pto.add(locality, Gender.MALE, 0, Util.sum(m_births)); 
+            pto.add(locality, Gender.FEMALE, 0, Util.sum(f_births));
+
+            if (Util.True)
+            {
+                // TODO: подвергнуь рождения смертности
+                throw new Exception("use fctx != null");
+            }
+        }
+
+        /* вычислить графу "оба пола" из отдельных граф для мужчин и женщин */
+        pto.makeBoth(locality);
+        
         Util.noop();
     }
 
