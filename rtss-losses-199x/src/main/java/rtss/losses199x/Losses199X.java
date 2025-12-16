@@ -37,7 +37,7 @@ public class Losses199X
 
             // for (int year = 1990; year <= 2016; year++)
             // {
-            //      PopulationByLocality p = LoadData.actualPopulation(year);
+            //     PopulationByLocality p = LoadData.actualPopulation(year);
             //     double v = p.forLocality(Locality.TOTAL).sum();
             //     Util.out(String.format("%4d %,d", year, (long) v));
             // }

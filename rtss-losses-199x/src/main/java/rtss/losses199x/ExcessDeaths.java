@@ -16,12 +16,12 @@ public class ExcessDeaths
         RosBrisDeathRates.use2021census(true);
 
         CombinedMortalityTable cmt = LoadData.mortalityTable1986();
-        RosBrisDeathRates dr1986 = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
+        RosBrisDeathRates rates1986 = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
         
         for (int year = 1989; year <= 2015; year++)
         {
             PopulationByLocality exposure = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, year);
-            RosBrisDeathRates dr = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
+            RosBrisDeathRates rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
             
             // ### create PopulationByLocality deaths for dr
             // ### create PopulationByLocality deaths for dr1986
@@ -32,7 +32,7 @@ public class ExcessDeaths
     
     LocalityGender[] lgs = {LocalityGender.URBAN_MALE, LocalityGender.URBAN_FEMALE, LocalityGender.RURAL_MALE, LocalityGender.RURAL_FEMALE};
     
-    private PopulationByLocality deaths(PopulationByLocality exposure, RosBrisDeathRates dr) throws Exception
+    private PopulationByLocality deaths(PopulationByLocality exposure, RosBrisDeathRates rates) throws Exception
     {
         PopulationByLocality deaths = PopulationByLocality.newPopulationByLocality();
         
@@ -40,9 +40,13 @@ public class ExcessDeaths
         {
             for (int age = 0; age <= Population.MAX_AGE; age++)
             {
-                // ###
+                double mx = rates.mx(lg.locality, lg.gender, age);
+                double pop = exposure.get(lg.locality, lg.gender, age);
+                deaths.set(lg.locality, lg.gender, age, pop * mx);
             }
         }
+
+        // ### recalc both and total
         
         return deaths;
     }
