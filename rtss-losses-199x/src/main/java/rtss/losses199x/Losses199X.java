@@ -25,8 +25,8 @@ public class Losses199X
             new ActualDeaths().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
             new ActualBirths().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
 
-            new BirthsDeficit().eval();
             new ExcessDeaths().eval();
+            new BirthsDeficit().eval();
 
             // PopulationByLocality p1989 = LoadData.populationCensus1989();
             // CombinedMortalityTable cmt = LoadData.mortalityTable1986();
