@@ -3,6 +3,9 @@ package rtss.rosbris;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.MortalityInfo;
+import rtss.data.mortality.MortalityUtil;
 import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -213,5 +216,54 @@ public class RosBrisDeathRates
         default:
             throw new RuntimeException("Invalid gender code " + code);
         }
+    }
+
+    /* =============================================================================================== */
+    
+    public static RosBrisDeathRates from(CombinedMortalityTable cmt, RosBrisTerritory territory, int year) throws Exception
+    {
+        RosBrisDeathRates dr = new RosBrisDeathRates();
+        dr.territory = territory;
+        dr.year = year;
+        
+        dr.from(cmt, Locality.TOTAL);
+
+        if (!cmt.isTotalOnly())
+        {
+            dr.from(cmt, Locality.RURAL);
+            dr.from(cmt, Locality.URBAN);
+        }
+        
+        return dr;
+    }
+    
+    private void from(CombinedMortalityTable cmt, Locality locality) throws Exception
+    {
+        from(cmt, locality, Gender.BOTH);
+        from(cmt, locality, Gender.MALE);
+        from(cmt, locality, Gender.FEMALE);
+    }
+
+    private void from(CombinedMortalityTable cmt, Locality locality, Gender gender) throws Exception
+    {
+        ValueKey vk = new ValueKey();
+        vk.territory = territory;
+        vk.year = year;
+        vk.locality = locality;
+        vk.gender = gender;
+
+        Double[] values = new Double[Population.MAX_AGE + 1];
+        
+        for (int age = 0; age <= CombinedMortalityTable.MAX_AGE; age++)
+        {
+            MortalityInfo mi = cmt.get(locality, gender, age);
+            double mx = MortalityUtil.qx2mx(mi.qx);
+            values[age] = mx;
+        }
+
+        if (map.containsKey(vk))
+            throw new Exception("Duplicate data records");
+
+        map.put(vk, values);
     }
 }

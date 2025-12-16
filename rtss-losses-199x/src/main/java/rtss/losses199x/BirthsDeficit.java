@@ -13,7 +13,7 @@ import rtss.util.Util;
 
 public class BirthsDeficit
 {
-    private CombinedMortalityTable cmt = LoadData.mortalityTable();
+    private CombinedMortalityTable cmt = LoadData.mortalityTable1986();
     private AgeSpecificFertilityRates asfr_rural = LoadData.loadASFR(Locality.RURAL);
     private AgeSpecificFertilityRates asfr_urban = LoadData.loadASFR(Locality.URBAN);
 

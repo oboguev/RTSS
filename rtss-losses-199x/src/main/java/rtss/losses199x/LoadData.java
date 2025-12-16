@@ -27,7 +27,7 @@ public class LoadData
         return p1989;
     }
 
-    public static CombinedMortalityTable mortalityTable() throws Exception
+    public static CombinedMortalityTable mortalityTable1986() throws Exception
     {
         CombinedMortalityTable cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987");
         return cmt;
