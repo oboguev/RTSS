@@ -388,7 +388,8 @@ public class SingleMortalityTable
     
     public void saveTable(String filepath, String comment) throws Exception
     {
-        String nl = "\n";
+        final String nl = "\n";
+        
         StringBuilder sb = new StringBuilder();
         if (comment != null && comment.length() != 0)
             sb.append("# " + comment + nl);
@@ -413,6 +414,40 @@ public class SingleMortalityTable
         }
 
         Util.writeAsFile(filepath, sb.toString());
+    }
+
+    /*****************************************************************************************************/
+    
+    public String dump()
+    {
+        final String nl = "\n";
+        StringBuilder sb = new StringBuilder();
+        
+        try
+        {
+            sb.append(source + nl + nl);
+            sb.append("# x, lx, dx, qx, px, Lx, Tx, ex" + nl + nl);
+
+            for (int age = 0; age <= MAX_AGE; age++)
+            {
+                MortalityInfo mi = m.get(age);
+                sb.append(String.format("%-8d", mi.x));
+                sb.append(String.format("%-8d", Math.round(mi.lx)));
+                sb.append(String.format("%-8d", Math.round(mi.dx)));
+                sb.append(String.format("%-8.5f", mi.qx));
+                sb.append(String.format("%-8.5f", mi.px));
+                sb.append(String.format("%-8d", Math.round(mi.Lx)));
+                sb.append(String.format("%-8d", Math.round(mi.Tx)));
+                sb.append(String.format("%.2f", mi.ex));
+                sb.append(nl);
+            }
+        }
+        catch (Exception ex)
+        {
+            sb.append(nl + nl + "Exception: " + ex.getLocalizedMessage());
+        }
+        
+        return sb.toString();
     }
 
     /*****************************************************************************************************/
@@ -452,7 +487,8 @@ public class SingleMortalityTable
     
     public String toString()
     {
-        return source;
+        // return source;
+        return dump();
     }
 
     /*****************************************************************************************************/

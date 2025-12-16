@@ -33,6 +33,8 @@ public class ExcessDeaths
 
         CombinedMortalityTable cmt = LoadData.mortalityTable1986();
         RosBrisDeathRates rates1986 = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
+        
+        String xxx = cmt.getSingleTable(Locality.TOTAL, Gender.BOTH).dump(); //###
 
         for (int year = yy1; year <= yy2; year++)
         {
