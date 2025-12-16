@@ -18,12 +18,12 @@ public class SingleMortalityTable
     private boolean sealed = false;
     public static final int MAX_AGE = Population.MAX_AGE;
     public static final int DAYS_PER_YEAR = 365;
-    
+
     private SingleMortalityTable()
     {
         source = "unknown";
     }
-    
+
     public MortalityInfo get(int age) throws Exception
     {
         MortalityInfo mi = m.get(age);
@@ -31,20 +31,20 @@ public class SingleMortalityTable
             throw new Exception("Missing mortality table data");
         return mi;
     }
-    
+
     /*****************************************************************************************************/
 
     public SingleMortalityTable(String path) throws Exception
     {
         load(path);
     }
-    
+
     private void load(String path) throws Exception
     {
-        checkWritable(); 
-        
+        checkWritable();
+
         this.source = path;
-        
+
         String rdata = Util.loadResource(path);
         rdata = rdata.replace("\r\n", "\n");
         String[] lines = rdata.split("\n");
@@ -53,18 +53,18 @@ public class SingleMortalityTable
         {
             char unicode_feff = '\uFEFF';
             line = line.replace("" + unicode_feff, "");
-                    
+
             int k = line.indexOf('#');
             if (k != -1)
                 line = line.substring(0, k);
             line = line.replace("\t", " ").replaceAll(" +", " ").trim();
             if (line.length() == 0)
                 continue;
-            
+
             String[] el = line.split(" ");
             if (el.length != 8)
                 throw new Exception("Invalid format of mortality table");
-            
+
             MortalityInfo mi = new MortalityInfo();
             mi.x = asInt(el[0]);
             mi.lx = asInt(el[1]);
@@ -74,25 +74,25 @@ public class SingleMortalityTable
             mi.Lx = asInt(el[5]);
             mi.Tx = asInt(el[6]);
             mi.ex = asDouble(el[7]);
-            
+
             if (mi.x < 0 || mi.x > MAX_AGE)
                 throw new Exception("Invalid data in mortality table");
-            
+
             if (m.containsKey(mi.x))
                 throw new Exception("Duplicate entries in mortality table " + path + ", age = " + mi.x);
-            
+
             m.put(mi.x, mi);
         }
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             if (!m.containsKey(age))
                 throw new Exception("Mising entry in mortality table");
         }
-        
+
         validate();
     }
-    
+
     public void validate() throws Exception
     {
         /*
@@ -101,7 +101,7 @@ public class SingleMortalityTable
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
-            
+
             Util.checkValidNonNegative(mi.px);
             Util.checkValidNonNegative(mi.qx);
             Util.checkValidNonNegative(mi.dx);
@@ -109,12 +109,12 @@ public class SingleMortalityTable
             Util.checkValidNonNegative(mi.lx);
             Util.checkValidNonNegative(mi.Lx);
             Util.checkValidNonNegative(mi.Tx);
-            
-            check_eq(String.format("px+qx for age %d px = %f, qx = %f", age, mi.px, mi.qx), 
+
+            check_eq(String.format("px+qx for age %d px = %f, qx = %f", age, mi.px, mi.qx),
                      mi.px + mi.qx, 1.0, 0.011);
             if (Math.abs(Math.round(mi.lx * mi.qx) - mi.dx) > 2)
                 inconsistent("lx * qx - dx for age " + age);
-        
+
             if (age != MAX_AGE)
             {
                 MortalityInfo mi2 = get(age + 1);
@@ -123,7 +123,7 @@ public class SingleMortalityTable
             }
         }
     }
-    
+
     @SuppressWarnings("unused")
     private void check_eq(String what, double a, double b) throws Exception
     {
@@ -132,12 +132,12 @@ public class SingleMortalityTable
 
     private void check_eq(String what, double a, double b, double diff) throws Exception
     {
-        if (Util.differ(a,b, diff))
+        if (Util.differ(a, b, diff))
         {
             inconsistent(what + " differ by " + (a - b));
         }
     }
-    
+
     private void inconsistent(String what) throws Exception
     {
         String msg = "Inconsistent mortality table in " + source + ": " + what;
@@ -154,7 +154,7 @@ public class SingleMortalityTable
     {
         return Double.parseDouble(s.replace(",", ""));
     }
-    
+
     /*****************************************************************************************************/
 
     static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, double weight) throws Exception
@@ -169,10 +169,10 @@ public class SingleMortalityTable
     {
         if (weight < 0 || weight > 1)
             throw new Exception("Incorrect interpolation weight");
-        
+
         double w1 = 1 - weight;
         double w2 = weight;
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi1 = mt1.get(age);
@@ -186,24 +186,24 @@ public class SingleMortalityTable
             mi.Lx = w1 * mi1.Lx + w2 * mi2.Lx;
             mi.Tx = w1 * mi1.Tx + w2 * mi2.Tx;
             mi.ex = w1 * mi1.ex + w2 * mi2.ex;
-            
-            m.put(age,  mi);
+
+            m.put(age, mi);
         }
     }
-    
+
     /*****************************************************************************************************/
 
     static SingleMortalityTable interpolate(SingleMortalityTable mt1, SingleMortalityTable mt2, int toAge, double weight) throws Exception
     {
         if (weight < 0 || weight > 1)
             throw new Exception("Incorrect interpolation weight");
-        
+
         double w1 = 1 - weight;
         double w2 = weight;
-        
+
         double[] qx1 = mt1.qx();
         double[] qx2 = mt2.qx();
-        
+
         double[] qx = Util.dup(qx1);
         for (int age = 0; age <= toAge; age++)
             qx[age] = w1 * qx1[age] + w2 * qx2[age];
@@ -214,33 +214,33 @@ public class SingleMortalityTable
     }
 
     /*****************************************************************************************************/
-    
+
     public double[] qx() throws Exception
     {
         double[] v = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            v[age] = get(age).qx; 
+            v[age] = get(age).qx;
         }
         return v;
     }
-    
+
     public double[] px() throws Exception
     {
         double[] v = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            v[age] = get(age).px; 
+            v[age] = get(age).px;
         }
         return v;
     }
-    
+
     public double[] lx() throws Exception
     {
         double[] v = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
         {
-            v[age] = get(age).lx; 
+            v[age] = get(age).lx;
         }
         return v;
     }
@@ -270,16 +270,16 @@ public class SingleMortalityTable
         smt.from_qx(qx);
         return smt;
     }
-    
+
     private void from_qx(double[] qx) throws Exception
     {
-        checkWritable(); 
+        checkWritable();
 
         if (qx.length != MAX_AGE + 1)
             throw new IllegalArgumentException("Incorrect qx length");
-        
+
         MortalityInfo prev_mi = null;
-        
+
         /* we'll need the row for MAX_AGE+1 for Lx calculations */
         for (int age = 0; age <= MAX_AGE + 1; age++)
         {
@@ -287,7 +287,7 @@ public class SingleMortalityTable
             mi.x = age;
             mi.qx = qx[Math.min(age, MAX_AGE)];
             mi.px = 1 - mi.qx;
-            
+
             if (age == 0)
             {
                 mi.lx = 100_000;
@@ -298,18 +298,18 @@ public class SingleMortalityTable
                 if (mi.lx < 0)
                     mi.lx = 0;
             }
-            
+
             mi.dx = (int) Math.round(mi.lx * mi.qx);
             m.put(mi.x, mi);
             prev_mi = mi;
         }
-        
+
         // calculate Lx
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = m.get(age);
             mi.Lx = mi.lx - mi.dx / 2;
-            
+
             if (age >= 5)
             {
                 // формула ЦСУ
@@ -344,7 +344,7 @@ public class SingleMortalityTable
 
         /* delete auxiliary row */
         m.remove(MAX_AGE + 1);
-        
+
         validate();
     }
 
@@ -357,7 +357,7 @@ public class SingleMortalityTable
     {
         return from_qx(path, lx2qx(lx));
     }
-    
+
     public static double[] lx2qx(double[] lx) throws Exception
     {
         if (lx.length != MAX_AGE + 1)
@@ -365,9 +365,9 @@ public class SingleMortalityTable
 
         if (Util.differ(lx[0], 100_000))
             throw new IllegalArgumentException("Invalid lx[0]");
-        
+
         double[] qx = new double[lx.length];
-        
+
         for (int age = 0; age <= lx.length; age++)
         {
             if (age < lx.length && lx[age] > 0)
@@ -377,28 +377,28 @@ public class SingleMortalityTable
             }
             else
             {
-                qx[age] = qx[age - 1] * (qx[age-1] / qx[age - 2]);
+                qx[age] = qx[age - 1] * (qx[age - 1] / qx[age - 2]);
             }
         }
 
         return qx;
     }
-    
+
     /*****************************************************************************************************/
-    
+
     public void saveTable(String filepath, String comment) throws Exception
     {
         final String nl = "\n";
-        
+
         StringBuilder sb = new StringBuilder();
         if (comment != null && comment.length() != 0)
             sb.append("# " + comment + nl);
-        
+
         sb.append("# Возраст в годах, Числа доживающих до возраста х лет, Числа умирающих при переходе от возраста x к возрасту х+1 лет, ");
         sb.append("Вероятность умереть в течение предстоящего года жизни, Вероятность дожить до возраста х+1 лет, Числа живущих в возрасте х лет, ");
         sb.append("Числа прожитых человеколет, Средняя продолжительность предстоящей жизни" + nl);
         sb.append("# x, lx, dx, qx, px, Lx, Tx, ex" + nl + nl);
-        
+
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = m.get(age);
@@ -417,16 +417,19 @@ public class SingleMortalityTable
     }
 
     /*****************************************************************************************************/
-    
+
     public String dump()
     {
         final String nl = "\n";
         StringBuilder sb = new StringBuilder();
-        
+
         try
         {
             sb.append(source + nl + nl);
-            sb.append("# x, lx, dx, qx, px, Lx, Tx, ex" + nl + nl);
+            // sb.append("# x, lx, dx, qx, px, Lx, Tx, ex" + nl + nl);
+
+            sb.append(" x        lx      dx      qx      px     Lx       Tx     ex" + nl);
+            sb.append("===     ======  ======= ======= ======= =====  ======== =====" + nl);
 
             for (int age = 0; age <= MAX_AGE; age++)
             {
@@ -446,7 +449,7 @@ public class SingleMortalityTable
         {
             sb.append(nl + nl + "Exception: " + ex.getLocalizedMessage());
         }
-        
+
         return sb.toString();
     }
 
@@ -454,37 +457,37 @@ public class SingleMortalityTable
 
     private String source;
     private final String tid = FastUUID.getUniqueId();
-    
+
     public int hashCode()
     {
         return tid.hashCode();
     }
-    
+
     public boolean equals(Object x)
     {
         if (x == null || !(x instanceof SingleMortalityTable))
             return false;
-        return ((SingleMortalityTable)x).tid.equals(tid);
+        return ((SingleMortalityTable) x).tid.equals(tid);
     }
-    
+
     public String source()
     {
         return source;
     }
 
     /*****************************************************************************************************/
-    
+
     public void seal()
     {
         sealed = true;
     }
-    
+
     private void checkWritable() throws Exception
     {
         if (sealed)
             throw new Exception("Table is sealed and cannot be modified");
     }
-    
+
     public String toString()
     {
         // return source;
@@ -492,9 +495,9 @@ public class SingleMortalityTable
     }
 
     /*****************************************************************************************************/
-    
+
     private Map<Integer, double[]> maxage2daily_lx = new HashMap<>();
-    
+
     public void clear_daily_lx() throws Exception
     {
         maxage2daily_lx.clear();
@@ -558,7 +561,7 @@ public class SingleMortalityTable
 
             maxage2daily_lx.put(MAX_AGE, daily_lx);
         }
-        
+
         return daily_lx;
     }
 
@@ -569,7 +572,7 @@ public class SingleMortalityTable
     {
         if (maxage == MAX_AGE)
             return daily_lx();
-        
+
         double[] daily_lx = maxage2daily_lx.get(maxage);
         if (daily_lx != null)
             return daily_lx;

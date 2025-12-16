@@ -34,8 +34,20 @@ public class ExcessDeaths
         CombinedMortalityTable cmt = LoadData.mortalityTable1986();
         RosBrisDeathRates rates1986 = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
         
-        String xxx = cmt.getSingleTable(Locality.TOTAL, Gender.BOTH).dump(); //###
-
+        // ###
+        Util.out("");
+        Util.out("==== age mx86 mx89");
+        Util.out("");
+        RosBrisDeathRates rates89 = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, 1989);
+        for (int age = 0; age <= 50; age++)
+        {
+            double mx86 = rates1986.mx(Locality.URBAN, Gender.MALE, age);
+            double mx89 = rates89.mx(Locality.URBAN, Gender.MALE, age);
+            Util.out(String.format("%3d %.5f %.5f", age, mx86, mx89));
+        }
+        Util.out("===================");
+        // ###
+        
         for (int year = yy1; year <= yy2; year++)
         {
             PopulationByLocality exposure = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, year);

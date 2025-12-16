@@ -258,7 +258,7 @@ public class RosBrisDeathRates
         {
             MortalityInfo mi = cmt.get(locality, gender, age);
             double mx = MortalityUtil.qx2mx(mi.qx);
-            values[age] = mx;
+            values[age] = mx / scale;
         }
 
         if (map.containsKey(vk))
