@@ -17,16 +17,16 @@ import rtss.util.Util;
 
 public class ExcessDeaths
 {
-    private Map<Integer, PopulationByLocality> year2deaths_actual_rates = new HashMap<>();;
-    private Map<Integer, PopulationByLocality> year2deaths_reference_rates = new HashMap<>();
+    private Map<Integer, PopulationByLocality> year2deaths_at_actual_rates = new HashMap<>();;
+    private Map<Integer, PopulationByLocality> year2deaths_at_reference_rates = new HashMap<>();
 
     private final int yy1 = 1989;
     private final int yy2 = 2015;
 
     public void eval() throws Exception
     {
-        year2deaths_actual_rates.clear();
-        year2deaths_reference_rates.clear();
+        year2deaths_at_actual_rates.clear();
+        year2deaths_at_reference_rates.clear();
 
         RosBrisPopulationExposureForDeaths.use2021census(true);
         RosBrisDeathRates.use2021census(true);
@@ -34,7 +34,7 @@ public class ExcessDeaths
         // CombinedMortalityTable cmt = LoadData.mortalityTable1986();
         // RosBrisDeathRates reference_rates = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
         RosBrisDeathRates reference_rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, 1989);
-        
+
         if (Util.False)
         {
             Util.out("");
@@ -49,22 +49,53 @@ public class ExcessDeaths
             }
             Util.out("===================");
         }
-        
+
         for (int year = yy1; year <= yy2; year++)
         {
             PopulationByLocality exposure = RosBrisPopulationExposureForDeaths.getPopulationByLocality(RosBrisTerritory.RF_BEFORE_2014, year);
             RosBrisDeathRates rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
 
-            PopulationByLocality d_actual_rates = deaths(exposure, rates);
-            PopulationByLocality d_reference_rates = deaths(exposure, reference_rates);
+            PopulationByLocality d_at_actual_rates = deaths(exposure, rates);
+            PopulationByLocality d_at_reference_rates = deaths(exposure, reference_rates);
 
-            year2deaths_actual_rates.put(year, d_actual_rates);
-            year2deaths_reference_rates.put(year, d_reference_rates);
+            year2deaths_at_actual_rates.put(year, d_at_actual_rates);
+            year2deaths_at_reference_rates.put(year, d_at_reference_rates);
         }
+
+        /* ========================================================================== */
 
         print(Locality.URBAN);
         print(Locality.RURAL);
         print(Locality.TOTAL);
+
+        /*
+         * total_excess даёт результат несколько отличающийся от print
+         * из-за разного учёта отрицательных величин
+         */
+
+        PopulationByLocality total_excess = null;
+
+        for (int year = yy1; year <= yy2; year++)
+        {
+            PopulationByLocality d_at_actual_rates = year2deaths_at_actual_rates.get(year);
+            PopulationByLocality d_at_reference_rates = year2deaths_at_reference_rates.get(year);
+            PopulationByLocality excess = d_at_actual_rates.sub(d_at_reference_rates);
+            neg2zero(excess);
+
+            if (total_excess == null)
+            {
+                total_excess = excess;
+            }
+            else
+            {
+                total_excess = total_excess.add(excess);
+                neg2zero(total_excess);
+            }
+        }
+        
+        total_excess.forLocality(Locality.TOTAL).display("TOTAL");
+        
+        Util.noop();
     }
 
     /*
@@ -98,15 +129,15 @@ public class ExcessDeaths
         Util.out("");
 
         PrintTable pt = new PrintTable(yy2 - yy1 + 1 + 3, 13);
-        
+
         int nr = 0;
 
         {
             int nc = 0;
-            
+
             pt.put(nr, nc++, "Year");
             pt.put(nr, nc++, "    ");
-            
+
             pt.put(nr, nc++, "MALE");
             pt.put(nr, nc++, "");
             pt.put(nr, nc++, "");
@@ -116,7 +147,7 @@ public class ExcessDeaths
             pt.put(nr, nc++, "");
             pt.put(nr, nc++, "");
             pt.put(nr, nc++, "    ");
-            
+
             pt.put(nr, nc++, "BOTH");
             pt.put(nr, nc++, "");
             pt.put(nr, nc++, "");
@@ -125,10 +156,10 @@ public class ExcessDeaths
         {
             nr++;
             int nc = 0;
-            
+
             pt.put(nr, nc++, "");
             pt.put(nr, nc++, "    ");
-            
+
             pt.put(nr, nc++, "expected");
             pt.put(nr, nc++, "actual");
             pt.put(nr, nc++, "excess");
@@ -138,7 +169,7 @@ public class ExcessDeaths
             pt.put(nr, nc++, "actual");
             pt.put(nr, nc++, "excess");
             pt.put(nr, nc++, "    ");
-            
+
             pt.put(nr, nc++, "expected");
             pt.put(nr, nc++, "actual");
             pt.put(nr, nc++, "excess");
@@ -146,8 +177,8 @@ public class ExcessDeaths
 
         for (int year = yy1; year <= yy2; year++)
         {
-            PopulationByLocality d_reference = year2deaths_reference_rates.get(year);
-            PopulationByLocality d_actual = year2deaths_actual_rates.get(year);
+            PopulationByLocality d_reference = year2deaths_at_reference_rates.get(year);
+            PopulationByLocality d_actual = year2deaths_at_actual_rates.get(year);
 
             nr = year - yy1 + 2;
             int nc = 0;
@@ -167,7 +198,7 @@ public class ExcessDeaths
             // both: expected -- actual -- excess
             put4(pt, nr, nc, d_reference, d_actual, locality, Gender.BOTH, false);
         }
-        
+
         pt.print();
     }
 
@@ -177,8 +208,9 @@ public class ExcessDeaths
         double expected = d_reference.sum(locality, gender, 0, Population.MAX_AGE);
         double actual = d_actual.sum(locality, gender, 0, Population.MAX_AGE);
         double excess = actual - expected;
-        if (excess < 0) excess = 0;
-        
+        if (excess < 0)
+            excess = 0;
+
         pt.put(nr, nc++, f2s(expected));
         pt.put(nr, nc++, f2s(actual));
         pt.put(nr, nc++, f2s(excess));
@@ -187,9 +219,32 @@ public class ExcessDeaths
             pt.put(nr, nc++, "");
 
     }
-    
+
     private String f2s(double v)
     {
         return String.format("%,d", Math.round(v));
+    }
+
+    private void neg2zero(PopulationByLocality p) throws Exception
+    {
+        neg2zero(p.forLocality(Locality.URBAN));
+        neg2zero(p.forLocality(Locality.RURAL));
+        neg2zero(p.forLocality(Locality.TOTAL));
+    }
+
+    private void neg2zero(Population p) throws Exception
+    {
+        neg2zero(p, Gender.MALE);
+        neg2zero(p, Gender.FEMALE);
+        neg2zero(p, Gender.BOTH);
+    }
+
+    private void neg2zero(Population p, Gender gender) throws Exception
+    {
+        for (int age = 0; age <= Population.MAX_AGE; age++)
+        {
+            if (p.get(gender, age) < 0)
+                p.set(gender, age, 0);
+        }
     }
 }

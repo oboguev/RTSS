@@ -326,7 +326,7 @@ public class PopulationByLocality
     }
 
     /*
-     * Вернуть результат вычитания @this + @p
+     * Вернуть результат вычисления @this + @p
      */
     public PopulationByLocality add(PopulationByLocality p) throws Exception
     {

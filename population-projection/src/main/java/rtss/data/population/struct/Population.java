@@ -507,7 +507,7 @@ public class Population
     }
 
     /*
-     * Вернуть результат вычитания @this - @p
+     * Вернуть результат вычисления @this + @p
      */
     public Population add(Population p) throws Exception
     {
