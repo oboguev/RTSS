@@ -3,7 +3,7 @@ package rtss.losses199x;
 import java.util.HashMap;
 import java.util.Map;
 
-import rtss.data.mortality.CombinedMortalityTable;
+// import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
@@ -31,7 +31,7 @@ public class ExcessDeaths
         RosBrisPopulationExposureForDeaths.use2021census(true);
         RosBrisDeathRates.use2021census(true);
 
-        CombinedMortalityTable cmt = LoadData.mortalityTable1986();
+        // CombinedMortalityTable cmt = LoadData.mortalityTable1986();
         // RosBrisDeathRates reference_rates = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
         RosBrisDeathRates reference_rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, 1989);
         

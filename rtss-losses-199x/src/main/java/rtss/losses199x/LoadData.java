@@ -13,6 +13,7 @@ import rtss.data.mortality.synthetic.MortalityTableGKS;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Locality;
+import rtss.rosbris.RosBrisDeathRates;
 import rtss.rosbris.RosBrisPopulationExposureForDeaths;
 import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
@@ -30,6 +31,13 @@ public class LoadData
     public static CombinedMortalityTable mortalityTable1986() throws Exception
     {
         CombinedMortalityTable cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987");
+        return cmt;
+    }
+    
+    public static CombinedMortalityTable mortalityTable1989() throws Exception
+    {
+        RosBrisDeathRates rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, 1989);
+        CombinedMortalityTable cmt = rates.toCombinedMortalityTable();
         return cmt;
     }
     

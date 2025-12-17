@@ -13,9 +13,10 @@ import rtss.util.Util;
 
 public class BirthsDeficit
 {
-    private CombinedMortalityTable cmt = LoadData.mortalityTable1986();
-    private AgeSpecificFertilityRates asfr_rural = LoadData.loadASFR(Locality.RURAL);
+    // private CombinedMortalityTable cmt = LoadData.mortalityTable1986();
+    private CombinedMortalityTable cmt = LoadData.mortalityTable1989();
     private AgeSpecificFertilityRates asfr_urban = LoadData.loadASFR(Locality.URBAN);
+    private AgeSpecificFertilityRates asfr_rural = LoadData.loadASFR(Locality.RURAL);
 
     public BirthsDeficit() throws Exception
     {
@@ -35,6 +36,7 @@ public class BirthsDeficit
         fw.setBirthRateRural(asfr_rural);
         fw.forward(p, cmt, (365 - 11) / 365.0);
 
+        /* оценка числа рождений за полный календарный 1989 год */
         year2births.put(1989, fw.getObservedBirths() * 365.0 / (365 - 11));
 
         /*
@@ -50,7 +52,7 @@ public class BirthsDeficit
         }
 
         Util.out("");
-        Util.out("Ожидаемое число рождений");
+        Util.out("Ожидаемое число рождений (по передвижке)");
         Util.out("при сохранении возрастных коэффициентов смертности и плодовитости");
         Util.out("");
         for (int year = 1989; year <= 2015; year++)
