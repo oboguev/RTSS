@@ -32,21 +32,23 @@ public class ExcessDeaths
         RosBrisDeathRates.use2021census(true);
 
         CombinedMortalityTable cmt = LoadData.mortalityTable1986();
-        RosBrisDeathRates rates1986 = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
+        // RosBrisDeathRates reference_rates = RosBrisDeathRates.from(cmt, RosBrisTerritory.RF_BEFORE_2014, 1986);
+        RosBrisDeathRates reference_rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, 1989);
         
-        // ###
-        Util.out("");
-        Util.out("==== age mx86 mx89");
-        Util.out("");
-        RosBrisDeathRates rates89 = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, 1989);
-        for (int age = 0; age <= 50; age++)
+        if (Util.False)
         {
-            double mx86 = rates1986.mx(Locality.URBAN, Gender.MALE, age);
-            double mx89 = rates89.mx(Locality.URBAN, Gender.MALE, age);
-            Util.out(String.format("%3d %.5f %.5f", age, mx86, mx89));
+            Util.out("");
+            Util.out("==== age mx_reference mx_89");
+            Util.out("");
+            RosBrisDeathRates rates89 = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, 1989);
+            for (int age = 0; age <= 50; age++)
+            {
+                double mx_reference = reference_rates.mx(Locality.URBAN, Gender.MALE, age);
+                double mx_89 = rates89.mx(Locality.URBAN, Gender.MALE, age);
+                Util.out(String.format("%3d %.5f %.5f", age, mx_reference, mx_89));
+            }
+            Util.out("===================");
         }
-        Util.out("===================");
-        // ###
         
         for (int year = yy1; year <= yy2; year++)
         {
@@ -54,7 +56,7 @@ public class ExcessDeaths
             RosBrisDeathRates rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
 
             PopulationByLocality d_actual_rates = deaths(exposure, rates);
-            PopulationByLocality d_reference_rates = deaths(exposure, rates1986);
+            PopulationByLocality d_reference_rates = deaths(exposure, reference_rates);
 
             year2deaths_actual_rates.put(year, d_actual_rates);
             year2deaths_reference_rates.put(year, d_reference_rates);

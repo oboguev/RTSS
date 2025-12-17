@@ -6,6 +6,7 @@ import java.util.Map;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.MortalityInfo;
 import rtss.data.mortality.MortalityUtil;
+import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -265,5 +266,35 @@ public class RosBrisDeathRates
             throw new Exception("Duplicate data records");
 
         map.put(vk, values);
+    }
+    
+    /* ========================================================================== */
+    
+    public CombinedMortalityTable toCombinedMortalityTable() throws Exception
+    {
+        CombinedMortalityTable cmt = CombinedMortalityTable.newEmptyTable();
+        
+        for (Locality locality : Locality.AllLocalities)
+        {
+            for (Gender gender : Gender.ThreeGenders)
+                toCombinedMortalityTable(cmt, locality, gender);
+        }
+        
+        return cmt;
+    }
+    
+    private void toCombinedMortalityTable(CombinedMortalityTable cmt, Locality locality, Gender gender) throws Exception
+    {
+        double[] qx = new double[CombinedMortalityTable.MAX_AGE + 1];
+        for (int age = 0; age <= CombinedMortalityTable.MAX_AGE; age++)
+        {
+            double mx = mx(locality, gender, age);
+            qx[age] = MortalityUtil.mx2qx(mx);
+        }
+        
+        String path = "РосБРиС territory=" + territory + "/" + year + " " + locality + " " + gender;
+        
+        SingleMortalityTable smt = SingleMortalityTable.from_qx(path, qx);
+        cmt.setTable(locality, gender, smt);
     }
 }
