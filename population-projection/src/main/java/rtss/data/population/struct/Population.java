@@ -108,6 +108,12 @@ public class Population
         return locality;
     }
 
+    public Population setLocality(Locality locality)
+    {
+        this.locality = locality;
+        return this;
+    }
+
     public Integer yearHint()
     {
         return yearHint;

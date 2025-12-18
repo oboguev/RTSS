@@ -1,5 +1,6 @@
 package rtss.losses199x;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import rtss.rosbris.RosBrisDeathRates;
 import rtss.rosbris.RosBrisPopulationExposureForDeaths;
 import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
+import rtss.util.plot.PopulationChart;
 
 public class ExcessDeaths
 {
@@ -80,6 +82,7 @@ public class ExcessDeaths
             PopulationByLocality d_at_actual_rates = year2deaths_at_actual_rates.get(year);
             PopulationByLocality d_at_reference_rates = year2deaths_at_reference_rates.get(year);
             PopulationByLocality excess = d_at_actual_rates.sub(d_at_reference_rates);
+
             neg2zero(excess);
 
             if (total_excess == null)
@@ -92,9 +95,51 @@ public class ExcessDeaths
                 neg2zero(total_excess);
             }
         }
-        
-        total_excess.forLocality(Locality.TOTAL).display("TOTAL");
-        
+
+        total_excess.makeBoth();
+        total_excess.recalcTotalLocalityFromUrbanRural();
+        total_excess.validate();
+
+        // total_excess.forLocality(Locality.TOTAL).toPopulationContext().display("TOTAL");
+
+        for (Locality locality : Locality.TotalUrbanRural)
+        {
+            final String imageExportDirectory = "C:\\@\\losses199x";
+            final int IMAGE_CX = 2400;
+            final int IMAGE_CY = 1200;
+            final int TN_CX = IMAGE_CX / 2;
+            final int TN_CY = IMAGE_CY / 2;
+
+            String title = "Избыточные смерти населения " + locality.name();
+            Population p;
+            
+            switch (locality)
+            {
+            case TOTAL:
+            case URBAN:
+                p = total_excess.forLocality(locality);
+                p = p.clone().setLocality(Locality.TOTAL);
+                new PopulationChart(title)
+                        .show("", p.toPopulationContext())
+                        .exportImage(IMAGE_CX, IMAGE_CY, imageExportDirectory + File.separator + locality + ".png")
+                        .exportImage(TN_CX, TN_CY, imageExportDirectory + File.separator + locality + "_tn.png");
+                break;
+
+            case RURAL:
+                /*
+                 * toPopulationContext предназачена для населений с обычной структурой,
+                 * а не произвольно быстро осциллирующих набооров
+                 */
+                p = total_excess.forLocality(locality);
+                p = p.clone().setLocality(Locality.TOTAL);
+                new PopulationChart(title)
+                        .show("", p)
+                        .exportImage(IMAGE_CX, IMAGE_CY, imageExportDirectory + File.separator + locality + ".png")
+                        .exportImage(TN_CX, TN_CY, imageExportDirectory + File.separator + locality + "_tn.png");
+                break;
+            }
+        }
+
         Util.noop();
     }
 
