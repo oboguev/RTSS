@@ -181,6 +181,17 @@ public class Util
         return s;
     }
 
+    public static String repeat(String s, int times)
+    {
+        if (times <= 0)
+            return "";
+        
+        String res = "";
+        for (int k = 0; k < times; k++)
+            res += s;
+        return res;
+    }
+
     // check if values differ
     public static boolean differ(double a, double b)
     {
@@ -699,7 +710,7 @@ public class Util
         {
             if (y[k] == 0 && y[k + 1] == 0)
                 continue;
-            
+
             if (strict)
             {
                 b = b && y[k] > y[k + 1];

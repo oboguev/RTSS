@@ -23,10 +23,16 @@ public class Losses199X
         try
         {
             new ActualDeaths().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
+            spacer();
+
             new ActualBirths().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
+            spacer();
 
             new ExcessDeaths().eval();
+            spacer();
+
             new BirthsDeficit().eval();
+            spacer();
 
             // PopulationByLocality p1989 = LoadData.populationCensus1989();
             // CombinedMortalityTable cmt = LoadData.mortalityTable1986();
@@ -42,7 +48,7 @@ public class Losses199X
             //     Util.out(String.format("%4d %,d", year, (long) v));
             // }
 
-            LoadData.actualPopulation(1990);
+            // LoadData.actualPopulation(1990);
 
             Util.noop();
             Util.out("** Completed");
@@ -52,5 +58,12 @@ public class Losses199X
             Util.err("** Exception: " + ex.getLocalizedMessage());
             ex.printStackTrace();
         }
+    }
+
+    private static void spacer()
+    {
+        Util.out("");
+        Util.out(Util.repeat("*", 100));
+        Util.out("");
     }
 }

@@ -9,6 +9,8 @@ import rtss.data.population.projection.ForwardPopulationUR;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Locality;
+import rtss.losses199x.util.ActualBirths;
+import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
 
 public class BirthsDeficit
@@ -17,6 +19,8 @@ public class BirthsDeficit
     private CombinedMortalityTable cmt = LoadData.mortalityTable1989();
     private AgeSpecificFertilityRates asfr_urban = LoadData.loadASFR(Locality.URBAN);
     private AgeSpecificFertilityRates asfr_rural = LoadData.loadASFR(Locality.RURAL);
+    
+    private Map<Integer, Double> actualBirths = new ActualBirths().getActualBirths(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
 
     public BirthsDeficit() throws Exception
     {
@@ -55,14 +59,23 @@ public class BirthsDeficit
         Util.out("Ожидаемое число рождений (по передвижке)");
         Util.out("при сохранении возрастных коэффициентов смертности и плодовитости");
         Util.out("");
+        Util.out("EXPECTED = ожидаемое число рождений");
+        Util.out("ACTUAL = фактическое число рождений");
+        Util.out("DFFICIT = дефицит");
+        Util.out("");
+        Util.out("year expected actual deficit");
         for (int year = 1989; year <= 2015; year++)
         {
-            Util.out(String.format("%4d %,9d", year, Math.round(year2births.get(year))));
+            long expected = Math.round(year2births.get(year));
+            long actual = Math.round(actualBirths.get(year));
+            long deficit = expected - actual;
+            if (deficit < 0)
+                deficit = 0;
+            Util.out(String.format("%4d %,9d %,9d %,9d", year, expected, actual, deficit));
         }
 
-        // ####
         Util.noop();
 
-        // ### сравнить с Map<Integer,Double> mb = LoadData.actualBirths(1989, 2015);
+        // ### сравнить с actualBirths 
     }
 }

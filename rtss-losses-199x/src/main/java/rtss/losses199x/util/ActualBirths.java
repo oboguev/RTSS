@@ -15,7 +15,7 @@ public class ActualBirths
     public double[] getRosBrisActualBirths(int y1, int y2, RosBrisTerritory territory, Locality locality) throws Exception
     {
         double[] values = new double[y2 - y1 + 1];
-        
+
         RosBrisFemalePopulationAverageForBirths.use2021census(true);
         RosBrisFertilityRates.use2021census(true);
 
@@ -28,7 +28,7 @@ public class ActualBirths
 
         return values;
     }
-    
+
     private double calcBirths(PopulationByLocality p, RosBrisFertilityRates rates, Locality locality) throws Exception
     {
         double v = 0;
@@ -62,11 +62,11 @@ public class ActualBirths
             int k = year - y1;
             Util.out(String.format("%s %9s %9s", year, f2s(u[k]), f2s(r[k])));
         }
-        
+
         Util.out("");
         Util.out("Число рождений в России согласно Росстату (Демографический ежегодник России), включая в 2014-2015 гг. Крым");
         Util.out("");
-        Map<Integer,Double> actual = TableValues.actualBirths(y1, y2);        
+        Map<Integer, Double> actual = TableValues.actualBirths(y1, y2);
         for (int year = y1; year <= y2; year++)
         {
             Util.out(String.format("%s %9s", year, f2s(actual.get(year))));
@@ -77,5 +77,18 @@ public class ActualBirths
     {
         long lv = Math.round(v);
         return String.format("%,d", lv);
+    }
+
+    public Map<Integer, Double> getActualBirths(int y1, int y2, RosBrisTerritory territory) throws Exception
+    {
+        Map<Integer, Double> actual = TableValues.actualBirths(y1, y2);
+
+        double[] u = getRosBrisActualBirths(y1, y2, territory, Locality.URBAN);
+        double[] r = getRosBrisActualBirths(y1, y2, territory, Locality.RURAL);
+
+        actual.put(2014, u[2014 - y1] + r[2014 - y1] + 1600);
+        actual.put(2015, u[2015 - y1] + r[2015 - y1] + 1600);
+        
+        return actual;
     }
 }
