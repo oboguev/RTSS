@@ -112,7 +112,7 @@ public class ExcessDeaths
 
             String title = "Избыточные смерти населения " + locality.name();
             Population p;
-            
+
             switch (locality)
             {
             case TOTAL:
@@ -138,6 +138,23 @@ public class ExcessDeaths
                         .exportImage(TN_CX, TN_CY, imageExportDirectory + File.separator + locality + "_tn.png");
                 break;
             }
+
+            p = total_excess.forLocality(locality).clone();
+            neg2zero(p);
+
+            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
+                                   locality.name(), Gender.MALE.name(),
+                                   averageAge(p, Gender.MALE)));
+
+            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
+                                   locality.name(), Gender.FEMALE.name(),
+                                   averageAge(p, Gender.FEMALE)));
+
+            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
+                                   locality.name(), Gender.BOTH.name(),
+                                   averageAge(p, Gender.BOTH)));
+            
+            Util.out("");
         }
 
         Util.noop();
@@ -291,5 +308,20 @@ public class ExcessDeaths
             if (p.get(gender, age) < 0)
                 p.set(gender, age, 0);
         }
+    }
+
+    private double averageAge(Population p, Gender gender) throws Exception
+    {
+        double age_pop_sum = 0;
+        double pop_sum = 0;
+
+        for (int age = 0; age <= Population.MAX_AGE; age++)
+        {
+            double pop = p.get(gender, age);
+            age_pop_sum += age * pop;
+            pop_sum += pop;
+        }
+
+        return age_pop_sum / pop_sum;
     }
 }

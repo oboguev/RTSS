@@ -61,7 +61,7 @@
     Небольшая часть населения (0.6%) была переписана без указания
     возраста. Мы пренебрегаем&nbsp; ею, т.к. невозможно указать, какие
     именно значения возрастных коэффициентов смертности и плодовитости
-    должны к ней прилаться.<br>
+    должны к ней прилагаться.<br>
     <br>
     <b>2. База данных рождений и смертей РосБРиС<br>
       <br>
@@ -127,8 +127,8 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
     экспоненциально убывающей функции. Рождение ребёнка не вычерпывает
     экспозицию как смерть и не уменьшает численность женщин, поэтому
     средняя численность женщин приближается арифметическим средним, без
-    экспоненциальной логики – как средняя численность, а не интеграл
-    выживания.<br>
+    экспоненциальной логики – как арифметически средняя численность, а
+    не интеграл выживания.<br>
     <br>
     Набор данных для расчета показателей рождаемости также содержит
     только женское население и только в возрастах 15...55.<br>
@@ -136,12 +136,12 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
     Возрастные коэффициенты смертности приведены в формате mx (а не qx),
     однако они могут быть преобразованы в формат qx, после чего на
     основе возрастного массива qx для данного года может быть построена
-    таблица смертности стандартного формат .<br>
+    таблица смертности стандартного формата .<br>
     <br>
     Число смертей в каждом году может быть исчисленно скалярным
     произведением вектора половозрастных коэффициентов смертности mx на
     вектор среднегодовой численности населения данного пола и вида
-    местности (набор DRa на набор PopDa).<br>
+    местности (записи набор DRa на соответствующие записи набора PopDa).<br>
     <br>
     Число рождений в каждом году может быть исчисленно скалярным
     произведением возрастных коэффициентов рождаемости на среднегодовую
@@ -262,15 +262,16 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
     <br>
     Значения для 2015 и 2016 гг. включают население Крыма, которое
     необходимо вычесть, т.к наш расчёт относится к населению территории
-    РСФСР/РФ-1991.<br>
-    Данные о численности населения, числе рождений и смертей в
-    Республике Крым имеются на сайте Крымстата (<a
+    РСФСР/РФ-1991. Данные о численности населения, числе рождений и
+    смертей в Республике Крым имеются на сайте Крымстата (<a
       href="https://82.rosstat.gov.ru">https://82.rosstat.gov.ru</a>, <a
       href="https://82.rosstat.gov.ru/folder/27537">https://82.rosstat.gov.ru/folder/27537</a>),
 
 
 
-    однако охватывают только Республику Крым и не включают Севастополя.
+
+
+    однако охватывают только Республику Крым и не включают Севастополь.
     Прямых сведений о Севастополе в публикациях Росстата нам обнаружить
     не удалось. <br>
     <br>
@@ -279,16 +280,18 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
     что постоянное население Крымского федерального округа по переписи
     14-25 октября 2014 года составляло 2,284,769 чел., но к счастью
     такая оценка не нужна, т.к. число рождений и смертей определяется по
-    сведениям РосБРиС (см. ниже), которые для числа рождений и смертей
-    на территории 1100 (РФ в границах до 2014 года) дают результаты с
-    удовлетворительной точностью совпадающие за 1989-2013 гг. со
-    сведениями Демографического ежегодника России.<br>
+    сведениям РосБРиС, дающим для числа рождений и смертей на территории
+    1100 (РФ в границах до 2014 года) результаты с удовлетворительной
+    точностью совпадающие за 1989-2013 гг. со сведениями
+    Демографического ежегодника России.<br>
     <br>
-    ### Крым<br>
+    В конечном итоге, сведения о фактической численности населения на
+    начало года для нашего расчёта не требуются.<br>
     <br>
     <hr width="100%" size="2"><br>
-    <b>Определение избыточных смертей.<br>
-      <br>
+    <div align="center"><b>Определение избыточных смертей</b><br>
+    </div>
+    <b> <br>
     </b>Понятие избыточных смертей может определяться и вычисляться
     по-разному.<br>
     Мы вычисляем <i>фактически состоявшиеся </i>в России избыточные
@@ -333,10 +336,14 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
     происходило бы при том или ином значении коэффциентов младенческой и
     раннедетской смертности. Падение рождаемости <i>занижает </i>количество
 
+
+
     смертей сравнительно с тем, которое состоялось бы при неизменной
     плодовитости и тех же уровнях смертности.<br>
     <br>
     Наш расчёт игнорирует это завышение и занижение и исчисляет <i>фактически
+
+
 
       состоявшиеся </i>избыточные смерти при том наличном в каждом году
     (1989-2015) составе и численности населения на территории РФ-1991,
@@ -368,32 +375,34 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
           <td style="height:15.0pt" height="20" bgcolor="#ccccff"
             align="center"><b><br>
             </b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td rowspan="1" colspan="3" bgcolor="#ccccff" align="center"><b>муж.</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td rowspan="1" colspan="3" bgcolor="#ccccff" align="center"><b>жен.</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td colspan="3" rowspan="1" bgcolor="#ccccff" align="center"><b>муж.
+
+
 
               + жен.</b></td>
         </tr>
         <tr style="height:15.0pt" height="20">
           <td style="height:15.0pt" height="20" bgcolor="#ccccff"
             align="center"><b>год</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>избыток</b></td>
-          <td class="xl65" bgcolor="#ccccff" align="center"><b><br>
+          <td class="xl65" bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>избыток</b></td>
-          <td class="xl65" bgcolor="#ccccff" align="center"><b><br>
+          <td class="xl65" bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
@@ -898,32 +907,34 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
           <td style="height:15.0pt" height="20" bgcolor="#ccccff"
             align="center"><b><br>
             </b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td rowspan="1" colspan="3" bgcolor="#ccccff" align="center"><b>муж.</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td rowspan="1" colspan="3" bgcolor="#ccccff" align="center"><b>жен.</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td colspan="3" rowspan="1" bgcolor="#ccccff" align="center"><b>муж.
+
+
 
               + жен.</b></td>
         </tr>
         <tr style="height:15.0pt" height="20">
           <td style="height:15.0pt" height="20" bgcolor="#ccccff"
             align="center"><b>год</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>избыток</b></td>
-          <td class="xl65" bgcolor="#ccccff" align="center"><b><br>
+          <td class="xl65" bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>избыток</b></td>
-          <td class="xl65" bgcolor="#ccccff" align="center"><b><br>
+          <td class="xl65" bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
@@ -1428,32 +1439,34 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
           <td style="height:15.0pt" height="20" bgcolor="#ccccff"
             align="center"><b><br>
             </b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td rowspan="1" colspan="3" bgcolor="#ccccff" align="center"><b>муж.</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td rowspan="1" colspan="3" bgcolor="#ccccff" align="center"><b>жен.</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td colspan="3" rowspan="1" bgcolor="#ccccff" align="center"><b>муж.
+
+
 
               + жен.</b></td>
         </tr>
         <tr style="height:15.0pt" height="20">
           <td style="height:15.0pt" height="20" bgcolor="#ccccff"
             align="center"><b>год</b></td>
-          <td bgcolor="#ccccff" align="center"><b><br>
+          <td bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>избыток</b></td>
-          <td class="xl65" bgcolor="#ccccff" align="center"><b><br>
+          <td class="xl65" bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>избыток</b></td>
-          <td class="xl65" bgcolor="#ccccff" align="center"><b><br>
+          <td class="xl65" bgcolor="#ffffff" align="center"><b><br>
             </b></td>
           <td bgcolor="#ccccff" align="center"><b>ожид.</b></td>
           <td class="xl65" bgcolor="#ccccff" align="center"><b>фактич.</b></td>
@@ -1952,26 +1965,58 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
     чел.<br>
     <br>
     Речь, напомним, идёт о числе избыточных смертей порождённых
-    изменением половозрастных и территориальных коэффициентов
-    смертности, при фактически имевшейся в каждом году половозрастной и
-    территориальной структуре населения.<br>
+    изменением половозрастных коэффициентов смертности, при фактически
+    имевшейся в каждом году половозрастной и территориальной структуре
+    населения.<br>
+    <br>
+    Погодовое распределение общего числа избыточных смертей:<br>
+    <br>
+    <blockquote><img src="excess-deaths/by-year-TOTAL-BOTH.gif" alt=""
+        width="1152" height="839"><br>
+    </blockquote>
     <br>
     Приводимые ниже графики изображают распределение избыточных смертей
     по полу и по возрасту на момент смерти.<br>
+    <i><br>
+    </i>
+    <div align="center"><i> Структура избыточных смертей городского и
+        сельского населения совокупно</i><br>
+      (график увеличивается при нажатии):<br>
+      <br>
+    </div>
+    <a href="excess-deaths/total.png"><img
+        src="excess-deaths/total_tn.png" alt="" width="1200"
+        height="600" border="0"></a><br>
     <br>
-    Структура избыточных смертей городского и сельского населения
-    совокупно<br>
-    (график увеличивается при нажатии)<br>
+    <div align="center"><i> Структура избыточных смертей городского
+        населения:</i><br>
+    </div>
     <br>
+    <a href="excess-deaths/urban.png"><img
+        src="excess-deaths/urban_tn.png" alt="" width="1200"
+        height="600" border="0"></a><br>
+    <div align="center"> Структура избыточных смертей сельского
+      населения:<br>
+    </div>
     <br>
-    Структура избыточных смертей городского населения<br>
-    Структура избыточных смертей сельского населения<br>
+    <a href="excess-deaths/rural.png"><img
+        src="excess-deaths/rural_tn.png" alt="" width="1200"
+        height="600" border="0"></a><br>
+    Как видно, избыточные смерnи в совокупном населении пришлись
+    преобладающим образом на мужчин, а среди них – на возрастную группу
+    30-70 лет, однако число избыточных смертей в группах мужчин в
+    возрастах 20-30 и 70+ тоже высоко.<br>
     <br>
-    #####<br>
+    Средний возраст избыточной смерти мужчин в совокупном населении –
+    51.4 года, а женщин – 63.0 года. Для городского населения эти
+    величины составляют 49.8 (муж) и 59.8 (жен). Однако средний возраст
+    избыточной смерти в данном случае прикрывает огромное число
+    избыточных смертей мужчин молодого возраста.<br>
     <br>
     <hr width="100%" size="2"><br>
     <br>
-    <b>Определение дефицита рождений.</b><br>
+    <div align="center"><b>Определение дефицита рождений</b><br>
+    </div>
     <br>
     Схема расчёта:<br>
     <ul>
@@ -2004,9 +2049,10 @@ href="https://www.nes.ru/research-main/research-centers/demogr/demogr-fermort-da
     <br>
     <br>
     <hr width="100%" size="2"><br>
+    Расчётный модуль: <tt>rtss.losses199x.Losses199X</tt>.<br>
     <br>
-    Издания Росстата приводят сведения об иммиграции и эмиграции, но с
-    более грубой возрастной разбивкой, чем базовые данные о населении.
+    ###Издания Росстата приводят сведения об иммиграции и эмиграции, но
+    с более грубой возрастной разбивкой, чем базовые данные о населении.
     Интерполяция может реконструировать вероятную форму разбивки по
     возрасту в более высоком разрешении по возрасту, однако существуют
     более значительные сомнения в полноте охвата внешней миграции
