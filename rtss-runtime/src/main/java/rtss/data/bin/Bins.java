@@ -585,4 +585,15 @@ public class Bins
         
         return bins(list);
     }
+    
+    public static boolean isAllZero(Bin[] bins)
+    {
+        for (Bin bin : bins)
+        {
+            if (bin.avg != 0)
+                return false;
+        }
+        
+        return true;
+    }
 }

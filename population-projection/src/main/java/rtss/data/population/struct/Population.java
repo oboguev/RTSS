@@ -793,10 +793,10 @@ public class Population
 
     /****************************************************************************************************/
 
+    private static final String nl = Util.nl;
+
     public void saveToFile(String dirPath, String comment) throws Exception
     {
-        final String nl = Util.nl;
-
         StringBuilder sb = new StringBuilder();
         sb.append("# age, both genders, male, female" + nl);
         if (comment != null && comment.length() != 0)
@@ -1212,7 +1212,11 @@ public class Population
     {
         try
         {
-            return toString("") + Util.nl + Util.nl + dump();
+            String result = String.format("title = %s", title != null ? title : "(null)");
+            result = result + nl + String.format("locality = %s", locality != null ? locality.name() : "(null)");
+            result = result + nl + toString("");
+            result = result + nl + nl + dump(false);
+            return result;
         }
         catch (Throwable ex)
         {

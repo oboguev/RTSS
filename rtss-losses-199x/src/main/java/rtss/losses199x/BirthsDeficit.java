@@ -75,7 +75,5 @@ public class BirthsDeficit
         }
 
         Util.noop();
-
-        // ### сравнить с actualBirths 
     }
 }

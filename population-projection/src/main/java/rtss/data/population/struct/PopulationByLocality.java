@@ -36,7 +36,7 @@ public class PopulationByLocality
         this.rural = rural;
         validate();
     }
-    
+
     public PopulationByLocality(Population total, Population urban, Population rural, double diff, int checkCutoffAge) throws Exception
     {
         this.total = total;
@@ -513,7 +513,7 @@ public class PopulationByLocality
             }
         }
     }
-    
+
     public void validate(double diff, int checkCutoffAge) throws Exception
     {
         if (rural != null)
@@ -552,7 +552,7 @@ public class PopulationByLocality
             }
         }
     }
-    
+
     private static boolean differ(double a, double b, int age, double diff, int checkCutoffAge)
     {
         if (Math.abs(a - b) <= 2)
@@ -633,6 +633,8 @@ public class PopulationByLocality
 
     /****************************************************************************************************/
 
+    private static final String nl = Util.nl;
+
     @Override
     public String toString()
     {
@@ -657,6 +659,32 @@ public class PopulationByLocality
                 sb.append(rural.toString("rural."));
             }
 
+            String spacer = nl + nl;
+
+            if (total != null)
+            {
+                if (spacer != null)
+                    sb.append(spacer);
+                spacer = nl + nl;
+                sb.append(total.toString());
+            }
+
+            if (urban != null)
+            {
+                if (spacer != null)
+                    sb.append(spacer);
+                spacer = nl + nl;
+                sb.append(urban.toString());
+            }
+
+            if (rural != null)
+            {
+                if (spacer != null)
+                    sb.append(spacer);
+                spacer = nl + nl;
+                sb.append(rural.toString());
+            }
+            
             return sb.toString();
         }
         catch (Throwable ex)

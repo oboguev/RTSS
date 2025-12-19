@@ -83,7 +83,7 @@ public class ExcessDeaths
             PopulationByLocality d_at_reference_rates = year2deaths_at_reference_rates.get(year);
             PopulationByLocality excess = d_at_actual_rates.sub(d_at_reference_rates);
 
-            neg2zero(excess);
+            neg2zero(excess); // ####
 
             if (total_excess == null)
             {
@@ -92,7 +92,7 @@ public class ExcessDeaths
             else
             {
                 total_excess = total_excess.add(excess);
-                neg2zero(total_excess);
+                neg2zero(total_excess); // ####
             }
         }
 
@@ -140,7 +140,7 @@ public class ExcessDeaths
             }
 
             p = total_excess.forLocality(locality).clone();
-            neg2zero(p);
+            neg2zero(p); // ####
 
             Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
                                    locality.name(), Gender.MALE.name(),

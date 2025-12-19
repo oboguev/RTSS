@@ -307,6 +307,19 @@ public class InterpolatePopulationAsMeanPreservingCurve
             InterpolationOptions options)
             throws Exception
     {
+        
+        if (Bins.isAllZero(bins))
+        {
+            // special case: all bin.avg are zero, zero population
+            int ppy = 12;
+            if (targetResolution == TargetResolution.DAILY)
+                ppy = 1;
+
+            double[] xx = Bins.ppy_x(bins, ppy);
+            double[] result = new double[xx.length];
+            return result;
+        }
+        
         if (options == null)
             options = new InterpolationOptions();
 
