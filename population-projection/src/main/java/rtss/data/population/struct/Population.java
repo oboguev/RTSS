@@ -65,6 +65,19 @@ public class Population
         return p;
     }
 
+    static public Population newPopulation(Locality locality, ValueConstraint vc)
+    {
+        Population p = newPopulation(locality);
+        
+        if (vc == null)
+            vc = ValueConstraint.NON_NEGATIVE;
+        p.male.setValueConstraint(vc);
+        p.female.setValueConstraint(vc);
+        p.both.setValueConstraint(vc);
+        
+        return p;
+    }
+
     private Population()
     {
     }

@@ -572,7 +572,13 @@ public class PopulationByLocality
 
     static private Population calcTotal(Population rural, Population urban) throws Exception
     {
-        Population total = Population.newPopulation(Locality.TOTAL);
+        ValueConstraint vc_rural = rural.valueConstraint();
+        ValueConstraint vc_urban = urban.valueConstraint();
+        
+        if (vc_rural != vc_urban)
+            throw new Exception("Mismatching value constraints for rural and urban");
+        
+        Population total = Population.newPopulation(Locality.TOTAL, vc_rural);
 
         for (int age = 0; age <= MAX_AGE; age++)
         {

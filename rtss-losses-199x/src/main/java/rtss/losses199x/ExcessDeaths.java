@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.data.ValueConstraint;
 // import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.struct.Population;
 import rtss.data.population.struct.PopulationByLocality;
@@ -83,16 +84,13 @@ public class ExcessDeaths
             PopulationByLocality d_at_reference_rates = year2deaths_at_reference_rates.get(year);
             PopulationByLocality excess = d_at_actual_rates.sub(d_at_reference_rates);
 
-            neg2zero(excess); // ####
-
             if (total_excess == null)
             {
                 total_excess = excess;
             }
             else
             {
-                total_excess = total_excess.add(excess);
-                neg2zero(total_excess); // ####
+                total_excess = total_excess.add(excess, ValueConstraint.NONE);
             }
         }
 
@@ -100,6 +98,27 @@ public class ExcessDeaths
         total_excess.recalcTotalLocalityFromUrbanRural();
         total_excess.validate();
 
+        for (Locality locality : Locality.TotalUrbanRural)
+        {
+            Population p = total_excess.forLocality(locality);
+            
+            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
+                                   locality.name(), Gender.MALE.name(),
+                                   averageAge(p, Gender.MALE)));
+
+            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
+                                   locality.name(), Gender.FEMALE.name(),
+                                   averageAge(p, Gender.FEMALE)));
+
+            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
+                                   locality.name(), Gender.BOTH.name(),
+                                   averageAge(p, Gender.BOTH)));
+            
+            Util.out("");
+        }
+        
+        Util.noop();
+        
         // total_excess.forLocality(Locality.TOTAL).toPopulationContext().display("TOTAL");
 
         for (Locality locality : Locality.TotalUrbanRural)
@@ -120,7 +139,7 @@ public class ExcessDeaths
                 p = total_excess.forLocality(locality);
                 p = p.clone().setLocality(Locality.TOTAL);
                 new PopulationChart(title)
-                        .show("", p.toPopulationContext())
+                        .show("", p)
                         .exportImage(IMAGE_CX, IMAGE_CY, imageExportDirectory + File.separator + locality + ".png")
                         .exportImage(TN_CX, TN_CY, imageExportDirectory + File.separator + locality + "_tn.png");
                 break;
@@ -138,23 +157,6 @@ public class ExcessDeaths
                         .exportImage(TN_CX, TN_CY, imageExportDirectory + File.separator + locality + "_tn.png");
                 break;
             }
-
-            p = total_excess.forLocality(locality).clone();
-            neg2zero(p); // ####
-
-            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
-                                   locality.name(), Gender.MALE.name(),
-                                   averageAge(p, Gender.MALE)));
-
-            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
-                                   locality.name(), Gender.FEMALE.name(),
-                                   averageAge(p, Gender.FEMALE)));
-
-            Util.out(String.format("Средний возраст избыточной смерти населения %s %s = %.1f", 
-                                   locality.name(), Gender.BOTH.name(),
-                                   averageAge(p, Gender.BOTH)));
-            
-            Util.out("");
         }
 
         Util.noop();
@@ -287,6 +289,7 @@ public class ExcessDeaths
         return String.format("%,d", Math.round(v));
     }
 
+    @SuppressWarnings("unused")
     private void neg2zero(PopulationByLocality p) throws Exception
     {
         neg2zero(p.forLocality(Locality.URBAN));
