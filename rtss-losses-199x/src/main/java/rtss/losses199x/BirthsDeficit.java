@@ -10,6 +10,7 @@ import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.selectors.Locality;
 import rtss.losses199x.util.ActualBirths;
+import rtss.losses199x.util.ActualDeaths;
 import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
 
@@ -21,6 +22,7 @@ public class BirthsDeficit
     private AgeSpecificFertilityRates asfr_rural = LoadData.loadASFR(Locality.RURAL);
     
     private Map<Integer, Double> actualBirths = new ActualBirths().getActualBirths(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
+    private double[] actualDeaths = new ActualDeaths().getRosBrisActualDeaths(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
 
     public BirthsDeficit() throws Exception
     {
@@ -31,6 +33,7 @@ public class BirthsDeficit
         PopulationByLocality p1989 = LoadData.populationCensus1989();
         PopulationContext p = p1989.toPopulationContext();
         Map<Integer, Double> year2births = new HashMap<>();
+        Map<Integer, Double> year2deaths = new HashMap<>();
 
         /*
          * передвижка от 12.1.1989 до 1.1.1990 с шагом 365-11 дней
@@ -42,6 +45,7 @@ public class BirthsDeficit
 
         /* оценка числа рождений за полный календарный 1989 год */
         year2births.put(1989, fw.getObservedBirths() * 365.0 / (365 - 11));
+        year2deaths.put(1989, fw.getObservedDeaths() * 365.0 / (365 - 11));
 
         /*
          *  передвижка от 1.1.1990 до 1.1.2016 с шагом год
@@ -53,10 +57,11 @@ public class BirthsDeficit
             fw.setBirthRateRural(asfr_rural);
             fw.forward(p, cmt, 1.0);
             year2births.put(year, fw.getObservedBirths());
+            year2deaths.put(year, fw.getObservedDeaths());
         }
 
         Util.out("");
-        Util.out("Ожидаемое число рождений (по передвижке)");
+        Util.out("Ожидаемое число рождений (по передвижке) замкнутого населения без миграции");
         Util.out("при сохранении возрастных коэффициентов смертности и плодовитости");
         Util.out("");
         Util.out("EXPECTED = ожидаемое число рождений");
@@ -74,6 +79,24 @@ public class BirthsDeficit
             Util.out(String.format("%4d %,9d %,9d %,9d", year, expected, actual, deficit));
         }
 
+        Util.out("");
+        Util.out("Ожидаемое число смертей (по передвижке) замкнутого населения без миграции");
+        Util.out("при сохранении возрастных коэффициентов смертности и плодовитости");
+        Util.out("");
+        Util.out("EXPECTED = ожидаемое число смертей");
+        Util.out("ACTUAL = фактическое число смертей");
+        Util.out("EXCESS = избыток");
+        Util.out("");
+        Util.out("year expected actual excess");
         Util.noop();
+        for (int year = 1989; year <= 2015; year++)
+        {
+            long expected = Math.round(year2deaths.get(year));
+            long actual = Math.round(actualDeaths[year - 1989]);
+            long excess = actual - expected;
+            if (excess < 0)
+                excess = 0;
+            Util.out(String.format("%4d %,9d %,9d %,9d", year, expected, actual, excess));
+        }
     }
 }
