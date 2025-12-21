@@ -11,6 +11,7 @@ package rtss.losses199x;
 //import rtss.data.selectors.Locality;
 import rtss.losses199x.util.ActualBirths;
 import rtss.losses199x.util.ActualDeaths;
+import rtss.losses199x.util.ChildMortality;
 //import rtss.rosbris.RosBrisPopulationExposureForDeaths;
 import rtss.rosbris.RosBrisTerritory;
 //import rtss.rosbris.core.RosBrisDataSet;
@@ -22,6 +23,9 @@ public class Losses199X
     {
         try
         {
+            new ChildMortality().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
+            spacer();
+
             new ActualDeaths().print(1989, 2015, RosBrisTerritory.RF_BEFORE_2014);
             spacer();
 
