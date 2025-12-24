@@ -106,6 +106,7 @@
 		<module>rtss-un-wpp</module>
 		<module>rtss-losses-199x</module>
 		<module>rtss-rosbris</module>
+		<module>rtss-actors-199x</module>
 	</modules>
 
 </project>
