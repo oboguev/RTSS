@@ -691,6 +691,7 @@ public class Population
 
             line = line.toLowerCase();
             line = line.replace("возраст не указан", "unknown");
+            line = line.replace("100 лет и старше", "100+");
 
             if (cols == null)
                 throw new Exception("Unidentified format of population table file");
