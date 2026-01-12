@@ -20,8 +20,8 @@ public class EnsureNonNegativeCurve
     {
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
-        int ppy = yyy.length / (last.age_x2 + 1);
-        if (yyy.length != ppy * (last.age_x2 + 1))
+        int ppy = yyy.length / (last.age_x2 + 1 - first.age_x1);
+        if (yyy.length != ppy * (last.age_x2 + 1 - first.age_x1))
             throw new IllegalArgumentException();
 
         Bin bin = null;

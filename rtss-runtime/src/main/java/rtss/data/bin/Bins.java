@@ -596,4 +596,12 @@ public class Bins
         
         return true;
     }
+
+    public static Bin[] fromYearlyValues(int start_age, double[] values) throws Exception
+    {
+        List<Bin> bins = new ArrayList<>();
+        for (int x = 0; x < values.length; x++)
+            bins.add(new Bin(start_age + x, start_age + x, values[x]));
+        return bins(bins);
+    }
 }

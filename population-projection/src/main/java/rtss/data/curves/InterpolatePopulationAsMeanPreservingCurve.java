@@ -588,7 +588,8 @@ public class InterpolatePopulationAsMeanPreservingCurve
                                                                     maxIterations,
                                                                     smoothingSigma,
                                                                     positivityThreshold,
-                                                                    maxConvergenceDifference);
+                                                                    maxConvergenceDifference,
+                                                                    true);
 
         if (Util.False)
         {

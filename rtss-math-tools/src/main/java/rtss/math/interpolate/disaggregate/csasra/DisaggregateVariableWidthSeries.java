@@ -50,7 +50,8 @@ public class DisaggregateVariableWidthSeries
             int maxIterations,
             double smoothingSigma,
             double positivityThreshold,
-            double maxConvergenceDifference) throws Exception
+            double maxConvergenceDifference,
+            boolean linearizeFirstSegment) throws Exception
     {
         boolean converged = false;
         int totalPoints = Arrays.stream(intervalWidths).sum();
@@ -137,8 +138,15 @@ public class DisaggregateVariableWidthSeries
         
         if (!converged)
             throw new Exception("disaggregation failed to converge");
-
-        return linearize_first_segment(restored, intervalWidths[0], intervalWidths[0] * aggregated[0]);
+        
+        if (linearizeFirstSegment)
+        {
+            return linearize_first_segment(restored, intervalWidths[0], intervalWidths[0] * aggregated[0]);
+        }
+        else
+        {
+            return restored;
+        }
     }
 
     private static double[] gaussianFilter(double[] data, double[] kernel)

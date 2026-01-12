@@ -12,9 +12,10 @@ public class CurveUtil
      */
     public static int ppy(double[] curve, Bin[] bins) throws Exception
     {
+        Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
-        int ppy = curve.length / (last.age_x2 + 1);
-        if (curve.length != ppy * (last.age_x2 + 1))
+        int ppy = curve.length / (last.age_x2 + 1 - first.age_x1);
+        if (curve.length != ppy * (last.age_x2 + 1 - first.age_x1))
             throw new IllegalArgumentException();
         return ppy;
     }

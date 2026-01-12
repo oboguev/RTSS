@@ -22,10 +22,13 @@ public class CurveVerifier
     public static void validate_means(double[] yy, Bin[] bins) throws Exception
     {
         int ppy = CurveUtil.ppy(yy, bins);
+
+        Bin first = Bins.firstBin(bins);
+        int start_x = first.x1(ppy);
         
         for (Bin bin : bins)
         {
-            double[] y = Util.splice(yy, bin.x1(ppy), bin.x2(ppy));
+            double[] y = Util.splice(yy, bin.x1(ppy) - start_x, bin.x2(ppy) - start_x);
             if (Util.differ(Util.average(y), bin.avg, 0.001))
                 throw new Exception("Curve does not preserve mean values of the bins");
         }
