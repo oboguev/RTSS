@@ -10,6 +10,7 @@ import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
+import rtss.util.plot.ChartXY;
 
 /**
  * Возрастные коэффициенты женской плодовитости
@@ -140,6 +141,19 @@ public class AgeSpecificFertilityRates
         }
         
         return new AgeSpecificFertilityRates(Bins.bins(list));
+    }
+    
+    public double[] curve()
+    {
+        double[] curve = new double[Population.MAX_AGE + 1];
+        for (int age = 0; age <= Population.MAX_AGE; age++)
+            curve[age] = forAge(age);
+        return curve;
+    }
+    
+    public void display(String title)
+    {
+        ChartXY.display(title, curve());
     }
     
     public String toString()

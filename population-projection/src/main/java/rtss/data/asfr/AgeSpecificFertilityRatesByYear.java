@@ -1,6 +1,7 @@
 package rtss.data.asfr;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class AgeSpecificFertilityRatesByYear
     public static AgeSpecificFertilityRatesByYear load(Area area, String sheetName) throws Exception
     {
         String path = String.format("age_specific_fertility_rates/%s/%s-ASFR.xlsx", area.name(), area.name());
-        return load(path);
+        return load(path, sheetName);
     }
 
     public static AgeSpecificFertilityRatesByYear load(String path) throws Exception
@@ -87,6 +88,13 @@ public class AgeSpecificFertilityRatesByYear
         }
 
         return ArrayUtils.toPrimitive(list.toArray(new Double[0]));
+    }
+    
+    public List<Integer> years()
+    {
+        List<Integer> years = new ArrayList<>(m.keySet());
+        Collections.sort(years);
+        return years;
     }
 
     /* ============================================================================================== */
