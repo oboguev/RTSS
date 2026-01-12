@@ -3,7 +3,7 @@ package rtss.ww2losses;
 import rtss.data.ValueConstraint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
-import rtss.data.asfr.InterpolateASFR;
+import rtss.data.asfr.InterpolateASFR_ByTime;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
@@ -238,12 +238,12 @@ public class Main
         {
         case USSR:
             yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/USSR/USSR-ASFR.xlsx");
-            halfyearly_asfrs = InterpolateASFR.interpolate(yearly_asfrs, 1920, 1959, 2);
+            halfyearly_asfrs = InterpolateASFR_ByTime.interpolate(yearly_asfrs, 1920, 1959, 2);
             break;
 
         case RSFSR:
             yearly_asfrs = AgeSpecificFertilityRatesByYear.load("age_specific_fertility_rates/survey-1960.xlsx");
-            halfyearly_asfrs = InterpolateASFR.interpolate(yearly_asfrs, 1920, 1959, 2);
+            halfyearly_asfrs = InterpolateASFR_ByTime.interpolate(yearly_asfrs, 1920, 1959, 2);
             break;
         }
 
