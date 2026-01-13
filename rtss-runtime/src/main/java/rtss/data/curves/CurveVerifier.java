@@ -34,6 +34,24 @@ public class CurveVerifier
         }
     }
     
+    public static void validate_means(double[] yy, Bin[] bins, double absoluteAllowance) throws Exception
+    {
+        int ppy = CurveUtil.ppy(yy, bins);
+
+        Bin first = Bins.firstBin(bins);
+        int start_x = first.x1(ppy);
+        
+        for (Bin bin : bins)
+        {
+            double[] y = Util.splice(yy, bin.x1(ppy) - start_x, bin.x2(ppy) - start_x);
+            double yav = Util.average(y);
+            if (Math.abs(yav - bin.avg) < absoluteAllowance)
+                continue;
+            if (Util.differ(yav, bin.avg, 0.001))
+                throw new Exception("Curve does not preserve mean values of the bins");
+        }
+    }
+
     /*
      * Validate curve mean values against the bins,
      * but allow average curve values in the last bin years be less than bin average

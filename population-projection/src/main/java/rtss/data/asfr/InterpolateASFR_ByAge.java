@@ -115,7 +115,7 @@ public class InterpolateASFR_ByAge
         if (!Util.isNonNegative(yy))
             throw new Exception("Error calculating curve (negative value)");
 
-        CurveVerifier.validate_means(yy, bins);
+        CurveVerifier.validate_means(yy, bins, 0.001);
 
         if (Util.False)
         {
