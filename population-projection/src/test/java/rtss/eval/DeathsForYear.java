@@ -12,6 +12,10 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.util.Util;
 
+/*
+ * Вычислить число смертей в указанном году,
+ * и долю детских смертей среди них.
+ */
 public class DeathsForYear
 {
     public static void main(String[] args)
