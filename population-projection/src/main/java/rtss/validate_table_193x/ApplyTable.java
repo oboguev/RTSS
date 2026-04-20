@@ -107,6 +107,8 @@ public class ApplyTable
         show_divergence(p1937, p1939, mt, 1.4);
 
         for_adh_population(mt);
+        
+        Util.out("*** Complete");
 
         Util.noop();
     }
@@ -129,7 +131,7 @@ public class ApplyTable
             boolean ur,
             int cutoffAge) throws Exception
     {
-        double mmax = 1.5;
+        double mmax = 1.7;
         int mmaxcount = 0;
 
         double m1 = 0.5;
