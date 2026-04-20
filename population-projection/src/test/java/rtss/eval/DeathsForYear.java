@@ -28,6 +28,7 @@ public class DeathsForYear
             final double cdr = 23.9;
             final int uptoAge = 5;
             new DeathsForYear().eval(Area.RSFSR, year, cbr, cdr, uptoAge);
+            new DeathsForYear().eval(Area.RSFSR, year, cbr, cdr, 17);
             Util.out("*** Completed");
         }
         catch (Throwable ex)
