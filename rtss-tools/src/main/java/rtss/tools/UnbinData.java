@@ -72,12 +72,12 @@ public class UnbinData
             
         if (yy == null)
         {
-            sb.append(String.format("Method %s failed", method));
+            sb.append(String.format("# Method %s failed", method));
         }
         else
         {
             sb.append("\n");
-            sb.append(String.format("Unbinned with method %s:", method));
+            sb.append(String.format("# Unbinned with method %s:", method));
             sb.append("\n");
 
             for (int k = 0; k < yy.length; k++)
@@ -88,11 +88,11 @@ public class UnbinData
 
                 if (iyear != null)
                 {
-                    sb.append(String.format("%d %f", iyear, yy[k]));
+                    sb.append(String.format("%d %f\n", iyear, yy[k]));
                 }
                 else
                 {
-                    sb.append(String.format("%f %f", dyear, yy[k]));
+                    sb.append(String.format("%f %f\n", dyear, yy[k]));
                 }
             }
         }

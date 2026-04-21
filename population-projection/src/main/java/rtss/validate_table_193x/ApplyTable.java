@@ -449,6 +449,10 @@ public class ApplyTable
         Util.out("На сколько требуется увеличить коэффициенты смертности таблицы, чтобы сумма смертей совпала с реконструкцией АДХ?");
         
         /* значения по АДХ-СССР стр. 120, 135 */
+        for_adh_population(mt, 1934, 30.4, 21.7, 204);
+        for_adh_population(mt, 1935, 33.0, 20.6, 198);
+        for_adh_population(mt, 1936, 34.6, 20.0, 186);
+
         for_adh_population(mt, 1937, 39.9, 21.7, 184);
         for_adh_population(mt, 1938, 39.0, 20.9, 174);
         for_adh_population(mt, 1939, 40.0, 20.1, 168);
