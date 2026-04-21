@@ -35,7 +35,7 @@ public class Bins
 
         return bins;
     }
-    
+
     public static Bin[] bins(List<Bin> bins) throws Exception
     {
         return bins(bins.toArray(new Bin[0]));
@@ -93,13 +93,13 @@ public class Bins
             y[k++] = bin.avg;
         return y;
     }
-    
-    public static int[] widths(Bin...bins)
+
+    public static int[] widths(Bin... bins)
     {
         return widths(1, bins);
     }
-    
-    public static int[] widths(int ppy, Bin...bins)
+
+    public static int[] widths(int ppy, Bin... bins)
     {
         int[] w = new int[bins.length];
         int k = 0;
@@ -537,34 +537,34 @@ public class Bins
 
         return Bins.bins(list);
     }
-    
+
     public static boolean compatibleLayout(Bin[] bins1, Bin[] bins2)
     {
         if (bins1.length != bins2.length)
             return false;
-        
+
         for (int k = 0; k < bins1.length; k++)
         {
             if (bins1[k].age_x1 != bins2[k].age_x1)
                 return false;
-            
+
             if (bins1[k].age_x2 != bins2[k].age_x2)
                 return false;
         }
-        
+
         return true;
     }
-    
+
     public static boolean isEqualWidths(Bin... bins)
     {
         Bin first = bins[0];
-        
+
         for (Bin bin : bins)
         {
             if (bin.widths_in_years != first.widths_in_years)
                 return false;
         }
-        
+
         return true;
     }
 
@@ -574,7 +574,7 @@ public class Bins
     public static Bin[] forWidths(int... widths) throws Exception
     {
         List<Bin> list = new ArrayList<>();
-        
+
         int age_x1 = 0;
         for (int w : widths)
         {
@@ -582,10 +582,10 @@ public class Bins
             list.add(new Bin(age_x1, age_x2, 0));
             age_x1 += w;
         }
-        
+
         return bins(list);
     }
-    
+
     public static boolean isAllZero(Bin[] bins)
     {
         for (Bin bin : bins)
@@ -593,7 +593,7 @@ public class Bins
             if (bin.avg != 0)
                 return false;
         }
-        
+
         return true;
     }
 
@@ -603,5 +603,61 @@ public class Bins
         for (int x = 0; x < values.length; x++)
             bins.add(new Bin(start_age + x, start_age + x, values[x]));
         return bins(bins);
+    }
+
+    public static Bin[] fromString(String binsAsString) throws Exception
+    {
+        return ReadBins.fromString(binsAsString);
+    }
+    
+    public static Bin[] fromResource(String path) throws Exception
+    {
+        return ReadBins.fromString(Util.loadResource(path));
+    }
+
+    public static Bin[] fromFile(String path) throws Exception
+    {
+        return ReadBins.fromString(Util.readFileAsString(path));
+    }
+
+    public static String asString(Bin... bins)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        for (Bin bin : bins)
+        {
+            if (sb.length() != 0)
+                sb.append("\n");
+            
+            Integer ix1 = asInteger(bin.age_x1);
+            Integer ix2 = asInteger(bin.age_x2);
+
+            if (ix1 != null && ix2 != null && ix1.equals(ix2))
+            {
+                sb.append(String.format("%d %f", ix1, bin.avg));
+            }
+            else if (ix1 != null && ix2 != null && ix1.equals(ix2))
+            {
+                sb.append(String.format("%d-%d %f", ix1, ix2, bin.avg));
+            }
+            else
+            {
+                sb.append(String.format("%f-%f %f", bin.age_x1, bin.age_x2, bin.avg));
+            }
+        }
+        
+        return sb.toString();
+    }
+    
+    private static Integer asInteger(double v)
+    {
+        if (Double.isNaN(v) || Double.isInfinite(v))
+            return null;
+
+        if (v < Integer.MIN_VALUE || v > Integer.MAX_VALUE)
+            return null;
+
+        int i = (int) v;
+        return (v == i) ? Integer.valueOf(i) : null;
     }
 }
