@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import rtss.csv.CSVSmartReader;
 import rtss.mexico.util.ColumnHeader;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -33,6 +34,17 @@ public class MexVitalRates
             Util.out("Рождаемость, смертность и суммарный коэффициент рождаемости населения Мексики (по CONAPO 2019):");
             Util.out("");
             new MexVitalRates().do_conapo2019("conapo-2019/ConDem50a19_ProyPob20a70/5_Indicadores_demográficos_proyecciones.xlsx");
+
+            Util.out("");
+            Util.out("====================================");
+            Util.out("");
+            Util.out("Рождаемость, смертность, младенческая симертность, суммарный коэффициент рождаемости и средний возраст населения Мексики (по CONAPO 2025):");
+            Util.out("  - Crude Birth Rate (births per 1,000 population)");
+            Util.out("  - Crude Death Rate (deaths per 1,000 population)");
+            Util.out("  - Infant Mortality Rate (deaths per 1,000 live births)");
+            Util.out("  - Total Fertility Rate (live births per woman)");
+            Util.out("");
+            new MexVitalRates().do_conapo2025("conapo-2025-05/Demographic indicators 1950-2070/05_indicadores_demograficos_proyecciones.csv");
 
             Util.out("");
             Util.out("====================================");
@@ -91,6 +103,34 @@ public class MexVitalRates
         }
     }
 
+
+    /* ============================================================================================ */
+    
+    private void do_conapo2025(String path) throws Exception
+    {
+        CSVSmartReader cvs = CSVSmartReader.fromResource(path);
+        
+        Util.out("год рождаемость смертность младенческая-смертность СКР средний-возраст");
+
+        for (int nr = 0; nr < cvs.rowCount(); nr++)
+        {
+            int geo = cvs.asInt(nr, "CVE_GEO");
+            if (geo != 0)
+                continue;
+            
+            int year = cvs.asInt(nr, "ANIO");
+            double cbr = cvs.asDouble(nr, "T_BRU_NAT");
+            double cdr = cvs.asDouble(nr, "T_BRU_MOR");
+            double imr = cvs.asDouble(nr, "TMI");
+            double tfr = cvs.asDouble(nr, "TGF");
+            double avage = cvs.asDouble(nr, "EDAD_MED");
+
+            Util.out(String.format("%d %.1f %.1f %.1f %.1f %.1f", year, cbr, cdr, imr, tfr, avage));
+        }
+        
+        // ####
+    }
+    
     /* ============================================================================================ */
 
     private void do_wpp() throws Exception
