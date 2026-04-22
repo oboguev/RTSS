@@ -4,6 +4,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.RandomAccess;
 
 import com.opencsv.CSVReader;
 
@@ -426,6 +427,9 @@ public class Bins
             list = reader.readAll();
         }
 
+        if (!(list instanceof RandomAccess))
+            list = new ArrayList<>(list);
+
         List<Bin> binlist = new ArrayList<>();
 
         for (String[] sa : list)
@@ -460,6 +464,9 @@ public class Bins
         {
             list = reader.readAll();
         }
+
+        if (!(list instanceof RandomAccess))
+            list = new ArrayList<>(list);
 
         List<Bin> binlist = new ArrayList<>();
 
@@ -496,6 +503,9 @@ public class Bins
         {
             list = reader.readAll();
         }
+
+        if (!(list instanceof RandomAccess))
+            list = new ArrayList<>(list);
 
         List<Bin> binlist = new ArrayList<>();
 

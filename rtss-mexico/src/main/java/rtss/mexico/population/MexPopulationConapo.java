@@ -3,12 +3,15 @@ package rtss.mexico.population;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import rtss.csv.CSVSmartReader;
 import rtss.mexico.util.ColumnHeader;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -16,6 +19,8 @@ import rtss.util.excel.ExcelRC;
 
 /**
  * Численность населения Мексики по CONAPO
+ * 
+ * Java heap: -Xmx16394m
  */
 public class MexPopulationConapo
 {
@@ -30,7 +35,7 @@ public class MexPopulationConapo
                 Util.out("=======================================================");
                 Util.out("Население Мексики на середину года (CONAPO 2019):");
                 Util.out("");
-                new MexPopulationConapo().do_main("conapo-2019/ConDem50a19_ProyPob20a70/0_Pob_Mitad_1950_2070.xlsx");
+                new MexPopulationConapo().do_conapo2019("conapo-2019/ConDem50a19_ProyPob20a70/0_Pob_Mitad_1950_2070.xlsx");
             }
 
             if (Util.True)
@@ -39,7 +44,24 @@ public class MexPopulationConapo
                 Util.out("=======================================================");
                 Util.out("Население Мексики на начало года (CONAPO 2019):");
                 Util.out("");
-                new MexPopulationConapo().do_main("conapo-2019/ConDem50a19_ProyPob20a70/0_Pob_Inicio_1950_2070.xlsx");
+                new MexPopulationConapo().do_conapo2019("conapo-2019/ConDem50a19_ProyPob20a70/0_Pob_Inicio_1950_2070.xlsx");
+            }
+
+            if (Util.True)
+            {
+                Util.out("=======================================================");
+                Util.out("Население Мексики на середину года (CONAPO 2025):");
+                Util.out("");
+                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at midyear 1950-2070/00_Pob_Mitad_1950_2070.csv");
+            }
+
+            if (Util.True)
+            {
+                Util.out("");
+                Util.out("=======================================================");
+                Util.out("Население Мексики на начало года (CONAPO 2025):");
+                Util.out("");
+                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at beginning-of-year 1950-2070/00_Pob_Inicio_1950_2070.csv");
             }
         }
         catch (Throwable ex)
@@ -48,8 +70,10 @@ public class MexPopulationConapo
             ex.printStackTrace();
         }
     }
-    
-    private void do_main(String fpath) throws Exception
+
+    /* ------------------------------------------------------------------------------------------------------- */
+
+    private void do_conapo2019(String fpath) throws Exception
     {
         try (XSSFWorkbook wb = Excel.loadWorkbook(fpath))
         {
@@ -61,21 +85,21 @@ public class MexPopulationConapo
             do_process(rc, headers);
         }
     }
-    
+
     static class YearData
     {
         /* for the whole country */
         Map<String, Integer> whole = new HashMap<>();
-        
+
         /* split by territories */
         Map<String, Integer> split = new HashMap<>();
-        
+
         /* line for the key */
         Map<String, Integer> line = new HashMap<>();
     }
-    
-    private Map<Integer, YearData> years = new HashMap<>(); 
-    
+
+    private Map<Integer, YearData> years = new HashMap<>();
+
     private void do_process(ExcelRC rc, Map<String, Integer> headers) throws Exception
     {
         int ixYear = ColumnHeader.getRequiredHeader(headers, "AÑO");
@@ -83,7 +107,7 @@ public class MexPopulationConapo
         int ixAge = ColumnHeader.getRequiredHeader(headers, "EDAD");
         int ixGender = ColumnHeader.getRequiredHeader(headers, "SEXO");
         int ixPopulation = ColumnHeader.getRequiredHeader(headers, "POBLACION");
-        
+
         for (int nr = 1; nr < rc.size(); nr++)
         {
             int year = asInt(rc, nr, ixYear);
@@ -91,18 +115,18 @@ public class MexPopulationConapo
             int age = asInt(rc, nr, ixAge);
             String gender = asString(rc, nr, ixGender);
             int population = asInt(rc, nr, ixPopulation);
-            
+
             YearData yd = years.get(year);
             if (yd == null)
             {
                 yd = new YearData();
                 years.put(year, yd);
             }
-            
+
             if (entityCode == 0)
             {
                 String key = age + "." + gender.toLowerCase();
-                
+
                 if (yd.whole.containsKey(key))
                     throw new Exception("Duplicate data");
                 yd.whole.put(key, population);
@@ -111,7 +135,7 @@ public class MexPopulationConapo
             else
             {
                 String key = age + "." + entityCode + "." + gender.toLowerCase();
-                
+
                 if (yd.split.containsKey(key) && yd.split.get(key) != population)
                 {
                     String msg = String.format("Duplicate data, sheet lines %d and %d", yd.line.get(key) + 1, nr + 1);
@@ -121,14 +145,14 @@ public class MexPopulationConapo
                 yd.line.put(key, nr);
             }
         }
-        
+
         List<Integer> ylist = new ArrayList<>(years.keySet());
         Collections.sort(ylist);
         for (int year : ylist)
         {
             YearData yd = years.get(year);
             int count = 0;
-            
+
             if (yd.whole.isEmpty())
             {
                 count = sumValues(yd.split);
@@ -145,11 +169,11 @@ public class MexPopulationConapo
                     throw new Exception("Conflicting whole/split values");
                 count = c1;
             }
-            
+
             Util.out(String.format("%s %d", year, count));
         }
     }
-    
+
     private String asString(ExcelRC rc, int nr, int nc) throws Exception
     {
         Object o = rc.get(nr, nc);
@@ -163,29 +187,80 @@ public class MexPopulationConapo
     private int asInt(ExcelRC rc, int nr, int nc) throws Exception
     {
         Object o = rc.get(nr, nc);
-        
+
         if (o == null)
             throw new Exception("Missing integer data");
 
         if (o instanceof Integer)
-            return ((Integer)o).intValue(); 
-        
+            return ((Integer) o).intValue();
+
         if (o instanceof Long)
-            return ((Long)o).intValue(); 
+            return ((Long) o).intValue();
 
         String s = asString(rc, nr, nc);
         if (s.endsWith(".0"))
             s = Util.stripTail(s, ".0");
         return Integer.parseInt(s);
     }
-    
+
     private int sumValues(Map<String, Integer> m)
     {
         int sum = 0;
-        
+
         for (int v : m.values())
             sum += v;
-        
+
         return sum;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------- */
+
+    private void do_conapo2025(String path) throws Exception
+    {
+        CSVSmartReader csv = CSVSmartReader.fromResource(path);
+
+        Set<String> keys = new HashSet<>();
+        Map<Integer, Double> m = new HashMap<>();
+
+        for (int nr = 0; nr < csv.rowCount(); nr++)
+        {
+            int year = csv.asInt(nr, "ANIO");
+            int geo = csv.asInt(nr, "CVE_GEO");
+            if (geo <= 0)
+                throw new Exception("Unexpected region code");
+            int age = csv.asInt(nr, "EDAD");
+            String gender = csv.asString(nr, "SEXO");
+            double pop = csv.asDouble(nr, "POBLACION");
+
+            String key = String.format("%d/%d/%d/%s", year, geo, age, gender.toLowerCase());
+            if (keys.contains(key))
+                throw new Exception("Duplicate record");
+            keys.add(key);
+
+            Double v = m.get(year);
+            if (v == null)
+                m.put(year, pop);
+            else
+                m.put(year, pop + v);
+        }
+        
+        List<Integer> years = new ArrayList<>(m.keySet());
+        Collections.sort(years);
+        for (int year : years)
+        {
+            Util.out(String.format("%d %s", year, f2s(m.get(year))));
+        }
+    }
+
+    private String f2s(double v) throws Exception
+    {
+        String sv = String.format("%,f", v);
+        sv = stripTrailingDecimalZeros(sv);
+        return sv;
+    }
+
+    private static String stripTrailingDecimalZeros(String sv)
+    {
+        return sv.replaceFirst("\\.?0+$", "");
     }
 }

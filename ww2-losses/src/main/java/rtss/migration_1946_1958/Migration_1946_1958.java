@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.RandomAccess;
 
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
@@ -171,7 +172,10 @@ public class Migration_1946_1958
         try (CSVReader reader = new CSVReader(new StringReader(text)))
         {
             lines = reader.readAll();
-        }        
+        }
+
+        if (!(lines instanceof RandomAccess))
+            lines = new ArrayList<>(lines);
         
         for (String[] sa : lines)
         {

@@ -8,7 +8,7 @@ public class Main
 {
     public static void main(String[] args)
     {
-        try 
+        try
         {
             Main m = new Main();
             m.do_main();
@@ -19,36 +19,42 @@ public class Main
             ex.printStackTrace();
             System.exit(1);
         }
-        
+
         Util.out("");
         Util.out("*** Completed.");
     }
-    
+
     private void do_main() throws Exception
     {
-        PostProcess pp = new PostProcess ();
+        PostProcess pp = new PostProcess();
         pp.initCensusSource(loadCensusSource());
         pp.initInterpolationData(loadInterpolationData());
         pp.postProcess();
     }
-    
+
     private List<String[]> loadCensusSource() throws Exception
     {
         String s = Util.loadResource("census_1920_source.txt");
         s = s.replace("\t", ",");
         try (CSVReader reader = new CSVReader(new StringReader(s)))
         {
-            return reader.readAll();
+            List<String[]> list = reader.readAll();
+            if (!(list instanceof RandomAccess))
+                list = new ArrayList<>(list);
+            return list;
         }
     }
-    
+
     private List<String[]> loadInterpolationData() throws Exception
     {
         String s = Util.loadResource("interpolation.txt");
         s = s.replace("\t", " ").replaceAll(" +", " ").replace(" ", ",");
         try (CSVReader reader = new CSVReader(new StringReader(s)))
         {
-            return reader.readAll();
+            List<String[]> list = reader.readAll();
+            if (!(list instanceof RandomAccess))
+                list = new ArrayList<>(list);
+            return list;
         }
     }
 }

@@ -1,9 +1,11 @@
 package rtss.csv;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.RandomAccess;
 
 import com.opencsv.CSVReader;
 
@@ -26,6 +28,8 @@ public class CSVSmartReader
         CSVReader reader = new CSVReader(new StringReader(text));
         List<String[]> lines = reader.readAll();
         reader.close();
+        if (!(lines instanceof RandomAccess))
+            lines = new ArrayList<>(lines);
         String[] header = lines.remove(0);
         return new CSVSmartReader(header, lines);
     }
