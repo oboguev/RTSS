@@ -1,0 +1,31 @@
+CLAVE	Unique Municipality Code	Code for the municipality. text
+CLAVE_ENT	Entity Code	Code for the federal entity (state). text
+NOM_ENT	Federal Entity Name	Name of the federal entity (state). text
+NOM_MUN	Municipality Name	Name of the municipality. text
+ANO	Year	Year. text
+HOM_MIT_ANO	Men at Mid-Year	Estimated number of men in the population at mid-year. numeric
+MUJ_MIT_ANO	Women at Mid-Year	Estimated number of women in the population at mid-year. numeric
+POB_MIT_MUN	Mid-Year Population in Municipality	Estimated total population in the municipality at mid-year (sum of men and women). numeric
+MUJ_00_014	Women Aged 0 to 14	Estimated number of women in the age group between 00 and 14 years. numeric
+HOM_00_014	Men Aged 0 to 14	Estimated number of men in the age group between 00 and 14 years. numeric
+POB_00_014	Population Aged 0 to 14	Estimated number of persons in the age group between 00 and 14 years. numeric
+MUJ_015_64	Women Aged 15 to 64	Estimated number of women in the age group between 15 and 64 years. numeric
+HOM_015_64	Men Aged 15 to 64	Estimated number of men in the age group between 15 and 64 years. numeric
+POB_015_64	Population Aged 15 to 64	Estimated number of persons in the age group between 15 and 64 years. numeric
+MUJ_60_MAS	Women Aged 60 and Over	Estimated number of women in the age group of 60 years or older. numeric
+HOM_60_MAS	Men Aged 60 and Over	Estimated number of men in the age group of 60 years or older. numeric
+POB_60_MAS	Population aged 60 and over	Estimated total population in the age group of 60 years and older. numeric
+MUJ_65_MAS	Women aged 65 and over	Estimated number of women in the age group of 65 years or older. numeric
+HOM_65_MAS	Men aged 65 and over	Estimated number of men in the age group of 65 years or older. numeric
+POB_65_MAS	Population aged 65 and over	Estimated total population in the age group of 65 years and older. numeric
+POB_MIT_ENT	Mid-year population in entity	Estimated total population in the federal entity at mid-year. numeric
+EDAD_MED	Median age	Median age of the municipality's population in the corresponding year. numeric
+POR_MUN	Percentage of municipality	Percentage represented by the municipality's population relative to the total population of the federal entity. numeric
+IND_ENV_60	Aging Index (60 years)	Aging index indicating the percentage of people over 60 years of age relative to the total population. numeric
+IND_ENV_65	Aging Index (65 years)	Aging index indicating the percentage of people over 65 years of age relative to the total population. numeric
+RHM	Male-to-female ratio	Male-to-female ratio; expresses the number of men per 100 women in the population. numeric
+RAZ_DEP_ADU	Adult dependency ratio	Adult dependency ratio; indicates the proportion of people over 60 years of age relative to the productive-age population (15 to 64 years). numeric
+RAZ_DEP_INF	Child dependency ratio	Child dependency ratio; indicates the proportion of people under 15 years of age relative to the productive-age population (15 to 64 years). numeric
+RAZ_DEP	Total dependency ratio	Total dependency ratio; is the sum of the child dependency ratio and the adult dependency ratio. numeric
+fecha	Date	Date. timestamp
+NOM_ENT_etq	Federal Entity	Name of the federal entity. text

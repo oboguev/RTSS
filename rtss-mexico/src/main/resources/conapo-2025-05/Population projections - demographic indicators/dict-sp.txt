@@ -1,0 +1,31 @@
+CLAVE	Clave única de municipio	Clave del municipio.	text
+CLAVE_ENT	Clave de entidad	Clave de la entidad federativa.	text
+NOM_ENT	Nombre de entidad federativa	Nombre de la entidad federativa.	text
+NOM_MUN	Nombre de municipio	Nombre del municipio.	text
+ANO	Año	Año.	text
+HOM_MIT_ANO	Hombres a mitad de año	Número estimado de hombres en la población a mitad del año.	numeric
+MUJ_MIT_ANO	Mujeres a mitad de año	Número estimado de mujeres en la población a mitad del año.	numeric
+POB_MIT_MUN	Población a mitad de año en municipio	Población total estimada en el municipio a mitad del año (suma de hombres y mujeres).	numeric
+MUJ_00_014	Mujeres de 0 a 14 años	Número estimado de mujeres en el grupo de edad entre 00 y 14 años.	numeric
+HOM_00_014	Hombres de 0 a 14 años	Número estimado de hombres en el grupo de edad entre 00 y 14 años.	numeric
+POB_00_014	Población de 0 a 14 años	Número estimado de personas en el grupo de edad entre 00 y 14 años.	numeric
+MUJ_015_64	Mujeres de 15 a 64 años	Número estimado de mujeres en el grupo de edad entre 15 y 64 años.	numeric
+HOM_015_64	Hombres de 15 a 64 años	Número estimado de hombres en el grupo de edad entre 15 y 64 años.	numeric
+POB_015_64	Población de 15 a 64 años	Número estimado de personasen el grupo de edad entre 15 y 64 años.	numeric
+MUJ_60_MAS	Mujeres de 60 años y más	Número estimado de mujeres en el grupo de edad de 60 años o más.	numeric
+HOM_60_MAS	Hombres de 60 años y más	Número estimado de hombres en el grupo de edad de 60 años o más.	numeric
+POB_60_MAS	Población de 60 años y más	Población total estimada en el grupo de edad de 60 años en adelante.	numeric
+MUJ_65_MAS	Mujeres de 65 años y más	Número estimado de mujeres en el grupo de edad de 65 o más años.	numeric
+HOM_65_MAS	Hombres de 65 años y más	Número estimado de hombres en el grupo de edad de 65 o más años.	numeric
+POB_65_MAS	Población de 65 años y más	Población total estimada en el grupo de edad de 65 años en adelante.	numeric
+POB_MIT_ENT	Población a mitad de año en entidad	Población total estimada en la entidad federativa a mitad del año.	numeric
+EDAD_MED	Edad mediana	Edad mediana de la población del municipio en el año correspondiente.	numeric
+POR_MUN	Porcentaje del municipio	Porcentaje que representa la población del municipio respecto a la población total de la entidad federativa.	numeric
+IND_ENV_60	Índice de Envejecimiento 60 años	Índice de envejecimiento que indica el porcentaje de personas mayores de 60 años respecto a la población total.	numeric
+IND_ENV_65	Índice de Envejecimiento 65 años	Índice de envejecimiento que indica el porcentaje de personas mayores de 65 años respecto a la población total.	numeric
+RHM	Relación hombres-mujeres	Relación hombres-mujeres; expresa el número de hombres por cada 100 mujeres en la población.	numeric
+RAZ_DEP_ADU	Razón de dependencia adulta	Razón de dependencia de adultos; indica la proporción de personas mayores de 60 años respecto a la población en edad productiva (15 a 64 años).	numeric
+RAZ_DEP_INF	Razón de dependencia infantil	Razón de dependencia infantil; indica la proporción de personas menores de 15 años respecto a la población en edad productiva (15 a 64 años).	numeric
+RAZ_DEP	Razón de dependencia total	Razón total de dependencia; es la suma de la razón de dependencia infantil y la razón de dependencia de adultos.	numeric
+fecha	Fecha	Fecha.	timestamp
+NOM_ENT_etq	Entidad federativa	Nombre de la entidad federativa.	text

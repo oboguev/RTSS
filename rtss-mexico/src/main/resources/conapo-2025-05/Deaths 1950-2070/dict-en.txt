@@ -1,0 +1,10 @@
+_id	_id		int
+RENGLON	Row	Unique case identifier (primary key). numeric
+ANIO	Year	Year. numeric
+ENTIDAD	Entity	Name of the federal entity. text
+CVE_GEO	Geographic Code	Geographic code (INEGI 2020) of the federal entity. numeric
+SEXO	Sex	Sex. text
+EDAD	Age	Age. numeric
+DEFUNCIONES	Deaths	Number of deaths. numeric
+ENTIDAD_FEDERATIVA	Federal Entity	Name of the federal entity. text
+FECHA	Date	Date. timestamp

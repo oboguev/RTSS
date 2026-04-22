@@ -1,0 +1,10 @@
+_id	_id		int
+RENGLON	Renglón	Identificador único de caso (Llave primaria).	text
+ANIO	Año	Año.	text
+ENTIDAD	Entidad	Nombre de entidad federativa.	text
+CVE_GEO	Clave geográfica	Clave geográfica (INEGI 2020) de entidad federativa.	text
+EDAD	Edad	Edad.	text
+SEXO	Sexo	Sexo.	text
+POBLACION	Población	Población a mitad de año.	numeric
+ENTIDAD_FEDERATIVA	Entidad	Nombre de entidad federativa.	text
+FECHA	Fecha	Fecha.	timestamp

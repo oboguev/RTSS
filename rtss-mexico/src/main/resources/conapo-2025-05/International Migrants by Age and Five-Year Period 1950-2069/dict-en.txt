@@ -1,0 +1,11 @@
+_id	_id		int
+RENGLON	Row	Unique case identifier (Primary Key). numeric
+ANIO	Year	Five-year interval year. text
+ENTIDAD	Entity	Name of federal entity. text
+CVE_GEO	Geographic Code	Geographic code (INEGI 2010) of federal entity. numeric
+EDAD	Age	Five-year age group. text
+SEXO	Sex	Sex. text
+EMIGRANTES	Emigrants	International emigrants. numeric
+INMIGRANTES	Immigrants	International immigrants. numeric
+ENTIDAD_FEDERATIVA	Entity	Federal entity. text
+FECHA	Date	Date. timestamp

@@ -1,0 +1,11 @@
+_id	_id		int
+RENGLON	Renglón	Identificador único de caso (Llave primaria).	numeric
+ANIO	Año	Año quinquenales.	text
+ENTIDAD	Entidad	Nombre de entidad federativa.	text
+CVE_GEO	Clave geográfica	Clave geográfica (INEGI 2010) de entidad federativa.	numeric
+EDAD	Edad	Grupo quinquenal de edad.	text
+SEXO	Sexo	Sexo.	text
+EMIGRANTES	Emigrantes	Emigrantes internacionales.	numeric
+INMIGRANTES	Inmigrantes	Inmigrantes internacionales.	numeric
+ENTIDAD_FEDERATIVA	Entidad	Entidad federativa.	text
+FECHA	fecha	Fecha.	timestamp
