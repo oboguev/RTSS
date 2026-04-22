@@ -28,7 +28,7 @@ public class MexPopulationConapo
             if (Util.True)
             {
                 Util.out("=======================================================");
-                Util.out("Население Мексики на середину года (CONAPO):");
+                Util.out("Население Мексики на середину года (CONAPO 2019):");
                 Util.out("");
                 new MexPopulationConapo().do_main("conapo-2019/ConDem50a19_ProyPob20a70/0_Pob_Mitad_1950_2070.xlsx");
             }
@@ -37,7 +37,7 @@ public class MexPopulationConapo
             {
                 Util.out("");
                 Util.out("=======================================================");
-                Util.out("Население Мексики на начало года (CONAPO):");
+                Util.out("Население Мексики на начало года (CONAPO 2019):");
                 Util.out("");
                 new MexPopulationConapo().do_main("conapo-2019/ConDem50a19_ProyPob20a70/0_Pob_Inicio_1950_2070.xlsx");
             }
