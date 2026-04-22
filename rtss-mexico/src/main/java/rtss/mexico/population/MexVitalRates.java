@@ -19,6 +19,8 @@ import rtss.un.wpp.WPP2024;
 
 /**
  * Рождаемость и смертность населения Мексики по CONAPO и UN WPP
+ * 
+ * Java heap size: -Xmx16384m
  */
 public class MexVitalRates
 {
@@ -28,9 +30,9 @@ public class MexVitalRates
         {
             org.apache.poi.util.IOUtils.setByteArrayMaxOverride(300_000_000);
             
-            Util.out("Рождаемость, смертность и суммарный коэффициент рождаемости населения Мексики (по CONAPO):");
+            Util.out("Рождаемость, смертность и суммарный коэффициент рождаемости населения Мексики (по CONAPO 2019):");
             Util.out("");
-            new MexVitalRates().do_conapo("conapo/ConDem50a19_ProyPob20a70/5_Indicadores_demográficos_proyecciones.xlsx");
+            new MexVitalRates().do_conapo2019("conapo-2019/ConDem50a19_ProyPob20a70/5_Indicadores_demográficos_proyecciones.xlsx");
 
             Util.out("");
             Util.out("====================================");
@@ -52,7 +54,7 @@ public class MexVitalRates
         }
     }
 
-    private void do_conapo(String fpath) throws Exception
+    private void do_conapo2019(String fpath) throws Exception
     {
         try (XSSFWorkbook wb = Excel.loadWorkbook(fpath))
         {
@@ -61,11 +63,11 @@ public class MexVitalRates
             XSSFSheet sheet = wb.getSheetAt(0);
             ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
             Map<String, Integer> headers = ColumnHeader.getTopHeaders(sheet, rc);
-            do_conapo_process(rc, headers);
+            do_conapo2019_process(rc, headers);
         }
     }
 
-    private void do_conapo_process(ExcelRC rc, Map<String, Integer> headers) throws Exception
+    private void do_conapo2019_process(ExcelRC rc, Map<String, Integer> headers) throws Exception
     {
         Util.out("год рождаемость смертность СКР");
         
