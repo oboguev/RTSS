@@ -9,6 +9,7 @@ import rtss.data.bin.Bins;
 import rtss.data.curves.CurveVerifier;
 import rtss.data.curves.TargetResolution;
 import rtss.data.curves.ensure.EnsureNonNegativeCurve;
+import rtss.data.selectors.SumOrAverage;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.SteffenSplineInterpolator;
 import rtss.math.interpolate.TargetPrecision;
@@ -20,13 +21,17 @@ import rtss.util.Clipboard;
 import rtss.util.UI;
 import rtss.util.Util;
 
-public class UnbinData
+/*
+ * Disaggregate data expressed as average per bin,
+ * such as rates per age group 
+ */
+public class UnbinDataAverage
 {
     public static void main(String[] args)
     {
         try
         {
-            new UnbinData().do_main();
+            new UnbinDataAverage().do_main(SumOrAverage.AVERAGE);
             Util.out("*** Result was placed on the clipboard.");
         }
         catch (Throwable ex)
@@ -37,13 +42,23 @@ public class UnbinData
         }
     }
 
-    private void do_main() throws Exception
+    void do_main(SumOrAverage kind) throws Exception
     {
         String text = Clipboard.getText();
         if (text == null || text.length() == 0)
             throw new Exception("No data on the clipboard");
 
         Bin[] bins = Bins.fromString(text);
+        
+        switch (kind)
+        {
+        case SUM:
+            for (Bin bin : bins)
+                bin.avg /= bin.widths_in_years;
+            break;
+        case AVERAGE:
+            break;
+        }
         
         StringBuilder sb = new StringBuilder();
         addOutput(sb, "CSASRA", bins, unbin_csasra(bins));

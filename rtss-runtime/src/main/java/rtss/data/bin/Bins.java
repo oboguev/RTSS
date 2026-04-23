@@ -29,7 +29,10 @@ public class Bins
 
             if (bin.widths_in_years < 1)
                 throw new Exception("Invalid bin width");
+        }
 
+        for (Bin bin : bins)
+        {
             if (bin.next != null && bin.age_x2 + 1 != bin.next.age_x1)
                 throw new Exception("Bins not continuous");
         }
