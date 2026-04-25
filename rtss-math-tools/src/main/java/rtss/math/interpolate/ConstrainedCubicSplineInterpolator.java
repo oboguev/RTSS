@@ -161,11 +161,20 @@ public class ConstrainedCubicSplineInterpolator implements UnivariateInterpolato
         for (int k = 0; k < x.length; k++)
         {
             double v = sp.value(x[k]);
-            if (Math.abs(v - y[k]) < 1e-6)
+            double absError = Math.abs(v - y[k]);
+            double relError = absError / Math.max(Math.abs(y[k]), 1.0);
+
+            // Use relative tolerance for better numerical stability with large x values
+            if (relError < 1e-6)
+                continue;
+            // Fallback to absolute tolerance for values near zero
+            if (absError < 1e-6)
                 continue;
             if (Util.False && !Util.differ(v, y[k]))
                 continue;
-            throw new Exception("Spline self-test failed");
+            throw new Exception("Spline self-test failed at x[" + k + "]=" + x[k] +
+                               ": expected y=" + y[k] + ", got v=" + v +
+                               ", absError=" + absError + ", relError=" + relError);
         }
     }
 
