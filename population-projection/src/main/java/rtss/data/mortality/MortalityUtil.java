@@ -12,6 +12,8 @@ public class MortalityUtil
     private static double[] mx2qx_table_qx = null;
     private static boolean useMxTable = true;
     
+    public static final double MAX_MX = 2.0;
+    
     /*
      * Convert mortality "qx" value to "mx".
      * Подсчёт грубой вычислительной силой.
@@ -21,6 +23,13 @@ public class MortalityUtil
      * double mx = -Math.log1p(-qx);
      */
     public static double qx2mx(double qx) throws Exception
+    {
+        qx = validate_qx(qx);
+        double mx = -Math.log1p(-qx);
+        return mx;
+    }
+    
+    public static double qx2mx_old(double qx) throws Exception
     {
         qx = validate_qx(qx);
         
@@ -54,6 +63,15 @@ public class MortalityUtil
      * double qx = -Math.expm1(-mx); 
      */
     public static double mx2qx(double mx) throws Exception
+    {
+        if (!(mx >= 0 && mx <= MAX_MX)) 
+            throw new Exception("mx value is out of valid range: " + mx);
+
+        double qx = -Math.expm1(-mx);
+        return qx;
+    }
+    
+    public static double mx2qx_old(double mx) throws Exception
     {
         if (!useMxTable)
         {
@@ -192,7 +210,7 @@ public class MortalityUtil
     {
         if (!useMxTable)
         {
-            if (mx >= 0 && mx <= 2.0)
+            if (mx >= 0 && mx <= MAX_MX)
                 return mx;
         }
         else

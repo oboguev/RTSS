@@ -23,7 +23,19 @@ import rtss.util.Util;
 
 /*
  * Disaggregate data expressed as average per bin,
- * such as rates per age group 
+ * such as rates per age group.
+ * 
+ * Input data on the clipboard is a sequence of lines: 
+ *  
+ *      year-year value
+ *      year-year value
+ *      year      value
+ *      year      value
+ *      year-year value
+ *      year-year value
+ *  
+ * First part of a line can be a range of a single-year value (bin width = 1). 
+ *  
  */
 public class UnbinDataAverage
 {
