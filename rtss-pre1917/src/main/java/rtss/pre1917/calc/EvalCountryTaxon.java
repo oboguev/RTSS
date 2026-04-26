@@ -118,7 +118,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                 immigration(tmPopulation, year, lump.china);
                 break;
 
-            case "СССР-1911":
+            case "СССР-1991":
                 immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
                 immigration(tmPopulation, year, lump.persia);
                 immigration(tmPopulation, year, lump.japan);
