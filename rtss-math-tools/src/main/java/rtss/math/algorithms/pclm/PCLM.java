@@ -27,8 +27,8 @@ public class PCLM
     private final double lambda;
     private final int ppy;
 
-    private final int nBins;    // Number of input bins (I in the paper)
-    private final int nPoints;  // Number of output points (J in the paper)
+    private final int nBins; // Number of input bins (I in the paper)
+    private final int nPoints; // Number of output points (J in the paper)
 
     /**
      * Creates a new PCLM instance.
@@ -42,15 +42,14 @@ public class PCLM
      */
     public PCLM(Bin[] bins, double lambda, int ppy)
     {
-        if (bins == null || bins.length == 0) {
+        if (bins == null || bins.length == 0)
             throw new IllegalArgumentException("bins array cannot be null or empty");
-        }
-        if (lambda < 0) {
+
+        if (lambda < 0)
             throw new IllegalArgumentException("lambda must be non-negative");
-        }
-        if (ppy < 1) {
+
+        if (ppy < 1)
             throw new IllegalArgumentException("ppy must be at least 1");
-        }
 
         this.bins = bins;
         this.lambda = lambda;
@@ -82,7 +81,8 @@ public class PCLM
 
         // Extract observed counts from bins
         double[] y = new double[nBins];
-        for (int i = 0; i < nBins; i++) {
+        for (int i = 0; i < nBins; i++)
+        {
             y[i] = bins[i].avg * bins[i].widths_in_years * ppy;
         }
 
@@ -93,7 +93,8 @@ public class PCLM
         Matrix betaMatrix = new Matrix(beta, nPoints);
         Matrix eta = X.times(betaMatrix);
         double[] gamma = new double[nPoints];
-        for (int j = 0; j < nPoints; j++) {
+        for (int j = 0; j < nPoints; j++)
+        {
             gamma[j] = Math.exp(eta.get(j, 0));
         }
 
@@ -111,7 +112,8 @@ public class PCLM
 
         int firstAge = bins[0].age_x1;
 
-        for (int i = 0; i < nBins; i++) {
+        for (int i = 0; i < nBins; i++)
+        {
             Bin bin = bins[i];
 
             // Calculate which points belong to this bin
@@ -119,7 +121,8 @@ public class PCLM
             int pointEnd = (bin.age_x2 - firstAge + 1) * ppy - 1;
 
             // Set C[i, j] = 1 for all points j that belong to bin i
-            for (int j = pointStart; j <= pointEnd && j < nPoints; j++) {
+            for (int j = pointStart; j <= pointEnd && j < nPoints; j++)
+            {
                 C.set(i, j, 1.0);
             }
         }
@@ -141,13 +144,16 @@ public class PCLM
         Matrix D = Matrix.identity(n, n);
 
         // Apply differencing 'deg' times
-        for (int d = 0; d < deg; d++) {
+        for (int d = 0; d < deg; d++)
+        {
             int rows = D.getRowDimension() - 1;
             int cols = D.getColumnDimension();
             Matrix D_new = new Matrix(rows, cols);
 
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
                     D_new.set(i, j, D.get(i + 1, j) - D.get(i, j));
                 }
             }
@@ -175,12 +181,14 @@ public class PCLM
 
         // Initialize β with log of average count per point
         double totalCount = 0.0;
-        for (double yi : y) {
+        for (double yi : y)
+        {
             totalCount += yi;
         }
         double bstart = Math.log(totalCount / nx);
         double[] b = new double[nx];
-        for (int j = 0; j < nx; j++) {
+        for (int j = 0; j < nx; j++)
+        {
             b[j] = bstart;
         }
 
@@ -188,7 +196,8 @@ public class PCLM
         final int MAX_ITERATIONS = 50;
         final double CONVERGENCE_THRESHOLD = 1e-6;
 
-        for (int it = 0; it < MAX_ITERATIONS; it++) {
+        for (int it = 0; it < MAX_ITERATIONS; it++)
+        {
             double[] b0 = b.clone();
 
             // Compute η = X × β
@@ -197,7 +206,8 @@ public class PCLM
 
             // Compute γ = exp(η)
             double[] gam = new double[nx];
-            for (int j = 0; j < nx; j++) {
+            for (int j = 0; j < nx; j++)
+            {
                 gam[j] = Math.exp(eta.get(j, 0));
             }
 
@@ -208,16 +218,19 @@ public class PCLM
 
             // Build weights: w = [1/μ_1, ..., 1/μ_I, la2, ..., la2]
             double[] w = new double[nBins + nx - 2];
-            for (int i = 0; i < nBins; i++) {
+            for (int i = 0; i < nBins; i++)
+            {
                 w[i] = 1.0 / muArray[i];
             }
-            for (int i = nBins; i < w.length; i++) {
+            for (int i = nBins; i < w.length; i++)
+            {
                 w[i] = la2;
             }
 
             // Compute Γ (Gamma matrix) = diag(γ)
             Matrix Gamma = new Matrix(nx, nx);
-            for (int j = 0; j < nx; j++) {
+            for (int j = 0; j < nx; j++)
+            {
                 Gamma.set(j, j, gam[j]);
             }
 
@@ -227,7 +240,8 @@ public class PCLM
             // Build z = [y - μ + Q×β, 0, ..., 0]
             Matrix Qb = Q.times(betaMatrix);
             double[] z = new double[nBins + nx - 2];
-            for (int i = 0; i < nBins; i++) {
+            for (int i = 0; i < nBins; i++)
+            {
                 z[i] = y[i] - muArray[i] + Qb.get(i, 0);
             }
             // Remaining elements are already 0
@@ -242,11 +256,13 @@ public class PCLM
 
             // Check convergence
             double db = 0.0;
-            for (int j = 0; j < nx; j++) {
+            for (int j = 0; j < nx; j++)
+            {
                 db = Math.max(db, Math.abs(b[j] - b0[j]));
             }
 
-            if (db < CONVERGENCE_THRESHOLD) {
+            if (db < CONVERGENCE_THRESHOLD)
+            {
                 return b;
             }
         }
@@ -265,14 +281,18 @@ public class PCLM
 
         Matrix result = new Matrix(rowsA + rowsB, cols);
 
-        for (int i = 0; i < rowsA; i++) {
-            for (int j = 0; j < cols; j++) {
+        for (int i = 0; i < rowsA; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
                 result.set(i, j, A.get(i, j));
             }
         }
 
-        for (int i = 0; i < rowsB; i++) {
-            for (int j = 0; j < cols; j++) {
+        for (int i = 0; i < rowsB; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
                 result.set(rowsA + i, j, B.get(i, j));
             }
         }
@@ -291,7 +311,8 @@ public class PCLM
 
         // Build diagonal weight matrix W
         Matrix W = new Matrix(m, m);
-        for (int i = 0; i < m; i++) {
+        for (int i = 0; i < m; i++)
+        {
             W.set(i, i, w[i]);
         }
 
