@@ -2,7 +2,7 @@ package rtss.pre1917.tools.old;
 
 import rtss.util.Util;
 
-public class ShowAllAreasValuesRaw extends ShowAllAreasValues 
+public class OldShowAllAreasValuesRaw extends OldShowAllAreasValues 
 {
     public static void main(String[] args)
     {
@@ -19,7 +19,7 @@ public class ShowAllAreasValuesRaw extends ShowAllAreasValues
         }
     }
     
-    private ShowAllAreasValuesRaw() throws Exception
+    private OldShowAllAreasValuesRaw() throws Exception
     {
     }
 }
