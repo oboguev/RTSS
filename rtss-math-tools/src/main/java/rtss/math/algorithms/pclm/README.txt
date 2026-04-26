@@ -97,7 +97,7 @@ Key correspondences:
 - lambda: Smoothing parameter (identical)
 - IRLS iteration: Same algorithm and convergence criterion
 
-Differences from previous implementation (rtss.math.algorithms.pclm):
+Differences from previous implementation (rtss.math.algorithms.pclm0):
 - Uses IRLS (correct) instead of Nelder-Mead simplex (incorrect)
 - Uses Poisson log-likelihood (correct) instead of squared residuals (incorrect)
 - Uses exponential link function (correct) instead of linear (incorrect)
@@ -133,4 +133,4 @@ Dependencies
 Author
 ------
 Implemented following the Rizzi et al. (2015) specification
-Date: 2026-04-25
+
