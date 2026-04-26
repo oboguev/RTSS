@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
@@ -15,7 +17,7 @@ import rtss.util.Util;
  * Выявить территории с заниженной регистрацией рождений и смертей
  * в начале периода сравнительно с концом периода.
  */
-public class FlagUnderRegistration extends ShowAreaValues
+public class FlagUnderRegistration
 {
     public static void main(String[] args)
     {
@@ -30,23 +32,30 @@ public class FlagUnderRegistration extends ShowAreaValues
         }
     }
 
-    Set<String> skip = Set.of("Бакинская с Баку",
-                              "Дагестанская обл.",
-                              "Елисаветпольская",
-                              "Закаспийская обл.",
-                              "Карсская обл.",
-                              "Кутаисская с Батумской",
-                              "Семиреченская обл.",
-                              "Сыр-Дарьинская обл.",
-                              "Ферганская обл.",
-                              "Черноморская",
-                              "Самаркандская обл.");
+    private Set<String> skip = Set.of("Бакинская с Баку",
+                                      "Дагестанская обл.",
+                                      "Елисаветпольская",
+                                      "Закаспийская обл.",
+                                      "Карсская обл.",
+                                      "Кутаисская с Батумской",
+                                      "Семиреченская обл.",
+                                      "Сыр-Дарьинская обл.",
+                                      "Ферганская обл.",
+                                      "Черноморская",
+                                      "Самаркандская обл.");
 
     private static final double PROMILLE = 1000.0;
 
+    protected final TerritoryDataSet tdsUGVI;
+
     protected FlagUnderRegistration() throws Exception
     {
-        super(LoadOptions.MERGE_POST1897_REGIONS);
+        tdsUGVI = new LoadData().loadUGVI(LoadOptions.MERGE_POST1897_REGIONS,
+                                          LoadOptions.DONT_VERIFY,
+                                          LoadOptions.MERGE_CITIES,
+                                          LoadOptions.EVAL_PROGRESSIVE,
+                                          LoadOptions.ADJUST_FEMALE_BIRTHS,
+                                          LoadOptions.FILL_MISSING_BD);
     }
 
     private void flagUnderRegistration() throws Exception
@@ -95,7 +104,7 @@ public class FlagUnderRegistration extends ShowAreaValues
 
         wa_cbr.reset();
         wa_cdr.reset();
-        
+
         boolean printed = false;
 
         for (int year = 1896; year <= 1904; year++)
@@ -111,31 +120,31 @@ public class FlagUnderRegistration extends ShowAreaValues
             String s_cdr = null;
 
             if (cbr / cbr_2 < threshold)
-                s_cbr = String.format("%2.1f", 100.0 * cbr / cbr_2 );
+                s_cbr = String.format("%2.1f", 100.0 * cbr / cbr_2);
 
             if (cdr / cdr_2 < threshold)
-                s_cdr = String.format("%2.1f", 100.0 * cdr / cdr_2 );
-            
+                s_cdr = String.format("%2.1f", 100.0 * cdr / cdr_2);
+
             if (s_cbr != null || s_cdr != null)
             {
-                if (! printed)
+                if (!printed)
                 {
                     Util.out(tname);
                     printed = true;
                 }
-                
+
                 if (s_cbr == null)
                     s_cbr = "";
 
                 if (s_cdr == null)
                     s_cdr = "";
-                
+
                 while (s_cbr.length() < 4)
                     s_cbr = " " + s_cbr;
-                
+
                 while (s_cdr.length() < 4)
                     s_cdr = " " + s_cdr;
-                
+
                 Util.out(String.format("    %d %s %s", year, s_cbr, s_cdr));
             }
         }

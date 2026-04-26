@@ -36,13 +36,11 @@ public class CSVSmartReader
     
     /* =========================================================== */
     
-    private String[] header;
     private List<String[]> rows;
     private Map<String, Integer> title2col = new HashMap<>();
     
     private CSVSmartReader(String[] header, List<String[]> rows) throws Exception
     {
-        this.header = header;
         this.rows = rows;
         
         for (int k = 0; k < header.length; k++)

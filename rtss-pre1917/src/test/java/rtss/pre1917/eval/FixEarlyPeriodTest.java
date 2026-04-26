@@ -7,7 +7,7 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
-import rtss.pre1917.tools.ShowAreaValues;
+import rtss.pre1917.tools.old.ShowAreaValues;
 import rtss.util.Util;
 
 public class FixEarlyPeriodTest

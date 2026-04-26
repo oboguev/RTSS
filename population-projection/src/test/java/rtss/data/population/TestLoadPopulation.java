@@ -15,6 +15,7 @@ public class TestLoadPopulation
             p = PopulationByLocality.census(Area.RSFSR, 1970);
             p = PopulationByLocality.census(Area.USSR, 1979);
             p = PopulationByLocality.census(Area.RSFSR, 1979);
+            Util.unused(p);
             Util.out("** Complete");
         }
         catch (Exception ex)

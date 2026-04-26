@@ -2,6 +2,7 @@ package rtss.math.algorithms.pclm;
 
 import Jama.Matrix;
 import rtss.data.bin.Bin;
+import rtss.util.Util;
 
 /**
  * Penalized Composite Link Model (PCLM)
@@ -308,6 +309,8 @@ public class PCLM
     {
         int m = A.getRowDimension();
         int n = A.getColumnDimension();
+        
+        Util.unused(n);
 
         // Build diagonal weight matrix W
         Matrix W = new Matrix(m, m);

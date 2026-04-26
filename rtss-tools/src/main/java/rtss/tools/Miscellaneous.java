@@ -15,12 +15,6 @@ public class Miscellaneous
             mx = 0.243;
             qx = MortalityUtil.mx2qx(mx);
             
-            final double lambda = 0.000123;
-            String s1 = String.format("%s", lambda);
-            String s2 = String.format("%f", lambda);
-            String s3 = String.format("%g", lambda);
-            String s4 = String.format("%e", lambda);
-            
             Util.noop();
         }
         catch (Exception ex)
