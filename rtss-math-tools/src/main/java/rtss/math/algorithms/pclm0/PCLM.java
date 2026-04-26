@@ -1,7 +1,7 @@
-package rtss.math.algorithms.pclm;
+package rtss.math.algorithms.pclm0;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-//import org.apache.commons.math3.linear.*;
+// import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
@@ -10,39 +10,56 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import Jama.Matrix;
 
 /*
- * A version of PCLM for open-ended last interval.
+ * Penalized Composite Link Model (PCLM)
+ * 
+ * Developed by DeepSeek
+ * https://chat.deepseek.com/a/chat/s/e701734e-b05a-4788-9522-f6f203bc7b47
+ * 
+ *    Design Matrix (X):  This matrix maps the bins to the knots (intervals between bin edges). 
+ *                        Each row corresponds to a bin, and each column corresponds to a knot.
+ *                       
+ *    Penalty Matrix (D):  This matrix enforces smoothness by penalizing large second differences between adjacent knots.
+ *    
+ *    Objective Function:  The function to minimize combines the log-likelihood (sum of squared residuals) and the roughness penalty.
+ *    
+ *    Optimization:        The Nelder-Mead simplex method is used to find the parameters that minimize the objective function.
+ *    
+ *    For unequal bin widths, the design matrix must account for the proportion of each bin that overlaps with the underlying knots (intervals). 
+ *    This requires calculating the fraction of each bin that falls into each knot interval.
+ *    But Penalty Matrix (D) remains the same, as it enforces smoothness on the estimated parameters (knots) regardless of bin width.
+ *    
  */
-public class OpenEndedPCLM
+
+public class PCLM
 {
     private double[] binCounts; // Observed counts in each bin (N entries)
-    private double[] binEdges; // Edges of the bins  (N + 1 entries, first N entries are left edges of the bins, the last entry is the right edge of the last bin)
+    private double[] binEdges; // Front edges of the bins (N + 1 entries), the last entry defines the right edge of the last bin
     private double lambda; // Smoothing parameter
-    private double upperBound; // Artificial upper bound for the open-ended interval, overrides the last entry in binEdges 
 
-    public OpenEndedPCLM(double[] binCounts, double[] binEdges, double lambda, double upperBound) {
+    public PCLM(double[] binCounts, double[] binEdges, double lambda)
+    {
         this.binCounts = binCounts;
         this.binEdges = binEdges;
         this.lambda = lambda;
-        this.upperBound = upperBound;
     }
 
     public double[] fit()
     {
         int nBins = binCounts.length;
-        int nKnots = binEdges.length;
+        int nKnots = binEdges.length - 1;
 
-        // Design matrix for the composite link model (adjusted for unequal bin widths and open-ended intervals)
+        // Design matrix for the composite link model (adjusted for unequal bin widths)
         Matrix X = new Matrix(nBins, nKnots);
         for (int i = 0; i < nBins; i++)
         {
             double binStart = binEdges[i];
-            double binEnd = (i == nBins - 1) ? upperBound : binEdges[i + 1]; // Use upperBound for the last bin
+            double binEnd = binEdges[i + 1];
             double binWidth = binEnd - binStart;
 
             for (int j = 0; j < nKnots; j++)
             {
                 double knotStart = binEdges[j];
-                double knotEnd = (j == nKnots - 1) ? upperBound : binEdges[j + 1]; // Use upperBound for the last knot
+                double knotEnd = binEdges[j + 1];
 
                 // Calculate the overlap between the bin and the knot
                 double overlapStart = Math.max(binStart, knotStart);
@@ -89,13 +106,12 @@ public class OpenEndedPCLM
 
     public static void main(String[] args)
     {
-        // Example usage with an open-ended interval
-        double[] binCounts = { 10, 20, 30, 40, 50 }; // Observed counts in each bin
-        double[] binEdges = { 0, 10, 20, 30, 40, 100 }; // Edges of the bins (last bin is open-ended: 100+)
+        // Example usage with unequal bin widths
+        double[] binCounts = { 10, 20, 30, 40 }; // Observed counts in each bin
+        double[] binEdges = { 0, 3, 7, 10, 15 }; // Edges of the bins (unequal widths)
         double lambda = 1.0; // Smoothing parameter
-        double upperBound = 120; // Artificial upper bound for the open-ended interval
 
-        OpenEndedPCLM pclm = new OpenEndedPCLM(binCounts, binEdges, lambda, upperBound);
+        PCLM pclm = new PCLM(binCounts, binEdges, lambda);
         double[] estimatedParams = pclm.fit();
 
         System.out.println("Estimated Parameters:");
