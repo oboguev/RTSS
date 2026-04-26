@@ -1,4 +1,4 @@
-package rtss.pre1917.tools.old;
+package rtss.pre1917.tools.show;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +13,7 @@ import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.util.Util;
 
-public class OldShowAreaValues
+public class ShowAreaValues
 {
     public static void main(String[] args)
     {
@@ -39,12 +39,12 @@ public class OldShowAreaValues
             Util.out("рождаемость и смертность была такой же, как в среднем по стабилизированному участку.");
             Util.out("Годы стабилизированного участка помечены звёздочкой cправа.");
             Util.out("");
-            new OldShowAreaValues().show_values_select();
-            new OldShowAreaValues().show_values_central_asia();
-            new OldShowAreaValues().show_values_cacauses();
-            new OldShowAreaValues().show_values_fixed();
-            new OldShowAreaValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_post1897();
-            new OldShowAreaValues().show_values_southern();
+            new ShowAreaValues().show_values_select();
+            new ShowAreaValues().show_values_central_asia();
+            new ShowAreaValues().show_values_cacauses();
+            new ShowAreaValues().show_values_fixed();
+            new ShowAreaValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_post1897();
+            new ShowAreaValues().show_values_southern();
         }
         catch (Throwable ex)
         {
@@ -64,7 +64,7 @@ public class OldShowAreaValues
     private final char NBSP = 0xA0;
     private final String NBSP_S = "" + NBSP;
 
-    public OldShowAreaValues(TerritoryDataSet tdsUGVI,
+    public ShowAreaValues(TerritoryDataSet tdsUGVI,
             TerritoryDataSet tdsCSK,
             TerritoryDataSet tdsCensus1897) throws Exception
     {
@@ -80,7 +80,7 @@ public class OldShowAreaValues
         onlyRaw = true;
     }
 
-    public OldShowAreaValues(LoadOptions... options) throws Exception
+    public ShowAreaValues(LoadOptions... options) throws Exception
     {
         Set<LoadOptions> xo = Set.of(options);
 
@@ -98,7 +98,7 @@ public class OldShowAreaValues
         evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
     }
 
-    public OldShowAreaValues() throws Exception
+    public ShowAreaValues() throws Exception
     {
         this(new LoadOptions[0]);
     }

@@ -7,7 +7,7 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
-import rtss.pre1917.tools.old.OldShowAreaValues;
+import rtss.pre1917.tools.show.ShowAreaValues;
 import rtss.util.Util;
 
 public class FixEarlyPeriodTest
@@ -57,11 +57,11 @@ public class FixEarlyPeriodTest
         Territory t = tdsUGVI.get(tname);
         Territory tCensus = tdsCensus1897.get(tname);
         
-        new OldShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
+        new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
         Territory xt = new FixEarlyPeriod().fix(t, tCensus, by, dy);        
 
-        new OldShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
+        new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
 
     @SuppressWarnings("unused")
@@ -70,11 +70,11 @@ public class FixEarlyPeriodTest
         Territory t = tdsUGVI.get(tname);
         Territory tCensus = tdsCensus1897.get(tname);
         
-        new OldShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
+        new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
         Territory xt = new FixEarlyPeriod().fix(t, tCensus, yl1, yl2, yr1, yr2);        
 
-        new OldShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
+        new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
 
     @SuppressWarnings("unused")
@@ -83,10 +83,10 @@ public class FixEarlyPeriodTest
         Territory t = tdsUGVI.get(tname);
         Territory tCensus = tdsCensus1897.get(tname);
         
-        new OldShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
+        new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
         Territory xt = new FixEarlyPeriod().fix(t, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);        
 
-        new OldShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
+        new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
 }

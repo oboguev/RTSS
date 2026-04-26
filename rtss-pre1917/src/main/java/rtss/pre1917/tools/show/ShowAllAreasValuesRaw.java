@@ -1,8 +1,8 @@
-package rtss.pre1917.tools.old;
+package rtss.pre1917.tools.show;
 
 import rtss.util.Util;
 
-public class OldShowAllAreasValuesRaw extends OldShowAllAreasValues 
+public class ShowAllAreasValuesRaw extends ShowAllAreasValues 
 {
     public static void main(String[] args)
     {
@@ -19,7 +19,7 @@ public class OldShowAllAreasValuesRaw extends OldShowAllAreasValues
         }
     }
     
-    private OldShowAllAreasValuesRaw() throws Exception
+    private ShowAllAreasValuesRaw() throws Exception
     {
     }
 }
