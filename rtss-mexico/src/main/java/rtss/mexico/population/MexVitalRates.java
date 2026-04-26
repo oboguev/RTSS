@@ -54,6 +54,7 @@ public class MexVitalRates
             Util.out("  - Crude Death Rate (deaths per 1,000 population)");
             Util.out("  - Total Fertility Rate (live births per woman)");
             Util.out("  - Net Reproduction Rate (surviving daughters per woman) = чистый (нетто) коэффициент воспроизводства");
+            Util.out("  - Infant Mortality Rate (infant deaths per 1,000 live births) = младенческая смертность");
             Util.out("");
             new MexVitalRates().do_wpp();
             
@@ -127,15 +128,13 @@ public class MexVitalRates
 
             Util.out(String.format("%d %.1f %.1f %.1f %.1f %.1f", year, cbr, cdr, imr, tfr, avage));
         }
-        
-        // ####
     }
     
     /* ============================================================================================ */
 
     private void do_wpp() throws Exception
     {
-        Util.out("год рождаемость смертность СКР ЧКВ");
+        Util.out("год рождаемость смертность СКР ЧКВ млад.-смертность");
 
         try (WPP wpp = new WPP2024())
         {
@@ -148,6 +147,7 @@ public class MexVitalRates
                 Double cdr = null;
                 Double tfr = null;
                 Double nrr = null;
+                Double imr = null;
                 
                 Map<String, Object> m = mx.get(year);
                 for (String key : m.keySet())
@@ -168,9 +168,13 @@ public class MexVitalRates
                     {
                         nrr = ExcelRC.asRequiredDouble(m.get(key));
                     }
+                    else if (key.toLowerCase().contains("Infant Mortality Rate".toLowerCase()))
+                    {
+                        imr = ExcelRC.asRequiredDouble(m.get(key));
+                    }
                 }
                 
-                Util.out(String.format("%d %s %s %s %s", year, d2s(cbr), d2s(cdr), d2s(tfr), d2s(nrr)));
+                Util.out(String.format("%d %s %s %s %s %s", year, d2s(cbr), d2s(cdr), d2s(tfr), d2s(nrr), d2s(imr)));
             }
         }
     }
