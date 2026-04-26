@@ -1,4 +1,4 @@
-package rtss.math.algorithms.pclm2;
+package rtss.math.algorithms.pclm;
 
 import Jama.Matrix;
 import rtss.data.bin.Bin;
