@@ -1,5 +1,6 @@
 package rtss.pre1917.tools.show;
 
+import rtss.pre1917.ExportData;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
@@ -23,13 +24,14 @@ public class ShowAllAreasValues extends ShowAreaValues
         }
     }
 
-    protected static ShowAllAreasValues rawShowAllAreasValues() throws Exception
+    protected static ShowAllAreasValues rawShowAllAreasValues(ExportData exportData) throws Exception
     {
         TerritoryDataSet rawUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY);
         TerritoryDataSet rawCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
         TerritoryDataSet rawCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY);
         ShowAllAreasValues raw = new ShowAllAreasValues(rawUGVI, rawCSK, rawCensus1897);
         raw.setOnlyRaw();
+        raw.setExportData(exportData);
         return raw;
     }
 

@@ -1,5 +1,6 @@
 package rtss.pre1917.tools.show;
 
+import rtss.pre1917.ExportData;
 import rtss.util.Util;
 
 public class ShowAllAreasValuesRaw extends ShowAllAreasValues 
@@ -38,9 +39,11 @@ public class ShowAllAreasValuesRaw extends ShowAllAreasValues
 
         try
         {
+            ExportData exportData = ExportData.forRaw();
             // new ShowAllAreasValues().show_values_all();
             // new ShowAllAreasValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_all();
-            rawShowAllAreasValues().show_values_all();
+            rawShowAllAreasValues(exportData).show_values_all();
+            exportData.export("p:\\@\\CSK-UGVI-raw.csv");
         }
         catch (Throwable ex)
         {

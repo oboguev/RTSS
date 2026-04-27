@@ -3,6 +3,7 @@ package rtss.pre1917.tools.show;
 import java.util.HashSet;
 import java.util.Set;
 
+import rtss.pre1917.ExportData;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.AdjustTerritories;
@@ -58,6 +59,8 @@ public class ShowAreaValues
     protected final TerritoryDataSet tdsCensus1897;
     protected final TotalMigration totalMigration;
     protected final EvalGrowthRate evalGrowthRate;
+    
+    private ExportData exportData;
 
     private boolean onlyRaw = false;
 
@@ -78,6 +81,11 @@ public class ShowAreaValues
     public void setOnlyRaw()
     {
         onlyRaw = true;
+    }
+    
+    public void setExportData(ExportData exportData)
+    {
+        this.exportData = exportData;
     }
 
     public ShowAreaValues(LoadOptions... options) throws Exception
@@ -323,6 +331,9 @@ public class ShowAreaValues
                                              s_saldo(saldo),
                                              // по стаб. участку
                                              stable);
+                    
+                    if (exportData != null)
+                        exportData.add(t.name, year, tyCSK, ty, saldo, stable.equals("*"));
 
                     Util.out(s.trim());
                 }
