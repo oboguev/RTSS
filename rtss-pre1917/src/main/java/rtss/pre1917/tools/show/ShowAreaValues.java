@@ -236,19 +236,24 @@ public class ShowAreaValues
         if (prefix == null)
         {
             Util.out("");
-            Util.out("************************************************************");
+            Util.out("***************************************************************************************");
             Util.out("");
-            Util.out("Рождаемость и смертность для " + t.name);
+            Util.out(t.name);
             Util.out("");
         }
         else
         {
             Util.out("");
-            Util.out(prefix + "Рождаемость и смертность для " + t.name);
+            Util.out(prefix + t.name);
             Util.out("");
         }
     
-        if (tEval == null)
+        if (onlyRaw)
+        {
+            Util.out("год       ЦСК             УГВИ                 чр      чс    мигр  ");
+            Util.out("==== =========== ========================================== =======");
+        }
+        else if (tEval == null)
         {
             Util.out("год       ЦСК             УГВИ                 чр      чс    мигр      прогрессивный от 1897");
             Util.out("==== =========== ========================================== =======  ========================");
@@ -299,30 +304,62 @@ public class ShowAreaValues
                     stable = "*";
 
                 long saldo = totalMigration.saldo(t.name, year);
+                
+                if (onlyRaw)
+                {
+                    String s = String.format("%d %s %s %s %s %s %s %s %s %s",
+                                             // год
+                                             year,
+                                             // ЦСК
+                                             s_population(popCSK),
+                                             // УГВИ
+                                             s_population(ty.population.total.both),
+                                             s_rate(cbrUGVI), 
+                                             s_rate(cdrUGVI), 
+                                             s_ep(cbrUGVI, cdrUGVI),
+                                             s_bd(ty.births.total.both),
+                                             s_bd(ty.deaths.total.both),
+                                             // миграционное сальдо
+                                             s_saldo(saldo),
+                                             // по стаб. участку
+                                             stable);
 
-                String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
-                                         // год
-                                         year,
-                                         // ЦСК
-                                         s_population(popCSK),
-                                         // УГВИ
-                                         s_population(ty.population.total.both),
-                                         s_rate(cbrUGVI), s_rate(cdrUGVI), s_ep(cbrUGVI, cdrUGVI),
-                                         s_bd(ty.births.total.both),
-                                         s_bd(ty.deaths.total.both),
-                                         // миграционное сальдо
-                                         s_saldo(saldo),
-                                         // прогрессивный расчёт
-                                         s_population(ty.progressive_population.total.both),
-                                         s_rate(cbrProgressive), s_rate(cdrProgressive), s_ep(cbrProgressive, cdrProgressive),
-                                         // по стаб. участку
-                                         s_population(popEval),
-                                         s_rate(cbrEval), s_rate(cdrEval), s_ep(cbrEval, cdrEval),
-                                         s_bd(birthsEval), s_bd(deathsEval),
-                                         stable,
-                                         s_pct(ty.births.total.both, birthsEval), s_pct(ty.deaths.total.both, deathsEval));
+                    Util.out(s.trim());
+                }
+                else
+                {
+                    String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
+                                             // год
+                                             year,
+                                             // ЦСК
+                                             s_population(popCSK),
+                                             // УГВИ
+                                             s_population(ty.population.total.both),
+                                             s_rate(cbrUGVI), 
+                                             s_rate(cdrUGVI), 
+                                             s_ep(cbrUGVI, cdrUGVI),
+                                             s_bd(ty.births.total.both),
+                                             s_bd(ty.deaths.total.both),
+                                             // миграционное сальдо
+                                             s_saldo(saldo),
+                                             // прогрессивный расчёт
+                                             s_population(ty.progressive_population.total.both),
+                                             s_rate(cbrProgressive), 
+                                             s_rate(cdrProgressive), 
+                                             s_ep(cbrProgressive, cdrProgressive),
+                                             // по стаб. участку
+                                             s_population(popEval),
+                                             s_rate(cbrEval), 
+                                             s_rate(cdrEval), 
+                                             s_ep(cbrEval, cdrEval),
+                                             s_bd(birthsEval), 
+                                             s_bd(deathsEval),
+                                             stable,
+                                             s_pct(ty.births.total.both, birthsEval), 
+                                             s_pct(ty.deaths.total.both, deathsEval));
 
-                Util.out(s.trim());
+                    Util.out(s.trim());
+                }
             }
         }
     }
