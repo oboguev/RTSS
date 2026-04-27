@@ -56,8 +56,20 @@ public class MexVitalRates
             Util.out("  - Net Reproduction Rate (surviving daughters per woman) = чистый (нетто) коэффициент воспроизводства");
             Util.out("  - Infant Mortality Rate (infant deaths per 1,000 live births) = младенческая смертность");
             Util.out("");
-            new MexVitalRates().do_wpp();
+            new MexVitalRates().do_wpp_mx();
             
+            Util.out("");
+            Util.out("====================================");
+            Util.out("");
+            Util.out("Рождаемость, смертность, суммарный коэффициент рождаемости и нетто коэффициент воспроизводства населения РСФСР/РФ (по UN WPP 2024):");
+            Util.out("  - Crude Birth Rate (births per 1,000 population)");
+            Util.out("  - Crude Death Rate (deaths per 1,000 population)");
+            Util.out("  - Total Fertility Rate (live births per woman)");
+            Util.out("  - Net Reproduction Rate (surviving daughters per woman) = чистый (нетто) коэффициент воспроизводства");
+            Util.out("  - Infant Mortality Rate (infant deaths per 1,000 live births) = младенческая смертность");
+            Util.out("");
+            new MexVitalRates().do_wpp_ru();
+
             Util.noop();
         }
         catch (Throwable ex)
@@ -132,13 +144,23 @@ public class MexVitalRates
     
     /* ============================================================================================ */
 
-    private void do_wpp() throws Exception
+    private void do_wpp_mx() throws Exception
+    {
+        do_wpp("Mexico");
+    }
+    
+    private void do_wpp_ru() throws Exception
+    {
+        do_wpp("Russian Federation");
+    }
+
+    private void do_wpp(String country) throws Exception
     {
         Util.out("год рождаемость смертность СКР ЧКВ млад.-смертность");
 
         try (WPP wpp = new WPP2024())
         {
-            Map<Integer, Map<String, Object>> mx = wpp.forCountry("Mexico");
+            Map<Integer, Map<String, Object>> mx = wpp.forCountry(country);
             List<Integer> years = new ArrayList<>(mx.keySet());
             Collections.sort(years);
             for (int year : years)
