@@ -47,7 +47,8 @@ public class PCLMTest
                        new Bin(40, 49, 15.0)
         };
 
-        double lambda = 1.0;
+        // double lambda = 1.0;
+        double lambda = 0.0001;
         int ppy = 1;
 
         PCLM pclm = new PCLM(bins, lambda, ppy);
@@ -111,7 +112,8 @@ public class PCLMTest
                        new Bin(85, 100, 0.2000) // Open-ended last interval
         };
 
-        double lambda = 10.0; // Higher smoothing for mortality data
+        // double lambda = 10.0; // Higher smoothing
+        double lambda = 0.0001;
         int ppy = 1;
 
         PCLM pclm = new PCLM(bins, lambda, ppy);
@@ -157,7 +159,8 @@ public class PCLMTest
                        new Bin(50, 100, 35.0) // 51-year bin
         };
 
-        double lambda = 5.0;
+        // double lambda = 5.0;
+        double lambda = 0.0001;
         int ppy = 1;
 
         PCLM pclm = new PCLM(bins, lambda, ppy);
@@ -207,7 +210,8 @@ public class PCLMTest
                        new Bin(40, 49, 15.0)
         };
 
-        double lambda = 1.0;
+        // double lambda = 1.0;
+        double lambda = 0.0001; 
         int ppy = 4; // Quarterly disaggregation
 
         PCLM pclm = new PCLM(bins, lambda, ppy);
@@ -261,7 +265,8 @@ public class PCLMTest
                        new Bin(20, 24, 0.0008)
         };
 
-        double lambda = 10.0;
+        // double lambda = 10.0;
+        double lambda = 0.0001;
         int ppy = 4; // Quarterly disaggregation
 
         PCLM pclm = new PCLM(bins, lambda, ppy);
