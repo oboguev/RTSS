@@ -44,6 +44,21 @@ public class ExportData
         return ed;
     }
 
+    public static ExportData forFinal()
+    {
+        ExportData ed = new ExportData();
+        
+        ed.columns.add("территория");
+        ed.columns.add("год");
+        ed.addDetailedColumns("чн");
+        ed.addDetailedColumns("чр");
+        ed.addDetailedColumns("чс");
+        ed.columns.add("мигр");
+        ed.columns.add("стаб");
+        
+        return ed;
+    }
+
     private void addDetailedColumns(String which)
     {
         addDetailedColumns(which, "горсел");
