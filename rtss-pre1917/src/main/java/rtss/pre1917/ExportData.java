@@ -178,6 +178,29 @@ public class ExportData
         m.put(key, mv);
     }
 
+    public void add(String territoryName, int year, TerritoryYear ty, long saldo, boolean stable)
+    {
+        Map<String, String> mv = new HashMap<>();
+
+        if (ty != null)
+        {
+            addValues(mv, "чн", ty.population);
+            addValues(mv, "чр", ty.births);
+            addValues(mv, "чс", ty.deaths);
+        }
+
+        addValue(mv, "мигр", saldo);
+        if (stable)
+            addValue(mv, "стаб", 1L);
+
+        TerritoryNameYearKey key = new TerritoryNameYearKey(territoryName, year);
+        if (m.containsKey(key))
+            throw new IllegalArgumentException("Duplicate key: " + key);
+        m.put(key, mv);
+    }
+
+    /* ================================================================================================= */
+
     private void addValues(Map<String, String> mv, String prefix, URValue value)
     {
         if (value != null)
