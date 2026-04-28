@@ -3,6 +3,7 @@ package rtss.data.curves;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.mortality.MortalityUtil;
+import rtss.data.selectors.Gender;
 import rtss.external.Osier.Osier;
 import rtss.external.Osier.OsierCall;
 import rtss.external.Osier.OsierMortalityType;
@@ -19,9 +20,9 @@ public class OsierTask
         // ocall.enableLocalLog(true);
     }
 
-    public static double[] mortality(Bin[] bins, OsierMortalityType mtype, String datasetName, String method, int ppy) throws Exception
+    public static double[] mortality(Bin[] bins, Gender gender, OsierMortalityType mtype, String datasetName, String method, int ppy) throws Exception
     {
-        return new OsierTask().do_mortality(bins, mtype, datasetName, method, ppy);
+        return new OsierTask().do_mortality(bins, gender, mtype, datasetName, method, ppy);
     }
 
     public static double[] population(Bin[] bins, String datasetName, String method, int ppy) throws Exception
@@ -29,7 +30,7 @@ public class OsierTask
         return new OsierTask().do_population(bins, datasetName, method, ppy);
     }
 
-    private double[] do_mortality(Bin[] bins, OsierMortalityType mtype, String datasetName, String method, int ppy) throws Exception
+    private double[] do_mortality(Bin[] bins, Gender gender, OsierMortalityType mtype, String datasetName, String method, int ppy) throws Exception
     {
         String sc, reply;
         boolean visible = true;
@@ -37,7 +38,7 @@ public class OsierTask
         /* convert pro mille values from qx to mx */
         Bin[] xbins = Bins.multiply(bins, 0.001);
         if (mtype == OsierMortalityType.QX2MX)
-            xbins = MortalityUtil.qx2mx(xbins);
+            xbins = MortalityUtil.qx2mx(xbins, gender);
 
         /* if not called here, will be defaulted to the setting in rtss-config.yml */
         ocall.setDefaultStartupScript(visible);
@@ -69,7 +70,7 @@ public class OsierTask
 
         double[] curve = getCurve(funcname, bins, ppy);
         if (mtype == OsierMortalityType.QX2MX)
-            curve = MortalityUtil.mx2qx(curve);
+            curve = MortalityUtil.mx2qx(curve, gender);
         // ocall.stop();
         curve = Util.multiply(curve, 1000.0);
         return curve;

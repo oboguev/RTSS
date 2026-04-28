@@ -14,6 +14,7 @@ import rtss.data.curves.ViewCurve;
 import rtss.data.mortality.MortalityUtil;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
+import rtss.data.selectors.Gender;
 import rtss.external.Osier.OsierMortalityType;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.mpspline.MeanPreservingIntegralSpline;
@@ -99,7 +100,7 @@ public class BuildSingleTable
 
         // return curve_hp(bins, debug_title);
         // return curve_spline_1(bins, debug_title);
-        
+
         /*
          * Another approach to explore for mean-preserving decomposition could have been the 
          * use of B-splines with smoothness criteria plus mean-preservation criteria, then 
@@ -143,16 +144,16 @@ public class BuildSingleTable
                     yyy[bin.age_x1] = bin.avg;
             }
         }
-        
+
         for (int age = 0; age < yyy.length; age++)
         {
             /*
              * Clip mortality curve (usually at high ages) to 1000 promille
              */
             if (yyy[age] > 1000.0)
-                yyy[age] = 1000.0; 
+                yyy[age] = 1000.0;
         }
-        
+
         if (Util.True)
         {
             /*
@@ -167,7 +168,7 @@ public class BuildSingleTable
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
         CurveVerifier.validate_means_allow_last_beless(yy, bins);
-        
+
         if (Util.False && bins[0].widths_in_years == 1)
         {
             // the change is rare and tiny, such as 71.009 => 71.006
@@ -197,12 +198,13 @@ public class BuildSingleTable
     }
 
     @SuppressWarnings("unused")
-    private static double[] curve_osier(Bin[] bins, String method, String params, String debug_title) throws Exception
+    private static double[] curve_osier(Bin[] bins, Gender gender, String method, String params, String debug_title) throws Exception
     {
-        return curve_osier(bins, OsierMortalityType.QX2MX, method, params, debug_title);
+        return curve_osier(bins, gender, OsierMortalityType.QX2MX, method, params, debug_title);
     }
 
-    private static double[] curve_osier(Bin[] bins, OsierMortalityType mtype, String method, String params, String debug_title) throws Exception
+    private static double[] curve_osier(Bin[] bins, Gender gender, OsierMortalityType mtype, String method, String params, String debug_title)
+            throws Exception
     {
         int ppy = 1;
 
@@ -225,7 +227,7 @@ public class BuildSingleTable
             }
         }
 
-        double[] yy = OsierTask.mortality(bins, mtype, "XXX", method, ppy);
+        double[] yy = OsierTask.mortality(bins, gender, mtype, "XXX", method, ppy);
         if (Util.True)
         {
             String title = "Osier curve (" + method + ") " + debug_title;
@@ -240,7 +242,7 @@ public class BuildSingleTable
                 break;
 
             case QX2MX:
-                ViewCurve.view(title, MortalityUtil.proqx2mx(bins), "mx", MortalityUtil.proqx2mx(yy));
+                ViewCurve.view(title, MortalityUtil.proqx2mx(bins, gender), "mx", MortalityUtil.proqx2mx(yy, gender));
                 break;
             }
         }
@@ -281,10 +283,10 @@ public class BuildSingleTable
      * Generated curve is incorrect
      */
     @SuppressWarnings("unused")
-    private static double[] curve_osier_hp8(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_osier_hp8(Bin[] bins, Gender gender, String debug_title) throws Exception
     {
         int ppy = 10;
-        double[] yy = OsierTask.mortality(bins, OsierMortalityType.QX2MX, "XXX", "HELIGMAN_POLLARD8", ppy);
+        double[] yy = OsierTask.mortality(bins, gender, OsierMortalityType.QX2MX, "XXX", "HELIGMAN_POLLARD8", ppy);
         if (Util.True)
         {
             String title = "Osier HP curve " + debug_title;
@@ -300,10 +302,10 @@ public class BuildSingleTable
      * Fails
      */
     @SuppressWarnings("unused")
-    private static double[] curve_osier_hp8_adjusted(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_osier_hp8_adjusted(Bin[] bins, Gender gender, String debug_title) throws Exception
     {
         int ppy = 10;
-        double[] yy = OsierTask.mortality(bins, OsierMortalityType.QX2MX, "XXX", "ADJUSTED_HELIGMAN_POLLARD8", ppy);
+        double[] yy = OsierTask.mortality(bins, gender, OsierMortalityType.QX2MX, "XXX", "ADJUSTED_HELIGMAN_POLLARD8", ppy);
         if (Util.True)
         {
             String title = "Osier HP curve " + debug_title;
@@ -319,10 +321,10 @@ public class BuildSingleTable
      * Fails
      */
     @SuppressWarnings("unused")
-    private static double[] curve_osier_hp(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_osier_hp(Bin[] bins, Gender gender, String debug_title) throws Exception
     {
         int ppy = 1;
-        double[] yy = OsierTask.mortality(bins, OsierMortalityType.QX2MX, "XXX", "HELIGMAN_POLLARD", ppy);
+        double[] yy = OsierTask.mortality(bins, gender, OsierMortalityType.QX2MX, "XXX", "HELIGMAN_POLLARD", ppy);
         if (Util.True)
         {
             String title = "Osier HP curve " + debug_title;

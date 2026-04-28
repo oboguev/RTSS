@@ -113,11 +113,11 @@ public class MortalityTableADH
         if (Util.True)
         {
             male_mortality_bins = Bins.multiply(male_mortality_bins, 0.001);
-            male_mortality_bins = MortalityUtil.mx2qx(male_mortality_bins);
+            male_mortality_bins = MortalityUtil.mx2qx(male_mortality_bins, Gender.MALE);
             male_mortality_bins = Bins.multiply(male_mortality_bins, 1000.0);
 
             female_mortality_bins = Bins.multiply(female_mortality_bins, 0.001);
-            female_mortality_bins = MortalityUtil.mx2qx(female_mortality_bins);
+            female_mortality_bins = MortalityUtil.mx2qx(female_mortality_bins, Gender.FEMALE);
             female_mortality_bins = Bins.multiply(female_mortality_bins, 1000.0);
         }
 
