@@ -64,7 +64,7 @@ public class UnbinDataAverage
         if (text == null || text.length() == 0)
             throw new Exception("No data on the clipboard");
         
-        List<Bin[]> binlist = Bins.fromFileMultiSeries(text);
+        List<Bin[]> binlist = Bins.fromStringMultiSeries(text);
         
         switch (kind)
         {
