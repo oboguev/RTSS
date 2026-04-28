@@ -55,6 +55,10 @@ public class ExportData
         ed.addDetailedColumns("чс");
         ed.columns.add("мигр");
         ed.columns.add("стаб");
+        ed.columns.add("р");
+        ed.columns.add("с");
+        ed.columns.add("р");
+        ed.columns.add("еп");
         
         return ed;
     }
@@ -152,6 +156,9 @@ public class ExportData
 
     /* ================================================================================================= */
 
+    /*
+     * Used for export Raw
+     */
     public void add(String territoryName, int year, TerritoryYear tyCSK, TerritoryYear tyUGVI, long saldo, boolean stable)
     {
         Map<String, String> mv = new HashMap<>();
@@ -178,20 +185,24 @@ public class ExportData
         m.put(key, mv);
     }
 
-    public void add(String territoryName, int year, TerritoryYear ty, long saldo, boolean stable)
+    /*
+     * Used for export Final
+     */
+    public void add(String territoryName, int year, Long population, Long births, Long deaths, Long saldo, boolean stable, Double cbr, Double cdr, Double ngr)
     {
         Map<String, String> mv = new HashMap<>();
 
-        if (ty != null)
-        {
-            addValues(mv, "чн", ty.population);
-            addValues(mv, "чр", ty.births);
-            addValues(mv, "чс", ty.deaths);
-        }
-
+        addValue(mv, "чн", population);
+        addValue(mv, "чр", births);
+        addValue(mv, "чс", deaths);
         addValue(mv, "мигр", saldo);
+        
         if (stable)
             addValue(mv, "стаб", 1L);
+        
+        addRateValue(mv, "р", cbr);
+        addRateValue(mv, "c", cdr);
+        addRateValue(mv, "еп", ngr);
 
         TerritoryNameYearKey key = new TerritoryNameYearKey(territoryName, year);
         if (m.containsKey(key))
@@ -229,6 +240,17 @@ public class ExportData
         if (value != null)
         {
             mv.put(key, "" + value);
+        }
+    }
+
+    private void addRateValue(Map<String, String> mv, String key, Double value)
+    {
+        if (key.equals("территория") || key.equals("год") || !columns.contains(key))
+            throw new IllegalArgumentException("Invalid key: " + key);
+
+        if (value != null)
+        {
+            mv.put(key, String.format("%.1f, value"));
         }
     }
 }
