@@ -30,12 +30,12 @@ public class Territory
 
         return ty;
     }
-    
+
     public TerritoryYear territoryYearOrNull(int year)
     {
         return year2value.get(year);
     }
-    
+
     public void copyYear(TerritoryYear ty)
     {
         ty = ty.dup(this);
@@ -51,32 +51,32 @@ public class Territory
     {
         return dup(name);
     }
-    
+
     public Territory dup(String name)
     {
         Territory t = new Territory(name);
-        
+
         for (int year : year2value.keySet())
         {
             TerritoryYear ty = year2value.get(year);
             ty = ty.dup(t);
             t.year2value.put(year, ty);
         }
-        
+
         return t;
     }
-    
+
     public List<Integer> years()
     {
         List<Integer> list = new ArrayList<>(year2value.keySet());
         Collections.sort(list);
         return list;
     }
-    
+
     public int minYear(int dflt)
     {
         int res = -1;
-        
+
         for (int year : years())
         {
             if (res == -1)
@@ -84,17 +84,17 @@ public class Territory
             else
                 res = Math.min(res, year);
         }
-        
+
         if (res == -1)
             res = dflt;
-        
+
         return res;
     }
-    
+
     public int maxYear(int dflt)
     {
         int res = -1;
-        
+
         for (int year : years())
         {
             if (res == -1)
@@ -102,13 +102,13 @@ public class Territory
             else
                 res = Math.max(res, year);
         }
-        
+
         if (res == -1)
             res = dflt;
-        
+
         return res;
     }
-    
+
     public String toString()
     {
         return name;
@@ -125,7 +125,7 @@ public class Territory
         for (TerritoryYear ty : year2value.values())
             ty.leaveOnlyTotalBoth();
     }
-    
+
     /*
      * Изменить progressive_population.total.both начиная с года (@year + 1) и во все последующие годы на величину @delta.
      * Соответствует дополнительному приросту (или потерям) населения за год @year. 
@@ -139,7 +139,7 @@ public class Territory
                 ty.progressive_population.total.both += delta;
         }
     }
-    
+
     /*
      * В году @year произошли дополнительные @extraDeaths смертей
      */
@@ -150,9 +150,9 @@ public class Territory
             TerritoryYear ty = this.territoryYearOrNull(y);
             if (ty != null)
             {
-                if (y == year)
+                if (y == year && ty.deaths.total.both != null)
                     ty.deaths.total.both += extraDeaths;
-                
+
                 if (y > year && ty.population.total.both != null && Util.False)
                     ty.population.total.both -= extraDeaths;
 

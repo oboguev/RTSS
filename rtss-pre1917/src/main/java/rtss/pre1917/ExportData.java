@@ -50,15 +50,15 @@ public class ExportData
         
         ed.columns.add("территория");
         ed.columns.add("год");
-        ed.addDetailedColumns("чн");
-        ed.addDetailedColumns("чр");
-        ed.addDetailedColumns("чс");
+        ed.columns.add("чн");
+        ed.columns.add("чр");
+        ed.columns.add("чс");
         ed.columns.add("мигр");
-        ed.columns.add("стаб");
         ed.columns.add("р");
         ed.columns.add("с");
-        ed.columns.add("р");
         ed.columns.add("еп");
+        ed.columns.add("стаб");
+        ed.columns.add("vr.ok");
         
         return ed;
     }
@@ -201,7 +201,7 @@ public class ExportData
             addValue(mv, "стаб", "*");
         
         addRateValue(mv, "р", cbr);
-        addRateValue(mv, "c", cdr);
+        addRateValue(mv, "с", cdr);
         addRateValue(mv, "еп", ngr);
 
         addValue(mv, "vr.ok", vrok ? 1L : 0L);
@@ -252,7 +252,7 @@ public class ExportData
 
         if (value != null)
         {
-            mv.put(key, String.format("%.1f, value"));
+            mv.put(key, String.format("%.1f", value));
         }
     }
 

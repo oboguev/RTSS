@@ -8,6 +8,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
+import rtss.pre1917.eval.ApplyWarDeaths;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
@@ -19,7 +20,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         try
         {
-            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI().exportData("c:\\@@\\Empire.csv");
+            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI().exportData("p:\\@\\Empire.csv");
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
 
@@ -105,7 +106,6 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
         case "Империя":
             tdsExportPopulation = tdsPopulation.dup();
-            // #### apply military deaths in 1904 1905 1914 to tdsExportPopulation
             break;
         }
 
@@ -169,6 +169,15 @@ public class EvalCountryTaxon extends EvalCountryBase
 
             if (taxonName.equals("РСФСР-1991"))
                 extraDeaths(1914, 94_000);
+        }
+
+        switch (taxonName)
+        {
+        case "Империя":
+            long empirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
+            long empirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
+            new ApplyWarDeaths(empirePopulation1904, empirePopulation1914).apply(tdsExportPopulation);
+            break;
         }
 
         /* ===================== Построить структуру с результатом ===================== */
