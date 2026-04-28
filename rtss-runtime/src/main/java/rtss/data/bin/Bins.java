@@ -622,7 +622,7 @@ public class Bins
     {
         return ReadBins.fromString(binsAsString);
     }
-    
+
     public static Bin[] fromResource(String path) throws Exception
     {
         return ReadBins.fromString(Util.loadResource(path));
@@ -641,7 +641,7 @@ public class Bins
         {
             if (sb.length() != 0)
                 sb.append("\n");
-            
+
             Integer ix1 = asInteger(bin.age_x1);
             Integer ix2 = asInteger(bin.age_x2);
 
@@ -658,10 +658,10 @@ public class Bins
                 sb.append(String.format("%f-%f %f", bin.age_x1, bin.age_x2, bin.avg));
             }
         }
-        
+
         return sb.toString();
     }
-    
+
     private static Integer asInteger(double v)
     {
         if (Double.isNaN(v) || Double.isInfinite(v))
@@ -672,5 +672,13 @@ public class Bins
 
         int i = (int) v;
         return (v == i) ? Integer.valueOf(i) : null;
+    }
+
+    public static Bin[] bins(int start_x,
+            int[] intervalWidths,
+            double[] aggregated)
+    {
+        // ####
+        return null;
     }
 }

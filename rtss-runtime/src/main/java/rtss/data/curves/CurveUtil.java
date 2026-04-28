@@ -109,7 +109,7 @@ public class CurveUtil
                     throw new Exception("Unable distort the curve: a is out of range");
                 v = distort(y, ymin, ymax, a);
             }
-            
+
             a1 = a;
             a2 = 1.0;
         }
@@ -125,7 +125,7 @@ public class CurveUtil
                     throw new Exception("Unable distort the curve: a is out of range");
                 v = distort(y, ymin, ymax, a);
             }
-            
+
             a1 = 1.0;
             a2 = a;
         }
@@ -133,20 +133,20 @@ public class CurveUtil
         {
             return y.clone();
         }
-        
+
         for (;;)
         {
             double a = (a1 + a2) / 2;
-            
+
             v = distort(y, ymin, ymax, a);
             double vsum = Util.sum(v);
-            
+
             if (Util.same(vsum, targetSum) && Math.abs(vsum - targetSum) < 0.5)
                 return v;
-            
+
             if (Util.same(a1, a2))
                 throw new Exception("Unable distort the curve: out of cycles");
-            
+
             if (vsum < targetSum)
             {
                 // keep decreasing a (and increasing sum)
@@ -312,5 +312,33 @@ public class CurveUtil
         }
 
         return trends;
+    }
+    
+    /*
+     * Декомпозиция иногда изменяет значения элементов для коризин с шириной 1 год
+     * из-за ошибок округления или ранней остановки схождения. Скопировать точные
+     * значения для 1-годовых корзин. 
+     */
+    public static void avoidDecompositionRounding(double[] y, Bin[] bins)
+    {
+        Bin first = Bins.firstBin(bins);
+        Bin last = Bins.lastBin(bins);
+
+        int blen = last.age_x2 - first.age_x1 + 1;
+        int ylen = y.length;
+
+        if (ylen == 0 || blen == 0 || ylen < blen || 0 != (ylen % blen))
+            throw new IllegalArgumentException("Длина массива не кратна размеру корзин");
+        
+        if (ylen == blen)
+        {
+            for (Bin bin : bins)
+            {
+                if (bin.widths_in_years == 1)
+                {
+                    y[bin.age_x1 - first.age_x1] = bin.avg;
+                }
+            }
+        }
     }
 }

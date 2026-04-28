@@ -2,6 +2,7 @@ package rtss.math.algorithms.pclm;
 
 import Jama.Matrix;
 import rtss.data.bin.Bin;
+import rtss.data.curves.CurveUtil;
 import rtss.util.Util;
 
 /**
@@ -98,6 +99,8 @@ public class PCLM
         {
             gamma[j] = Math.exp(eta.get(j, 0));
         }
+
+        CurveUtil.avoidDecompositionRounding(gamma, bins);
 
         return gamma;
     }

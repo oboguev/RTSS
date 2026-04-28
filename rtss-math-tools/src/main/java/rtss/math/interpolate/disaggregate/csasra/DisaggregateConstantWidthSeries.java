@@ -110,6 +110,8 @@ public class DisaggregateConstantWidthSeries
 
             System.arraycopy(restored, 0, restoredPrev, 0, restoredPoints);
         }
+        
+        // add CurveUtil.avoidDecompositionRounding(restored, Bins.bins(0, intervalWidths, aggregated));
 
         return restored;
     }

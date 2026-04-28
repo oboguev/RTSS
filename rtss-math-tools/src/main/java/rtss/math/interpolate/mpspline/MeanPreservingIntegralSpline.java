@@ -9,6 +9,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveUtil;
 import rtss.data.curves.CurveVerifier;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.FritschCarlsonMonotonicSpline;
@@ -22,7 +23,9 @@ public class MeanPreservingIntegralSpline
 {
     public static double[] eval(Bin[] bins, Options options) throws Exception
     {
-        return new MeanPreservingIntegralSpline().do_eval(bins, options);
+        double[] y = new MeanPreservingIntegralSpline().do_eval(bins, options);
+        CurveUtil.avoidDecompositionRounding(y, bins);
+        return y;
     }
 
     private double[] do_eval(Bin[] bins, Options options) throws Exception

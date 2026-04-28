@@ -4,6 +4,7 @@ import java.util.Map;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveUtil;
 import rtss.external.Script;
 import rtss.external.ScriptReply;
 import rtss.external.R.R;
@@ -57,7 +58,9 @@ public class PCLM_Rizzi_2015
 
     public static double[] pclm(Bin[] bins, double lambda, int ppy) throws Exception
     {
-        return new PCLM_Rizzi_2015(bins, lambda, ppy).pclm();
+        double[] y = new PCLM_Rizzi_2015(bins, lambda, ppy).pclm();
+        CurveUtil.avoidDecompositionRounding(y, bins);
+        return y;
     }
 
     private double[] pclm() throws Exception

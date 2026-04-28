@@ -2,6 +2,8 @@ package rtss.math.interpolate.disaggregate.csasra;
 
 import java.util.Arrays;
 
+import rtss.data.bin.Bins;
+import rtss.data.curves.CurveUtil;
 import rtss.util.Util;
 
 // import rtss.util.Util;
@@ -109,6 +111,8 @@ public class DisaggregateVariableWidthSeriesWithStartValues
 
         if (!converged)
             throw new Exception("disaggregation failed to converge");
+        
+        CurveUtil.avoidDecompositionRounding(restored, Bins.bins(0, intervalWidths, aggregated));        
 
         return restored;
     }

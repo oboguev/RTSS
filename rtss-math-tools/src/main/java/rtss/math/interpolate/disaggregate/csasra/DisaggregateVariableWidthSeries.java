@@ -2,6 +2,8 @@ package rtss.math.interpolate.disaggregate.csasra;
 
 import java.util.Arrays;
 
+import rtss.data.bin.Bins;
+import rtss.data.curves.CurveUtil;
 import rtss.util.Util;
 
 /*
@@ -76,12 +78,12 @@ public class DisaggregateVariableWidthSeries
 
         double[] restoredPrev = new double[totalPoints];
         System.arraycopy(restored, 0, restoredPrev, 0, totalPoints);
-        
+
         /*
          * Initialize gaussian smoothing kernel
          */
         double[] kernel = createGaussianKernel(smoothingSigma);
-        
+
         /*
          * The smoothing and adjustment steps are repeated until the series converges (changes between iterations fall below a threshold).
          */
@@ -131,7 +133,7 @@ public class DisaggregateVariableWidthSeries
                 converged = true;
                 break;
             }
-            
+
             if (iteration == maxIterations - 1)
             {
                 // about to abort due to non-convergence
@@ -140,25 +142,25 @@ public class DisaggregateVariableWidthSeries
 
             System.arraycopy(restored, 0, restoredPrev, 0, totalPoints);
         }
-        
+
         if (!converged)
             throw new Exception("disaggregation failed to converge");
-        
+
         if (linearizeFirstSegment)
         {
-            return linearize_first_segment(restored, intervalWidths[0], intervalWidths[0] * aggregated[0]);
+            restored = linearize_first_segment(restored, intervalWidths[0], intervalWidths[0] * aggregated[0]);
         }
-        else
-        {
-            return restored;
-        }
+        
+        CurveUtil.avoidDecompositionRounding(restored, Bins.bins(0, intervalWidths, aggregated));
+        
+        return restored;
     }
 
     private static double[] gaussianFilter(double[] data, double[] kernel)
     {
         int size = data.length;
         double[] smoothedData = new double[size];
-    
+
         int kernelRadius = kernel.length / 2;
 
         for (int i = 0; i < size; i++)
@@ -245,7 +247,7 @@ public class DisaggregateVariableWidthSeries
 
         double a, b;
 
-        for (int pass = 0 ;;)
+        for (int pass = 0;;)
         {
             if (pass++ > 10_000)
                 throw new Exception("не сходится линеаризация первого сегмента");
@@ -255,7 +257,7 @@ public class DisaggregateVariableWidthSeries
             double s = sum(a, b, width);
             if (Util.same(sum, s, 0.00001))
                 break;
-            
+
             if (s > sum)
                 b2 = b;
             else

@@ -10,6 +10,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
+import rtss.data.curves.CurveUtil;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
 import rtss.math.interpolate.FunctionRangeExtenderDirect;
 import rtss.math.interpolate.SteffenSplineInterpolator;
@@ -47,7 +48,9 @@ public class MeanPreservingIterativeSpline
 
     public static double[] eval(Bin[] bins, int ppy, Options options, TargetPrecision precision) throws Exception
     {
-        return new MeanPreservingIterativeSpline().do_eval(bins, ppy, options, precision);
+        double[] y = new MeanPreservingIterativeSpline().do_eval(bins, ppy, options, precision);
+        CurveUtil.avoidDecompositionRounding(y, bins);
+        return y;
     }
 
     private double[] do_eval(Bin[] bins, int ppy, Options options, TargetPrecision precision) throws Exception
