@@ -8,6 +8,7 @@ import rtss.data.curves.CurveUtil;
 import rtss.external.Script;
 import rtss.external.ScriptReply;
 import rtss.external.R.R;
+import rtss.math.algorithms.pclm.PCLM;
 
 /**
  * Decompose bin data into single-year values with PCLM (penalized composite link model).
@@ -29,6 +30,9 @@ public class PCLM_Rizzi_2015
 
     private final int min_year;
     private final int max_year;
+    
+    /* use native Java implementation */
+    public static boolean UseNativeJavaImplementation = true;
 
     /*
      * Lambda is a smoothing parameter.
@@ -58,9 +62,22 @@ public class PCLM_Rizzi_2015
 
     public static double[] pclm(Bin[] bins, double lambda, int ppy) throws Exception
     {
-        double[] y = new PCLM_Rizzi_2015(bins, lambda, ppy).pclm();
-        CurveUtil.avoidDecompositionRounding(y, bins);
-        return y;
+        if (UseNativeJavaImplementation)
+        {
+            /*
+             * Execute locally
+             */
+            return new PCLM(bins, lambda, ppy).pclm();
+        }
+        else
+        {
+            /*
+             * Execute on R server
+             */
+            double[] y = new PCLM_Rizzi_2015(bins, lambda, ppy).pclm();
+            CurveUtil.avoidDecompositionRounding(y, bins);
+            return y;
+        }
     }
 
     private double[] pclm() throws Exception
