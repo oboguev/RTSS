@@ -14,13 +14,19 @@ public class MortalityUtil
     
     public static final double MAX_MX = 2.0;
     
+    public static double qx2mx(double qx, double age) throws Exception
+    {
+        // ### if (age >= 1.0)
+        return qx2mx(qx);
+        // ### for age 0 
+        // ### based on qx decide a0
+        // ### and use adjusted analytic
+    }
+    
     /*
      * Convert mortality "qx" value to "mx".
-     * Подсчёт грубой вычислительной силой.
-     * 
      * Аналитическая формула: mx = −ln(1 − qx).
-     * 
-     * double mx = -Math.log1p(-qx);
+     * Java: double mx = -Math.log1p(-qx);
      */
     public static double qx2mx(double qx) throws Exception
     {
@@ -29,6 +35,10 @@ public class MortalityUtil
         return mx;
     }
     
+    /*
+     * Convert mortality "qx" value to "mx".
+     * Подсчёт грубой вычислительной силой.
+     */
     public static double qx2mx_old(double qx) throws Exception
     {
         qx = validate_qx(qx);
@@ -56,11 +66,19 @@ public class MortalityUtil
         }
     }
     
+    public static double mx2qx(double mx, double age) throws Exception
+    {
+        // ### if (age >= 1.0)
+        return mx2qx(mx); 
+        // ### for age 0 
+        // ### based on qx decide a0
+        // ### and use adjusted analytic
+    }
+
     /*
-     * Подсчёт грубой вычислительной силой.
-     * 
+     * Convert mortality "mx" value to "qx".
      * Аналитическая формула: qx = 1 - exp(-mx).
-     * double qx = -Math.expm1(-mx); 
+     * Java: double qx = -Math.expm1(-mx); 
      */
     public static double mx2qx(double mx) throws Exception
     {
@@ -71,6 +89,10 @@ public class MortalityUtil
         return qx;
     }
     
+    /*
+     * Convert mortality "mx" value to "qx".
+     * Подсчёт грубой вычислительной силой.
+     */
     public static double mx2qx_old(double mx) throws Exception
     {
         if (!useMxTable)
@@ -161,7 +183,7 @@ public class MortalityUtil
     {
         double[] mx = new double[qx.length];
         for (int k = 0; k < qx.length; k++)
-            mx[k] = qx2mx(qx[k]);
+            mx[k] = qx2mx(qx[k], k);
         return mx;
     }
 
@@ -169,7 +191,7 @@ public class MortalityUtil
     {
         double[] qx = new double[mx.length];
         for (int k = 0; k < qx.length; k++)
-            qx[k] = mx2qx(mx[k]);
+            qx[k] = mx2qx(mx[k], k);
         return qx;
     }
     
@@ -177,7 +199,7 @@ public class MortalityUtil
     {
         bins = Bins.clone(bins);
         for (Bin bin: bins)
-            bin.avg = qx2mx(bin.avg);
+            bin.avg = qx2mx(bin.avg, bin.mid_x);
         return bins;
     }
 
@@ -185,7 +207,7 @@ public class MortalityUtil
     {
         bins = Bins.clone(bins);
         for (Bin bin: bins)
-            bin.avg = mx2qx(bin.avg);
+            bin.avg = mx2qx(bin.avg, bin.mid_x);
         return bins;
     }
     
