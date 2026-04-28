@@ -45,7 +45,8 @@ public class MortalityUtil
 
     private static double m0ToQ0(double m0, Gender gender)
     {
-        m0 = validate_mx(m0);
+        if (!(m0 >= 0 && m0 <= MAX_MX))
+            throw new IllegalArgumentException("mx value is out of valid range: " + m0);
 
         if (m0 == 0.0)
             return 0.0;
