@@ -633,6 +633,21 @@ public class Bins
         return ReadBins.fromString(Util.readFileAsString(path));
     }
 
+    public static List<Bin[]> fromStringMultiSeries(String binsAsString) throws Exception
+    {
+        return ReadBins.fromStringMultiSeries(binsAsString);
+    }
+
+    public static List<Bin[]> fromResourceMultiSeries(String path) throws Exception
+    {
+        return ReadBins.fromStringMultiSeries(Util.loadResource(path));
+    }
+
+    public static List<Bin[]> fromFileMultiSeries(String path) throws Exception
+    {
+        return ReadBins.fromStringMultiSeries(Util.readFileAsString(path));
+    }
+
     public static String asString(Bin... bins)
     {
         StringBuilder sb = new StringBuilder();
