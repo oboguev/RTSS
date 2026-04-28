@@ -150,7 +150,7 @@ public class URValue
     public String toString()
     {
         return String.format("%s: U = (%s), R = (%s), T = (%s)",
-                             territoryYear.toString(),
+                             territoryYear == null ? "anonymous" : territoryYear.toString(),
                              urban.toString(),
                              rural.toString(),
                              total.toString());
