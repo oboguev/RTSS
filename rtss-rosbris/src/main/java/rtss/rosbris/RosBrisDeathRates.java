@@ -258,7 +258,7 @@ public class RosBrisDeathRates
         for (int age = 0; age <= CombinedMortalityTable.MAX_AGE; age++)
         {
             MortalityInfo mi = cmt.get(locality, gender, age);
-            double mx = MortalityUtil.qx2mx(mi.qx);
+            double mx = MortalityUtil.qx2mx(mi.qx, gender, age);
             values[age] = mx / scale;
         }
 
@@ -289,7 +289,7 @@ public class RosBrisDeathRates
         for (int age = 0; age <= CombinedMortalityTable.MAX_AGE; age++)
         {
             double mx = mx(locality, gender, age);
-            qx[age] = MortalityUtil.mx2qx(mx);
+            qx[age] = MortalityUtil.mx2qx(mx, gender, age);
         }
         
         String path = "РосБРиС territory=" + territory + "/" + year + " " + locality + " " + gender;
