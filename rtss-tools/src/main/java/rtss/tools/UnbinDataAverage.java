@@ -1,6 +1,8 @@
 package rtss.tools;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
 
@@ -54,36 +56,139 @@ public class UnbinDataAverage
         }
     }
 
+    /* ============================================================================================================= */
+
     void do_main(SumOrAverage kind) throws Exception
     {
         String text = Clipboard.getText();
         if (text == null || text.length() == 0)
             throw new Exception("No data on the clipboard");
-
-        Bin[] bins = Bins.fromString(text);
+        
+        List<Bin[]> binlist = Bins.fromFileMultiSeries(text);
         
         switch (kind)
         {
         case SUM:
-            for (Bin bin : bins)
-                bin.avg /= bin.widths_in_years;
+            /*
+             * Reduce to averages
+             */
+            for (Bin[] bins : binlist)
+            {
+                for (Bin bin : bins)
+                    bin.avg /= bin.widths_in_years;
+            }
             break;
+
         case AVERAGE:
             break;
         }
         
-        StringBuilder sb = new StringBuilder();
-        addOutput(sb, "CSASRA", bins, unbin_csasra(bins));
-        addOutput(sb, "SPLINE", bins, unbin_spline(bins));
-
-        // text = Bins.asString(bins);
+        if (binlist.size() == 1)
+        {
+            do_main_single(kind, binlist.get(0));
+        }
+        else
+        {
+            StringBuilder sb = new StringBuilder();
+            do_main_multi(sb, kind, binlist, "CSASRA");
+            do_main_multi(sb, kind, binlist, "SPLINE");
+            text = sb.toString();
+        }
         
-        text = sb.toString();
-
         if (File.separatorChar == '\\')
             text = text.replace("\n", "\r\n");
 
         Clipboard.put(text);
+    }
+    
+    /* ============================================================================================================= */
+
+    private String do_main_single(SumOrAverage kind, Bin[] bins) throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+        addOutput(sb, "CSASRA", bins, unbin_csasra(bins));
+        addOutput(sb, "SPLINE", bins, unbin_spline(bins));
+
+        // return Bins.asString(bins);
+        
+        return sb.toString();
+    }
+    
+    /* ============================================================================================================= */
+
+    private void do_main_multi(StringBuilder sb, SumOrAverage kind, List<Bin[]> binlist, String method) throws Exception
+    {
+        if (sb.length() != 0)
+        {
+            sb.append("\n");
+            sb.append("###########################################################################\n");
+            sb.append("\n");
+        }
+
+        sb.append("\n");
+        sb.append(String.format("# Unbinned with method %s:", method));
+        sb.append("\n");
+        
+        List<double[]> yys = new ArrayList<>();
+        int yylen = -1;
+        
+        for (Bin[] bins : binlist)
+        {
+            double[] yy = null;
+            
+            switch (method)
+            {
+            case "CSASRA":
+                yy = unbin_csasra(bins);
+                break;
+                
+            case "SPLINE":
+                yy = unbin_spline(bins);
+                break;
+            }
+            
+            yys.add(yy);
+            
+            if (yy != null)
+            {
+                if (yylen != -1 && yylen != yy.length)
+                    throw new Exception("Unpacked to different lengths");
+                yylen = yy.length;
+            }
+        }
+        
+        Bin[] bins = binlist.get(0);
+            
+        for (int k = 0; k < yylen; k++)
+        {
+            // assuming x-scale step by 1
+            double dyear = bins[0].age_x1 + k;
+            Integer iyear = asInteger(dyear);
+
+            if (iyear != null)
+            {
+                sb.append(String.format("%d", iyear));
+            }
+            else
+            {
+                sb.append(String.format("%f", dyear));
+            }
+            
+            for (int j = 0; j < binlist.size(); j++)
+            {
+                double[] yy = yys.get(j);
+                if (yy == null)
+                {
+                    sb.append(" none");
+                }
+                else
+                {
+                    sb.append(String.format(" %f", yy[k]));
+                }
+            }
+
+            sb.append("\n");
+        }
     }
     
     /* ============================================================================================================= */
