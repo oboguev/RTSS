@@ -177,7 +177,7 @@ public class ExportData
 
         addValue(mv, "мигр", saldo);
         if (stable)
-            addValue(mv, "стаб", 1L);
+            addValue(mv, "стаб", "*");
 
         TerritoryNameYearKey key = new TerritoryNameYearKey(territoryName, year);
         if (m.containsKey(key))
@@ -188,7 +188,7 @@ public class ExportData
     /*
      * Used for export Final
      */
-    public void add(String territoryName, int year, Long population, Long births, Long deaths, Long saldo, boolean stable, Double cbr, Double cdr, Double ngr)
+    public void add(String territoryName, int year, Long population, Long births, Long deaths, Long saldo, boolean stable, Double cbr, Double cdr, Double ngr, boolean vrok)
     {
         Map<String, String> mv = new HashMap<>();
 
@@ -198,11 +198,13 @@ public class ExportData
         addValue(mv, "мигр", saldo);
         
         if (stable)
-            addValue(mv, "стаб", 1L);
+            addValue(mv, "стаб", "*");
         
         addRateValue(mv, "р", cbr);
         addRateValue(mv, "c", cdr);
         addRateValue(mv, "еп", ngr);
+
+        addValue(mv, "vr.ok", vrok ? 1L : 0L);
 
         TerritoryNameYearKey key = new TerritoryNameYearKey(territoryName, year);
         if (m.containsKey(key))
@@ -251,6 +253,17 @@ public class ExportData
         if (value != null)
         {
             mv.put(key, String.format("%.1f, value"));
+        }
+    }
+
+    private void addValue(Map<String, String> mv, String key, String value)
+    {
+        if (key.equals("территория") || key.equals("год") || !columns.contains(key))
+            throw new IllegalArgumentException("Invalid key: " + key);
+
+        if (value != null)
+        {
+            mv.put(key, value);
         }
     }
 }

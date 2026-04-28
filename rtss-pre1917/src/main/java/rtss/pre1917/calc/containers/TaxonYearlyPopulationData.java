@@ -5,10 +5,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import rtss.pre1917.ExportData;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.TotalMigration;
+import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
 
@@ -20,18 +23,21 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public final TerritoryDataSet tdsPopulation;
     public final TerritoryDataSet tdsVitalRates;
     public final TerritoryDataSet tdsCSK;
+    public final TerritoryDataSet tdsExportPopulation;
     public final int toYear;
 
     public TaxonYearlyPopulationData(String taxonName,
             TerritoryDataSet tdsPopulation,
             TerritoryDataSet tdsVitalRates,
             TerritoryDataSet tdsCSK,
+            TerritoryDataSet tdsExportPopulation,
             int toYear)
     {
         this.taxonName = taxonName;
         this.tdsPopulation = tdsPopulation;
         this.tdsVitalRates = tdsVitalRates;
         this.tdsCSK = tdsCSK;
+        this.tdsExportPopulation = tdsExportPopulation;
         this.toYear = toYear;
     }
 
@@ -211,5 +217,66 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 
         for (PopulationDifference pd : list)
             Util.out(String.format("    \"%s\" %,d %.1f", pd.tname, pd.diff, pd.pct));
+    }
+
+    public TaxonYearlyPopulationData exportData(String fpath) throws Exception
+    {
+        if (fpath == null || tdsExportPopulation == null)
+            return this;
+        
+        ExportData ed = ExportData.forFinal();
+
+        for (String tname : Util.sort(tdsExportPopulation.keySet()))
+        {
+            if (!Taxon.isComposite(tname))
+                exportValues(ed, tname);
+        }
+        
+        ed.export(fpath);
+
+        return this;
+    }
+
+    private void exportValues(ExportData ed, String tname) throws Exception
+    {
+        final TotalMigration totalMigration = TotalMigration.getTotalMigration();
+        final Territory t = tdsExportPopulation.get(tname);
+        
+        final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(null);
+                    
+        for (int year : t.years())
+        {
+            if (year >= 1896 && year <= 1914)
+            {
+                TerritoryYear ty = t.territoryYear(year);
+
+                Double cbr = rate(ty.births.total.both, ty.progressive_population.total.both);
+                Double cdr = rate(ty.deaths.total.both, ty.progressive_population.total.both);
+                Double ngr = (cbr != null && cdr != null) ? cbr - cdr : 0;
+
+                long saldo = totalMigration.saldo(t.name, year);
+                
+                boolean vrok = this.tdsVitalRates.containsKey(t.name);
+                
+                boolean stable = evalGrowthRate.is_stable_year(t.name, year);
+                
+                ed.add(t.name, year, 
+                       ty.progressive_population.total.both, 
+                       ty.births.total.both, 
+                       ty.deaths.total.both, 
+                       saldo, 
+                       stable, 
+                       cbr, cdr, ngr, 
+                       vrok);
+            }
+        }
+    }
+
+    private Double rate(Long v, Long pop)
+    {
+        if (v == null || pop == null || pop == 0)
+            return null;
+        else
+            return (v * 1000.0) / pop;
     }
 }

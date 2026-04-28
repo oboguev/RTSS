@@ -5,6 +5,7 @@ import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.containers.TaxonYearData;
 import rtss.pre1917.calc.containers.TaxonYearlyPopulationData;
 import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.pre1917.merge.MergeTaxon;
@@ -18,7 +19,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         try
         {
-            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI();
+            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI().exportData("c:\\@@\\Empire.csv");
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
 
@@ -42,6 +43,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private Territory tmPopulation;
     private Territory tmVitalRates;
+    private TerritoryDataSet tdsExportPopulation;
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
@@ -96,6 +98,16 @@ public class EvalCountryTaxon extends EvalCountryBase
         /* ===================== Правки ===================== */
 
         corrections();
+
+        /* ===================== Сохранить для экспорта данных ===================== */
+
+        switch (taxonName)
+        {
+        case "Империя":
+            tdsExportPopulation = tdsPopulation.dup();
+            // #### apply military deaths in 1904 1905 1914 to tdsExportPopulation
+            break;
+        }
 
         /* ===================== Суммирование по таксону ===================== */
 
@@ -167,6 +179,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                                      tdsPopulation,
                                                                      tdsVitalRates,
                                                                      tdsCSK,
+                                                                     tdsExportPopulation,
                                                                      toYear);
         TaxonYearData yd;
 
