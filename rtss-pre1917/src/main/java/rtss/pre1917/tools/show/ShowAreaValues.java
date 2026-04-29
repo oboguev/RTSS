@@ -283,6 +283,17 @@ public class ShowAreaValues
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
 
+            TerritoryYear tyEval = null;
+            if (tEval != null)
+                tyEval = tEval.territoryYearOrNull(year);
+
+            TerritoryYear tyCSK = null;
+            if (tCSK != null)
+                tyCSK = tCSK.territoryYearOrNull(year);
+            
+            if (ty == null && tyEval == null && tyCSK == null)
+                continue;
+            
             Long ty_population_total_both = null;
             Long ty_progressive_population_total_both = null;
             Long ty_births_total_both = null;
@@ -317,7 +328,6 @@ public class ShowAreaValues
             if (ty_deaths_total_both != null && ty_progressive_population_total_both != null)
                 cdrProgressive = rate(ty.deaths.total.both, ty.progressive_population.total.both);
 
-            TerritoryYear tyEval = null;
             Double cbrEval = null;
             Double cdrEval = null;
             Long popEval = null;
@@ -326,8 +336,6 @@ public class ShowAreaValues
 
             if (tEval != null)
             {
-                tyEval = tEval.territoryYearOrNull(year);
-
                 if (tyEval != null && tyEval.population != null && tyEval.population.total != null)
                     popEval = tyEval.population.total.both;
 
@@ -341,10 +349,7 @@ public class ShowAreaValues
                 cdrEval = rate(deathsEval, popEval);
             }
 
-            TerritoryYear tyCSK = null;
             Long popCSK = null;
-            if (tCSK != null)
-                tyCSK = tCSK.territoryYearOrNull(year);
             if (tyCSK != null)
                 popCSK = tyCSK.population.total.both;
 
