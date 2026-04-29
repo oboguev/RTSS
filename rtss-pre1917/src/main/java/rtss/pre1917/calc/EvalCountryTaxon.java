@@ -13,6 +13,7 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.pre1917.eval.ApplyWarDeaths;
 import rtss.pre1917.merge.MergeTaxon;
+import rtss.pre1917.merge.MergeTaxon.MergeTaxonOptions;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.util.Util;
@@ -29,7 +30,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
             Util.out("В этом варианте расчёта не учитываются военные смерти в 1904-1905 и 1914 годах");
         }
-        
+
         try
         {
             new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI()
@@ -136,7 +137,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             else
                 tdsVitalRates.put(tname, t.dup());
         }
-        
+
         if (tdsVitalRates.size() == tdsPopulation.size())
         {
             Util.out("Для подсчёта естественного движения используются все входящие территории");
@@ -149,18 +150,23 @@ public class EvalCountryTaxon extends EvalCountryBase
                 if (!tdsVitalRates.containsKey(tname))
                     Util.out("    " + tname);
             }
-            
+
         }
 
         new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
 
         /* ===================== Суммирование по таксону ===================== */
 
-        tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears);
-        tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears);
+        tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears,
+                                             MergeTaxonOptions.FlagMissingProgressivePopulation);
+
+        tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears,
+                                             MergeTaxonOptions.FlagMissingProgressivePopulation,
+                                             MergeTaxonOptions.FlagMissingBirths,
+                                             MergeTaxonOptions.FlagMissingDeaths);
 
         /* ===================== Часть иммиграции не разбиваемая по губерниям ===================== */
-        
+
         long lumpTotal = 0;
 
         for (int year = 1896; year <= toYear; year++)
@@ -204,7 +210,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                 break;
             }
         }
-        
+
         Util.out(String.format("Величина части иммиграции не разбиваемой по губерниям, с 1896 по конец периода: %,d", lumpTotal));
 
         /* ===================== Учёт военных потерь ===================== */
