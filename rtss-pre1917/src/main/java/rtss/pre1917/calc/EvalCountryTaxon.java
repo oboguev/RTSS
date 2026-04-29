@@ -21,6 +21,15 @@ public class EvalCountryTaxon extends EvalCountryBase
 {
     public static void main(String[] args)
     {
+        if (DoCountMilitaryDeaths)
+        {
+            Util.out("В этом варианте расчёта учитываются военные смерти в 1904-1905 и 1914 годах");
+        }
+        else
+        {
+            Util.out("В этом варианте расчёта не учитываются военные смерти в 1904-1905 и 1914 годах");
+        }
+        
         try
         {
             new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI()
@@ -53,7 +62,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
-    private final static boolean DoCountMilitaryDeaths = Util.False;
+    private final static boolean DoCountMilitaryDeaths = Util.True;
 
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
