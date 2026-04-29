@@ -38,6 +38,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             new EvalCountryTaxon("Средняя Азия", 1913).calc(true).print();
             new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
             new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
+            new EvalCountryTaxon("50 губерний Европейской России", 1914).calc(true).print();
         }
         catch (Throwable ex)
         {
@@ -297,9 +298,9 @@ public class EvalCountryTaxon extends EvalCountryBase
     private void showPopulationPercentageVitalRatesVsPopulation() throws Exception
     {
         Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
-        Util.out(String.format("    в %d-%d годах %.1f населения", 1896, toYear, populationPercentageVitalRatesVsPopulation(1896, toYear)));
-        Util.out(String.format("    в %d году %.1f населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
-        Util.out(String.format("    в %d году %.1f населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
+        Util.out(String.format("    в %d-%d годах %.1f%% населения", 1896, toYear, populationPercentageVitalRatesVsPopulation(1896, toYear)));
+        Util.out(String.format("    в %d году %.1f%% населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
+        Util.out(String.format("    в %d году %.1f%% населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
     }
 
     private double populationPercentageVitalRatesVsPopulation(int y1, int y2) throws Exception
