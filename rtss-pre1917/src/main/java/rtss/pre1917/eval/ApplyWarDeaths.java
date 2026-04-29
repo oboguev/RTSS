@@ -1,8 +1,10 @@
 package rtss.pre1917.eval;
 
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.util.Util;
 
 public class ApplyWarDeaths
 {
@@ -37,12 +39,18 @@ public class ApplyWarDeaths
     private void apply(Territory t, int year, double empireDeaths, double empirePopulation, int referenceYear)
     {
         TerritoryYear ty = t.territoryYearOrNull(referenceYear);
-        if (ty == null && referenceYear == 1914)
-            throw new RuntimeException("No 1914 data for " + t.name);
-        
+
+        if (ty == null || ty.progressive_population == null ||
+            ty.progressive_population.total == null ||
+            ty.progressive_population.total.both == null)
+        {
+            if (Taxon.isComposite(t.name))
+                return;
+        }
+
         double fraction = ty.progressive_population.total.both / empirePopulation;
         long extraDeaths = Math.round(empireDeaths * fraction);
-        
+
         t.extraDeaths(year, extraDeaths);
     }
 }

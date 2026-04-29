@@ -1,9 +1,12 @@
 package rtss.pre1917.calc;
 
+import java.util.HashSet;
+
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.containers.TaxonYearData;
 import rtss.pre1917.calc.containers.TaxonYearlyPopulationData;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
@@ -20,7 +23,8 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         try
         {
-            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI().exportData("p:\\@\\Final.csv");
+            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI()
+                    .exportData("c:\\@\\Final.csv");
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
 
@@ -83,20 +87,14 @@ public class EvalCountryTaxon extends EvalCountryBase
         eval_1896(tdsPopulation);
 
         if (verbose)
+        {
             FilterByTaxon.filteredOutByTaxon(taxonName, tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
+            FilterByTaxon.filterByTaxon(taxonName, tdsPopulation).showTerritoryNames("Территории для численности населения");
+        }
 
-        tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
-
-        if (verbose)
-            tdsPopulation.showTerritoryNames("Территории для численности населения");
-
-        new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
-
-        /* ===================== Естественное движение ===================== */
+        /* ================================= Правки ================================ */
 
         tdsVitalRates = tdsPopulation.dup();
-
-        /* ===================== Правки ===================== */
 
         corrections();
 
@@ -106,8 +104,30 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
         case "Империя":
             tdsExportPopulation = tdsPopulation.dup();
+            for (String tname : new HashSet<>(tdsExportPopulation.keySet()))
+            {
+                if (Taxon.isComposite(tname))
+                    tdsExportPopulation.remove(tname);
+            }
             break;
         }
+
+        /* ================================================================= */
+
+        tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
+
+        /* ===================== Естественное движение ===================== */
+
+        for (String tname : new HashSet<>(tdsVitalRates.keySet()))
+        {
+            Territory t = tdsPopulation.get(tname);
+            if (t == null)
+                tdsVitalRates.remove(tname);
+            else
+                tdsVitalRates.put(tname, t.dup());
+        }
+
+        new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
 
         /* ===================== Суммирование по таксону ===================== */
 
