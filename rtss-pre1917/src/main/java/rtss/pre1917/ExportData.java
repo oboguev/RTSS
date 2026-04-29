@@ -17,6 +17,7 @@ import com.opencsv.CSVWriter;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.ValueByGender;
+import rtss.util.Util;
 
 public class ExportData
 {
@@ -57,6 +58,9 @@ public class ExportData
         ed.columns.add("р");
         ed.columns.add("с");
         ed.columns.add("еп");
+        ed.columns.add("р2");
+        ed.columns.add("с2");
+        ed.columns.add("еп2");
         ed.columns.add("стаб");
         ed.columns.add("vr.ok");
         
@@ -188,7 +192,10 @@ public class ExportData
     /*
      * Used for export Final
      */
-    public void add(String territoryName, int year, Long population, Long births, Long deaths, Long saldo, boolean stable, Double cbr, Double cdr, Double ngr, boolean vrok)
+    public void add(String territoryName, int year, Long population, Long births, Long deaths, Long saldo, boolean stable, 
+            Double cbr, Double cdr, Double ngr, 
+            Double cbr2, Double cdr2, Double ngr2, 
+            boolean vrok)
     {
         Map<String, String> mv = new HashMap<>();
 
@@ -203,6 +210,10 @@ public class ExportData
         addRateValue(mv, "р", cbr);
         addRateValue(mv, "с", cdr);
         addRateValue(mv, "еп", ngr);
+
+        addRateValue(mv, "р2", cbr);
+        addRateValue(mv, "с2", cdr);
+        addRateValue(mv, "еп2", ngr);
 
         addValue(mv, "vr.ok", vrok ? 1L : 0L);
 

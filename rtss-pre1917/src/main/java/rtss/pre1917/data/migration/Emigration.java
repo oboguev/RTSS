@@ -73,7 +73,7 @@ public class Emigration
             }
             else
             {
-                throw new Exception(String.format("Нет данных об эмиграции из %s в %d году", tname, year));
+                throw new MissingMigrationDataException(String.format("Нет данных об эмиграции из %s в %d году", tname, year));
             }
         }
 

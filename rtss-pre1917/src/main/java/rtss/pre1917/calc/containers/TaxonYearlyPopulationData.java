@@ -10,6 +10,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.MissingMigrationDataException;
 import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.util.WeightedAverage;
@@ -25,6 +26,8 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public final TerritoryDataSet tdsCSK;
     public final TerritoryDataSet tdsExportPopulation;
     public final int toYear;
+
+    private final double PROMILLE = 1000.0;
 
     public TaxonYearlyPopulationData(String taxonName,
             TerritoryDataSet tdsPopulation,
@@ -223,7 +226,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     {
         if (fpath == null || tdsExportPopulation == null)
             return this;
-        
+
         ExportData ed = ExportData.forFinal();
 
         for (String tname : Util.sort(tdsExportPopulation.keySet()))
@@ -231,7 +234,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             if (!Taxon.isComposite(tname))
                 exportValues(ed, tname);
         }
-        
+
         ed.export(fpath);
 
         return this;
@@ -241,32 +244,61 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     {
         final TotalMigration totalMigration = TotalMigration.getTotalMigration();
         final Territory t = tdsExportPopulation.get(tname);
-        
+
         final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(null);
-                    
+
         for (int year : t.years())
         {
-            if (year >= 1896 && year <= 1914)
+            if (year >= 1896)
             {
                 TerritoryYear ty = t.territoryYear(year);
 
                 Double cbr = rate(ty.births.total.both, ty.progressive_population.total.both);
                 Double cdr = rate(ty.deaths.total.both, ty.progressive_population.total.both);
-                Double ngr = (cbr != null && cdr != null) ? cbr - cdr : 0;
+                Double ngr = (cbr != null && cdr != null) ? cbr - cdr : null;
 
-                long saldo = totalMigration.saldo(t.name, year);
-                
-                boolean vrok = this.tdsVitalRates.containsKey(t.name);
-                
+                Double cbr2 = null;
+                Double cdr2 = null;
+                Double ngr2 = null;
+
+                TerritoryYear ty2 = t.territoryYearOrNull(year + 1);
+                if (ty2 != null &&
+                    ty2.progressive_population != null &&
+                    ty2.progressive_population.total != null &&
+                    ty2.progressive_population.total.both != null)
+                {
+                    long pop_middle = (ty.progressive_population.total.both + ty2.progressive_population.total.both) / 2;
+                    cbr2 = rate(ty.births.total.both, pop_middle);
+                    cdr2 = rate(ty.deaths.total.both, pop_middle);
+                    ngr2 = (cbr2 != null && cdr2 != null) ? cbr2 - cdr2 : null;
+                }
+
+                Long saldo = null;
+
+                try
+                {
+                    saldo = totalMigration.saldo(t.name, year);
+                }
+                catch (MissingMigrationDataException ex)
+                {
+                    if (year < 1916)
+                        throw ex;
+                }
+
+                boolean vrok = this.tdsVitalRates.containsKey(t.name) || t.name.equals("Выборгская");
+                if (cbr == null && cdr == null)
+                    vrok = false;
+
                 boolean stable = evalGrowthRate.is_stable_year(t.name, year);
-                
-                ed.add(t.name, year, 
-                       ty.progressive_population.total.both, 
-                       ty.births.total.both, 
-                       ty.deaths.total.both, 
-                       saldo, 
-                       stable, 
-                       cbr, cdr, ngr, 
+
+                ed.add(t.name, year,
+                       ty.progressive_population.total.both,
+                       ty.births.total.both,
+                       ty.deaths.total.both,
+                       saldo,
+                       stable,
+                       cbr, cdr, ngr,
+                       cbr2, cdr2, ngr2,
                        vrok);
             }
         }
@@ -277,6 +309,6 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         if (v == null || pop == null || pop == 0)
             return null;
         else
-            return (v * 1000.0) / pop;
+            return (v * PROMILLE) / pop;
     }
 }
