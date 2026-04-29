@@ -60,7 +60,7 @@ public class ShowAreaValues
     protected final TerritoryDataSet tdsCensus1897;
     protected final TotalMigration totalMigration;
     protected final EvalGrowthRate evalGrowthRate;
-    
+
     private ExportData exportData;
 
     private boolean onlyRaw = false;
@@ -83,7 +83,7 @@ public class ShowAreaValues
     {
         onlyRaw = true;
     }
-    
+
     public void setExportData(ExportData exportData)
     {
         this.exportData = exportData;
@@ -233,7 +233,7 @@ public class ShowAreaValues
             Util.out("");
             return;
         }
-        
+
         show(t, null);
     }
 
@@ -241,7 +241,7 @@ public class ShowAreaValues
     {
         Territory tCSK = tdsCSK.get(t.name);
         Territory tEval = onlyRaw ? null : evalGrowthRate.evalTerritory(t);
-        
+
         if (prefix == null)
         {
             Util.out("");
@@ -256,7 +256,7 @@ public class ShowAreaValues
             Util.out(prefix + t.name);
             Util.out("");
         }
-    
+
         if (onlyRaw)
         {
             Util.out("год       ЦСК             УГВИ                 чр      чс    мигр  ");
@@ -273,114 +273,153 @@ public class ShowAreaValues
             Util.out("==== =========== ========================================== =======  ========================  ========================================= =======");
         }
 
-        for (int year : t.years())
+        int maxyear = t.maxYear(1917);
+        if (tCSK != null)
+            maxyear = Math.max(maxyear, tCSK.maxYear(1917));
+        if (tEval != null)
+            maxyear = Math.max(maxyear, tEval.maxYear(1917));
+
+        for (int year = 1896; year <= maxyear; year++)
         {
-            if (year >= 1896 /* && year <= 1914 */)
+            TerritoryYear ty = t.territoryYearOrNull(year);
+
+            Long ty_population_total_both = null;
+            Long ty_progressive_population_total_both = null;
+            Long ty_births_total_both = null;
+            Long ty_deaths_total_both = null;
+
+            if (ty != null && ty.population != null && ty.population.total != null)
+                ty_population_total_both = ty.population.total.both;
+
+            if (ty != null && ty.progressive_population != null && ty.progressive_population.total != null)
+                ty_progressive_population_total_both = ty.progressive_population.total.both;
+
+            if (ty != null && ty.births != null && ty.births.total != null)
+                ty_births_total_both = ty.births.total.both;
+
+            if (ty != null && ty.deaths != null && ty.deaths.total != null)
+                ty_deaths_total_both = ty.deaths.total.both;
+
+            Double cbrUGVI = null;
+            Double cdrUGVI = null;
+            Double cbrProgressive = null;
+            Double cdrProgressive = null;
+
+            if (ty_births_total_both != null && ty_population_total_both != null)
+                cbrUGVI = rate(ty.births.total.both, ty.population.total.both);
+
+            if (ty_deaths_total_both != null && ty_population_total_both != null)
+                cdrUGVI = rate(ty.deaths.total.both, ty.population.total.both);
+
+            if (ty_births_total_both != null && ty_progressive_population_total_both != null)
+                cbrProgressive = rate(ty.births.total.both, ty.progressive_population.total.both);
+
+            if (ty_deaths_total_both != null && ty_progressive_population_total_both != null)
+                cdrProgressive = rate(ty.deaths.total.both, ty.progressive_population.total.both);
+
+            TerritoryYear tyEval = null;
+            Double cbrEval = null;
+            Double cdrEval = null;
+            Long popEval = null;
+            Long birthsEval = null;
+            Long deathsEval = null;
+
+            if (tEval != null)
             {
-                TerritoryYear ty = t.territoryYear(year);
-                Double cbrUGVI = rate(ty.births.total.both, ty.population.total.both);
-                Double cdrUGVI = rate(ty.deaths.total.both, ty.population.total.both);
+                tyEval = tEval.territoryYearOrNull(year);
 
-                Double cbrProgressive = rate(ty.births.total.both, ty.progressive_population.total.both);
-                Double cdrProgressive = rate(ty.deaths.total.both, ty.progressive_population.total.both);
-
-                TerritoryYear tyEval = null;
-                Double cbrEval = null;
-                Double cdrEval = null;
-                Long popEval = null;
-                Long birthsEval = null;
-                Long deathsEval = null;
-
-                if (tEval != null)
-                {
-                    tyEval = tEval.territoryYear(year);
+                if (tyEval != null && tyEval.population != null && tyEval.population.total != null)
                     popEval = tyEval.population.total.both;
+
+                if (tyEval != null && tyEval.births != null && tyEval.births.total != null)
                     birthsEval = tyEval.births.total.both;
+
+                if (tyEval != null && tyEval.deaths != null && tyEval.deaths.total != null)
                     deathsEval = tyEval.deaths.total.both;
-                    cbrEval = rate(birthsEval, popEval);
-                    cdrEval = rate(deathsEval, popEval);
-                }
 
-                TerritoryYear tyCSK = null;
-                Long popCSK = null;
-                if (tCSK != null)
-                    tyCSK = tCSK.territoryYearOrNull(year);
-                if (tyCSK != null)
-                    popCSK = tyCSK.population.total.both;
+                cbrEval = rate(birthsEval, popEval);
+                cdrEval = rate(deathsEval, popEval);
+            }
 
-                String stable = NBSP_S;
-                if (evalGrowthRate.is_stable_year(t.name, year))
-                    stable = "*";
+            TerritoryYear tyCSK = null;
+            Long popCSK = null;
+            if (tCSK != null)
+                tyCSK = tCSK.territoryYearOrNull(year);
+            if (tyCSK != null)
+                popCSK = tyCSK.population.total.both;
 
-                Long saldo = null;
-                try
-                {
+            String stable = NBSP_S;
+            if (evalGrowthRate.is_stable_year(t.name, year))
+                stable = "*";
+
+            Long saldo = null;
+            try
+            {
                 saldo = totalMigration.saldo(t.name, year);
-                }
-                catch (MissingMigrationDataException ex)
-                {
-                    if (year < 1917)
-                        throw ex;
-                }
-                
-                if (onlyRaw)
-                {
-                    String s = String.format("%d %s %s %s %s %s %s %s %s %s",
-                                             // год
-                                             year,
-                                             // ЦСК
-                                             s_population(popCSK),
-                                             // УГВИ
-                                             s_population(ty.population.total.both),
-                                             s_rate(cbrUGVI), 
-                                             s_rate(cdrUGVI), 
-                                             s_ep(cbrUGVI, cdrUGVI),
-                                             s_bd(ty.births.total.both),
-                                             s_bd(ty.deaths.total.both),
-                                             // миграционное сальдо
-                                             s_saldo(saldo),
-                                             // по стаб. участку
-                                             stable);
-                    
-                    if (exportData != null)
-                        exportData.add(t.name, year, tyCSK, ty, saldo, stable.equals("*"));
+            }
+            catch (MissingMigrationDataException ex)
+            {
+                if (year < 1916)
+                    throw ex;
+            }
 
-                    Util.out(s.trim());
-                }
-                else
-                {
-                    String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
-                                             // год
-                                             year,
-                                             // ЦСК
-                                             s_population(popCSK),
-                                             // УГВИ
-                                             s_population(ty.population.total.both),
-                                             s_rate(cbrUGVI), 
-                                             s_rate(cdrUGVI), 
-                                             s_ep(cbrUGVI, cdrUGVI),
-                                             s_bd(ty.births.total.both),
-                                             s_bd(ty.deaths.total.both),
-                                             // миграционное сальдо
-                                             s_saldo(saldo),
-                                             // прогрессивный расчёт
-                                             s_population(ty.progressive_population.total.both),
-                                             s_rate(cbrProgressive), 
-                                             s_rate(cdrProgressive), 
-                                             s_ep(cbrProgressive, cdrProgressive),
-                                             // по стаб. участку
-                                             s_population(popEval),
-                                             s_rate(cbrEval), 
-                                             s_rate(cdrEval), 
-                                             s_ep(cbrEval, cdrEval),
-                                             s_bd(birthsEval), 
-                                             s_bd(deathsEval),
-                                             stable,
-                                             s_pct(ty.births.total.both, birthsEval), 
-                                             s_pct(ty.deaths.total.both, deathsEval));
+            if (onlyRaw)
+            {
+                String s = String.format("%d %s %s %s %s %s %s %s %s %s",
+                                         // год
+                                         year,
+                                         // ЦСК
+                                         s_population(popCSK),
+                                         // УГВИ
+                                         s_population(ty_population_total_both),
+                                         s_rate(cbrUGVI),
+                                         s_rate(cdrUGVI),
+                                         s_ep(cbrUGVI, cdrUGVI),
+                                         s_bd(ty_births_total_both),
+                                         s_bd(ty_deaths_total_both),
+                                         // миграционное сальдо
+                                         s_saldo(saldo),
+                                         // по стаб. участку
+                                         stable);
 
-                    Util.out(s.trim());
-                }
+                if (exportData != null)
+                    exportData.add(t.name, year, tyCSK, ty, saldo, stable.equals("*"));
+
+                Util.out(s.trim());
+            }
+            else
+            {
+                String s = String.format("%d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
+                                         // год
+                                         year,
+                                         // ЦСК
+                                         s_population(popCSK),
+                                         // УГВИ
+                                         s_population(ty_population_total_both),
+                                         s_rate(cbrUGVI),
+                                         s_rate(cdrUGVI),
+                                         s_ep(cbrUGVI, cdrUGVI),
+                                         s_bd(ty_births_total_both),
+                                         s_bd(ty_deaths_total_both),
+                                         // миграционное сальдо
+                                         s_saldo(saldo),
+                                         // прогрессивный расчёт
+                                         s_population(ty_progressive_population_total_both),
+                                         s_rate(cbrProgressive),
+                                         s_rate(cdrProgressive),
+                                         s_ep(cbrProgressive, cdrProgressive),
+                                         // по стаб. участку
+                                         s_population(popEval),
+                                         s_rate(cbrEval),
+                                         s_rate(cdrEval),
+                                         s_ep(cbrEval, cdrEval),
+                                         s_bd(birthsEval),
+                                         s_bd(deathsEval),
+                                         stable,
+                                         s_pct(ty_births_total_both, birthsEval),
+                                         s_pct(ty_deaths_total_both, deathsEval));
+
+                Util.out(s.trim());
             }
         }
     }
