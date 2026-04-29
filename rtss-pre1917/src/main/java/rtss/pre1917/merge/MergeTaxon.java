@@ -1,7 +1,10 @@
 package rtss.pre1917.merge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -21,27 +24,35 @@ public class MergeTaxon
 {
     public static enum WhichYears
     {
-        TaxonExistingYears,
-        AllSetYears
+        TaxonExistingYears, AllSetYears
     }
-    
-    private TerritoryDataSet territories;
-    
-    public static Territory mergeTaxon(TerritoryDataSet territories, String txname, WhichYears whichYears) throws Exception
+
+    public static enum MergeTaxonOptions
     {
-        return new MergeTaxon(territories).mergeTaxon(txname, whichYears);
+        None, FlagMissingProgressivePopulation, FlagMissingPopulation, FlagMissingBirths, FlagMissingDeaths
     }
-    
+
+    private TerritoryDataSet territories;
+
+    public static Territory mergeTaxon(TerritoryDataSet territories, String txname, WhichYears whichYears, 
+            MergeTaxonOptions... options) throws Exception
+    {
+        return new MergeTaxon(territories).mergeTaxon(txname, whichYears, options);
+    }
+
     public MergeTaxon(TerritoryDataSet territories)
     {
         this.territories = territories;
     }
-    
-    public Territory mergeTaxon(String txname, WhichYears whichYears) throws Exception
+
+    public Territory mergeTaxon(String txname, WhichYears whichYears, MergeTaxonOptions... options) throws Exception
     {
         Territory src = territories.get(txname);
-        Territory res = new Territory(txname); 
+        Territory res = new Territory(txname);
         
+        Set<MergeTaxonOptions> opts = new HashSet<>(Arrays.asList(options));
+        opts.remove(MergeTaxonOptions.None);
+
         List<Integer> years;
         if (whichYears == WhichYears.TaxonExistingYears)
         {
@@ -53,23 +64,23 @@ public class MergeTaxon
             for (int y = territories.minYear(); y <= territories.maxYear(); y++)
                 years.add(y);
         }
-        
+
         for (int year : years)
         {
             Taxon tx = Taxon.of(txname, year, territories);
             tx = tx.flatten(territories, year);
-            
+
             TerritoryYear ty = res.territoryYear(year);
-            
-            sum_ur(ty, "population", tx);
-            sum_ur(ty, "progressive_population", tx);
-            sum_ur(ty, "midyear_population", tx);
-            sum_ur(ty, "births", tx);
-            sum_ur(ty, "deaths", tx);
-            
+
+            sum_ur(ty, "population", tx, opts.contains(MergeTaxonOptions.FlagMissingPopulation));
+            sum_ur(ty, "progressive_population", tx, opts.contains(MergeTaxonOptions.FlagMissingProgressivePopulation));
+            sum_ur(ty, "midyear_population", tx, false);
+            sum_ur(ty, "births", tx, opts.contains(MergeTaxonOptions.FlagMissingBirths));
+            sum_ur(ty, "deaths", tx, opts.contains(MergeTaxonOptions.FlagMissingDeaths));
+
             rate(ty, "cbr", tx);
             rate(ty, "cdr", tx);
-            
+
             if (ty.cbr != null && ty.cdr != null)
             {
                 ty.ngr = ty.cbr - ty.cdr;
@@ -82,26 +93,26 @@ public class MergeTaxon
 
         return res;
     }
-    
-    private void sum_ur(TerritoryYear ty, String selector, Taxon tx) throws Exception
+
+    private void sum_ur(TerritoryYear ty, String selector, Taxon tx, boolean flagMissing) throws Exception
     {
-        sum_vg(ty, selector + ".total", tx);
-        sum_vg(ty, selector + ".rural", tx);
-        sum_vg(ty, selector + ".urban", tx);
+        sum_vg(ty, selector + ".total", tx, flagMissing);
+        sum_vg(ty, selector + ".rural", tx, flagMissing);
+        sum_vg(ty, selector + ".urban", tx, flagMissing);
     }
 
-    private void sum_vg(TerritoryYear ty, String selector, Taxon tx) throws Exception
+    private void sum_vg(TerritoryYear ty, String selector, Taxon tx, boolean flagMissing) throws Exception
     {
-        sum_long(ty, selector + ".male", tx);
-        sum_long(ty, selector + ".female", tx);
-        sum_long(ty, selector + ".both", tx);
+        sum_long(ty, selector + ".male", tx, flagMissing);
+        sum_long(ty, selector + ".female", tx, flagMissing);
+        sum_long(ty, selector + ".both", tx, flagMissing);
     }
 
-    private void sum_long(TerritoryYear ty, String selector, Taxon tx) throws Exception
+    private void sum_long(TerritoryYear ty, String selector, Taxon tx, boolean flagMissing) throws Exception
     {
         double res = 0;
         int count = 0;
-        
+
         for (String tname : tx.territories.keySet())
         {
             Territory ter2 = territories.get(tname);
@@ -116,23 +127,24 @@ public class MergeTaxon
                     count++;
                 }
             }
+            // ### @@@@ and in EvalCountryTaxon
         }
-        
+
         if (count != 0)
             FieldValue.setLong(ty, selector, Math.round(res));
     }
-    
+
     private void rate(TerritoryYear ty, String selector, Taxon tx) throws Exception
     {
-        WeightedAverage wa = new WeightedAverage(); 
-        
+        WeightedAverage wa = new WeightedAverage();
+
         for (String tname : tx.territories.keySet())
         {
             Territory ter2 = territories.get(tname);
             if (ter2 != null && ter2.hasYear(ty.year))
             {
                 TerritoryYear ty2 = ter2.territoryYear(ty.year);
-                
+
                 Long pop = ty2.population.total.both;
                 if (pop == null)
                     pop = ty2.midyear_population.total.both;
@@ -140,12 +152,12 @@ public class MergeTaxon
                 Double rate = FieldValue.getDouble(ty2, selector);
 
                 double weight = tx.territories.get(tname);
-                
+
                 if (pop != null && rate != null)
                     wa.add(rate, pop * weight);
             }
         }
-        
+
         if (wa.count() != 0)
             FieldValue.setDouble(ty, selector, wa.doubleResult());
     }
