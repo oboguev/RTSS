@@ -162,7 +162,7 @@ public class ExportData
     /*
      * Used for export Raw
      */
-    public void add(String territoryName, int year, TerritoryYear tyCSK, TerritoryYear tyUGVI, long saldo, boolean stable)
+    public void add(String territoryName, int year, TerritoryYear tyCSK, TerritoryYear tyUGVI, Long saldo, boolean stable)
     {
         Map<String, String> mv = new HashMap<>();
 

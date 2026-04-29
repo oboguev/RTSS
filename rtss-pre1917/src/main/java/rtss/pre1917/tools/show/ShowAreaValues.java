@@ -10,6 +10,7 @@ import rtss.pre1917.calc.AdjustTerritories;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.MissingMigrationDataException;
 import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.util.Util;
@@ -274,7 +275,7 @@ public class ShowAreaValues
 
         for (int year : t.years())
         {
-            if (year >= 1896 && year <= 1914)
+            if (year >= 1896 /* && year <= 1914 */)
             {
                 TerritoryYear ty = t.territoryYear(year);
                 Double cbrUGVI = rate(ty.births.total.both, ty.population.total.both);
@@ -311,7 +312,16 @@ public class ShowAreaValues
                 if (evalGrowthRate.is_stable_year(t.name, year))
                     stable = "*";
 
-                long saldo = totalMigration.saldo(t.name, year);
+                Long saldo = null;
+                try
+                {
+                saldo = totalMigration.saldo(t.name, year);
+                }
+                catch (MissingMigrationDataException ex)
+                {
+                    if (year < 1917)
+                        throw ex;
+                }
                 
                 if (onlyRaw)
                 {
