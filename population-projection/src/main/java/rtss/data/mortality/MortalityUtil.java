@@ -17,6 +17,9 @@ public class MortalityUtil
 
     public static double qx2mx(double qx, Gender gender, double age) throws Exception
     {
+        if (age < 0 || age > 150)
+            throw new Exception("Invalid age");
+            
         if (age >= 1.0)
             return qx2mx(qx);
         else
@@ -25,6 +28,9 @@ public class MortalityUtil
 
     public static double mx2qx(double mx, Gender gender, double age) throws Exception
     {
+        if (age < 0 || age > 150)
+            throw new Exception("Invalid age");
+            
         if (age >= 1.0)
             return mx2qx(mx);
         else

@@ -691,9 +691,21 @@ public class Bins
 
     public static Bin[] bins(int start_x,
             int[] intervalWidths,
-            double[] aggregated)
+            double[] aggregated) throws Exception
     {
-        // ####
-        return null;
+        List<Bin> list = new ArrayList<>();
+
+        if (aggregated.length != intervalWidths.length)
+            throw new Exception("Mismatching lengths");
+
+        int x = start_x;
+
+        for (int k = 0; k < aggregated.length; k++)
+        {
+            list.add(new Bin(x, x + intervalWidths[k] - 1, aggregated[k]));
+            x += intervalWidths[k];
+        }
+
+        return bins(list);
     }
 }
