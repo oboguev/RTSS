@@ -53,7 +53,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
-    private final static boolean DoCountMilitaryDeaths = Util.True;
+    private final static boolean DoCountMilitaryDeaths = Util.False;
 
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
@@ -128,7 +128,20 @@ public class EvalCountryTaxon extends EvalCountryBase
                 tdsVitalRates.put(tname, t.dup());
         }
         
-        // ###@@@@ out: территории не исп. для р и с
+        if (tdsVitalRates.size() == tdsPopulation.size())
+        {
+            Util.out("Для подсчёта естественного движения используются все входящие территории");
+        }
+        else
+        {
+            Util.out("Для подсчёта естественного движения не используются:");
+            for (String tname : Util.sort(tdsPopulation.keySet()))
+            {
+                if (!tdsVitalRates.containsKey(tname))
+                    Util.out("    " + tname);
+            }
+            
+        }
 
         new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
 

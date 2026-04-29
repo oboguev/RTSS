@@ -17,7 +17,6 @@ import com.opencsv.CSVWriter;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.ValueByGender;
-import rtss.util.Util;
 
 public class ExportData
 {
