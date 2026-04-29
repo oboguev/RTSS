@@ -28,6 +28,9 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public final int toYear;
 
     private final double PROMILLE = 1000.0;
+    private final String nl = "\n";
+    private final char NBSP = 0xA0;
+    private final String NBSP_S = "" + NBSP;
 
     public TaxonYearlyPopulationData(String taxonName,
             TerritoryDataSet tdsPopulation,
@@ -222,30 +225,48 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             Util.out(String.format("    \"%s\" %,d %.1f", pd.tname, pd.diff, pd.pct));
     }
 
-    public TaxonYearlyPopulationData exportData(String fpath) throws Exception
+    public TaxonYearlyPopulationData exportData(String csvPath, String txtPath) throws Exception
     {
-        if (fpath == null || tdsExportPopulation == null)
+        if (tdsExportPopulation == null)
+            return this;
+
+        if (csvPath == null && txtPath == null)
             return this;
 
         ExportData ed = ExportData.forFinal();
+        StringBuilder sb = new StringBuilder();
 
         for (String tname : Util.sort(tdsExportPopulation.keySet()))
         {
             if (!Taxon.isComposite(tname))
-                exportValues(ed, tname);
+                exportValues(ed, sb, tname);
         }
 
-        ed.export(fpath);
+        if (csvPath != null)
+            ed.export(csvPath);
+
+        if (txtPath != null)
+            Util.writeAsFile(txtPath, sb.toString().replace("\n", "\r\n"));
 
         return this;
     }
 
-    private void exportValues(ExportData ed, String tname) throws Exception
+    private void exportValues(ExportData ed, StringBuilder sb, String tname) throws Exception
     {
-        final TotalMigration totalMigration = TotalMigration.getTotalMigration();
-        final Territory t = tdsExportPopulation.get(tname);
+        if (sb.length() != 0)
+            sb.append(nl + "*************************************************************************" + nl);
 
+        sb.append(nl);
+        sb.append(tname + nl);
+        sb.append(nl);
+        sb.append("год      чн       чр     чс      мигр   р    с    еп   р2   с2   еп2 v s" + nl);
+        sb.append("==== ========= ======= ======= ======= ==== ==== ==== ==== ==== ==== = =" + nl);
+
+        final TotalMigration totalMigration = TotalMigration.getTotalMigration();
         final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(null);
+        final Territory t = tdsExportPopulation.get(tname).dup();
+
+        addLastYear(t, totalMigration);
 
         for (int year : t.years())
         {
@@ -300,8 +321,54 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                        cbr, cdr, ngr,
                        cbr2, cdr2, ngr2,
                        vrok);
+
+                line(sb, year,
+                     ty.progressive_population.total.both,
+                     ty.births.total.both,
+                     ty.deaths.total.both,
+                     saldo,
+                     stable,
+                     cbr, cdr, ngr,
+                     cbr2, cdr2, ngr2,
+                     vrok);
             }
         }
+    }
+
+    private void line(StringBuilder sb, int year, Long population, Long births, Long deaths, Long saldo, boolean stable,
+            Double cbr, Double cdr, Double ngr,
+            Double cbr2, Double cdr2, Double ngr2,
+            boolean vrok)
+    {
+        String line = String.format("%4d %s %s %s %s %s %s %s %s %s %s %s %s",
+                                    year,
+                                    s_count(population, 9),
+                                    s_count(births, 7),
+                                    s_count(deaths, 7),
+                                    s_count(saldo, 7),
+                                    s_rate(cbr), s_rate(cdr), s_rate(ngr),
+                                    s_rate(cbr2), s_rate(cdr2), s_rate(ngr2),
+                                    vrok ? "1" : "0",
+                                    stable ? "*" : NBSP_S);
+
+        sb.append(line + nl);
+    }
+
+    private String s_count(Long value, int width)
+    {
+        return s_wide(value == null ? "" : String.format("%,d", value), width);
+    }
+
+    private String s_rate(Double value)
+    {
+        return s_wide(value == null ? "" : String.format("%.1f", value), 4);
+    }
+
+    private String s_wide(String s, int width)
+    {
+        while (s.length() < width)
+            s = " " + s;
+        return s;
     }
 
     private Double rate(Long v, Long pop)
@@ -310,5 +377,55 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             return null;
         else
             return (v * PROMILLE) / pop;
+    }
+
+    private void addLastYear(Territory t, TotalMigration totalMigration) throws Exception
+    {
+        List<Integer> years = t.years();
+        if (years.size() == 0)
+            return;
+        int year = years.get(years.size() - 1);
+        TerritoryYear ty = t.territoryYear(year);
+
+        if (ty.progressive_population == null ||
+            ty.progressive_population.total == null ||
+            ty.progressive_population.total.both == null)
+        {
+            return;
+        }
+
+        if (ty.births == null ||
+            ty.births.total == null ||
+            ty.births.total.both == null)
+        {
+            return;
+        }
+
+        if (ty.deaths == null ||
+            ty.deaths.total == null ||
+            ty.deaths.total.both == null)
+        {
+            return;
+        }
+
+        Long saldo = null;
+
+        try
+        {
+            saldo = totalMigration.saldo(t.name, year);
+        }
+        catch (MissingMigrationDataException ex)
+        {
+            if (year < 1916)
+                throw ex;
+        }
+
+        if (t.hasYear(year + 1))
+            throw new Exception("Must not have year " + (year + 1));
+
+        TerritoryYear ty2 = t.territoryYear(year + 1);
+        ty2.progressive_population.total.both = ty.progressive_population.total.both + ty.births.total.both - ty.deaths.total.both;
+        if (saldo != null)
+            ty2.progressive_population.total.both += saldo;
     }
 }

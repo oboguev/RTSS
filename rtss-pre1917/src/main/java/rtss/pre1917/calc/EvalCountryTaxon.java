@@ -24,7 +24,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         try
         {
             new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI()
-                    .exportData("c:\\@\\Final.csv");
+                    .exportData("c:\\@\\Final.csv", "c:\\@\\Final.txt");
             new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
             new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
 
