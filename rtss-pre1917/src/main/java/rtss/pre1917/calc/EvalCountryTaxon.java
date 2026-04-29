@@ -126,6 +126,8 @@ public class EvalCountryTaxon extends EvalCountryBase
             else
                 tdsVitalRates.put(tname, t.dup());
         }
+        
+        // ###@@@@ out: территории не исп. для р и с
 
         new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
 
