@@ -47,6 +47,11 @@ public class Territory
         return year2value.containsKey(year);
     }
 
+    public void removeYear(int year)
+    {
+        year2value.remove(year);
+    }
+
     public Territory dup()
     {
         return dup(name);

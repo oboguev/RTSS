@@ -20,7 +20,7 @@ public class EvalGrowthRate
 
     private final TerritoryDataSet tdsCensus1897;
     TotalMigration totalMigration = TotalMigration.getTotalMigration();
-    
+
     private final double PROMILLE = 1000.0;
 
     public EvalGrowthRate(TerritoryDataSet tdsCensus1897) throws Exception
@@ -54,7 +54,7 @@ public class EvalGrowthRate
         tname_y1.put(tname, y1);
         tname_y2.put(tname, y2);
     }
-    
+
     public boolean is_stable_year(String tname, int year)
     {
         if (tname_y1.containsKey(tname))
@@ -83,10 +83,10 @@ public class EvalGrowthRate
 
         int y1 = tname_y1.get(t.name);
         int y2 = tname_y2.get(t.name);
-        
+
         return evalTerritory(t, y1, y2);
     }
-    
+
     public Territory evalTerritory(Territory t, int y1, int y2) throws Exception
     {
         Territory tCensus1897 = tdsCensus1897.get(t.name);
@@ -110,7 +110,7 @@ public class EvalGrowthRate
 
         /* =========================================================================== */
 
-        long p1897 = cgr.population_1897_Jan1(ngr/ PROMILLE);
+        long p1897 = cgr.population_1897_Jan1(ngr / PROMILLE);
 
         Territory xt = t.dup();
         xt.leaveOnlyTotalBoth();
@@ -129,6 +129,9 @@ public class EvalGrowthRate
                 xt.territoryYear(year + 1).population.total.both = Math.round(ymult * xt.territoryYear(year).population.total.both);
             }
         }
+        
+        xt.removeYear(1916);
+        xt.removeYear(1917);
 
         // средние уровни рождаемости и смертности в стабилизированном участке
         double cbr = 0;
@@ -141,15 +144,26 @@ public class EvalGrowthRate
         }
         cbr /= nyears;
         cdr /= nyears;
-        
+
         // пересчитать число рождений и смертей вне стабилизированого участка
-        for (int year = 1896; year <= 1916; year++)
+        for (int year = 1896; year <= 1917; year++)
         {
             if (!(year >= y1 && year <= y2))
             {
                 TerritoryYear ty = xt.territoryYearOrNull(year);
-                ty.births.total.both = Math.round(ty.population.total.both * cbr / PROMILLE); 
-                ty.deaths.total.both = Math.round(ty.population.total.both * cdr / PROMILLE); 
+                if (ty != null)
+                {
+                    if (year <= 1914)
+                    {
+                        ty.births.total.both = Math.round(ty.population.total.both * cbr / PROMILLE);
+                        ty.deaths.total.both = Math.round(ty.population.total.both * cdr / PROMILLE);
+                    }
+                    else
+                    {
+                        ty.births.total.both = null;
+                        ty.deaths.total.both = null;
+                    }
+                }
             }
         }
 
