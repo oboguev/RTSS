@@ -22,7 +22,6 @@ import rtss.pre1917.data.migration.TotalMigration;
  * т.к. для промежутка между 1897 годом и моментом  их создания сведения о естественом движении 
  * не включены в базу (могут быть добавлены позднее, из уездных сведений УГВИ). 
  * Она, однако, может быть вычислена для суммы составных частей (см. LoadOptions.MERGE_POST1897_REGIONS).
- * 
  */
 public class EvalProgressive
 {
@@ -83,12 +82,15 @@ public class EvalProgressive
 
         ty1897.progressive_population.total.both = tyCensus.population.total.both - in1;
         ty1898.progressive_population.total.both = tyCensus.population.total.both + in2;
+        
+        ty1897.migration.total.both = totalMigration.saldo(tname, 1897);
 
         if (xty1896 != null)
         {
             in = xty1896.births.total.both - xty1896.deaths.total.both;
             in += totalMigration.saldo(tname, 1896);
             ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
+            ty1896.migration.total.both = totalMigration.saldo(tname, 1896); 
         }
 
         for (int year = 1898; year <= 1916; year++)
@@ -96,14 +98,19 @@ public class EvalProgressive
             TerritoryYear xty = xt.territoryYearOrNull(year);
             TerritoryYear ty = t.territoryYearOrNull(year);
             TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
+            
+            if (ty != null)
+            {
+                ty.migration.total.both = totalMigration.saldo(tname, year);
+                
+                if (ty_next != null && xty != null)
+                {
+                    in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
+                    in += totalMigration.saldo(tname, year);
 
-            if (ty == null || ty_next == null || xty == null)
-                continue;
-
-            in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
-            in += totalMigration.saldo(tname, year);
-
-            ty_next.progressive_population.total.both = ty.progressive_population.total.both + in;
+                    ty_next.progressive_population.total.both = ty.progressive_population.total.both + in;
+                }
+            }
         }
     }
 

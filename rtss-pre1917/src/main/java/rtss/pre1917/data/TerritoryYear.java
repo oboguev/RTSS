@@ -34,6 +34,7 @@ public class TerritoryYear
     public URValue progressive_population = new URValue(this);
     public URValue births = new URValue(this);
     public URValue deaths = new URValue(this);
+    public URValue migration = new URValue(this);
 
     public void setValue(String what, Double v) throws Exception
     {

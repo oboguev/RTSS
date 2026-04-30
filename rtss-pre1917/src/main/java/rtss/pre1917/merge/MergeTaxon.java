@@ -184,6 +184,7 @@ public class MergeTaxon
             sum_ur(ty, "midyear_population", tx, options);
             sum_ur(ty, "births", tx, options);
             sum_ur(ty, "deaths", tx, options);
+            sum_ur(ty, "migration", tx, options);
 
             rate(ty, "cbr", tx);
             rate(ty, "cdr", tx);
