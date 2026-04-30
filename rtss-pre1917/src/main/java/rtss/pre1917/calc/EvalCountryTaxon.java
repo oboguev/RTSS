@@ -49,7 +49,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             new EvalCountryTaxon("Средняя Азия", 1913).calc(true).print();
             new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
             new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
-            new EvalCountryTaxon("50 губерний Европейской России", 1914).calc(true).print();
+            new EvalCountryTaxon("50 губерний Европейской России", 1913).calc(true).print();
         }
         catch (Throwable ex)
         {
@@ -128,6 +128,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         /* ================================================================= */
 
         tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
+        tdsVitalRates = FilterByTaxon.filterByTaxon(taxonName, tdsVitalRates);
 
         /* ===================== Естественное движение ===================== */
 
