@@ -155,6 +155,8 @@ public class MergeTaxon
 
     public Territory mergeTaxon(String txname, WhichYears whichYears, MergeTaxonOptions options) throws Exception
     {
+        VerifyNoTerritoryDuplication.verify(territories);
+        
         Territory src = territories.get(txname);
         Territory res = new Territory(txname);
 
