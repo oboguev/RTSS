@@ -178,6 +178,9 @@ public class EvalCountryTaxon extends EvalCountryBase
                 .flagMissing("births.total.both", 1896, toYear)
                 .flagMissing("deaths.total.both", 1896, toYear)
                 .allowMissingTeritories(territoriesExcludedFromVitalRates)
+                .allowMissingSelectorsTeritoriesYears(Set.of("births.total.both", "deaths.total.both"),
+                                                      Set.of("Сахалин"),
+                                                      Set.of(1903, 1904, 1905, 1906, 1907))
                 .allowMissingTeritory("Закатальский окр.")
                 .allowMissingTeritory("Сухумский окр."));
 

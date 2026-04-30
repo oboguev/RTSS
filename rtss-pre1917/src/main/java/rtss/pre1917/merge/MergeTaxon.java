@@ -29,16 +29,34 @@ public class MergeTaxon
 
     public static class MissingDataAllowance
     {
+        private Set<String> selectors;
         private Set<String> territoryNames;
+        private Set<Integer> years;
 
         public MissingDataAllowance(Set<String> territoryNames)
         {
             this.territoryNames = territoryNames;
         }
-        
-        public boolean allowMissing(String tname)
+
+        public MissingDataAllowance(Set<String> selectors, Set<String> territoryNames, Set<Integer> years)
         {
-            return territoryNames.contains(tname);
+            this.selectors = selectors;
+            this.territoryNames = territoryNames;
+            this.years = years;
+        }
+
+        public boolean allowMissing(String selector, String tname, int year)
+        {
+            if (selectors != null && !selectors.contains(selector))
+                return false;
+
+            if (territoryNames != null && !territoryNames.contains(tname))
+                return false;
+
+            if (years != null && !years.contains(year))
+                return false;
+
+            return true;
         }
     }
 
@@ -91,16 +109,22 @@ public class MergeTaxon
             return this;
         }
 
+        public MergeTaxonOptions allowMissingSelectorsTeritoriesYears(Set<String> selectors, Set<String> tnames, Set<Integer> years)
+        {
+            missingDataAllowances.add(new MissingDataAllowance(selectors, tnames, years));
+            return this;
+        }
+
         /* -------------------------------------------- */
 
         public boolean isFlagMissing(String selector, String tname, int year)
         {
             for (MissingDataAllowance mda : missingDataAllowances)
             {
-                if (mda.allowMissing(tname))
+                if (mda.allowMissing(selector, tname, year))
                     return false;
             }
-            
+
             for (MissingDataCheck mdc : missingDataChecks)
             {
                 if (mdc.isFlagMissing(selector, year))
@@ -203,12 +227,18 @@ public class MergeTaxon
             if (ter2 == null)
             {
                 String combined = MergePost1897Regions.contained2combined(tname);
-                if (combined != null && territories.containsKey(combined))
-                    continue;
+                if (combined != null)
+                {
+                    if (territories.containsKey(combined) || !options.isFlagMissing(selector, combined, ty.year))
+                        continue;
+                }
 
                 combined = MergeCities.contained2combined(tname);
-                if (combined != null && territories.containsKey(combined))
-                    continue;
+                if (combined != null)
+                {
+                    if (territories.containsKey(combined) || !options.isFlagMissing(selector, combined, ty.year))
+                        continue;
+                }
 
                 if (flag)
                     Util.err(String.format("MergeTaxon: missing territory [%s]", tname));
