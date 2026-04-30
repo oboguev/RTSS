@@ -1,7 +1,9 @@
 package rtss.pre1917.merge;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -24,20 +26,35 @@ public class MergeTaxon
     {
         TaxonExistingYears, AllSetYears
     }
-    
+
+    public static class MissingDataAllowance
+    {
+        private Set<String> territoryNames;
+
+        public MissingDataAllowance(Set<String> territoryNames)
+        {
+            this.territoryNames = territoryNames;
+        }
+        
+        public boolean allowMissing(String tname)
+        {
+            return territoryNames.contains(tname);
+        }
+    }
+
     public static class MissingDataCheck
     {
         private String selector;
         private Integer enforceYearMin;
         private Integer enforceYearMax;
-        
+
         public MissingDataCheck(String selector, Integer enforceYearMin, Integer enforceYearMax)
         {
             this.selector = selector;
             this.enforceYearMin = enforceYearMin;
             this.enforceYearMax = enforceYearMax;
         }
-        
+
         public boolean isFlagMissing(String selector, int year)
         {
             if (!this.selector.equals(selector))
@@ -52,6 +69,7 @@ public class MergeTaxon
 
     public static class MergeTaxonOptions
     {
+        private List<MissingDataAllowance> missingDataAllowances = new ArrayList<>();
         private List<MissingDataCheck> missingDataChecks = new ArrayList<>();
 
         public MergeTaxonOptions flagMissing(String selector, Integer enforceYearMin, Integer enforceYearMax)
@@ -59,11 +77,30 @@ public class MergeTaxon
             missingDataChecks.add(new MissingDataCheck(selector, enforceYearMin, enforceYearMax));
             return this;
         }
-        
+
+        public MergeTaxonOptions allowMissingTeritory(String tname)
+        {
+            Set<String> xs = new HashSet<>();
+            xs.add(tname);
+            return allowMissingTeritories(xs);
+        }
+
+        public MergeTaxonOptions allowMissingTeritories(Set<String> tnames)
+        {
+            missingDataAllowances.add(new MissingDataAllowance(tnames));
+            return this;
+        }
+
         /* -------------------------------------------- */
 
-        public boolean isFlagMissing(String selector, int year)
+        public boolean isFlagMissing(String selector, String tname, int year)
         {
+            for (MissingDataAllowance mda : missingDataAllowances)
+            {
+                if (mda.allowMissing(tname))
+                    return false;
+            }
+            
             for (MissingDataCheck mdc : missingDataChecks)
             {
                 if (mdc.isFlagMissing(selector, year))
@@ -157,10 +194,10 @@ public class MergeTaxon
         double res = 0;
         int count = 0;
 
-        boolean flag = options.isFlagMissing(selector, ty.year);
-
         for (String tname : tx.territories.keySet())
         {
+            boolean flag = options.isFlagMissing(selector, tname, ty.year);
+
             Territory ter2 = territories.get(tname);
 
             if (ter2 == null)
@@ -168,7 +205,7 @@ public class MergeTaxon
                 String combined = MergePost1897Regions.contained2combined(tname);
                 if (combined != null && territories.containsKey(combined))
                     continue;
-                
+
                 combined = MergeCities.contained2combined(tname);
                 if (combined != null && territories.containsKey(combined))
                     continue;

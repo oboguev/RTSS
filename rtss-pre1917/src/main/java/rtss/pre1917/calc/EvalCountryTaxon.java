@@ -1,6 +1,7 @@
 package rtss.pre1917.calc;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
@@ -106,6 +107,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         /* ================================= Правки ================================ */
 
         tdsVitalRates = tdsPopulation.dup();
+        Set<String> territoriesExcludedFromVitalRates = new HashSet<>();
 
         corrections();
 
@@ -133,9 +135,15 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
             Territory t = tdsPopulation.get(tname);
             if (t == null)
+            {
+                if (!Taxon.isComposite(tname))
+                    Util.err("In vital rates set but not in population set: " + tname);
                 tdsVitalRates.remove(tname);
+            }
             else
+            {
                 tdsVitalRates.put(tname, t.dup());
+            }
         }
 
         if (tdsVitalRates.size() == tdsPopulation.size())
@@ -148,7 +156,10 @@ public class EvalCountryTaxon extends EvalCountryBase
             for (String tname : Util.sort(tdsPopulation.keySet()))
             {
                 if (!tdsVitalRates.containsKey(tname))
+                {
+                    territoriesExcludedFromVitalRates.add(tname);
                     Util.out("    " + tname);
+                }
             }
 
         }
@@ -158,12 +169,17 @@ public class EvalCountryTaxon extends EvalCountryBase
         /* ===================== Суммирование по таксону ===================== */
 
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
-                .flagMissing("progressive_population.total.both", 1896, toYear + 1));
+                .flagMissing("progressive_population.total.both", 1896, toYear + 1)
+                .allowMissingTeritory("Закатальский окр.")
+                .allowMissingTeritory("Сухумский окр."));
 
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
                 .flagMissing("progressive_population.total.both", 1896, toYear + 1)
                 .flagMissing("births.total.both", 1896, toYear)
-                .flagMissing("deaths.total.both", 1896, toYear));
+                .flagMissing("deaths.total.both", 1896, toYear)
+                .allowMissingTeritories(territoriesExcludedFromVitalRates)
+                .allowMissingTeritory("Закатальский окр.")
+                .allowMissingTeritory("Сухумский окр."));
 
         /* ===================== Часть иммиграции не разбиваемая по губерниям ===================== */
 
