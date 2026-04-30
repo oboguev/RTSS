@@ -58,12 +58,12 @@ public class MergeCities
 
         return xs;
     }
-    
+
     public static MergeDescriptor findContaining(String what)
     {
         return MergeDescriptor.findContaining(MergeCitiesDescriptors, what);
     }
-    
+
     public static String combined2parent(String combined)
     {
         return MergeDescriptor.combined2parent(MergeCitiesDescriptors, combined);
@@ -73,7 +73,7 @@ public class MergeCities
     {
         return MergeDescriptor.parent2combined(MergeCitiesDescriptors, combined);
     }
-    
+
     public static void removeCities(Map<String, ?> m)
     {
         for (MergeDescriptor md : MergeCitiesDescriptors)
@@ -82,7 +82,7 @@ public class MergeCities
                 m.remove(city);
         }
     }
-    
+
     public static boolean isMergedCity(String tname)
     {
         for (MergeDescriptor md : MergeCitiesDescriptors)
@@ -90,7 +90,21 @@ public class MergeCities
             if (md.children.contains(tname))
                 return true;
         }
-        
+
         return false;
+    }
+
+    public static String contained2combined(String contained)
+    {
+        for (MergeDescriptor md : MergeCitiesDescriptors)
+        {
+            if (contained.equals(md.parent))
+                return md.combined;
+
+            if (md.children.contains(contained))
+                return md.combined;
+        }
+
+        return null;
     }
 }

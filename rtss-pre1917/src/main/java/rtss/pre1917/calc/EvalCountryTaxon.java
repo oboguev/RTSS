@@ -157,13 +157,13 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         /* ===================== Суммирование по таксону ===================== */
 
-        tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears,
-                                             MergeTaxonOptions.FlagMissingProgressivePopulation);
+        tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
+                .flagMissing("progressive_population.total.both", 1896, toYear + 1));
 
-        tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears,
-                                             MergeTaxonOptions.FlagMissingProgressivePopulation,
-                                             MergeTaxonOptions.FlagMissingBirths,
-                                             MergeTaxonOptions.FlagMissingDeaths);
+        tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
+                .flagMissing("progressive_population.total.both", 1896, toYear + 1)
+                .flagMissing("births.total.both", 1896, toYear)
+                .flagMissing("deaths.total.both", 1896, toYear));
 
         /* ===================== Часть иммиграции не разбиваемая по губерниям ===================== */
 

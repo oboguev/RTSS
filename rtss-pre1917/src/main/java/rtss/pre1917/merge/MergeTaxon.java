@@ -1,16 +1,14 @@
 package rtss.pre1917.merge;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.util.FieldValue;
+import rtss.util.Util;
 import rtss.pre1917.util.WeightedAverage;
 
 /*
@@ -26,16 +24,65 @@ public class MergeTaxon
     {
         TaxonExistingYears, AllSetYears
     }
-
-    public static enum MergeTaxonOptions
+    
+    public static class MissingDataCheck
     {
-        None, FlagMissingProgressivePopulation, FlagMissingPopulation, FlagMissingBirths, FlagMissingDeaths
+        private String selector;
+        private Integer enforceYearMin;
+        private Integer enforceYearMax;
+        
+        public MissingDataCheck(String selector, Integer enforceYearMin, Integer enforceYearMax)
+        {
+            this.selector = selector;
+            this.enforceYearMin = enforceYearMin;
+            this.enforceYearMax = enforceYearMax;
+        }
+        
+        public boolean isFlagMissing(String selector, int year)
+        {
+            if (!this.selector.equals(selector))
+                return false;
+            if (enforceYearMin != null && year < enforceYearMin)
+                return false;
+            if (enforceYearMax != null && year > enforceYearMax)
+                return false;
+            return true;
+        }
+    }
+
+    public static class MergeTaxonOptions
+    {
+        private List<MissingDataCheck> missingDataChecks = new ArrayList<>();
+
+        public MergeTaxonOptions flagMissing(String selector, Integer enforceYearMin, Integer enforceYearMax)
+        {
+            missingDataChecks.add(new MissingDataCheck(selector, enforceYearMin, enforceYearMax));
+            return this;
+        }
+        
+        /* -------------------------------------------- */
+
+        public boolean isFlagMissing(String selector, int year)
+        {
+            for (MissingDataCheck mdc : missingDataChecks)
+            {
+                if (mdc.isFlagMissing(selector, year))
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     private TerritoryDataSet territories;
 
-    public static Territory mergeTaxon(TerritoryDataSet territories, String txname, WhichYears whichYears, 
-            MergeTaxonOptions... options) throws Exception
+    public static Territory mergeTaxon(TerritoryDataSet territories, String txname, WhichYears whichYears) throws Exception
+    {
+        return mergeTaxon(territories, txname, whichYears, new MergeTaxonOptions());
+    }
+
+    public static Territory mergeTaxon(TerritoryDataSet territories, String txname, WhichYears whichYears,
+            MergeTaxonOptions options) throws Exception
     {
         return new MergeTaxon(territories).mergeTaxon(txname, whichYears, options);
     }
@@ -45,13 +92,10 @@ public class MergeTaxon
         this.territories = territories;
     }
 
-    public Territory mergeTaxon(String txname, WhichYears whichYears, MergeTaxonOptions... options) throws Exception
+    public Territory mergeTaxon(String txname, WhichYears whichYears, MergeTaxonOptions options) throws Exception
     {
         Territory src = territories.get(txname);
         Territory res = new Territory(txname);
-        
-        Set<MergeTaxonOptions> opts = new HashSet<>(Arrays.asList(options));
-        opts.remove(MergeTaxonOptions.None);
 
         List<Integer> years;
         if (whichYears == WhichYears.TaxonExistingYears)
@@ -72,11 +116,11 @@ public class MergeTaxon
 
             TerritoryYear ty = res.territoryYear(year);
 
-            sum_ur(ty, "population", tx, opts.contains(MergeTaxonOptions.FlagMissingPopulation));
-            sum_ur(ty, "progressive_population", tx, opts.contains(MergeTaxonOptions.FlagMissingProgressivePopulation));
-            sum_ur(ty, "midyear_population", tx, false);
-            sum_ur(ty, "births", tx, opts.contains(MergeTaxonOptions.FlagMissingBirths));
-            sum_ur(ty, "deaths", tx, opts.contains(MergeTaxonOptions.FlagMissingDeaths));
+            sum_ur(ty, "population", tx, options);
+            sum_ur(ty, "progressive_population", tx, options);
+            sum_ur(ty, "midyear_population", tx, options);
+            sum_ur(ty, "births", tx, options);
+            sum_ur(ty, "deaths", tx, options);
 
             rate(ty, "cbr", tx);
             rate(ty, "cdr", tx);
@@ -94,40 +138,72 @@ public class MergeTaxon
         return res;
     }
 
-    private void sum_ur(TerritoryYear ty, String selector, Taxon tx, boolean flagMissing) throws Exception
+    private void sum_ur(TerritoryYear ty, String selector, Taxon tx, MergeTaxonOptions options) throws Exception
     {
-        sum_vg(ty, selector + ".total", tx, flagMissing);
-        sum_vg(ty, selector + ".rural", tx, flagMissing);
-        sum_vg(ty, selector + ".urban", tx, flagMissing);
+        sum_vg(ty, selector + ".total", tx, options);
+        sum_vg(ty, selector + ".rural", tx, options);
+        sum_vg(ty, selector + ".urban", tx, options);
     }
 
-    private void sum_vg(TerritoryYear ty, String selector, Taxon tx, boolean flagMissing) throws Exception
+    private void sum_vg(TerritoryYear ty, String selector, Taxon tx, MergeTaxonOptions options) throws Exception
     {
-        sum_long(ty, selector + ".male", tx, flagMissing);
-        sum_long(ty, selector + ".female", tx, flagMissing);
-        sum_long(ty, selector + ".both", tx, flagMissing);
+        sum_long(ty, selector + ".male", tx, options);
+        sum_long(ty, selector + ".female", tx, options);
+        sum_long(ty, selector + ".both", tx, options);
     }
 
-    private void sum_long(TerritoryYear ty, String selector, Taxon tx, boolean flagMissing) throws Exception
+    private void sum_long(TerritoryYear ty, String selector, Taxon tx, MergeTaxonOptions options) throws Exception
     {
         double res = 0;
         int count = 0;
 
+        boolean flag = options.isFlagMissing(selector, ty.year);
+
         for (String tname : tx.territories.keySet())
         {
             Territory ter2 = territories.get(tname);
-            if (ter2 != null && ter2.hasYear(ty.year))
+
+            if (ter2 == null)
             {
-                TerritoryYear ty2 = ter2.territoryYear(ty.year);
-                Long lv = FieldValue.getLong(ty2, selector);
-                if (lv != null)
-                {
-                    double weight = tx.territories.get(tname);
-                    res += lv * weight;
-                    count++;
-                }
+                String combined = MergePost1897Regions.contained2combined(tname);
+                if (combined != null && territories.containsKey(combined))
+                    continue;
+                
+                combined = MergeCities.contained2combined(tname);
+                if (combined != null && territories.containsKey(combined))
+                    continue;
+
+                if (flag)
+                    Util.err(String.format("MergeTaxon: missing territory [%s]", tname));
+                continue;
             }
-            // ### @@@@ and in EvalCountryTaxon
+
+            if (!ter2.hasYear(ty.year))
+            {
+                if (flag)
+                    Util.err(String.format("MergeTaxon: missing territory [%s] year [%d]", tname, ty.year));
+                continue;
+            }
+
+            TerritoryYear ty2 = ter2.territoryYearOrNull(ty.year);
+            if (ty2 == null)
+            {
+                if (flag)
+                    Util.err(String.format("MergeTaxon: missing territory [%s] year [%d]", tname, ty.year));
+                continue;
+            }
+
+            Long lv = FieldValue.getLong(ty2, selector);
+            if (lv == null)
+            {
+                if (flag)
+                    Util.err(String.format("MergeTaxon: missing territory [%s] year [%d] field [%s]", tname, ty.year, selector));
+                continue;
+            }
+
+            double weight = tx.territories.get(tname);
+            res += lv * weight;
+            count++;
         }
 
         if (count != 0)

@@ -25,6 +25,17 @@ public class MergePost1897Regions
     {
         return MergeDescriptor.find(MergePost1897Descriptors, combined);
     }
+    
+    public static String contained2combined(String contained)
+    {
+        for (MergeDescriptor md : MergePost1897Descriptors)
+        {
+            if (md.parent.equals(contained) || md.children.contains(contained))
+                return md.combined;
+        }
+        
+        return null;
+    }
 
     /* ================================================================== */
     
