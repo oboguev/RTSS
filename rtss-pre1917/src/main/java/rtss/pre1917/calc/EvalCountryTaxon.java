@@ -193,32 +193,33 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
             LumpImmigration lump = immigration.lumpImmigrationForYear(year);
             final double TurkeyFactor = 2.33;
+            long lumpYearSum = 0;
 
             switch (taxonName)
             {
             case "Империя":
-                lumpTotal += immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
-                lumpTotal += immigration(tmPopulation, year, lump.persia);
-                lumpTotal += immigration(tmPopulation, year, lump.japan);
-                lumpTotal += immigration(tmPopulation, year, lump.china);
+                lumpYearSum += immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
+                lumpYearSum += immigration(tmPopulation, year, lump.persia);
+                lumpYearSum += immigration(tmPopulation, year, lump.japan);
+                lumpYearSum += immigration(tmPopulation, year, lump.china);
                 break;
 
             case "СССР-1991":
-                lumpTotal += immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
-                lumpTotal += immigration(tmPopulation, year, lump.persia);
-                lumpTotal += immigration(tmPopulation, year, lump.japan);
-                lumpTotal += immigration(tmPopulation, year, lump.china);
+                lumpYearSum += immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
+                lumpYearSum += immigration(tmPopulation, year, lump.persia);
+                lumpYearSum += immigration(tmPopulation, year, lump.japan);
+                lumpYearSum += immigration(tmPopulation, year, lump.china);
                 break;
 
             case "РСФСР-1991":
             case "Сибирь":
-                lumpTotal += immigration(tmPopulation, year, lump.japan);
-                lumpTotal += immigration(tmPopulation, year, lump.china);
+                lumpYearSum += immigration(tmPopulation, year, lump.japan);
+                lumpYearSum += immigration(tmPopulation, year, lump.china);
                 break;
 
             case "Кавказ":
-                lumpTotal += immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
-                lumpTotal += immigration(tmPopulation, year, lump.persia);
+                lumpYearSum += immigration(tmPopulation, year, Math.round(lump.turkey * TurkeyFactor));
+                lumpYearSum += immigration(tmPopulation, year, lump.persia);
                 break;
 
             case "Новороссия":
@@ -228,6 +229,17 @@ public class EvalCountryTaxon extends EvalCountryBase
             case "Литва":
             case "Средняя Азия":
                 break;
+            }
+
+            lumpTotal += lumpYearSum;
+
+            if (tmPopulation.territoryYearOrNull(year).migration.total.both == null)
+            {
+                tmPopulation.territoryYearOrNull(year).migration.total.both = lumpYearSum;
+            }
+            else
+            {
+                tmPopulation.territoryYearOrNull(year).migration.total.both += lumpYearSum;
             }
         }
 
@@ -293,6 +305,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             yd.cbr_middle = cbr_middle;
             yd.cdr_middle = cdr_middle;
             yd.population_increase = pop_total_next - pop_total;
+            yd.migration = tmPopulation.territoryYear(year).migration.total.both;
 
             cd.put(year, yd);
         }

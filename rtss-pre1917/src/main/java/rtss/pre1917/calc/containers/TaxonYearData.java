@@ -10,4 +10,6 @@ public class TaxonYearData
 
     public Double cbr_middle;
     public Double cdr_middle;
+    
+    public Long migration;
 }

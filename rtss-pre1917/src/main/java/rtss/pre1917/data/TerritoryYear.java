@@ -290,6 +290,7 @@ public class TerritoryYear
         ty.progressive_population = this.progressive_population.dup(ty);
         ty.births = this.births.dup(ty);
         ty.deaths = this.deaths.dup(ty);
+        ty.migration= this.migration.dup(ty);
         return ty;
     }
     
@@ -341,6 +342,7 @@ public class TerritoryYear
         progressive_population.merge(ty.progressive_population);
         births.merge(ty.births);
         deaths.merge(ty.deaths);
+        migration.merge(ty.migration);
     }
     
     private Double rate(long p1, Double r1, long p2, Double r2) throws Exception
@@ -377,5 +379,6 @@ public class TerritoryYear
         progressive_population.leaveOnlyTotalBoth();
         births.leaveOnlyTotalBoth();
         deaths.leaveOnlyTotalBoth();
+        migration.leaveOnlyTotalBoth();
     }
 }
