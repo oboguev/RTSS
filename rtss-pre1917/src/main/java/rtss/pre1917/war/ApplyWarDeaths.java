@@ -60,7 +60,11 @@ public class ApplyWarDeaths
         if (year == 1914)
             fraction = wls.getLossPercentageVsEmpireForTeritory(t.name);
         
-        if (fraction == null)
+        if (fraction != null)
+        {
+            fraction /= 100.0;
+        }
+        else
         {
             // Util.err("No war loss data for " + t.name);
             fraction = (double) ty.progressive_population.total.both / empirePopulation;
@@ -69,5 +73,25 @@ public class ApplyWarDeaths
         long extraDeaths = Math.round(empireDeaths * fraction);
 
         t.extraDeaths(year, extraDeaths);
+    }
+    
+    public void print(TerritoryDataSet tds) throws Exception
+    {
+        WarLossShare wls = new LoadData().loadWarLossShare();
+
+        Util.out("=========================================");
+        for (String tname : tds.keySet())
+        {
+            Double f1 = wls.getLossPercentageVsEmpireForTeritory(tname);
+            if (f1 != null)
+                f1 /= 100.0;
+            
+            Territory t = tds.get(tname);
+            TerritoryYear ty = t.territoryYearOrNull(1914);
+            double f2 = (double) ty.progressive_population.total.both / empirePopulation1914;
+            
+            Util.out(String.format("\"%s\" %s %f", tname, f1, f2));
+        }
+        Util.out("=========================================");
     }
 }

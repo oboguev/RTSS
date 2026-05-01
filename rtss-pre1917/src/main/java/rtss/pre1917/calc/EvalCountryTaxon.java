@@ -76,6 +76,9 @@ public class EvalCountryTaxon extends EvalCountryBase
             typdRusEvro = new EvalCountryTaxon(RusEvro, 1914).calc(false);
     }
 
+    private static Long EmpirePopulation1904 = null;
+    private static Long EmpirePopulation1914 = null;
+
     private TaxonYearlyPopulationData calc(boolean verbose) throws Exception
     {
         if (verbose)
@@ -85,6 +88,13 @@ public class EvalCountryTaxon extends EvalCountryBase
             Util.out("");
             Util.out("Расчёт для " + taxonName);
             Util.out("");
+        }
+        
+        boolean isEmpire = this.taxonName.equals("Империя");
+        if (!isEmpire)
+        {
+            if (EmpirePopulation1904 == null || EmpirePopulation1914 == null)
+                throw new Exception("Сначала нужно вычислить таксон Империя");
         }
 
         /* ===================== Численность населения ===================== */
@@ -112,17 +122,15 @@ public class EvalCountryTaxon extends EvalCountryBase
         corrections();
 
         /* ===================== Сохранить для экспорта данных ===================== */
-
-        switch (taxonName)
+        
+        if (isEmpire)
         {
-        case "Империя":
             tdsExportPopulation = tdsPopulation.dup();
             for (String tname : new HashSet<>(tdsExportPopulation.keySet()))
             {
                 if (Taxon.isComposite(tname))
                     tdsExportPopulation.remove(tname);
             }
-            break;
         }
 
         /* ================================================================= */
@@ -246,7 +254,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         Util.out(String.format("Величина части иммиграции не разбиваемой по губерниям, с 1896 по конец периода: %,d", lumpTotal));
 
         /* ===================== Учёт военных потерь ===================== */
-
+        
         if (DoCountMilitaryDeaths)
         {
             // Империя: japaneseWarDeaths(1.0)
@@ -257,14 +265,13 @@ public class EvalCountryTaxon extends EvalCountryBase
             if (taxonName.equals("РСФСР-1991"))
                 extraDeaths(1914, ApplyWarDeaths.RsfsrWarDeaths_1914);
         }
-
-        switch (taxonName)
+        
+        if (isEmpire)
         {
-        case "Империя":
-            long empirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
-            long empirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
-            new ApplyWarDeaths(empirePopulation1904, empirePopulation1914).apply(tdsExportPopulation);
-            break;
+            EmpirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
+            EmpirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
+            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsExportPopulation);
+            // new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).print(tdsExportPopulation);
         }
 
         /* ===================== Построить структуру с результатом ===================== */
@@ -316,11 +323,6 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         return cd;
     }
-
-    /*
-     * Число военных смертей для всей Империи в 1904 и 1905 гг.
-     */
-    private static Long EmpirePopulation1904 = null;
 
     private void japaneseWarDeaths() throws Exception
     {
