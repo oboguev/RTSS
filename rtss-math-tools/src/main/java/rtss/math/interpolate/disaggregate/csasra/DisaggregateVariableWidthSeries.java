@@ -57,7 +57,8 @@ public class DisaggregateVariableWidthSeries
             int maxIterations,
             double smoothingSigma,
             double positivityThreshold,
-            double maxConvergenceDifference,
+            Double maxAbsConvergenceDifference,
+            Double maxRelConvergenceDifference,
             boolean linearizeFirstSegment) throws Exception
     {
         boolean converged = false;
@@ -128,10 +129,25 @@ public class DisaggregateVariableWidthSeries
              * Optional: Check for convergence
              * The maxDifference method calculates the maximum difference between the current and previous iterations to determine convergence. 
              */
-            if (iteration > 0 && maxDifference(restored, restoredPrev) < maxConvergenceDifference)
+            // if (iteration > 0 && maxAbsDifference(restored, restoredPrev) < maxAbsConvergenceDifference)
+            if (iteration > 0)
             {
-                converged = true;
-                break;
+                if (maxAbsConvergenceDifference != null && maxRelConvergenceDifference != null)
+                {
+                    converged = maxAbsDifferenceIsLess(restored, restoredPrev, maxAbsConvergenceDifference) ||
+                                maxRelDifferenceIsLess(restored, restoredPrev, maxRelConvergenceDifference);
+                }
+                else if (maxAbsConvergenceDifference != null)
+                {
+                    converged = maxAbsDifferenceIsLess(restored, restoredPrev, maxAbsConvergenceDifference);
+                }
+                else if (maxRelConvergenceDifference != null)
+                {
+                    converged = maxRelDifferenceIsLess(restored, restoredPrev, maxRelConvergenceDifference);
+                }
+
+                if (converged)
+                    break;
             }
 
             if (iteration == maxIterations - 1)
@@ -150,9 +166,9 @@ public class DisaggregateVariableWidthSeries
         {
             restored = linearize_first_segment(restored, intervalWidths[0], intervalWidths[0] * aggregated[0]);
         }
-        
+
         CurveUtil.avoidDecompositionRounding(restored, Bins.bins(0, intervalWidths, aggregated));
-        
+
         return restored;
     }
 
@@ -219,7 +235,8 @@ public class DisaggregateVariableWidthSeries
         return sum / (end - start);
     }
 
-    private static double maxDifference(double[] a, double[] b)
+    @SuppressWarnings("unused")
+    private static double maxAbsDifference(double[] a, double[] b)
     {
         double maxDiff = 0;
 
@@ -232,6 +249,45 @@ public class DisaggregateVariableWidthSeries
 
         return maxDiff;
     }
+
+    private static boolean maxAbsDifferenceIsLess(double[] a, double[] b, double maxAbsConvergenceDifference)
+    {
+        for (int i = 0; i < a.length; i++)
+        {
+            double diff = Math.abs(a[i] - b[i]);
+            if (diff > maxAbsConvergenceDifference)
+                return false;
+        }
+
+        return true;
+    }
+    
+
+    private static boolean maxRelDifferenceIsLess(double[] a, double[] b, double maxRelConvergenceDifference)
+    {
+        for (int i = 0; i < a.length; i++)
+        {
+            double diff = Math.abs(a[i] - b[i]);
+            double base = Math.max(Math.abs(a[i]), Math.abs(b[i]));
+
+            final double precisionThreshold = 1e-10;
+
+            // Handle the case where both values are zero or very close to zero
+            if (base < precisionThreshold)
+            {
+                if (diff > precisionThreshold)
+                    return false;
+                continue;
+            }
+
+            double relDiff = diff / base;
+
+            if (relDiff > maxRelConvergenceDifference)
+                return false;
+        }
+
+        return true;
+    }    
 
     /* ======================================================================== */
 

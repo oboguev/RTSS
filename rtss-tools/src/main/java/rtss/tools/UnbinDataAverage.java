@@ -63,9 +63,9 @@ public class UnbinDataAverage
         String text = Clipboard.getText();
         if (text == null || text.length() == 0)
             throw new Exception("No data on the clipboard");
-        
+
         List<Bin[]> binlist = Bins.fromStringMultiSeries(text);
-        
+
         switch (kind)
         {
         case SUM:
@@ -82,7 +82,7 @@ public class UnbinDataAverage
         case AVERAGE:
             break;
         }
-        
+
         if (binlist.size() == 1)
         {
             do_main_single(kind, binlist.get(0));
@@ -94,13 +94,13 @@ public class UnbinDataAverage
             do_main_multi(sb, kind, binlist, "SPLINE");
             text = sb.toString();
         }
-        
+
         if (File.separatorChar == '\\')
             text = text.replace("\n", "\r\n");
 
         Clipboard.put(text);
     }
-    
+
     /* ============================================================================================================= */
 
     private String do_main_single(SumOrAverage kind, Bin[] bins) throws Exception
@@ -110,10 +110,10 @@ public class UnbinDataAverage
         addOutput(sb, "SPLINE", bins, unbin_spline(bins));
 
         // return Bins.asString(bins);
-        
+
         return sb.toString();
     }
-    
+
     /* ============================================================================================================= */
 
     private void do_main_multi(StringBuilder sb, SumOrAverage kind, List<Bin[]> binlist, String method) throws Exception
@@ -128,27 +128,27 @@ public class UnbinDataAverage
         sb.append("\n");
         sb.append(String.format("# Unbinned with method %s:", method));
         sb.append("\n");
-        
+
         List<double[]> yys = new ArrayList<>();
         int yylen = -1;
-        
+
         for (Bin[] bins : binlist)
         {
             double[] yy = null;
-            
+
             switch (method)
             {
             case "CSASRA":
                 yy = unbin_csasra(bins);
                 break;
-                
+
             case "SPLINE":
                 yy = unbin_spline(bins);
                 break;
             }
-            
+
             yys.add(yy);
-            
+
             if (yy != null)
             {
                 if (yylen != -1 && yylen != yy.length)
@@ -156,9 +156,9 @@ public class UnbinDataAverage
                 yylen = yy.length;
             }
         }
-        
+
         Bin[] bins = binlist.get(0);
-            
+
         for (int k = 0; k < yylen; k++)
         {
             // assuming x-scale step by 1
@@ -173,7 +173,7 @@ public class UnbinDataAverage
             {
                 sb.append(String.format("%f", dyear));
             }
-            
+
             for (int j = 0; j < binlist.size(); j++)
             {
                 double[] yy = yys.get(j);
@@ -190,7 +190,7 @@ public class UnbinDataAverage
             sb.append("\n");
         }
     }
-    
+
     /* ============================================================================================================= */
 
     private void addOutput(StringBuilder sb, String method, Bin[] bins, double[] yy)
@@ -201,7 +201,7 @@ public class UnbinDataAverage
             sb.append("###########################################################################\n");
             sb.append("\n");
         }
-            
+
         if (yy == null)
         {
             sb.append(String.format("# Method %s failed", method));
@@ -241,7 +241,7 @@ public class UnbinDataAverage
         int i = (int) v;
         return (v == i) ? Integer.valueOf(i) : null;
     }
-    
+
     /* ============================================================================================================= */
 
     private double[] unbin_csasra(Bin[] bins)
@@ -251,10 +251,12 @@ public class UnbinDataAverage
         final double[] averages = Bins.midpoint_y(bins);
 
         final int[] intervalWidths = Bins.widths(bins);
-        final int maxIterations = 5000;
+        final int maxIterations = 1_000_000;
         final double positivityThreshold = 1e-6;
-        final double maxConvergenceDifference = 1e-3;
+        final double maxAbsConvergenceDifference = 1e-3;
+        final double maxRelConvergenceDifference = 1e-4;
         final double smoothingSigma = 1.0;
+        final boolean linearizeFirstSegment = false;
 
         try
         {
@@ -263,14 +265,15 @@ public class UnbinDataAverage
                                                                         maxIterations,
                                                                         smoothingSigma,
                                                                         positivityThreshold,
-                                                                        maxConvergenceDifference,
-                                                                        true);
+                                                                        maxAbsConvergenceDifference,
+                                                                        maxRelConvergenceDifference,
+                                                                        linearizeFirstSegment);
 
             if (!Util.isNonNegative(yyy))
                 throw new Exception("Error calculating curve (negative value)");
 
             CurveVerifier.validate_means(yyy, bins);
-            
+
             return yyy;
         }
         catch (Exception ex)
@@ -286,7 +289,7 @@ public class UnbinDataAverage
     {
         final int ppy = 1;
         final TargetResolution targetResolution = TargetResolution.YEARLY;
-        
+
         String title = "clipboard data";
 
         TargetPrecision precision = new TargetPrecision().eachBinRelativeDifference(0.001);
@@ -366,13 +369,13 @@ public class UnbinDataAverage
                 throw new Exception("Error calculating curve (negative value)");
 
             CurveVerifier.validate_means(yy, bins);
-            
+
             return yy;
         }
         catch (Exception ex)
         {
             UI.messageBox("Unable to unbin with SPLINE: " + ex.getLocalizedMessage(), "Acknowledge");
-            
+
             return null;
         }
     }

@@ -106,6 +106,7 @@ public class InterpolateASFR_ByAge
                                                                     smoothingSigma,
                                                                     positivityThreshold,
                                                                     maxConvergenceDifference,
+                                                                    null,
                                                                     false);
 
         if (!Util.isNonNegative(yyy))
