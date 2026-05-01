@@ -5,6 +5,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.util.Util;
 
 public class ApplyWarDeaths
 {
@@ -43,7 +44,7 @@ public class ApplyWarDeaths
     private void apply(Territory t, int year, long empireDeaths, long empirePopulation, int referenceYear) throws Exception
     {
         WarLossShare wls = new LoadData().loadWarLossShare();
-        
+
         TerritoryYear ty = t.territoryYearOrNull(referenceYear);
 
         if (ty == null || ty.progressive_population == null ||
@@ -54,7 +55,17 @@ public class ApplyWarDeaths
                 return;
         }
 
-        double fraction = (double) ty.progressive_population.total.both / empirePopulation;
+        Double fraction = null;
+        
+        if (year == 1914)
+            fraction = wls.getLossPercentageVsEmpireForTeritory(t.name);
+        
+        if (fraction == null)
+        {
+            // Util.err("No war loss data for " + t.name);
+            fraction = (double) ty.progressive_population.total.both / empirePopulation;
+        }
+
         long extraDeaths = Math.round(empireDeaths * fraction);
 
         t.extraDeaths(year, extraDeaths);
