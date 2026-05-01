@@ -101,7 +101,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         if (verbose)
         {
             FilterByTaxon.filteredOutByTaxon(taxonName, tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
-            FilterByTaxon.filterByTaxon(taxonName, tdsPopulation).showTerritoryNames("Территории для численности населения");
+            FilterByTaxon.filterByTaxon(taxonName, tdsPopulation).showTerritoryNames("Территории для численности населения", taxonName, 1914);
         }
 
         /* ================================= Правки ================================ */

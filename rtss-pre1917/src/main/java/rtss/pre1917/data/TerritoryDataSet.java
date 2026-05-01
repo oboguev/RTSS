@@ -24,10 +24,10 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         this.dataSetType = dataSetType;
         this.loadOptions = loadOptions;
     }
-    
+
     public String toString()
     {
-        StringBuilder sb = new StringBuilder(); 
+        StringBuilder sb = new StringBuilder();
         for (String tname : Util.sort(keySet()))
         {
             if (sb.length() != 0)
@@ -194,7 +194,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
     {
         new MergeCities(this).merge();
     }
-    
+
     public void mergePost1897Regions() throws Exception
     {
         new MergePost1897Regions(this).merge();
@@ -226,6 +226,30 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             Util.out(comment);
 
         for (String tname : Util.sort(this.keySet()))
+        {
             Util.out("    " + tname);
+        }
+    }
+
+    public void showTerritoryNames(String comment, String taxonName, int year) throws Exception
+    {
+        Taxon tx = Taxon.of(taxonName, year, this);
+        tx = tx.flatten(this, year);
+
+        if (comment != null)
+            Util.out(comment);
+
+        for (String tname : Util.sort(this.keySet()))
+        {
+            Double weight = tx.territories.get(tname);
+            if (weight.equals(Taxon.DoubleONE))
+            {
+                Util.out("    " + tname);
+            }
+            else
+            {
+                Util.out(String.format("    %s (%.1f%%)", tname, weight * 100.0));
+            }
+        }
     }
 }
