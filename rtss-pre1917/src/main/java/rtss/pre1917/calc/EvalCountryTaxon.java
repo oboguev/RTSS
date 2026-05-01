@@ -12,11 +12,11 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
-import rtss.pre1917.eval.ApplyWarDeaths;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.MergeTaxonOptions;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
+import rtss.pre1917.war.ApplyWarDeaths;
 import rtss.util.Util;
 
 public class EvalCountryTaxon extends EvalCountryBase

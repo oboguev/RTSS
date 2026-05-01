@@ -33,6 +33,7 @@ import rtss.pre1917.eval.FillMissingBD;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.validate.CrossVerify;
+import rtss.pre1917.war.WarLossShare;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelColumnHeader;
@@ -98,7 +99,7 @@ public class LoadData
             {
                 int c1 = 'A' + self.currentWCOL;
                 String excelColID = "";
-                
+
                 if (c1 <= 'Z')
                 {
                     excelColID += (char) c1;
@@ -110,8 +111,7 @@ public class LoadData
                     excelColID += (char) ('A' + c1 - 1);
                     excelColID += (char) ('A' + c2);
                 }
-                
-                
+
                 Util.out(String.format("File %s, col %s (%d), row %s", self.currentFile, excelColID, self.currentWCOL + 1,
                                        self.currentNR + 1));
             }
@@ -886,7 +886,7 @@ public class LoadData
             throw new Exception("Invalid cell data type (for expected Double)");
         }
     }
-    
+
     private Integer asInteger(Object o) throws Exception
     {
         return (int) (long) asLong(o);
@@ -1003,7 +1003,7 @@ public class LoadData
                 continue;
 
             int year = asInteger(o);
-            
+
             EmigrationYear yd = new EmigrationYear(year);
 
             yd.total = getEmigration(rc, nr, headers, "всего");
@@ -1990,27 +1990,85 @@ public class LoadData
             if (o == null || o.toString().trim().length() == 0)
                 continue;
             int year = asInteger(o);
-            
-            ImmigrationYear yd = new ImmigrationYear(year); 
-            
+
+            ImmigrationYear yd = new ImmigrationYear(year);
+
             for (String h : headers.keySet())
             {
                 if (h.equals("год"))
                     continue;
-                
+
                 String country = Util.despace(h);
                 if (country.endsWith(" лб"))
                     country = Util.stripTail(country, " лб");
-                
+
                 int col = headers.get(h);
                 currentWCOL = col;
                 o = rc.get(nr, col);
-                long amount = asLong(o); 
-                
+                long amount = asLong(o);
+
                 yd.add(country, amount);
             }
-            
+
             immigration.setYearData(yd);
+        }
+
+        currentNR = null;
+    }
+
+    /* ================================================================================================= */
+
+    private static WarLossShare cachedWarLossShare = null;
+
+    public WarLossShare loadWarLossShare() throws Exception
+    {
+        if (cachedWarLossShare != null)
+            return cachedWarLossShare;
+
+        WarLossShare wls = new WarLossShare ();
+
+        currentFile = "1914-war-losses-by-territory.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+
+                loadWarLosses(wls, rc, headers);
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+        
+        cachedWarLossShare = wls;
+        
+        return wls;
+    }
+
+    private void loadWarLosses(WarLossShare wls, ExcelRC rc, Map<String, Integer> headers) throws Exception
+    {
+        int colTerritory = headers.get("губерния-1");
+        int colLossShare = headers.get("% смертей");
+
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+            
+            String tname = rc.asString(nr, colTerritory);
+            if (tname == null || tname.equals(""))
+                continue;
+            tname = TerritoryNames.canonic(tname);
+            double pct = rc.asRequiredDouble(nr, colLossShare);
+            wls.set(tname, pct);
         }
 
         currentNR = null;

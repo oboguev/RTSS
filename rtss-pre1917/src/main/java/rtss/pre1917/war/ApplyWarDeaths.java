@@ -1,5 +1,6 @@
-package rtss.pre1917.eval;
+package rtss.pre1917.war;
 
+import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -24,7 +25,7 @@ public class ApplyWarDeaths
         this.empirePopulation1914 = empirePopulation1914;
     }
 
-    public void apply(TerritoryDataSet tds)
+    public void apply(TerritoryDataSet tds) throws Exception
     {
         for (Territory t : tds.values())
         {
@@ -32,15 +33,17 @@ public class ApplyWarDeaths
         }
     }
 
-    private void apply(Territory t)
+    private void apply(Territory t) throws Exception
     {
         apply(t, 1904, EmpireWarDeaths_1904, empirePopulation1904, 1904);
         apply(t, 1905, EmpireWarDeaths_1905, empirePopulation1904, 1904);
         apply(t, 1914, EmpireWarDeaths_1914, empirePopulation1914, 1914);
     }
 
-    private void apply(Territory t, int year, long empireDeaths, long empirePopulation, int referenceYear)
+    private void apply(Territory t, int year, long empireDeaths, long empirePopulation, int referenceYear) throws Exception
     {
+        WarLossShare wls = new LoadData().loadWarLossShare();
+        
         TerritoryYear ty = t.territoryYearOrNull(referenceYear);
 
         if (ty == null || ty.progressive_population == null ||
