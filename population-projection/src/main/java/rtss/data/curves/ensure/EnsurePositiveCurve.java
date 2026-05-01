@@ -36,7 +36,7 @@ public class EnsurePositiveCurve
         
         first = Bins.firstBin(bins);
         last = Bins.lastBin(bins);
-        ppy = yyy.length / (last.age_x2 + 1);
+        ppy = yyy.length / (last.age_x2 + 1 - first.age_x1);
         if (yyy.length != ppy * (last.age_x2 + 1))
             throw new IllegalArgumentException();
         

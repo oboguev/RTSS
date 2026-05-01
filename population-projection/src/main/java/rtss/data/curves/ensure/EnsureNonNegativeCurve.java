@@ -49,7 +49,7 @@ public class EnsureNonNegativeCurve
     {
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
-        int ppy = yyy.length / (last.age_x2 + 1);
+        int ppy = yyy.length / (last.age_x2 + 1 - first.age_x1);
 
         int x1 = ppy * (bin.age_x1 - first.age_x1);
         int x2 = ppy * (bin.age_x2 + 1 - first.age_x1) - 1;
