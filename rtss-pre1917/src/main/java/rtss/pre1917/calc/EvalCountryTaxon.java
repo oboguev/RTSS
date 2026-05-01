@@ -255,7 +255,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             japaneseWarDeaths();
 
             if (taxonName.equals("РСФСР-1991"))
-                extraDeaths(1914, 94_000);
+                extraDeaths(1914, ApplyWarDeaths.RsfsrWarDeaths_1914);
         }
 
         switch (taxonName)
@@ -320,8 +320,6 @@ public class EvalCountryTaxon extends EvalCountryBase
     /*
      * Число военных смертей для всей Империи в 1904 и 1905 гг.
      */
-    private final double EmpireWarDeaths_1904 = 25_589;
-    private final double EmpireWarDeaths_1905 = 25_363;
     private static Long EmpirePopulation1904 = null;
 
     private void japaneseWarDeaths() throws Exception
@@ -345,8 +343,8 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private void japaneseWarDeaths(double fraction) throws Exception
     {
-        extraDeaths(1904, Math.round(EmpireWarDeaths_1904 * fraction));
-        extraDeaths(1905, Math.round(EmpireWarDeaths_1905 * fraction));
+        extraDeaths(1904, Math.round(ApplyWarDeaths.EmpireWarDeaths_1904 * fraction));
+        extraDeaths(1905, Math.round(ApplyWarDeaths.EmpireWarDeaths_1905 * fraction));
     }
 
     protected void extraDeaths(int year, long deaths) throws Exception

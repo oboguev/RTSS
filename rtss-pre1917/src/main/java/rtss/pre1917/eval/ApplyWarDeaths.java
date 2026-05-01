@@ -7,12 +7,16 @@ import rtss.pre1917.data.TerritoryYear;
 
 public class ApplyWarDeaths
 {
-    private final double empirePopulation1904;
-    private final double empirePopulation1914;
+    private final long empirePopulation1904;
+    private final long empirePopulation1914;
 
-    private final double EmpireWarDeaths_1904 = 25_589;
-    private final double EmpireWarDeaths_1905 = 25_363;
-    private final double EmpireWarDeaths_1914 = 177_000;
+    public static final long EmpireWarDeaths_1904 = 25_589;
+    public static final long EmpireWarDeaths_1905 = 25_363;
+    public static final long EmpireWarDeaths_1914 = 177_000;
+
+    public static final long RsfsrWarDeaths_1904 = 13_465;
+    public static final long RsfsrWarDeaths_1905 = 13_346;
+    public static final long RsfsrWarDeaths_1914 = 98_600;
 
     public ApplyWarDeaths(long empirePopulation1904, long empirePopulation1914)
     {
@@ -35,7 +39,7 @@ public class ApplyWarDeaths
         apply(t, 1914, EmpireWarDeaths_1914, empirePopulation1914, 1914);
     }
 
-    private void apply(Territory t, int year, double empireDeaths, double empirePopulation, int referenceYear)
+    private void apply(Territory t, int year, long empireDeaths, long empirePopulation, int referenceYear)
     {
         TerritoryYear ty = t.territoryYearOrNull(referenceYear);
 
@@ -47,7 +51,7 @@ public class ApplyWarDeaths
                 return;
         }
 
-        double fraction = ty.progressive_population.total.both / empirePopulation;
+        double fraction = (double) ty.progressive_population.total.both / empirePopulation;
         long extraDeaths = Math.round(empireDeaths * fraction);
 
         t.extraDeaths(year, extraDeaths);
