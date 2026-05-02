@@ -90,9 +90,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             Util.out("");
         }
 
-        boolean isEmpire = this.taxonName.equals("Империя");
-
-        /* ===================== Численность населения ===================== */
+        /* ===================== Загрузить данные о численности и естественном движении населения ===================== */
 
         tdsPopulation = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
                                                 LoadOptions.ADJUST_FEMALE_BIRTHS,
@@ -112,7 +110,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         /* ================================= Правки ================================ */
 
         /*
-         * Первоначально tdsVitalRates используется только как список имён территорий, "включать или не включать", 
+         * Первоначально tdsVitalRates используется только как список имён территорий (отметка "включать или не включать"), 
          * выводимый из corrections(). 
          * Но сами фактические данные о населении внутри tdsVitalRates затем обновятся из tdsPopulation / tdsExportPopulation. 
          */
@@ -120,11 +118,10 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         corrections();
         
-        if (isEmpire)
+        if (taxonName.equals("Империя"))
             calc_empire();
         else
             calc_non_empire();
-
 
         /* ===================== Построить структуру с результатом ===================== */
 
