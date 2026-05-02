@@ -2,7 +2,6 @@ package rtss.pre1917.calc;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
-import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
@@ -124,29 +123,6 @@ public class EvalCountryBase
     }
     
     /* ================================================================================================ */
-
-    /*
-     * Вычислить численность населения губерний и областей на начало 1896 года (прогрессивная оценка)
-     */
-    protected void eval_1896(TerritoryDataSet tds) throws Exception
-    {
-        for (String tname : tds.keySet())
-        {
-            if (Taxon.isComposite(tname))
-                continue;
-
-            Territory t = tds.get(tname);
-            TerritoryYear ty1896 = t.territoryYearOrNull(1896);
-            TerritoryYear ty1897 = t.territoryYearOrNull(1897);
-
-            if (ty1897 != null && ty1896 != null)
-            {
-                long in = ty1896.births.total.both - ty1896.deaths.total.both;
-                in += totalMigration.saldo(tname, 1896);
-                ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
-            }
-        }
-    }
 
     private void excludeFromVitalRates(String tname) throws Exception
     {

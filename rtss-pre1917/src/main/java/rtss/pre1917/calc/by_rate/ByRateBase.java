@@ -52,7 +52,6 @@ public abstract class ByRateBase extends EvalCountryBase
                                                 LoadOptions.MERGE_POST1897_REGIONS,
                                                 LoadOptions.EVAL_PROGRESSIVE);
         tdsPopulation.leaveOnlyTotalBoth();
-        eval_1896(tdsPopulation);
 
         tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
 

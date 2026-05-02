@@ -99,7 +99,6 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                 LoadOptions.MERGE_POST1897_REGIONS,
                                                 LoadOptions.EVAL_PROGRESSIVE);
         tdsPopulation.leaveOnlyTotalBoth();
-        eval_1896(tdsPopulation);
 
         if (verbose)
         {

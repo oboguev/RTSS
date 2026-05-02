@@ -652,4 +652,18 @@ public class Taxon
                 territories.remove(city);
         }
     }
+
+    private static Taxon TaxonFinland = null;
+
+    private static synchronized Taxon taxonFinland() throws Exception
+    {
+        if (TaxonFinland == null)
+            TaxonFinland = Taxon.of("Финляндия", 1913, null);
+        return TaxonFinland;
+    }
+    
+    public static boolean isFinland(String tname) throws Exception
+    {
+        return taxonFinland().territories.containsKey(tname);
+    }
 }

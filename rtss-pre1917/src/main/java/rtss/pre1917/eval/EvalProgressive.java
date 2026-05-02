@@ -8,6 +8,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.TotalMigration;
+import rtss.util.Util;
 
 /*
  * Вычислить progressive_population отчётом от переписи 1897 года с приложением ежегодных
@@ -46,12 +47,15 @@ public class EvalProgressive
     {
         for (String tname : tds.keySet())
         {
-            if (Taxon.isComposite(tname))
+            if (Taxon.isComposite(tname) || Taxon.isFinland(tname))
                 continue;
 
             Territory tCensus = census.get(censusTerritoryName(tname));
             if (tCensus == null)
+            {
+                Util.err("Нельзя сделать прогрессивный расчёт для " + tname);
                 continue;
+            }
 
             evalProgressive(tname, tCensus);
         }

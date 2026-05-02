@@ -28,9 +28,9 @@ public class ApplyWarDeaths
     
     public static void applyToEmpire(Territory tmEmpire)
     {
-        tmEmpire.extraDeaths(1904, Math.round(EmpireWarDeaths_1904));
-        tmEmpire.extraDeaths(1905, Math.round(EmpireWarDeaths_1905));
-        tmEmpire.extraDeaths(1914, Math.round(EmpireWarDeaths_1914));
+        tmEmpire.extraDeaths(1904, EmpireWarDeaths_1904);
+        tmEmpire.extraDeaths(1905, EmpireWarDeaths_1905);
+        tmEmpire.extraDeaths(1914, EmpireWarDeaths_1914);
     }
 
     public void apply(TerritoryDataSet tds) throws Exception
