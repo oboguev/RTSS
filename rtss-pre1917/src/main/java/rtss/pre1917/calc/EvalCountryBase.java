@@ -118,6 +118,7 @@ public class EvalCountryBase
 
     private void corrections_Siberia() throws Exception
     {
+        useStabilized("Забайкальская обл.", 1908, 1913);
         fixEarlyPeriod("Приморская обл.", 1896, 1898, 1899, 1903);
         excludeFromVitalRates("Приморская обл.");
     }

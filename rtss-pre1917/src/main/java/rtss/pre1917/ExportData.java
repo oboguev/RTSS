@@ -210,9 +210,9 @@ public class ExportData
         addRateValue(mv, "с", cdr);
         addRateValue(mv, "еп", ngr);
 
-        addRateValue(mv, "р2", cbr);
-        addRateValue(mv, "с2", cdr);
-        addRateValue(mv, "еп2", ngr);
+        addRateValue(mv, "р2", cbr2);
+        addRateValue(mv, "с2", cdr2);
+        addRateValue(mv, "еп2", ngr2);
 
         addValue(mv, "vr.ok", vrok ? 1L : 0L);
 
