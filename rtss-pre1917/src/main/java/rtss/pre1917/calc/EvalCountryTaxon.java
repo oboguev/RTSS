@@ -91,11 +91,6 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
 
         boolean isEmpire = this.taxonName.equals("Империя");
-        if (DoCountMilitaryDeaths && !isEmpire)
-        {
-            if (EmpirePopulation1904 == null || EmpirePopulation1914 == null)
-                throw new Exception("Сначала нужно вычислить таксон Империя");
-        }
 
         /* ===================== Численность населения ===================== */
 
@@ -124,32 +119,107 @@ public class EvalCountryTaxon extends EvalCountryBase
         tdsVitalRates = tdsPopulation.dup();
 
         corrections();
+        
+        if (isEmpire)
+            calc_empire();
+        else
+            calc_non_empire();
 
-        if (DoCountMilitaryDeaths && !isEmpire)
-        {
-            // ### apply war losses to tdsPopulation 
-        }
 
+        /* ===================== Построить структуру с результатом ===================== */
+
+        showPopulationPercentageVitalRatesVsPopulation();
+
+        return buildTaxonYearlyPopulationData();
+    }
+    
+    private void calc_empire() throws Exception
+    {
+        // do NOT apply war losses to individual territories -- not yet
+        
         /* ===================== Сохранить для экспорта данных ===================== */
 
-        if (isEmpire)
+        tdsExportPopulation = tdsPopulation.dup();
+        for (String tname : new HashSet<>(tdsExportPopulation.keySet()))
         {
-            tdsExportPopulation = tdsPopulation.dup();
-            for (String tname : new HashSet<>(tdsExportPopulation.keySet()))
-            {
-                if (Taxon.isComposite(tname))
-                    tdsExportPopulation.remove(tname);
-            }
+            if (Taxon.isComposite(tname))
+                tdsExportPopulation.remove(tname);
+        }
+        
+        filterPopulationSetsByTaxon();
+        Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
+        checkProgressiveAvailable();
+        mergeTaxonPopulation();
+        
+        if (DoCountMilitaryDeaths)
+        {
+            // apply war losses manually (in bulk) to tmPopulation  
+            EmpirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
+            // Империя: japaneseWarDeaths(1.0)
+            // СССР-1991: japaneseWarDeaths(0.926)
+            // РСФСР-1991: japaneseWarDeaths(0.527)
+            japaneseWarDeaths();
+            
+            // #### 1914 for tmPopulation
+        }
+        
+        /* Часть иммиграции не разбиваемая по губерниям */
+        applyLumpImmigration(tmPopulation, true);
+        
+        if (DoCountMilitaryDeaths)
+        {
+            // apply war losses to individual territories in tdsExport and tdsVital 
+            EmpirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
+            EmpirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
+            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsExportPopulation);
+            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsVitalRates);
+        }
+        else
+        {
+            EmpirePopulation1904 = null;
+            EmpirePopulation1914 = null;
+            
+        }
+        
+        mergeTaxonVitalRates(territoriesExcludedFromVitalRates);
+        
+        /* Часть иммиграции не разбиваемая по губерниям */
+        applyLumpImmigration(tmVitalRates, false);
+    }
+
+    private void calc_non_empire() throws Exception
+    {
+        if (DoCountMilitaryDeaths)
+        {
+            // apply war losses to individual territories
+            if (EmpirePopulation1904 == null || EmpirePopulation1914 == null)
+                throw new Exception("Сначала нужно вычислить таксон Империя");
+            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsPopulation);
         }
 
-        /* ================================================================= */
+        filterPopulationSetsByTaxon();
+        Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
+        checkProgressiveAvailable();
+        mergeTaxonPopulation();
+        mergeTaxonVitalRates(territoriesExcludedFromVitalRates);
 
+        // do NOT apply war losses to tmPopulation or tmVital, as they were already applied 
+        
+        /* Часть иммиграции не разбиваемая по губерниям */
+        applyLumpImmigration(tmPopulation, true);
+        applyLumpImmigration(tmVitalRates, false);
+    }
+    
+    private void filterPopulationSetsByTaxon() throws Exception
+    {
         tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
         tdsVitalRates = FilterByTaxon.filterByTaxon(taxonName, tdsVitalRates);
-
-        /* ===================== Естественное движение ===================== */
-
+    }
+    
+    private Set<String> refreshVitalSetData() throws Exception
+    {
         Set<String> territoriesExcludedFromVitalRates = new HashSet<>();
+        
         for (String tname : new HashSet<>(tdsVitalRates.keySet()))
         {
             Territory t = tdsPopulation.get(tname);
@@ -161,6 +231,8 @@ public class EvalCountryTaxon extends EvalCountryBase
             }
             else
             {
+                if (Taxon.isComposite(tname))
+                    Util.err("Composite taxon in vital rates: " + tname);
                 tdsVitalRates.put(tname, t.dup());
             }
         }
@@ -171,7 +243,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
         else
         {
-            Util.out("Для подсчёта естественного движения не используются:");
+            Util.out("Для подсчёта естественного движения не используются территории:");
             for (String tname : Util.sort(tdsPopulation.keySet()))
             {
                 if (!tdsVitalRates.containsKey(tname))
@@ -182,46 +254,18 @@ public class EvalCountryTaxon extends EvalCountryBase
             }
 
         }
-
-        /* ===================== Суммирование по таксону ===================== */
-
+        
+        return territoriesExcludedFromVitalRates;
+    }
+    
+    private void checkProgressiveAvailable() throws Exception
+    {
         new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
         new CheckProgressiveAvailable(tdsVitalRates).check(toYear + 1);
         if (tdsExportPopulation != null)
             new CheckProgressiveAvailable(tdsExportPopulation).check(toYear + 1);
-
-        mergeTaxonPopulation();
-        mergeTaxonVitalRates(territoriesExcludedFromVitalRates);
-
-        /* Часть иммиграции не разбиваемая по губерниям */
-        applyLumpImmigration(tmPopulation, true);
-        applyLumpImmigration(tmVitalRates, true);
-
-        /* ===================== Учёт военных потерь ===================== */
-
-        if (DoCountMilitaryDeaths && isEmpire)
-        {
-            EmpirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
-            // Империя: japaneseWarDeaths(1.0)
-            // СССР-1991: japaneseWarDeaths(0.926)
-            // РСФСР-1991: japaneseWarDeaths(0.527)
-            japaneseWarDeaths();
-
-            EmpirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
-            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsExportPopulation);
-            // new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).print(tdsExportPopulation);
-
-            // if (taxonName.equals("РСФСР-1991"))
-            //    extraDeaths(1914, ApplyWarDeaths.RsfsrWarDeaths_1914);
-        }
-
-        /* ===================== Построить структуру с результатом ===================== */
-
-        showPopulationPercentageVitalRatesVsPopulation();
-
-        return buildTaxonYearlyPopulationData();
     }
-
+    
     private void mergeTaxonPopulation() throws Exception
     {
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
