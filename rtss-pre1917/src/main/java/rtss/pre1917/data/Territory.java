@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rtss.math.algorithms.MathUtil;
+import rtss.pre1917.data.migration.TotalMigration;
 import rtss.util.Util;
 
 public class Territory
@@ -165,6 +167,98 @@ public class Territory
 
                 if (y > year && ty.progressive_population.total.both != null)
                     ty.progressive_population.total.both -= extraDeaths;
+            }
+        }
+    }
+
+    private static final double PROMILLE = 1000.0;
+
+    public double calc_mid_CBR_total_both(int year) throws Exception
+    {
+        return calc_mid_CBR_total_both(year, false);
+    }
+    
+    public Double calc_mid_CBR_total_both(int year, boolean allowNull) throws Exception
+    {
+        try
+        {
+            TerritoryYear ty = territoryYearOrNull(year);
+            if (ty.births.total.both == null && allowNull)
+                return null;
+
+            return (PROMILLE * ty.births.total.both) / calc_avg_year_progressive_population_total_both(year);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(String.format("Ошибка вычисления среднегодового CBR %s в %d году", name, year), ex);
+        }
+    }
+
+    public double calc_mid_CDR_total_both(int year) throws Exception
+    {
+        return calc_mid_CDR_total_both(year, false);
+    }
+    
+    public Double calc_mid_CDR_total_both(int year, boolean allowNull) throws Exception
+    {
+        try
+        {
+            TerritoryYear ty = territoryYearOrNull(year);
+            if (ty.deaths.total.both == null && allowNull)
+                return null;
+
+            return (PROMILLE * ty.deaths.total.both) / calc_avg_year_progressive_population_total_both(year);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(String.format("Ошибка вычисления среднегодового CDR %s в %d году", name, year), ex);
+        }
+    }
+
+    public long calc_avg_year_progressive_population_total_both(int year) throws Exception
+    {
+        return calc_avg_year_progressive_population_total_both(year, false);
+    }
+
+    public Long calc_avg_year_progressive_population_total_both(int year, boolean allowNull) throws Exception
+    {
+        try
+        {
+            TerritoryYear ty = territoryYearOrNull(year);
+
+            Long pop1 = ty.progressive_population.total.both;
+            Long pop2 = null;
+
+            TerritoryYear ty2 = territoryYearOrNull(year + 1);
+            if (ty2 != null &&
+                ty2.progressive_population != null &&
+                ty2.progressive_population.total != null &&
+                ty2.progressive_population.total.both != null)
+            {
+                pop2 = ty2.progressive_population.total.both;
+            }
+            else
+            {
+                long migr = ty.migration.total.both;
+                if (migr == 0)
+                    migr = TotalMigration.getTotalMigration().saldo(name, year);
+
+                long incr = ty.births.total.both - ty.deaths.total.both + migr;
+                pop2 = pop1 + incr;
+            }
+
+            return MathUtil.log_average(pop1, pop2);
+        }
+        catch (Exception ex)
+        {
+            if (allowNull)
+            {
+                Util.err(String.format("Ошибка вычисления среднегодового населения %s в %d году", name, year));
+                return null;
+            }
+            else
+            {
+                throw new Exception(String.format("Ошибка вычисления среднегодового населения %s в %d году", name, year), ex);
             }
         }
     }

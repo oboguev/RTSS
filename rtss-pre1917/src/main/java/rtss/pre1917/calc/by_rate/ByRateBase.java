@@ -38,7 +38,7 @@ public abstract class ByRateBase
 
     protected void eval() throws Exception
     {
-        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet();
+        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(false);
 
         for (String tname : tdsEmpire.keySet())
         {
@@ -56,20 +56,31 @@ public abstract class ByRateBase
             {
                 if (year == 1898 || year == 1905 || year == 1910)
                     continue;
-
-                TerritoryYear ty = t.territoryYear(year);
-                long pop = ty.progressive_population.total.both;
-
-                TerritoryYear ty2 = t.territoryYear(year + 1);
-                long pop2 = ty2.progressive_population.total.both;
-
-                pop = MathUtil.log_average(pop, pop2);
                 
-                double cbr = (PROMILLE * denull(ty.births.total.both)) / pop;
-                double cdr = (PROMILLE * denull(ty.deaths.total.both)) / pop;
+                TerritoryYear ty = t.territoryYearOrNull(year);
+                if (ty.births.total.both != null && ty.deaths.total.both != null)
+                {
+                    double cbr = t.calc_mid_CBR_total_both(year);
+                    double cdr = t.calc_mid_CDR_total_both(year);
+                    rate += rate(cbr, cdr);
+                    nyears++;
+                }
                 
-                rate += rate(cbr, cdr);
-                nyears++;
+                if (Util.False)
+                {
+                    long pop = ty.progressive_population.total.both;
+
+                    TerritoryYear ty2 = t.territoryYear(year + 1);
+                    long pop2 = ty2.progressive_population.total.both;
+
+                    pop = MathUtil.log_average(pop, pop2);
+                    
+                    double cbr = (PROMILLE * denull(ty.births.total.both)) / pop;
+                    double cdr = (PROMILLE * denull(ty.deaths.total.both)) / pop;
+                    
+                    rate += rate(cbr, cdr);
+                    nyears++;
+                }
             }
 
             results.add(new TerritoryResult(tname, rate / nyears));

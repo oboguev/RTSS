@@ -54,7 +54,7 @@ public class ByIncreaseOfGrowthRate
 
     protected void eval() throws Exception
     {
-        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet();
+        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(false);
 
         for (String tname : tdsEmpire.keySet())
         {
@@ -79,7 +79,7 @@ public class ByIncreaseOfGrowthRate
         }
         
     }
-    private double rate(Territory t, int... years)
+    private double rate(Territory t, int... years) throws Exception
     {
         double average = 0;
         int nyears = 0;
@@ -93,18 +93,13 @@ public class ByIncreaseOfGrowthRate
         return average / nyears;
     }
 
-    private double rate(Territory t, int year)
+    private double rate(Territory t, int year) throws Exception
     {
-        TerritoryYear ty = t.territoryYear(year);
+        TerritoryYear ty = t.territoryYearOrNull(year);
+        
+        double cbr = t.calc_mid_CBR_total_both(year);
+        double cdr = t.calc_mid_CDR_total_both(year);
 
-        long pop_vital = ty.progressive_population.total.both;
-        double cbr = (PROMILLE * denull(ty.births.total.both)) / pop_vital;
-        double cdr = (PROMILLE * denull(ty.deaths.total.both)) / pop_vital;
         return cbr - cdr;
-    }
-
-    private long denull(Long v)
-    {
-        return v != null ? v : 0;
     }
 }

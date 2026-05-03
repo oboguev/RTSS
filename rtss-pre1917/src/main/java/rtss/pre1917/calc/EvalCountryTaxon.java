@@ -22,6 +22,8 @@ import rtss.util.Util;
 
 public class EvalCountryTaxon extends EvalCountryBase
 {
+    private final static boolean DoCountMilitaryDeaths = Util.True;
+
     public static void main(String[] args)
     {
         if (DoCountMilitaryDeaths)
@@ -70,7 +72,12 @@ public class EvalCountryTaxon extends EvalCountryBase
      */
     public static TerritoryDataSet getFinalEmpirePopulationSet() throws Exception
     {
-        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913);
+        return getFinalEmpirePopulationSet(DoCountMilitaryDeaths);
+    }
+
+    public static TerritoryDataSet getFinalEmpirePopulationSet(boolean countMilitaryDeaths) throws Exception
+    {
+        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913, countMilitaryDeaths);
         eval.calc(false);
         eval.tdsExportPopulation.leaveOnlyTotalBoth();
         
@@ -95,14 +102,18 @@ public class EvalCountryTaxon extends EvalCountryBase
     private Territory tmPopulation;
     private Territory tmVitalRates;
     private TerritoryDataSet tdsExportPopulation;
+    private boolean countMilitaryDeaths;
 
     private static TaxonYearlyPopulationData typdRusEvro;
-
-    private final static boolean DoCountMilitaryDeaths = Util.True;
 
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
     private EvalCountryTaxon(String taxonName, int toYear) throws Exception
+    {
+        this(taxonName, toYear, DoCountMilitaryDeaths);
+    }
+
+    private EvalCountryTaxon(String taxonName, int toYear, boolean countMilitaryDeaths) throws Exception
     {
         super(taxonName, toYear);
 
@@ -184,7 +195,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         /* Часть иммиграции не разбиваемая по губерниям */
         applyLumpImmigration(tmPopulation, true);
 
-        if (DoCountMilitaryDeaths)
+        if (countMilitaryDeaths)
         {
             // apply war losses manually (in bulk) to tmPopulation
             ApplyWarDeaths.applyToEmpire(tmPopulation);
@@ -212,7 +223,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private void calc_non_empire() throws Exception
     {
-        if (DoCountMilitaryDeaths)
+        if (countMilitaryDeaths)
         {
             // apply war losses to individual territories
             if (EmpirePopulation1904 == null || EmpirePopulation1914 == null)
