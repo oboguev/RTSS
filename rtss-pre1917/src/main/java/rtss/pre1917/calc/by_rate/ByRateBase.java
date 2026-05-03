@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.calc.EvalCountryTaxon;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -65,22 +64,6 @@ public abstract class ByRateBase
                     rate += rate(cbr, cdr);
                     nyears++;
                 }
-                
-                if (Util.False)
-                {
-                    long pop = ty.progressive_population.total.both;
-
-                    TerritoryYear ty2 = t.territoryYear(year + 1);
-                    long pop2 = ty2.progressive_population.total.both;
-
-                    pop = MathUtil.log_average(pop, pop2);
-                    
-                    double cbr = (PROMILLE * denull(ty.births.total.both)) / pop;
-                    double cdr = (PROMILLE * denull(ty.deaths.total.both)) / pop;
-                    
-                    rate += rate(cbr, cdr);
-                    nyears++;
-                }
             }
 
             results.add(new TerritoryResult(tname, rate / nyears));
@@ -93,11 +76,6 @@ public abstract class ByRateBase
             Util.out(String.format("\"%s\" %.1f", r.tname, r.rate));
         }
     }
-
-    private long denull(Long v)
-    {
-        return v != null ? v : 0;
-    }
-
+    
     abstract double rate(double cbr, double cdr);
 }

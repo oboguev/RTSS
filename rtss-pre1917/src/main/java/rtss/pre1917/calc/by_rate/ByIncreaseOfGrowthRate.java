@@ -8,7 +8,6 @@ import rtss.pre1917.calc.EvalCountryTaxon;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
-import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
 public class ByIncreaseOfGrowthRate
@@ -95,8 +94,6 @@ public class ByIncreaseOfGrowthRate
 
     private double rate(Territory t, int year) throws Exception
     {
-        TerritoryYear ty = t.territoryYearOrNull(year);
-        
         double cbr = t.calc_mid_CBR_total_both(year);
         double cdr = t.calc_mid_CDR_total_both(year);
 
