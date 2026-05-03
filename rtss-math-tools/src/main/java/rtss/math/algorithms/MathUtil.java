@@ -28,18 +28,27 @@ public class MathUtil
 
         /*
          * For close values, log(pend) - log(pstart) may lose precision.
-         * Use log1p((pend - pstart) / pstart) instead.
+         * Use a symmetric criterion based on the ratio: when the ratio is close to 1,
+         * we use the high-precision log1p formula.
+         *
+         * We check if |log(pend/pstart)| < threshold, which is equivalent to:
+         * exp(-threshold) < pend/pstart < exp(threshold)
+         *
+         * Using threshold ≈ 0.4055 gives exp(±0.4055) ≈ 1.5 and 0.667
          */
-        double rel = delta / pstart;
-        
+        double ratio = pend / pstart;
+
         double result;
 
-        if (Math.abs(rel) < 0.5)
+        if (ratio > 0.667 && ratio < 1.5)
         {
+            // High precision branch for values close to each other
+            double rel = delta / pstart;
             result = delta / Math.log1p(rel);
         }
         else
         {
+            // Standard formula for values far apart
             result = delta / (Math.log(pend) - Math.log(pstart));
         }
         
