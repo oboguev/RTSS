@@ -55,6 +55,12 @@ public class MathUtil
         if (Double.isNaN(result) || Double.isInfinite(result))        
             throw new IllegalArgumentException("Failed to calculate log average");
         
+        double pmin = Math.min(pstart,  pend);
+        double pmax = Math.max(pstart,  pend);
+        
+        if (!(result >= pmin && result <= pmax))
+            throw new IllegalArgumentException("Ошибка вычисления среднего");
+        
         return result;
     }
 

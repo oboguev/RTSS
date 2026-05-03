@@ -4,6 +4,7 @@ public class TaxonYearData
 {
     public Long population;
     public Long population_increase;
+    public Long population_middle;
 
     public Double cbr;
     public Double cdr;

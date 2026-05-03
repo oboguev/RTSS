@@ -304,6 +304,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
             long pop_total = tmPopulation.territoryYear(year).progressive_population.total.both;
             long pop_total_next = tmPopulation.territoryYear(year + 1).progressive_population.total.both;
+            long pop_total_middle = MathUtil.log_average(pop_total, pop_total_next);
 
             TerritoryYear ty = tmVitalRates.territoryYear(year);
             long pop_vital = ty.progressive_population.total.both;
@@ -319,6 +320,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             double cdr_middle = (PROMILLE * ty.deaths.total.both) / pop_vital_middle;
 
             yd.population = pop_total;
+            yd.population_middle = pop_total_middle;
             yd.cbr = cbr;
             yd.cdr = cdr;
             yd.cbr_middle = cbr_middle;

@@ -33,6 +33,40 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     private final char NBSP = 0xA0;
     private final String NBSP_S = "" + NBSP;
 
+    public static class Summary
+    {
+        private int nyears;
+
+        public double cbr;
+        public double cdr;
+        public double ngr;
+        public long population_increase;
+        public long migration;
+
+        public void add(double cbr, double cdr, double ngr, long population_increase, long migration)
+        {
+            this.cbr += cbr;
+            this.cdr += cdr;
+            this.ngr += ngr;
+            this.population_increase = population_increase;
+            this.migration += migration;
+            nyears++;
+        }
+
+        public Summary getAverages()
+        {
+            Summary s = new Summary();
+
+            s.cbr = this.cbr / nyears;
+            s.cdr = this.cdr / nyears;
+            s.ngr = this.ngr / nyears;
+            s.population_increase = Math.round((double) this.population_increase / nyears);
+            s.migration = Math.round((double) this.migration / nyears);
+
+            return s;
+        }
+    }
+
     public TaxonYearlyPopulationData(String taxonName,
             TerritoryDataSet tdsPopulation,
             TerritoryDataSet tdsVitalRates,
@@ -57,6 +91,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 
         List<Integer> years = Util.sort(keySet());
         int lastPartialYear = years.get(years.size() - 1);
+        Summary summary = new Summary();
 
         for (int year : years)
         {
@@ -69,6 +104,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                                        year, yd.population, yd.cbr, yd.cdr, ngr,
                                        yd.population_increase,
                                        yd.migration));
+                summary.add(yd.cbr, yd.cdr, ngr, yd.population_increase, yd.migration);
             }
             else
             {
@@ -76,14 +112,22 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
 
+        Summary av = summary.getAverages();
+        Util.out(String.format("%d-%d %s %.1f %.1f %.1f %,d %,d",
+                               years.get(0), lastPartialYear - 1, 
+                               NBSP_S, av.cbr, av.cdr, av.ngr,
+                               av.population_increase,
+                               av.migration));
+
         Util.out("");
         printRateChange("CBR");
         printRateChange("CDR");
         printRateChange("NGR");
 
         Util.out("");
-        Util.out("То же в нормировке на среднегодовое население");
+        Util.out("То же в нормировке на среднегодовое население, численность населения указана среднегодовая");
         Util.out("");
+        summary = new Summary();
 
         for (int year : years)
         {
@@ -92,13 +136,13 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             if (year != lastPartialYear)
             {
                 double ngr_middle = yd.cbr_middle - yd.cdr_middle;
-                Util.out(String.format("%d %,d %.1f %.1f %.1f %,d",
-                                       year, yd.population, yd.cbr_middle, yd.cdr_middle, ngr_middle,
-                                       yd.population_increase));
+                Util.out(String.format("%d %,d %.1f %.1f %.1f",
+                                       year, yd.population_middle, yd.cbr_middle, yd.cdr_middle, ngr_middle));
+                summary.add(yd.cbr_middle, yd.cdr_middle, ngr_middle, 0, 0);
             }
             else
             {
-                Util.out(String.format("%d %,d", year, yd.population));
+                // Util.out(String.format("%d %,d", year, yd.population));
             }
         }
 
