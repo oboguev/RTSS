@@ -5,16 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 import rtss.math.algorithms.MathUtil;
-import rtss.pre1917.LoadData;
-import rtss.pre1917.LoadData.LoadOptions;
-import rtss.pre1917.calc.EvalCountryBase;
 import rtss.pre1917.calc.EvalCountryTaxon;
-import rtss.pre1917.calc.FilterByTaxon;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.util.Util;
 
 public abstract class ByRateBase
@@ -50,6 +45,10 @@ public abstract class ByRateBase
             if (Taxon.isComposite(tname) || tname.equals("Черноморская"))
                 continue;
 
+            Territory t = tdsEmpire.get(tname);
+            if (!t.hasValidVitalRate)
+                continue;
+
             double rate = 0;
             int nyears = 0;
 
@@ -58,7 +57,6 @@ public abstract class ByRateBase
                 if (year == 1898 || year == 1905 || year == 1910)
                     continue;
 
-                Territory t = tdsEmpire.get(tname);
                 TerritoryYear ty = t.territoryYear(year);
                 long pop = ty.progressive_population.total.both;
 

@@ -65,7 +65,8 @@ public class EvalCountryTaxon extends EvalCountryBase
      *     births.total.both
      *     deaths.total.both
      *     migration.total.both
-     * CBR и СDR должны вычисляться отдельно   
+     *     hasValidVitalRate
+     * CBR и СDR должны вычисляться отдельно, в зависимости от нужной нормировки   
      */
     public static TerritoryDataSet getFinalEmpirePopulationSet() throws Exception
     {
@@ -84,6 +85,8 @@ public class EvalCountryTaxon extends EvalCountryBase
                 ty.population = null;
                 ty.midyear_population = null;
             }
+            
+            t.hasValidVitalRate = eval.tdsVitalRates.containsKey(t.name);
         }
         
         return eval.tdsExportPopulation;

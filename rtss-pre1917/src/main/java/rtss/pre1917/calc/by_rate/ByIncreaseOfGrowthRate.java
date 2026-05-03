@@ -4,17 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rtss.pre1917.LoadData;
-import rtss.pre1917.LoadData.LoadOptions;
-import rtss.pre1917.calc.EvalCountryBase;
-import rtss.pre1917.calc.FilterByTaxon;
+import rtss.pre1917.calc.EvalCountryTaxon;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.util.Util;
 
-public class ByIncreaseOfGrowthRate extends EvalCountryBase
+public class ByIncreaseOfGrowthRate // extends EvalCountryBase
 {
     public static void main(String[] args)
     {
@@ -27,11 +24,6 @@ public class ByIncreaseOfGrowthRate extends EvalCountryBase
             Util.err("** Exception: ");
             ex.printStackTrace();
         }
-    }
-
-    protected ByIncreaseOfGrowthRate() throws Exception
-    {
-        super("Империя", 1913);
     }
 
     private static class TerritoryResult implements Comparable<TerritoryResult>
@@ -57,39 +49,22 @@ public class ByIncreaseOfGrowthRate extends EvalCountryBase
     }
 
     private List<TerritoryResult> results = new ArrayList<>();
+    
+    protected static final double PROMILLE = 1000.0;
 
     protected void eval() throws Exception
     {
-        /* ===================== Численность населения ===================== */
+        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet();
 
-        tdsPopulation = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
-                                                LoadOptions.ADJUST_FEMALE_BIRTHS,
-                                                LoadOptions.FILL_MISSING_BD,
-                                                LoadOptions.MERGE_CITIES,
-                                                LoadOptions.MERGE_POST1897_REGIONS,
-                                                LoadOptions.EVAL_PROGRESSIVE);
-        tdsPopulation.leaveOnlyTotalBoth();
-
-        tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
-
-        new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
-
-        /* ===================== Естественное движение ===================== */
-
-        tdsVitalRates = tdsPopulation.dup();
-
-        /* ===================== Правки ===================== */
-
-        corrections();
-
-        /* ===================== Результаты ===================== */
-
-        for (String tname : tdsVitalRates.keySet())
+        for (String tname : tdsEmpire.keySet())
         {
             if (Taxon.isComposite(tname) || tname.equals("Черноморская"))
                 continue;
 
-            Territory t = tdsVitalRates.get(tname);
+            Territory t = tdsEmpire.get(tname);
+            if (!t.hasValidVitalRate)
+                continue;
+            
             double r1 = rate(t, 1896, 1897, 1899, 1900);
             double r2 = rate(t, 1911, 1912, 1913);
 
@@ -102,8 +77,8 @@ public class ByIncreaseOfGrowthRate extends EvalCountryBase
         {
             Util.out(String.format("\"%s\" %.2f %.1f %.1f", r.tname, r.delta, r.rate1, r.rate2));
         }
+        
     }
-
     private double rate(Territory t, int... years)
     {
         double average = 0;
