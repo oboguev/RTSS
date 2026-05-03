@@ -31,6 +31,9 @@ public class EvalDivergence_UGVI
 
     private void calc() throws Exception
     {
+        Util.out("Расхождение между публиковавшимся УГВИ естественным приростом");
+        Util.out("и годовым изменением численности населения Империи");
+        Util.out("");
         Util.out("Естественный прирост и прирост населения Империи");
         Util.out("");
         
