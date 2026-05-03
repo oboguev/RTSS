@@ -58,11 +58,34 @@ public class EvalCountryTaxon extends EvalCountryBase
             ex.printStackTrace();
         }
     }
-    
+
+    /*
+     * Единственные употребимые поля:
+     *     progressive_population.total.both
+     *     births.total.both
+     *     deaths.total.both
+     *     migration.total.both
+     * CBR и СDR должны вычисляться отдельно   
+     */
     public static TerritoryDataSet getFinalEmpirePopulationSet() throws Exception
     {
-        EvalCountryTaxon  eval =  new EvalCountryTaxon("Империя", 1913);
+        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913);
         eval.calc(false);
+        eval.tdsExportPopulation.leaveOnlyTotalBoth();
+        
+        for (Territory t : eval.tdsExportPopulation.values())
+        {
+            for (int year : t.years())
+            {
+                TerritoryYear ty = t.territoryYear(year);
+                ty.cbr = null;
+                ty.cdr = null;
+                ty.ngr = null;
+                ty.population = null;
+                ty.midyear_population = null;
+            }
+        }
+        
         return eval.tdsExportPopulation;
     }
 
@@ -124,7 +147,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         tdsVitalRates = tdsPopulation.dup();
 
         corrections();
-        
+
         if (taxonName.equals("Империя"))
             calc_empire();
         else
@@ -136,11 +159,11 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         return buildTaxonYearlyPopulationData();
     }
-    
+
     private void calc_empire() throws Exception
     {
         // do NOT apply war losses to individual territories -- not yet
-        
+
         /* ===================== Сохранить для экспорта данных ===================== */
 
         tdsExportPopulation = tdsPopulation.dup();
@@ -149,20 +172,20 @@ public class EvalCountryTaxon extends EvalCountryBase
             if (Taxon.isComposite(tname))
                 tdsExportPopulation.remove(tname);
         }
-        
+
         filterPopulationSetsByTaxon();
         Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
         checkProgressiveAvailable();
         mergeTaxonPopulation();
-        
+
         /* Часть иммиграции не разбиваемая по губерниям */
         applyLumpImmigration(tmPopulation, true);
-        
+
         if (DoCountMilitaryDeaths)
         {
             // apply war losses manually (in bulk) to tmPopulation
             ApplyWarDeaths.applyToEmpire(tmPopulation);
-            
+
             // apply war losses to individual territories in tdsExport and tdsVital 
             EmpirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
             EmpirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
@@ -174,9 +197,9 @@ public class EvalCountryTaxon extends EvalCountryBase
             EmpirePopulation1904 = null;
             EmpirePopulation1914 = null;
         }
-        
+
         mergeTaxonVitalRates(territoriesExcludedFromVitalRates);
-        
+
         /* 
          * Часть иммиграции не разбиваемая по губерниям.
          * Не учитывается при вычислении естественного движения, причины объяснены в DOCX/PDF.
@@ -201,7 +224,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         mergeTaxonVitalRates(territoriesExcludedFromVitalRates);
 
         // do NOT apply war losses to tmPopulation or tmVital, as they were already applied 
-        
+
         /* 
          * Часть иммиграции не разбиваемая по губерниям. 
          * Не учитывается при вычислении естественного движения, причины объяснены в DOCX/PDF.
@@ -209,17 +232,17 @@ public class EvalCountryTaxon extends EvalCountryBase
         applyLumpImmigration(tmPopulation, true);
         // DO NOT applyLumpImmigration(tmVitalRates, false);
     }
-    
+
     private void filterPopulationSetsByTaxon() throws Exception
     {
         tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
         tdsVitalRates = FilterByTaxon.filterByTaxon(taxonName, tdsVitalRates);
     }
-    
+
     private Set<String> refreshVitalSetData() throws Exception
     {
         Set<String> territoriesExcludedFromVitalRates = new HashSet<>();
-        
+
         for (String tname : new HashSet<>(tdsVitalRates.keySet()))
         {
             Territory t = tdsPopulation.get(tname);
@@ -254,10 +277,10 @@ public class EvalCountryTaxon extends EvalCountryBase
             }
 
         }
-        
+
         return territoriesExcludedFromVitalRates;
     }
-    
+
     private void checkProgressiveAvailable() throws Exception
     {
         new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
@@ -265,7 +288,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         if (tdsExportPopulation != null)
             new CheckProgressiveAvailable(tdsExportPopulation).check(toYear + 1);
     }
-    
+
     private void mergeTaxonPopulation() throws Exception
     {
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
