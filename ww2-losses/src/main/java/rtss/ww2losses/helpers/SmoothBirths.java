@@ -6,6 +6,7 @@ import java.util.List;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.CurveVerifier;
+import rtss.math.algorithms.MathUtil;
 import rtss.math.interpolate.disaggregate.csasra.DisaggregateVariableWidthSeriesWithStartValues;
 import rtss.util.Util;
 import rtss.util.plot.ChartXY;
@@ -39,7 +40,7 @@ public class SmoothBirths
 
             double p1 = he.p_nonwar_with_births.sum();
             double p2 = he.next.p_nonwar_with_births.sum();
-            double pavg = (p1 + p2) / 2;
+            double pavg = MathUtil.log_average(p1, p2);
 
             double births = ap.CBR_1940_MIDYEAR * pavg * 0.5 / PROMILLE;
 

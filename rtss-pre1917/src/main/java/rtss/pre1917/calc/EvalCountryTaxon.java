@@ -57,6 +57,13 @@ public class EvalCountryTaxon extends EvalCountryBase
             ex.printStackTrace();
         }
     }
+    
+    public static TerritoryDataSet getFinalEmpirePopulationSet() throws Exception
+    {
+        EvalCountryTaxon  eval =  new EvalCountryTaxon("Империя", 1913);
+        eval.calc(false);
+        return eval.tdsExportPopulation;
+    }
 
     private Territory tmPopulation;
     private Territory tmVitalRates;

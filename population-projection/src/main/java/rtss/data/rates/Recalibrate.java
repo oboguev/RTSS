@@ -5,6 +5,7 @@ import rtss.data.population.synthetic.PopulationADH;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.math.algorithms.MathUtil;
 
 /*
  * Пересчитать уровни рождаемости и смертности из нормировки относительно численности населения в начале года 
@@ -74,7 +75,7 @@ public class Recalibrate
         PopulationByLocality p2 = PopulationADH.getPopulationByLocality(area, year + 1);
         double sp1 = p1.sum(Locality.TOTAL, Gender.BOTH, 0, PopulationByLocality.MAX_AGE);
         double sp2 = p2.sum(Locality.TOTAL, Gender.BOTH, 0, PopulationByLocality.MAX_AGE);
-        double spm = (sp1 + sp2) / 2;
+        double spm = MathUtil.log_average(sp1, sp2);
         return rate * sp1 / spm;
     }
 
@@ -88,7 +89,7 @@ public class Recalibrate
         PopulationByLocality p2 = PopulationADH.getPopulationByLocality(area, year + 1);
         double sp1 = p1.sum(Locality.TOTAL, Gender.BOTH, 0, PopulationByLocality.MAX_AGE);
         double sp2 = p2.sum(Locality.TOTAL, Gender.BOTH, 0, PopulationByLocality.MAX_AGE);
-        double spm = (sp1 + sp2) / 2;
+        double spm = MathUtil.log_average(sp1, sp2);
         return rate * spm / sp1;
     }
 

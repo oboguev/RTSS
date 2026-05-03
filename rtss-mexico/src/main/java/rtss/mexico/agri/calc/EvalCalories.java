@@ -3,6 +3,7 @@ package rtss.mexico.agri.calc;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.math.algorithms.MathUtil;
 import rtss.mexico.agri.entities.CaloricContent;
 import rtss.mexico.agri.entities.CaloricContent.CaloricElement;
 import rtss.mexico.agri.entities.CultureSet;
@@ -44,7 +45,7 @@ public class EvalCalories
 
         for (int year = 1897; year <= 1982; year++)
         {
-            long pop = (population.get(year) + population.get(year + 1)) / 2;
+            long pop = MathUtil.log_average(population.get(year), population.get(year + 1));
             CaloricContent cc = CaloricContent.eval(cs, year, pop);
             if (cc.size() != 0)
                 y2cc.put(year, cc);

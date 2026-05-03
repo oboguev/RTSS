@@ -2,6 +2,7 @@ package rtss.mexico.agri.fbs;
 
 import java.util.Map;
 
+import rtss.math.algorithms.MathUtil;
 import rtss.mexico.population.MexPopulationCombineEstimates;
 import rtss.util.Util;
 import rtss.util.excel.ExcelRow;
@@ -50,7 +51,7 @@ public class FoodBalanceSheets
         {
             String index = "Y" + year;
             double faoPopulation = rYear.asDouble(index) * 1000;
-            double mexPopulation = (population.get(year) + population.get(year + 1)) / 2;
+            double mexPopulation = MathUtil.log_average(population.get(year), population.get(year + 1));
             double factor = faoPopulation / mexPopulation;
 
             double calTotal = rTotal.asDouble(index);

@@ -206,13 +206,14 @@ public class ExportData
         if (stable)
             addValue(mv, "стаб", "*");
         
-        addRateValue(mv, "р", cbr);
-        addRateValue(mv, "с", cdr);
-        addRateValue(mv, "еп", ngr);
+        final int ndigits = 2;
+        addRateValue(mv, "р", ndigits, cbr);
+        addRateValue(mv, "с", ndigits, cdr);
+        addRateValue(mv, "еп", ndigits, ngr);
 
-        addRateValue(mv, "р2", cbr2);
-        addRateValue(mv, "с2", cdr2);
-        addRateValue(mv, "еп2", ngr2);
+        addRateValue(mv, "р2", ndigits, cbr2);
+        addRateValue(mv, "с2", ndigits, cdr2);
+        addRateValue(mv, "еп2", ndigits, ngr2);
 
         addValue(mv, "vr.ok", vrok ? 1L : 0L);
 
@@ -255,14 +256,14 @@ public class ExportData
         }
     }
 
-    private void addRateValue(Map<String, String> mv, String key, Double value)
+    private void addRateValue(Map<String, String> mv, String key, int digits, Double value)
     {
         if (key.equals("территория") || key.equals("год") || !columns.contains(key))
             throw new IllegalArgumentException("Invalid key: " + key);
 
         if (value != null)
         {
-            mv.put(key, String.format("%.1f", value));
+            mv.put(key, String.format("%." + digits + "f", value));
         }
     }
 
