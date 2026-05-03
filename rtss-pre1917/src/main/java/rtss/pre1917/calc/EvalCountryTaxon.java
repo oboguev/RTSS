@@ -177,8 +177,11 @@ public class EvalCountryTaxon extends EvalCountryBase
         
         mergeTaxonVitalRates(territoriesExcludedFromVitalRates);
         
-        /* Часть иммиграции не разбиваемая по губерниям */
-        applyLumpImmigration(tmVitalRates, false);
+        /* 
+         * Часть иммиграции не разбиваемая по губерниям.
+         * Не учитывается при вычислении естественного движения, причины объяснены в DOCX/PDF.
+         */
+        // DO NOT applyLumpImmigration(tmVitalRates, false);
     }
 
     private void calc_non_empire() throws Exception
@@ -199,9 +202,12 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         // do NOT apply war losses to tmPopulation or tmVital, as they were already applied 
         
-        /* Часть иммиграции не разбиваемая по губерниям */
+        /* 
+         * Часть иммиграции не разбиваемая по губерниям. 
+         * Не учитывается при вычислении естественного движения, причины объяснены в DOCX/PDF.
+         */
         applyLumpImmigration(tmPopulation, true);
-        applyLumpImmigration(tmVitalRates, false);
+        // DO NOT applyLumpImmigration(tmVitalRates, false);
     }
     
     private void filterPopulationSetsByTaxon() throws Exception
