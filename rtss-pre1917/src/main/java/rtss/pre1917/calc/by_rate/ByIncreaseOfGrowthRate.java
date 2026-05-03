@@ -11,7 +11,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
-public class ByIncreaseOfGrowthRate // extends EvalCountryBase
+public class ByIncreaseOfGrowthRate
 {
     public static void main(String[] args)
     {
