@@ -54,20 +54,20 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             this.cbr += cbr;
             this.cdr += cdr;
             this.ngr += ngr;
-            this.population_increase = population_increase;
+            this.population_increase += population_increase;
             this.migration += migration;
             nyears++;
         }
 
-        public Summary getAverages()
+        public Summary summaryLine()
         {
             Summary s = new Summary();
 
             s.cbr = this.cbr / nyears;
             s.cdr = this.cdr / nyears;
             s.ngr = this.ngr / nyears;
-            s.population_increase = Math.round((double) this.population_increase / nyears);
-            s.migration = Math.round((double) this.migration / nyears);
+            s.population_increase = this.population_increase;
+            s.migration = this.migration;
             
             s.first_year = this.first_year;
             s.last_year = this.last_year;
@@ -121,7 +121,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
 
-        Summary av = summary.getAverages();
+        Summary av = summary.summaryLine();
         Util.out(String.format("%d-%d %s %.1f %.1f %.1f %,d %,d",
                                av.first_year, av.last_year, 
                                NBSP_S, av.cbr, av.cdr, av.ngr,
@@ -156,7 +156,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
 
-        av = summary.getAverages();
+        av = summary.summaryLine();
         Util.out(String.format("%d-%d %s %.1f %.1f %.1f",
                                av.first_year, av.last_year, 
                                NBSP_S, av.cbr, av.cdr, av.ngr));
