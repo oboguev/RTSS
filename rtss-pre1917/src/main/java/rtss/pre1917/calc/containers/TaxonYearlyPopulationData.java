@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.ExportData;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -289,7 +290,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                     ty2.progressive_population.total != null &&
                     ty2.progressive_population.total.both != null)
                 {
-                    long pop_middle = (ty.progressive_population.total.both + ty2.progressive_population.total.both) / 2;
+                    long pop_middle = MathUtil.log_average(ty.progressive_population.total.both, ty2.progressive_population.total.both);
                     cbr2 = rate(ty.births.total.both, pop_middle);
                     cdr2 = rate(ty.deaths.total.both, pop_middle);
                     ngr2 = (cbr2 != null && cdr2 != null) ? cbr2 - cdr2 : null;

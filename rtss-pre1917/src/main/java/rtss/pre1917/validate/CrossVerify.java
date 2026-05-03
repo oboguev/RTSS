@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -67,7 +68,7 @@ public class CrossVerify
                     long pop1 = ty.population.all();
                     long pop2 = ty.population.all() + ty.births.all() - ty.deaths.all();
                     @SuppressWarnings("unused")
-                    long popm = (pop1 + pop2) / 2;
+                    long popm = MathUtil.log_average(pop1, pop2);
 
                     double cbr = (1000.0 * ty.births.all()) / pop2;
 
@@ -101,7 +102,7 @@ public class CrossVerify
                     long pop1 = ty.population.all();
                     long pop2 = ty.population.all() + ty.births.all() - ty.deaths.all();
                     @SuppressWarnings("unused")
-                    long popm = (pop1 + pop2) / 2;
+                    long popm = MathUtil.log_average(pop1, pop2);
 
                     double cdr = (1000.0 * ty.deaths.all()) / pop2;
 

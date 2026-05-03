@@ -31,15 +31,22 @@ public class MathUtil
          * Use log1p((pend - pstart) / pstart) instead.
          */
         double rel = delta / pstart;
+        
+        double result;
 
         if (Math.abs(rel) < 0.5)
         {
-            return delta / Math.log1p(rel);
+            result = delta / Math.log1p(rel);
         }
         else
         {
-            return delta / (Math.log(pend) - Math.log(pstart));
+            result = delta / (Math.log(pend) - Math.log(pstart));
         }
+        
+        if (Double.isNaN(result) || Double.isInfinite(result))        
+            throw new IllegalArgumentException("Failed to calculate log average");
+        
+        return result;
     }
 
     public static long log_average(long pstart, long pend)

@@ -3,6 +3,7 @@ package rtss.pre1917.calc;
 import java.util.HashSet;
 import java.util.Set;
 
+import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.containers.TaxonYearData;
@@ -303,7 +304,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
             TerritoryYear ty_next = tmVitalRates.territoryYear(year + 1);
             long pop_vital_next = ty_next.progressive_population.total.both;
-            long pop_vital_middle = (pop_vital + pop_vital_next) / 2;
+            long pop_vital_middle = MathUtil.log_average(pop_vital, pop_vital_next);
 
             double cbr = (PROMILLE * ty.births.total.both) / pop_vital;
             double cdr = (PROMILLE * ty.deaths.total.both) / pop_vital;

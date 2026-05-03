@@ -1,5 +1,6 @@
 package rtss.pre1917.tools;
 
+import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Territory;
@@ -33,7 +34,7 @@ public class Show1898
                 else if (v3 == null)
                     ave = v1;
                 else
-                    ave = (v1 + v3) / 2.0;
+                    ave = MathUtil.log_average(v1, v3);
                 
                 double r = 100.0 * v2 / ave;
                 
