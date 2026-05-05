@@ -73,9 +73,9 @@ public class FixEarlyPeriod
     public Territory fix(Territory t, Territory tCensus, int byl1, int byl2, int byr1, int byr2,
             int dyl1, int dyl2, int dyr1, int dyr2) throws Exception
     {
-        final double rate_threshold = 0.01;
-        double prev_av_cbr = 0;
-        double prev_av_cdr = 0;
+        final double rate_difference_threshold = 0.01;
+        double prev_right_cbr = 0;
+        double prev_right_cdr = 0;
         Territory xt = t;
 
         for (int pass = 0;; pass++)
@@ -83,8 +83,8 @@ public class FixEarlyPeriod
             xt = fix_pass(xt, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);
 
             if (pass >= 1 &&
-                Math.abs(av_cbr - prev_av_cbr) < rate_threshold &&
-                Math.abs(av_cdr - prev_av_cdr) < rate_threshold)
+                Math.abs(right_cbr - prev_right_cbr) < rate_difference_threshold &&
+                Math.abs(right_cdr - prev_right_cdr) < rate_difference_threshold)
             {
                 break;
             }
@@ -93,21 +93,26 @@ public class FixEarlyPeriod
                 throw new Exception("FixEarlyPeriod failed to converge for " + t.name);
             }
 
-            prev_av_cbr = av_cbr;
-            prev_av_cdr = av_cdr;
+            prev_right_cbr = right_cbr;
+            prev_right_cdr = right_cdr;
         }
 
         return xt;
     }
 
-    private double av_cbr;
-    private double av_cdr;
+    private double right_cbr; /* новое характерное значение рождаемости в правом участке */
+    private double right_cdr; /* новое характерное значение смертности в правом участке */
 
+    /*
+     * Клонировать территорию и поменять в ней левый участок по правому.
+     * Возвращает изменённую клонированную теритторию (территория-аргумент @t не меняется)
+     * и значения right_cbr / right_cdr для @t.   
+     */
     private Territory fix_pass(Territory t, Territory tCensus, int byl1, int byl2, int byr1, int byr2,
             int dyl1, int dyl2, int dyr1, int dyr2) throws Exception
     {
-        av_cbr = averageRate(t, byr1, byr2, BirthDeath.BIRTH);
-        av_cdr = averageRate(t, dyr1, dyr2, BirthDeath.DEATH);
+        right_cbr = averageRate(t, byr1, byr2, BirthDeath.BIRTH);
+        right_cdr = averageRate(t, dyr1, dyr2, BirthDeath.DEATH);
 
         /* ================================= seed data ================================= */
 
@@ -121,8 +126,8 @@ public class FixEarlyPeriod
         TerritoryYear xty1896 = xt.territoryYearOrNull(1896);
         TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
 
-        adjust_births(xty1897, byl1, byl2, av_cbr, tyCensus.population.total.both);
-        adjust_deaths(xty1897, dyl1, dyl2, av_cdr, tyCensus.population.total.both);
+        adjust_births(xty1897, byl1, byl2, right_cbr, tyCensus.population.total.both);
+        adjust_deaths(xty1897, dyl1, dyl2, right_cdr, tyCensus.population.total.both);
 
         long in = xty1897.births.total.both - xty1897.deaths.total.both;
         in += totalMigration.saldo(t.name, 1897);
@@ -134,8 +139,8 @@ public class FixEarlyPeriod
 
         if (xty1896 != null)
         {
-            adjust_births(xty1896, byl1, byl2, av_cbr, tyCensus.population.total.both);
-            adjust_deaths(xty1896, dyl1, dyl2, av_cdr, tyCensus.population.total.both);
+            adjust_births(xty1896, byl1, byl2, right_cbr, tyCensus.population.total.both);
+            adjust_deaths(xty1896, dyl1, dyl2, right_cdr, tyCensus.population.total.both);
 
             in = xty1896.births.total.both - xty1896.deaths.total.both;
             in += totalMigration.saldo(t.name, 1896);
@@ -147,8 +152,8 @@ public class FixEarlyPeriod
             TerritoryYear xty = xt.territoryYearOrNull(year);
             if (xty != null)
             {
-                adjust_births(xty, byl1, byl2, av_cbr, xty.progressive_population.total.both);
-                adjust_deaths(xty, dyl1, dyl2, av_cdr, xty.progressive_population.total.both);
+                adjust_births(xty, byl1, byl2, right_cbr, xty.progressive_population.total.both);
+                adjust_deaths(xty, dyl1, dyl2, right_cdr, xty.progressive_population.total.both);
 
                 TerritoryYear xty_next = xt.territoryYearOrNull(year + 1);
                 if (xty_next != null)
@@ -164,26 +169,39 @@ public class FixEarlyPeriod
         return xt;
     }
 
-    private void adjust_births(TerritoryYear ty, int byl1, int byl2, double av_cbr, long pop)
+    /*
+     * Если год попадает в промежуток, то установить число рождений для него как (pop * cbr / PROMILLE) 
+     */
+    private void adjust_births(TerritoryYear ty, int byl1, int byl2, double cbr, long pop)
     {
         if (ty.year >= byl1 && ty.year <= byl2)
         {
             ty.births.leaveOnlyTotalBoth();
-            ty.births.total.both = Math.round(pop * av_cbr / PROMILLE);
+            ty.births.total.both = Math.round(pop * cbr / PROMILLE);
         }
     }
 
-    private void adjust_deaths(TerritoryYear ty, int dyl1, int dyl2, double av_cdr, long pop)
+    /*
+     * Если год попадает в промежуток, то установить число смертей для него как (pop * cdr / PROMILLE) 
+     */
+    private void adjust_deaths(TerritoryYear ty, int dyl1, int dyl2, double cdr, long pop)
     {
         if (ty.year >= dyl1 && ty.year <= dyl2)
         {
             ty.deaths.leaveOnlyTotalBoth();
-            ty.deaths.total.both = Math.round(pop * av_cdr / PROMILLE);
+            ty.deaths.total.both = Math.round(pop * cdr / PROMILLE);
         }
     }
 
     /* ============================================================ */
 
+    /*
+     * Вычислить среднюю рождаемость или смертность (в промилле) 
+     * по территориии @t за период [y1 ... y2]
+     * исключая годы с отсутствующими данными, 1905-й год
+     * и годы в которые величина рождаемости или смертности выбивается
+     * из типичных для промежутка как outlier. 
+     */
     private double averageRate(Territory t, int y1, int y2, BirthDeath bd) throws Exception
     {
         List<Double> list = new ArrayList<>();
@@ -227,24 +245,23 @@ public class FixEarlyPeriod
 
     /* ============================================================ */
 
-    private double[] toArray(List<Double> list)
-    {
-        double[] r = new double[list.size()];
-        int k = 0;
-        for (Double d : list)
-            r[k++] = d;
-        return r;
-    }
-
     private double[] eliminateOutliers(double[] dx)
     {
+        if (dx.length <= 2)
+            return dx.clone();
+
         double av = average(dx);
         double stdev = stdev(dx);
+
+        if (stdev == 0.0)
+            return dx.clone();
+
+        double limit = 1.4 * stdev;
 
         List<Double> list = new ArrayList<>();
         for (Double d : dx)
         {
-            if (Math.abs(av - d) < 1.4 * stdev)
+            if (Math.abs(av - d) <= limit)
                 list.add(d);
         }
 
@@ -253,9 +270,16 @@ public class FixEarlyPeriod
 
     private double average(double[] dx)
     {
-        double v = 0;
+        Double v = null;
+        
         for (double d : dx)
-            v += d;
+        {
+            if (v == null)
+                v = d;
+            else
+                v += d;
+        }
+        
         return v / dx.length;
     }
 
@@ -266,5 +290,14 @@ public class FixEarlyPeriod
         for (double d : dx)
             v += Math.pow(d - av, 2);
         return Math.sqrt(v / (dx.length - 1));
+    }
+
+    private double[] toArray(List<Double> list)
+    {
+        double[] r = new double[list.size()];
+        int k = 0;
+        for (Double d : list)
+            r[k++] = d;
+        return r;
     }
 }
