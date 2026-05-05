@@ -17,6 +17,7 @@ public class FixEarlyPeriodTest
         try
         {
             new FixEarlyPeriodTest().test("Приморская обл.", 1896, 1898, 1899, 1903);
+            new FixEarlyPeriodTest(LoadOptions.MERGE_POST1897_REGIONS).test("Приморская обл. с Камчатской обл.", 1896, 1898, 1899, 1903);
         }
         catch (Throwable ex)
         {

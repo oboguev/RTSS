@@ -198,7 +198,7 @@ public class ShowAreaValues
         Util.out("");
 
         show_values("Кутаисская с Батумской");
-        show_values("Иркутская с Камчатской");
+        show_values("Приморская обл. с Камчатской обл.");
         show_values("Люблинская с Седлецкой и Холмской");
     }
 

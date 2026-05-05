@@ -67,7 +67,7 @@ public class Emigration
             {
                 // leave zero
             }
-            else if (union("Холмская", "Сахалин", "Камчатская", "Батумская").contains(tname))
+            else if (union("Холмская", "Сахалин", "Камчатская обл.", "Батумская").contains(tname))
             {
                 // leave zero
             }
