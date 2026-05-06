@@ -1,10 +1,13 @@
 package rtss.pre1917.war;
 
+import java.util.Map;
+
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.war.ApplyWarDeaths.WarDeathsSummary;
 import rtss.util.Util;
 
 public class ApplyWarDeaths
@@ -33,22 +36,34 @@ public class ApplyWarDeaths
         tmEmpire.extraDeaths(1914, EmpireWarDeaths_1914);
     }
 
-    public void apply(TerritoryDataSet tds) throws Exception
+    public void apply(TerritoryDataSet tds, Map<Integer, WarDeathsSummary> wdsm) throws Exception
     {
         for (Territory t : tds.values())
         {
-            apply(t);
+            apply(t, wdsm);
+        }
+        
+        if (wdsm != null)
+        {
+            WarDeathsSummary wds = wdsm.get(1904);
+            wds.empireDeathsPct = Math.round(wds.deaths * 100.0) / EmpireWarDeaths_1904;
+
+            wds = wdsm.get(1905);
+            wds.empireDeathsPct = Math.round(wds.deaths * 100.0) / EmpireWarDeaths_1905;
+            
+            wds = wdsm.get(1914);
+            wds.empireDeathsPct = Math.round(wds.deaths * 100.0) / EmpireWarDeaths_1914;
         }
     }
 
-    private void apply(Territory t) throws Exception
+    private void apply(Territory t, Map<Integer, WarDeathsSummary> wdsm) throws Exception
     {
-        apply(t, 1904, EmpireWarDeaths_1904, empirePopulation1904, 1904);
-        apply(t, 1905, EmpireWarDeaths_1905, empirePopulation1904, 1904);
-        apply(t, 1914, EmpireWarDeaths_1914, empirePopulation1914, 1914);
+        apply(t, 1904, EmpireWarDeaths_1904, empirePopulation1904, 1904, wdsm);
+        apply(t, 1905, EmpireWarDeaths_1905, empirePopulation1904, 1904, wdsm);
+        apply(t, 1914, EmpireWarDeaths_1914, empirePopulation1914, 1914, wdsm);
     }
 
-    private void apply(Territory t, int year, long empireDeaths, long empirePopulation, int referenceYear) throws Exception
+    private void apply(Territory t, int year, long empireDeaths, long empirePopulation, int referenceYear, Map<Integer, WarDeathsSummary> wdsm) throws Exception
     {
         boolean alwaysUse1914 = true;
         WarLossShare wls = new LoadData().loadWarLossShare();
@@ -87,6 +102,12 @@ public class ApplyWarDeaths
         long extraDeaths = Math.round(empireDeaths * fraction);
 
         t.extraDeaths(year, extraDeaths);
+        
+        if (wdsm != null)
+        {
+            WarDeathsSummary wds = wdsm.computeIfAbsent(year, ignored -> new WarDeathsSummary());
+            wds.deaths += extraDeaths;
+        }
     }
 
     public void print(TerritoryDataSet tds) throws Exception
@@ -107,5 +128,11 @@ public class ApplyWarDeaths
             Util.out(String.format("\"%s\" %s %f", tname, f1, f2));
         }
         Util.out("=========================================");
+    }
+    
+    public static class WarDeathsSummary
+    {
+        public long deaths;
+        public double empireDeathsPct;
     }
 }

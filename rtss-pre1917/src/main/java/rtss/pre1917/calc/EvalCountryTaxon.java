@@ -1,6 +1,8 @@
 package rtss.pre1917.calc;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import rtss.math.algorithms.MathUtil;
@@ -18,6 +20,7 @@ import rtss.pre1917.merge.MergeTaxon.MergeTaxonOptions;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
 import rtss.pre1917.war.ApplyWarDeaths;
+import rtss.pre1917.war.ApplyWarDeaths.WarDeathsSummary;
 import rtss.util.Util;
 
 public class EvalCountryTaxon extends EvalCountryBase
@@ -80,7 +83,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913, countMilitaryDeaths);
         eval.calc(false);
         eval.tdsExportPopulation.leaveOnlyTotalBoth();
-        
+
         for (Territory t : eval.tdsExportPopulation.values())
         {
             for (int year : t.years())
@@ -92,10 +95,10 @@ public class EvalCountryTaxon extends EvalCountryBase
                 ty.population = null;
                 ty.midyear_population = null;
             }
-            
+
             t.hasValidVitalRate = eval.tdsVitalRates.containsKey(t.name);
         }
-        
+
         return eval.tdsExportPopulation;
     }
 
@@ -116,8 +119,8 @@ public class EvalCountryTaxon extends EvalCountryBase
     private EvalCountryTaxon(String taxonName, int toYear, boolean countMilitaryDeaths) throws Exception
     {
         super(taxonName, toYear);
-        
-        this.countMilitaryDeaths = countMilitaryDeaths; 
+
+        this.countMilitaryDeaths = countMilitaryDeaths;
 
         if (Util.False && typdRusEvro == null && !taxonName.equals(RusEvro))
             typdRusEvro = new EvalCountryTaxon(RusEvro, 1914).calc(false);
@@ -202,11 +205,15 @@ public class EvalCountryTaxon extends EvalCountryBase
             // apply war losses manually (in bulk) to tmPopulation
             ApplyWarDeaths.applyToEmpire(tmPopulation);
 
+            Util.out(String.format("Число военных смертей в 1904 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1904));
+            Util.out(String.format("Число военных смертей в 1905 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1905));
+            Util.out(String.format("Число военных смертей в 1914 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1914));
+
             // apply war losses to individual territories in tdsExport and tdsVital 
             EmpirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
             EmpirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
-            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsExportPopulation);
-            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsVitalRates);
+            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsExportPopulation, null);
+            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsVitalRates, null);
             // new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).print(tdsExportPopulation);
         }
         else
@@ -233,7 +240,16 @@ public class EvalCountryTaxon extends EvalCountryBase
             // apply war losses to individual territories
             if (EmpirePopulation1904 == null || EmpirePopulation1914 == null)
                 throw new Exception("Сначала нужно вычислить таксон Империя");
-            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsPopulation);
+
+            Map<Integer, WarDeathsSummary> wds = new HashMap<>();
+            new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsPopulation, wds);
+
+            Util.out(String.format("Число военных смертей в 1904 году: %,d (%.1f%% от потерь Империи)",
+                                   wds.get(1904).deaths, wds.get(1904).empireDeathsPct));
+            Util.out(String.format("Число военных смертей в 1905 году: %,d (%.1f%% от потерь Империи)",
+                                   wds.get(1905).deaths, wds.get(1905).empireDeathsPct));
+            Util.out(String.format("Число военных смертей в 1914 году: %,d (%.1f%% от потерь Империи)",
+                                   wds.get(1914).deaths, wds.get(1914).empireDeathsPct));
         }
 
         Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
