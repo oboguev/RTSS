@@ -102,7 +102,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     private Territory tmPopulation;
     private Territory tmVitalRates;
     private TerritoryDataSet tdsExportPopulation;
-    private boolean countMilitaryDeaths;
+    private final boolean countMilitaryDeaths;
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
@@ -116,6 +116,8 @@ public class EvalCountryTaxon extends EvalCountryBase
     private EvalCountryTaxon(String taxonName, int toYear, boolean countMilitaryDeaths) throws Exception
     {
         super(taxonName, toYear);
+        
+        this.countMilitaryDeaths = countMilitaryDeaths; 
 
         if (Util.False && typdRusEvro == null && !taxonName.equals(RusEvro))
             typdRusEvro = new EvalCountryTaxon(RusEvro, 1914).calc(false);
@@ -205,6 +207,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             EmpirePopulation1914 = tmPopulation.territoryYearOrNull(1914).progressive_population.total.both;
             new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsExportPopulation);
             new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsVitalRates);
+            // new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).print(tdsExportPopulation);
         }
         else
         {
