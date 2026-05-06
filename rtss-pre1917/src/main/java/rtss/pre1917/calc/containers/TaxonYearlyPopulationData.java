@@ -74,14 +74,23 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 
             return s;
         }
-        
-        public void print()
+
+        public void print(boolean full)
         {
-            Util.out(String.format("%d-%d %s %.1f %.1f %.1f %,d %,d",
-                                   first_year, last_year,
-                                   NBSP_S, cbr, cdr, ngr,
-                                   population_increase,
-                                   migration));
+            if (full)
+            {
+                Util.out(String.format("%d-%d %s %.1f %.1f %.1f %,d %,d",
+                                       first_year, last_year,
+                                       NBSP_S, cbr, cdr, ngr,
+                                       population_increase,
+                                       migration));
+            }
+            else
+            {
+                Util.out(String.format("%d-%d %s %.1f %.1f %.1f",
+                                       first_year, last_year,
+                                       NBSP_S, cbr, cdr, ngr));
+            }
         }
     }
 
@@ -132,12 +141,12 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                 Util.out(String.format("%d %,d", year, yd.population));
             }
         }
-        
-        av1913.print();
+
+        av1913.print(true);
 
         Summary av = summary.summaryLine();
         if (av.last_year > 1913)
-            av.print();
+            av.print(true);
 
         Util.out("");
         printRateChange("CBR");
@@ -170,10 +179,10 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
 
-        av1913.print();
+        av1913.print(false);
         av = summary.summaryLine();
         if (av.last_year > 1913)
-            av.print();
+            av.print(false);
 
         return this;
     }
