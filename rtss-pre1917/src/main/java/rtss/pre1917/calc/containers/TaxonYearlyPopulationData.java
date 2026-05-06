@@ -28,10 +28,10 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public final TerritoryDataSet tdsExportPopulation;
     public final int toYear;
 
-    private final double PROMILLE = 1000.0;
-    private final String nl = "\n";
-    private final char NBSP = 0xA0;
-    private final String NBSP_S = "" + NBSP;
+    private final static double PROMILLE = 1000.0;
+    private final static String nl = "\n";
+    private final static char NBSP = 0xA0;
+    private final static String NBSP_S = "" + NBSP;
 
     public static class Summary
     {
@@ -50,7 +50,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             if (first_year == null)
                 first_year = year;
             last_year = year;
-            
+
             this.cbr += cbr;
             this.cdr += cdr;
             this.ngr += ngr;
@@ -68,11 +68,20 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             s.ngr = this.ngr / nyears;
             s.population_increase = this.population_increase;
             s.migration = this.migration;
-            
+
             s.first_year = this.first_year;
             s.last_year = this.last_year;
 
             return s;
+        }
+        
+        public void print()
+        {
+            Util.out(String.format("%d-%d %s %.1f %.1f %.1f %,d %,d",
+                                   first_year, last_year,
+                                   NBSP_S, cbr, cdr, ngr,
+                                   population_increase,
+                                   migration));
         }
     }
 
@@ -101,6 +110,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         List<Integer> years = Util.sort(keySet());
         int lastPartialYear = years.get(years.size() - 1);
         Summary summary = new Summary();
+        Summary av1913 = null;
 
         for (int year : years)
         {
@@ -114,19 +124,20 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                                        yd.population_increase,
                                        yd.migration));
                 summary.add(year, yd.cbr, yd.cdr, ngr, yd.population_increase, yd.migration);
+                if (year == 1913)
+                    av1913 = summary.summaryLine();
             }
             else
             {
                 Util.out(String.format("%d %,d", year, yd.population));
             }
         }
+        
+        av1913.print();
 
         Summary av = summary.summaryLine();
-        Util.out(String.format("%d-%d %s %.1f %.1f %.1f %,d %,d",
-                               av.first_year, av.last_year, 
-                               NBSP_S, av.cbr, av.cdr, av.ngr,
-                               av.population_increase,
-                               av.migration));
+        if (av.last_year > 1913)
+            av.print();
 
         Util.out("");
         printRateChange("CBR");
@@ -138,6 +149,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         Util.out("");
 
         summary = new Summary();
+        av1913 = null;
 
         for (int year : years)
         {
@@ -149,6 +161,8 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                 Util.out(String.format("%d %,d %.1f %.1f %.1f",
                                        year, yd.population_middle, yd.cbr_middle, yd.cdr_middle, ngr_middle));
                 summary.add(year, yd.cbr_middle, yd.cdr_middle, ngr_middle, 0, 0);
+                if (year == 1913)
+                    av1913 = summary.summaryLine();
             }
             else
             {
@@ -156,10 +170,10 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
 
+        av1913.print();
         av = summary.summaryLine();
-        Util.out(String.format("%d-%d %s %.1f %.1f %.1f",
-                               av.first_year, av.last_year, 
-                               NBSP_S, av.cbr, av.cdr, av.ngr));
+        if (av.last_year > 1913)
+            av.print();
 
         return this;
     }
