@@ -342,6 +342,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                 Double cbr2 = null;
                 Double cdr2 = null;
                 Double ngr2 = null;
+                Long pop_middle = null;
 
                 TerritoryYear ty2 = t.territoryYearOrNull(year + 1);
                 if (ty2 != null &&
@@ -349,7 +350,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                     ty2.progressive_population.total != null &&
                     ty2.progressive_population.total.both != null)
                 {
-                    long pop_middle = MathUtil.log_average(ty.progressive_population.total.both, ty2.progressive_population.total.both);
+                    pop_middle = MathUtil.log_average(ty.progressive_population.total.both, ty2.progressive_population.total.both);
                     cbr2 = rate(ty.births.total.both, pop_middle);
                     cdr2 = rate(ty.deaths.total.both, pop_middle);
                     ngr2 = (cbr2 != null && cdr2 != null) ? cbr2 - cdr2 : null;
@@ -380,6 +381,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                        saldo,
                        stable,
                        cbr, cdr, ngr,
+                       pop_middle,
                        cbr2, cdr2, ngr2,
                        vrok);
 

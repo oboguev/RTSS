@@ -57,6 +57,7 @@ public class ExportData
         ed.columns.add("р");
         ed.columns.add("с");
         ed.columns.add("еп");
+        ed.columns.add("чн2");
         ed.columns.add("р2");
         ed.columns.add("с2");
         ed.columns.add("еп2");
@@ -191,8 +192,9 @@ public class ExportData
     /*
      * Used for export Final
      */
-    public void add(String territoryName, int year, Long population, Long births, Long deaths, Long saldo, boolean stable, 
+    public void add(String territoryName, int year, Long population, Long births, Long deaths, Long saldo, boolean stable,
             Double cbr, Double cdr, Double ngr, 
+            Long avg_population, 
             Double cbr2, Double cdr2, Double ngr2, 
             boolean vrok)
     {
@@ -211,6 +213,7 @@ public class ExportData
         addRateValue(mv, "с", ndigits, cdr);
         addRateValue(mv, "еп", ndigits, ngr);
 
+        addValue(mv, "чн2", avg_population);
         addRateValue(mv, "р2", ndigits, cbr2);
         addRateValue(mv, "с2", ndigits, cdr2);
         addRateValue(mv, "еп2", ndigits, ngr2);
