@@ -26,7 +26,6 @@ import rtss.util.Util;
  */
 public class EvalProgressive
 {
-    private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
     private final TerritoryDataSet census;
 
     private final TerritoryDataSet tds;
@@ -68,16 +67,42 @@ public class EvalProgressive
 
     private void evalProgressive(String tname, Territory tCensus) throws Exception
     {
-        TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
-
         Territory t = tds.get(tname);
+        Territory xt = xtds.get(tname);
+
+        evalProgressive(t, xt, tCensus);
+    }
+
+    /*
+     * Вычислить t.progressive_population по:
+     * - отправной точке населеия по переписи 1897 года в tCensus 
+     * - числу смертей и рождений в t
+     * - данным о сальдо миграции
+     */
+    static public void evalProgressive(Territory t, Territory tCensus) throws Exception
+    {
+        evalProgressive(t, t, tCensus);
+    }
+
+    /*
+     * Вычислить t.progressive_population по:
+     * - отправной точке населеия по переписи 1897 года в tCensus 
+     * - числу смертей и рождений в xt
+     * - данным о сальдо миграции
+     */
+    static private void evalProgressive(Territory t, Territory xt, Territory tCensus) throws Exception
+    {
+        final TotalMigration totalMigration = TotalMigration.getTotalMigration();
+        String tname = t.name;
+
         TerritoryYear ty1896 = t.territoryYearOrNull(1896);
         TerritoryYear ty1897 = t.territoryYearOrNull(1897);
         TerritoryYear ty1898 = t.territoryYearOrNull(1898);
 
-        Territory xt = xtds.get(tname);
         TerritoryYear xty1896 = xt.territoryYearOrNull(1896);
         TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
+
+        TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
 
         long in = xty1897.births.total.both - xty1897.deaths.total.both;
         in += totalMigration.saldo(tname, 1897);
@@ -86,7 +111,7 @@ public class EvalProgressive
 
         ty1897.progressive_population.total.both = tyCensus.population.total.both - in1;
         ty1898.progressive_population.total.both = tyCensus.population.total.both + in2;
-        
+
         ty1897.migration.total.both = totalMigration.saldo(tname, 1897);
 
         if (xty1896 != null)
@@ -94,7 +119,7 @@ public class EvalProgressive
             in = xty1896.births.total.both - xty1896.deaths.total.both;
             in += totalMigration.saldo(tname, 1896);
             ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
-            ty1896.migration.total.both = totalMigration.saldo(tname, 1896); 
+            ty1896.migration.total.both = totalMigration.saldo(tname, 1896);
         }
 
         for (int year = 1898; year <= 1916; year++)
@@ -102,11 +127,11 @@ public class EvalProgressive
             TerritoryYear xty = xt.territoryYearOrNull(year);
             TerritoryYear ty = t.territoryYearOrNull(year);
             TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
-            
+
             if (ty != null)
             {
                 ty.migration.total.both = totalMigration.saldo(tname, year);
-                
+
                 if (ty_next != null && xty != null)
                 {
                     in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
@@ -118,7 +143,7 @@ public class EvalProgressive
         }
     }
 
-    private long null2zero(Long v)
+    static private long null2zero(Long v)
     {
         return v == null ? 0 : v;
     }

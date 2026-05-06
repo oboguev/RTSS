@@ -21,7 +21,7 @@ public class TestMathUtil
     {
         double av1 = MathUtil.log_average(1000.0, 2000.0);
         double av2 = log_average_naive(1000, 1000.0, 2000.0);
-        Util.noop();
+        Util.unused(av1, av2);
     }
 
     private double log_average_naive(int npoints, double v1, double v2)
