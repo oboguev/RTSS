@@ -76,11 +76,11 @@ public class FixEarlyPeriod
         final double rate_difference_threshold = 0.01;
         double prev_right_cbr = 0;
         double prev_right_cdr = 0;
-        Territory xt = t;
+        Territory xt = t.dup();
 
         for (int pass = 0;; pass++)
         {
-            xt = fix_pass(xt, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);
+            fix_pass(xt, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);
 
             if (pass >= 1 &&
                 Math.abs(right_cbr - prev_right_cbr) < rate_difference_threshold &&
@@ -104,69 +104,30 @@ public class FixEarlyPeriod
     private double right_cdr; /* новое характерное значение смертности в правом участке */
 
     /*
-     * Клонировать территорию и поменять в ней левый участок по правому.
-     * Возвращает изменённую клонированную теритторию (территория-аргумент @t не меняется)
+     * Поменять левый участок по правому.
+     * Возвращает изменённую теритторию
      * и значения right_cbr / right_cdr для @t.   
      */
-    private Territory fix_pass(Territory t, Territory tCensus, int byl1, int byl2, int byr1, int byr2,
+    private void fix_pass(Territory t, Territory tCensus, int byl1, int byl2, int byr1, int byr2,
             int dyl1, int dyl2, int dyr1, int dyr2) throws Exception
     {
+        // целевая рождаемость и сметность для левого участка, взять из правого участка
         right_cbr = averageRate(t, byr1, byr2, BirthDeath.BIRTH);
         right_cdr = averageRate(t, dyr1, dyr2, BirthDeath.DEATH);
 
-        /* ================================= seed data ================================= */
-
-        TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
-
-        TerritoryYear ty1896 = t.territoryYearOrNull(1896);
-        TerritoryYear ty1897 = t.territoryYearOrNull(1897);
-        TerritoryYear ty1898 = t.territoryYearOrNull(1898);
-
-        Territory xt = t.dup();
-        TerritoryYear xty1896 = xt.territoryYearOrNull(1896);
-        TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
-
-        adjust_births(xty1897, byl1, byl2, right_cbr, tyCensus.population.total.both);
-        adjust_deaths(xty1897, dyl1, dyl2, right_cdr, tyCensus.population.total.both);
-
-        long in = xty1897.births.total.both - xty1897.deaths.total.both;
-        in += totalMigration.saldo(t.name, 1897);
-        long in1 = Math.round(in * 27.0 / 365.0);
-        long in2 = in - in1;
-
-        ty1897.progressive_population.total.both = tyCensus.population.total.both - in1;
-        ty1898.progressive_population.total.both = tyCensus.population.total.both + in2;
-
-        if (xty1896 != null)
+        // adjust births and deaths in left window from exising progressive
+        for (int year = 1896; year <= 1916; year++)
         {
-            adjust_births(xty1896, byl1, byl2, right_cbr, tyCensus.population.total.both);
-            adjust_deaths(xty1896, dyl1, dyl2, right_cdr, tyCensus.population.total.both);
-
-            in = xty1896.births.total.both - xty1896.deaths.total.both;
-            in += totalMigration.saldo(t.name, 1896);
-            ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
-        }
-
-        for (int year = 1898; year <= 1916; year++)
-        {
-            TerritoryYear xty = xt.territoryYearOrNull(year);
-            if (xty != null)
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            if (ty != null)
             {
-                adjust_births(xty, byl1, byl2, right_cbr, xty.progressive_population.total.both);
-                adjust_deaths(xty, dyl1, dyl2, right_cdr, xty.progressive_population.total.both);
-
-                TerritoryYear xty_next = xt.territoryYearOrNull(year + 1);
-                if (xty_next != null)
-                {
-                    in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
-                    in += totalMigration.saldo(t.name, year);
-
-                    xty_next.progressive_population.total.both = xty.progressive_population.total.both + in;
-                }
+                adjust_births(ty, byl1, byl2, right_cbr, ty.progressive_population.total.both);
+                adjust_deaths(ty, dyl1, dyl2, right_cdr, ty.progressive_population.total.both);
             }
         }
 
-        return xt;
+        // пересчёт населения (progressive_population)
+        EvalProgressive.evalProgressive(t, tCensus);
     }
 
     /*
@@ -271,7 +232,7 @@ public class FixEarlyPeriod
     private double average(double[] dx)
     {
         Double v = null;
-        
+
         for (double d : dx)
         {
             if (v == null)
@@ -279,7 +240,7 @@ public class FixEarlyPeriod
             else
                 v += d;
         }
-        
+
         return v / dx.length;
     }
 
