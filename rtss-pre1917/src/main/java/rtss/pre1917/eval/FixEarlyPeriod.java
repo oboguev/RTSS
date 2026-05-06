@@ -7,7 +7,6 @@ import rtss.data.selectors.BirthDeath;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
-import rtss.pre1917.data.migration.TotalMigration;
 
 /*
  * Скорректировать рождаемость и смертность в указанном "левом" промежутке, сделав их значения такими же,
@@ -30,7 +29,6 @@ import rtss.pre1917.data.migration.TotalMigration;
  */
 public class FixEarlyPeriod
 {
-    private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
     private final double PROMILLE = 1000.0;
 
     public FixEarlyPeriod() throws Exception
@@ -197,11 +195,6 @@ public class FixEarlyPeriod
         default:
             return null;
         }
-    }
-
-    private long null2zero(Long v)
-    {
-        return v == null ? 0 : v;
     }
 
     /* ============================================================ */

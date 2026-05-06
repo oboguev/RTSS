@@ -6,6 +6,7 @@ import java.util.Map;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
+import rtss.util.Util;
 
 public class WarLossShare
 {
@@ -23,14 +24,6 @@ public class WarLossShare
         Double pct = tn2pct.get(tname);
         if (pct != null)
             return pct;
-
-        switch (tname)
-        {
-        case "Сахалин":
-        case "Выборгская":
-            // return 0.0;
-            break;
-        }
 
         for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
         {
@@ -61,7 +54,15 @@ public class WarLossShare
             }
         }
 
-        // Util.err("No war loss data for " + tname);
+        switch (tname)
+        {
+        case "Сахалин":
+        case "Выборгская":
+            return 0.0;
+            // return null;
+        }
+
+        Util.err("No war loss data for " + tname);
 
         return null;
     }

@@ -25,7 +25,7 @@ public class ApplyWarDeaths
         this.empirePopulation1904 = empirePopulation1904;
         this.empirePopulation1914 = empirePopulation1914;
     }
-    
+
     public static void applyToEmpire(Territory tmEmpire)
     {
         tmEmpire.extraDeaths(1904, EmpireWarDeaths_1904);
@@ -50,38 +50,45 @@ public class ApplyWarDeaths
 
     private void apply(Territory t, int year, long empireDeaths, long empirePopulation, int referenceYear) throws Exception
     {
+        boolean alwaysUse1914 = true;
         WarLossShare wls = new LoadData().loadWarLossShare();
 
-        TerritoryYear ty = t.territoryYearOrNull(referenceYear);
-
-        if (ty == null || ty.progressive_population == null ||
-            ty.progressive_population.total == null ||
-            ty.progressive_population.total.both == null)
-        {
-            if (Taxon.isComposite(t.name))
-                return;
-        }
-
         Double fraction = null;
-        
-        if (year == 1914)
+
+        if (year == 1914 || alwaysUse1914)
+        {
             fraction = wls.getLossPercentageVsEmpireForTeritory(t.name);
-        
-        if (fraction != null)
-        {
-            fraction /= 100.0;
+            if (fraction != null)
+            {
+                fraction /= 100.0;
+            }
+            else
+            {
+                Util.err("No war loss data for " + t.name);
+                fraction = 0.0;
+            }
         }
-        else
+        else 
         {
-            // Util.err("No war loss data for " + t.name);
+            TerritoryYear ty = t.territoryYearOrNull(referenceYear);
+
+            if (ty == null || ty.progressive_population == null ||
+                ty.progressive_population.total == null ||
+                ty.progressive_population.total.both == null)
+            {
+                if (Taxon.isComposite(t.name))
+                    return;
+            }
+
             fraction = (double) ty.progressive_population.total.both / empirePopulation;
+            fraction /= 100.0;
         }
 
         long extraDeaths = Math.round(empireDeaths * fraction);
 
         t.extraDeaths(year, extraDeaths);
     }
-    
+
     public void print(TerritoryDataSet tds) throws Exception
     {
         WarLossShare wls = new LoadData().loadWarLossShare();
@@ -92,11 +99,11 @@ public class ApplyWarDeaths
             Double f1 = wls.getLossPercentageVsEmpireForTeritory(tname);
             if (f1 != null)
                 f1 /= 100.0;
-            
+
             Territory t = tds.get(tname);
             TerritoryYear ty = t.territoryYearOrNull(1914);
             double f2 = (double) ty.progressive_population.total.both / empirePopulation1914;
-            
+
             Util.out(String.format("\"%s\" %s %f", tname, f1, f2));
         }
         Util.out("=========================================");

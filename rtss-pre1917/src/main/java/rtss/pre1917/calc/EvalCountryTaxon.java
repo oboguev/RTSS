@@ -226,6 +226,8 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private void calc_non_empire() throws Exception
     {
+        filterPopulationSetsByTaxon();
+
         if (countMilitaryDeaths)
         {
             // apply war losses to individual territories
@@ -234,7 +236,6 @@ public class EvalCountryTaxon extends EvalCountryBase
             new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsPopulation);
         }
 
-        filterPopulationSetsByTaxon();
         Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
         checkProgressiveAvailable();
         mergeTaxonPopulation();
