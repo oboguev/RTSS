@@ -16,7 +16,9 @@ public class EvalCountryBase
     protected TerritoryDataSet tdsPopulation;
     protected TerritoryDataSet tdsVitalRates;
 
-    protected final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+    protected final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, 
+                                                                                   LoadOptions.MERGE_CITIES,
+                                                                                   LoadOptions.MERGE_POST1897_REGIONS);
     protected final TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY,
                                                                                   LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                                                   LoadOptions.MERGE_CITIES,
