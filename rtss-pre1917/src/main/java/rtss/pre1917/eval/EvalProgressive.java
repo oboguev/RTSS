@@ -84,6 +84,11 @@ public class EvalProgressive
         evalProgressive(t, t, tCensus);
     }
 
+    static public void evalProgressive(Territory t, long censusPopulation) throws Exception
+    {
+        evalProgressive(t, t, censusPopulation);
+    }
+
     /*
      * Вычислить t.progressive_population по:
      * - отправной точке населеия по переписи 1897 года в tCensus 
@@ -91,6 +96,12 @@ public class EvalProgressive
      * - данным о сальдо миграции
      */
     static private void evalProgressive(Territory t, Territory xt, Territory tCensus) throws Exception
+    {
+        TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
+        evalProgressive(t, xt, tyCensus.population.total.both);
+    }
+    
+    static private void evalProgressive(Territory t, Territory xt, long censusPopulation) throws Exception
     {
         final TotalMigration totalMigration = TotalMigration.getTotalMigration();
         String tname = t.name;
@@ -102,15 +113,13 @@ public class EvalProgressive
         TerritoryYear xty1896 = xt.territoryYearOrNull(1896);
         TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
 
-        TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
-
         long in = xty1897.births.total.both - xty1897.deaths.total.both;
         in += totalMigration.saldo(tname, 1897);
         long in1 = Math.round(in * 27.0 / 365.0);
         long in2 = in - in1;
 
-        ty1897.progressive_population.total.both = tyCensus.population.total.both - in1;
-        ty1898.progressive_population.total.both = tyCensus.population.total.both + in2;
+        ty1897.progressive_population.total.both = censusPopulation - in1;
+        ty1898.progressive_population.total.both = censusPopulation + in2;
 
         ty1897.migration.total.both = totalMigration.saldo(tname, 1897);
 
