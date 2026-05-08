@@ -10,6 +10,13 @@ import rtss.pre1917.data.TerritoryYear;
  */
 public class Astrakhan
 {
+    public static Territory calcSettled(Territory tAstrakan) throws Exception
+    {
+        Territory t = tAstrakan.dup("Астраханская (оседлое)");
+        EvalProgressive.evalProgressive(t,  DemographicConstants.перепись1897_Астраханская_губ_оседлое_население);
+        return t;
+    }
+    
     public static Territory calcNomadic(int y1, int y2)
     {
         Territory t1 = calc("Астраханская (кочевые калмыки)",

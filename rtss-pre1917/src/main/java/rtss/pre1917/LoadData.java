@@ -27,6 +27,7 @@ import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.data.migration.Immigration;
 import rtss.pre1917.data.migration.ImmigrationYear;
 import rtss.pre1917.data.migration.InnerMigration;
+import rtss.pre1917.eval.Astrakhan;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FillMissingBD;
@@ -388,6 +389,21 @@ public class LoadData
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
             new EvalProgressive(territories).evalProgressive();
 
+        if (hasOption(LoadOptions.EVAL_SPLIT_ASTRAKHAN, options))
+        {
+            if (!hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
+                throw new Exception("Несовместимые опции");
+
+            Territory t = territories.get("Астраханская");
+            t = Astrakhan.calcSettled(t);
+            territories.put(t.name, t);
+            
+            t = Astrakhan.calcNomadic(1896, 1915);
+            territories.put(t.name, t);
+            
+            territories.remove("Астраханская");
+        }
+            
         if (hasOption(LoadOptions.VERIFY, options))
             new CrossVerify().verify(territories);
 
