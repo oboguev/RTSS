@@ -261,9 +261,12 @@ public class EvalCountryTaxon extends EvalCountryBase
             // apply war losses manually (in bulk) to tmPopulation
             ApplyWarDeaths.applyToEmpire(tmPopulation);
 
-            Util.out(String.format("Число военных смертей в 1904 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1904));
-            Util.out(String.format("Число военных смертей в 1905 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1905));
-            Util.out(String.format("Число военных смертей в 1914 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1914));
+            if (options.verbose())
+            {
+                Util.out(String.format("Число военных смертей в 1904 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1904));
+                Util.out(String.format("Число военных смертей в 1905 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1905));
+                Util.out(String.format("Число военных смертей в 1914 году: %,d", ApplyWarDeaths.EmpireWarDeaths_1914));
+            }
 
             // apply war losses to individual territories in tdsExport and tdsVital 
             EmpirePopulation1904 = tmPopulation.territoryYearOrNull(1904).progressive_population.total.both;
@@ -300,12 +303,15 @@ public class EvalCountryTaxon extends EvalCountryBase
             Map<Integer, WarDeathsSummary> wds = new HashMap<>();
             new ApplyWarDeaths(EmpirePopulation1904, EmpirePopulation1914).apply(tdsPopulation, wds);
 
-            Util.out(String.format("Число военных смертей в 1904 году: %,d (%.1f%% от потерь Империи)",
-                                   wds.get(1904).deaths, wds.get(1904).empireDeathsPct));
-            Util.out(String.format("Число военных смертей в 1905 году: %,d (%.1f%% от потерь Империи)",
-                                   wds.get(1905).deaths, wds.get(1905).empireDeathsPct));
-            Util.out(String.format("Число военных смертей в 1914 году: %,d (%.1f%% от потерь Империи)",
-                                   wds.get(1914).deaths, wds.get(1914).empireDeathsPct));
+            if (options.verbose())
+            {
+                Util.out(String.format("Число военных смертей в 1904 году: %,d (%.1f%% от потерь Империи)",
+                                       wds.get(1904).deaths, wds.get(1904).empireDeathsPct));
+                Util.out(String.format("Число военных смертей в 1905 году: %,d (%.1f%% от потерь Империи)",
+                                       wds.get(1905).deaths, wds.get(1905).empireDeathsPct));
+                Util.out(String.format("Число военных смертей в 1914 году: %,d (%.1f%% от потерь Империи)",
+                                       wds.get(1914).deaths, wds.get(1914).empireDeathsPct));
+            }
         }
 
         Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
@@ -352,17 +358,21 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         if (tdsVitalRates.size() == tdsPopulation.size())
         {
-            Util.out("Для подсчёта естественного движения используются все входящие территории");
+            if (options.verbose())
+                Util.out("Для подсчёта естественного движения используются все входящие территории");
         }
         else
         {
-            Util.out("Для подсчёта естественного движения не используются территории:");
+            if (options.verbose())
+                Util.out("Для подсчёта естественного движения не используются территории:");
+
             for (String tname : Util.sort(tdsPopulation.keySet()))
             {
                 if (!tdsVitalRates.containsKey(tname))
                 {
                     territoriesExcludedFromVitalRates.add(tname);
-                    Util.out("    " + tname);
+                    if (options.verbose())
+                        Util.out("    " + tname);
                 }
             }
 
@@ -512,7 +522,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             }
         }
 
-        if (print)
+        if (print && options.verbose())
             Util.out(String.format("Величина части иммиграции не разбиваемой по губерниям, с 1896 по конец периода: %,d", lumpTotal));
     }
 
@@ -524,10 +534,13 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private void showPopulationPercentageVitalRatesVsPopulation() throws Exception
     {
-        Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
-        Util.out(String.format("    в %d-%d годах %.1f%% населения", 1896, toYear, populationPercentageVitalRatesVsPopulation(1896, toYear)));
-        Util.out(String.format("    в %d году %.1f%% населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
-        Util.out(String.format("    в %d году %.1f%% населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
+        if (options.verbose())
+        {
+            Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
+            Util.out(String.format("    в %d-%d годах %.1f%% населения", 1896, toYear, populationPercentageVitalRatesVsPopulation(1896, toYear)));
+            Util.out(String.format("    в %d году %.1f%% населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
+            Util.out(String.format("    в %d году %.1f%% населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
+        }
     }
 
     private double populationPercentageVitalRatesVsPopulation(int y1, int y2) throws Exception
