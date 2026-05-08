@@ -1,10 +1,13 @@
 package rtss.pre1917.eval;
 
+import java.util.Collection;
+
 import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.data.DemographicConstants;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.util.Util;
 
 /*
  * Вычислить кочевое население Астраханской губернии
@@ -15,8 +18,8 @@ public class Astrakhan
     {
         Territory t = tFullAstrakan.dup("Астраханская (оседлое)");
         EvalProgressive.evalProgressive(t, DemographicConstants.перепись1897_Астраханская_губ_оседлое_население);
-        
-        evalUgviPopulation(t, tFullAstrakan, 
+
+        evalUgviPopulation(t, tFullAstrakan,
                            DemographicConstants.перепись1897_Астраханская_губ_оседлое_население,
                            DemographicConstants.перепись1897_Астраханская_губ_всё_население);
 
@@ -75,7 +78,7 @@ public class Astrakhan
             }
         }
 
-        evalUgviPopulation(t, tFullAstrakan, 
+        evalUgviPopulation(t, tFullAstrakan,
                            censusPopulation,
                            DemographicConstants.перепись1897_Астраханская_губ_всё_население);
 
@@ -85,21 +88,21 @@ public class Astrakhan
     /*
      * Примерная доля населения по УГВИ относимая на под-территорию
      */
-    private static void evalUgviPopulation(Territory t, Territory tFullAstrakan, 
-                       long thisPopulationCensus,
-                       long wholePopulationCensus)
+    private static void evalUgviPopulation(Territory t, Territory tFullAstrakan,
+            long thisPopulationCensus,
+            long wholePopulationCensus)
     {
         final double share = (double) thisPopulationCensus / wholePopulationCensus;
-        
+
         for (int year : t.years())
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             TerritoryYear tyFull = tFullAstrakan.territoryYearOrNull(year);
             if (ty != null && tyFull != null && tyFull.population.total.both != null)
-                ty.population.total.both = Math.round(tyFull.population.total.both * share); 
+                ty.population.total.both = Math.round(tyFull.population.total.both * share);
         }
     }
-    
+
     /* ======================================================================================= */
 
     public static boolean isAnyAstrakhan(String tname)
@@ -131,5 +134,99 @@ public class Astrakhan
             ty1.population.total.both += ty2.population.total.both;
 
         return ty1;
+    }
+
+    /*
+     * Пропустить tname при слиянии по таксону
+     */
+    public static boolean shouldMergeTaxon(String tname, Collection<String> taxonTerritorySet, TerritoryDataSet tds) throws Exception
+    {
+        // не астраханская территория
+        if (!isAnyAstrakhan(tname))
+            return true;
+
+        // не содержит конфликта
+        if (!taxonTerritorySet.contains("Астраханская"))
+            return true;
+
+        // не содержит конфликта
+        if (!taxonTerritorySet.contains("Астраханская (оседлое)") &&
+            !taxonTerritorySet.contains("Астраханская (кочевники)"))
+        {
+            return true;
+        }
+
+        if (taxonTerritorySet.contains("Астраханская (оседлое)") != taxonTerritorySet.contains("Астраханская (кочевники)"))
+        {
+            throw new Exception("Неясно намерение по Астраханской губернии");
+        }
+
+        /*
+         * Таксон содержит все три варианта:
+         *   - Астраханская
+         *   - Астраханская (оседлое)
+         *   - Астраханская (кочевники)
+         */
+
+        if (tname.equals("Астраханская"))
+        {
+            // tds содержит Астраханская и не содержит отдельных -> merge
+            if (tds.containsKey("Астраханская") &&
+                !tds.containsKey("Астраханская (оседлое)") &&
+                !tds.containsKey("Астраханская (кочевники)"))
+            {
+                return true;
+            }
+
+            // tds не содержит Астраханская и содержит отдельные -> skip
+            if (!tds.containsKey("Астраханская") &&
+                tds.containsKey("Астраханская (оседлое)") &&
+                tds.containsKey("Астраханская (кочевники)"))
+            {
+                return false;
+            }
+
+            // tds не содержит Астраханская и содержит только оседлое (vital rates)  -> skip
+            if (!tds.containsKey("Астраханская") &&
+                tds.containsKey("Астраханская (оседлое)") &&
+                !tds.containsKey("Астраханская (кочевники)"))
+            {
+                return false;
+            }
+
+            Util.err("Inconsistent state for Астраханская");
+
+            return false;
+        }
+        else // оседлое или кочевники отдельно
+        {
+            // tds не содержит Астраханская и содержит отдельные -> merge
+            if (!tds.containsKey("Астраханская") &&
+                tds.containsKey("Астраханская (оседлое)") &&
+                tds.containsKey("Астраханская (кочевники)"))
+            {
+                return true;
+            }
+
+            // tds не содержит Астраханская и содержит только оседлое (vital rates)  -> merge
+            if (!tds.containsKey("Астраханская") &&
+                tds.containsKey("Астраханская (оседлое)") &&
+                !tds.containsKey("Астраханская (кочевники)"))
+            {
+                return true;
+            }
+
+            // tds содержит Астраханская и не содержит отдельных -> skip
+            if (tds.containsKey("Астраханская") &&
+                !tds.containsKey("Астраханская (оседлое)") &&
+                !tds.containsKey("Астраханская (кочевники)"))
+            {
+                return false;
+            }
+
+            Util.err("Inconsistent state for Астраханская");
+
+            return false;
+        }
     }
 }

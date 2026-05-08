@@ -9,6 +9,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.eval.Astrakhan;
 import rtss.util.FieldValue;
 import rtss.util.Util;
 import rtss.pre1917.util.WeightedAverage;
@@ -223,6 +224,9 @@ public class MergeTaxon
 
         for (String tname : tx.territories.keySet())
         {
+            if (!Astrakhan.shouldMergeTaxon(tname, tx.territories.keySet(), territories))
+                continue;
+            
             boolean flag = options.isFlagMissing(selector, tname, ty.year);
 
             Territory ter2 = territories.get(tname);
