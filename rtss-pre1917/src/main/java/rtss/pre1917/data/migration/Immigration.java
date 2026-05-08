@@ -27,6 +27,12 @@ public class Immigration
      */
     public long immigrants(String tname, int year) throws Exception
     {
+        if (tname.equals("Астраханская (кочевники)"))
+            return 0;
+            
+        if (tname.equals("Астраханская (оседлое)"))
+            tname = "Астраханская";
+
         String key = key(tname, year);
 
         Double v = tname2amount.get(key);

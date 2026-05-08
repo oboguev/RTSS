@@ -13,6 +13,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.MissingMigrationDataException;
 import rtss.pre1917.data.migration.TotalMigration;
+import rtss.pre1917.eval.Astrakhan;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
@@ -262,9 +263,13 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         List<PopulationDifference> list = new ArrayList<>();
 
         for (String tname : tdsPopulation.keySet())
-
         {
-            if (!Taxon.isComposite(tname))
+            if (Astrakhan.isAnyAstrakhan(tname))
+            {
+                TerritoryYear ty = Astrakhan.territoryYearOrNull(tdsPopulation, toYear);
+                list.add(new PopulationDifference(tname, ty.population.total.both, ty.progressive_population.total.both));
+            }
+            else if (!Taxon.isComposite(tname))
             {
                 Territory t = tdsPopulation.get(tname);
                 TerritoryYear ty = t.territoryYearOrNull(toYear);
@@ -282,9 +287,13 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         List<PopulationDifference> list = new ArrayList<>();
 
         for (String tname : tdsPopulation.keySet())
-
         {
-            if (!Taxon.isComposite(tname))
+            if (Astrakhan.isAnyAstrakhan(tname))
+            {
+                TerritoryYear ty = Astrakhan.territoryYearOrNull(tdsPopulation, toYear);
+                list.add(new PopulationDifference(tname, ty.population.total.both, ty.progressive_population.total.both));
+            }
+            else if (!Taxon.isComposite(tname))
             {
                 TerritoryYear ty = tdsPopulation.get(tname).territoryYearOrNull(toYear);
                 TerritoryYear tyCSK = tdsCSK.get(tname).territoryYearOrNull(toYear);

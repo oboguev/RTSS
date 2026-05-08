@@ -34,10 +34,16 @@ public class Emigration
     /* ================================== FETCH DATA ================================== */
 
     /*
-     * Число эиигрантов уехавших за границу из губернии или области @tname в год @year 
+     * Число эмигрантов уехавших за границу из губернии или области @tname в год @year 
      */
     public long emigrants(String tname, int year) throws Exception
     {
+        if (tname.equals("Астраханская (кочевники)"))
+            return 0;
+            
+        if (tname.equals("Астраханская (оседлое)"))
+            tname = "Астраханская";
+
         String key = key(tname, year);
 
         Double v = tname2amount.get(key);

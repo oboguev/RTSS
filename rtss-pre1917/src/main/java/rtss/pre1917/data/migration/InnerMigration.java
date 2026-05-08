@@ -289,6 +289,12 @@ public class InnerMigration
 
     public long inFlow(String tname, int year)
     {
+        if (tname.equals("Астраханская (кочевники)"))
+            return 0;
+            
+        if (tname.equals("Астраханская (оседлое)"))
+            tname = "Астраханская";
+
         MergeDescriptor md = MergePost1897Regions.find(tname);
 
         if (md == null)
@@ -316,6 +322,12 @@ public class InnerMigration
 
     public long outFlow(String tname, int year)
     {
+        if (tname.equals("Астраханская (кочевники)"))
+            return 0;
+            
+        if (tname.equals("Астраханская (оседлое)"))
+            tname = "Астраханская";
+
         MergeDescriptor md = MergePost1897Regions.find(tname);
 
         if (md == null)

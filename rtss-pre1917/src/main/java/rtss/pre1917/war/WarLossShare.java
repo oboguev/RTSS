@@ -21,6 +21,12 @@ public class WarLossShare
 
     public Double getLossPercentageVsEmpireForTeritory(String tname)
     {
+        if (tname.equals("Астраханская (кочевники)"))
+            return 0.0;
+            
+        if (tname.equals("Астраханская (оседлое)"))
+            tname = "Астраханская";
+
         Double pct = tn2pct.get(tname);
         if (pct != null)
             return pct;

@@ -45,6 +45,9 @@ public class EvalCountryBase
         if (taxonName.equals("русские губернии Европейской России и Кавказа, кроме Черноморской"))
             return;
 
+        /* не включать кочевников астраханских степей в подсчёт естественого движения */
+        excludeFromVitalRates("Астраханская (кочевники)");
+
         corrections_Kavkaz();
         corrections_CentralAsia();
         corrections_Siberia();
