@@ -64,6 +64,9 @@ public class LoadData
         // - скорректировать на недоучёт регистрации рождений и смертей иудеев (только для УГВИ)
         FILL_MISSING_BD, DONT_FILL_MISSING_BD,
 
+        // разбить Астраханскую губернию на оседлую и кочевые части
+        EVAL_SPLIT_ASTRAKHAN, DONT_EVAL_SPLIT_ASTRAKHAN,
+
         // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
         // и сохранить её в поле progressive_population, параллельно собственным данным УГВИ
         EVAL_PROGRESSIVE, DONT_EVAL_PROGRESSIVE
@@ -2025,7 +2028,7 @@ public class LoadData
         if (cachedWarLossShare != null)
             return cachedWarLossShare;
 
-        WarLossShare wls = new WarLossShare ();
+        WarLossShare wls = new WarLossShare();
 
         currentFile = "1914-war-losses-by-territory.xlsx";
 
@@ -2048,9 +2051,9 @@ public class LoadData
         {
             currentFile = null;
         }
-        
+
         cachedWarLossShare = wls;
-        
+
         return wls;
     }
 
@@ -2062,7 +2065,7 @@ public class LoadData
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             currentNR = nr;
-            
+
             String tname = rc.asString(nr, colTerritory);
             if (tname == null || tname.equals(""))
                 continue;

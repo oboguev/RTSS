@@ -203,6 +203,8 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                 LoadOptions.FILL_MISSING_BD,
                                                 LoadOptions.MERGE_CITIES,
                                                 LoadOptions.MERGE_POST1897_REGIONS,
+                                                options.splitAstrakhan() ? LoadOptions.EVAL_SPLIT_ASTRAKHAN
+                                                                         : LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
                                                 LoadOptions.EVAL_PROGRESSIVE);
         tdsPopulation.leaveOnlyTotalBoth();
 
