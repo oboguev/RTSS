@@ -8,9 +8,9 @@ import rtss.pre1917.data.TerritoryYear;
 /*
  * Вычислить кочевое население Астраханской губернии
  */
-public class AstrakhanNomadic
+public class Astrakhan
 {
-    public static Territory calc(int y1, int y2)
+    public static Territory calcNomadic(int y1, int y2)
     {
         Territory t1 = calc("Астраханская (кочевые калмыки)",
                             DemographicConstants.перепись1897_Астраханская_губ_кочевое_калмыцкое_население,
