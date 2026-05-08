@@ -40,22 +40,22 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         try
         {
-            new EvalCountryTaxon("Империя", 1913).calc(true).print().printDifferenceWithCSK().printDifferenceWithUGVI()
+            new EvalCountryTaxon("Империя", 1913, Options.VERBOSE).calc().print().printDifferenceWithCSK().printDifferenceWithUGVI()
                     .exportData("c:\\@\\Final.csv", "c:\\@\\Final.txt");
-            new EvalCountryTaxon("РСФСР-1991", 1914).calc(true).print();
-            new EvalCountryTaxon("СССР-1991", 1913).calc(true).print();
+            new EvalCountryTaxon("РСФСР-1991", 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1991", 1913, Options.VERBOSE).calc().print();
 
-            new EvalCountryTaxon("Европейская часть РСФСР-1991", 1914).calc(true).print();
-            new EvalCountryTaxon("Сибирь", 1914).calc(true).print();
-            new EvalCountryTaxon("Новороссия", 1914).calc(true).print();
-            new EvalCountryTaxon("Малороссия", 1913).calc(true).print();
-            new EvalCountryTaxon("Белоруссия", 1913).calc(true).print();
-            new EvalCountryTaxon("Литва", 1913).calc(true).print();
-            new EvalCountryTaxon("Кавказ", 1914).calc(true).print();
-            new EvalCountryTaxon("Средняя Азия", 1914).calc(true).print();
-            new EvalCountryTaxon("привислинские губернии", 1913).calc(true).print();
-            new EvalCountryTaxon("Остзейские губернии", 1913).calc(true).print();
-            new EvalCountryTaxon("50 губерний Европейской России", 1913).calc(true).print();
+            new EvalCountryTaxon("Европейская часть РСФСР-1991", 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Сибирь", 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Новороссия", 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Малороссия", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Белоруссия", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Литва", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Кавказ", 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Средняя Азия", 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("привислинские губернии", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Остзейские губернии", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("50 губерний Европейской России", 1913, Options.VERBOSE).calc().print();
         }
         catch (Throwable ex)
         {
@@ -64,10 +64,11 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
     }
 
-    public static class Options
+    public static class Options implements Cloneable
     {
         private boolean countMilitaryDeaths = DoCountMilitaryDeaths;
         private boolean splitAstrakhan = true;
+        private boolean verbose = true;
 
         public Options countMilitaryDeaths(boolean b)
         {
@@ -81,6 +82,12 @@ public class EvalCountryTaxon extends EvalCountryBase
             return this;
         }
 
+        public Options verbose(boolean b)
+        {
+            verbose = b;
+            return this;
+        }
+
         public boolean countMilitaryDeaths()
         {
             return countMilitaryDeaths;
@@ -90,6 +97,27 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
             return splitAstrakhan;
         }
+
+        public boolean verbose()
+        {
+            return verbose;
+        }
+
+        @Override
+        public Options clone()
+        {
+            try
+            {
+                return (Options) super.clone();
+            }
+            catch (CloneNotSupportedException ex)
+            {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        public static Options VERBOSE = new Options().verbose(true);
+        public static Options SILENT = new Options().verbose(false);
     }
 
     /*
@@ -108,8 +136,8 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     public static TerritoryDataSet getFinalEmpirePopulationSet(Options options) throws Exception
     {
-        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913, options);
-        eval.calc(false);
+        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913, options.clone().verbose(false));
+        eval.calc();
         eval.tdsExportPopulation.leaveOnlyTotalBoth();
 
         for (Territory t : eval.tdsExportPopulation.values())
@@ -151,15 +179,15 @@ public class EvalCountryTaxon extends EvalCountryBase
         this.options = options;
 
         if (Util.False && typdRusEvro == null && !taxonName.equals(RusEvro))
-            typdRusEvro = new EvalCountryTaxon(RusEvro, 1914).calc(false);
+            typdRusEvro = new EvalCountryTaxon(RusEvro, 1914, options.clone().verbose(false)).calc();
     }
 
     private static Long EmpirePopulation1904 = null;
     private static Long EmpirePopulation1914 = null;
 
-    private TaxonYearlyPopulationData calc(boolean verbose) throws Exception
+    private TaxonYearlyPopulationData calc() throws Exception
     {
-        if (verbose)
+        if (options.verbose())
         {
             Util.out("");
             Util.out("====================================================================================================================");
@@ -178,7 +206,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                 LoadOptions.EVAL_PROGRESSIVE);
         tdsPopulation.leaveOnlyTotalBoth();
 
-        if (verbose)
+        if (options.verbose())
         {
             FilterByTaxon.filteredOutByTaxon(taxonName, tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
             FilterByTaxon.filterByTaxon(taxonName, tdsPopulation).showTerritoryNames("Территории для численности населения", taxonName, 1914);
