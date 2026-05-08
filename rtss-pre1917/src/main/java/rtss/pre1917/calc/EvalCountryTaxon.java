@@ -64,6 +64,34 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
     }
 
+    public static class Options
+    {
+        private boolean countMilitaryDeaths = DoCountMilitaryDeaths;
+        private boolean splitAstrakhan = true;
+
+        public Options countMilitaryDeaths(boolean b)
+        {
+            countMilitaryDeaths = b;
+            return this;
+        }
+
+        public Options splitAstrakhan(boolean b)
+        {
+            splitAstrakhan = b;
+            return this;
+        }
+
+        public boolean countMilitaryDeaths()
+        {
+            return countMilitaryDeaths;
+        }
+
+        public boolean splitAstrakhan()
+        {
+            return splitAstrakhan;
+        }
+    }
+
     /*
      * Единственные употребимые поля:
      *     progressive_population.total.both
@@ -75,12 +103,12 @@ public class EvalCountryTaxon extends EvalCountryBase
      */
     public static TerritoryDataSet getFinalEmpirePopulationSet() throws Exception
     {
-        return getFinalEmpirePopulationSet(DoCountMilitaryDeaths);
+        return getFinalEmpirePopulationSet(new Options());
     }
 
-    public static TerritoryDataSet getFinalEmpirePopulationSet(boolean countMilitaryDeaths) throws Exception
+    public static TerritoryDataSet getFinalEmpirePopulationSet(Options options) throws Exception
     {
-        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913, countMilitaryDeaths);
+        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913, options);
         eval.calc(false);
         eval.tdsExportPopulation.leaveOnlyTotalBoth();
 
@@ -105,7 +133,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     private Territory tmPopulation;
     private Territory tmVitalRates;
     private TerritoryDataSet tdsExportPopulation;
-    private final boolean countMilitaryDeaths;
+    private final Options options;
 
     private static TaxonYearlyPopulationData typdRusEvro;
 
@@ -113,14 +141,14 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private EvalCountryTaxon(String taxonName, int toYear) throws Exception
     {
-        this(taxonName, toYear, DoCountMilitaryDeaths);
+        this(taxonName, toYear, new Options().countMilitaryDeaths(DoCountMilitaryDeaths));
     }
 
-    private EvalCountryTaxon(String taxonName, int toYear, boolean countMilitaryDeaths) throws Exception
+    private EvalCountryTaxon(String taxonName, int toYear, Options options) throws Exception
     {
         super(taxonName, toYear);
 
-        this.countMilitaryDeaths = countMilitaryDeaths;
+        this.options = options;
 
         if (Util.False && typdRusEvro == null && !taxonName.equals(RusEvro))
             typdRusEvro = new EvalCountryTaxon(RusEvro, 1914).calc(false);
@@ -200,7 +228,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         /* Часть иммиграции не разбиваемая по губерниям */
         applyLumpImmigration(tmPopulation, true);
 
-        if (countMilitaryDeaths)
+        if (options.countMilitaryDeaths())
         {
             // apply war losses manually (in bulk) to tmPopulation
             ApplyWarDeaths.applyToEmpire(tmPopulation);
@@ -235,7 +263,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         filterPopulationSetsByTaxon();
 
-        if (countMilitaryDeaths)
+        if (options.countMilitaryDeaths())
         {
             // apply war losses to individual territories
             if (EmpirePopulation1904 == null || EmpirePopulation1914 == null)

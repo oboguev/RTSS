@@ -48,12 +48,12 @@ public class ByIncreaseOfGrowthRate
     }
 
     private List<TerritoryResult> results = new ArrayList<>();
-    
+
     protected static final double PROMILLE = 1000.0;
 
     protected void eval() throws Exception
     {
-        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(false);
+        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(new EvalCountryTaxon.Options().countMilitaryDeaths(false));
 
         for (String tname : tdsEmpire.keySet())
         {
@@ -63,7 +63,7 @@ public class ByIncreaseOfGrowthRate
             Territory t = tdsEmpire.get(tname);
             if (!t.hasValidVitalRate)
                 continue;
-            
+
             double r1 = rate(t, 1896, 1897, 1899, 1900);
             double r2 = rate(t, 1911, 1912, 1913);
 
@@ -76,8 +76,9 @@ public class ByIncreaseOfGrowthRate
         {
             Util.out(String.format("\"%s\" %.2f %.1f %.1f", r.tname, r.delta, r.rate1, r.rate2));
         }
-        
+
     }
+
     private double rate(Territory t, int... years) throws Exception
     {
         double average = 0;

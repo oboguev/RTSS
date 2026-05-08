@@ -37,7 +37,7 @@ public abstract class ByRateBase
 
     protected void eval() throws Exception
     {
-        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(false);
+        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(new EvalCountryTaxon.Options().countMilitaryDeaths(false));
 
         for (String tname : tdsEmpire.keySet())
         {
