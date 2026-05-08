@@ -25,20 +25,42 @@ public class YearDataSummary
         if (first_year == null)
             first_year = yd.year;
         last_year = yd.year;
+        
+        this.births = add(this.births, yd.births);
+        this.deaths = add(this.deaths, yd.deaths);
+        this.migration = add(this.migration, yd.migration);
 
-        this.births += yd.births;
-        this.deaths += yd.deaths;
-        this.migration += yd.migration;
+        this.cbr = add(this.cbr, yd.cbr);
+        this.cdr = add(this.cdr, yd.cdr);
+        this.ngr = add(this.ngr, yd.ngr);
 
-        this.cbr += yd.cbr;
-        this.cdr += yd.cdr;
-        this.ngr += yd.ngr;
-
-        this.cbr2 += yd.cbr2;
-        this.cdr2 += yd.cdr2;
-        this.ngr2 += yd.ngr2;
+        this.cbr2 = add(this.cbr2, yd.cbr2);
+        this.cdr2 = add(this.cdr2, yd.cdr2);
+        this.ngr2 = add(this.ngr2, yd.ngr2);
 
         nyears++;
+    }
+    
+    private Long add(Long v1, Long v2)
+    {
+        if (v2 == null)
+            throw new IllegalArgumentException("null value");
+        
+        if (v1 == null)
+            return v2;
+        else
+            return v1 + v2;
+    }
+
+    private Double add(Double v1, Double v2)
+    {
+        if (v2 == null)
+            throw new IllegalArgumentException("null value");
+        
+        if (v1 == null)
+            return v2;
+        else
+            return v1 + v2;
     }
 
     public YearDataSummary getSummary()
