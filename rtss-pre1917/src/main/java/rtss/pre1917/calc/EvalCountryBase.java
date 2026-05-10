@@ -2,6 +2,7 @@ package rtss.pre1917.calc;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
@@ -46,7 +47,7 @@ public class EvalCountryBase
             return;
 
         /* не включать кочевников астраханских степей в подсчёт естественого движения */
-        excludeFromVitalRates("Астраханская (кочевники)");
+        excludeFromVitalRates(Taxon.Астраханская_кочевники);
 
         corrections_Kavkaz();
         corrections_CentralAsia();

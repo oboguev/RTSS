@@ -38,10 +38,10 @@ public class Emigration
      */
     public long emigrants(String tname, int year) throws Exception
     {
-        if (tname.equals("Астраханская (кочевники)"))
+        if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
             
-        if (tname.equals("Астраханская (оседлое)"))
+        if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
         String key = key(tname, year);

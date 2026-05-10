@@ -3,6 +3,7 @@ package rtss.pre1917.data.migration;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
@@ -289,10 +290,10 @@ public class InnerMigration
 
     public long inFlow(String tname, int year)
     {
-        if (tname.equals("Астраханская (кочевники)"))
+        if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
             
-        if (tname.equals("Астраханская (оседлое)"))
+        if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
         MergeDescriptor md = MergePost1897Regions.find(tname);
@@ -322,10 +323,10 @@ public class InnerMigration
 
     public long outFlow(String tname, int year)
     {
-        if (tname.equals("Астраханская (кочевники)"))
+        if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
             
-        if (tname.equals("Астраханская (оседлое)"))
+        if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
         MergeDescriptor md = MergePost1897Regions.find(tname);

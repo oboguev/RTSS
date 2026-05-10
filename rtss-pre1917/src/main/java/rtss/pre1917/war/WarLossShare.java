@@ -3,6 +3,7 @@ package rtss.pre1917.war;
 import java.util.HashMap;
 import java.util.Map;
 
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
@@ -21,10 +22,10 @@ public class WarLossShare
 
     public Double getLossPercentageVsEmpireForTeritory(String tname)
     {
-        if (tname.equals("Астраханская (кочевники)"))
+        if (tname.equals(Taxon.Астраханская_кочевники))
             return 0.0;
             
-        if (tname.equals("Астраханская (оседлое)"))
+        if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
         Double pct = tn2pct.get(tname);

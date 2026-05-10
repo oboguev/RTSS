@@ -5,6 +5,7 @@ import java.util.Map;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Foreigners;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
@@ -27,10 +28,10 @@ public class Immigration
      */
     public long immigrants(String tname, int year) throws Exception
     {
-        if (tname.equals("Астраханская (кочевники)"))
+        if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
             
-        if (tname.equals("Астраханская (оседлое)"))
+        if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
         String key = key(tname, year);

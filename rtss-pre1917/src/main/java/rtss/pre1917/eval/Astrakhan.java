@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.data.DemographicConstants;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
@@ -16,7 +17,7 @@ public class Astrakhan
 {
     public static Territory calcSettled(Territory tFullAstrakan) throws Exception
     {
-        Territory t = tFullAstrakan.dup("Астраханская (оседлое)");
+        Territory t = tFullAstrakan.dup(Taxon.Астраханская_оседлое);
         EvalProgressive.evalProgressive(t, DemographicConstants.перепись1897_Астраханская_губ_оседлое_население);
 
         evalUgviPopulation(t, tFullAstrakan,
@@ -40,7 +41,7 @@ public class Astrakhan
                             DemographicConstants.рост_Астраханская_губ_кочевое_киргиз_кайсацкое_население,
                             y1, y2);
 
-        Territory t = new Territory("Астраханская (кочевники)");
+        Territory t = new Territory(Taxon.Астраханская_кочевники);
 
         for (int year = y1; year <= y2; year++)
         {
@@ -108,8 +109,8 @@ public class Astrakhan
     public static boolean isAnyAstrakhan(String tname)
     {
         return tname.equals("Астраханская") ||
-               tname.equals("Астраханская (оседлое)") ||
-               tname.equals("Астраханская (кочевники)");
+               tname.equals(Taxon.Астраханская_оседлое) ||
+               tname.equals(Taxon.Астраханская_кочевники);
     }
 
     /*
@@ -121,8 +122,8 @@ public class Astrakhan
         if (t != null)
             return t.territoryYearOrNull(year);
 
-        Territory t1 = tds.get("Астраханская (оседлое)");
-        Territory t2 = tds.get("Астраханская (кочевники)");
+        Territory t1 = tds.get(Taxon.Астраханская_оседлое);
+        Territory t2 = tds.get(Taxon.Астраханская_кочевники);
 
         TerritoryYear ty1 = t1.territoryYearOrNull(year);
         TerritoryYear ty2 = t2.territoryYearOrNull(year);
@@ -150,13 +151,13 @@ public class Astrakhan
             return true;
 
         // не содержит конфликта
-        if (!taxonTerritorySet.contains("Астраханская (оседлое)") &&
-            !taxonTerritorySet.contains("Астраханская (кочевники)"))
+        if (!taxonTerritorySet.contains(Taxon.Астраханская_оседлое) &&
+            !taxonTerritorySet.contains(Taxon.Астраханская_кочевники))
         {
             return true;
         }
 
-        if (taxonTerritorySet.contains("Астраханская (оседлое)") != taxonTerritorySet.contains("Астраханская (кочевники)"))
+        if (taxonTerritorySet.contains(Taxon.Астраханская_оседлое) != taxonTerritorySet.contains(Taxon.Астраханская_кочевники))
         {
             throw new Exception("Неясно намерение по Астраханской губернии");
         }
@@ -172,24 +173,24 @@ public class Astrakhan
         {
             // tds содержит Астраханская и не содержит отдельных -> merge
             if (tds.containsKey("Астраханская") &&
-                !tds.containsKey("Астраханская (оседлое)") &&
-                !tds.containsKey("Астраханская (кочевники)"))
+                !tds.containsKey(Taxon.Астраханская_оседлое) &&
+                !tds.containsKey(Taxon.Астраханская_кочевники))
             {
                 return true;
             }
 
             // tds не содержит Астраханская и содержит отдельные -> skip
             if (!tds.containsKey("Астраханская") &&
-                tds.containsKey("Астраханская (оседлое)") &&
-                tds.containsKey("Астраханская (кочевники)"))
+                tds.containsKey(Taxon.Астраханская_оседлое) &&
+                tds.containsKey(Taxon.Астраханская_кочевники))
             {
                 return false;
             }
 
             // tds не содержит Астраханская и содержит только оседлое (vital rates)  -> skip
             if (!tds.containsKey("Астраханская") &&
-                tds.containsKey("Астраханская (оседлое)") &&
-                !tds.containsKey("Астраханская (кочевники)"))
+                tds.containsKey(Taxon.Астраханская_оседлое) &&
+                !tds.containsKey(Taxon.Астраханская_кочевники))
             {
                 return false;
             }
@@ -202,24 +203,24 @@ public class Astrakhan
         {
             // tds не содержит Астраханская и содержит отдельные -> merge
             if (!tds.containsKey("Астраханская") &&
-                tds.containsKey("Астраханская (оседлое)") &&
-                tds.containsKey("Астраханская (кочевники)"))
+                tds.containsKey(Taxon.Астраханская_оседлое) &&
+                tds.containsKey(Taxon.Астраханская_кочевники))
             {
                 return true;
             }
 
             // tds не содержит Астраханская и содержит только оседлое (vital rates)  -> merge
             if (!tds.containsKey("Астраханская") &&
-                tds.containsKey("Астраханская (оседлое)") &&
-                !tds.containsKey("Астраханская (кочевники)"))
+                tds.containsKey(Taxon.Астраханская_оседлое) &&
+                !tds.containsKey(Taxon.Астраханская_кочевники))
             {
                 return true;
             }
 
             // tds содержит Астраханская и не содержит отдельных -> skip
             if (tds.containsKey("Астраханская") &&
-                !tds.containsKey("Астраханская (оседлое)") &&
-                !tds.containsKey("Астраханская (кочевники)"))
+                !tds.containsKey(Taxon.Астраханская_оседлое) &&
+                !tds.containsKey(Taxon.Астраханская_кочевники))
             {
                 return false;
             }

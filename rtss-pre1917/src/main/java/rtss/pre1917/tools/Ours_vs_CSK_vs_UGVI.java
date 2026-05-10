@@ -7,6 +7,7 @@ import java.util.List;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.EvalCountryTaxon;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
@@ -48,10 +49,10 @@ public class Ours_vs_CSK_vs_UGVI
         {
             String tname2 = tname;
             
-            if (tname.equals("Астраханская (кочевники)"))
+            if (tname.equals(Taxon.Астраханская_кочевники))
                 continue;
 
-            if (tname.equals("Астраханская (оседлое)"))
+            if (tname.equals(Taxon.Астраханская_оседлое))
             {
                 tname2 = "Астраханская";
             }
@@ -62,9 +63,9 @@ public class Ours_vs_CSK_vs_UGVI
             long p = ty.population.total.both;
             long pOurs = tyOurs.progressive_population.total.both;
 
-            if (tname.equals("Астраханская (оседлое)"))
+            if (tname.equals(Taxon.Астраханская_оседлое))
             {
-                tyOurs = tdsOurs.territoryYearOrNull("Астраханская (кочевники)", year);
+                tyOurs = tdsOurs.territoryYearOrNull(Taxon.Астраханская_кочевники, year);
                 pOurs += tyOurs.progressive_population.total.both;
             }
             
