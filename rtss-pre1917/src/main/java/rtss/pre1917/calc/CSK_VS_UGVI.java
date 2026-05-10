@@ -6,6 +6,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.merge.MergeTaxon;
+import rtss.pre1917.merge.MergeTaxon.MergeTaxonOptions;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.util.FieldValue;
 import rtss.util.Util;
@@ -40,7 +41,7 @@ public class CSK_VS_UGVI
         TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
         TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
 
-        Territory tmCSK = MergeTaxon.mergeTaxon(tdsCSK, txname, WhichYears.AllSetYears);
+        Territory tmCSK = MergeTaxon.mergeTaxon(tdsCSK, txname, WhichYears.AllSetYears.AllSetYears, new MergeTaxonOptions().setLog(false));
         Territory tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, txname, WhichYears.AllSetYears);
 
         for (int year = 1896; year <= 1915; year++)

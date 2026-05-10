@@ -138,7 +138,7 @@ public class Astrakhan
     }
 
     /*
-     * Следует ли суммировать этот tname при слиянии по таксону
+     * Следует ли суммировать эту территорию (tname) при слиянии по таксону?
      */
     public static boolean shouldMergeTaxon(String tname, Collection<String> taxonTerritorySet, TerritoryDataSet tds) throws Exception
     {
@@ -146,103 +146,91 @@ public class Astrakhan
         if (!isAnyAstrakhan(tname))
             return true;
 
-        // не содержит конфликта
-        if (!taxonTerritorySet.contains("Астраханская"))
-        {
-            log(tname, "нет конфликта: набор не содержит слитной территории, м.б. только раздельные");
-            return true;
-        }
+        String taxonCode = code(taxonTerritorySet);
+        String tdsCode = code(tds.keySet());
 
-        // не содержит конфликта
-        if (!taxonTerritorySet.contains(Taxon.Астраханская_оседлое) &&
-            !taxonTerritorySet.contains(Taxon.Астраханская_кочевники))
+        if (taxonCode.equals("A"))
         {
-            log(tname, "нет конфликта, набор не содержит раздельных, м.б. только слитное");
-            return true;
-        }
-
-        if (taxonTerritorySet.contains(Taxon.Астраханская_оседлое) != taxonTerritorySet.contains(Taxon.Астраханская_кочевники))
-        {
-            throw new Exception("Неясно намерение по Астраханской губернии");
-        }
-
-        /*
-         * Таксон содержит все три варианта:
-         *   - Астраханская
-         *   - Астраханская (оседлое)
-         *   - Астраханская (кочевники)
-         */
-
-        if (tname.equals("Астраханская"))
-        {
-            // tds содержит Астраханская и не содержит отдельных -> merge
-            if (tds.containsKey("Астраханская") &&
-                !tds.containsKey(Taxon.Астраханская_оседлое) &&
-                !tds.containsKey(Taxon.Астраханская_кочевники))
+            switch (tdsCode)
             {
-                log(tname, "вливается, набор содержит только слитное, и не содержит раздельных");
+            case "A":
                 return true;
-            }
 
-            // tds не содержит Астраханская и содержит отдельные -> skip
-            if (!tds.containsKey("Астраханская") &&
-                tds.containsKey(Taxon.Астраханская_оседлое) &&
-                tds.containsKey(Taxon.Астраханская_кочевники))
-            {
-                log(tname, "пропускается, набор не содержит слитного, только оба раздельных");
+            default:
+                Util.err("Inconsistent state for Астраханская");
                 return false;
             }
-
-            // tds не содержит Астраханская и содержит только оседлое (vital rates)  -> skip
-            if (!tds.containsKey("Астраханская") &&
-                tds.containsKey(Taxon.Астраханская_оседлое) &&
-                !tds.containsKey(Taxon.Астраханская_кочевники))
+        }
+        else if (taxonCode.equals("OK"))
+        {
+            switch (tdsCode)
             {
-                log(tname, "пропускается, набор не содержит слитного и кочевников, только оседлое");
+            case "OK":
+                return true;
+
+            default:
+                Util.err("Inconsistent state for Астраханская");
                 return false;
             }
+        }
+        else if (taxonCode.equals("AOK"))
+        {
+            /*
+             * Таксон содержит все три варианта:
+             *   - Астраханская
+             *   - Астраханская (оседлое)
+             *   - Астраханская (кочевники)
+             */
 
-            Util.err("Inconsistent state for Астраханская");
+            switch (tdsCode)
+            {
+            case "A":
+                return tname.equals("Астраханская"); 
 
-            log(tname, "пропускается, несогласованное состояние");
+            case "OK":
+                return tname.equals(Taxon.Астраханская_оседлое) || tname.equals(Taxon.Астраханская_кочевники);
+
+            case "O":
+                return tname.equals(Taxon.Астраханская_оседлое);
+
+            case "K":
+                return tname.equals(Taxon.Астраханская_кочевники);
+
+            case "AOK":
+                return tname.equals("Астраханская"); 
+
+            default:
+                Util.err("Inconsistent state for Астраханская");
+                return false;
+            }
+        }
+        else if (taxonCode.equals(""))
+        {
             return false;
         }
-        else // оседлое или кочевники отдельно
+        else
         {
-            // tds не содержит Астраханская и содержит отдельные -> merge
-            if (!tds.containsKey("Астраханская") &&
-                tds.containsKey(Taxon.Астраханская_оседлое) &&
-                tds.containsKey(Taxon.Астраханская_кочевники))
-            {
-                log(tname, "вливается, набор содержит оба раздельных и не содержит слитного");
-                return true;
-            }
-
-            // tds не содержит Астраханская и содержит только оседлое (vital rates)  -> merge
-            if (!tds.containsKey("Астраханская") &&
-                tds.containsKey(Taxon.Астраханская_оседлое) &&
-                !tds.containsKey(Taxon.Астраханская_кочевники))
-            {
-                log(tname, "вливается, набор содержит оба оседлое и не содержит слитного и кочевников");
-                return true;
-            }
-
-            // tds содержит Астраханская и не содержит отдельных -> skip
-            if (tds.containsKey("Астраханская") &&
-                !tds.containsKey(Taxon.Астраханская_оседлое) &&
-                !tds.containsKey(Taxon.Астраханская_кочевники))
-            {
-                log(tname, "пропускается, набор содержит слитное и не содержит раздельных");
-                return false;
-            }
-
             Util.err("Inconsistent state for Астраханская");
-
-            log(tname, "пропускается, несогласованное состояние");
             return false;
         }
     }
-    
+
+    // буквы в коде -- латинские
+    private static String code(Collection<String> tnames)
+    {
+        String code = "";
+
+        if (tnames.contains("Астраханская"))
+            code += "A";
+        if (tnames.contains(Taxon.Астраханская_оседлое))
+            code += "O";
+        if (tnames.contains(Taxon.Астраханская_кочевники))
+            code += "K";
+
+        return code;
+    }
+
+    @SuppressWarnings("unused")
     private static void log(String tname, String decision)
     {
         // Util.err("Merging taxon: территория " + tname + " " + decision);

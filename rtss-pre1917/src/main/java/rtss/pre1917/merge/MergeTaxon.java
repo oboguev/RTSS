@@ -90,6 +90,7 @@ public class MergeTaxon
     {
         private List<MissingDataAllowance> missingDataAllowances = new ArrayList<>();
         private List<MissingDataCheck> missingDataChecks = new ArrayList<>();
+        private boolean log;
 
         public MergeTaxonOptions flagMissing(String selector, Integer enforceYearMin, Integer enforceYearMax)
         {
@@ -116,6 +117,12 @@ public class MergeTaxon
             return this;
         }
 
+        public MergeTaxonOptions setLog(boolean log)
+        {
+            this.log = log;
+            return this;
+        }
+
         /* -------------------------------------------- */
 
         public boolean isFlagMissing(String selector, String tname, int year)
@@ -133,6 +140,11 @@ public class MergeTaxon
             }
 
             return false;
+        }
+
+        public boolean isLog()
+        {
+            return log;
         }
     }
 
@@ -157,7 +169,7 @@ public class MergeTaxon
     public Territory mergeTaxon(String txname, WhichYears whichYears, MergeTaxonOptions options) throws Exception
     {
         VerifyNoTerritoryDuplication.verify(territories);
-        
+
         Territory src = territories.get(txname);
         Territory res = new Territory(txname);
 
@@ -187,8 +199,8 @@ public class MergeTaxon
             sum_ur(ty, "deaths", tx, options);
             sum_ur(ty, "migration", tx, options);
 
-            rate(ty, "cbr", tx);
-            rate(ty, "cdr", tx);
+            rate(ty, "cbr", tx, options);
+            rate(ty, "cdr", tx, options);
 
             if (ty.cbr != null && ty.cdr != null)
             {
@@ -222,11 +234,11 @@ public class MergeTaxon
         double res = 0;
         int count = 0;
 
-        for (String tname : tx.territories.keySet())
+        for (String tname : Util.sort(tx.territories.keySet()))
         {
             if (!Astrakhan.shouldMergeTaxon(tname, tx.territories.keySet(), territories))
                 continue;
-            
+
             boolean flag = options.isFlagMissing(selector, tname, ty.year);
 
             Territory ter2 = territories.get(tname);
@@ -275,16 +287,21 @@ public class MergeTaxon
                 continue;
             }
 
+            if (options.isLog())
+                Util.out(String.format("Merging to taxon: %s %d %s", ty2.territory.name, ty2.year, selector));
+
             double weight = tx.territories.get(tname);
             res += lv * weight;
             count++;
         }
 
         if (count != 0)
+        {
             FieldValue.setLong(ty, selector, Math.round(res));
+        }
     }
 
-    private void rate(TerritoryYear ty, String selector, Taxon tx) throws Exception
+    private void rate(TerritoryYear ty, String selector, Taxon tx, MergeTaxonOptions options) throws Exception
     {
         WeightedAverage wa = new WeightedAverage();
 
@@ -304,7 +321,11 @@ public class MergeTaxon
                 double weight = tx.territories.get(tname);
 
                 if (pop != null && rate != null)
+                {
+                    if (options.isLog())
+                        Util.out(String.format("Merging to taxon: %s %d %s", ty2.territory.name, ty2.year, selector));
                     wa.add(rate, pop * weight);
+                }
             }
         }
 
