@@ -45,13 +45,13 @@ public class ApplyWarDeaths
         if (wdsm != null)
         {
             WarDeathsSummary wds = wdsm.get(1904);
-            wds.empireDeathsPct = Math.round(wds.deaths * 100.0) / EmpireWarDeaths_1904;
+            wds.empireDeathsPct = wds.deaths * 100.0 / EmpireWarDeaths_1904;
 
             wds = wdsm.get(1905);
-            wds.empireDeathsPct = Math.round(wds.deaths * 100.0) / EmpireWarDeaths_1905;
+            wds.empireDeathsPct = wds.deaths * 100.0 / EmpireWarDeaths_1905;
             
             wds = wdsm.get(1914);
-            wds.empireDeathsPct = Math.round(wds.deaths * 100.0) / EmpireWarDeaths_1914;
+            wds.empireDeathsPct = wds.deaths * 100.0 / EmpireWarDeaths_1914;
         }
     }
 
