@@ -45,8 +45,10 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         public double ngr;
         public long population_increase;
         public long migration;
+        
+        public double vitalShare;
 
-        public void add(int year, double cbr, double cdr, double ngr, long population_increase, long migration)
+        public void add(int year, double cbr, double cdr, double ngr, long population_increase, long migration, double vitalShare)
         {
             if (first_year == null)
                 first_year = year;
@@ -57,6 +59,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             this.ngr += ngr;
             this.population_increase += population_increase;
             this.migration += migration;
+            this.vitalShare += vitalShare;
             nyears++;
         }
 
@@ -69,6 +72,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             s.ngr = this.ngr / nyears;
             s.population_increase = this.population_increase;
             s.migration = this.migration;
+            s.vitalShare = this.vitalShare / nyears;
 
             s.first_year = this.first_year;
             s.last_year = this.last_year;
@@ -88,9 +92,9 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
             else
             {
-                Util.out(String.format("%d-%d %s %.1f %.1f %.1f",
+                Util.out(String.format("%d-%d %s %.1f %.1f %.1f %5.1f",
                                        first_year, last_year,
-                                       NBSP_S, cbr, cdr, ngr));
+                                       NBSP_S, cbr, cdr, ngr, vitalShare));
             }
         }
     }
@@ -133,7 +137,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                                        year, yd.population, yd.cbr, yd.cdr, ngr,
                                        yd.population_increase,
                                        yd.migration));
-                summary.add(year, yd.cbr, yd.cdr, ngr, yd.population_increase, yd.migration);
+                summary.add(year, yd.cbr, yd.cdr, ngr, yd.population_increase, yd.migration, yd.vitalShare);
                 if (year == 1913)
                     av1913 = summary.summaryLine();
             }
@@ -155,7 +159,8 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         printRateChange("NGR");
 
         Util.out("");
-        Util.out("То же в нормировке на среднегодовое население, численность населения указана среднегодовая");
+        Util.out("То же в нормировке на среднегодовое население, численность населения указана среднегодовая,");
+        Util.out("плюс % населения таксона использованный для расчёта показателей естественного движения");
         Util.out("");
 
         summary = new Summary();
@@ -168,9 +173,9 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             if (year != lastPartialYear)
             {
                 double ngr_middle = yd.cbr_middle - yd.cdr_middle;
-                Util.out(String.format("%d %,d %.1f %.1f %.1f",
-                                       year, yd.population_middle, yd.cbr_middle, yd.cdr_middle, ngr_middle));
-                summary.add(year, yd.cbr_middle, yd.cdr_middle, ngr_middle, 0, 0);
+                Util.out(String.format("%d %,d %.1f %.1f %.1f %5.1f",
+                                       year, yd.population_middle, yd.cbr_middle, yd.cdr_middle, ngr_middle, yd.vitalShare));
+                summary.add(year, yd.cbr_middle, yd.cdr_middle, ngr_middle, 0, 0, yd.vitalShare);
                 if (year == 1913)
                     av1913 = summary.summaryLine();
             }

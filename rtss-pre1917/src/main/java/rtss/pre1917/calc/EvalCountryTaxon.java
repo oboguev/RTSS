@@ -452,6 +452,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             yd.cdr_middle = cdr_middle;
             yd.population_increase = pop_total_next - pop_total;
             yd.migration = tmPopulation.territoryYear(year).migration.total.both;
+            yd.vitalShare = (100.0 * pop_vital_middle) / pop_total_middle;
 
             cd.put(year, yd);
         }

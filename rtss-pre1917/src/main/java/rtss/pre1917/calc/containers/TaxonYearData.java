@@ -13,4 +13,6 @@ public class TaxonYearData
     public Double cdr_middle;
     
     public Long migration;
+    
+    public Double vitalShare;
 }
