@@ -138,7 +138,7 @@ public class Astrakhan
     }
 
     /*
-     * Пропустить tname при слиянии по таксону
+     * Следует ли суммировать этот tname при слиянии по таксону
      */
     public static boolean shouldMergeTaxon(String tname, Collection<String> taxonTerritorySet, TerritoryDataSet tds) throws Exception
     {
@@ -148,12 +148,16 @@ public class Astrakhan
 
         // не содержит конфликта
         if (!taxonTerritorySet.contains("Астраханская"))
+        {
+            log(tname, "нет конфликта: набор не содержит слитной территории, м.б. только раздельные");
             return true;
+        }
 
         // не содержит конфликта
         if (!taxonTerritorySet.contains(Taxon.Астраханская_оседлое) &&
             !taxonTerritorySet.contains(Taxon.Астраханская_кочевники))
         {
+            log(tname, "нет конфликта, набор не содержит раздельных, м.б. только слитное");
             return true;
         }
 
@@ -176,6 +180,7 @@ public class Astrakhan
                 !tds.containsKey(Taxon.Астраханская_оседлое) &&
                 !tds.containsKey(Taxon.Астраханская_кочевники))
             {
+                log(tname, "вливается, набор содержит только слитное, и не содержит раздельных");
                 return true;
             }
 
@@ -184,6 +189,7 @@ public class Astrakhan
                 tds.containsKey(Taxon.Астраханская_оседлое) &&
                 tds.containsKey(Taxon.Астраханская_кочевники))
             {
+                log(tname, "пропускается, набор не содержит слитного, только оба раздельных");
                 return false;
             }
 
@@ -192,11 +198,13 @@ public class Astrakhan
                 tds.containsKey(Taxon.Астраханская_оседлое) &&
                 !tds.containsKey(Taxon.Астраханская_кочевники))
             {
+                log(tname, "пропускается, набор не содержит слитного и кочевников, только оседлое");
                 return false;
             }
 
             Util.err("Inconsistent state for Астраханская");
 
+            log(tname, "пропускается, несогласованное состояние");
             return false;
         }
         else // оседлое или кочевники отдельно
@@ -206,6 +214,7 @@ public class Astrakhan
                 tds.containsKey(Taxon.Астраханская_оседлое) &&
                 tds.containsKey(Taxon.Астраханская_кочевники))
             {
+                log(tname, "вливается, набор содержит оба раздельных и не содержит слитного");
                 return true;
             }
 
@@ -214,6 +223,7 @@ public class Astrakhan
                 tds.containsKey(Taxon.Астраханская_оседлое) &&
                 !tds.containsKey(Taxon.Астраханская_кочевники))
             {
+                log(tname, "вливается, набор содержит оба оседлое и не содержит слитного и кочевников");
                 return true;
             }
 
@@ -222,12 +232,19 @@ public class Astrakhan
                 !tds.containsKey(Taxon.Астраханская_оседлое) &&
                 !tds.containsKey(Taxon.Астраханская_кочевники))
             {
+                log(tname, "пропускается, набор содержит слитное и не содержит раздельных");
                 return false;
             }
 
             Util.err("Inconsistent state for Астраханская");
 
+            log(tname, "пропускается, несогласованное состояние");
             return false;
         }
+    }
+    
+    private static void log(String tname, String decision)
+    {
+        Util.err("Merging taxon: территория " + tname + " " + decision);
     }
 }
