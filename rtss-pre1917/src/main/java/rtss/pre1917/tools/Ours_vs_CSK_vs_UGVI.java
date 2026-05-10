@@ -46,16 +46,32 @@ public class Ours_vs_CSK_vs_UGVI
 
         for (String tname : tdsOurs.keySet())
         {
-            TerritoryYear ty = tds.territoryYearOrNull(tname, year);
+            String tname2 = tname;
+            
+            if (tname.equals("Астраханская (кочевники)"))
+                continue;
+
+            if (tname.equals("Астраханская (оседлое)"))
+            {
+                tname2 = "Астраханская";
+            }
+
             TerritoryYear tyOurs = tdsOurs.territoryYearOrNull(tname, year);
+            TerritoryYear ty = tds.territoryYearOrNull(tname2, year);
 
             long p = ty.population.total.both;
             long pOurs = tyOurs.progressive_population.total.both;
 
+            if (tname.equals("Астраханская (оседлое)"))
+            {
+                tyOurs = tdsOurs.territoryYearOrNull("Астраханская (кочевники)", year);
+                pOurs += tyOurs.progressive_population.total.both;
+            }
+            
             TerritoryDifference td = new TerritoryDifference();
             diffs.add(td);
 
-            td.name = tname;
+            td.name = tname2;
             td.diff = p - pOurs;
             td.pct = (100.0 * td.diff) / pOurs;
         }
