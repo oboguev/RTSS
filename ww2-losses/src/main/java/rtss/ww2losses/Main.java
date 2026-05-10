@@ -5,6 +5,7 @@ import rtss.data.asfr.AgeSpecificFertilityRatesByTimepoint;
 import rtss.data.asfr.AgeSpecificFertilityRatesByYear;
 import rtss.data.asfr.InterpolateASFR_ByTime;
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.synthetic.MortalityTableADH;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
@@ -67,6 +68,7 @@ public class Main
     static
     {
         PopulationADH.setFilesVersion("ADH.v1");
+        MortalityTableADH.setFilesVersion(Area.RSFSR, "ADH.v1");
     }
 
     public static void main(String[] args)

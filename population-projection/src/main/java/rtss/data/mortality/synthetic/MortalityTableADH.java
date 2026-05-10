@@ -2,6 +2,7 @@ package rtss.data.mortality.synthetic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
@@ -43,6 +44,14 @@ public class MortalityTableADH
 
     static public boolean UsePrecomputedFiles = true;
     static public boolean UseCache = true;
+    static private ConcurrentHashMap<Area,String> FilesVersion = new ConcurrentHashMap<>();
+
+    public static synchronized String setFilesVersion(Area area, String filesVersion)
+    {
+        String previous = FilesVersion.get(area);
+        FilesVersion.put(area, filesVersion);
+        return previous;
+    }
 
     public static CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
     {
@@ -51,7 +60,11 @@ public class MortalityTableADH
 
     public static synchronized CombinedMortalityTable getMortalityTable(Area area, String year) throws Exception
     {
-        String path = String.format("mortality_tables/%s/%s", area.name(), year);
+        String path = null;
+        if (FilesVersion.get(area) == null || FilesVersion.get(area).length() == 0)
+            path = String.format("mortality_tables/%s/%s", area.name(), year);
+        else
+            path = String.format("mortality_tables/%s/%s/%s", area.name(), FilesVersion.get(area), year);
 
         CombinedMortalityTable cmt = null;
 
@@ -105,7 +118,7 @@ public class MortalityTableADH
         String path = String.format("mortality_tables/%s/%s-MortalityRates-ADH.xlsx", area.name(), area.name());
         Bin[] male_mortality_bins = MortalityRatesFromExcel.loadRates(path, Gender.MALE, year);
         Bin[] female_mortality_bins = MortalityRatesFromExcel.loadRates(path, Gender.FEMALE, year);
-        
+
         /*
          * Значения в файле (и таблице приложения 5 книги АДХ) приведены в формате "mx".
          * Преобразовать в формат "qx".
@@ -161,7 +174,6 @@ public class MortalityTableADH
 
         return cmt;
     }
-
 
     /*
      * Для некоторых лет (РСФСР 1927-1933, 1937, 1946-1948) рассчитанная АДХ мужская смертность в возрастной группе 85-100 ниже, 

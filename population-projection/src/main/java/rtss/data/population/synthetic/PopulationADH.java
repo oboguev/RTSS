@@ -33,9 +33,11 @@ public class PopulationADH
         return Util.multiply(ageBinWidths, 365);
     }
 
-    public static void setFilesVersion(String filesVersion)
+    public static String setFilesVersion(String filesVersion)
     {
+        String previous = FilesVersion;
         FilesVersion = filesVersion;
+        return previous;
     }
 
     public static Population getPopulation(Area area, int year) throws Exception
