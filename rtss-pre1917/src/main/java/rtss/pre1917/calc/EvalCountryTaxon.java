@@ -50,6 +50,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             new EvalCountryTaxon("Новороссия", 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Малороссия", 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Белоруссия", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Белоруссия без Смоленской", 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Литва", 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Кавказ", 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Средняя Азия", 1914, Options.VERBOSE).calc().print();
