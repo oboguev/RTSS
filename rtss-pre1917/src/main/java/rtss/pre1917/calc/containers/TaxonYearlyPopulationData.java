@@ -357,8 +357,8 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         sb.append(nl);
         sb.append(tname + nl);
         sb.append(nl);
-        sb.append("год      чн       чр     чс      мигр   р    с    еп   р2   с2   еп2 v s" + nl);
-        sb.append("==== ========= ======= ======= ======= ==== ==== ==== ==== ==== ==== = =" + nl);
+        sb.append("год      чн       чр     чс      мигр   р    с    еп     чн2      р2   с2   еп2 v s" + nl);
+        sb.append("==== ========= ======= ======= ======= ==== ==== ==== =========  ==== ==== ==== = =" + nl);
 
         final TotalMigration totalMigration = TotalMigration.getTotalMigration();
         final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(null);
@@ -429,6 +429,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                      saldo,
                      stable,
                      cbr, cdr, ngr,
+                     pop_middle,
                      cbr2, cdr2, ngr2,
                      vrok);
             }
@@ -437,16 +438,18 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 
     private void line(StringBuilder sb, int year, Long population, Long births, Long deaths, Long saldo, boolean stable,
             Double cbr, Double cdr, Double ngr,
+            Long pop_middle,
             Double cbr2, Double cdr2, Double ngr2,
             boolean vrok)
     {
-        String line = String.format("%4d %s %s %s %s %s %s %s %s %s %s %s %s",
+        String line = String.format("%4d %s %s %s %s %s %s %s %s %s %s %s %s %s",
                                     year,
                                     s_count(population, 9),
                                     s_count(births, 7),
                                     s_count(deaths, 7),
                                     s_count(saldo, 7),
                                     s_rate(cbr), s_rate(cdr), s_rate(ngr),
+                                    s_count(pop_middle, 9),
                                     s_rate(cbr2), s_rate(cdr2), s_rate(ngr2),
                                     vrok ? "1" : "0",
                                     stable ? "*" : NBSP_S);
