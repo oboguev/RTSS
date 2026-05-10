@@ -245,6 +245,6 @@ public class Astrakhan
     
     private static void log(String tname, String decision)
     {
-        Util.err("Merging taxon: территория " + tname + " " + decision);
+        // Util.err("Merging taxon: территория " + tname + " " + decision);
     }
 }
