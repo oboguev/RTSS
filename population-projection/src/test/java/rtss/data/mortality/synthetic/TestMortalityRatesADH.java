@@ -38,6 +38,9 @@ public class TestMortalityRatesADH
                 continue;
             
             Util.out("Processing year " + year);
+            
+            MortalityTableADH.UsePrecomputedFiles = false;
+            MortalityTableADH.UseCache = false;
 
             CombinedMortalityTable cmt = MortalityTableADH.getMortalityTable(Area.RSFSR, year);
 
