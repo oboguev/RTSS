@@ -98,6 +98,11 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
     }
+    
+    public List<Integer> years()
+    {
+        return Util.sort(keySet());
+    }
 
     public TaxonYearlyPopulationData(String taxonName,
             TerritoryDataSet tdsPopulation,
@@ -121,7 +126,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         Util.out("в нормировке на население на начало года");
         Util.out("");
 
-        List<Integer> years = Util.sort(keySet());
+        List<Integer> years = years();
         int lastPartialYear = years.get(years.size() - 1);
         Summary summary = new Summary();
         Summary av1913 = null;

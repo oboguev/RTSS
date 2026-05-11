@@ -158,6 +158,16 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         return eval.tdsExportPopulation;
     }
+    
+    public static void warmup() throws Exception
+    {
+        new EvalCountryTaxon("Империя", 1913, Options.SILENT).calc();
+    }
+    
+    public static TaxonYearlyPopulationData calc(String taxonName, int toYear, Options options) throws Exception
+    {
+        return new EvalCountryTaxon(taxonName, toYear, options).calc();
+    }
 
     private Territory tmPopulation;
     private Territory tmVitalRates;
