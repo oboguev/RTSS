@@ -26,9 +26,10 @@ public class TestMortalityRatesADH
     {
         if (Util.False)
         {
+            MortalityTableADH.UsePrecomputedFiles = false;
+            MortalityTableADH.UseCache = false;
             MortalityTableADH.getMortalityTable(Area.RSFSR, 1946);
             return;
-            
         }
 
         for (int year = 1927; year <= 1958; year++)
@@ -40,9 +41,9 @@ public class TestMortalityRatesADH
 
             CombinedMortalityTable cmt = MortalityTableADH.getMortalityTable(Area.RSFSR, year);
 
-            if (Util.False)
+            if (Util.True)
             {
-                File rootDir = new File("P:\\@@\\ADH-RSFSR-mt");
+                File rootDir = new File("C:\\@\\ADH-RSFSR-mt");
                 File dir = new File(rootDir, "" + year);
                 dir.mkdirs();
                 String comment = String.format("Таблица построена по данным АДХ-РСФСР модулем %s", 

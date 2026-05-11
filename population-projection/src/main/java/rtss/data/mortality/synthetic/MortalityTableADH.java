@@ -29,7 +29,7 @@ import rtss.util.plot.ChartXYSplineAdvanced;
  * Данные АДХ часто содержат слишком низкую смертность в группе 85-100 сравнительно с группой 80-84.
  * Это видно:
  * 
- *     - по ходу кривой Хелигмана-Полларда с коэффицентами подобранными под данные АДХ (curve_hp ниже)
+ *     - по ходу кривой Хелигмана-Полларда с коэффицентами подобранными под данные АДХ (curve_hp)
  *       в двух последних диапазонах (80-84-100)
  *       
  *     - по завороту сплайна (curve_spline_1) в тех же диапазонах
@@ -120,11 +120,18 @@ public class MortalityTableADH
         Bin[] female_mortality_bins = MortalityRatesFromExcel.loadRates(path, Gender.FEMALE, year);
 
         /*
-         * Значения в файле (и таблице приложения 5 книги АДХ) приведены в формате "mx".
-         * Преобразовать в формат "qx".
+         * Значения в файле (и таблице приложения 5 книги АДХ) приведены в формате "mx", 
+         * кроме возраста 0, который уже q0.
+         * Преобразовать значения "mx" в формат "qx".
          */
         if (Util.True)
         {
+            if (male_mortality_bins[0].widths_in_years != 1 || female_mortality_bins[0].widths_in_years != 1)
+                throw new Exception("Неожиданная структура записи");
+            
+            double mq0 = male_mortality_bins[0].avg;
+            double fq0 = female_mortality_bins[0].avg;
+            
             male_mortality_bins = Bins.multiply(male_mortality_bins, 0.001);
             male_mortality_bins = MortalityUtil.mx2qx(male_mortality_bins, Gender.MALE);
             male_mortality_bins = Bins.multiply(male_mortality_bins, 1000.0);
@@ -132,6 +139,9 @@ public class MortalityTableADH
             female_mortality_bins = Bins.multiply(female_mortality_bins, 0.001);
             female_mortality_bins = MortalityUtil.mx2qx(female_mortality_bins, Gender.FEMALE);
             female_mortality_bins = Bins.multiply(female_mortality_bins, 1000.0);
+            
+            male_mortality_bins[0].avg = mq0;
+            female_mortality_bins[0].avg = fq0;
         }
 
         Population p = PopulationADH.getPopulation(area, year);
