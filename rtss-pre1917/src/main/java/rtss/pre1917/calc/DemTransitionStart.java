@@ -19,6 +19,8 @@ public class DemTransitionStart
         {
             EvalCountryTaxon.warmup();
             
+            // new DemTransitionStart().calc("Новороссия", 1914, null);
+
             new DemTransitionStart().calc("РСФСР-1991", 1914);
             new DemTransitionStart().calc("Новороссия", 1914);
             new DemTransitionStart().calc("Малороссия", 1913);
@@ -82,5 +84,21 @@ public class DemTransitionStart
         double tryear = (p90 - tl.b) / tl.a;
         
         Util.out(String.format("Начало перехода: %.1f", tryear));
+        
+        if (Util.False)
+        {
+            for (int year = 1896; year <= 1921; year++)
+            {
+                TaxonYearData yd = yds.get(year);
+
+                double x = year + 0.5;
+                Util.out(String.format("%.1f [%5.2f] -> %.2f [%6.2f%%]", 
+                                       x, 
+                                       yd != null && yd.cbr_middle != null ? yd.cbr_middle : null, 
+                                       tl.predict(x), 100.0 * tl.predict(x) / t1896));
+            }
+            
+            Util.noop();
+        }
     }
 }
