@@ -24,13 +24,13 @@ import rtss.util.Util;
 
 public class BuildSingleTable
 {
-    public static SingleMortalityTable makeSingleTable(Bin[] bins, String debug_title) throws Exception
+    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title) throws Exception
     {
-        double[] qx = curve(bins, debug_title);
+        double[] qx = curve(bins, exposure, debug_title);
         return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
     }
 
-    private static double[] curve(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve(Bin[] bins, double[] exposure, String debug_title) throws Exception
     {
         /*
          * Tried to use Osier library (see Sigurd Dyrting, "Osier : A Library for Demographic Calculations"
@@ -113,10 +113,10 @@ public class BuildSingleTable
          * piece-wise monotonicity (U-shape) criteria.     
          */
 
-        return curve_pclm(bins, debug_title);
+        return curve_pclm(bins, exposure, debug_title);
     }
 
-    private static double[] curve_pclm(Bin[] bins, String debug_title) throws Exception
+    private static double[] curve_pclm(Bin[] bins, double[] exposure, String debug_title) throws Exception
     {
         final int ppy = 1;
 
@@ -130,7 +130,7 @@ public class BuildSingleTable
             xbins = appendFakeBin(bins);
 
         final double lambda = 0.0001;
-        double[] yyy = PCLM_Rizzi_2015.pclm(xbins, lambda, ppy);
+        double[] yyy = PCLM_Rizzi_2015.pclm(xbins, exposure, lambda, ppy);
         yyy = Util.splice(yyy, first.age_x1, ppy * (last.age_x2 + 1) - 1);
 
         if (Util.True)

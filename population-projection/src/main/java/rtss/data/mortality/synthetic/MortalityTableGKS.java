@@ -109,7 +109,8 @@ public class MortalityTableGKS
         Bin[] mortality_bins = MortalityRatesFromExcel.loadAgeQx(context.filepath, locality, gender);
         mortality_bins = Bins.multiply(mortality_bins, 1000.0);
         String title = String.format("ГКС-%s-%s %s %s", context.area.name(), context.year, locality.name(), gender.name());
-        SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, title);
+        // TODO ###@@@ get population
+        SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, null, title);
         return mt;
     }
 }

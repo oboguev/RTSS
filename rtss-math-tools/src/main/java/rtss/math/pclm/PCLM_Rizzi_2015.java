@@ -54,13 +54,13 @@ public class PCLM_Rizzi_2015
         this.max_year = Bins.lastBin(xbins).age_x2;
     }
 
-    public static double[] pclm(Bin[] bins, int ppy) throws Exception
+    public static double[] pclm(Bin[] bins, double[] exposure, int ppy) throws Exception
     {
         final double lambda = 0.0001;
-        return pclm(bins, lambda, ppy);
+        return pclm(bins, exposure, lambda, ppy);
     }
 
-    public static double[] pclm(Bin[] bins, double lambda, int ppy) throws Exception
+    public static double[] pclm(Bin[] bins, double[] exposure, double lambda, int ppy) throws Exception
     {
         if (UseNativeJavaImplementation)
         {

@@ -345,7 +345,7 @@ public class UnbinDataAverage
             if (Util.False)
             {
                 final double lambda = 0.0001;
-                yyy5 = PCLM_Rizzi_2015.pclm(bins, lambda, ppy);
+                yyy5 = PCLM_Rizzi_2015.pclm(bins, null, lambda, ppy);
             }
 
             double[] yyy = yyy1;

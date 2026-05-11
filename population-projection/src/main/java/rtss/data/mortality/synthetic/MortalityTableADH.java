@@ -153,8 +153,8 @@ public class MortalityTableADH
 
         fix_40_44(female_mortality_bins, female_population_sum_bins);
 
-        cmt.setTable(Locality.TOTAL, Gender.MALE, BuildSingleTable.makeSingleTable(male_mortality_bins, debug_title_male));
-        cmt.setTable(Locality.TOTAL, Gender.FEMALE, BuildSingleTable.makeSingleTable(female_mortality_bins, debug_title_female));
+        cmt.setTable(Locality.TOTAL, Gender.MALE, BuildSingleTable.makeSingleTable(male_mortality_bins, p.asArray(Gender.MALE), debug_title_male));
+        cmt.setTable(Locality.TOTAL, Gender.FEMALE, BuildSingleTable.makeSingleTable(female_mortality_bins, p.asArray(Gender.FEMALE), debug_title_female));
 
         double[] qx = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
