@@ -24,7 +24,7 @@ public class TestMortalityRatesADH
 
     private void do_main() throws Exception
     {
-        if (Util.False)
+        if (Util.True)
         {
             MortalityTableADH.UsePrecomputedFiles = false;
             MortalityTableADH.UseCache = false;

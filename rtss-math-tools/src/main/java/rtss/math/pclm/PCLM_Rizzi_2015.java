@@ -8,7 +8,9 @@ import rtss.data.curves.CurveUtil;
 import rtss.external.Script;
 import rtss.external.ScriptReply;
 import rtss.external.R.R;
+import rtss.math.algorithms.pclm.ExposuresPCLM;
 import rtss.math.algorithms.pclm.PCLM;
+import rtss.util.Util;
 
 /**
  * Decompose bin data into single-year values with PCLM (penalized composite link model).
@@ -30,7 +32,7 @@ public class PCLM_Rizzi_2015
 
     private final int min_year;
     private final int max_year;
-    
+
     /* use native Java implementation */
     public static boolean UseNativeJavaImplementation = true;
 
@@ -47,9 +49,9 @@ public class PCLM_Rizzi_2015
         this.ppy = ppy;
 
         this.xbins = Bins.avg2sum(bins);
-        for (Bin bin: xbins)
+        for (Bin bin : xbins)
             bin.avg *= ppy;
-        
+
         this.min_year = Bins.firstBin(xbins).age_x1;
         this.max_year = Bins.lastBin(xbins).age_x2;
     }
@@ -67,13 +69,18 @@ public class PCLM_Rizzi_2015
             /*
              * Execute locally
              */
-            return new PCLM(bins, lambda, ppy).pclm();
+            if (exposure != null)
+                return new ExposuresPCLM(bins, exposure, lambda, ppy).pclm();
+            else
+                return new PCLM(bins, lambda, ppy).pclm();
         }
         else
         {
             /*
              * Execute on R server
              */
+            if (exposure != null)
+                Util.err("Версия PCLM на сервере R не использует exposure");
             double[] y = new PCLM_Rizzi_2015(bins, lambda, ppy).pclm();
             CurveUtil.avoidDecompositionRounding(y, bins);
             return y;

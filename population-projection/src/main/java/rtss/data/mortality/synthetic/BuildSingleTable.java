@@ -26,6 +26,8 @@ public class BuildSingleTable
 {
     public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title) throws Exception
     {
+        // ###@@@
+        exposure = null;
         double[] qx = curve(bins, exposure, debug_title);
         return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
     }
@@ -126,7 +128,7 @@ public class BuildSingleTable
         Bin[] xbins = bins;
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
-        if (Util.True)
+        if (Util.True && exposure == null)
             xbins = appendFakeBin(bins);
 
         final double lambda = 0.0001;
