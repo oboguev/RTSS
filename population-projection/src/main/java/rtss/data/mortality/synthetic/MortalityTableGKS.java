@@ -7,6 +7,7 @@ import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.SingleMortalityTable;
+import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -29,9 +30,10 @@ public class MortalityTableGKS
         Area area;
         String year;
         String filepath;
+        PopulationByLocality population;
     }
 
-    public static synchronized CombinedMortalityTable getMortalityTable(Area area, String year) throws Exception
+    public static synchronized CombinedMortalityTable getMortalityTable(Area area, String year, PopulationByLocality population) throws Exception
     {
         String path = String.format("mortality_tables/%s/%s", area.name(), year);
 
@@ -68,6 +70,7 @@ public class MortalityTableGKS
             context.area = area;
             context.year = year;
             context.filepath = String.format("mortality_tables/%s/%s-MortalityRates-GKS-%s.xlsx", area.name(), area.name(), year);
+            context.population = population; 
 
             cmt = CombinedMortalityTable.newEmptyTable();
             compute(cmt, context, Locality.TOTAL);
@@ -109,8 +112,12 @@ public class MortalityTableGKS
         Bin[] mortality_bins = MortalityRatesFromExcel.loadAgeQx(context.filepath, locality, gender);
         mortality_bins = Bins.multiply(mortality_bins, 1000.0);
         String title = String.format("ГКС-%s-%s %s %s", context.area.name(), context.year, locality.name(), gender.name());
-        // TODO ###@@@ get population
-        SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, null, title);
+
+        double[] exposure = null;
+        if (context.population != null)
+            exposure = context.population.toArray(locality, gender);
+        
+        SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, exposure, title);
         return mt;
     }
 }

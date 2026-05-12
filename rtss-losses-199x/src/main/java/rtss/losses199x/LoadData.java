@@ -30,7 +30,14 @@ public class LoadData
 
     public static CombinedMortalityTable mortalityTable1986() throws Exception
     {
-        CombinedMortalityTable cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987");
+        /* 
+         * Население РСФСР по переписи 1989 года используется для hinting-а при декомпозиции
+         * таблицы смертности 1986-1987 года. Для этого важны не абсолютные значения
+         * численности в возрастах, а их относительное соотношение.
+         */
+        PopulationByLocality p1989 = PopulationByLocality.census(Area.RSFSR, 1989);
+        
+        CombinedMortalityTable cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987", p1989);
         return cmt;
     }
     
