@@ -415,7 +415,7 @@ public class PopulationByLocality
 
     public static PopulationByLocality census(Area area, int year) throws Exception
     {
-        return load(String.format("population_data/%s/%d", area.name(), year));
+        return load(String.format("population_data/%s/census/%d", area.name(), year));
     }
 
     public static PopulationByLocality load(String path) throws Exception

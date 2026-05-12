@@ -44,7 +44,13 @@ public class MortalityTableADH
 
     static public boolean UsePrecomputedFiles = true;
     static public boolean UseCache = true;
-    static private ConcurrentHashMap<Area,String> FilesVersion = new ConcurrentHashMap<>();
+    static private ConcurrentHashMap<Area, String> FilesVersion = new ConcurrentHashMap<>();
+
+    static
+    {
+        FilesVersion.put(Area.USSR, "ADH");
+        FilesVersion.put(Area.RSFSR, "ADH");
+    }
 
     public static synchronized String setFilesVersion(Area area, String filesVersion)
     {
@@ -128,10 +134,10 @@ public class MortalityTableADH
         {
             if (male_mortality_bins[0].widths_in_years != 1 || female_mortality_bins[0].widths_in_years != 1)
                 throw new Exception("Неожиданная структура записи");
-            
+
             double mq0 = male_mortality_bins[0].avg;
             double fq0 = female_mortality_bins[0].avg;
-            
+
             male_mortality_bins = Bins.multiply(male_mortality_bins, 0.001);
             male_mortality_bins = MortalityUtil.mx2qx(male_mortality_bins, Gender.MALE);
             male_mortality_bins = Bins.multiply(male_mortality_bins, 1000.0);
@@ -139,7 +145,7 @@ public class MortalityTableADH
             female_mortality_bins = Bins.multiply(female_mortality_bins, 0.001);
             female_mortality_bins = MortalityUtil.mx2qx(female_mortality_bins, Gender.FEMALE);
             female_mortality_bins = Bins.multiply(female_mortality_bins, 1000.0);
-            
+
             male_mortality_bins[0].avg = mq0;
             female_mortality_bins[0].avg = fq0;
         }
@@ -154,7 +160,8 @@ public class MortalityTableADH
         fix_40_44(female_mortality_bins, female_population_sum_bins);
 
         cmt.setTable(Locality.TOTAL, Gender.MALE, BuildSingleTable.makeSingleTable(male_mortality_bins, p.asArray(Gender.MALE), debug_title_male));
-        cmt.setTable(Locality.TOTAL, Gender.FEMALE, BuildSingleTable.makeSingleTable(female_mortality_bins, p.asArray(Gender.FEMALE), debug_title_female));
+        cmt.setTable(Locality.TOTAL, Gender.FEMALE,
+                     BuildSingleTable.makeSingleTable(female_mortality_bins, p.asArray(Gender.FEMALE), debug_title_female));
 
         double[] qx = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
