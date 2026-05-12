@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PCLM Exposure-Weighted Mortality Rate Ungrouping</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.55;
+      max-width: 980px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+      color: #222;
+    }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { border-bottom: 2px solid #ddd; padding-bottom: 0.35rem; }
+    code, pre {
+      font-family: Consolas, "Liberation Mono", Menlo, monospace;
+      background: #f6f8fa;
+    }
+    code { padding: 0.1rem 0.25rem; border-radius: 3px; }
+    pre { padding: 1rem; overflow-x: auto; border-radius: 6px; }
+    .note {
+      border-left: 4px solid #777;
+      padding: 0.5rem 1rem;
+      background: #f7f7f7;
+      margin: 1rem 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.5rem 0.65rem;
+      vertical-align: top;
+    }
+    th { background: #f2f2f2; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>PCLM Exposure-Weighted Mortality Rate Ungrouping</h1>
+
+  <p>This note summarizes the key implementation point from the discussion: if one-year population or exposure by age is available, PCLM can and should use it when ungrouping grouped mortality rates.</p>
+
+  <h2>1. Can PCLM use one-year population exposures?</h2>
+
+  <p>Yes. The Rizzi–Gampe–Eilers PCLM framework includes an extension from grouped counts to grouped rates. In the basic histogram/counts version, the latent unknowns are one-year counts, and a grouped observation is just the sum of those latent counts within the bin.</p>
+
+  <p>For mortality rates, the latent unknowns are instead one-year rates:</p>
+
+  <pre><code>m[x] = unknown one-year mortality rate at age x
+E[x] = known one-year exposure / population at age x</code></pre>
+
+  <p>The expected number of deaths at age <code>x</code> is:</p>
+
+  <pre><code>expected_deaths[x] = E[x] * m[x]</code></pre>
+
+  <p>Therefore, for a grouped age interval <code>i</code>, the model should aggregate expected deaths as:</p>
+
+  <pre><code>mu[i] = sum over x in bin i of E[x] * m[x]</code></pre>
+
+  <p>If the source table gives a grouped mortality rate, for example an ADH value in deaths per 1000 persons, convert it to an estimated grouped death count before fitting:</p>
+
+  <pre><code>D[i] = grouped_rate_per_1000[i] / 1000 * sum(E[x] over x in bin i)</code></pre>
+
+  <p>The PCLM then estimates one-year rates <code>m[x]</code> such that:</p>
+
+  <pre><code>D[i] ≈ sum over x in bin i of E[x] * m[x]</code></pre>
+
+  <div class="note">
+    <strong>Important:</strong> this makes the grouped rate an exposure-weighted average, not a simple arithmetic average of one-year rates.
+  </div>
+
+  <h2>2. Why this matters especially for ages 85+</h2>
+
+  <p>For a wide old-age group such as <code>85+</code> or <code>85–100</code>, population exposure falls sharply with age. Ages 85–89 usually carry much more weight than ages 95–100. Therefore a true mortality curve can rise substantially at the oldest ages while the grouped <code>85+</code> rate remains moderate.</p>
+
+  <p>The correct grouped-rate identity is:</p>
+
+  <pre><code>m_group = sum(E[x] * m[x]) / sum(E[x])</code></pre>
+
+  <p>not:</p>
+
+  <pre><code>m_group = average(m[x])</code></pre>
+
+  <p>If the algorithm treats the grouped mortality rate as a simple average over ages 85–100, it imposes the wrong constraint. That can force the old-age curve to be too low or produce artificial bends near the right boundary.</p>
+
+  <h2>3. Does the R code in the Rizzi article include exposure?</h2>
+
+  <p>The R code printed in Appendix 2 of the article does not include an explicit <code>exposure</code> argument. It demonstrates the basic PCLM for grouped counts / histogram ungrouping:</p>
+
+  <pre><code>pclm &lt;- function(y, C, X, lambda = 1, deg = 2, show = F)</code></pre>
+
+  <p>That demo uses:</p>
+
+  <ul>
+    <li><code>y</code>: observed grouped counts;</li>
+    <li><code>C</code>: composition matrix;</li>
+    <li><code>X</code>: design matrix, often identity;</li>
+    <li><code>lambda</code>: smoothing parameter.</li>
+  </ul>
+
+  <p>In the demo, <code>C</code> is a 0/1 matrix. For example, <code>C[i, x] = 1</code> if age <code>x</code> belongs to bin <code>i</code>. This is appropriate for grouped counts.</p>
+
+  <p>However, the function is general enough to support rates if the exposure weights are inserted into <code>C</code> before calling <code>pclm</code>.</p>
+
+  <h2>4. Composition matrix for counts vs. rates</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Case</th>
+        <th>Meaning of latent gamma</th>
+        <th>Composition matrix entry</th>
+        <th>Observed y</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Grouped counts</td>
+        <td>One-year counts</td>
+        <td><code>C[i, x] = 1</code> if age x belongs to bin i</td>
+        <td>Observed count in bin i</td>
+      </tr>
+      <tr>
+        <td>Grouped rates</td>
+        <td>One-year rates</td>
+        <td><code>C[i, x] = E[x]</code> if age x belongs to bin i</td>
+        <td>Estimated death count in bin i</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>5. Implementation recipe</h2>
+
+  <p>For mortality rates, implement a separate PCLM mode, conceptually:</p>
+
+  <pre><code>input:
+  grouped_rate[i]        // e.g. deaths per 1000 persons
+  age_bin[i]             // e.g. 0, 1-4, 5-9, ..., 80-84, 85+
+  exposure[x]            // one-year population/exposure by age
+
+convert grouped rates to grouped death counts:
+  D[i] = grouped_rate[i] / 1000.0 * sum(exposure[x] for x in age_bin[i])
+
+build composition matrix:
+  C[i][x] = exposure[x] if x in age_bin[i]
+  C[i][x] = 0 otherwise
+
+fit PCLM:
+  D ≈ C * m
+
+output:
+  m[x] = estimated one-year mortality rates</code></pre>
+
+  <p>After estimating one-year <code>m[x]</code>, convert to <code>q[x]</code> if needed. The aggregation relationship is linear for central death rates / hazards, but not for probabilities of dying <code>q[x]</code>. Therefore, the rate-PCLM should preferably operate in <code>m[x]</code> space rather than directly in <code>q[x]</code> space.</p>
+
+  <h2>6. Practical conclusion</h2>
+
+  <p>If your current implementation passes grouped mortality coefficients to PCLM as ordinary binned values, with a 0/1 composition matrix, it is not using the available population-age distribution. It is effectively preserving simple bin averages, not exposure-weighted mortality rates.</p>
+
+  <p>The more principled fix is not merely to add a fake final bin or adjust the <code>80–84 / 85+</code> values, although those may still be useful diagnostics or secondary corrections. The core fix is to implement the rate version of PCLM:</p>
+
+  <pre><code>C[i][x] = exposure[x]
+y[i]    = grouped_rate[i] * total_exposure_in_bin</code></pre>
+
+  <p>This is the formulation that lets PCLM use one-year population exposures when decomposing grouped age-specific mortality rates.</p>
+</body>
+</html>
