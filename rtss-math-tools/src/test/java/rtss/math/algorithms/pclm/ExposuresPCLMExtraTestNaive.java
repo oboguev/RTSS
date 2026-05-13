@@ -7,7 +7,7 @@ import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.util.Util;
 
-public class ExposuresPCLMExtraTest
+public class ExposuresPCLMExtraTestNaive
 {
     public static void main(String[] args)
     {
@@ -75,6 +75,7 @@ public class ExposuresPCLMExtraTest
         Util.out("ExposuresPCLM");
         Util.out("");
         yy = new ExposuresPCLM(bins, exposures, lambda, ppy).pclm();
+        /* verify will fail because it uses simple average not weighted by exposure */
         verify(bins, ppy, yy);
     }
     

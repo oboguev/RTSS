@@ -26,8 +26,7 @@ public class BuildSingleTable
 {
     public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title) throws Exception
     {
-        // ###@@@
-        // ###@@@ exposure = null;
+        // exposure = null;
         double[] qx = curve(bins, exposure, debug_title);
         return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
     }
@@ -128,7 +127,7 @@ public class BuildSingleTable
         Bin[] xbins = bins;
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
-        if (Util.True && exposure == null)
+        if (exposure == null)
             xbins = appendFakeBin(bins);
 
         final double lambda = 0.0001;
@@ -169,7 +168,7 @@ public class BuildSingleTable
 
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
-        CurveVerifier.validate_means_allow_last_beless(yy, bins);
+        CurveVerifier.validate_means_allow_last_beless(yy, bins, exposure);
 
         if (Util.False && bins[0].widths_in_years == 1)
         {

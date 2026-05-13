@@ -18,14 +18,14 @@ public class CurveVerifier
     {
         validate_means(yy, bins);
     }
-    
+
     public static void validate_means(double[] yy, Bin[] bins) throws Exception
     {
         int ppy = CurveUtil.ppy(yy, bins);
 
         Bin first = Bins.firstBin(bins);
         int start_x = first.x1(ppy);
-        
+
         for (Bin bin : bins)
         {
             double[] y = Util.splice(yy, bin.x1(ppy) - start_x, bin.x2(ppy) - start_x);
@@ -33,14 +33,14 @@ public class CurveVerifier
                 throw new Exception("Curve does not preserve mean values of the bins");
         }
     }
-    
+
     public static void validate_means(double[] yy, Bin[] bins, double absoluteAllowance) throws Exception
     {
         int ppy = CurveUtil.ppy(yy, bins);
 
         Bin first = Bins.firstBin(bins);
         int start_x = first.x1(ppy);
-        
+
         for (Bin bin : bins)
         {
             double[] y = Util.splice(yy, bin.x1(ppy) - start_x, bin.x2(ppy) - start_x);
@@ -57,22 +57,36 @@ public class CurveVerifier
      * but allow average curve values in the last bin years be less than bin average
      * (if mortality curve is clipped at 1000 promille).
      */
-    public static void validate_means_allow_last_beless(double[] yy, Bin[] bins) throws Exception
+    public static void validate_means_allow_last_beless(double[] yy, Bin[] bins, double[] exposure) throws Exception
     {
         int ppy = CurveUtil.ppy(yy, bins);
-        
+
         for (Bin bin : bins)
         {
             double[] y = Util.splice(yy, bin.x1(ppy), bin.x2(ppy));
-            
+
             if (bin.next == null && Util.average(y) < bin.avg)
                 continue;
-            
-            if (Util.differ(Util.average(y), bin.avg, 0.001))
-                throw new Exception("Curve does not preserve mean values of the bins");
+
+            if (exposure == null)
+            {
+                if (Util.differ(Util.average(y), bin.avg, 0.001))
+                    throw new Exception("Curve does not preserve mean values of the bins");
+            }
+            else
+            {
+                // weighted average
+                if (yy.length != exposure.length)
+                    throw new Exception("exposure и yy разной длины");
+                double[] w = Util.splice(exposure, bin.x1(ppy), bin.x2(ppy));
+                w = Util.divide(w, Util.sum(w));
+                double[] m = Util.multiply(y, w);
+                if (Util.differ(Util.sum(m), bin.avg, 0.001))
+                    throw new Exception("Curve does not preserve mean values of the bins");
+            }
         }
     }
-    
+
     /*
      * Verify that the bins data is U-shaped
      */
@@ -80,7 +94,7 @@ public class CurveVerifier
     {
         boolean was_down = false;
         boolean was_up = false;
-        
+
         for (Bin bin : bins)
         {
             Bin prev = bin.prev;
@@ -105,10 +119,10 @@ public class CurveVerifier
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     public static boolean verifyUShape(Bin[] bins, String title, boolean doThrow) throws Exception
     {
         if (Bins.flips(bins) > 1)
@@ -125,7 +139,7 @@ public class CurveVerifier
         Bin minBin = Bins.findMinBin(bins);
         if (minBin == firstBin || minBin == lastBin)
             return error(title, doThrow, "Mortality minimum is not in the middle");
-        
+
         return true;
     }
 
@@ -142,7 +156,7 @@ public class CurveVerifier
             return false;
         }
     }
-    
+
     /*
      * Verify that curve values are positive
      */
@@ -152,7 +166,7 @@ public class CurveVerifier
         StringBuilder sb = new StringBuilder();
 
         Bin recent = null;
-        
+
         for (int x = 0; x < curve.length; x++)
         {
             if (curve[x] <= 0)
@@ -170,7 +184,7 @@ public class CurveVerifier
                 }
             }
         }
-        
+
         if (recent != null)
         {
             String msg = String.format("Nevative or zero-value segments in %s at ages %s", title, sb.toString());
@@ -190,12 +204,12 @@ public class CurveVerifier
     {
         return verifyUShape(curve, bins, true, title, doThrow);
     }
-    
+
     public static boolean verifyUShape(double[] curve, Bin[] bins, boolean strict, String title, boolean doThrow) throws Exception
     {
         final int ppy = CurveUtil.ppy(curve, bins);
         StringBuilder sb = new StringBuilder();
-        
+
         Bin minBin1 = null;
         Bin minBin2 = null;
         Bin lastMinBin = null;
@@ -218,22 +232,22 @@ public class CurveVerifier
                 minBin2 = bin;
             }
         }
-        
+
         lastMinBin = minBin1;
         if (minBin2 != null)
             lastMinBin = minBin2;
-        
+
         boolean inflected = false;
         Bin recentErrorBin = null;
         double tolerance = 1.0;
         if (!strict)
             tolerance = 1.0;
-        
+
         for (int x = 1; x < curve.length; x++)
         {
             Bin bin = CurveUtil.x2bin(x, ppy, bins);
             boolean error = false;
-            
+
             if (bin.index < minBin1.index)
             {
                 // must be trending down
@@ -262,7 +276,7 @@ public class CurveVerifier
                         error = true;
                 }
             }
-            
+
             if (error && bin != recentErrorBin)
             {
                 recentErrorBin = bin;
@@ -271,27 +285,27 @@ public class CurveVerifier
                 sb.append(binRange(bin));
             }
         }
-        
+
         if (recentErrorBin != null)
         {
             List<List<Integer>> xlist = locateContinuousNonMonotonicPoints(curve, bins, title, tolerance, null);
             String desc = describeContinuousNonMonotonicPoints(xlist);
-            
+
             String minsegs = binRange(minBin1);
             if (minBin2 != null)
                 minsegs += " " + binRange(minBin2);
-            
-            String msg = String.format("Non-monotonic segments in %s at ranges %s and ages %s, minimum segments: %s", 
+
+            String msg = String.format("Non-monotonic segments in %s at ranges %s and ages %s, minimum segments: %s",
                                        title, sb.toString(), desc, minsegs);
             if (doThrow)
                 throw new Exception(msg);
             Util.err(msg);
             return false;
         }
-        
+
         return true;
     }
-    
+
     private static String binRange(Bin bin)
     {
         if (bin.age_x1 == bin.age_x2)
@@ -303,11 +317,12 @@ public class CurveVerifier
     /*
      * @inflection returned as the minimum point before raise and can be the last point *before* the minimum bin
      */
-    public static List<Integer> locateNonMonotonicPoints(double[] curve, Bin[] bins, String title, double tolerance, MutableInt inflection) throws Exception
+    public static List<Integer> locateNonMonotonicPoints(double[] curve, Bin[] bins, String title, double tolerance, MutableInt inflection)
+            throws Exception
     {
         final int ppy = CurveUtil.ppy(curve, bins);
         List<Integer> list = new ArrayList<>();
-        
+
         Bin minBin1 = null;
         Bin minBin2 = null;
         Bin lastMinBin = null;
@@ -330,24 +345,24 @@ public class CurveVerifier
                 minBin2 = bin;
             }
         }
-        
+
         lastMinBin = minBin1;
         if (minBin2 != null)
             lastMinBin = minBin2;
-        
+
         boolean inflected = false;
         double lastv = curve[0];
-        
+
         for (int x = 1; x < curve.length; x++)
         {
             Bin bin = CurveUtil.x2bin(x, ppy, bins);
-            
+
             if (bin.index < minBin1.index)
             {
                 // must be trending down
                 if (curve[x] > tolerance * lastv)
                     list.add(x);
-                else 
+                else
                     lastv = curve[x];
             }
             else if (bin.index > lastMinBin.index)
@@ -355,7 +370,7 @@ public class CurveVerifier
                 // must be trending up
                 if (tolerance * curve[x] < lastv)
                     list.add(x);
-                else 
+                else
                     lastv = curve[x];
             }
             else if (bin == minBin1 || bin == minBin2)
@@ -382,18 +397,19 @@ public class CurveVerifier
                 }
             }
         }
-        
+
         return list;
     }
-    
-    public static List<List<Integer>> locateContinuousNonMonotonicPoints(double[] curve, Bin[] bins, String title, double tolerance, MutableInt inflection) throws Exception
+
+    public static List<List<Integer>> locateContinuousNonMonotonicPoints(double[] curve, Bin[] bins, String title, double tolerance,
+            MutableInt inflection) throws Exception
     {
         List<List<Integer>> xlist = new ArrayList<>();
-        
+
         Integer last_x = null;
         List<Integer> list = null;
-        
-        for (int x : locateNonMonotonicPoints(curve, bins, title, tolerance, inflection)) 
+
+        for (int x : locateNonMonotonicPoints(curve, bins, title, tolerance, inflection))
         {
             if (last_x != null && x == last_x + 1)
             {
@@ -407,7 +423,7 @@ public class CurveVerifier
             }
             last_x = x;
         }
-        
+
         return xlist;
     }
 
@@ -419,7 +435,7 @@ public class CurveVerifier
             String s = "" + list.get(0);
             if (list.size() != 1)
                 s += "-" + list.get(list.size() - 1);
-            
+
             if (sb.length() != 0)
                 sb.append(" ");
             sb.append(s);
