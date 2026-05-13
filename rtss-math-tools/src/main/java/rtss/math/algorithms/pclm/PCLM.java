@@ -73,7 +73,7 @@ public class PCLM
     public double[] pclm() throws Exception
     {
         // Build the composition matrix C (nBins × nPoints)
-        Matrix C = buildCompositionMatrix();
+        Matrix C = validate(buildCompositionMatrix());
 
         // Build the identity matrix X (nPoints × nPoints) - or could be B-spline basis
         Matrix X = Matrix.identity(nPoints, nPoints);
@@ -97,12 +97,12 @@ public class PCLM
         double[] gamma = new double[nPoints];
         for (int j = 0; j < nPoints; j++)
         {
-            gamma[j] = Math.exp(eta.get(j, 0));
+            gamma[j] = validate(Math.exp(eta.get(j, 0)));
         }
 
         CurveUtil.avoidDecompositionRounding(gamma, bins);
 
-        return gamma;
+        return validate(gamma);
     }
 
     /**
@@ -332,6 +332,26 @@ public class PCLM
         // Solve the system
         Matrix betaMatrix = AtWA.solve(AtWz);
 
-        return betaMatrix.getColumnPackedCopy();
+        return validate(betaMatrix.getColumnPackedCopy());
+    }
+
+    private double validate(double v)
+    {
+        if (!Double.isFinite(v))
+            throw new RuntimeException("Numeric overflow or underflow");
+        return v;
+    }
+
+    private double[] validate(double[] v)
+    {
+        for (int k = 0; k < v.length; k++)
+            validate(v[k]);
+        return v;
+    }
+
+    private Matrix validate(Matrix v)
+    {
+        validate(v.getRowPackedCopy());
+        return v;
     }
 }

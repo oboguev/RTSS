@@ -99,8 +99,7 @@ public class ExposuresPCLM
         // Verify exposures array length
         if (exposures.length != expectedPoints)
         {
-            throw new IllegalArgumentException(String.format(
-                                                             "exposures array length mismatch: expected %d (ppy=%d × age_range=%d) but got %d",
+            throw new IllegalArgumentException(String.format("exposures array length mismatch: expected %d (ppy=%d × age_range=%d) but got %d",
                                                              expectedPoints, ppy, (lastAge - firstAge + 1), exposures.length));
         }
 
@@ -111,8 +110,7 @@ public class ExposuresPCLM
         {
             if (exposures[i] < 0)
             {
-                throw new IllegalArgumentException(String.format(
-                                                                 "exposure[%d] is negative: %.4f", i, exposures[i]));
+                throw new IllegalArgumentException(String.format("exposure[%d] is negative: %.4f", i, exposures[i]));
             }
         }
     }
@@ -181,13 +179,13 @@ public class ExposuresPCLM
         double[] gamma = new double[nPoints];
         for (int j = 0; j < nPoints; j++)
         {
-            gamma[j] = Math.exp(eta.get(j, 0));
+            gamma[j] = validate(Math.exp(eta.get(j, 0)));
         }
 
         // Apply rounding avoidance to maintain conservation property
         CurveUtil.avoidDecompositionRounding(gamma, bins);
 
-        return gamma;
+        return validate(gamma);
     }
 
     /**
