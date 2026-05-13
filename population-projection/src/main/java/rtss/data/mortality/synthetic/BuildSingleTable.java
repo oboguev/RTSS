@@ -120,15 +120,21 @@ public class BuildSingleTable
     private static double[] curve_pclm(Bin[] bins, double[] exposure, String debug_title) throws Exception
     {
         final int ppy = 1;
+        final double[] exposure_original = exposure;
 
         /*
          * To suppress boundary effects, append fake bin with growing rate 
          */
+        boolean useFakeBin = exposure == null || Util.True;
         Bin[] xbins = bins;
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
-        if (exposure == null)
+        if (useFakeBin)
+        {
             xbins = appendFakeBin(bins);
+            if (exposure != null)
+                exposure = appendFakeExposures(exposure, Bins.lastBin(xbins));
+        }
 
         final double lambda = 0.0001;
         double[] yyy = PCLM_Rizzi_2015.pclm(xbins, exposure, lambda, ppy);
@@ -165,10 +171,12 @@ public class BuildSingleTable
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
+        if (useFakeBin)
+            yy = Util.splice(yy, 0, Bins.lastBin(xbins).age_x1 - 1);
 
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
-        CurveVerifier.validate_means_allow_last_beless(yy, bins, exposure);
+        CurveVerifier.validate_means_allow_last_beless(yy, bins, exposure_original);
 
         if (Util.False && bins[0].widths_in_years == 1)
         {
@@ -197,6 +205,89 @@ public class BuildSingleTable
                          last.avg + 1.8 * (last.avg - last.prev.avg)));
         return Bins.bins(list);
     }
+    
+    private static double[] appendFakeExposures(final double[] exposures, final Bin fakeBin) 
+    {
+        double[] e = new double[exposures.length + fakeBin.widths_in_years];
+        System.arraycopy(exposures, 0, e, 0, exposures.length);
+        
+        double ratio = estimateTailDeclineRatio(exposures);
+
+        double v = Math.max(0.0, exposures[exposures.length - 1]);
+
+        for (int i = exposures.length; i < e.length; i++)
+        {
+            v *= ratio;
+            e[i] = v;
+        }        
+
+        return e;
+    }
+    
+    private static double estimateTailDeclineRatio(double[] exposures)
+    {
+        /*
+         * Estimate the average one-year survival/decline ratio near the end:
+         *
+         *     exposure[age + 1] / exposure[age]
+         *
+         * Use only the last few valid positive pairs.
+         */
+
+        final int lookback = 7;
+
+        double sumRatios = 0.0;
+        int count = 0;
+
+        int start = Math.max(1, exposures.length - lookback);
+
+        for (int i = start; i < exposures.length; i++)
+        {
+            double prev = exposures[i - 1];
+            double curr = exposures[i];
+
+            if (prev > 0.0 && curr >= 0.0)
+            {
+                double r = curr / prev;
+
+                if (Double.isFinite(r) && r > 0.0)
+                {
+                    sumRatios += r;
+                    count++;
+                }
+            }
+        }
+
+        double ratio;
+
+        if (count == 0)
+        {
+            /*
+             * Fallback if the tail data is unusable.
+             * At very old ages, 0.70 means each next age has 70%
+             * of the previous age's population.
+             */
+            ratio = 0.70;
+        }
+        else
+        {
+            ratio = sumRatios / count;
+        }
+
+        /*
+         * Clamp to a plausible simple range.
+         *
+         * - Do not allow growth or nearly flat continuation.
+         * - Do not allow collapse that is too abrupt unless already explicit
+         *   in the real data.
+         *
+         * For ages around 100+, something like 0.55 .. 0.85 is a reasonable
+         * "common sense" range for a synthetic tail.
+         */
+        ratio = Math.max(0.55, Math.min(0.85, ratio));
+
+        return ratio;
+    }    
 
     @SuppressWarnings("unused")
     private static double[] curve_osier(Bin[] bins, Gender gender, String method, String params, String debug_title) throws Exception
