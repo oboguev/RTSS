@@ -27,7 +27,7 @@ public class BuildSingleTable
     public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title) throws Exception
     {
         // ###@@@
-        exposure = null;
+        // ###@@@ exposure = null;
         double[] qx = curve(bins, exposure, debug_title);
         return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
     }

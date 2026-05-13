@@ -36,6 +36,9 @@ import rtss.util.Util;
  */
 public class ExposuresPCLM
 {
+    public static int MAX_ITERATIONS = 50;
+    public static double CONVERGENCE_THRESHOLD = 1e-6;
+
     private final Bin[] bins;
     private final double[] exposures;
     private final double lambda;
@@ -273,8 +276,6 @@ public class ExposuresPCLM
         }
 
         // IRLS iterations
-        final int MAX_ITERATIONS = 50;
-        final double CONVERGENCE_THRESHOLD = 1e-6;
 
         for (int it = 0; it < MAX_ITERATIONS; it++)
         {
