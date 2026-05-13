@@ -70,7 +70,7 @@ public class PCLM_Rizzi_2015
              * Execute locally
              */
             if (exposure != null)
-                return new ExposuresPCLM(bins, exposure, lambda, ppy).pclm();
+                return new ExposuresPCLM(bins, exposure, lambda, ppy).setMaxIterations(1000).pclm();
             else
                 return new PCLM(bins, lambda, ppy).pclm();
         }

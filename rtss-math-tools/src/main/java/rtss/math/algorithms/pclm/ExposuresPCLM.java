@@ -47,6 +47,9 @@ public class ExposuresPCLM
     private final int nBins; // Number of input bins (I in the paper)
     private final int nPoints; // Number of output points (J in the paper)
 
+    private int maxIterations = MAX_ITERATIONS;
+    private double convergenceThreshold = CONVERGENCE_THRESHOLD;
+
     /**
      * Creates a new exposure-aware PCLM instance for mortality rate disaggregation.
      *
@@ -78,7 +81,12 @@ public class ExposuresPCLM
             throw new IllegalArgumentException("ppy must be at least 1");
 
         this.bins = bins;
-        this.exposures = exposures;
+        /*
+         * normalize exposures to avoid numeric overflow/underflow,
+         * and since we care only about relative distribution
+         * rather than actual counts 
+         */
+        this.exposures = Util.divide(exposures, Util.sum(exposures));
         this.lambda = lambda;
         this.ppy = ppy;
         this.nBins = bins.length;
@@ -92,8 +100,8 @@ public class ExposuresPCLM
         if (exposures.length != expectedPoints)
         {
             throw new IllegalArgumentException(String.format(
-                    "exposures array length mismatch: expected %d (ppy=%d × age_range=%d) but got %d",
-                    expectedPoints, ppy, (lastAge - firstAge + 1), exposures.length));
+                                                             "exposures array length mismatch: expected %d (ppy=%d × age_range=%d) but got %d",
+                                                             expectedPoints, ppy, (lastAge - firstAge + 1), exposures.length));
         }
 
         this.nPoints = expectedPoints;
@@ -104,9 +112,21 @@ public class ExposuresPCLM
             if (exposures[i] < 0)
             {
                 throw new IllegalArgumentException(String.format(
-                        "exposure[%d] is negative: %.4f", i, exposures[i]));
+                                                                 "exposure[%d] is negative: %.4f", i, exposures[i]));
             }
         }
+    }
+
+    public ExposuresPCLM setMaxIterations(int maxIterations)
+    {
+        this.maxIterations = maxIterations;
+        return this;
+    }
+
+    public ExposuresPCLM setConvergenceThreshold(double convergenceThreshold)
+    {
+        this.convergenceThreshold = convergenceThreshold;
+        return this;
     }
 
     /**
@@ -251,7 +271,7 @@ public class ExposuresPCLM
     private double[] performIRLS(double[] y, Matrix C, Matrix X, Matrix D) throws Exception
     {
         int nx = X.getColumnDimension();
-        double la2 = Math.sqrt(lambda);
+        double la2 = validate(Math.sqrt(lambda));
 
         // Initialize β with log of average rate
         // Start with total deaths / total exposure as initial rate estimate
@@ -269,6 +289,11 @@ public class ExposuresPCLM
         double avgRate = totalDeaths / totalExposure;
         double bstart = Math.log(Math.max(avgRate, 1e-10)); // Avoid log(0)
 
+        validate(totalDeaths);
+        validate(totalExposure);
+        validate(avgRate);
+        validate(bstart);
+
         double[] b = new double[nx];
         for (int j = 0; j < nx; j++)
         {
@@ -277,78 +302,78 @@ public class ExposuresPCLM
 
         // IRLS iterations
 
-        for (int it = 0; it < MAX_ITERATIONS; it++)
+        for (int it = 0; it < maxIterations; it++)
         {
-            double[] b0 = b.clone();
+            double[] b0 = validate(b.clone());
 
             // Compute η = X × β
-            Matrix betaMatrix = new Matrix(b, nx);
-            Matrix eta = X.times(betaMatrix);
+            Matrix betaMatrix = validate(new Matrix(b, nx));
+            Matrix eta = validate(X.times(betaMatrix));
 
             // Compute γ = exp(η) - these are the rates
             double[] gam = new double[nx];
             for (int j = 0; j < nx; j++)
             {
-                gam[j] = Math.exp(eta.get(j, 0));
+                gam[j] = validate(Math.exp(eta.get(j, 0)));
             }
 
             // Compute μ = C × γ - these are the expected death counts
-            Matrix gamMatrix = new Matrix(gam, nx);
-            Matrix mu = C.times(gamMatrix);
-            double[] muArray = mu.getColumnPackedCopy();
+            Matrix gamMatrix = validate(new Matrix(gam, nx));
+            Matrix mu = validate(C.times(gamMatrix));
+            double[] muArray = validate(mu.getColumnPackedCopy());
 
             // Build weights: w = [1/μ_1, ..., 1/μ_I, la2, ..., la2]
             double[] w = new double[nBins + nx - 2];
             for (int i = 0; i < nBins; i++)
             {
                 // Avoid division by zero
-                w[i] = 1.0 / Math.max(muArray[i], 1e-10);
+                w[i] = validate(1.0 / Math.max(muArray[i], 1e-10));
             }
             for (int i = nBins; i < w.length; i++)
             {
-                w[i] = la2;
+                w[i] = validate(la2);
             }
 
             // Compute Γ (Gamma matrix) = diag(γ)
-            Matrix Gamma = new Matrix(nx, nx);
+            Matrix Gamma = validate(new Matrix(nx, nx));
             for (int j = 0; j < nx; j++)
             {
                 Gamma.set(j, j, gam[j]);
             }
 
             // Compute Q = C × Γ × X
-            Matrix Q = C.times(Gamma).times(X);
+            Matrix Q = validate(C.times(Gamma).times(X));
 
             // Build z = [y - μ + Q×β, 0, ..., 0]
-            Matrix Qb = Q.times(betaMatrix);
+            Matrix Qb = validate(Q.times(betaMatrix));
             double[] z = new double[nBins + nx - 2];
             for (int i = 0; i < nBins; i++)
             {
-                z[i] = y[i] - muArray[i] + Qb.get(i, 0);
+                z[i] = validate(y[i] - muArray[i] + Qb.get(i, 0));
             }
             // Remaining elements are already 0
 
             // Stack matrices: [Q; D] and solve weighted least squares
-            Matrix A = stackMatrices(Q, D);
-            Matrix zMatrix = new Matrix(z, z.length);
+            Matrix A = validate(stackMatrices(Q, D));
+            Matrix zMatrix = validate(new Matrix(z, z.length));
 
             // Weighted least squares: A^T W A β = A^T W z
-            b = solveWeightedLeastSquares(A, zMatrix, w);
+            b = validate(solveWeightedLeastSquares(A, zMatrix, w));
 
             // Check convergence
             double db = 0.0;
             for (int j = 0; j < nx; j++)
             {
-                db = Math.max(db, Math.abs(b[j] - b0[j]));
+                db = validate(Math.max(db, Math.abs(b[j] - b0[j])));
             }
 
-            if (db < CONVERGENCE_THRESHOLD)
+            if (db < convergenceThreshold)
             {
                 return b;
             }
         }
 
-        throw new Exception("ExposuresPCLM algorithm failed to converge after " + MAX_ITERATIONS + " iterations");
+        throw new Exception("ExposuresPCLM algorithm failed to converge after " + maxIterations + " iterations");
     }
 
     /**
@@ -391,6 +416,7 @@ public class ExposuresPCLM
         int n = A.getColumnDimension();
 
         Util.unused(n);
+        validate(w);
 
         // Build diagonal weight matrix W
         Matrix W = new Matrix(m, m);
@@ -409,6 +435,26 @@ public class ExposuresPCLM
         // Solve the system
         Matrix betaMatrix = AtWA.solve(AtWz);
 
-        return betaMatrix.getColumnPackedCopy();
+        return validate(betaMatrix.getColumnPackedCopy());
+    }
+
+    private double validate(double v)
+    {
+        if (!Double.isFinite(v))
+            throw new RuntimeException("Numeric overflow or underflow");
+        return v;
+    }
+
+    private double[] validate(double[] v)
+    {
+        for (int k = 0; k < v.length; k++)
+            validate(v[k]);
+        return v;
+    }
+
+    private Matrix validate(Matrix v)
+    {
+        validate(v.getRowPackedCopy());
+        return v;
     }
 }

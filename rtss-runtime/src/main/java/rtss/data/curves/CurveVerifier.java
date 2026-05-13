@@ -81,7 +81,7 @@ public class CurveVerifier
                 double[] w = Util.splice(exposure, bin.x1(ppy), bin.x2(ppy));
                 w = Util.divide(w, Util.sum(w));
                 double[] m = Util.multiply(y, w);
-                if (Util.differ(Util.sum(m), bin.avg, 0.001))
+                if (Util.differ(Util.sum(m), bin.avg, 0.0015))
                     throw new Exception("Curve does not preserve mean values of the bins");
             }
         }

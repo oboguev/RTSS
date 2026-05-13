@@ -969,53 +969,64 @@ public class RefineYearlyPopulationCore
         @Override
         public Boolean call() throws Exception
         {
-            OptimizationResult result = new OptimizationResult();
-            result.optimizerSettings = optimizerSettings;
+            String previousThreadName = Thread.currentThread().getName();
 
-            initialObjective.optimizerSettings = optimizerSettings;
-            initialObjective.px = Util.splice(clone.p, 0, clone.nTunablePoints - 1);
-
-            result.px = clone.refineSeries(optimizerSettings, innerLogLevel, initialObjective, result);
-
-            double[] fullP = clone.fullP(result.px);
-
-            // check if it is the same as the initial curve
-            String same = "";
-            if (Util.same(fullP, clone.p))
-                same = "  same-as-initial";
-
-            // check if the returned curve is monotonically decreasing
-            String nonmonotnic = "";
-            if (!clone.verifyMonotonicity(fullP))
-                nonmonotnic = "  non-monotonic";
-
-            // check if the returned curve presverves bins sums
-            String preserves = "";
-            double sum04 = Util.sum_range(fullP, 0, 4);
-            double sum59 = Util.sum_range(fullP, 5, 9);
-            if (Util.differ(sum04, clone.psum04, 0.001) || Util.differ(sum59, clone.psum59, 0.001))
-                preserves = "  non-sum-preserving";
-
-            if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL)
+            try
             {
-                Util.out(String.format("lambda=%-4d  sigma=%8.6f  initial objective = %12.7e  result objective = %12.7e%s%s%s",
-                                       optimizerSettings.minimumLambda,
-                                       optimizerSettings.sigmaFraction,
-                                       initialObjective.objective,
-                                       result.objective,
-                                       same,
-                                       nonmonotnic,
-                                       preserves));
-            }
+                Thread.currentThread().setName("parallel: refineSeries");
 
-            if (same.isEmpty() &&
-                nonmonotnic.isEmpty() &&
-                preserves.isEmpty())
+                OptimizationResult result = new OptimizationResult();
+                result.optimizerSettings = optimizerSettings;
+
+                initialObjective.optimizerSettings = optimizerSettings;
+                initialObjective.px = Util.splice(clone.p, 0, clone.nTunablePoints - 1);
+
+                result.px = clone.refineSeries(optimizerSettings, innerLogLevel, initialObjective, result);
+
+                double[] fullP = clone.fullP(result.px);
+
+                // check if it is the same as the initial curve
+                String same = "";
+                if (Util.same(fullP, clone.p))
+                    same = "  same-as-initial";
+
+                // check if the returned curve is monotonically decreasing
+                String nonmonotnic = "";
+                if (!clone.verifyMonotonicity(fullP))
+                    nonmonotnic = "  non-monotonic";
+
+                // check if the returned curve presverves bins sums
+                String preserves = "";
+                double sum04 = Util.sum_range(fullP, 0, 4);
+                double sum59 = Util.sum_range(fullP, 5, 9);
+                if (Util.differ(sum04, clone.psum04, 0.001) || Util.differ(sum59, clone.psum59, 0.001))
+                    preserves = "  non-sum-preserving";
+
+                if (outerLogLevel == Level.TRACE || outerLogLevel == Level.ALL)
+                {
+                    Util.out(String.format("lambda=%-4d  sigma=%8.6f  initial objective = %12.7e  result objective = %12.7e%s%s%s",
+                                           optimizerSettings.minimumLambda,
+                                           optimizerSettings.sigmaFraction,
+                                           initialObjective.objective,
+                                           result.objective,
+                                           same,
+                                           nonmonotnic,
+                                           preserves));
+                }
+
+                if (same.isEmpty() &&
+                    nonmonotnic.isEmpty() &&
+                    preserves.isEmpty())
+                {
+                    results.add(result);
+                }
+
+                return true;
+            }
+            finally
             {
-                results.add(result);
+                Thread.currentThread().setName(previousThreadName);
             }
-
-            return true;
         }
     }
 

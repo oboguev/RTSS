@@ -13,7 +13,12 @@ public class ExposuresPCLMExtraTestFixed
     {
         try
         {
+            Util.out("============== test 1 ==============");
             test_1();
+            
+            Util.out("");
+            Util.out("============== test 2 ==============");
+            test_2();
         }
         catch (Exception ex)
         {
@@ -63,8 +68,6 @@ public class ExposuresPCLMExtraTestFixed
         if (exposures.length != width * ppy)
             throw new IllegalArgumentException("exposures width");
 
-        // ExposuresPCLM.MAX_ITERATIONS = 1000;
-
         Util.out("");
         Util.out("========================================");
         Util.out("Regular PCLM (preserves simple average)");
@@ -77,6 +80,72 @@ public class ExposuresPCLMExtraTestFixed
         Util.out("ExposuresPCLM (preserves exposure-weighted average)");
         Util.out("=======================================================");
         yy = new ExposuresPCLM(bins, exposures, lambda, ppy).pclm();
+        verifySimple(bins, ppy, yy, null);
+        Util.out("");
+        Util.out("Now checking EXPOSURE-WEIGHTED conservation:");
+        verifyExposureWeighted(bins, ppy, yy, exposures);
+
+        Util.out("");
+        Util.out("=======================================================");
+        Util.out("Exposure distribution analysis:");
+        Util.out("=======================================================");
+        analyzeExposureDistribution(bins, exposures, ppy);
+    }
+
+    private static void test_2() throws Exception
+    {
+        /* ADH-RSFSR 1946 FEMALE */
+        List<Bin> blist = new ArrayList<>();
+        blist.add(new Bin(0, 0, 124.300000));
+        blist.add(new Bin(1, 4, 19.703302));
+        blist.add(new Bin(5, 9, 3.394227));
+        blist.add(new Bin(10, 14, 2.097797));
+        blist.add(new Bin(15, 19, 2.596623));
+        blist.add(new Bin(20, 24, 3.394227));
+        blist.add(new Bin(25, 29, 3.693163));
+        blist.add(new Bin(30, 34, 4.191192));
+        blist.add(new Bin(35, 39, 4.688972));
+        blist.add(new Bin(40, 44, 5.186503));
+        blist.add(new Bin(45, 49, 6.975557));
+        blist.add(new Bin(50, 54, 8.364819));
+        blist.add(new Bin(55, 59, 13.113262));
+        blist.add(new Bin(60, 64, 19.605267));
+        blist.add(new Bin(65, 69, 32.364682));
+        blist.add(new Bin(70, 74, 53.609496));
+        blist.add(new Bin(75, 79, 78.082925));
+        blist.add(new Bin(80, 84, 107.474327));
+        blist.add(new Bin(85, 100, 147.088936));
+
+        Bin[] bins = Bins.bins(blist);
+
+        final double[] exposures = { 370786, 522895, 675004, 827113, 979222, 1131331, 1280492, 1357259, 1353841, 1274077, 1089536, 1000971, 966605,
+                                     988398, 1064489, 1227473, 1324231, 1377012, 1381221, 1338063, 1237519, 1149408, 1061429, 974699, 889944, 798426,
+                                     749865, 732824, 747618, 793268, 886885, 945399, 981365, 992370, 978982, 934180, 901365, 872759, 849006, 829689,
+                                     817054, 797477, 773460, 744885, 712124, 673539, 639894, 609119, 581267, 556180, 533864, 513487, 495099, 478621,
+                                     463929, 451550, 438075, 424119, 409637, 394619, 379401, 362170, 343333, 322936, 301159, 277264, 256192, 236895,
+                                     219329, 203320, 189138, 174458, 159697, 144823, 129884, 114527, 100876, 88366, 76893, 66338, 56405, 47971, 40644,
+                                     34271, 28709, 23756, 19721, 16377, 13615, 11336, 9459, 7919, 6659, 5636, 4812, 4159, 3651, 3272, 3008, 2848,
+                                     2771 };
+
+        final double lambda = 0.0001;
+        final int ppy = 1;
+
+        int width = Bins.lastBin(bins).age_x2 - Bins.firstBin(bins).age_x1 + 1;
+        if (exposures.length != width * ppy)
+            throw new IllegalArgumentException("exposures width");
+
+        Util.out("");
+        Util.out("========================================");
+        Util.out("Regular PCLM (preserves simple average)");
+        Util.out("========================================");
+        double[] yy = new PCLM(bins, lambda, ppy).pclm();
+        verifySimple(bins, ppy, yy, null);
+
+        Util.out("");
+        Util.out("=======================================================");
+        Util.out("ExposuresPCLM (preserves exposure-weighted average)");
+        Util.out("=======================================================");
+        yy = new ExposuresPCLM(bins, exposures, lambda, ppy).setMaxIterations(1000).pclm();
         verifySimple(bins, ppy, yy, null);
         Util.out("");
         Util.out("Now checking EXPOSURE-WEIGHTED conservation:");
@@ -107,7 +176,7 @@ public class ExposuresPCLMExtraTestFixed
             double pct = 100.0 * (yyav - bin.avg) / bin.avg;
 
             Util.out(String.format("%d-%-2d   %10.5f   %10.5f   %+7.2f%%",
-                bin.age_x1, bin.age_x2, bin.avg, yyav, pct));
+                                   bin.age_x1, bin.age_x2, bin.avg, yyav, pct));
         }
     }
 
@@ -142,7 +211,7 @@ public class ExposuresPCLMExtraTestFixed
             double pct = 100.0 * (weightedAvg - bin.avg) / bin.avg;
 
             Util.out(String.format("%d-%-2d   %10.5f   %10.5f   %+7.2f%%",
-                bin.age_x1, bin.age_x2, bin.avg, weightedAvg, pct));
+                                   bin.age_x1, bin.age_x2, bin.avg, weightedAvg, pct));
         }
     }
 
@@ -173,7 +242,7 @@ public class ExposuresPCLMExtraTestFixed
             double ratio = max / min;
 
             Util.out(String.format("%d-%-2d   %,12.0f   %,10.0f   %,10.0f   %6.2f",
-                bin.age_x1, bin.age_x2, total, min, max, ratio));
+                                   bin.age_x1, bin.age_x2, total, min, max, ratio));
         }
 
         Util.out("");
