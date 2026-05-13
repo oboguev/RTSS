@@ -24,7 +24,7 @@ public class ExposuresPCLMExtraTest
 
     private static void test_1() throws Exception
     {
-
+        /* ADH-RSFSR 1946 MALE */
         List<Bin> blist = new ArrayList<>();
         blist.add(new Bin(0, 0, 146.200000));
         blist.add(new Bin(1, 4, 21.368391));
