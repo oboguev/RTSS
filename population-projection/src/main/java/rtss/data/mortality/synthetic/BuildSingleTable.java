@@ -14,6 +14,8 @@ import rtss.data.curves.ViewCurve;
 import rtss.data.mortality.MortalityUtil;
 import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
+import rtss.data.mortality.laws.tail.OldAgeTail;
+import rtss.data.mortality.laws.tail.OldAgeTailModel;
 import rtss.data.selectors.Gender;
 import rtss.external.Osier.OsierMortalityType;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
@@ -114,10 +116,51 @@ public class BuildSingleTable
          * piece-wise monotonicity (U-shape) criteria.     
          */
 
-        return curve_pclm(bins, exposure, debug_title);
+        /*
+         * Если последняя корзина слишком широка, например 85-100, требование плавности недостаточно для
+         * реалистической реконструкции хода кривой внутри неё. Одно только требование плавности оказывается
+         * недостаточным. Более узкие корзины задают алгоритму движение кривой. Но когда корзина слишком
+         * широка, общий алгоритм декомпозиции неспособен справиться с ней исходя лишь из математических
+         * соображений. Fake bin помогает, но не до конца. Поэтому для широких корзин мы применяем модельную
+         * реконструкцию последнего возрастного сегмента, если он слишком широк. 
+         */
+        boolean useModelTail = Bins.lastBin(bins).widths_in_years >= 10 && Util.False;
+
+        boolean allowFakeBin = !useModelTail || Util.True;
+        double[] curve = curve_pclm(bins, exposure, debug_title, allowFakeBin);
+
+        if (useModelTail)
+        {
+            /*
+             * GOMPERTZ даст более быстрый рост справа. 
+             * Если рост слишком быстр, попробовать COALE_KISKER_LIKE.
+             * KANNISTO скорее будет замедлять рост из-за верхней асимптоты.   
+             */
+            int tailBinIndex = bins.length - 1;
+
+            curve = OldAgeTail.applyOldAgeTailToBin(
+                                                    curve,
+                                                    bins,
+                                                    exposure,
+                                                    tailBinIndex,
+                                                    OldAgeTailModel.GOMPERTZ);
+            
+            CurveVerifier.validate_means_allow_last_beless(curve, bins, exposure);
+
+            if (Util.True)
+            {
+                /*
+                 * Display yearly curve
+                 */
+                String title = "Yearly curve with model tail " + debug_title;
+                ViewCurve.view(title, bins, "qx", curve);
+            }
+        }
+
+        return curve;
     }
 
-    private static double[] curve_pclm(Bin[] bins, double[] exposure, String debug_title) throws Exception
+    private static double[] curve_pclm(Bin[] bins, double[] exposure, String debug_title, boolean allowFakeBin) throws Exception
     {
         final int ppy = 1;
         final double[] exposure_original = exposure;
@@ -125,7 +168,7 @@ public class BuildSingleTable
         /*
          * To suppress boundary effects, append fake bin with growing rate 
          */
-        boolean useFakeBin = exposure == null || Util.True;
+        boolean useFakeBin = allowFakeBin && (exposure == null || Util.True);
         Bin[] xbins = bins;
         Bin first = Bins.firstBin(bins);
         Bin last = Bins.lastBin(bins);
@@ -205,12 +248,12 @@ public class BuildSingleTable
                          last.avg + 1.8 * (last.avg - last.prev.avg)));
         return Bins.bins(list);
     }
-    
-    private static double[] appendFakeExposures(final double[] exposures, final Bin fakeBin) 
+
+    private static double[] appendFakeExposures(final double[] exposures, final Bin fakeBin)
     {
         double[] e = new double[exposures.length + fakeBin.widths_in_years];
         System.arraycopy(exposures, 0, e, 0, exposures.length);
-        
+
         double ratio = estimateTailDeclineRatio(exposures);
 
         double v = Math.max(0.0, exposures[exposures.length - 1]);
@@ -219,11 +262,11 @@ public class BuildSingleTable
         {
             v *= ratio;
             e[i] = v;
-        }        
+        }
 
         return e;
     }
-    
+
     private static double estimateTailDeclineRatio(double[] exposures)
     {
         /*
@@ -287,7 +330,7 @@ public class BuildSingleTable
         ratio = Math.max(0.55, Math.min(0.85, ratio));
 
         return ratio;
-    }    
+    }
 
     @SuppressWarnings("unused")
     private static double[] curve_osier(Bin[] bins, Gender gender, String method, String params, String debug_title) throws Exception
