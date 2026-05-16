@@ -138,13 +138,12 @@ public class BuildSingleTable
              */
             int tailBinIndex = bins.length - 1;
 
-            curve = OldAgeTail.applyOldAgeTailToBin(
-                                                    curve,
+            curve = OldAgeTail.applyOldAgeTailToBin(curve,
                                                     bins,
                                                     exposure,
                                                     tailBinIndex,
                                                     OldAgeTailModel.GOMPERTZ);
-            
+
             CurveVerifier.validate_means_allow_last_beless(curve, bins, exposure);
 
             if (Util.True)
