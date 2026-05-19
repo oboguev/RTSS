@@ -52,7 +52,7 @@ public class MexPopulationConapo
                 Util.out("=======================================================");
                 Util.out("Население Мексики на середину года (CONAPO 2025):");
                 Util.out("");
-                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at midyear 1950-2070/00_Pob_Mitad_1950_2070.csv");
+                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at midyear 1970-2070/00_Pob_Mitad_1950_2070.csv");
             }
 
             if (Util.True)
@@ -61,7 +61,7 @@ public class MexPopulationConapo
                 Util.out("=======================================================");
                 Util.out("Население Мексики на начало года (CONAPO 2025):");
                 Util.out("");
-                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at beginning-of-year 1950-2070/00_Pob_Inicio_1950_2070.csv");
+                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at beginning-of-year 1970-2070/00_Pob_Inicio_1950_2070.csv");
             }
         }
         catch (Throwable ex)
