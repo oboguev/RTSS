@@ -38,18 +38,19 @@ public class MexVitalRates
             Util.out("");
             Util.out("====================================");
             Util.out("");
-            Util.out("Рождаемость, смертность, младенческая симертность, суммарный коэффициент рождаемости и средний возраст населения Мексики (по CONAPO 2025):");
+            Util.out("Рождаемость, смертность, младенческая смертность, суммарный коэффициент рождаемости и средний возраст населения Мексики (по CONAPO 2025):");
             Util.out("  - Crude Birth Rate (births per 1,000 population)");
             Util.out("  - Crude Death Rate (deaths per 1,000 population)");
             Util.out("  - Infant Mortality Rate (deaths per 1,000 live births)");
             Util.out("  - Total Fertility Rate (live births per woman)");
+            Util.out("  - Median age");
             Util.out("");
             new MexVitalRates().do_conapo2025("conapo-2025-05/Demographic indicators 1950-2070/05_indicadores_demograficos_proyecciones.csv");
 
             Util.out("");
             Util.out("====================================");
             Util.out("");
-            Util.out("Рождаемость, смертность, суммарный коэффициент рождаемости и нетто коэффициент воспроизводства населения Мексики (по UN WPP 2024):");
+            Util.out("Рождаемость, смертность, младенческая смертность, суммарный коэффициент рождаемости и нетто коэффициент воспроизводства населения Мексики (по UN WPP 2024):");
             Util.out("  - Crude Birth Rate (births per 1,000 population)");
             Util.out("  - Crude Death Rate (deaths per 1,000 population)");
             Util.out("  - Total Fertility Rate (live births per woman)");
@@ -61,7 +62,7 @@ public class MexVitalRates
             Util.out("");
             Util.out("====================================");
             Util.out("");
-            Util.out("Рождаемость, смертность, суммарный коэффициент рождаемости и нетто коэффициент воспроизводства населения РСФСР/РФ (по UN WPP 2024):");
+            Util.out("Рождаемость, смертность, младенческая смертность, суммарный коэффициент рождаемости и нетто коэффициент воспроизводства населения РСФСР/РФ (по UN WPP 2024):");
             Util.out("  - Crude Birth Rate (births per 1,000 population)");
             Util.out("  - Crude Death Rate (deaths per 1,000 population)");
             Util.out("  - Total Fertility Rate (live births per woman)");

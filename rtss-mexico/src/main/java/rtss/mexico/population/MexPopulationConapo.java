@@ -52,7 +52,15 @@ public class MexPopulationConapo
                 Util.out("=======================================================");
                 Util.out("Население Мексики на середину года (CONAPO 2025):");
                 Util.out("");
-                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at midyear 1970-2070/00_Pob_Mitad_1950_2070.csv");
+                new MexPopulationConapo().do_conapo2025_1("conapo-2025-05/Population at midyear 1950-2070/00_Pob_Mitad_1950_2070.csv");
+            }
+
+            if (Util.True)
+            {
+                Util.out("=======================================================");
+                Util.out("Население Мексики на середину года (CONAPO 2025):");
+                Util.out("");
+                new MexPopulationConapo().do_conapo2025_2("conapo-2025-05/Demographic indicators 1950-2070/05_indicadores_demograficos_proyecciones.csv");
             }
 
             if (Util.True)
@@ -61,7 +69,7 @@ public class MexPopulationConapo
                 Util.out("=======================================================");
                 Util.out("Население Мексики на начало года (CONAPO 2025):");
                 Util.out("");
-                new MexPopulationConapo().do_conapo2025("conapo-2025-05/Population at beginning-of-year 1970-2070/00_Pob_Inicio_1950_2070.csv");
+                new MexPopulationConapo().do_conapo2025_1("conapo-2025-05/Population at beginning-of-year 1950-2070/00_Pob_Inicio_1950_2070.csv");
             }
         }
         catch (Throwable ex)
@@ -215,7 +223,7 @@ public class MexPopulationConapo
 
     /* ------------------------------------------------------------------------------------------------------- */
 
-    private void do_conapo2025(String path) throws Exception
+    private void do_conapo2025_1(String path) throws Exception
     {
         CSVSmartReader csv = CSVSmartReader.fromResource(path);
 
@@ -262,5 +270,24 @@ public class MexPopulationConapo
     private static String stripTrailingDecimalZeros(String sv)
     {
         return sv.replaceFirst("\\.?0+$", "");
+    }
+
+    /* ------------------------------------------------------------------------------------------------------- */
+
+    private void do_conapo2025_2(String path) throws Exception
+    {
+        CSVSmartReader cvs = CSVSmartReader.fromResource(path);
+        
+        for (int nr = 0; nr < cvs.rowCount(); nr++)
+        {
+            int geo = cvs.asInt(nr, "CVE_GEO");
+            if (geo != 0)
+                continue;
+            
+            int year = cvs.asInt(nr, "ANIO");
+            int pop_middle = cvs.asInt(nr, "POB_MIT_ANIO");
+
+            Util.out(String.format("%d %,d", year, pop_middle));
+        }
     }
 }

@@ -25,7 +25,15 @@ public class MexMigration
                 Util.out("");
                 Util.out("год эмигрантов иммигрантов");
                 new MexMigration()
-                        .do_main("conapo-2025-05/International Migrants by Age and Five-Year Period 1950-2069/02_mig_inter_quinquen_proyecciones.csv");
+                        .do_main_1("conapo-2025-05/International Migrants by Age and Five-Year Period 1950-2069/02_mig_inter_quinquen_proyecciones.csv");
+
+                Util.out("");
+                Util.out("=======================================================");
+                Util.out("Эмиграция из Мексики и иммиграция в Мексику (CONAPO 2025):");
+                Util.out("");
+                Util.out("год эмигрантов иммигрантов");
+                new MexMigration()
+                        .do_main_2("conapo-2025-05/Demographic indicators 1950-2070/05_indicadores_demograficos_proyecciones.csv");
             }
         }
         catch (Throwable ex)
@@ -41,7 +49,7 @@ public class MexMigration
         public double immigrants;
     }
 
-    private void do_main(String path) throws Exception
+    private void do_main_1(String path) throws Exception
     {
         CSVSmartReader csv = CSVSmartReader.fromResource(path);
         Map<String, YearData> myear = new HashMap<>();
@@ -55,7 +63,7 @@ public class MexMigration
             String age = csv.asString(nr, "EDAD");
             double em = csv.asDouble(nr, "EMIGRANTES");
             double im = csv.asDouble(nr, "INMIGRANTES");
-            
+
             int y1 = n1(year);
             if (y1 >= 2025)
                 continue;
@@ -104,6 +112,37 @@ public class MexMigration
         Util.out("");
         Util.out("всего эмигрантов иммигрантов");
         Util.out(String.format("%s %s %s", "*", f2s(total.emigrants), f2s(total.immigrants)));
+    }
+
+    private void do_main_2(String path) throws Exception
+    {
+        CSVSmartReader cvs = CSVSmartReader.fromResource(path);
+
+        Util.out("");
+        Util.out("всего эмигрантов иммигрантов");
+
+        int total_emigrants = 0;
+        int total_immigrants = 0;
+
+        for (int nr = 0; nr < cvs.rowCount(); nr++)
+        {
+            int geo = cvs.asInt(nr, "CVE_GEO");
+            if (geo != 0)
+                continue;
+
+            int year = cvs.asInt(nr, "ANIO");
+            int emigrants = cvs.asInt(nr, "EMI_INT");
+            int immigrants = cvs.asInt(nr, "INM_INT");
+
+            total_emigrants += emigrants;
+            total_immigrants += immigrants;
+
+            Util.out(String.format("%s %s %s", year, f2s(emigrants), f2s(immigrants)));
+        }
+
+        Util.out("");
+        Util.out("всего эмигрантов иммигрантов");
+        Util.out(String.format("%s %s %s", "*", f2s(total_emigrants), f2s(total_immigrants)));
     }
 
     private String f2s(double v) throws Exception
