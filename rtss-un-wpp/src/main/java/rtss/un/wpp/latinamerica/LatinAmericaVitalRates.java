@@ -102,6 +102,7 @@ public class LatinAmericaVitalRates
         defineCountry("Панама", "Panama");
         defineCountry("Доминиканская республика", "Dominican Republic");
         defineCountry("Гондурас", "Honduras");
+        defineCountry("Уругвай", "Uruguay");
     }
     
     private void defineCountry(String rname, String ename)
