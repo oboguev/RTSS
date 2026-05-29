@@ -26,14 +26,14 @@ import rtss.util.Util;
 
 public class BuildSingleTable
 {
-    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title) throws Exception
+    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt) throws Exception
     {
         // exposure = null;
-        double[] qx = curve(bins, exposure, debug_title);
+        double[] qx = curve(bins, exposure, debug_title, modelMt);
         return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
     }
 
-    private static double[] curve(Bin[] bins, double[] exposure, String debug_title) throws Exception
+    private static double[] curve(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt) throws Exception
     {
         /*
          * Tried to use Osier library (see Sigurd Dyrting, "Osier : A Library for Demographic Calculations"

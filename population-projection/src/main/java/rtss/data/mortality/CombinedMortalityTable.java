@@ -20,6 +20,9 @@ public class CombinedMortalityTable
 
     protected Map<String, SingleMortalityTable> m = new HashMap<>();
     private boolean sealed = false;
+    
+    private static Map<String, CombinedMortalityTable> cacheForComplete = new HashMap<>();
+    private static Map<String, CombinedMortalityTable> cacheForTotal = new HashMap<>();
 
     protected CombinedMortalityTable()
     {
@@ -46,6 +49,34 @@ public class CombinedMortalityTable
         }
         
         return true;
+    }
+
+    static public synchronized CombinedMortalityTable loadCached(String path) throws Exception
+    {
+        CombinedMortalityTable cmt = cacheForComplete.get(path);
+
+        if (cmt == null)
+        {
+            cmt = load(path);
+            cmt.seal();
+            cacheForComplete.put(path, cmt);
+        }
+        
+        return cmt;
+    }
+
+    static public synchronized CombinedMortalityTable loadTotalCached(String path) throws Exception
+    {
+        CombinedMortalityTable cmt = cacheForTotal.get(path);
+
+        if (cmt == null)
+        {
+            cmt = loadTotal(path);
+            cmt.seal();
+            cacheForTotal.put(path, cmt);
+        }
+        
+        return cmt;
     }
 
     static public CombinedMortalityTable loadTotal(String path) throws Exception
@@ -274,9 +305,9 @@ public class CombinedMortalityTable
         return comment;
     }
 
-    public void comment(String comment)
+    public void comment(String comment) throws Exception
     {
-        // checkWritable();
+        checkWritable();
         this.comment = comment;
     }
 

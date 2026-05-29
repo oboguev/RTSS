@@ -59,12 +59,7 @@ public class MortalityTableADH
         return previous;
     }
 
-    public static CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
-    {
-        return getMortalityTable(area, "" + year);
-    }
-
-    public static synchronized CombinedMortalityTable getMortalityTable(Area area, String year) throws Exception
+    public static synchronized CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
     {
         String path = null;
         if (FilesVersion.get(area) == null || FilesVersion.get(area).length() == 0)
@@ -114,7 +109,7 @@ public class MortalityTableADH
     /*
      * Read data from Excel and generate the table with 1-year resolution
      */
-    private static CombinedMortalityTable get(Area area, String year) throws Exception
+    private static CombinedMortalityTable get(Area area, int year) throws Exception
     {
         String debug_title_male = String.format("АДХ-%s %s %s", area.toString(), year, Gender.MALE.name());
         String debug_title_female = String.format("АДХ-%s %s %s", area.toString(), year, Gender.FEMALE.name());
@@ -159,9 +154,21 @@ public class MortalityTableADH
 
         fix_40_44(female_mortality_bins, female_population_sum_bins);
 
-        cmt.setTable(Locality.TOTAL, Gender.MALE, BuildSingleTable.makeSingleTable(male_mortality_bins, p.asArray(Gender.MALE), debug_title_male));
-        cmt.setTable(Locality.TOTAL, Gender.FEMALE,
-                     BuildSingleTable.makeSingleTable(female_mortality_bins, p.asArray(Gender.FEMALE), debug_title_female));
+        CombinedMortalityTable modelMt = modelTableFor(area, year);
+
+        cmt.setTable(Locality.TOTAL,
+                     Gender.MALE,
+                     BuildSingleTable.makeSingleTable(male_mortality_bins,
+                                                      p.asArray(Gender.MALE),
+                                                      debug_title_male,
+                                                      modelTable(modelMt, Locality.TOTAL, Gender.MALE)));
+
+        cmt.setTable(Locality.TOTAL,
+                     Gender.FEMALE,
+                     BuildSingleTable.makeSingleTable(female_mortality_bins,
+                                                      p.asArray(Gender.FEMALE),
+                                                      debug_title_female,
+                                                      modelTable(modelMt, Locality.TOTAL, Gender.FEMALE)));
 
         double[] qx = new double[MAX_AGE + 1];
         for (int age = 0; age <= MAX_AGE; age++)
@@ -190,6 +197,67 @@ public class MortalityTableADH
         }
 
         return cmt;
+    }
+
+    private static SingleMortalityTable modelTable(CombinedMortalityTable mt, Locality locality, Gender gender) throws Exception
+    {
+        if (mt == null)
+            return null;
+        else
+            return mt.getSingleTable(locality, gender);
+    }
+    
+    /*
+     * Модельная таблица применяется для задания общей формы "хвоста" qx старших возрастов
+     */
+    private static CombinedMortalityTable modelTableFor(Area area, int year) throws Exception
+    {
+        if (area == Area.RSFSR && year >= 1954)
+        {
+            return CombinedMortalityTable.loadCached("RSFSR/1958-1959");
+        }
+        else if (year <= 1927)
+        {
+            return CombinedMortalityTable.loadCached("USSR/1926-1927");
+        }
+        else if (year > 1927 && year < 1938)
+        {
+            CombinedMortalityTable cmt1 = CombinedMortalityTable.loadCached("USSR/1926-1927");
+            CombinedMortalityTable cmt2 = CombinedMortalityTable.loadCached("USSR/1938-1939");
+            return CombinedMortalityTable.interpolate(cmt1, cmt2, weight(year, 1927, 1938));
+        }
+        else if (year == 1938 || year == 1939)
+        {
+            return CombinedMortalityTable.loadCached("USSR/1938-1939");
+        }
+        else if (year > 1939 && year < 1958)
+        {
+            CombinedMortalityTable cmt1 = CombinedMortalityTable.loadCached("USSR/1938-1939");
+            CombinedMortalityTable cmt2 = CombinedMortalityTable.loadCached("USSR/1958-1959");
+            return CombinedMortalityTable.interpolate(cmt1, cmt2, weight(year, 1939, 1958));
+        }
+        else if (year >= 1958)
+        {
+            return CombinedMortalityTable.loadCached("USSR/1958-1959");
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+    private static double weight(int year, int y1, int y2)
+    {
+        if (!(y2 > y1))
+            throw new IllegalArgumentException();
+
+        double y = year;
+        double w = (y - y1) / (y2 - y1);
+        if (w < 0)
+            w = 0;
+        if (w > 1)
+            w = 1;
+        return w;
     }
 
     /*
