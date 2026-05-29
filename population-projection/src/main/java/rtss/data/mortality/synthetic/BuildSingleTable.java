@@ -27,7 +27,8 @@ import rtss.util.Util;
 
 public class BuildSingleTable
 {
-    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt) throws Exception
+    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt)
+            throws Exception
     {
         // exposure = null;
         double[] qx = curve(bins, exposure, debug_title, modelMt);
@@ -162,29 +163,32 @@ public class BuildSingleTable
             }
         }
 
-        if (useTailModelTable)
+        for (Double beta : List.of(3.0, 1.5, 1.2, 1.0))
         {
-            int tailBinIndex = bins.length - 1;
-            
-            curve = OldAgeTailViaModelTable.applyStandardQxTailToBin(curve, 
-                                                                  bins, 
-                                                                  exposure, 
-                                                                  modelMt.qx(), 
-                                                                  tailBinIndex,
-                                                                  OldAgeTailViaModelTable.STANDARD_TAIL_BETA);                    
-
-            CurveVerifier.validate_means_allow_last_beless(curve, bins, exposure);
-
-            if (Util.True)
+            if (useTailModelTable)
             {
-                /*
-                 * Display yearly curve
-                 */
-                String title = "Yearly curve with model tail " + debug_title;
-                ViewCurve.view(title, bins, "qx", curve);
+                int tailBinIndex = bins.length - 1;
+
+                double[] curve2 = OldAgeTailViaModelTable.applyStandardQxTailToBin(curve,
+                                                                         bins,
+                                                                         exposure,
+                                                                         modelMt.qx(),
+                                                                         tailBinIndex,
+                                                                         beta);
+
+                CurveVerifier.validate_means_allow_last_beless(curve2, bins, exposure);
+
+                if (Util.True)
+                {
+                    /*
+                     * Display yearly curve
+                     */
+                    String title = "Yearly curve with model tail " + debug_title + " beta=" + beta;
+                    ViewCurve.view(title, bins, "qx", curve2);
+                }
             }
         }
-        
+
         return curve;
     }
 

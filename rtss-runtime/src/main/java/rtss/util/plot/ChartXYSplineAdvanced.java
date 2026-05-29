@@ -2,6 +2,8 @@ package rtss.util.plot;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,6 +125,41 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
         setVisible(true);
     }
 
+    /**
+     * Exports the chart as an image file.
+     *
+     * The exported chart is the same chart as the first visible UI tab:
+     * spline chart when {@code showSplinePane} is true, otherwise line chart.
+     *
+     * The image format is selected from the filename extension:
+     * {@code .png}, {@code .jpg}, or {@code .jpeg}.
+     */
+    public void exportImage(int cx, int cy, String fn) throws IOException
+    {
+        if (cx <= 0 || cy <= 0)
+            throw new IllegalArgumentException("Image dimensions must be positive");
+
+        if (fn == null || fn.trim().length() == 0)
+            throw new IllegalArgumentException("Output file name must not be empty");
+
+        JFreeChart jchart = new MyDisplayPanel(this, false).createExportChart();
+        File file = new File(fn);
+        String lower = fn.toLowerCase();
+
+        if (lower.endsWith(".png"))
+        {
+            ChartUtils.saveChartAsPNG(file, jchart, cx, cy);
+        }
+        else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))
+        {
+            ChartUtils.saveChartAsJPEG(file, jchart, cx, cy);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unsupported image extension; use .png, .jpg, or .jpeg: " + fn);
+        }
+    }
+
     static class MyDisplayPanel extends DisplayPanel
     {
         public static final long serialVersionUID = 1;
@@ -137,10 +174,17 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
          */
         public MyDisplayPanel(ChartXYSplineAdvanced chart)
         {
+            this(chart, true);
+        }
+
+        private MyDisplayPanel(ChartXYSplineAdvanced chart, boolean createSwingContent)
+        {
             super(new BorderLayout());
             this.chart = chart;
             this.data1 = chart.dataset;
-            add(createContent());
+
+            if (createSwingContent)
+                add(createContent());
         }
 
         /**
@@ -156,11 +200,10 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
         }
 
         /**
-         * Creates a chart based on the first dataset, with a fitted linear regression line.
+         * Creates the spline chart.
          */
-        private ChartPanel createChartPanel1()
+        private JFreeChart createChart1()
         {
-            // create plot
             NumberAxis xAxis = new NumberAxis(chart.xLabel);
             xAxis.setAutoRangeIncludesZero(false);
             NumberAxis yAxis = new NumberAxis(chart.yLabel);
@@ -183,21 +226,26 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
                 }
             }
 
-            // create and return the chart panel
             String title = chart.getTitle();
-            JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
-            addChart(chart);
-            ChartUtils.applyCurrentTheme(chart);
-            ChartPanel chartPanel = new ChartPanel(chart);
-            return chartPanel;
+            JFreeChart jchart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+            addChart(jchart);
+            ChartUtils.applyCurrentTheme(jchart);
+            return jchart;
         }
 
         /**
-         * Creates a chart based on the second dataset, with a fitted power regression line.
+         * Creates a panel for the spline chart.
          */
-        private ChartPanel createChartPanel2()
+        private ChartPanel createChartPanel1()
         {
-            // create subplot 1
+            return new ChartPanel(createChart1());
+        }
+
+        /**
+         * Creates the line chart.
+         */
+        private JFreeChart createChart2()
+        {
             NumberAxis xAxis = new NumberAxis(chart.xLabel);
             xAxis.setAutoRangeIncludesZero(false);
             NumberAxis yAxis = new NumberAxis(chart.yLabel);
@@ -220,13 +268,27 @@ public class ChartXYSplineAdvanced extends ApplicationFrame
                 }
             }
 
-            // create and return the chart panel
             String title = chart.getTitle();
-            JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
-            addChart(chart);
-            ChartUtils.applyCurrentTheme(chart);
-            ChartPanel chartPanel = new ChartPanel(chart);
-            return chartPanel;
+            JFreeChart jchart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+            addChart(jchart);
+            ChartUtils.applyCurrentTheme(jchart);
+            return jchart;
+        }
+
+        /**
+         * Creates a panel for the line chart.
+         */
+        private ChartPanel createChartPanel2()
+        {
+            return new ChartPanel(createChart2());
+        }
+
+        private JFreeChart createExportChart()
+        {
+            if (chart.showSplinePane)
+                return createChart1();
+            else
+                return createChart2();
         }
     }
 }

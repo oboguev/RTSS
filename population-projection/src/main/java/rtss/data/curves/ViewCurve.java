@@ -37,7 +37,7 @@ public class ViewCurve
                     curveTitle = "curve" + cnum;
                 curveTitles.add(curveTitle);
                 curveTitle = null;
-                
+
                 double[] y = (double[]) o;
                 curves.add(y);
 
@@ -56,7 +56,7 @@ public class ViewCurve
         double[] xxx = Bins.ppy_x(bins, ppy);
         ChartXYSplineAdvanced chart = new ChartXYSplineAdvanced(chartTitle, "x", "y").showSplinePane(false);
         chart.addSeries("bins", xxx, Bins.ppy_y(bins, ppy));
-        
+
         for (int k = 0; k < curves.size(); k++)
             chart.addSeries(curveTitles.get(k), xxx, curves.get(k));
 
