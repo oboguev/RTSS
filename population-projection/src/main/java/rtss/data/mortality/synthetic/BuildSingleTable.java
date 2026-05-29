@@ -166,19 +166,12 @@ public class BuildSingleTable
             }
         }
 
-        for (Double beta : List.of(3.0, 1.5, 1.2, 1.0))
+        for (Double beta : List.of(3.0, 1.5, 1.2, 1.0, 0.5))
         {
             if (useTailModelTable)
             {
-                int tailBinIndex = bins.length - 1;
-
-                double[] curve2 = OldAgeTailViaModelTable.applyStandardQxTailToBin(curve,
-                                                                         bins,
-                                                                         exposure,
-                                                                         modelMt.qx(),
-                                                                         tailBinIndex,
-                                                                         beta);
-
+                double[] curve2 = OldAgeTailViaModelTable.apply(curve, bins, exposure, modelMt.qx(), 70, beta);
+                        
                 CurveVerifier.validate_means_allow_last_beless(curve2, bins, exposure);
 
                 if (Util.True)
@@ -186,7 +179,7 @@ public class BuildSingleTable
                     /*
                      * Display yearly curve
                      */
-                    String title = "Yearly curve with model tail " + debug_title + " beta=" + beta;
+                    String title = "Yearly curve with model tail " + debug_title + " tail_age=" + 70 + " beta=" + beta;
                     ViewCurve.view(title, bins, "qx", curve2);
                     ViewCurve.exportImage(fn(title), IMAGE_CX, IMAGE_CY, title, bins, "qx", curve2);
                 }
