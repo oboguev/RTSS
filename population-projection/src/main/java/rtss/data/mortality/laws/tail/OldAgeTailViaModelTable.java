@@ -2,35 +2,11 @@ package rtss.data.mortality.laws.tail;
 
 import rtss.data.bin.Bin;
 
-public class OldAgeTailModelTable
+public class OldAgeTailViaModelTable
 {
     private static final double OLD_AGE_EPS = 1e-12;
 
     public static final double STANDARD_TAIL_BETA = 1.0;
-
-    private static double[] applyStandardQxTailToLastBin(
-            double[] curve,
-            Bin[] bins,
-            double[] exposure,
-            double[] standardQx) throws Exception
-    {
-
-        /*
-         * If you still append a fake bin after the real ADH last bin,
-         * then pass bins.length - 2 here instead.
-         *
-         * If there is no fake bin, bins.length - 1 is correct.
-         */
-        int tailBinIndex = bins.length - 1;
-
-        return applyStandardQxTailToBin(
-                                        curve,
-                                        bins,
-                                        exposure,
-                                        standardQx,
-                                        tailBinIndex,
-                                        STANDARD_TAIL_BETA);
-    }
 
     /*
      * beta = 1.0 means: use the standard table's old-age qx shape as-is.
