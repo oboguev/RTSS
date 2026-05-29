@@ -16,6 +16,7 @@ import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
 import rtss.data.mortality.laws.tail.OldAgeTail;
 import rtss.data.mortality.laws.tail.OldAgeTailModel;
+import rtss.data.mortality.laws.tail.OldAgeTailModelTable;
 import rtss.data.selectors.Gender;
 import rtss.external.Osier.OsierMortalityType;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
@@ -128,12 +129,13 @@ public class BuildSingleTable
          * Исправлять нужно с 70 или даже 65 лет.
          * Поэтому мы пока что запретили модельный хвост. 
          */
-        boolean useModelTail = Bins.lastBin(bins).widths_in_years >= 10 && Util.False;
+        boolean useTailModel = Bins.lastBin(bins).widths_in_years >= 10 && Util.False;
+        boolean useTailModelTable = Bins.lastBin(bins).widths_in_years >= 10 && modelMt != null && Util.True;
 
-        boolean allowFakeBin = !useModelTail || Util.True;
+        boolean allowFakeBin = (!useTailModel && !useTailModelTable) || Util.True;
         double[] curve = curve_pclm(bins, exposure, debug_title, allowFakeBin);
 
-        if (useModelTail)
+        if (useTailModel)
         {
             /*
              * GOMPERTZ даст более быстрый рост справа. 
@@ -160,6 +162,29 @@ public class BuildSingleTable
             }
         }
 
+        if (useTailModelTable)
+        {
+            int tailBinIndex = bins.length - 1;
+            
+            curve = OldAgeTailModelTable.applyStandardQxTailToBin(curve, 
+                                                                  bins, 
+                                                                  exposure, 
+                                                                  modelMt.qx(), 
+                                                                  tailBinIndex,
+                                                                  OldAgeTailModelTable.STANDARD_TAIL_BETA);                    
+
+            CurveVerifier.validate_means_allow_last_beless(curve, bins, exposure);
+
+            if (Util.True)
+            {
+                /*
+                 * Display yearly curve
+                 */
+                String title = "Yearly curve with model tail " + debug_title;
+                ViewCurve.view(title, bins, "qx", curve);
+            }
+        }
+        
         return curve;
     }
 

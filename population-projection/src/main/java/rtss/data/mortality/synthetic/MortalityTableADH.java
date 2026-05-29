@@ -214,16 +214,16 @@ public class MortalityTableADH
     {
         if (area == Area.RSFSR && year >= 1954)
         {
-            return CombinedMortalityTable.loadCached("RSFSR/1958-1959");
+            return CombinedMortalityTable.loadCached("mortality_tables/RSFSR/1958-1959");
         }
         else if (year <= 1927)
         {
-            return CombinedMortalityTable.loadCached("USSR/1926-1927");
+            return CombinedMortalityTable.loadCached("mortality_tables/USSR/1926-1927");
         }
         else if (year > 1927 && year < 1938)
         {
-            CombinedMortalityTable cmt1 = CombinedMortalityTable.loadCached("USSR/1926-1927");
-            CombinedMortalityTable cmt2 = CombinedMortalityTable.loadCached("USSR/1938-1939");
+            CombinedMortalityTable cmt1 = CombinedMortalityTable.loadCached("mortality_tables/USSR/1926-1927");
+            CombinedMortalityTable cmt2 = CombinedMortalityTable.loadCached("mortality_tables/USSR/1938-1939");
             return CombinedMortalityTable.interpolate(cmt1, cmt2, weight(year, 1927, 1938));
         }
         else if (year == 1938 || year == 1939)
@@ -232,13 +232,13 @@ public class MortalityTableADH
         }
         else if (year > 1939 && year < 1958)
         {
-            CombinedMortalityTable cmt1 = CombinedMortalityTable.loadCached("USSR/1938-1939");
-            CombinedMortalityTable cmt2 = CombinedMortalityTable.loadCached("USSR/1958-1959");
+            CombinedMortalityTable cmt1 = CombinedMortalityTable.loadCached("mortality_tables/USSR/1938-1939");
+            CombinedMortalityTable cmt2 = CombinedMortalityTable.loadCached("mortality_tables/USSR/1958-1959");
             return CombinedMortalityTable.interpolate(cmt1, cmt2, weight(year, 1939, 1958));
         }
         else if (year >= 1958)
         {
-            return CombinedMortalityTable.loadCached("USSR/1958-1959");
+            return CombinedMortalityTable.loadCached("mortality_tables/USSR/1958-1959");
         }
         else
         {
