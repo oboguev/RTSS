@@ -27,6 +27,9 @@ import rtss.util.Util;
 
 public class BuildSingleTable
 {
+    private static final int IMAGE_CX = 3435;
+    private static final int IMAGE_CY = 1341;
+    
     public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt)
             throws Exception
     {
@@ -185,6 +188,7 @@ public class BuildSingleTable
                      */
                     String title = "Yearly curve with model tail " + debug_title + " beta=" + beta;
                     ViewCurve.view(title, bins, "qx", curve2);
+                    ViewCurve.exportImage(fn(title), IMAGE_CX, IMAGE_CY, title, bins, "qx", curve2);
                 }
             }
         }
@@ -243,6 +247,7 @@ public class BuildSingleTable
              */
             String title = "PCLM yearly curve " + debug_title;
             ViewCurve.view(title, bins, "qx", yyy);
+            ViewCurve.exportImage(fn(title), IMAGE_CX, IMAGE_CY, title, bins, "qx", yyy);
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
@@ -623,5 +628,10 @@ public class BuildSingleTable
         }
 
         return Bins.bins(list);
+    }
+    
+    private static String fn(String title)
+    {
+        return "c:\\@\\pclm\\zzz\\" + title + ".png";
     }
 }

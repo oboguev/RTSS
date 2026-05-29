@@ -17,6 +17,18 @@ public class ViewCurve
 {
     public static void view(String chartTitle, Bin[] bins, Object... args) throws Exception
     {
+        ChartXYSplineAdvanced chart = chart(chartTitle, bins, args);
+        chart.display();
+    }
+
+    public static void exportImage(String fn, int cx, int cy, String chartTitle, Bin[] bins, Object... args) throws Exception
+    {
+        ChartXYSplineAdvanced chart = chart(chartTitle, bins, args);
+        chart.exportImage(cx, cy, fn);
+    }
+    
+    private static ChartXYSplineAdvanced chart(String chartTitle, Bin[] bins, Object... args) throws Exception
+    {
         List<String> curveTitles = new ArrayList<>();
         List<double[]> curves = new ArrayList<>();
 
@@ -59,7 +71,7 @@ public class ViewCurve
 
         for (int k = 0; k < curves.size(); k++)
             chart.addSeries(curveTitles.get(k), xxx, curves.get(k));
-
-        chart.display();
+        
+        return chart;
     }
 }
