@@ -117,7 +117,7 @@ public class MortalityTableGKS
         if (context.population != null)
             exposure = context.population.toArray(locality, gender);
         
-        SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, exposure, title);
+        SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, exposure, title, null);
         return mt;
     }
 }

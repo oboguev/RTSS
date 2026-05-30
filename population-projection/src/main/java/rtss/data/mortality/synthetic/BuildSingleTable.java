@@ -16,6 +16,7 @@ import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.laws.HeligmanPollard_R;
 import rtss.data.mortality.laws.tail.OldAgeTail;
 import rtss.data.mortality.laws.tail.OldAgeTailModel;
+import rtss.data.mortality.laws.tail.OldAgeTailViaModelTable;
 import rtss.data.selectors.Gender;
 import rtss.external.Osier.OsierMortalityType;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
@@ -26,14 +27,18 @@ import rtss.util.Util;
 
 public class BuildSingleTable
 {
-    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title) throws Exception
+    private static final int IMAGE_CX = 3435;
+    private static final int IMAGE_CY = 1341;
+    
+    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt)
+            throws Exception
     {
         // exposure = null;
-        double[] qx = curve(bins, exposure, debug_title);
+        double[] qx = curve(bins, exposure, debug_title, modelMt);
         return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
     }
 
-    private static double[] curve(Bin[] bins, double[] exposure, String debug_title) throws Exception
+    private static double[] curve(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt) throws Exception
     {
         /*
          * Tried to use Osier library (see Sigurd Dyrting, "Osier : A Library for Demographic Calculations"
@@ -128,12 +133,13 @@ public class BuildSingleTable
          * Исправлять нужно с 70 или даже 65 лет.
          * Поэтому мы пока что запретили модельный хвост. 
          */
-        boolean useModelTail = Bins.lastBin(bins).widths_in_years >= 10 && Util.False;
+        boolean useTailModel = Bins.lastBin(bins).widths_in_years >= 10 && Util.False;
+        boolean useTailModelTable = Bins.lastBin(bins).widths_in_years >= 10 && modelMt != null && Util.True;
 
-        boolean allowFakeBin = !useModelTail || Util.True;
+        boolean allowFakeBin = (!useTailModel && !useTailModelTable) || Util.True;
         double[] curve = curve_pclm(bins, exposure, debug_title, allowFakeBin);
 
-        if (useModelTail)
+        if (useTailModel)
         {
             /*
              * GOMPERTZ даст более быстрый рост справа. 
@@ -157,6 +163,26 @@ public class BuildSingleTable
                  */
                 String title = "Yearly curve with model tail " + debug_title;
                 ViewCurve.view(title, bins, "qx", curve);
+            }
+        }
+
+        for (Double beta : List.of(3.0, 1.5, 1.2, 1.0, 0.5))
+        {
+            if (useTailModelTable)
+            {
+                double[] curve2 = OldAgeTailViaModelTable.apply(curve, bins, exposure, modelMt.qx(), 70, beta);
+                        
+                CurveVerifier.validate_means_allow_last_beless(curve2, bins, exposure);
+
+                if (Util.True)
+                {
+                    /*
+                     * Display yearly curve
+                     */
+                    String title = "Yearly curve with model tail " + debug_title + " tail_age=" + 70 + " beta=" + beta;
+                    ViewCurve.view(title, bins, "qx", curve2);
+                    ViewCurve.exportImage(fn(title), IMAGE_CX, IMAGE_CY, title, bins, "qx", curve2);
+                }
             }
         }
 
@@ -214,6 +240,7 @@ public class BuildSingleTable
              */
             String title = "PCLM yearly curve " + debug_title;
             ViewCurve.view(title, bins, "qx", yyy);
+            ViewCurve.exportImage(fn(title), IMAGE_CX, IMAGE_CY, title, bins, "qx", yyy);
         }
 
         double[] yy = Bins.ppy2yearly(yyy, ppy);
@@ -594,5 +621,10 @@ public class BuildSingleTable
         }
 
         return Bins.bins(list);
+    }
+    
+    private static String fn(String title)
+    {
+        return "c:\\@\\pclm\\zzz\\" + title + ".png";
     }
 }
