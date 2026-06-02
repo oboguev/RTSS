@@ -17,6 +17,7 @@ import rtss.data.mortality.laws.HeligmanPollard_R;
 import rtss.data.mortality.laws.tail.OldAgeTail;
 import rtss.data.mortality.laws.tail.OldAgeTailModel;
 import rtss.data.mortality.laws.tail.OldAgeTailViaModelTable;
+import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.external.Osier.OsierMortalityType;
 import rtss.math.interpolate.ConstrainedCubicSplineInterpolator;
@@ -170,7 +171,7 @@ public class BuildSingleTable
         {
             if (useTailModelTable)
             {
-                double[] curve2 = OldAgeTailViaModelTable.apply(curve, bins, exposure, modelMt.qx(), 70, beta);
+                double[] curve2 = OldAgeTailViaModelTable.apply(curve, bins, exposure, modelMt.qx(), 70, Population.MAX_AGE, beta);
                         
                 CurveVerifier.validate_means_allow_last_beless(curve2, bins, exposure);
 
