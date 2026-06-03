@@ -1,0 +1,521 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>DecomposeCbrCdr</title>
+  </head>
+  <body>
+    <p data-start="0" data-end="200"><i>Можно ли составить алгоритм,
+        который берёт последовательность агрегированных взвешенных
+        "колверовских" по типу значений (CBR, CDR) для последовательных
+        периодов заданной длины (напр. пятилетней, но в общем случае с
+        переменной шириной интервалов) и восстанавливает гладкие годовые
+        значения CBR и CDR, так чтобы их взвешенное среднее для каждого
+        интервала сохранялось (как CSASRA сохраняет арифметическое
+        среднее), не прибегая при этом к данным о численности населения?
+      </i><i>Миграцию можно принять пренебрежимой.</i><i><br>
+        <br>
+      </i></p>
+    <hr width="100%" size="2">
+    <p data-start="0" data-end="200"><br>
+      Да, можно. Но это уже будет не просто CSASRA, а <strong
+        data-start="48" data-end="87">самосогласованный взвешенный
+        CSASRA</strong>, где веса не задаются извне, а выводятся из
+      самой восстановленной траектории CBR/CDR через естественный
+      прирост.</p>
+    <p data-start="202" data-end="221">Главная идея такая:</p>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub><mo>⋅</mo><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub></mrow></mfrac></mrow><annotation
+                encoding="application/x-tex">CBR_k=\frac{\sum_{t \in
+                I_k} w_t \cdot CBR_t}{\sum_{t \in I_k} w_t}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span></span><span class="base"><span
+              class="mord"><span class="mfrac"><span class="vlist-t
+                  vlist-t2"><span class="vlist-r"><span class="vlist"><span><span
+                          class="mord"><span class="mord"><span
+                              class="msupsub"><span class="vlist-t
+                                vlist-t2"><span class="vlist-r"><span
+                                    class="vlist"><span><span
+                                        class="sizing reset-size6 size3
+                                        mtight"><span class="mord
+                                          mathnormal mtight"></span></span></span></span><span
+                                    class="vlist-s">​</span></span><span
+                                  class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span><span
+                      class="vlist-s">​</span></span><span
+                    class="vlist-r"><span class="vlist"><span></span></span></span></span></span><span
+                class="mclose nulldelimiter"></span></span></span></span></span></span>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub><mo>⋅</mo><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub></mrow></mfrac></mrow><annotation
+                encoding="application/x-tex">CDR_k=\frac{\sum_{t \in
+                I_k} w_t \cdot CDR_t}{\sum_{t \in I_k} w_t}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span></span><span class="base"><span
+              class="mord"><span class="mfrac"><span class="vlist-t
+                  vlist-t2"><span class="vlist-r"><span class="vlist-s"></span></span><span
+                    class="vlist-r"><span class="vlist"><span></span></span></span></span></span><span
+                class="mclose nulldelimiter"></span></span></span></span></span></span>
+    <p data-start="373" data-end="593">где <span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>k</mi></msub></mrow><annotation
+                encoding="application/x-tex">I_k</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span
+                class="msupsub"><span class="vlist-t vlist-t2"><span
+                    class="vlist-r"><span class="vlist"><span><span
+                          class="sizing reset-size6 size3 mtight"><span
+                            class="mord mathnormal mtight"></span></span></span></span><span
+                      class="vlist-s">​</span></span><span
+                    class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>
+      — пятилетка или иной интервал, а <span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub></mrow><annotation
+                encoding="application/x-tex">w_t</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span
+                class="msupsub"><span class="vlist-t vlist-t2"><span
+                    class="vlist-r"><span class="vlist"><span><span
+                          class="pstrut"></span></span></span><span
+                      class="vlist-s">​</span></span><span
+                    class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>
+      — годовая экспозиция населения. Но внешних <span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub></mrow><annotation
+                encoding="application/x-tex">w_t</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span
+                class="msupsub"><span class="vlist-t vlist-t2"><span
+                    class="vlist-r"><span class="vlist"><span><span
+                          class="pstrut"></span></span></span><span
+                      class="vlist-s">​</span></span><span
+                    class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>
+      у нас нет. Если миграцией пренебречь, то относительные веса можно
+      восстановить из самих годовых CBR/CDR, потому что:</p>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo>=</mo><mfrac><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub><mo>−</mo><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mn>1000</mn></mfrac></mrow><annotation
+                encoding="application/x-tex">r_t =
+                \frac{CBR_t-CDR_t}{1000}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>задаёт
+    естественный прирост населения.
+    <p data-start="673" data-end="793">Абсолютный масштаб населения не
+      нужен: можно положить <span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mn>0</mn></msub><mo>=</mo><mn>1</mn></mrow><annotation
+                encoding="application/x-tex">P_0=1</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span></span><span class="base"><span
+              class="mord"></span></span></span></span>. Для взвешенных
+      средних важны только относительные веса.</p>
+    <h2 data-section-id="1t3khrh" data-start="795" data-end="814">Базовый
+      алгоритм</h2>
+    <p data-start="816" data-end="860">Пусть на входе есть
+      агрегированные значения:</p>
+    <blockquote>
+      <pre class="overflow-visible! px-0!" data-start="862" data-end="967"><div class="relative w-full mt-4 mb-1"><div class=""><div class="contents"><div class="relative"><div class="h-full min-h-0 min-w-0"><div class="h-full min-h-0 min-w-0"><div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl"><div class="h-full w-full border-radius-3xl bg-token-bg-elevated-secondary corner-superellipse/1.1 overflow-clip rounded-3xl lxnfua_clipPathFallback"><div class="relative"><div class="pe-11 pt-3"><div class="relative z-0 flex max-w-full"><div id="code-block-viewer" dir="ltr" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼd ͼr"><div class="cm-scroller"><pre class="cm-content q9tKkq_readonly m-0"><code><span>1895-1899: CBR = B0, CDR = D0</span><br><span>1900-1904: CBR = B1, CDR = D1</span><br><span>1905-1909: CBR = B2, CDR = D2</span><br><span>...</span></code></pre></div></div></div></div></div></div></div></div></div></div></div></div></div></pre>
+    </blockquote>
+    <p data-start="969" data-end="989">и ширины интервалов:</p>
+    <blockquote>
+      <pre class="overflow-visible! px-0!" data-start="991" data-end="1015"><div class="relative w-full mt-4 mb-1"><div class=""><div class="contents"><div class="relative"><div class="h-full min-h-0 min-w-0"><div class="h-full min-h-0 min-w-0"><div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl"><div class="h-full w-full border-radius-3xl bg-token-bg-elevated-secondary corner-superellipse/1.1 overflow-clip rounded-3xl lxnfua_clipPathFallback"><div class="relative"><div class="pe-11 pt-3"><div class="relative z-0 flex max-w-full"><div id="code-block-viewer" dir="ltr" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼd ͼr"><div class="cm-scroller"><pre class="cm-content q9tKkq_readonly m-0"><code><span>5, 5, 5, ...</span></code></pre></div></div></div></div></div></div></div></div></div></div></div></div></div></pre>
+    </blockquote>
+    <p data-start="1017" data-end="1039">или переменные ширины:</p>
+    <blockquote>
+      <pre class="overflow-visible! px-0!" data-start="1041" data-end="1068"><div class="relative w-full mt-4 mb-1"><div class=""><div class="contents"><div class="relative"><div class="h-full min-h-0 min-w-0"><div class="h-full min-h-0 min-w-0"><div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl"><div class="h-full w-full border-radius-3xl bg-token-bg-elevated-secondary corner-superellipse/1.1 overflow-clip rounded-3xl lxnfua_clipPathFallback"><div class="relative"><div class="pe-11 pt-3"><div class="relative z-0 flex max-w-full"><div id="code-block-viewer" dir="ltr" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼd ͼr"><div class="cm-scroller"><pre class="cm-content q9tKkq_readonly m-0"><code><span>3, 7, 5, 4, ...</span></code></pre></div></div></div></div></div></div></div></div></div></div></div></div></div></pre>
+    </blockquote>
+    <p data-start="1070" data-end="1079">Алгоритм:</p>
+    <ol data-start="1081" data-end="1685">
+      <li data-section-id="1vm8egx" data-start="1081" data-end="1121">
+        Развернуть интервалы в годовую сетку.
+        <br>
+        <br>
+      </li>
+      <li data-section-id="1bcelee" data-start="1123" data-end="1260">
+        Получить начальное приближение годовых <span class="katex"><span
+            class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">CBR_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span></span></span></span>и <span
+          class="katex"><span class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">CDR_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span></span></span></span>.<br
+          data-start="1187" data-end="1190">
+        Например, обычным CSASRA, который сохраняет арифметические
+        средние.
+        <br>
+        <br>
+      </li>
+      <li data-section-id="g7rs17" data-start="1262" data-end="1365">
+        По текущим годовым <span class="katex"><span
+            class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">CBR_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span><span class="mord"><span
+                  class="msupsub"><span class="vlist-t vlist-t2"><span
+                      class="vlist-r"><span class="vlist-s"></span></span><span
+                      class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>
+        и <span class="katex"><span class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">CDR_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span><span class="mord mathnormal"></span></span></span></span>
+        вычислить условную траекторию населения, положив <span
+          class="katex"><span class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mn>0</mn></msub><mo>=</mo><mn>1</mn></mrow><annotation
+                  encoding="application/x-tex">P_0=</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="mord"></span></span></span></span>.
+        <br>
+        <br>
+      </li>
+      <li data-section-id="17ckfsq" data-start="1367" data-end="1449">
+        Из этой траектории получить веса <span class="katex"><span
+            class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">w_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span><span class="mord"><span
+                  class="msupsub"><span class="vlist-t vlist-t2"><span
+                      class="vlist-r"><span class="vlist"><span><span
+                            class="pstrut"></span></span></span><span
+                        class="vlist-s">​</span></span><span
+                      class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>,
+        например как среднегодовое население.
+        <br>
+        <br>
+      </li>
+      <li data-section-id="csh3t6" data-start="1451" data-end="1591">
+        Применить взвешенный аналог CSASRA: после сглаживания внутри
+        каждого интервала нормировать не на арифметическое среднее, а на
+        взвешенное.
+        <br>
+        <br>
+      </li>
+      <li data-section-id="tkaji4" data-start="1593" data-end="1656">
+        Пересчитать <span class="katex"><span class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">P_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span><span class="mord"><span
+                  class="msupsub"><span class="vlist-t vlist-t2"><span
+                      class="vlist-r"><span class="vlist"><span><span
+                            class="pstrut"></span></span></span><span
+                        class="vlist-s">​</span></span><span
+                      class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>
+        и <span class="katex"><span class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">w_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span><span class="mord"><span
+                  class="msupsub"><span class="vlist-t vlist-t2"><span
+                      class="vlist-r"><span class="vlist"><span><span
+                            class="pstrut"></span></span></span><span
+                        class="vlist-s">​</span></span><span
+                      class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>
+        по новым <span class="katex"><span class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">CBR_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span><span class="mord"><span
+                  class="msupsub"><span class="vlist-t vlist-t2"><span
+                      class="vlist-r"><span class="vlist"><span><span
+                            class="sizing reset-size6 size3 mtight"><span
+                              class="mord mathnormal mtight"></span></span></span></span><span
+                        class="vlist-s">​</span></span><span
+                      class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>,
+        <span class="katex"><span class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">CDR_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span></span></span></span>.
+        <br>
+        <br>
+      </li>
+      <li data-section-id="9v6ra1" data-start="1658" data-end="1685">
+        Повторять до сходимости.
+      </li>
+    </ol>
+    <p data-start="1687" data-end="1728">Иными словами, это fixed-point
+      iteration:</p>
+    <blockquote>
+      <pre class="overflow-visible! px-0!" data-start="1730" data-end="1816"><div class="relative w-full mt-4 mb-1"><div class=""><div class="contents"><div class="relative"><div class="h-full min-h-0 min-w-0"><div class="h-full min-h-0 min-w-0"><div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl"><div class="h-full w-full border-radius-3xl bg-token-bg-elevated-secondary corner-superellipse/1.1 overflow-clip rounded-3xl lxnfua_clipPathFallback"><div class="relative"><div class="pe-11 pt-3"><div class="relative z-0 flex max-w-full"><div id="code-block-viewer" dir="ltr" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼd ͼr"><div class="cm-scroller"><pre class="cm-content q9tKkq_readonly m-0"><code><span>CBR/CDR -&gt; weights -&gt; weighted CSASRA -&gt; new CBR/CDR -&gt; new weights -&gt; ...</span></code></pre></div></div></div></div></div></div></div></div></div></div></div></div></div></pre>
+    </blockquote>
+    <h2 data-section-id="1nv4sai" data-start="1818" data-end="1863">Как
+      считать веса без численности населения</h2>
+    <p data-start="1865" data-end="1924">Самый простой вариант — через
+      годовой естественный прирост:</p>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>n</mi><mi>t</mi></msub><mo>=</mo><mfrac><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub><mo>−</mo><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mn>1000</mn></mfrac></mrow><annotation
+                encoding="application/x-tex">n_t =
+                \frac{CBR_t-CDR_t}{1000}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>Если
+    пользоваться непрерывной экспоненциальной моделью внутри года:
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>P</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>P</mi><mi>t</mi></msub><msup><mi>e</mi><msub><mi>n</mi><mi>t</mi></msub></msup></mrow><annotation
+                encoding="application/x-tex">P_{t+1}=P_t e^{n_t}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>а
+    годовую экспозицию можно взять как:
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub><mo>=</mo><mrow><mo
+                    fence="true">{</mo><mtable rowspacing="0.36em"
+                    columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle
+                          displaystyle="false" scriptlevel="0"><mrow><msub><mi>P</mi><mi>t</mi></msub><mo>⋅</mo><mfrac><mrow><msup><mi>e</mi><msub><mi>n</mi><mi>t</mi></msub></msup><mo>−</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>t</mi></msub></mfrac><mo
+                              separator="true">,</mo></mrow></mstyle></mtd><mtd><mstyle
+                          displaystyle="false" scriptlevel="0"><mrow><msub><mi>n</mi><mi>t</mi></msub><mo
+                              mathvariant="normal">≠</mo><mn>0</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle
+                          displaystyle="false" scriptlevel="0"><mrow><msub><mi>P</mi><mi>t</mi></msub><mo
+                              separator="true">,</mo></mrow></mstyle></mtd><mtd><mstyle
+                          displaystyle="false" scriptlevel="0"><mrow><msub><mi>n</mi><mi>t</mi></msub><mo>=</mo><mn>0</mn></mrow></mstyle></mtd></mtr></mtable></mrow></mrow><annotation
+                encoding="application/x-tex">w_t =
+                \begin{cases}
+                P_t \cdot \frac{e^{n_t}-1}{n_t}, &amp; n_t \ne 0 \\
+                P_t, &amp; n_t = 0
+                \end{cases}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>При
+    малых <span class="katex"><span class="katex-mathml"><math
+          xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mi>t</mi></msub></mrow><annotation
+              encoding="application/x-tex">n_t</annotation></semantics></math></span><span
+        class="katex-html" aria-hidden="true"><span class="base"><span
+            class="strut"></span><span class="mord"><span
+              class="msupsub"><span class="vlist-t vlist-t2"><span
+                  class="vlist-r"><span class="vlist"><span><span
+                        class="pstrut"></span></span></span><span
+                    class="vlist-s">​</span></span><span class="vlist-r"><span
+                    class="vlist"><span></span></span></span></span></span></span></span></span></span>
+    это практически то же самое, что среднегодовое население.
+    <p data-start="2278" data-end="2392">Если хочется ближе к
+      демографической практике “mid-year population”, можно использовать
+      более простое приближение:</p>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub><mo>≈</mo><msub><mi>P</mi><mi>t</mi></msub><mo>⋅</mo><msup><mi>e</mi><mrow><msub><mi>n</mi><mi>t</mi></msub><mi
+                      mathvariant="normal">/</mi><mn>2</mn></mrow></msup></mrow><annotation
+                encoding="application/x-tex">w_t \approx P_t \cdot
+                e^{n_t/2}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>или
+    дискретную midpoint-формулу:
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>P</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>P</mi><mi>t</mi></msub><mo>⋅</mo><mfrac><mrow><mn>1</mn><mo>+</mo><msub><mi>n</mi><mi>t</mi></msub><mi
+                      mathvariant="normal">/</mi><mn>2</mn></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>n</mi><mi>t</mi></msub><mi
+                      mathvariant="normal">/</mi><mn>2</mn></mrow></mfrac></mrow><annotation
+                encoding="application/x-tex">P_{t+1}=P_t \cdot
+                \frac{1+n_t/2}{1-n_t/2}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span></span></span></span></span><span
+      class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>P</mi><mi>t</mi></msub><mo>+</mo><msub><mi>P</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation
+                encoding="application/x-tex">w_t=\frac{P_t+P_{t+1}}{2}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>Для
+    CBR/CDR порядка 30–50 на тысячу и CDR порядка 20–40 на тысячу
+    различия между этими вариантами будут малы.
+    <h2 data-section-id="bk0wi" data-start="2660" data-end="2703">Взвешенная
+      нормализация внутри интервала</h2>
+    <p data-start="2705" data-end="2777">Обычный CSASRA, грубо говоря,
+      после сглаживания делает внутри интервала:</p>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>x</mi><mi>t</mi></msub><mo>←</mo><msub><mi>x</mi><mi>t</mi></msub><mo>⋅</mo><mfrac><msub><mi>X</mi><mi>k</mi></msub><msub><mover
+                      accent="true"><mi>x</mi><mo>ˉ</mo></mover><mi>k</mi></msub></mfrac></mrow><annotation
+                encoding="application/x-tex">x_t \leftarrow x_t \cdot
+                \frac{X_k}{\bar{x}_k}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>где
+    <span class="katex"><span class="katex-mathml"><math
+          xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover
+                  accent="true"><mi>x</mi><mo>ˉ</mo></mover><mi>k</mi></msub></mrow><annotation
+              encoding="application/x-tex">\bar{x}_k</annotation></semantics></math></span><span
+        class="katex-html" aria-hidden="true"><span class="base"><span
+            class="strut"></span><span class="mord"><span class="mord
+              accent"><span class="vlist-t"><span class="vlist-r"><span
+                    class="vlist"><span><span class="pstrut"></span></span><span><span
+                        class="pstrut"></span></span></span></span></span></span><span
+              class="msupsub"><span class="vlist-t vlist-t2"><span
+                  class="vlist-r"><span class="vlist"><span><span
+                        class="pstrut"></span></span></span><span
+                    class="vlist-s">​</span></span><span class="vlist-r"><span
+                    class="vlist"><span></span></span></span></span></span></span></span></span></span>
+    — арифметическое среднее восстановленных значений внутри интервала.
+    <p data-start="2920" data-end="2965">Во взвешенном варианте нужно
+      заменить это на:</p>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>x</mi><mi>t</mi></msub><mo>←</mo><msub><mi>x</mi><mi>t</mi></msub><mo>⋅</mo><mfrac><msub><mi>X</mi><mi>k</mi></msub><msubsup><mover
+                      accent="true"><mi>x</mi><mo>ˉ</mo></mover><mi>k</mi><mrow><mo
+                        stretchy="false">(</mo><mi>w</mi><mo
+                        stretchy="false">)</mo></mrow></msubsup></mfrac></mrow><annotation
+                encoding="application/x-tex">x_t \leftarrow x_t \cdot
+                \frac{X_k}{\bar{x}^{(w)}_k}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>где
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mover
+                    accent="true"><mi>x</mi><mo>ˉ</mo></mover><mi>k</mi><mrow><mo
+                      stretchy="false">(</mo><mi>w</mi><mo
+                      stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub><msub><mi>x</mi><mi>t</mi></msub></mrow><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub></mrow></mfrac></mrow><annotation
+                encoding="application/x-tex">\bar{x}^{(w)}_k=\frac{\sum_{t
+                \in I_k} w_t x_t}{\sum_{t \in I_k} w_t}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                accent"><span class="vlist-t"><span class="vlist-r"><span
+                      class="vlist"><span><span class="pstrut"></span><span
+                          class="mord mathnormal"></span></span></span></span></span></span></span></span></span></span></span>То
+    есть для CBR:
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub><mo>←</mo><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub><mo>⋅</mo><mfrac><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>k</mi></msub></mrow><mfrac><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mrow><munder><mo>∑</mo><mrow><mi>t</mi><mo>∈</mo><msub><mi>I</mi><mi>k</mi></msub></mrow></munder><msub><mi>w</mi><mi>t</mi></msub></mrow></mfrac></mfrac></mrow><annotation
+                encoding="application/x-tex">CBR_t \leftarrow CBR_t
+                \cdot \frac{CBR_k}{\frac{\sum_{t \in I_k} w_t
+                CBR_t}{\sum_{t \in I_k} w_t}}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord mathnormal"></span></span></span></span></span>и
+    аналогично для CDR.
+    <p data-start="3256" data-end="3391">Важно: <strong
+        data-start="3263" data-end="3310">веса должны быть одни и те же
+        для CBR и CDR</strong>, потому что denominator у обоих
+      коэффициентов — одно и то же население/exposure.</p>
+    <h2 data-section-id="1ccmsz4" data-start="3393" data-end="3418">Что
+      именно сохраняется</h2>
+    <p data-start="3420" data-end="3455">После сходимости будет
+      выполняться:</p>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><mfrac><mrow><mo>∑</mo><msub><mi>w</mi><mi>t</mi></msub><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mrow><mo>∑</mo><msub><mi>w</mi><mi>t</mi></msub></mrow></mfrac></mrow><annotation
+                encoding="application/x-tex">CBR_k = \frac{\sum w_t
+                CBR_t}{\sum w_t}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span></span></span></span></span><span
+      class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><mfrac><mrow><mo>∑</mo><msub><mi>w</mi><mi>t</mi></msub><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mrow><mo>∑</mo><msub><mi>w</mi><mi>t</mi></msub></mrow></mfrac></mrow><annotation
+                encoding="application/x-tex">CDR_k = \frac{\sum w_t
+                CDR_t}{\sum w_t}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord mathnormal"></span></span></span></span></span>Следовательно,
+    автоматически сохраняется и периодный естественный прирост:
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>k</mi></msub><mo>−</mo><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><mfrac><mrow><mo>∑</mo><msub><mi>w</mi><mi>t</mi></msub><mo
+                      stretchy="false">(</mo><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub><mo>−</mo><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub><mo
+                      stretchy="false">)</mo></mrow><mrow><mo>∑</mo><msub><mi>w</mi><mi>t</mi></msub></mrow></mfrac></mrow><annotation
+                encoding="application/x-tex">CBR_k-CDR_k=
+                \frac{\sum w_t(CBR_t-CDR_t)}{\sum w_t}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord mathnormal"></span></span></span></span></span>То
+    есть если вы потом построите условные births/deaths:
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>B</mi><mi>t</mi></msub><mo>=</mo><msub><mi>w</mi><mi>t</mi></msub><mo>⋅</mo><mfrac><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mn>1000</mn></mfrac></mrow><annotation
+                encoding="application/x-tex">B_t = w_t \cdot
+                \frac{CBR_t}{1000}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span></span></span></span></span><span
+      class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>D</mi><mi>t</mi></msub><mo>=</mo><msub><mi>w</mi><mi>t</mi></msub><mo>⋅</mo><mfrac><mrow><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>t</mi></msub></mrow><mn>1000</mn></mfrac></mrow><annotation
+                encoding="application/x-tex">D_t = w_t \cdot
+                \frac{CDR_t}{1000}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span><br>
+    то внутри каждого интервала их отношение к exposure будет давать
+    исходные колверовские CBR/CDR.
+    <h2 data-section-id="1mgftqp" data-start="3924" data-end="3944">Упрощённая
+      версия</h2>
+    <p data-start="3946" data-end="3998">Можно сделать и более простой
+      алгоритм без итераций.</p>
+    <ol data-start="4000" data-end="4047">
+      <li data-section-id="16mzeuu" data-start="4000" data-end="4047">
+        Для каждого агрегированного интервала взять:
+      </li>
+    </ol>
+    <span class="katex-display"><span class="katex"><span
+          class="katex-mathml"><math
+            xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>n</mi><mi>k</mi></msub><mo>=</mo><mfrac><mrow><mi>C</mi><mi>B</mi><msub><mi>R</mi><mi>k</mi></msub><mo>−</mo><mi>C</mi><mi>D</mi><msub><mi>R</mi><mi>k</mi></msub></mrow><mn>1000</mn></mfrac></mrow><annotation
+                encoding="application/x-tex">n_k=\frac{CBR_k-CDR_k}{1000}</annotation></semantics></math></span><span
+          class="katex-html" aria-hidden="true"><span class="base"><span
+              class="strut"></span><span class="mord"><span class="mord
+                mathnormal"></span></span></span></span></span></span>Внутри
+    интервала считать, что население растёт с постоянным <span
+      class="katex"><span class="katex-mathml"><math
+          xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mi>k</mi></msub></mrow><annotation
+              encoding="application/x-tex">n_k</annotation></semantics></math></span><span
+        class="katex-html" aria-hidden="true"><span class="base"><span
+            class="strut"></span><span class="mord"><span class="mord
+              mathnormal">n</span><span class="msupsub"><span
+                class="vlist-t vlist-t2"><span class="vlist-r"><span
+                    class="vlist"><span><span class="pstrut"></span><span
+                        class="sizing reset-size6 size3 mtight"><span
+                          class="mord mathnormal mtight">k</span></span></span></span><span
+                    class="vlist-s">​</span></span><span class="vlist-r"><span
+                    class="vlist"><span></span></span></span></span></span></span></span></span></span>.
+    <ol start="2" data-start="4085" data-end="4259">
+      <li data-section-id="92hj7r" data-start="4158" data-end="4207">
+        Получить приблизительные годовые веса <span class="katex"><span
+            class="katex-mathml"><math
+              xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>t</mi></msub></mrow><annotation
+                  encoding="application/x-tex">w_t</annotation></semantics></math></span><span
+            class="katex-html" aria-hidden="true"><span class="base"><span
+                class="strut"></span><span class="mord"><span
+                  class="msupsub"><span class="vlist-t vlist-t2"><span
+                      class="vlist-r"><span class="vlist"><span><span
+                            class="pstrut"></span></span></span><span
+                        class="vlist-s">​</span></span><span
+                      class="vlist-r"><span class="vlist"><span></span></span></span></span></span></span></span></span></span>.
+      </li>
+      <li data-section-id="s8k75x" data-start="4209" data-end="4259">
+        Один раз применить weighted-CSASRA к CBR и CDR.
+      </li>
+    </ol>
+    <p data-start="4261" data-end="4467">Это уже будет лучше, чем
+      арифметическое сохранение средних. Но самосогласованная
+      итерационная версия концептуально чище, потому что годовые веса
+      будут соответствовать именно восстановленным годовым CBR/CDR.</p>
+    <h2 data-section-id="uvud45" data-start="4469" data-end="4483">Ограничения</h2>
+    <p data-start="4485" data-end="4739">Строго говоря, без численности
+      населения нельзя восстановить <strong data-start="4546"
+        data-end="4558">реальные</strong> колверовские denominators.
+      Можно восстановить только <strong data-start="4612"
+        data-end="4669">внутренне согласованную условную траекторию
+        населения</strong>, заданную гипотезой нулевой миграции и
+      выбранной формулой экспозиции.</p>
+    <p data-start="4741" data-end="4761">Поэтому ответ такой:</p>
+    <p data-start="4763" data-end="4951"><strong data-start="4763"
+        data-end="4796">Да, алгоритм составить можно.</strong><br
+        data-start="4796" data-end="4799">
+      Но он будет восстанавливать не “истинные” веса Колвера, а веса,
+      эндогенно выводимые из восстановленных CBR/CDR при предположении
+      пренебрежимой миграции.</p>
+    <p data-start="4953" data-end="5251" data-is-last-node=""
+      data-is-only-node="">Для ваших целей это, вероятно, вполне
+      подходящий вариант. Особенно если речь идёт о пятилетках: за 5 лет
+      относительные веса обычно меняются не настолько сильно, чтобы
+      результат радикально отличался от обычного CSASRA. Но формально
+      это будет правильнее, чем сохранять простое арифметическое
+      среднее.</p>
+  </body>
+</html>
