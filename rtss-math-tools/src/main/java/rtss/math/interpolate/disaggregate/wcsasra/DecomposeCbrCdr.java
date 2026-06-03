@@ -20,6 +20,11 @@ import rtss.data.bin.Bin;
  *   n[t] = (cbr[t] - cdr[t]) / 1000
  *
  * assuming negligible migration and arbitrary initial population P0 = 1.
+ * 
+ * **********************************************************************
+ * 
+ * Для пятилеток брать sigma в диапазоне 0.3 - 0.5 - 1.25 - 1.5.
+ * 
  */
 public class DecomposeCbrCdr
 {
