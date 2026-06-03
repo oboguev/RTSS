@@ -15,7 +15,7 @@ import rtss.util.Util;
  * 
  * Input data on the clipboard is a sequence of lines: 
  *  
- *      sigma    1.25   # smoothing sigma    
+ *      sigma    0.3       # smoothing sigma    
  *      year-year value
  *      year-year value
  *      year      value
