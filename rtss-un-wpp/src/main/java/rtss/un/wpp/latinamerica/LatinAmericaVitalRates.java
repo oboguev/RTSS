@@ -21,7 +21,8 @@ public class LatinAmericaVitalRates
     {
         try (WPP wpp = new WPP2024())
         {
-            new LatinAmericaVitalRates().do_main(wpp);
+            new LatinAmericaVitalRates().print_quinquennial(wpp);
+            // new LatinAmericaVitalRates().print_yearly(wpp);
         }
         catch (Throwable ex)
         {
@@ -29,60 +30,60 @@ public class LatinAmericaVitalRates
             ex.printStackTrace();
         }
     }
-    
-    private void do_main(WPP wpp) throws Exception
+
+    @SuppressWarnings("unused")
+    private void print_quinquennial(WPP wpp) throws Exception
     {
         this.wpp = wpp;
-        
+
         if (Util.False)
         {
             for (String s : wpp.listCountries())
                 Util.out(s);
         }
-        
+
         defineCountries();
-        
+
         show_rate("Crude birth rates", "CBR");
         show_rate("Crude death rates", "CDR");
         show_rate("Total fertility rates", "TFR");
         show_rate("Net reproduction rates", "NRR");
-        
+
         show_population(1950, 2000, 5);
     }
-    
+
     private void show_rate(String ratePrintableName, String rateCode) throws Exception
     {
         Util.out("");
         Util.out("==================== " + ratePrintableName + " ====================");
         show_rates_header();
-        
+
         for (String rname : Countries)
         {
             String ename = rc2ec.get(rname);
             show_rates(rname, ename, rateCode);
         }
     }
-    
+
     private void show_population(int y1, int y2, int ystep) throws Exception
     {
         Util.out("");
         Util.out("==================== Население на начало года ====================");
         show_population_header(y1, y2, ystep);
-        
+
         for (String rname : Countries)
         {
             String ename = rc2ec.get(rname);
             show_population(rname, ename, y1, y2, ystep);
         }
     }
-    
 
     /* ======================================================================================== */
-    
+
     private WPP wpp;
     private final List<String> Countries = new ArrayList<>();
-    private final Map<String,String> rc2ec = new HashMap<>();
-    
+    private final Map<String, String> rc2ec = new HashMap<>();
+
     private void defineCountries()
     {
         defineCountry("Венесуэла", "Venezuela (Bolivarian Republic of)");
@@ -104,7 +105,7 @@ public class LatinAmericaVitalRates
         defineCountry("Гондурас", "Honduras");
         defineCountry("Уругвай", "Uruguay");
     }
-    
+
     private void defineCountry(String rname, String ename)
     {
         Countries.add(rname);
@@ -112,40 +113,40 @@ public class LatinAmericaVitalRates
     }
 
     /* ======================================================================================== */
-    
+
     private void show_rates_header() throws Exception
     {
         StringBuilder sb = new StringBuilder("страна");
 
         for (int year = 1950; year < 2020; year += 5)
             sb.append(String.format(",%d-%d", year, year + 4));
-        
+
         Util.out(sb.toString());
     }
-    
+
     private void show_rates(String rname, String ename, String which) throws Exception
     {
         StringBuilder sb = new StringBuilder(rname);
 
         for (int year = 1950; year < 2020; year += 5)
             sb.append("," + rate(ename, year, year + 4, which));
-        
+
         Util.out(sb.toString());
     }
-    
+
     private String rate(String ename, int year1, int year2, String which) throws Exception
     {
         Map<Integer, Map<String, Object>> cdata = wpp.forCountry(ename);
-        
+
         double sum = 0;
         int nyears = 0;
-        
+
         for (int year = year1; year <= year2; year++)
         {
             Map<String, Object> ydata = cdata.get(year);
             if (ydata == null)
                 throw new Exception("Missing data");
-            
+
             boolean found = false;
 
             for (String key : ydata.keySet())
@@ -179,13 +180,13 @@ public class LatinAmericaVitalRates
                     sum += ExcelRC.asRequiredDouble(ydata.get(key));
                 }
             }
-            
+
             if (!found)
                 throw new Exception("Missing data");
 
             nyears++;
         }
-        
+
         return String.format("%.2f", sum / nyears);
     }
 
@@ -197,23 +198,23 @@ public class LatinAmericaVitalRates
 
         for (int year = y1; year <= y2; year += ystep)
             sb.append(String.format(",%d", year));
-        
+
         Util.out(sb.toString());
     }
 
     private void show_population(String rname, String ename, int y1, int y2, int ystep) throws Exception
     {
         StringBuilder sb = new StringBuilder(rname);
-        
+
         Map<Integer, Map<String, Object>> cdata = wpp.forCountry(ename);
         if (cdata == null)
             throw new Exception("Missing data");
 
         for (int year = y1; year <= y2; year += ystep)
             sb.append("," + population(cdata, year));
-        
+
         Util.out(sb.toString());
-        
+
     }
 
     private String population(Map<Integer, Map<String, Object>> cdata, int year) throws Exception
@@ -236,10 +237,65 @@ public class LatinAmericaVitalRates
                 value = Math.round(dvalue);
             }
         }
-        
+
         if (!found)
             throw new Exception("Missing data");
-        
+
         return String.format("%d", value);
+    }
+
+    /* ======================================================================================== */
+
+    @SuppressWarnings("unused")
+    private void print_yearly(WPP wpp) throws Exception
+    {
+        this.wpp = wpp;
+
+        defineCountries();
+
+        Map<String, Map<Integer, Map<String, Object>>> cn2cdata = new HashMap<>();
+
+        StringBuilder sb = new StringBuilder();
+
+        for (String rname : Countries)
+        {
+            if (sb.length() != 0)
+                sb.append(",,");
+            sb.append("\"" + rname + "\"");
+
+            String ename = rc2ec.get(rname);
+            Map<Integer, Map<String, Object>> cdata = wpp.forCountry(ename);
+            cn2cdata.put(rname, cdata);
+        }
+
+        Util.out("\"год\"," + sb.toString());
+
+        for (int year = 1950; year <= 2023; year++)
+        {
+            sb = new StringBuilder();
+            sb.append("" + year);
+
+            for (String rname : Countries)
+            {
+                Map<Integer, Map<String, Object>> cdata = cn2cdata.get(rname);
+                Map<String, Object> ydata = cdata.get(year);
+                double cbr = ydata2double(ydata, "Crude Birth Rate");
+                double cdr = ydata2double(ydata, "Crude Death Rate");
+                sb.append(String.format(",%.1f,%.1f", cbr, cdr));
+            }
+
+            Util.out(sb.toString());
+        }
+    }
+
+    private double ydata2double(Map<String, Object> ydata, String key) throws Exception
+    {
+        for (String xkey : ydata.keySet())
+        {
+            if (xkey.toLowerCase().contains(key.toLowerCase()))
+                return ExcelRC.asRequiredDouble(ydata.get(xkey));
+        }
+
+        throw new Exception("Missing data");
     }
 }
