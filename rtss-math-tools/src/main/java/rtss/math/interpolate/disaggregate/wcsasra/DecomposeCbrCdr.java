@@ -24,6 +24,8 @@ import rtss.data.bin.Bin;
  * **********************************************************************
  * 
  * Для пятилеток брать sigma в диапазоне 0.3 - 0.5 - 1.25 - 1.5.
+ * Лучше 0.5.
+ * Ниже 0.3 не спускаться, т.к. тогда сглаживание исчезает.
  * 
  */
 public class DecomposeCbrCdr
@@ -76,8 +78,7 @@ public class DecomposeCbrCdr
             double[] ncdr = reconstructWithFixedWeights(cdrAggregated, widths, weights, ycdr);
 
             double[] checkWeights = exposureWeights(ncbr, ncdr);
-            double err = Math.max(
-                                  maxConstraintRelativeError(ncbr, cbrAggregated, widths, checkWeights),
+            double err = Math.max(maxConstraintRelativeError(ncbr, cbrAggregated, widths, checkWeights),
                                   maxConstraintRelativeError(ncdr, cdrAggregated, widths, checkWeights));
 
             boolean valuesConverged = converged(ncbr, ycbr) &&
@@ -99,8 +100,7 @@ public class DecomposeCbrCdr
          * This brings the final arrays as close as possible to exact
          * self-consistency with the weights implied by the final CBR/CDR.
          */
-        boolean projected = projectToSelfConsistentWeights(
-                                                           ycbr, ycdr,
+        boolean projected = projectToSelfConsistentWeights(ycbr, ycdr,
                                                            cbrAggregated, cdrAggregated,
                                                            widths);
 
