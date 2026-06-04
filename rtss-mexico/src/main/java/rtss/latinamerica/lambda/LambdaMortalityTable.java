@@ -58,6 +58,12 @@ public class LambdaMortalityTable
         double[] qxm = load_qx(csv, ename, year, "m");
         double[] qxf = load_qx(csv, ename, year, "f");
         
+        if (qxf == null && qxm == null)
+            return null;
+        
+        if (qxf == null || qxm == null)
+            throw new Exception("Unexpected file structure");
+
         SingleMortalityTable sm = SingleMortalityTable.from_qx(cname + " " + year + " male", qxm);
         SingleMortalityTable sf = SingleMortalityTable.from_qx(cname + " " + year + " female", qxf);
         
@@ -104,7 +110,7 @@ public class LambdaMortalityTable
         }
 
         if (lastage == -1)
-            throw new Exception("No data for " + ename + " " + year);
+            return null;
 
         for (int age = lastage + 1; age <= Population.MAX_AGE; age++)
             qx[age] = 1;
@@ -121,7 +127,18 @@ public class LambdaMortalityTable
         {
             List<Integer> years = countryTableYears("Гондурас");
             CombinedMortalityTable cmt = countryMortalityTable("Гондурас", 1940);
+
+            for (String rname : CountryName.rnames())
+            {
+                for (int year : countryTableYears(rname))
+                {
+                    Util.out("Loading " + rname + " " + year);
+                    cmt = countryMortalityTable(rname, year);
+                }
+            }
+            
             Util.unused(years, cmt);
+            Util.out("Completed");
         }
         catch (Exception ex)
         {

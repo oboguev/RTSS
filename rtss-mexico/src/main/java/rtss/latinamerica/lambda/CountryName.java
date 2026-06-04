@@ -20,7 +20,7 @@ public class CountryName
         define("Колумбия", "Colombia");
         define("Коста-Рика", "Costa Rica");
         define("Куба", "Cuba");
-        define("Доминиканская республик", "Dominican Republic");
+        define("Доминиканская республика", "Dominican Republic");
         define("Эквадор", "Ecuador");
         define("Сальвадор", "El Salvador");
         define("Гватемала", "Guatemala");
