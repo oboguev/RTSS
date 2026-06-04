@@ -337,6 +337,12 @@ public class CombinedMortalityTable
             return false;
         return ((CombinedMortalityTable) x).tid.equals(tid);
     }
+    
+    public void setSource(String source) throws Exception
+    {
+        checkWritable();
+        this.source = source;
+    }
 
     /*****************************************************************************************************/
     

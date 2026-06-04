@@ -183,7 +183,7 @@ public class LambdaPopulation
             List<String> cnames = CountryName.rnames();
             List<Integer> years = countryPopulationYears("Гондурас");
             Population p = countryPopulation("Гондурас", 1940);
-            Util.noop();
+            Util.unused(cnames, years, p);
         }
         catch (Exception ex)
         {

@@ -56,7 +56,7 @@ public class CountryName
     {
         return ename2code.get(ename);
     }
-    
+
     public static List<String> rnames()
     {
         List<String> list = new ArrayList<>(rname2ename.keySet());
@@ -69,5 +69,25 @@ public class CountryName
         List<String> list = new ArrayList<>(ename2rname.keySet());
         Collections.sort(list);
         return list;
+    }
+
+    public static String ename(String cname)
+    {
+        if (ename2rname.containsKey(cname))
+            return cname;
+        else if (r2e(cname) != null)
+            return r2e(cname);
+        else
+            throw new IllegalArgumentException("Unknown country name: " + cname);
+    }
+
+    public static String rname(String cname)
+    {
+        if (rname2ename.containsKey(cname))
+            return cname;
+        else if (e2r(cname) != null)
+            return e2r(cname);
+        else
+            throw new IllegalArgumentException("Unknown country name: " + cname);
     }
 }
