@@ -26,7 +26,10 @@ public class PrintCDR
 
     private void do_main() throws Exception
     {
-        Util.out("Смертность по LAMBdA");
+        Util.out("Смертность по LAMBdA, расчёт двумя способами");
+        Util.out("");
+        Util.out("  Способ 1: qx + межпереписная интерполяция годового прироста населения");
+        Util.out("  Способ 2 (более надёжный): предрасчитанные mx");
         Util.out("");
 
         for (String rname : CountryName.rnames())
@@ -43,8 +46,15 @@ public class PrintCDR
                 double pstart = p.sum();
                 double pend = pstart + yearlyIncrease(rname, year, true, true);
                 double pavg = MathUtil.log_average(pstart, pend);
+                double cdr1 = deaths / pavg * 1000.0;
 
-                Util.out(String.format("%s %d %.1f", rname, year, deaths / pavg * 1000.0));
+                /*----------------------------------------------------------------- */
+
+                deaths = deaths(p, rname, year, Gender.MALE) + deaths(p, rname, year, Gender.FEMALE);
+                pavg = p.sum();
+                double cdr2 = deaths / pavg * 1000.0;
+
+                Util.out(String.format("%s %d %.1f %.1f", rname, year, cdr1, cdr2));
             }
         }
     }
@@ -115,5 +125,19 @@ public class PrintCDR
         double v = pYear * Math.expm1(r);
 
         return v;
+    }
+
+    private double deaths(Population p, String rname, int year, Gender gender) throws Exception
+    {
+        double[] mx = LambdaMortalityTable.loadMx(rname, year, gender);
+        
+        double sum = 0;
+
+        for (int age = 0; age <= Population.MAX_AGE; age++)
+        {
+            sum += p.get(gender, age) * mx[age];
+        }
+
+        return sum;
     }
 }

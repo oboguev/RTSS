@@ -57,16 +57,16 @@ public class LambdaMortalityTable
 
         double[] qxm = load_qx(csv, ename, year, "m");
         double[] qxf = load_qx(csv, ename, year, "f");
-        
+
         if (qxf == null && qxm == null)
             return null;
-        
+
         if (qxf == null || qxm == null)
             throw new Exception("Unexpected file structure");
 
         SingleMortalityTable sm = SingleMortalityTable.from_qx(cname + " " + year + " male", qxm);
         SingleMortalityTable sf = SingleMortalityTable.from_qx(cname + " " + year + " female", qxf);
-        
+
         CombinedMortalityTable cmt = CombinedMortalityTable.newEmptyTable();
         cmt.setTable(Locality.TOTAL, Gender.MALE, sm);
         cmt.setTable(Locality.TOTAL, Gender.FEMALE, sf);
@@ -118,6 +118,67 @@ public class LambdaMortalityTable
         return qx;
     }
 
+    public static double[] loadMx(String cname, int year, Gender gender) throws Exception
+    {
+        String ename = CountryName.ename(cname);
+
+        String mxColName = null;
+        switch (gender)
+        {
+        case MALE:
+            mxColName = "Mx_m";
+            break;
+            
+        case FEMALE:
+            mxColName = "Mx_f";
+            break;
+            
+        default:
+            throw new IllegalArgumentException();
+
+        }
+
+        CSVSmartReader csv = loadCSV();
+
+        int colCtry = csv.column("ctry");
+        int colYear = csv.column("year");
+        int colAge = csv.column("age");
+        int colMx = csv.column(mxColName);
+        if (colCtry < 0 || colYear < 0 || colAge < 0 || colMx < 0)
+            throw new Exception("Unexpected file structure");
+
+        int lastage = -1;
+
+        double[] mx = new double[Population.MAX_AGE + 1];
+
+        for (int nr = 0; nr < csv.rowCount(); nr++)
+        {
+            String ctry = csv.asString(nr, colCtry);
+            if (ctry == null || !ctry.equals(ename))
+                continue;
+            int cyear = csv.asInt(nr, colYear);
+            if (cyear != year)
+                continue;
+
+            int age = csv.asInt(nr, colAge);
+            double q = csv.asDouble(nr, colMx);
+
+            if (age != 1 + lastage || age > Population.MAX_AGE)
+                throw new Exception("Unexpected file structure");
+
+            mx[age] = q;
+            lastage = age;
+        }
+
+        if (lastage == -1)
+            return null;
+
+        for (int age = lastage + 1; age <= Population.MAX_AGE; age++)
+            mx[age] = mx[lastage];
+
+        return mx;
+    }
+
     public static void main(String[] args)
     {
         /*
@@ -134,9 +195,13 @@ public class LambdaMortalityTable
                 {
                     Util.out("Loading " + rname + " " + year);
                     cmt = countryMortalityTable(rname, year);
+                    double[] mxm = loadMx(rname, year, Gender.MALE);  
+                    double[] mxf = loadMx(rname, year, Gender.FEMALE);
+                    if (cmt == null || mxm == null || mxf == null)
+                        throw new Exception("Missing data");
                 }
             }
-            
+
             Util.unused(years, cmt);
             Util.out("Completed");
         }
