@@ -35,7 +35,7 @@ public class BlendLatinAmericaVitalRates
 
     private void do_main() throws Exception
     {
-        rc = Excel.readSheet("Latin-America-Vital-Rates-Yearly.xlsx", false, "Все страны");
+        rc = Excel.readSheet("latinamerica/Latin-America-Vital-Rates-Yearly.xlsx", false, "Все страны");
 
         do_country("Венесуэла", "Venezuela", new Glue(1950, 1959));
         do_country("Коста-Рика", "Costa Rica", new Glue(1950, 1959));
