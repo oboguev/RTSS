@@ -183,10 +183,12 @@ public class LambdaMortalityTable
         if (lastage == -1)
             return null;
 
-        double delta = (mx[lastage] - mx[lastage - 5]) / 5;
-
+        /*
+         * Добавлять delta не нужно, т.к. mx группы 85+ относится ко всему возрастному интервалу 
+         */
+        // double delta = (mx[lastage] - mx[lastage - 5]) / 5;
         for (int age = lastage + 1; age <= Population.MAX_AGE; age++)
-            mx[age] = mx[age - 1] + delta;
+            mx[age] = mx[age - 1] /* + delta */;
 
         return mx;
     }

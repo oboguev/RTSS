@@ -3,6 +3,7 @@ package rtss.latinamerica.lambda;
 import java.util.List;
 
 import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.MortalityUtil;
 import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
@@ -26,10 +27,11 @@ public class PrintCDR
 
     private void do_main() throws Exception
     {
-        Util.out("Смертность по LAMBdA, расчёт двумя способами");
+        Util.out("Смертность по LAMBdA, расчёт тремя способами");
         Util.out("");
         Util.out("  Способ 1: qx + межпереписная интерполяция годового прироста населения");
-        Util.out("  Способ 2 (более надёжный): предрасчитанные mx");
+        Util.out("  Способ 2: (лучше) mx из qx");
+        Util.out("  Способ 3 (самый надёжный): предрасчитанные mx");
         Util.out("");
 
         for (String rname : CountryName.rnames())
@@ -41,7 +43,7 @@ public class PrintCDR
                 if (p == null || cmt == null)
                     continue;
 
-                double deaths = deaths(p, cmt);
+                double deaths = qx_deaths(p, cmt);
 
                 double pstart = p.sum();
                 double pend = pstart + yearlyIncrease(rname, year, true, true);
@@ -50,28 +52,51 @@ public class PrintCDR
 
                 /*----------------------------------------------------------------- */
 
-                deaths = deaths(p, rname, year, Gender.MALE) + deaths(p, rname, year, Gender.FEMALE);
+                deaths = qx2mx_deaths(p, cmt);
+
                 pavg = p.sum();
                 double cdr2 = deaths / pavg * 1000.0;
 
-                Util.out(String.format("%s %d %.1f %.1f", rname, year, cdr1, cdr2));
+                /*----------------------------------------------------------------- */
+
+                deaths = mx_deaths(p, rname, year, Gender.MALE) + mx_deaths(p, rname, year, Gender.FEMALE);
+                pavg = p.sum();
+                double cdr3 = deaths / pavg * 1000.0;
+
+                Util.out(String.format("%s %d %.1f %.1f %.1f", rname, year, cdr1, cdr2, cdr3));
             }
         }
     }
 
-    private double deaths(Population p, CombinedMortalityTable cmt) throws Exception
+    private double qx_deaths(Population p, CombinedMortalityTable cmt) throws Exception
     {
-        return deaths(p, cmt, Gender.MALE) + deaths(p, cmt, Gender.FEMALE);
+        return qx_deaths(p, cmt, Gender.MALE) + qx_deaths(p, cmt, Gender.FEMALE);
     }
 
-    private double deaths(Population p, CombinedMortalityTable cmt, Gender gender) throws Exception
+    private double qx_deaths(Population p, CombinedMortalityTable cmt, Gender gender) throws Exception
     {
+        double[] qx = cmt.getSingleTable(Locality.TOTAL, gender).qx();
         double sum = 0;
 
         for (int age = 0; age <= Population.MAX_AGE; age++)
-        {
-            sum += p.get(gender, age) * cmt.getSingleTable(Locality.TOTAL, gender).qx()[age];
-        }
+            sum += p.get(gender, age) * qx[age];
+
+        return sum;
+    }
+
+    private double qx2mx_deaths(Population p, CombinedMortalityTable cmt) throws Exception
+    {
+        return qx2mx_deaths(p, cmt, Gender.MALE) + qx2mx_deaths(p, cmt, Gender.FEMALE);
+    }
+
+    private double qx2mx_deaths(Population p, CombinedMortalityTable cmt, Gender gender) throws Exception
+    {
+        double[] qx = cmt.getSingleTable(Locality.TOTAL, gender).qx();
+        double[] mx = MortalityUtil.qx2mx(qx, gender);
+        double sum = 0;
+
+        for (int age = 0; age <= Population.MAX_AGE; age++)
+            sum += p.get(gender, age) * mx[age];
 
         return sum;
     }
@@ -127,7 +152,7 @@ public class PrintCDR
         return v;
     }
 
-    private double deaths(Population p, String rname, int year, Gender gender) throws Exception
+    private double mx_deaths(Population p, String rname, int year, Gender gender) throws Exception
     {
         double[] mx = LambdaMortalityTable.loadMx(rname, year, gender);
         
