@@ -113,6 +113,9 @@ public class LambdaPopulation
             {
                 bin.age_x2 = age - 1;
                 bin.widths_in_years = bin.age_x2 - bin.age_x1 + 1;
+                
+                if (bin.widths_in_years <= 0)
+                    throw new Exception("Unexpected data structure");
             }
 
             bin = new Bin(age, age, people);
@@ -183,7 +186,17 @@ public class LambdaPopulation
             List<String> cnames = CountryName.rnames();
             List<Integer> years = countryPopulationYears("Гондурас");
             Population p = countryPopulation("Гондурас", 1940);
+
+            for (String rname : CountryName.rnames())
+            {
+                for (int year : LambdaPopulation.countryPopulationYears(rname))
+                {
+                    p = LambdaPopulation.countryPopulation(rname, year);
+                }
+            }
+            
             Util.unused(cnames, years, p);
+            Util.out("Completed");
         }
         catch (Exception ex)
         {
