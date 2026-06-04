@@ -112,8 +112,18 @@ public class LambdaMortalityTable
         if (lastage == -1)
             return null;
 
+        /*
+         * Таблица LAMBdA использует открытый интервал 85+ с qx = 1.0
+         */
+        double delta = 0;
+        if (qx[lastage] == 1.0)
+        {
+            delta = (qx[lastage - 1] - qx[lastage - 6]) / 5;
+            qx[lastage] = Math.min(1.0, qx[lastage - 1] + delta);
+        }
+
         for (int age = lastage + 1; age <= Population.MAX_AGE; age++)
-            qx[age] = 1;
+            qx[age] = Math.min(1.0, qx[age - 1] + delta);
 
         return qx;
     }
@@ -128,11 +138,11 @@ public class LambdaMortalityTable
         case MALE:
             mxColName = "Mx_m";
             break;
-            
+
         case FEMALE:
             mxColName = "Mx_f";
             break;
-            
+
         default:
             throw new IllegalArgumentException();
 
@@ -173,8 +183,10 @@ public class LambdaMortalityTable
         if (lastage == -1)
             return null;
 
+        double delta = (mx[lastage] - mx[lastage - 5]) / 5;
+
         for (int age = lastage + 1; age <= Population.MAX_AGE; age++)
-            mx[age] = mx[lastage];
+            mx[age] = mx[age - 1] + delta;
 
         return mx;
     }
@@ -195,7 +207,7 @@ public class LambdaMortalityTable
                 {
                     Util.out("Loading " + rname + " " + year);
                     cmt = countryMortalityTable(rname, year);
-                    double[] mxm = loadMx(rname, year, Gender.MALE);  
+                    double[] mxm = loadMx(rname, year, Gender.MALE);
                     double[] mxf = loadMx(rname, year, Gender.FEMALE);
                     if (cmt == null || mxm == null || mxf == null)
                         throw new Exception("Missing data");

@@ -101,6 +101,9 @@ public class SingleMortalityTable
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
+            
+            if (mi.qx > 1.0)
+                throw new Exception("qx > 1");
 
             Util.checkValidNonNegative(mi.px);
             Util.checkValidNonNegative(mi.qx);
