@@ -1,9 +1,12 @@
 package rtss.latinamerica.lambda;
 
+import java.util.List;
+
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.population.struct.Population;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.math.algorithms.MathUtil;
 import rtss.util.Util;
 
 public class PrintCDR
@@ -25,7 +28,7 @@ public class PrintCDR
     {
         Util.out("Смертность по LAMBdA");
         Util.out("");
-        
+
         for (String rname : CountryName.rnames())
         {
             for (int year : LambdaPopulation.countryPopulationYears(rname))
@@ -34,15 +37,18 @@ public class PrintCDR
                 CombinedMortalityTable cmt = LambdaMortalityTable.countryMortalityTable(rname, year);
                 if (p == null || cmt == null)
                     continue;
-                
+
                 double deaths = deaths(p, cmt);
-                double total = p.sum();
-                
-                Util.out(String.format("%s %d %.1f", rname, year, deaths/total * 1000.0));
+
+                double pstart = p.sum();
+                double pend = pstart + yearlyIncrease(rname, year, true, true);
+                double pavg = MathUtil.log_average(pstart, pend);
+
+                Util.out(String.format("%s %d %.1f", rname, year, deaths / pavg * 1000.0));
             }
         }
     }
-    
+
     private double deaths(Population p, CombinedMortalityTable cmt) throws Exception
     {
         return deaths(p, cmt, Gender.MALE) + deaths(p, cmt, Gender.FEMALE);
@@ -51,14 +57,63 @@ public class PrintCDR
     private double deaths(Population p, CombinedMortalityTable cmt, Gender gender) throws Exception
     {
         double sum = 0;
-        
+
         for (int age = 0; age <= Population.MAX_AGE; age++)
         {
             sum += p.get(gender, age) * cmt.getSingleTable(Locality.TOTAL, gender).qx()[age];
         }
-        
-        
-        
+
         return sum;
+    }
+
+    private double yearlyIncrease(String cname, int year, boolean before, boolean after) throws Exception
+    {
+        List<Integer> years = LambdaPopulation.countryPopulationYears(cname);
+        Integer ybefore = null;
+        Integer yafter = null;
+
+        for (int y : years)
+        {
+            if (before && y < year && (ybefore == null || y > ybefore))
+                ybefore = y;
+
+            if (after && y > year && (yafter == null || y < yafter))
+                yafter = y;
+        }
+
+        if (ybefore == null)
+            ybefore = year;
+
+        if (yafter == null)
+            yafter = year;
+
+        if (ybefore == yafter)
+            return 0;
+
+        Population xp1 = LambdaPopulation.countryPopulation(cname, ybefore);
+        Population xp2 = LambdaPopulation.countryPopulation(cname, yafter);
+
+        double p1 = xp1.sum();
+        double p2 = xp2.sum();
+
+        int y1 = ybefore;
+        int y2 = yafter;
+
+        if (y2 <= y1)
+            throw new IllegalArgumentException("y2 must be greater than y1");
+
+        if (year < y1 || year > y2)
+            throw new IllegalArgumentException("year must be between y1 and y2");
+
+        if (p1 <= 0 || p2 <= 0)
+            throw new IllegalArgumentException("Population must be positive for exponential interpolation");
+
+        double r = (Math.log(p2) - Math.log(p1)) / (y2 - y1);
+
+        double pYear = p1 * Math.exp(r * (year - y1));
+
+        double v = pYear * Math.expm1(r);
+
+        return v;
     }
 }
