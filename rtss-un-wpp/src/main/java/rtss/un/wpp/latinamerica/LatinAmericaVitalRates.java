@@ -60,7 +60,7 @@ public class LatinAmericaVitalRates
 
         for (String rname : Countries)
         {
-            String ename = rc2ec.get(rname);
+            String ename = CountryNames.r2e(rname);
             show_rates(rname, ename, rateCode);
         }
     }
@@ -73,7 +73,7 @@ public class LatinAmericaVitalRates
 
         for (String rname : Countries)
         {
-            String ename = rc2ec.get(rname);
+            String ename = CountryNames.r2e(rname);
             show_population(rname, ename, y1, y2, ystep);
         }
     }
@@ -82,34 +82,33 @@ public class LatinAmericaVitalRates
 
     private WPP wpp;
     private final List<String> Countries = new ArrayList<>();
-    private final Map<String, String> rc2ec = new HashMap<>();
 
-    private void defineCountries()
+    private void defineCountries() throws Exception
     {
-        defineCountry("Венесуэла", "Venezuela (Bolivarian Republic of)");
-        defineCountry("Коста-Рика", "Costa Rica");
-        defineCountry("Гватемала", "Guatemala");
-        defineCountry("Колумбия", "Colombia");
-        defineCountry("Эквадор", "Ecuador");
-        defineCountry("Бразилия", "Brazil");
-        defineCountry("Парагвай", "Paraguay");
-        defineCountry("Перу", "Peru");
-        defineCountry("Боливия", "Bolivia (Plurinational State of)");
-        defineCountry("Сальвадор", "El Salvador");
-        defineCountry("Чили", "Chile");
-        defineCountry("Аргентина", "Argentina");
-        defineCountry("Мексика", "Mexico");
-        defineCountry("Куба", "Cuba");
-        defineCountry("Панама", "Panama");
-        defineCountry("Доминиканская республика", "Dominican Republic");
-        defineCountry("Гондурас", "Honduras");
-        defineCountry("Уругвай", "Uruguay");
+        defineCountry("Коста-Рика");
+        defineCountry("Гватемала");
+        defineCountry("Колумбия");
+        defineCountry("Эквадор");
+        defineCountry("Бразилия");
+        defineCountry("Парагвай");
+        defineCountry("Перу");
+        defineCountry("Боливия");
+        defineCountry("Сальвадор");
+        defineCountry("Чили");
+        defineCountry("Аргентина");
+        defineCountry("Мексика");
+        defineCountry("Куба");
+        defineCountry("Панама");
+        defineCountry("Доминиканская республика");
+        defineCountry("Гондурас");
+        defineCountry("Уругвай");
     }
 
-    private void defineCountry(String rname, String ename)
+    private void defineCountry(String rname) throws Exception
     {
         Countries.add(rname);
-        rc2ec.put(rname, ename);
+        if (CountryNames.r2e(rname) == null)
+            throw new Exception("Unmapped country name: " + rname);
     }
 
     /* ======================================================================================== */
@@ -263,7 +262,7 @@ public class LatinAmericaVitalRates
                 sb.append(",,");
             sb.append("\"" + rname + "\"");
 
-            String ename = rc2ec.get(rname);
+            String ename = CountryNames.r2e(rname);
             Map<Integer, Map<String, Object>> cdata = wpp.forCountry(ename);
             cn2cdata.put(rname, cdata);
         }

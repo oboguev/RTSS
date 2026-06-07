@@ -10,6 +10,10 @@ import rtss.un.wpp.WPP2024;
 import rtss.util.Util;
 import rtss.util.excel.ExcelRC;
 
+/*
+ * To load the WPP file, use Java heap size 16G:
+ *     java -Xmx16g
+ */
 public class MexPopulationWpp
 {
     public static void main(String[] args)
@@ -54,7 +58,7 @@ public class MexPopulationWpp
                     {
                         pi = ExcelRC.asDouble(m.get(key));
                     }
-                    else if (key.toLowerCase().contains("Total Population, as of 1 July ".toLowerCase()))
+                    else if (key.toLowerCase().contains("Total Population, as of 1 July".toLowerCase()))
                     {
                         pm = ExcelRC.asDouble(m.get(key));
                     }
