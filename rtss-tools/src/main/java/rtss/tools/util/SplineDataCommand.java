@@ -12,8 +12,8 @@ public class SplineDataCommand
         public Double to;
         public Double step;
         public Double offset;
-        public double[] x;
-        public double[] y;
+        public List<Double> x = new ArrayList<>();
+        public List<List<Double>> y = new ArrayList<>();
     }
 
     public static Command parse(String text)
@@ -22,9 +22,6 @@ public class SplineDataCommand
 
         text = text.replace("\r", "");
         String[] lines = text.split("\n");
-
-        List<Double> xList = new ArrayList<>();
-        List<Double> yList = new ArrayList<>();
 
         for (String line : lines)
         {
@@ -67,23 +64,37 @@ public class SplineDataCommand
             }
             else if (tokens.length >= 2)
             {
-                double x = Double.parseDouble(tokens[0]);
-                double y = Double.parseDouble(tokens[1]);
-                xList.add(x);
-                yList.add(y);
+                double vx = Double.parseDouble(tokens[0]);
+                c.x.add(vx);
+                
+                List<Double> yy = new ArrayList<>();
+                
+                for (int nt = 1; nt < tokens.length; nt++)
+                {
+                    double y = Double.parseDouble(tokens[nt].replace(",", ""));
+                    yy.add(y);
+                }
+                
+                c.y.add(yy);
             }
             else
             {
                 throw new IllegalArgumentException("Malformattted input line");
             }
         }
+        
+        if (c.y.size() == 0)
+            throw new IllegalArgumentException("Missing data");
+        
+        int nys0 = c.y.get(0).size();
+        if (nys0 == 0)
+            throw new IllegalArgumentException("Missing data");
 
-        c.x = new double[xList.size()];
-        c.y = new double[yList.size()];
-        for (int i = 0; i < xList.size(); i++)
+        for (int nr = 0; nr < c.y.size(); nr++)
         {
-            c.x[i] = xList.get(i);
-            c.y[i] = yList.get(i);
+            int nys = c.y.get(nr).size();
+            if (nys != nys0) 
+                throw new IllegalArgumentException("Изменяющееся число колонок");
         }
 
         return c;

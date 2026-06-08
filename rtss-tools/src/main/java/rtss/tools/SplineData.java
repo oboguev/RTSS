@@ -1,6 +1,8 @@
 package rtss.tools;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
@@ -53,10 +55,10 @@ public class SplineData
         Command c = SplineDataCommand.parse(text);
 
         if (c.from == null)
-            c.from = c.x[0];
+            c.from = c.x.get(0);
 
         if (c.to == null)
-            c.to = c.x[c.x.length - 1];
+            c.to = c.x.get(c.x.size() - 1);
 
         if (c.step == null)
             c.step = 1.0;
@@ -67,36 +69,49 @@ public class SplineData
         if (c.offset == null)
             c.offset = 0.0;
 
-        PolynomialSplineFunction sp = null;
-        UnivariateFunction f = null;
+        int nys = c.y.get(0).size();
+        List<UnivariateFunction> ff = new ArrayList<>();
 
-        switch (c.method)
+        for (int ny = 0; ny < nys; ny++)
         {
-        case "ConstrainedCubicSplineInterpolator":
-            sp = new ConstrainedCubicSplineInterpolator().interpolate(c.x, c.y);
-            f = new FunctionRangeExtenderDirect(sp);
-            break;
+            PolynomialSplineFunction sp = null;
+            UnivariateFunction f = null;
 
-        case "AkimaSplineInterpolator":
-            sp = new AkimaSplineInterpolator().interpolate(c.x, c.y);
-            f = new FunctionRangeExtenderDirect(sp);
-            break;
+            switch (c.method)
+            {
+            case "ConstrainedCubicSplineInterpolator":
+                sp = new ConstrainedCubicSplineInterpolator().interpolate(l2a(c.x), l2a(c.y, ny));
+                f = new FunctionRangeExtenderDirect(sp);
+                break;
 
-        case "SteffenSplineInterpolator":
-            sp = new SteffenSplineInterpolator().interpolate(c.x, c.y);
-            f = new FunctionRangeExtenderDirect(sp);
-            break;
+            case "AkimaSplineInterpolator":
+                sp = new AkimaSplineInterpolator().interpolate(l2a(c.x), l2a(c.y, ny));
+                f = new FunctionRangeExtenderDirect(sp);
+                break;
 
-        default:
-            throw new IllegalArgumentException("Invalid spline method: " + c.method);
+            case "SteffenSplineInterpolator":
+                sp = new SteffenSplineInterpolator().interpolate(l2a(c.x), l2a(c.y, ny));
+                f = new FunctionRangeExtenderDirect(sp);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid spline method: " + c.method);
+            }
+            
+            ff.add(f);
         }
 
         StringBuilder sb = new StringBuilder();
 
         for (double x = c.from + c.offset; x <= c.to; x += c.step)
         {
-            double y = f.value(x);
-            sb.append(String.format("%s %.4f\n", f2s(x), y));
+            sb.append(String.format("%s", f2s(x)));
+            for (int ny = 0; ny < nys; ny++)
+            {
+                double y = ff.get(ny).value(x);
+                sb.append(String.format(" %.4f", y));
+            }
+            sb.append("\n");
         }
 
         text = sb.toString();
@@ -106,12 +121,28 @@ public class SplineData
 
         Clipboard.put(text);
     }
-    
+
     private String f2s(double v) throws Exception
     {
         String s = String.format("%s", v);
         if (s.endsWith(".0"))
             s = Util.stripTail(s, ".0");
         return s;
+    }
+
+    private double[] l2a(List<Double> list)
+    {
+        double[] a = new double[list.size()];
+        for (int k = 0; k < list.size(); k++)
+            a[k] = list.get(k);
+        return a;
+    }
+
+    private double[] l2a(List<List<Double>> list, int ny)
+    {
+        double[] a = new double[list.size()];
+        for (int k = 0; k < list.size(); k++)
+            a[k] = list.get(k).get(ny);
+        return a;
     }
 }

@@ -71,7 +71,7 @@ public class LatinAmericaPopulation
     {
         defineCountries();
 
-        WPP wpp = new WPP2024();
+        wpp = new WPP2024();
         
         for (String rname : Countries)
         {
