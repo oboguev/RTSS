@@ -1,5 +1,6 @@
 package rtss.data;
 
+import rtss.util.CoreMathUtil;
 import rtss.util.Util;
 
 public class DoubleArray
@@ -205,6 +206,27 @@ public class DoubleArray
         {
             if (res.values[age] != null || p.values[age] != null)
                 res.values[age] += p.values[age];
+        }
+
+        return res;
+    }
+
+    public DoubleArray log_average(DoubleArray p, ValueConstraint rvc) throws Exception
+    {
+        if (vc != p.vc && rvc == null)
+            throw new IllegalArgumentException("массивы разнотипны");
+
+        if (maxage != p.maxage)
+            throw new IllegalArgumentException("массивы разнотипны");
+
+        DoubleArray res = clone();
+        if (rvc != null)
+            res.vc = rvc;
+
+        for (int age = 0; age < values.length; age++)
+        {
+            if (res.values[age] != null || p.values[age] != null)
+                res.values[age] = CoreMathUtil.log_average(res.values[age], p.values[age]);
         }
 
         return res;

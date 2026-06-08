@@ -95,6 +95,11 @@ public class LoadData
     
     private static Map<Integer,PopulationByLocality> actualMidyearPopulation; 
 
+    /*
+     * Грубая оценка численности населения территории в границах России 1991-2014 года на начало календарного года.
+     * Не использовать без коррекции.
+     * Не используется.  
+     */
     public static PopulationByLocality actualPopulation(int year) throws Exception
     {
         if (actualMidyearPopulation == null)
@@ -114,7 +119,7 @@ public class LoadData
         
         PopulationByLocality p1 = actualMidyearPopulation.get(year - 1);
         PopulationByLocality p2 = actualMidyearPopulation.get(year);
-        PopulationByLocality p = p1.avg(p2);
+        PopulationByLocality p = p1.log_average(p2);
         return p;
     }
     

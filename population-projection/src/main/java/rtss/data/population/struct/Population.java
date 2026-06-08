@@ -580,6 +580,41 @@ public class Population
         return p2;
     }
 
+    public Population log_average(Population p) throws Exception
+    {
+        return log_average(p, null);
+    }
+
+    public Population log_average(Population p, ValueConstraint rvc) throws Exception
+    {
+        if (locality != p.locality && rvc == null)
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((male != null) != (p.male != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((female != null) != (p.female != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((both != null) != (p.both != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        Population res = newPopulation(locality);
+        if (rvc != null)
+            res.setValueConstraint(rvc);
+
+        if (male != null)
+            res.male = male.log_average(p.male, rvc);
+
+        if (female != null)
+            res.female = female.log_average(p.female, rvc);
+
+        if (both != null)
+            res.both = both.log_average(p.both, rvc);
+
+        return res;
+    }
+
     /*
      * Сдвинуть возрастное распределение на @years лет вверх
      */

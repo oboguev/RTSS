@@ -373,6 +373,36 @@ public class PopulationByLocality
         return p2;
     }
 
+    public PopulationByLocality log_average(PopulationByLocality p) throws Exception
+    {
+        return avg(p, null);
+    }
+
+    public PopulationByLocality log_average(PopulationByLocality p, ValueConstraint rvc) throws Exception
+    {
+        if ((rural != null) != (p.rural != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((urban != null) != (p.urban != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        if ((total != null) != (p.total != null))
+            throw new IllegalArgumentException("населения разнотипны");
+
+        PopulationByLocality res = new PopulationByLocality();
+
+        if (rural != null)
+            res.rural = rural.log_average(p.rural, rvc);
+
+        if (urban != null)
+            res.urban = urban.log_average(p.urban, rvc);
+
+        if (total != null)
+            res.total = total.log_average(p.total, rvc);
+
+        return res;
+    }
+
     /*
      * Сдвинуть возрастное распределение на @years лет вверх
      */
