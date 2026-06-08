@@ -5,6 +5,7 @@ import java.util.List;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.MatchMortalityTable;
+import rtss.data.mortality.synthetic.MortalityTableADH;
 import rtss.data.mortality.synthetic.PatchMortalityTable;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchInstruction;
 import rtss.data.mortality.synthetic.PatchMortalityTable.PatchOpcode;
@@ -126,7 +127,7 @@ public class MortalityTable_1940 extends UtilBase_194x
         }
         else if (ap.area == Area.RSFSR)
         {
-            CombinedMortalityTable mt = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
+            CombinedMortalityTable mt = MortalityTableADH.getMortalityTable(Area.RSFSR, 1940);
             mt.comment("АДХ-РСФСР-1940");
             
             // рабочий дескриптор для MatchMortalityTable.match
@@ -168,7 +169,7 @@ public class MortalityTable_1940 extends UtilBase_194x
             mt1 = PatchMortalityTable.patchInfantMortalityRate(mt1, ADH_USSR_infant_CDR_1940 * PROMILLE, "infant mortality patched to ADH");
         }
 
-        mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
+        mt2 = MortalityTableADH.getMortalityTable(Area.RSFSR, 1940);
         mt2.comment("АДХ-РСФСР-1940");
     }
 

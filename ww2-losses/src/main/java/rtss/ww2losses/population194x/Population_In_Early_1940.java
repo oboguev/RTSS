@@ -2,11 +2,13 @@ package rtss.ww2losses.population194x;
 
 import rtss.data.mortality.CombinedMortalityTable;
 import rtss.data.mortality.synthetic.InterpolateMortalityTable;
+import rtss.data.mortality.synthetic.MortalityTableADH;
 import rtss.data.population.calc.RescalePopulation;
 import rtss.data.population.projection.ForwardPopulationT;
 import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.population.struct.PopulationContext;
 import rtss.data.population.synthetic.PopulationADH;
+import rtss.data.selectors.Area;
 import rtss.forward_1926_193x.Adjust_1939;
 import rtss.ww2losses.params.AreaParameters;
 
@@ -101,7 +103,7 @@ public class Population_In_Early_1940 extends UtilBase_194x
             throw new IllegalArgumentException();
         }
         
-        CombinedMortalityTable mt2 = CombinedMortalityTable.loadTotal("mortality_tables/RSFSR/1940");
+        CombinedMortalityTable mt2 = MortalityTableADH.getMortalityTable(Area.RSFSR, 1940);
         mt2.comment("АДХ-РСФСР-1940");
 
         cmt = InterpolateMortalityTable.forTargetRates(mt1, mt2, p, fctx, fw.getBirthRateTotal(), cdr, 4, null);
