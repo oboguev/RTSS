@@ -127,7 +127,7 @@ public class MortalityTable_1940 extends UtilBase_194x
         }
         else if (ap.area == Area.RSFSR)
         {
-            CombinedMortalityTable mt = MortalityTableADH.getMortalityTable(Area.RSFSR, 1940);
+            CombinedMortalityTable mt = MortalityTableADH.getWritableMortalityTable(Area.RSFSR, 1940);
             mt.comment("АДХ-РСФСР-1940");
             
             // рабочий дескриптор для MatchMortalityTable.match

@@ -59,6 +59,22 @@ public class MortalityTableADH
         return previous;
     }
 
+    public static synchronized CombinedMortalityTable getWritableMortalityTable(Area area, int year) throws Exception
+    {
+        String path = null;
+        if (FilesVersion.get(area) == null || FilesVersion.get(area).length() == 0)
+            path = String.format("mortality_tables/%s/%s", area.name(), year);
+        else
+            path = String.format("mortality_tables/%s/%s/%s", area.name(), FilesVersion.get(area), year);
+        
+        CombinedMortalityTable cmt = CombinedMortalityTable.loadTotal(path);
+
+        if (cmt == null)
+            cmt = get(area, year);
+        
+        return cmt;
+    }
+
     public static synchronized CombinedMortalityTable getMortalityTable(Area area, int year) throws Exception
     {
         String path = null;

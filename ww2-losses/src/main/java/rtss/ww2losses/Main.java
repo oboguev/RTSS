@@ -462,7 +462,7 @@ public class Main
                                     deficit1946_postimmigration);
         
         area2births.put(area, birthCurve(halves));
-        if (area2births.size() == 2)
+        if (area2births.size() == 2 && exportDirectory != null)
             ExportResults.exportBirths(exportDirectory, area2births.get(Area.USSR), area2births.get(Area.RSFSR));
 
         evalSummary(allExcessDeathsByAgeAt1946(false));
