@@ -33,63 +33,175 @@ public class ExtractDemTransCurves
         public String sheet;
         public double[] cbr;
         public double[] cdr;
+        public Map<Integer, Double> mcbr = new HashMap<>();
+        public Map<Integer, Double> mcdr = new HashMap<>();
+        public double weight = 1.0;
     }
 
     private List<Country> countries = new ArrayList<>();
 
-    private void addCountry(String cname, int startYear, String sheet)
+    private void addCountry(Country c) throws Exception
+    {
+        countries.add(c);
+    }
+
+    private void addCountry(String cname, int startYear, String sheet) throws Exception
+    {
+        addCountry(getCountry(cname, startYear, sheet));
+    }
+
+    private Country getCountry(String cname, int startYear, String sheet) throws Exception
     {
         Country c = new Country();
         c.cname = cname;
         c.startYear = startYear;
         c.sheet = sheet;
-        countries.add(c);
+        loadCountry(c);
+        return c;
     }
 
     private void defineCountries() throws Exception
     {
+        Country c1, c2;
+
         /*
          * Датировка по 10%-му снижению смертности.
          * Когда значение смертности ныряет под 90% начального значения или, в случае колебаний, начального значения тренда.
          */
         addCountry("Аргентина", 1885, "Аргентина-Колвер");
         addCountry("Бразилия", 1893, "Бразилия");
-        addCountry("Венесуэла", 1921, "Венесуэла-Колвер");
-        addCountry("Венесуэла", 1921, "Венесуэла-Бриньоли");
-        addCountry("Гватемала", 1936, "Гватемала"); // ### не включать 
         addCountry("Гондурас", 1944, "Гондурас-правка");
         addCountry("Колумбия", 1922, "Колумбия");
-        addCountry("Коста-Рика", 1925, "Коста-Рика-Бриньоли");
-        addCountry("Коста-Рика", 1921, "Коста-Рика-Колвер");
-        addCountry("Мексика", 1917, "Мексика-Бриньоли-CONAPO-реформа");
-        addCountry("Мексика", 1917, "Мексика-Колвер-CONAPO-реформа");
+        addCountry("Мексика", 1917, "Мексика-Бриньоли-CONAPO-реформа"); // ### Бриньлои выброс рождаемости с 1947 по 1952
+        addCountry("Мексика", 1917, "Мексика-Колвер-CONAPO-реформа"); // Колвер с 1917
         addCountry("Панама", 1918, "Панама");
         addCountry("Перу", 1940, "Перу");
         addCountry("Сальвадор", 1942, "Сальвадор");
-        addCountry("Чили", 1912, "Чили-Бриньоли");
-        addCountry("Чили", 1912, "Чили-Колвер");
         addCountry("Эквадор", 1915, "Эквадор");
+
+        // Венесуэла усреднить и с 1921
+        c1 = getCountry("Венесуэла", 1921, "Венесуэла-Колвер");
+        c2 = getCountry("Венесуэла", 1921, "Венесуэла-Бриньоли");
+        addCountry(average(c1, c2, 1921));
+
+        // Коста-Рика усреднить и с 1923
+        c1 = getCountry("Коста-Рика", 1925, "Коста-Рика-Бриньоли");
+        c2 = getCountry("Коста-Рика", 1921, "Коста-Рика-Колвер");
+        addCountry(average(c1, c2, 1923));
+
+        // Чили усреднить и с 1912
+        c1 = getCountry("Чили", 1912, "Чили-Бриньоли");
+        c2 = getCountry("Чили", 1912, "Чили-Колвер");
+        addCountry(average(c1, c2, 1912));
+
+        // addCountry("Гватемала", 1936, "Гватемала"); // линия рождаемости у Гватемалы атипична  
     }
 
     private void do_main() throws Exception
     {
         defineCountries();
 
-        for (Country c : countries)
-            loadCountry(c);
-        
-        countries.sort(Comparator.comparingInt(c -> c.startYear));
+        // countries.sort(Comparator.comparingInt(c -> c.startYear));
         countries.sort(Comparator.comparing(c -> c.cname));
-        
-        // ###
+
+        for (Country c : countries)
+        {
+            eval(c);
+            // ###
+        }
+
+        out("cbr");
+        out("cdr");
     }
-    
+
+    private void out(String what)
+    {
+        countries.sort(Comparator.comparingInt(c -> c.startYear));
+
+        Util.out("");
+        Util.out("Вывод " + what.toUpperCase());
+
+        char quote = '"';
+
+        StringBuilder sb = new StringBuilder("набор");
+        for (Country c : countries)
+            sb.append("," + quote + c.sheet + quote);
+        Util.out(sb.toString());
+
+        sb = new StringBuilder("вес");
+        for (Country c : countries)
+            sb.append("," + c.weight);
+        Util.out(sb.toString());
+
+        sb = new StringBuilder("начало");
+        for (Country c : countries)
+            sb.append("," + c.startYear);
+        Util.out(sb.toString());
+
+        sb = new StringBuilder("год");
+        for (Country c : countries)
+            sb.append("," + quote + c.cname + quote);
+        Util.out(sb.toString());
+
+        int nyears = countries.get(0).cbr.length;
+
+        for (int year = 0; year < nyears; year++)
+        {
+            sb = new StringBuilder("" + year);
+            
+            for (Country c : countries)
+            {
+                sb.append(",");
+                
+                if (year < c.cbr.length)
+                {
+                    double v, v0;
+                    switch (what)
+                    {
+                    case "cbr":
+                        v = c.cbr[year];
+                        v0 = c.cbr[0];
+                        break;
+
+                    case "cdr":
+                        v = c.cdr[year];
+                        v0 = c.cdr[0];
+                        break;
+
+                    default:
+                        throw new IllegalArgumentException();
+                    }
+                    
+                    sb.append(String.format("%.3f", v / v0));
+                }
+            }
+            
+            Util.out(sb.toString());
+        }
+    }
+
+    private void eval(Country c)
+    {
+        double v = 1.0;
+
+        double cbr0 = c.cbr[0];
+        double cdr0 = c.cdr[0];
+
+        for (int k = 0; k < c.cbr.length; k++)
+        {
+            double ngr = 50 * c.cbr[k] / cbr0 - 30 * c.cdr[k] / cdr0;
+            v *= (1 + ngr / 1000);
+        }
+
+        Util.out(String.format("%s %.2f", c.sheet, v));
+    }
+
     private void loadCountry(Country c) throws Exception
     {
         ExcelRC rc = Excel.readSheet("latinamerica/Latin-America-Vital-Rates-Yearly.xlsx", true, c.sheet);
         Integer tnr = null;
         Integer tnc = null;
-        
+
         for (int nr = 0; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             int ncols = rc.get(nr).size();
@@ -110,29 +222,26 @@ public class ExtractDemTransCurves
                 }
             }
         }
-        
+
         if (tnr == null || tnc == null)
             throw new Exception("Unabe to locate series in " + c.sheet);
-        
-        Map<Integer,Double> cbrs = new HashMap<>();
-        Map<Integer,Double> cdrs = new HashMap<>();
-        
+
         for (int nr = tnr + 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
             String ys = rc.asString(nr, tnc);
             if (ys == null || ys.equals(""))
                 continue;
-            
+
             if (ys.endsWith(".0"))
                 ys = Util.stripTail(ys, ".0");
             int year = Integer.parseInt(ys);
 
             double cbr;
             double cdr;
-            
+
             if (rc.isEmpty(nr, tnc + 1) && rc.isEmpty(nr, tnc + 2))
                 continue;
-            
+
             try
             {
                 cbr = rc.asDouble(nr, tnc + 1);
@@ -143,22 +252,69 @@ public class ExtractDemTransCurves
                 throw new Exception("Unable to parse series in " + c.sheet, ex);
             }
 
-            if (cbrs.containsKey(year))
+            if (c.mcbr.containsKey(year))
                 throw new Exception("Duplicate year in " + c.sheet);
-            cbrs.put(year, cbr);
-            cdrs.put(year, cdr);
+            c.mcbr.put(year, cbr);
+            c.mcdr.put(year, cdr);
         }
-        
+
+        fill(c);
+    }
+
+    private void fill(Country c)
+    {
+        int maxYear = Collections.max(c.mcbr.keySet());
         // int minYear = Collections.min(cbrs.keySet());
-        int maxYear = Collections.max(cbrs.keySet());
-        
+
         c.cbr = new double[maxYear - c.startYear + 1];
         c.cdr = new double[maxYear - c.startYear + 1];
-        
+
         for (int year = c.startYear; year <= maxYear; year++)
         {
-            c.cbr[year - c.startYear] = cbrs.get(year);
-            c.cdr[year - c.startYear] = cdrs.get(year);
+            c.cbr[year - c.startYear] = c.mcbr.get(year);
+            c.cdr[year - c.startYear] = c.mcdr.get(year);
         }
+    }
+
+    private Country average(Country c1, Country c2, int startYear)
+    {
+        Country c = new Country();
+        if (!c1.cname.equals(c2.cname))
+            throw new IllegalArgumentException();
+        c.cname = c1.cname;
+        c.sheet = c1.cname + "-среднее";
+        c.startYear = startYear;
+
+        int miny1 = Collections.min(c1.mcbr.keySet());
+        int miny2 = Collections.min(c2.mcbr.keySet());
+
+        int maxy1 = Collections.max(c1.mcbr.keySet());
+        int maxy2 = Collections.max(c2.mcbr.keySet());
+
+        if (maxy1 != maxy2)
+            throw new IllegalArgumentException();
+
+        for (int year = Math.min(miny1, miny2); year <= maxy1; year++)
+        {
+            if (year >= miny1 && year >= miny2)
+            {
+                c.mcbr.put(year, (c1.mcbr.get(year) + c2.mcbr.get(year)) / 2);
+                c.mcdr.put(year, (c1.mcdr.get(year) + c2.mcdr.get(year)) / 2);
+            }
+            else if (year >= miny1)
+            {
+                c.mcbr.put(year, c1.mcbr.get(year));
+                c.mcdr.put(year, c1.mcdr.get(year));
+            }
+            else
+            {
+                c.mcbr.put(year, c2.mcbr.get(year));
+                c.mcdr.put(year, c2.mcdr.get(year));
+            }
+        }
+
+        fill(c);
+
+        return c;
     }
 }
