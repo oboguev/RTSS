@@ -94,7 +94,26 @@ public class ExtractDemTransCurves
         c2 = getCountry("Чили", 1912, "Чили-Колвер");
         addCountry(average(c1, c2, 1912));
 
-        // addCountry("Гватемала", 1936, "Гватемала"); // линия рождаемости у Гватемалы атипична  
+        // линия рождаемости у Гватемалы атипична, поэтому не использовать её  
+        addCountry("Гватемала", 1936, "Гватемала"); // ###
+
+        /*
+         * Устранить влияние войн и природных катастроф
+         */
+        if (haveCountry("Гондурас"))
+        {
+            interpolate("Гондурас", 1973, 1974);
+            interpolate("Гондурас", 1998, 1998);
+        }
+        interpolate("Перу", 1970, 1970);
+        interpolate("Сальвадор", 1979, 1983);
+        interpolate("Колумбия", 1985, 1985);
+
+        /*
+         * Устранить влияние пандемии ковида
+         */
+        for (Country c : countries)
+            interpolate(c, 2020, 2022);
     }
 
     private void do_main() throws Exception
@@ -105,13 +124,41 @@ public class ExtractDemTransCurves
         countries.sort(Comparator.comparing(c -> c.cname));
 
         for (Country c : countries)
-        {
-            eval(c);
-            // ###
-        }
+            eval(c); // ###
 
         out("cbr");
         out("cdr");
+    }
+
+    private Country getCountry(String cname) throws Exception
+    {
+        Country rc = null;
+
+        for (Country c : countries)
+        {
+            if (c.cname.equals(cname))
+            {
+                if (rc != null)
+                    throw new Exception("Две страны: " + cname);
+                rc = c;
+            }
+        }
+
+        if (rc == null)
+            throw new Exception("Нет страны: " + cname);
+
+        return rc;
+    }
+
+    private boolean haveCountry(String cname) throws Exception
+    {
+        for (Country c : countries)
+        {
+            if (c.cname.equals(cname))
+                return true;
+        }
+
+        return false;
     }
 
     private void out(String what)
@@ -126,21 +173,25 @@ public class ExtractDemTransCurves
         StringBuilder sb = new StringBuilder("набор");
         for (Country c : countries)
             sb.append("," + quote + c.sheet + quote);
+        sb.append(",среднее");
         Util.out(sb.toString());
 
         sb = new StringBuilder("вес");
         for (Country c : countries)
             sb.append("," + c.weight);
+        sb.append(",");
         Util.out(sb.toString());
 
         sb = new StringBuilder("начало");
         for (Country c : countries)
             sb.append("," + c.startYear);
+        sb.append(",");
         Util.out(sb.toString());
 
         sb = new StringBuilder("год");
         for (Country c : countries)
             sb.append("," + quote + c.cname + quote);
+        sb.append(",среднее");
         Util.out(sb.toString());
 
         int nyears = countries.get(0).cbr.length;
@@ -148,11 +199,14 @@ public class ExtractDemTransCurves
         for (int year = 0; year < nyears; year++)
         {
             sb = new StringBuilder("" + year);
-            
+
+            double sum = 0;
+            double weights = 0;
+
             for (Country c : countries)
             {
                 sb.append(",");
-                
+
                 if (year < c.cbr.length)
                 {
                     double v, v0;
@@ -171,11 +225,18 @@ public class ExtractDemTransCurves
                     default:
                         throw new IllegalArgumentException();
                     }
-                    
-                    sb.append(String.format("%.3f", v / v0));
+
+                    v = v / v0;
+
+                    sb.append(String.format("%.3f", v));
+
+                    sum += c.weight * v;
+                    weights += c.weight;
                 }
             }
-            
+
+            sb.append(String.format(",%.3f", sum / weights));
+
             Util.out(sb.toString());
         }
     }
@@ -316,5 +377,30 @@ public class ExtractDemTransCurves
         fill(c);
 
         return c;
+    }
+
+    private void interpolate(String cname, int y1, int y2) throws Exception
+    {
+        interpolate(getCountry(cname), y1, y2);
+    }
+
+    private void interpolate(Country c, int y1, int y2) throws Exception
+    {
+        interpolate(c.mcbr, y1, y2);
+        interpolate(c.mcdr, y1, y2);
+        fill(c);
+    }
+
+    private void interpolate(Map<Integer, Double> m, int y1, int y2) throws Exception
+    {
+        y1--;
+        y2++;
+        double v1 = m.get(y1);
+        double v2 = m.get(y2);
+        for (int year = y1 + 1; year < y2; year++)
+        {
+            double v = v1 + (v2 - v1) * (year - y1) / (double) (y2 - y1);
+            m.put(year, v);
+        }
     }
 }
