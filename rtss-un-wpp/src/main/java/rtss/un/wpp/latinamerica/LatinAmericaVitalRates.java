@@ -102,6 +102,7 @@ public class LatinAmericaVitalRates
         defineCountry("Доминиканская республика");
         defineCountry("Гондурас");
         defineCountry("Уругвай");
+        // defineCountry("Никарагуа");
     }
 
     private void defineCountry(String rname) throws Exception
