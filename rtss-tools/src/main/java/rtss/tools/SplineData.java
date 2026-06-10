@@ -21,7 +21,7 @@ import rtss.util.Util;
  * 
  * Входные данные на clipbaord -- последовательность строк: 
  *  
- *      method    ConstrainedCubicSplineInterpolator   № тип сплайна
+ *      method    ConstrainedCubicSplineInterpolator   # тип сплайна
  *      from  1900     # начальное значение x для интерполяции
  *      to    2000     # конечное значение x для интерполяции
  *      step   1.0     # шаг по x
