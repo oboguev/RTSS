@@ -1,6 +1,8 @@
 package rtss.tools;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import rtss.math.algorithms.smooth.SmoothSeries;
 import rtss.tools.util.SmoothDataCommand;
@@ -15,9 +17,9 @@ import rtss.util.Util;
  *      method  CenteredMovingAverage | MedianThenAverage | Whittaker  # метод
  *      # опции -- см. ниже
  *      # данные (последовательность для сглаживания):
- *      x1
- *      x2
- *      x3
+ *      x1 x2 x3
+ *      x1 x2 x3
+ *      x1 x2 x3
  *      ....
  *      
  * Опции:      
@@ -31,6 +33,10 @@ import rtss.util.Util;
  *      
  *      method     Whittaker
  *      lambda     50.0
+ *      lambda-1   30.0
+ *      lambda-2   100.0
+ *      lambda-1   3
+ *      lambda-2   5
  *      # кризисные годы (война, эпидемия)
  *      start-year 1900
  *      weight     1933 0.1
@@ -62,33 +68,53 @@ public class SmoothData
             throw new Exception("No data on the clipboard");
         SmoothDataCommand c = SmoothDataCommand.parse(text);
 
-        double[] va = null;
+        List<double[]> list = new ArrayList<>();
 
-        switch (c.method)
+        for (int ns = 0; ns < c.series.size(); ns++)
         {
-        case CenteredMovingAverage:
-            va = SmoothSeries.smoothCenteredMovingAverage(c.data, c.window);
-            break;
+            double[] series = c.series.get(ns);
 
-        case MedianThenAverage:
-            va = SmoothSeries.smoothMedianThenAverage(c.data, c.medianWindow, c.averageWindow);
-            break;
+            double[] va = null;
 
-        case Whittaker:
-            va = SmoothSeries.smoothWhittaker(c.data, c.lambda, c.weights);
-            break;
+            switch (c.method)
+            {
+            case CenteredMovingAverage:
+                va = SmoothSeries.smoothCenteredMovingAverage(series, c.window);
+                break;
 
-        default:
-            throw new IllegalArgumentException();
+            case MedianThenAverage:
+                va = SmoothSeries.smoothMedianThenAverage(series, c.medianWindow, c.averageWindow);
+                break;
+
+            case Whittaker:
+                Double lambda = c.lambdas.get(ns + 1);
+                if (lambda == null)
+                    lambda = c.lambda;
+                va = SmoothSeries.smoothWhittaker(series, lambda, c.weights);
+                break;
+
+            default:
+                throw new IllegalArgumentException();
+            }
+
+            list.add(va);
         }
 
+        int nrows = c.series.get(0).length;
         StringBuilder sb = new StringBuilder();
 
-        for (double v : va)
+        for (int nr = 0; nr < nrows; nr++)
         {
-            if (sb.length() != 0)
-                sb.append("\n");
-            sb.append(String.format("%.4f", v));
+            for (int ns = 0; ns < list.size(); ns++)
+            {
+                if (ns != 0)
+                    sb.append(" ");
+                double[] va = list.get(ns);
+                double v = va[nr];
+                sb.append(String.format("%.4f", v));
+            }
+                    
+            sb.append("\n");
         }
 
         text = sb.toString();
