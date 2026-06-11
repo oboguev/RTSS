@@ -93,7 +93,7 @@ public class SmoothDataCommand
             else if (tokens.length == 3 && tokens[0].equals("weight"))
             {
                 int y = Integer.parseInt(tokens[1]);
-                double w = Double.parseDouble(tokens[1]);
+                double w = Double.parseDouble(tokens[2]);
                 c.mweights.put(y, w);
             }
             else if (tokens.length >= 1)
