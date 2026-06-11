@@ -41,6 +41,8 @@ public class CountryNames
         defineCountry("Панама", "Panama");
         defineCountry("Парагвай", "Paraguay");
         defineCountry("Перу", "Peru");
+        defineCountry("Пуэрто Рико", "Puerto Rico");
+        defineCountry("Пуэрто-Рико", "Puerto Rico");
         defineCountry("Сальвадор", "El Salvador");
         defineCountry("Уругвай", "Uruguay");
         defineCountry("Чили", "Chile");

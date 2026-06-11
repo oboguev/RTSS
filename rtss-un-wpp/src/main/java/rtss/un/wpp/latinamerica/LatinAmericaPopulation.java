@@ -35,6 +35,12 @@ public class LatinAmericaPopulation
     
     private void defineCountries() throws Exception
     {
+        // defineCountries_1();
+        defineCountries_2();
+    }
+    
+    private void defineCountries_1() throws Exception
+    {
         defineCountry("Аргентина");
         defineCountry("Боливия");
         defineCountry("Бразилия");
@@ -57,6 +63,31 @@ public class LatinAmericaPopulation
         defineCountry("Венецуэлла");
     }
 
+    private void defineCountries_2() throws Exception
+    {
+        defineCountry("Мексика");
+        defineCountry("Гватемала");
+        defineCountry("Гондурас");
+        defineCountry("Сальвадор");
+        defineCountry("Никарагуа");
+        defineCountry("Коста-Рика");
+        defineCountry("Панама");
+        defineCountry("Куба");
+        defineCountry("Гаити");
+        defineCountry("Доминиканская республика");
+        defineCountry("Пуэрто-Рико");
+        defineCountry("Венесуэла");
+        defineCountry("Колумбия");
+        defineCountry("Эквадор");
+        defineCountry("Перу");
+        defineCountry("Боливия");
+        defineCountry("Чили");
+        defineCountry("Бразилия");
+        defineCountry("Парагвай");
+        defineCountry("Уругвай");
+        defineCountry("Аргентина");
+    }
+    
     private void defineCountry(String rname) throws Exception
     {
         Countries.add(rname);
