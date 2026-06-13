@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rtss.math.algorithms.smooth.SmoothSeries;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
 import rtss.util.excel.ExcelRC;
@@ -181,14 +182,15 @@ public class ExtractDemTransCurves
 
     private void out(String what)
     {
-        // ### add smoothed with Whittaker lambda = 5
+        final char quote = '"';
         
         countries.sort(Comparator.comparingInt(c -> c.startYear));
+        int nyears = countries.get(0).cbr.length;
 
         Util.out("");
         Util.out("Вывод " + what.toUpperCase());
 
-        char quote = '"';
+        countries.sort(Comparator.comparing(c -> c.cname));
 
         StringBuilder sb = new StringBuilder("набор");
         for (Country c : countries)
@@ -212,16 +214,58 @@ public class ExtractDemTransCurves
         for (Country c : countries)
             sb.append("," + quote + c.cname + quote);
         sb.append(",среднее");
+        sb.append(",\"сглаженное среднее\"");
         Util.out(sb.toString());
 
-        int nyears = countries.get(0).cbr.length;
+        /* ------------------ calculate average ------------------------- */
+        
+        double[] average = new double[nyears];
+
+        for (int year = 0; year < nyears; year++)
+        {
+            double sum = 0;
+            double weights = 0;
+
+            for (Country c : countries)
+            {
+                if (year < c.cbr.length)
+                {
+                    double v, v0;
+                    switch (what)
+                    {
+                    case "cbr":
+                        v = c.cbr[year];
+                        v0 = c.cbr[0];
+                        break;
+
+                    case "cdr":
+                        v = c.cdr[year];
+                        v0 = c.cdr[0];
+                        break;
+
+                    default:
+                        throw new IllegalArgumentException();
+                    }
+
+                    v = v / v0;
+
+                    sum += c.weight * v;
+                    weights += c.weight;
+                }
+            }
+            
+            average[year] = sum / weights;
+        }
+        
+        double lambda = 5.0;
+        double[] smooth = SmoothSeries.smoothWhittaker(average, lambda, null);
+        smooth[0] = 1.0;
+
+        /* ------------------ generate output ----------------------- */
 
         for (int year = 0; year < nyears; year++)
         {
             sb = new StringBuilder("" + year);
-
-            double sum = 0;
-            double weights = 0;
 
             for (Country c : countries)
             {
@@ -249,14 +293,12 @@ public class ExtractDemTransCurves
                     v = v / v0;
 
                     sb.append(String.format("%.3f", v));
-
-                    sum += c.weight * v;
-                    weights += c.weight;
                 }
             }
 
-            sb.append(String.format(",%.3f", sum / weights));
-
+            sb.append(String.format(",%.3f", average[year]));
+            sb.append(String.format(",%.3f", smooth[year]));
+            
             Util.out(sb.toString());
         }
     }
