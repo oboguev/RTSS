@@ -47,16 +47,26 @@ public class ExtractDemTransCurves
 
     private void addCountry(String cname, int startYear, String sheet) throws Exception
     {
-        addCountry(getCountry(cname, startYear, sheet));
+        addCountry(cname, startYear, sheet, null);
+    }
+
+    private void addCountry(String cname, int startYear, String sheet, LoadCountryOptions options) throws Exception
+    {
+        addCountry(getCountry(cname, startYear, sheet, options));
     }
 
     private Country getCountry(String cname, int startYear, String sheet) throws Exception
+    {
+        return getCountry(cname, startYear, sheet, null);
+    }
+
+    private Country getCountry(String cname, int startYear, String sheet, LoadCountryOptions options) throws Exception
     {
         Country c = new Country();
         c.cname = cname;
         c.startYear = startYear;
         c.sheet = sheet;
-        loadCountry(c);
+        loadCountry(c, options);
         return c;
     }
 
@@ -73,12 +83,12 @@ public class ExtractDemTransCurves
         addCountry("Гватемала", 1948, "Гватемала-Колвер-Бриньоли");
         addCountry("Гондурас", 1948, "Гондурас-Колвер-Бриньоли");
         addCountry("Колумбия", 1922, "Колумбия");
-        addCountry("Коста-Рика", 1923, "Коста-Рика-Бриньоли-обе-Колвер");
+        addCountry("Коста-Рика", 1923, "Коста-Рика-Бриньоли-обе-Колвер", new LoadCountryOptions().useSmoothCBR());
         addCountry("Мексика", 1917, "Мексика-Бриньоли-CONAPO-реформа"); 
         addCountry("Никарагуа", 1949, "Никарагуа-Бриньоли");
-        addCountry("Панама", 1918, "Панама");
+        addCountry("Панама", 1913, "Панама", new LoadCountryOptions().useSmoothCBR());
         addCountry("Перу", 1940, "Перу");
-        addCountry("Сальвадор", 1943, "Сальвадор-Колвер-Бриньоли");
+        addCountry("Сальвадор", 1938, "Сальвадор-Колвер-Бриньоли", new LoadCountryOptions().useSmoothCBR());  // 1938-1943 -- смертность "раздумывала"
         addCountry("Эквадор", 1915, "Эквадор");
         
         // Венесуэла усреднить и с 1921
@@ -86,13 +96,13 @@ public class ExtractDemTransCurves
         c2 = getCountry("Венесуэла", 1921, "Венесуэла-Бриньоли");
         addCountry(average(c1, c2, 1921));
 
-        // Чили усреднить и с 1912
-        c1 = getCountry("Чили", 1912, "Чили-Бриньоли");
-        c2 = getCountry("Чили", 1912, "Чили-Колвер");
-        addCountry(average(c1, c2, 1912));
+        // Чили усреднить и с 1922
+        c1 = getCountry("Чили", 1922, "Чили-Бриньоли", new LoadCountryOptions().useSmoothCBR());
+        c2 = getCountry("Чили", 1922, "Чили-Колвер", new LoadCountryOptions().useSmoothCBR());
+        addCountry(average(c1, c2, 1922));
 
         /*
-         * Устранить влияние войн и природных катастроф
+         * Устранить влияние войн, эпидемий и природных катастроф
          */
         if (haveCountry("Гватемала"))
         {
@@ -171,6 +181,8 @@ public class ExtractDemTransCurves
 
     private void out(String what)
     {
+        // ### add smoothed with Whittaker lambda = 5
+        
         countries.sort(Comparator.comparingInt(c -> c.startYear));
 
         Util.out("");
@@ -265,8 +277,11 @@ public class ExtractDemTransCurves
         Util.out(String.format("%s %.2f", c.sheet, v));
     }
 
-    private void loadCountry(Country c) throws Exception
+    private void loadCountry(Country c, LoadCountryOptions options) throws Exception
     {
+        if (options == null)
+            options = new LoadCountryOptions();
+        
         ExcelRC rc = Excel.readSheet("latinamerica/Latin-America-Vital-Rates-Yearly.xlsx", true, c.sheet);
         Integer tnr = null;
         Integer tnc = null;
@@ -294,10 +309,17 @@ public class ExtractDemTransCurves
 
         if (tnr == null || tnc == null)
             throw new Exception("Unabe to locate series in " + c.sheet);
+        
+        if (options.useSmoothCBR && !"р-сгл".equals(rc.asString(tnr, tnc + 4)))
+            throw new Exception("Unabe to locate series in " + c.sheet);
+        
+        final int col_year = tnc;
+        final int col_cbr = options.useSmoothCBR ? tnc + 4 : tnc + 1;
+        final int col_cdr = tnc + 2;
 
         for (int nr = tnr + 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
-            String ys = rc.asString(nr, tnc);
+            String ys = rc.asString(nr, col_year);
             if (ys == null || ys.equals(""))
                 continue;
 
@@ -308,13 +330,13 @@ public class ExtractDemTransCurves
             double cbr;
             double cdr;
 
-            if (rc.isEmpty(nr, tnc + 1) && rc.isEmpty(nr, tnc + 2))
+            if (rc.isEmpty(nr, col_cbr) && rc.isEmpty(nr, col_cdr))
                 continue;
 
             try
             {
-                cbr = rc.asDouble(nr, tnc + 1);
-                cdr = rc.asDouble(nr, tnc + 2);
+                cbr = rc.asDouble(nr, col_cbr);
+                cdr = rc.asDouble(nr, col_cdr);
             }
             catch (Exception ex)
             {
@@ -409,6 +431,17 @@ public class ExtractDemTransCurves
         {
             double v = v1 + (v2 - v1) * (year - y1) / (double) (y2 - y1);
             m.put(year, v);
+        }
+    }
+    
+    public static class LoadCountryOptions
+    {
+        public boolean useSmoothCBR;
+        
+        public LoadCountryOptions useSmoothCBR()
+        {
+            useSmoothCBR = true;
+            return this;
         }
     }
 }
