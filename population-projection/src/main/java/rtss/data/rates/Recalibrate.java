@@ -15,6 +15,74 @@ public class Recalibrate
 {
     private static double PROMILLE = 1000.0;
 
+    public static class Rates
+    {
+        public double cbr;
+        public double cdr;
+
+        public Rates()
+        {
+        }
+        
+        public Rates cbr(double cbr)
+        {
+            this.cbr = cbr;
+            return this;
+        }
+
+        public Rates cdr(double cdr)
+        {
+            this.cdr = cdr;
+            return this;
+        }
+
+        public Rates(double cbr, double cdr)
+        {
+            this.cbr = cbr;
+            this.cdr = cdr;
+        }
+
+        public double cbr()
+        {
+            return cbr;
+        }
+
+        public double cdr()
+        {
+            return cdr;
+        }
+    }
+
+    /*
+     * Рождаемость и смертность в нормировке на среднегодовое население -> рождаемость и смертность в нормировке на население начала года.   
+     * Миграция полагается нулевой.   
+     * 
+     * Линейная формула верна лишь для низких величин рождаемости и смертности.
+     * Она поэтому не годится для младенческой смертности, для преобразования которой следует использовать mx2qx.   
+     */
+    public static Rates m2e(Rates rates)
+    {
+        Rates x = new Rates(0, 0);
+        x.cbr = cbr_m2e(rates.cbr, rates.cdr);
+        x.cdr = cdr_m2e(rates.cbr, rates.cdr);
+        return x;
+    }
+
+    /*
+     * Рождаемость и смертность в нормировке на население в начале года -> рождаемость и смертность в нормировке на среднегодовое население.
+     * Миграция полагается нулевой.
+     * 
+     * Линейная формула верна лишь для низких величин рождаемости и смертности.
+     * Она поэтому не годится для младенческой смертности, для преобразования которой следует использовать qx2mx.   
+     */
+    public static Rates e2m(Rates rates)
+    {
+        Rates x = new Rates(0, 0);
+        x.cbr = cbr_e2m(rates.cbr, rates.cdr);
+        x.cdr = cdr_e2m(rates.cbr, rates.cdr);
+        return x;
+    }
+
     /*
      * Рождаемость и смертность в нормировке на население в начале года -> рождаемость в нормировке на среднегодовое население.
      * Миграция полагается нулевой.
@@ -32,7 +100,6 @@ public class Recalibrate
      * Миграция полагается нулевой.   
      * 
      * Линейная формула верна лишь для низких величин рождаемости и смертности.
-     * Она поэтому не годится для младенческой смертности, для преобразования которой следует использовать qx2mx.   
      */
     public static double cdr_e2m(double cbr, double cdr)
     {
@@ -57,7 +124,6 @@ public class Recalibrate
      * Миграция полагается нулевой.   
      * 
      * Линейная формула верна лишь для низких величин рождаемости и смертности.
-     * Она поэтому не годится для младенческой смертности, для преобразования которой следует использовать mx2qx.   
      */
     public static double cdr_m2e(double cbr, double cdr)
     {
@@ -91,63 +157,5 @@ public class Recalibrate
         double sp2 = p2.sum(Locality.TOTAL, Gender.BOTH, 0, PopulationByLocality.MAX_AGE);
         double spm = MathUtil.log_average(sp1, sp2);
         return rate * spm / sp1;
-    }
-
-    public static class Rates
-    {
-        public double cbr;
-        public double cdr;
-
-        public Rates()
-        {
-        }
-        
-        public Rates cbr(double cbr)
-        {
-            this.cbr = cbr;
-            return this;
-        }
-
-        public Rates cdr(double cdr)
-        {
-            this.cdr = cdr;
-            return this;
-        }
-
-        public Rates(double cbr, double cdr)
-        {
-            this.cbr = cbr;
-            this.cdr = cdr;
-        }
-    }
-
-    /*
-     * Рождаемость и смертность в нормировке на среднегодовое население -> рождаемость и смертность в нормировке на население начала года.   
-     * Миграция полагается нулевой.   
-     * 
-     * Линейная формула верна лишь для низких величин рождаемости и смертности.
-     * Она поэтому не годится для младенческой смертности, для преобразования которой следует использовать mx2qx.   
-     */
-    public static Rates m2e(Rates rates)
-    {
-        Rates x = new Rates(0, 0);
-        x.cbr = cbr_m2e(rates.cbr, rates.cdr);
-        x.cdr = cdr_m2e(rates.cbr, rates.cdr);
-        return x;
-    }
-
-    /*
-     * Рождаемость и смертность в нормировке на население в начале года -> рождаемость и смертность в нормировке на среднегодовое население.
-     * Миграция полагается нулевой.
-     * 
-     * Линейная формула верна лишь для низких величин рождаемости и смертности.
-     * Она поэтому не годится для младенческой смертности, для преобразования которой следует использовать qx2mx.   
-     */
-    public static Rates e2m(Rates rates)
-    {
-        Rates x = new Rates(0, 0);
-        x.cbr = cbr_e2m(rates.cbr, rates.cdr);
-        x.cdr = cdr_e2m(rates.cbr, rates.cdr);
-        return x;
     }
 }
