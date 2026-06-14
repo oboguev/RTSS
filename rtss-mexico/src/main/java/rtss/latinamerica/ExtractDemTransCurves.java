@@ -85,7 +85,7 @@ public class ExtractDemTransCurves
         addCountry("Гондурас", 1948, "Гондурас-Колвер-Бриньоли");
         addCountry("Колумбия", 1922, "Колумбия");
         addCountry("Коста-Рика", 1923, "Коста-Рика-Бриньоли-обе-Колвер", new LoadCountryOptions().useSmoothCBR());
-        addCountry("Мексика", 1917, "Мексика-Бриньоли-CONAPO-реформа"); 
+        addCountry("Мексика", 1916, "Мексика-итог-реформа"); 
         addCountry("Никарагуа", 1949, "Никарагуа-Бриньоли");
         addCountry("Панама", 1913, "Панама", new LoadCountryOptions().useSmoothCBR());
         addCountry("Перу", 1940, "Перу");
@@ -213,8 +213,8 @@ public class ExtractDemTransCurves
         sb = new StringBuilder("год");
         for (Country c : countries)
             sb.append("," + quote + c.cname + quote);
-        sb.append(",среднее");
-        sb.append(",\"сглаженное среднее\"");
+        sb.append(",\"грубое среднее\"");
+        sb.append(",\"среднее\"");  // сглаженное среднее
         Util.out(sb.toString());
 
         /* ------------------ calculate average ------------------------- */
