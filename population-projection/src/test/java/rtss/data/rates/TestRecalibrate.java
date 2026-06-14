@@ -21,7 +21,8 @@ public class TestRecalibrate
         try
         {
             TestRecalibrate self = new TestRecalibrate();
-            self.test_1();
+            self.test_1(false);
+            self.test_1(true);
             self.test_2();
 
             Util.out("");
@@ -34,21 +35,33 @@ public class TestRecalibrate
         }
     }
 
-    private void test_1() throws Exception
+    private void test_1(boolean linear) throws Exception
     {
-        test_1(1937, CBR_1937_MIDYEAR, CDR_1937_MIDYEAR);
-        test_1(1938, CBR_1938_MIDYEAR, CDR_1938_MIDYEAR);
-        test_1(1939, CBR_1939_MIDYEAR, CDR_1939_MIDYEAR);
+        test_1(linear, 1937, CBR_1937_MIDYEAR, CDR_1937_MIDYEAR);
+        test_1(linear, 1938, CBR_1938_MIDYEAR, CDR_1938_MIDYEAR);
+        test_1(linear, 1939, CBR_1939_MIDYEAR, CDR_1939_MIDYEAR);
     }
 
-    private void test_1(int year, double cbr, double cdr) throws Exception
+    private void test_1(boolean linear, int year, double cbr, double cdr) throws Exception
     {
         Rates rm = new Rates(cbr, cdr);
-        Rates re = Recalibrate.m2e(rm);
-        Rates rm2 = Recalibrate.e2m(re);
-
+        Rates re, rm2;
+        
         Util.out("");
-        Util.out("" + year);
+
+        if (linear)
+        {
+            Util.out("Linear " + year);
+            re = Recalibrate.m2e_linear(rm);
+            rm2 = Recalibrate.e2m_linear(re);
+        }
+        else
+        {
+            Util.out("Constant-rate " + year);
+            re = Recalibrate.m2e(rm);
+            rm2 = Recalibrate.e2m(re);
+        }
+
         Util.out(String.format("%.3f %.3f", rm.cbr, rm.cdr));
         Util.out(String.format("%.3f %.3f", re.cbr, re.cdr));
         Util.out(String.format("%.3f %.3f", rm2.cbr, rm2.cdr));
