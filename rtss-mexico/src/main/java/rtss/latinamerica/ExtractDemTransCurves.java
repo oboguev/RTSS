@@ -40,6 +40,8 @@ public class ExtractDemTransCurves
     }
 
     private List<Country> countries = new ArrayList<>();
+    private double[] smooth_average_relative_cbr;
+    private double[] smooth_average_relative_cdr;
 
     private void addCountry(Country c) throws Exception
     {
@@ -145,8 +147,10 @@ public class ExtractDemTransCurves
         for (Country c : countries)
             eval(c); // ###
 
-        out("cbr");
-        out("cdr");
+        out("relative_cbr");
+        out("relative_cdr");
+        lag("relative_cbr", 90);
+        lag("relative_cbr", 50);
     }
 
     private Country getCountry(String cname) throws Exception
@@ -233,12 +237,12 @@ public class ExtractDemTransCurves
                     double v, v0;
                     switch (what)
                     {
-                    case "cbr":
+                    case "relative_cbr":
                         v = c.cbr[year];
                         v0 = c.cbr[0];
                         break;
 
-                    case "cdr":
+                    case "relative_cdr":
                         v = c.cdr[year];
                         v0 = c.cdr[0];
                         break;
@@ -276,12 +280,12 @@ public class ExtractDemTransCurves
                     double v, v0;
                     switch (what)
                     {
-                    case "cbr":
+                    case "relative_cbr":
                         v = c.cbr[year];
                         v0 = c.cbr[0];
                         break;
 
-                    case "cdr":
+                    case "relative_cdr":
                         v = c.cdr[year];
                         v0 = c.cdr[0];
                         break;
@@ -300,6 +304,20 @@ public class ExtractDemTransCurves
             sb.append(String.format(",%.3f", smooth[year]));
             
             Util.out(sb.toString());
+        }
+
+        switch (what)
+        {
+        case "relative_cbr":
+            smooth_average_relative_cbr = smooth;
+            break;
+
+        case "relative_cdr":
+            smooth_average_relative_cdr = smooth;
+            break;
+
+        default:
+            throw new IllegalArgumentException();
         }
     }
 
@@ -476,6 +494,77 @@ public class ExtractDemTransCurves
         }
     }
     
+    private double[] curve(Country c, String what)
+    {
+        double[] v = new double [c.cbr.length];
+        double[] x;
+
+        switch (what)
+        {
+        case "relative_cbr":
+            x = c.cbr;
+            break;
+
+        case "relative_cdr":
+            x = c.cdr;
+            break;
+
+        default:
+            throw new IllegalArgumentException();
+        }
+        
+        for (int k = 0; k < v.length; k++)
+            v[k] = x[k] / x[0];
+        
+        return v;
+    }
+
+    private void lag(String what, double pct)
+    {
+        Util.out("");
+        Util.out("Лаг (в годах) до падения " + what + " до " + pct + "%");
+        for (Country c : countries)
+        {
+            double [] r = curve(c, what);
+            lag(c.cname, r, pct);
+        }
+        
+        switch (what)
+        {
+        case "relative_cbr":
+            lag("среднее", smooth_average_relative_cbr, pct);
+            break;
+
+        case "relative_cdr":
+            lag("среднее", smooth_average_relative_cdr, pct);
+            break;
+
+        default:
+            throw new IllegalArgumentException();
+        }
+        
+    }
+
+    private void lag(String cname, double [] r, double pct)
+    {
+        pct /= 100.0;
+        
+        int year;
+        for (year = 0; year < r.length; year++)
+        {
+            if (r[year] <= pct)
+                break;
+        }
+        
+        if (!(r[year] <= pct))
+            throw new IllegalArgumentException();
+        
+        if (Math.abs(r[year - 1] - pct) <= Math.abs(r[year] - pct))
+            year--;
+        
+        Util.out(cname + " " + year);
+    }
+
     public static class LoadCountryOptions
     {
         public boolean useSmoothCBR;
@@ -486,4 +575,5 @@ public class ExtractDemTransCurves
             return this;
         }
     }
+
 }

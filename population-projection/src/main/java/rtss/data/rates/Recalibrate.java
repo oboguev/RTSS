@@ -105,7 +105,7 @@ public class Recalibrate
      * Модель: население внутри года меняется экспоненциально с постоянным темпом роста. 
      * Миграция полагается нулевой.
      */
-    public static double cbr_m2e_log(double cbr, double cdr)
+    private static double cbr_m2e_log(double cbr, double cdr)
     {
         double f = mean_to_start_population_factor_from_mid_rates(cbr, cdr);
         return cbr * f;
@@ -117,7 +117,7 @@ public class Recalibrate
      * Модель: население внутри года меняется экспоненциально с постоянным темпом роста. 
      * Миграция полагается нулевой.
      */
-    public static double cdr_m2e_log(double cbr, double cdr)
+    private static double cdr_m2e_log(double cbr, double cdr)
     {
         double f = mean_to_start_population_factor_from_mid_rates(cbr, cdr);
         return cdr * f;
@@ -129,7 +129,7 @@ public class Recalibrate
      * Модель: население внутри года меняется экспоненциально с постоянным темпом роста. 
      * Миграция полагается нулевой.
      */
-    public static double cbr_e2m_log(double cbr, double cdr)
+    private static double cbr_e2m_log(double cbr, double cdr)
     {
         double f = mean_to_start_population_factor_from_early_rates(cbr, cdr);
         return cbr / f;
@@ -141,7 +141,7 @@ public class Recalibrate
      * Модель: население внутри года меняется экспоненциально с постоянным темпом роста. 
      * Миграция полагается нулевой.
      */
-    public static double cdr_e2m_log(double cbr, double cdr)
+    private static double cdr_e2m_log(double cbr, double cdr)
     {
         double f = mean_to_start_population_factor_from_early_rates(cbr, cdr);
         return cdr / f;
@@ -209,7 +209,7 @@ public class Recalibrate
      * 
      * Линейная формула верна лишь для низких величин рождаемости и смертности.
      */
-    public static double cbr_e2m_linear(double cbr, double cdr)
+    private static double cbr_e2m_linear(double cbr, double cdr)
     {
         double f = 1 + (cbr - cdr) / (PROMILLE * 2);
         return cbr / f;
@@ -221,7 +221,7 @@ public class Recalibrate
      * 
      * Линейная формула верна лишь для низких величин рождаемости и смертности, а точнее прироста (CBR - CDR).
      */
-    public static double cdr_e2m_linear(double cbr, double cdr)
+    private static double cdr_e2m_linear(double cbr, double cdr)
     {
         double f = 1 + (cbr - cdr) / (PROMILLE * 2);
         return cdr / f;
@@ -233,7 +233,7 @@ public class Recalibrate
      * 
      * Линейная формула верна лишь для низких величин рождаемости и смертности.
      */
-    public static double cbr_m2e_linear(double cbr, double cdr)
+    private static double cbr_m2e_linear(double cbr, double cdr)
     {
         double f = 1 - (cbr - cdr) / (PROMILLE * 2);
         return cbr / f;
@@ -245,7 +245,7 @@ public class Recalibrate
      * 
      * Линейная формула верна лишь для низких величин рождаемости и смертности.
      */
-    public static double cdr_m2e_linear(double cbr, double cdr)
+    private static double cdr_m2e_linear(double cbr, double cdr)
     {
         double f = 1 - (cbr - cdr) / (PROMILLE * 2);
         return cdr / f;

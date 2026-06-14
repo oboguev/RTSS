@@ -39,6 +39,7 @@ public class LatinAmericaPopulation
         defineCountries_2();
     }
     
+    @SuppressWarnings("unused")
     private void defineCountries_1() throws Exception
     {
         defineCountry("Аргентина");
@@ -63,6 +64,7 @@ public class LatinAmericaPopulation
         defineCountry("Венецуэлла");
     }
 
+    @SuppressWarnings("unused")
     private void defineCountries_2() throws Exception
     {
         defineCountry("Мексика");
