@@ -121,12 +121,12 @@ public class ReadBins
                 String[] parts = s.trim().split("\\s*-\\s*");
                 if (parts.length != 2)
                     throw new Exception("Invalid year range on line " + lineNumber + ": " + line);
-                x1 = Integer.parseInt(parts[0]);
-                x2 = Integer.parseInt(parts[1]);
+                x1 = Integer.parseInt(numstr(parts[0]));
+                x2 = Integer.parseInt(numstr(parts[1]));
             }
             else
             {
-                x1 = x2 = Integer.valueOf(s);
+                x1 = x2 = Integer.valueOf(numstr(s));
             }
 
             // Parse each series value and add a Bin to the corresponding series
@@ -150,5 +150,11 @@ public class ReadBins
         }
 
         return result;
+    }
+    
+    private static String numstr(String s)
+    {
+        // 1,000 -> 1000
+        return s.replace(",", "");
     }
 }

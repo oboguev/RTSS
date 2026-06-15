@@ -149,6 +149,14 @@ public class Util
         return text;
     }
 
+    public static String stripComment(String text)
+    {
+        int pos = text.indexOf('#');
+        if (pos < 0)
+            return text;
+        return text.substring(0, pos);
+    }
+
     public static byte[] loadResourceAsBytes(String path) throws Exception
     {
         try
@@ -185,7 +193,7 @@ public class Util
     {
         if (times <= 0)
             return "";
-        
+
         String res = "";
         for (int k = 0; k < times; k++)
             res += s;

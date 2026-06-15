@@ -2,8 +2,8 @@ package rtss.data.bin;
 
 public class Bin
 {
-    public int age_x1; // starting age of this bin
-    public int age_x2; // last age of this bin 
+    public int age_x1; // starting age of this bin (inclusive)
+    public int age_x2; // last age of this bin (inclusive)
     public int widths_in_years;
     // public int widths_in_points;
     public double avg;

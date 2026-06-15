@@ -708,4 +708,31 @@ public class Bins
 
         return bins(list);
     }
+
+    public static Bin[] splitBinStructure(Bin[] bins, List<Integer> splits) throws Exception
+    {
+        for (int split : splits)
+            bins = splitBinStructure(bins, split);
+        return bins;
+    }
+
+    public static Bin[] splitBinStructure(Bin[] bins, int split) throws Exception
+    {
+        List<Bin> list = new ArrayList<>();
+
+        for (Bin bin : bins)
+        {
+            if (split > bin.age_x1 && split <= bin.age_x2)
+            {
+                list.add(new Bin(bin.age_x1, split - 1, 0));
+                list.add(new Bin(split, bin.age_x2, 0));
+            }
+            else
+            {
+                list.add(new Bin(bin.age_x1, bin.age_x2, 0));
+            }
+        }
+
+        return bins(list);
+    }
 }
