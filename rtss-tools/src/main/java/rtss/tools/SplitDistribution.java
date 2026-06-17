@@ -98,7 +98,7 @@ public class SplitDistribution
 
         for (String line : text.replace("\r\n", "\n").split("\n"))
         {
-            line = Util.stripComment(line);
+            line = Util.stripLineComment(line);
             line = Util.despace(line);
             if (line.isEmpty())
                 continue;

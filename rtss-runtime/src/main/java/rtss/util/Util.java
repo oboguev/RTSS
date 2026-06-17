@@ -149,12 +149,31 @@ public class Util
         return text;
     }
 
-    public static String stripComment(String text)
+    public static String stripLineComment(String text)
     {
         int pos = text.indexOf('#');
         if (pos < 0)
             return text;
         return text.substring(0, pos);
+    }
+
+    public static String stripMultiLineComment(String text)
+    {
+        StringBuilder sb = new StringBuilder();
+        String end = "";
+
+        for (String line : text.replace("\r\n", "\n").split("\n"))
+        {
+            if (!sb.isEmpty())
+            {
+                sb.append("\n");
+                end = "\n";
+            }
+            sb.append(stripLineComment(line));
+        }
+        
+        sb.append(end);
+        return sb.toString();
     }
 
     public static byte[] loadResourceAsBytes(String path) throws Exception
