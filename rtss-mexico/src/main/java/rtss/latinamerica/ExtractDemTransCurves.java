@@ -87,13 +87,13 @@ public class ExtractDemTransCurves
         addCountry("Гондурас", 1948, "Гондурас-Колвер-Бриньоли");
         addCountry("Колумбия", 1922, "Колумбия");
         addCountry("Коста-Рика", 1923, "Коста-Рика-Бриньоли-обе-Колвер", new LoadCountryOptions().useSmoothCBR());
-        addCountry("Мексика", 1916, "Мексика-итог-реформа"); 
+        addCountry("Мексика", 1916, "Мексика-итог-реформа");
         addCountry("Никарагуа", 1949, "Никарагуа-Бриньоли");
         addCountry("Панама", 1913, "Панама", new LoadCountryOptions().useSmoothCBR());
         addCountry("Перу", 1940, "Перу");
-        addCountry("Сальвадор", 1938, "Сальвадор-Колвер-Бриньоли", new LoadCountryOptions().useSmoothCBR());  // 1938-1943 -- смертность "раздумывала"
+        addCountry("Сальвадор", 1938, "Сальвадор-Колвер-Бриньоли", new LoadCountryOptions().useSmoothCBR()); // 1938-1943 -- смертность "раздумывала"
         addCountry("Эквадор", 1915, "Эквадор");
-        
+
         // Венесуэла усреднить и с 1921
         c1 = getCountry("Венесуэла", 1921, "Венесуэла-Колвер");
         c2 = getCountry("Венесуэла", 1921, "Венесуэла-Бриньоли");
@@ -111,22 +111,22 @@ public class ExtractDemTransCurves
         {
             interpolate("Гватемала", 1976, 1976);
             interpolate("Гватемала", 1980, 1982);
-            
+
         }
-        
+
         if (haveCountry("Гондурас"))
         {
             interpolate("Гондурас", 1973, 1974);
             interpolate("Гондурас", 1998, 1998);
         }
-        
+
         interpolate("Колумбия", 1985, 1985);
 
         interpolate("Никарагуа", 1972, 1972);
         interpolate("Никарагуа", 1978, 1980);
         interpolate("Никарагуа", 1983, 1988);
         interpolate("Никарагуа", 1998, 1998);
-        
+
         interpolate("Перу", 1970, 1970);
         interpolate("Сальвадор", 1979, 1983);
 
@@ -151,6 +151,7 @@ public class ExtractDemTransCurves
         out("relative_cdr");
         lag("relative_cbr", 90);
         lag("relative_cbr", 50);
+        show_transition_years();
     }
 
     private Country getCountry(String cname) throws Exception
@@ -187,7 +188,7 @@ public class ExtractDemTransCurves
     private void out(String what)
     {
         final char quote = '"';
-        
+
         countries.sort(Comparator.comparingInt(c -> c.startYear));
         int nyears = countries.get(0).cbr.length;
 
@@ -218,11 +219,11 @@ public class ExtractDemTransCurves
         for (Country c : countries)
             sb.append("," + quote + c.cname + quote);
         sb.append(",\"грубое среднее\"");
-        sb.append(",\"среднее\"");  // сглаженное среднее
+        sb.append(",\"среднее\""); // сглаженное среднее
         Util.out(sb.toString());
 
         /* ------------------ calculate average ------------------------- */
-        
+
         double[] average = new double[nyears];
 
         for (int year = 0; year < nyears; year++)
@@ -257,10 +258,10 @@ public class ExtractDemTransCurves
                     weights += c.weight;
                 }
             }
-            
+
             average[year] = sum / weights;
         }
-        
+
         double lambda = 5.0;
         double[] smooth = SmoothSeries.smoothWhittaker(average, lambda, null);
         smooth[0] = 1.0;
@@ -302,7 +303,7 @@ public class ExtractDemTransCurves
 
             sb.append(String.format(",%.3f", average[year]));
             sb.append(String.format(",%.3f", smooth[year]));
-            
+
             Util.out(sb.toString());
         }
 
@@ -341,7 +342,7 @@ public class ExtractDemTransCurves
     {
         if (options == null)
             options = new LoadCountryOptions();
-        
+
         ExcelRC rc = Excel.readSheet("latinamerica/Latin-America-Vital-Rates-Yearly.xlsx", true, c.sheet);
         Integer tnr = null;
         Integer tnc = null;
@@ -369,10 +370,10 @@ public class ExtractDemTransCurves
 
         if (tnr == null || tnc == null)
             throw new Exception("Unabe to locate series in " + c.sheet);
-        
+
         if (options.useSmoothCBR && !"р-сгл".equals(rc.asString(tnr, tnc + 4)))
             throw new Exception("Unabe to locate series in " + c.sheet);
-        
+
         final int col_year = tnc;
         final int col_cbr = options.useSmoothCBR ? tnc + 4 : tnc + 1;
         final int col_cdr = tnc + 2;
@@ -493,10 +494,10 @@ public class ExtractDemTransCurves
             m.put(year, v);
         }
     }
-    
+
     private double[] curve(Country c, String what)
     {
-        double[] v = new double [c.cbr.length];
+        double[] v = new double[c.cbr.length];
         double[] x;
 
         switch (what)
@@ -512,10 +513,10 @@ public class ExtractDemTransCurves
         default:
             throw new IllegalArgumentException();
         }
-        
+
         for (int k = 0; k < v.length; k++)
             v[k] = x[k] / x[0];
-        
+
         return v;
     }
 
@@ -525,10 +526,10 @@ public class ExtractDemTransCurves
         Util.out("Лаг (в годах) до падения " + what + " до " + pct + "%");
         for (Country c : countries)
         {
-            double [] r = curve(c, what);
+            double[] r = curve(c, what);
             lag(c.cname, r, pct);
         }
-        
+
         switch (what)
         {
         case "relative_cbr":
@@ -542,33 +543,51 @@ public class ExtractDemTransCurves
         default:
             throw new IllegalArgumentException();
         }
-        
+
     }
 
-    private void lag(String cname, double [] r, double pct)
+    private void lag(String cname, double[] r, double pct)
+    {
+        int year = calc_lag(r, pct);
+        Util.out(cname + " " + year);
+    }
+
+    private int calc_lag(double[] r, double pct)
     {
         pct /= 100.0;
-        
+
         int year;
         for (year = 0; year < r.length; year++)
         {
             if (r[year] <= pct)
                 break;
         }
-        
+
         if (!(r[year] <= pct))
             throw new IllegalArgumentException();
-        
+
         if (Math.abs(r[year - 1] - pct) <= Math.abs(r[year] - pct))
             year--;
-        
-        Util.out(cname + " " + year);
+
+        return year;
+    }
+
+    private void show_transition_years()
+    {
+        Util.out("");
+        Util.out("Датировка начала перехода смертности и начала перехода рождаемости");
+
+        for (Country c : countries)
+        {
+            double[] r = curve(c, "relative_cbr");
+            Util.out(String.format("%s %d %d", c.cname, c.startYear, c.startYear + calc_lag(r, 90)));
+        }
     }
 
     public static class LoadCountryOptions
     {
         public boolean useSmoothCBR;
-        
+
         public LoadCountryOptions useSmoothCBR()
         {
             useSmoothCBR = true;
