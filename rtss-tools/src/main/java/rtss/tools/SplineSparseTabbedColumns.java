@@ -244,11 +244,13 @@ public class SplineSparseTabbedColumns
         return list.get(list.size() - 1);
     }
 
+    @SuppressWarnings("unused")
     private int minYear(Map<Integer, Double> m)
     {
         return minYear(m.keySet());
     }
 
+    @SuppressWarnings("unused")
     private int maxYear(Map<Integer, Double> m)
     {
         return maxYear(m.keySet());

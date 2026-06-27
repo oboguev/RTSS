@@ -144,13 +144,18 @@ public class ExtractDemTransCurves
         // countries.sort(Comparator.comparingInt(c -> c.startYear));
         countries.sort(Comparator.comparing(c -> c.cname));
 
+        Util.out("Прирост населения (разы) при стартовых CBR=50 CDR=30 с начала перехода по конец истории");
         for (Country c : countries)
-            eval(c); // ###
+            Util.out(String.format("%s %.2f", c.sheet, eval_population_increase(c, 50.0, 30.0, null)));
 
         out("relative_cbr");
         out("relative_cdr");
+
         lag("relative_cbr", 90);
         lag("relative_cbr", 50);
+
+        show_main_phase_duration();
+
         show_transition_years();
     }
 
@@ -193,7 +198,7 @@ public class ExtractDemTransCurves
         int nyears = countries.get(0).cbr.length;
 
         Util.out("");
-        Util.out("Вывод " + what.toUpperCase());
+        Util.out("Вывод " + what.toUpperCase() + " c начала перехода смертности");
 
         countries.sort(Comparator.comparing(c -> c.cname));
 
@@ -322,8 +327,14 @@ public class ExtractDemTransCurves
         }
     }
 
-    private void eval(Country c)
+    private double eval_population_increase(Country c, Double initial_cbr, Double initial_cdr, Integer stopYear)
     {
+        if (initial_cbr == null)
+            initial_cbr = c.cbr[0];
+
+        if (initial_cdr == null)
+            initial_cdr = c.cdr[0];
+
         double v = 1.0;
 
         double cbr0 = c.cbr[0];
@@ -331,12 +342,17 @@ public class ExtractDemTransCurves
 
         for (int k = 0; k < c.cbr.length; k++)
         {
-            double ngr = 50 * c.cbr[k] / cbr0 - 30 * c.cdr[k] / cdr0;
+            if (stopYear != null && k == stopYear)
+                break;
+
+            double ngr = initial_cbr * c.cbr[k] / cbr0 - initial_cdr * c.cdr[k] / cdr0;
             v *= (1 + ngr / 1000);
         }
 
-        Util.out(String.format("%s %.2f", c.sheet, v));
+        return v;
     }
+
+    /* =========================================================================================================== */
 
     private void loadCountry(Country c, LoadCountryOptions options) throws Exception
     {
@@ -520,10 +536,13 @@ public class ExtractDemTransCurves
         return v;
     }
 
+    /* =========================================================================================================== */
+
     private void lag(String what, double pct)
     {
         Util.out("");
         Util.out("Лаг (в годах) до падения " + what + " до " + pct + "%");
+
         for (Country c : countries)
         {
             double[] r = curve(c, what);
@@ -572,15 +591,68 @@ public class ExtractDemTransCurves
         return year;
     }
 
-    private void show_transition_years()
+    /* =========================================================================================================== */
+
+    private void show_main_phase_duration() throws Exception
     {
         Util.out("");
-        Util.out("Датировка начала перехода смертности и начала перехода рождаемости");
+        Util.out("Длительность главной фазы с начала перехода D90 и до падения естественного прироста обратно к значению в точке D90 (годы),");
+        Util.out("величина естественного прироста в точке D90 (промилле),");
+        Util.out("максимальная величина естественного прироста в главной фазе (промилле),");
+        Util.out("естественный рост населения (разы сверх начального 1.0) за период главной фазы");
+
+        for (Country c : countries)
+        {
+            int end_ix = calc_main_phase_end_year_index(c);
+            double incr = eval_population_increase(c, null, null, end_ix);
+
+            Double max_ngr = null;
+
+            for (int y = 0; y <= end_ix; y++)
+            {
+                double ngr = c.cbr[0] - c.cdr[y];
+                if (max_ngr == null || ngr > max_ngr)
+                    max_ngr = ngr;
+            }
+
+            Util.out(String.format("%s %d %.1f %.1f %.1f",
+                                   c.cname,
+                                   end_ix,
+                                   c.cbr[0] - c.cdr[0],
+                                   max_ngr,
+                                   incr));
+        }
+    }
+
+    private int calc_main_phase_end_year_index(Country c) throws Exception
+    {
+        double ngr0 = c.cbr[0] - c.cdr[0];
+
+        for (int y = c.cbr.length - 1; y >= 0; y--)
+        {
+            double ngr = c.cbr[y] - c.cdr[y];
+            if (ngr >= ngr0)
+                return y + 1;
+        }
+
+        throw new Exception("Cannot find main phase end year");
+    }
+
+    /* =========================================================================================================== */
+
+    private void show_transition_years() throws Exception
+    {
+        Util.out("");
+        Util.out("Датировка начала перехода смертности (D90), начала перехода рождаемости (B90) и конца главной фазы");
 
         for (Country c : countries)
         {
             double[] r = curve(c, "relative_cbr");
-            Util.out(String.format("%s %d %d", c.cname, c.startYear, c.startYear + calc_lag(r, 90)));
+            Util.out(String.format("%s %d %d %d",
+                                   c.cname,
+                                   c.startYear,
+                                   c.startYear + calc_lag(r, 90),
+                                   c.startYear + calc_main_phase_end_year_index(c)));
         }
     }
 
@@ -594,5 +666,4 @@ public class ExtractDemTransCurves
             return this;
         }
     }
-
 }
