@@ -41,6 +41,18 @@ public class TaxonTerritoryFraction
     
     /* =========================================================== */
 
+    static public TaxonTerritoryFraction percent(double pct)
+    {
+        return new TaxonTerritoryFraction(pct / 100.0);
+    }
+
+    static public TaxonTerritoryFraction percent(int year1, double fraction1, int year2, double fraction2)
+    {
+        return new TaxonTerritoryFraction(year1, fraction1 / 100.0, year2, fraction2 / 100.0);
+    }
+
+    /* =========================================================== */
+
     public double fraction(int year)
     {
         if (ttfs != null)
@@ -58,12 +70,31 @@ public class TaxonTerritoryFraction
             else if (year >= year2)
                 return fraction2;
             else
-                // ### use linear interpolation
-                return 0;
+                // use linear interpolation (year1, fraction1) -> (year2, fraction2)
+                return fraction1 + (fraction2 - fraction1) * (year - year1) / (double)(year2 - year1);
         }
         else
         {
             return fraction;
         }
+    }
+
+    /* =========================================================== */
+    
+    public String describe() throws Exception
+    {
+        if (ttfs != null)
+        {
+            throw new Exception("Nested description not implemented");
+        }
+        else if (year1 != null)
+        {
+            return String.format("%.1f%% в %d → %.1f%% в %d", fraction1 * 100.0, year1, fraction2 * 100.0, year2);
+        }
+        else
+        {
+            return String.format("%.1f%%", fraction * 100.0);
+        }
+        
     }
 }

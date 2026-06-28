@@ -248,7 +248,8 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             }
             else
             {
-                Util.out(String.format("    %s (%.1f%%)", tname, ttf.fraction(year) * 100.0));
+                // Util.out(String.format("    %s (%.1f%%)", tname, ttf.fraction(year) * 100.0));
+                Util.out(String.format("    %s (%s)", tname, ttf.describe()));
             }
         }
     }
