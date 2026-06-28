@@ -24,7 +24,7 @@ public class RSFSR_1991_MigrationBalance
             ex.printStackTrace();
         }
     }
-    
+
     public RSFSR_1991_MigrationBalance() throws Exception
     {
     }
@@ -36,22 +36,24 @@ public class RSFSR_1991_MigrationBalance
 
         for (int year = 1896; year <= 1916; year++)
         {
-            double rsfsr_saldo = 0; 
-            double other_saldo = 0; 
-            
+            double rsfsr_saldo = 0;
+            double other_saldo = 0;
+
             Taxon tx = Taxon.of("РСФСР-1991", year, tds);
             tx = tx.flatten(tds, year);
-            
+
             for (String tname : tds.keySet())
             {
-                Double rsfsr_weight = tx.territories.get(tname);
-                if (rsfsr_weight == null)
-                    rsfsr_weight = 0.0;
+                double rsfsr_weight = 0;
+
+                if (tx.territories.get(tname) != null)
+                    rsfsr_weight = tx.territories.get(tname).fraction(year);
+
                 long saldo = innerMigration.saldo(tname, year);
                 rsfsr_saldo += saldo * rsfsr_weight;
                 other_saldo += saldo * (1.0 - rsfsr_weight);
             }
-            
+
             Util.out(String.format("%d %,d %,d", year, Math.round(rsfsr_saldo), Math.round(other_saldo)));
         }
     }

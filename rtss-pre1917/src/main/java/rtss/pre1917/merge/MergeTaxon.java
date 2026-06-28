@@ -290,7 +290,7 @@ public class MergeTaxon
             if (options.isLog())
                 Util.out(String.format("Merging to taxon: %s %d %s", ty2.territory.name, ty2.year, selector));
 
-            double weight = tx.territories.get(tname);
+            double weight = tx.territories.get(tname).fraction(ty.year);
             res += lv * weight;
             count++;
         }
@@ -318,7 +318,7 @@ public class MergeTaxon
 
                 Double rate = FieldValue.getDouble(ty2, selector);
 
-                double weight = tx.territories.get(tname);
+                double weight = tx.territories.get(tname).fraction(ty.year);
 
                 if (pop != null && rate != null)
                 {

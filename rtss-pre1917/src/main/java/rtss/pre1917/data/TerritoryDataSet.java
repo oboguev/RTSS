@@ -125,7 +125,7 @@ public class TerritoryDataSet extends HashMap<String, Territory>
         {
             /* child and Territory TerritoryYear */
             Territory xter = get(xname);
-            double fraction = tx.territories.get(xname);
+            TaxonTerritoryFraction fraction = tx.territories.get(xname);
 
             if (xter != null && xter.hasYear(year))
             {
@@ -134,21 +134,21 @@ public class TerritoryDataSet extends HashMap<String, Territory>
                 {
                     if (cty.population.all() == null)
                         cty.population.total.both = 0L;
-                    cty.population.total.both = Math.round(cty.population.all() + fraction * xty.population.all());
+                    cty.population.total.both = Math.round(cty.population.all() + fraction.fraction(year) * xty.population.all());
                 }
 
                 if (xty.births.all() != null)
                 {
                     if (cty.births.all() == null)
                         cty.births.total.both = 0L;
-                    cty.births.total.both = Math.round(cty.births.all() + fraction * xty.births.all());
+                    cty.births.total.both = Math.round(cty.births.all() + fraction.fraction(year) * xty.births.all());
                 }
 
                 if (xty.deaths.all() != null)
                 {
                     if (cty.deaths.all() == null)
                         cty.deaths.total.both = 0L;
-                    cty.deaths.total.both = Math.round(cty.deaths.all() + fraction * xty.deaths.all());
+                    cty.deaths.total.both = Math.round(cty.deaths.all() + fraction.fraction(year) * xty.deaths.all());
                 }
 
                 if (cty.population.all() != null && xty.cbr != null)
@@ -241,14 +241,14 @@ public class TerritoryDataSet extends HashMap<String, Territory>
 
         for (String tname : Util.sort(this.keySet()))
         {
-            Double weight = tx.territories.get(tname);
-            if (weight.equals(Taxon.DoubleONE))
+            TaxonTerritoryFraction ttf = tx.territories.get(tname);
+            if (ttf.equals(Taxon.FractionONE))
             {
                 Util.out("    " + tname);
             }
             else
             {
-                Util.out(String.format("    %s (%.1f%%)", tname, weight * 100.0));
+                Util.out(String.format("    %s (%.1f%%)", tname, ttf.fraction(year) * 100.0));
             }
         }
     }

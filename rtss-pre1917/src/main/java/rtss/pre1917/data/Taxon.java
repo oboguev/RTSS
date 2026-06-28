@@ -15,10 +15,10 @@ import rtss.pre1917.merge.MergeDescriptor;
  */
 public class Taxon
 {
-    public final Map<String, Double> territories = new HashMap<>();
+    public final Map<String, TaxonTerritoryFraction> territories = new HashMap<>();
     private final String name;
     private final int year;
-    public static Double DoubleONE = Double.valueOf(1.0);
+    public static final TaxonTerritoryFraction FractionONE = new TaxonTerritoryFraction(1.0);
     
     public static final String Астраханская_оседлое = "Астраханская (оседлое население)";
     public static final String Астраханская_кочевники = "Астраханская (кочевники)";
@@ -31,14 +31,19 @@ public class Taxon
 
     private Taxon add(String name) throws Exception
     {
-        return add(name, DoubleONE);
+        return add(name, FractionONE);
     }
 
-    private Taxon add(String name, double fraction) throws Exception
+    private Taxon add(String name, TaxonTerritoryFraction fraction) throws Exception
     {
         TerritoryNames.checkValidTerritoryName(name);
         territories.put(name, fraction);
         return this;
+    }
+    
+    private Taxon add(String name, double fraction) throws Exception
+    {
+        return add(name, new TaxonTerritoryFraction(fraction));
     }
 
     public static Taxon of(String name, int year, TerritoryDataSet tds) throws Exception
@@ -620,24 +625,33 @@ public class Taxon
     public Taxon flatten(TerritoryDataSet tds, int year) throws Exception
     {
         Taxon tx = new Taxon(name, year);
-        flatten(tx.territories, DoubleONE, tds, year);
+        flatten(tx.territories, FractionONE, tds, year);
         tx.weedOutCities(tds, year);
         return tx;
     }
 
-    private void flatten(Map<String, Double> out, Double pweight, TerritoryDataSet tds, int year) throws Exception
+    private void flatten(Map<String, TaxonTerritoryFraction> out, TaxonTerritoryFraction pweight, TerritoryDataSet tds, int year) throws Exception
     {
         for (String tname : territories.keySet())
         {
-            Double weight = territories.get(tname);
+            TaxonTerritoryFraction weight = territories.get(tname);
 
-            if (weight == DoubleONE && pweight == DoubleONE)
+            if (weight == FractionONE && pweight == FractionONE)
             {
-                weight = DoubleONE;
+                weight = FractionONE;
+            }
+            else if (pweight == FractionONE)
+            {
+                // just use weight
+            }
+            else if (weight == FractionONE)
+            {
+                // use pweight
+                weight = pweight;
             }
             else
             {
-                weight *= pweight;
+                weight = new TaxonTerritoryFraction(weight, pweight);
             }
 
             if (!isComposite(tname))
