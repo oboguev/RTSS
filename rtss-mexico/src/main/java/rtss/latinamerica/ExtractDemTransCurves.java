@@ -26,6 +26,8 @@ public class ExtractDemTransCurves
             ex.printStackTrace();
         }
     }
+    
+    /* ============================================================================================================== */
 
     public static class Country
     {
@@ -42,6 +44,8 @@ public class ExtractDemTransCurves
     private List<Country> countries = new ArrayList<>();
     private double[] smooth_average_relative_cbr;
     private double[] smooth_average_relative_cdr;
+    
+    private Country cRSFSR;
 
     private void addCountry(Country c) throws Exception
     {
@@ -104,6 +108,8 @@ public class ExtractDemTransCurves
         c2 = getCountry("Чили", 1922, "Чили-Колвер", new LoadCountryOptions().useSmoothCBR());
         addCountry(average(c1, c2, 1922));
 
+        cRSFSR = getCountry("РСФСР-1991", 1897, "РСФСР-1991", new LoadCountryOptions().useSmoothCBR().useSmoothCDR());
+
         /*
          * Устранить влияние войн, эпидемий и природных катастроф
          */
@@ -136,6 +142,8 @@ public class ExtractDemTransCurves
         for (Country c : countries)
             interpolate(c, 2020, 2022);
     }
+
+    /* ============================================================================================================== */
 
     private void do_main() throws Exception
     {
@@ -205,12 +213,15 @@ public class ExtractDemTransCurves
         StringBuilder sb = new StringBuilder("набор");
         for (Country c : countries)
             sb.append("," + quote + c.sheet + quote);
+        sb.append(",\"грубое среднее\"");
         sb.append(",среднее");
+        sb.append("," + quote + cRSFSR.sheet + quote);
         Util.out(sb.toString());
 
         sb = new StringBuilder("вес");
         for (Country c : countries)
             sb.append("," + c.weight);
+        sb.append(",");
         sb.append(",");
         Util.out(sb.toString());
 
@@ -218,6 +229,8 @@ public class ExtractDemTransCurves
         for (Country c : countries)
             sb.append("," + c.startYear);
         sb.append(",");
+        sb.append(",");
+        sb.append("," + cRSFSR.startYear);
         Util.out(sb.toString());
 
         sb = new StringBuilder("год");
@@ -225,8 +238,9 @@ public class ExtractDemTransCurves
             sb.append("," + quote + c.cname + quote);
         sb.append(",\"грубое среднее\"");
         sb.append(",\"среднее\""); // сглаженное среднее
+        sb.append("," + quote + cRSFSR.cname + quote);
         Util.out(sb.toString());
-
+        
         /* ------------------ calculate average ------------------------- */
 
         double[] average = new double[nyears];
@@ -308,6 +322,36 @@ public class ExtractDemTransCurves
 
             sb.append(String.format(",%.3f", average[year]));
             sb.append(String.format(",%.3f", smooth[year]));
+            
+            {
+                Country c  = cRSFSR;
+                sb.append(",");
+
+                if (year < c.cbr.length)
+                {
+                    double v, v0;
+                    switch (what)
+                    {
+                    case "relative_cbr":
+                        v = c.cbr[year];
+                        v0 = c.cbr[0];
+                        break;
+
+                    case "relative_cdr":
+                        v = c.cdr[year];
+                        v0 = c.cdr[0];
+                        break;
+
+                    default:
+                        throw new IllegalArgumentException();
+                    }
+
+                    v = v / v0;
+
+                    sb.append(String.format("%.3f", v));
+                }
+            }
+            
 
             Util.out(sb.toString());
         }
@@ -390,9 +434,12 @@ public class ExtractDemTransCurves
         if (options.useSmoothCBR && !"р-сгл".equals(rc.asString(tnr, tnc + 4)))
             throw new Exception("Unabe to locate series in " + c.sheet);
 
+        if (options.useSmoothCDR && !"с-сгл".equals(rc.asString(tnr, tnc + 5)))
+            throw new Exception("Unabe to locate series in " + c.sheet);
+
         final int col_year = tnc;
-        final int col_cbr = options.useSmoothCBR ? tnc + 4 : tnc + 1;
-        final int col_cdr = tnc + 2;
+        int col_cbr = options.useSmoothCBR ? tnc + 4 : tnc + 1;
+        int col_cdr = options.useSmoothCDR ? tnc + 5 : tnc + 2;
 
         for (int nr = tnr + 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -659,10 +706,17 @@ public class ExtractDemTransCurves
     public static class LoadCountryOptions
     {
         public boolean useSmoothCBR;
+        public boolean useSmoothCDR;
 
         public LoadCountryOptions useSmoothCBR()
         {
             useSmoothCBR = true;
+            return this;
+        }
+
+        public LoadCountryOptions useSmoothCDR()
+        {
+            useSmoothCDR = true;
             return this;
         }
     }
