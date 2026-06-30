@@ -41,6 +41,11 @@ public class Taxon
         return this;
     }
 
+    private Taxon addPercent(String name, double fraction) throws Exception
+    {
+        return add(name, fraction / 100.0);
+    }
+
     private Taxon add(String name, double fraction) throws Exception
     {
         return add(name, new TaxonTerritoryFraction(fraction));
@@ -381,7 +386,7 @@ public class Taxon
                     .add("Тульская")
                     .add("Уфимская")
                     .add("Ярославская")
-                    .add("Выборгская", 0.7)
+                    .addPercent("Выборгская", 70)
                     .add("Ставропольская")
                     .add("Черноморская")
                     .add("Кубанская обл.")
@@ -566,7 +571,7 @@ public class Taxon
     private void add_ussr_1991(int year) throws Exception
     {
         add("50 губерний Европейской России");
-        add("Выборгская", 0.7);
+        addPercent("Выборгская", 70);
 
         add("Сибирь");
         add("Средняя Азия");
@@ -575,12 +580,14 @@ public class Taxon
         add("г. Баку");
         add("Бакинская");
         add("Бакинская с Баку");
-        add("Батумская");
+        // часть территории Батумской области с 50% её населения отошла в 1918 году к Турции
+        // эта територия содержала 7.2% совокупного населения Кутаисской губернии + Батумской области
+        addPercent("Батумская", 50);
+        addPercent("Кутаисская с Батумской", 92.8);
         add("Дагестанская обл.");
         add("Елисаветпольская");
         add("Кубанская обл.");
         add("Кутаисская");
-        add("Кутаисская с Батумской");
         add("Ставропольская");
         add("Терская обл.");
         add("Тифлисская");

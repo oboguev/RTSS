@@ -27,6 +27,12 @@ public class TaxonTerritoryFraction
 
     public TaxonTerritoryFraction(int year1, double fraction1, int year2, double fraction2)
     {
+        if (fraction1 <= 0 || fraction1 >= 1)
+            throw new IllegalArgumentException();
+        
+        if (fraction2 <= 0 || fraction2 >= 1)
+            throw new IllegalArgumentException();
+
         this.year1 = year1;
         this.year2 = year2;
         
@@ -36,6 +42,8 @@ public class TaxonTerritoryFraction
 
     public TaxonTerritoryFraction(double fraction)
     {
+        if (fraction <= 0 || fraction > 1)
+            throw new IllegalArgumentException();
         this.fraction = fraction;
     }
     
