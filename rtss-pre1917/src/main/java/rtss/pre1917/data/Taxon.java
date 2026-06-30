@@ -19,7 +19,7 @@ public class Taxon
     private final String name;
     private final int year;
     public static final TaxonTerritoryFraction FractionONE = new TaxonTerritoryFraction(1.0);
-    
+
     public static final String Астраханская_оседлое = "Астраханская (оседлое население)";
     public static final String Астраханская_кочевники = "Астраханская (кочевники)";
 
@@ -40,10 +40,33 @@ public class Taxon
         territories.put(name, fraction);
         return this;
     }
-    
+
     private Taxon add(String name, double fraction) throws Exception
     {
         return add(name, new TaxonTerritoryFraction(fraction));
+    }
+
+    private Taxon remove(String name) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(name);
+        if (!territories.containsKey(name))
+            throw new Exception("Таксон не содержит территории " + name);
+        territories.remove(name);
+        return this;
+    }
+
+    private Taxon set(String name, double pecrentage) throws Exception
+    {
+        return set(name, TaxonTerritoryFraction.percent(pecrentage));
+    }
+
+    private Taxon set(String name, TaxonTerritoryFraction fraction) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(name);
+        if (!territories.containsKey(name))
+            throw new Exception("Таксон не содержит территории " + name);
+        territories.put(name, fraction);
+        return this;
     }
 
     public static Taxon of(String name, int year, TerritoryDataSet tds) throws Exception
@@ -375,6 +398,28 @@ public class Taxon
         case "СССР-1991":
             t.add_ussr_1991(year);
             break;
+
+        case "СССР-1926":
+            // ### в СССР 1991 -- set("Батумская обл.", 0.5) ### кутаисская с батумской
+            t.add_ussr_1991(year);
+            // ### flatten
+            t.remove("Курляндская")
+                    .remove("Лифляндская")
+                    .remove("Эстляндская")
+                    .remove("Холмская") // ### if contains
+                    .remove("Виленская")
+                    .remove("Ковенская")
+                    .remove("Гродненская")
+                    .remove("Бессарабская")
+                    .remove("Карсская обл.") // ### if contains
+                    .remove("Выборгская")
+                    .set("Волынская", 49.3)
+                    .set("Минская", 66.6)
+                    .set("Витебская", 66.9)
+                    .set("Псковская", 81.5)
+                    // ### кутаисская с батумской
+                    .set("Батумская обл.", 0.5);
+            break;
         }
 
         if (t.territories.size() == 0)
@@ -696,7 +741,7 @@ public class Taxon
             TaxonFinland = Taxon.of("Финляндия", 1913, null);
         return TaxonFinland;
     }
-    
+
     public static boolean isFinland(String tname) throws Exception
     {
         return taxonFinland().territories.containsKey(tname);
