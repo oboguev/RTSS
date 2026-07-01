@@ -439,7 +439,12 @@ public class SingleMortalityTable
         {
             MortalityInfo mi = m.get(age);
             for (int x = age; x <= MAX_AGE; x++)
+            {
+                if (mi.Tx == null)
+                    mi.Tx = 0.0;
                 mi.Tx += m.get(x).Lx;
+            }
+            
             if (mi.lx != 0)
             {
                 mi.ex = mi.Tx / mi.lx;

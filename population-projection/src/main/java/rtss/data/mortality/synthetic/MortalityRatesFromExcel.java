@@ -146,6 +146,7 @@ public class MortalityRatesFromExcel extends ExcelLoader
             if (sa.equals(""))
                 continue;
 
+            sa = sa.replace(" лет и старше", "-" + Population.MAX_AGE);
             sa = sa.replace(" и старше", "-" + Population.MAX_AGE);
             sa = sa.replace("+", "-" + Population.MAX_AGE);
 

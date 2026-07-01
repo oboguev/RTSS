@@ -24,7 +24,7 @@ public class MortalityTableGKS
 
     static public boolean UsePrecomputedFiles = true;
     static public boolean UseCache = true;
-    
+
     private static class Context
     {
         Area area;
@@ -69,8 +69,9 @@ public class MortalityTableGKS
             Context context = new Context();
             context.area = area;
             context.year = year;
-            context.filepath = String.format("mortality_tables/%s/%s-MortalityRates-GKS-%s.xlsx", area.name(), area.name(), year);
-            context.population = population; 
+            // context.filepath = String.format("mortality_tables/%s/%s-MortalityRates-GKS-%s.xlsx", area.name(), area.name(), year);
+            context.filepath = String.format("mortality_tables/%s/%s-AbridgedMortalityTable-GKS-%s.xlsx", area.name(), area.name(), year);
+            context.population = population;
 
             cmt = CombinedMortalityTable.newEmptyTable();
             compute(cmt, context, Locality.TOTAL);
@@ -93,18 +94,25 @@ public class MortalityTableGKS
 
         return cmt;
     }
-    
+
     private static void compute(CombinedMortalityTable cmt, Context context, Locality locality) throws Exception
     {
         compute(cmt, context, locality, Gender.BOTH);
         compute(cmt, context, locality, Gender.MALE);
         compute(cmt, context, locality, Gender.FEMALE);
     }
-    
+
     private static void compute(CombinedMortalityTable cmt, Context context, Locality locality, Gender gender) throws Exception
     {
-        SingleMortalityTable mt = getSingleTable(context, locality, gender);
-        cmt.setTable(locality, gender, mt);
+        try
+        {
+            SingleMortalityTable mt = getSingleTable(context, locality, gender);
+            cmt.setTable(locality, gender, mt);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(String.format("Error whole computing %s %s %s", context.filepath, locality, gender), ex);
+        }
     }
 
     private static SingleMortalityTable getSingleTable(Context context, Locality locality, Gender gender) throws Exception
@@ -116,7 +124,7 @@ public class MortalityTableGKS
         double[] exposure = null;
         if (context.population != null)
             exposure = context.population.toArray(locality, gender);
-        
+
         SingleMortalityTable mt = BuildSingleTable.makeSingleTable(mortality_bins, exposure, title, null);
         return mt;
     }
