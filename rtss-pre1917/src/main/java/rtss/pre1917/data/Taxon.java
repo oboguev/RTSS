@@ -422,6 +422,7 @@ public class Taxon
                     .setPercent("Минская", 66.6)
                     .setPercent("Витебская", 66.9)
                     .setPercent("Псковская", 81.5)
+                    .setPercent("Санкт-Петербургская с Санкт-Петербургом", 98.5)
                     .setPercent("Батумская", 50)
                     .setPercent("Кутаисская с Батумской", 92.8);
             break;

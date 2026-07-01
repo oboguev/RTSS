@@ -25,7 +25,7 @@ import rtss.util.Util;
 
 public class EvalCountryTaxon extends EvalCountryBase
 {
-    private final static boolean DoCountMilitaryDeaths = Util.False;
+    private final static boolean DoCountMilitaryDeaths = Util.True;
 
     public static void main(String[] args)
     {
@@ -499,6 +499,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                 break;
 
             case "СССР-1991":
+            case "СССР-1926":
                 lumpYearSum += immigration(tm, year, Math.round(lump.turkey * TurkeyFactor));
                 lumpYearSum += immigration(tm, year, lump.persia);
                 lumpYearSum += immigration(tm, year, lump.japan);
