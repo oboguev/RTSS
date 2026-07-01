@@ -94,6 +94,15 @@ public class CombinedMortalityTable
         return new CombinedMortalityTable(path);
     }
 
+    static public CombinedMortalityTable loadMF(String path) throws Exception
+    {
+        CombinedMortalityTable cmt = new CombinedMortalityTable();
+        cmt.source = path;
+        cmt.loadTables(path, Gender.MALE);
+        cmt.loadTables(path, Gender.FEMALE);
+        return cmt;
+    }
+    
     public MortalityInfo get(Locality locality, Gender gender, int age) throws Exception
     {
         String key = key(locality, gender);
