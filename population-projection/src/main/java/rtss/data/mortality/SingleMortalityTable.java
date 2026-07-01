@@ -49,31 +49,70 @@ public class SingleMortalityTable
         rdata = rdata.replace("\r\n", "\n");
         String[] lines = rdata.split("\n");
 
+        // Parse the column layout from the last comment line before data
+        Map<String, Integer> columnMap = null;
+
         for (String line : lines)
         {
             char unicode_feff = '\uFEFF';
             line = line.replace("" + unicode_feff, "");
 
+            // Check if this is a comment line
             int k = line.indexOf('#');
             if (k != -1)
+            {
+                // Extract the comment part to check if it's a column layout descriptor
+                String comment = line.substring(k + 1).trim();
+                if (comment.contains("x,") && (comment.contains("lx,") || comment.contains("l\u0445,")))
+                {
+                    // This is a column layout line, parse it
+                    columnMap = parseColumnLayout(comment);
+                }
+                // Remove comment from the line
                 line = line.substring(0, k);
+            }
+
             line = line.replace("\t", " ").replaceAll(" +", " ").trim();
             if (line.length() == 0)
                 continue;
 
+            // If we reach data without finding a column layout, use default
+            if (columnMap == null)
+            {
+                columnMap = getDefaultColumnLayout();
+            }
+
             String[] el = line.split(" ");
-            if (el.length != 8)
-                throw new Exception("Invalid format of mortality table");
+
+            // Validate that we have the required minimum fields
+            if (el.length < 6)
+                throw new Exception("Invalid format of mortality table: expected at least 6 columns, got " + el.length);
 
             MortalityInfo mi = new MortalityInfo();
-            mi.x = asInt(el[0]);
-            mi.lx = asInt(el[1]);
-            mi.dx = asInt(el[2]);
-            mi.qx = asDouble(el[3]);
-            mi.px = asDouble(el[4]);
-            mi.Lx = asInt(el[5]);
-            mi.Tx = asInt(el[6]);
-            mi.ex = asDouble(el[7]);
+
+            // Parse required fields (must be present and in this order at the start)
+            mi.x = asInt(el[columnMap.get("x")]);
+            mi.lx = asInt(el[columnMap.get("lx")]);
+            mi.dx = asInt(el[columnMap.get("dx")]);
+            mi.qx = asDouble(el[columnMap.get("qx")]);
+            mi.px = asDouble(el[columnMap.get("px")]);
+            mi.ex = asDouble(el[columnMap.get("ex")]);
+
+            // Parse optional fields
+            if (columnMap.containsKey("Lx") && columnMap.get("Lx") < el.length)
+                mi.Lx = asDouble(el[columnMap.get("Lx")]);
+            else
+                mi.Lx = null;
+
+            if (columnMap.containsKey("Tx") && columnMap.get("Tx") < el.length)
+                mi.Tx = asDouble(el[columnMap.get("Tx")]);
+            else
+                mi.Tx = null;
+
+            if (columnMap.containsKey("Vx") && columnMap.get("Vx") < el.length)
+                mi.Vx = asDouble(el[columnMap.get("Vx")]);
+            else
+                mi.Vx = null;
 
             if (mi.x < 0 || mi.x > MAX_AGE)
                 throw new Exception("Invalid data in mortality table");
@@ -93,6 +132,62 @@ public class SingleMortalityTable
         validate();
     }
 
+    private Map<String, Integer> parseColumnLayout(String layoutLine) throws Exception
+    {
+        Map<String, Integer> columnMap = new HashMap<>();
+
+        // Remove extra spaces and split by comma
+        String[] columns = layoutLine.replace(" ", "").split(",");
+
+        for (int i = 0; i < columns.length; i++)
+        {
+            String col = columns[i].trim();
+
+            // Normalize Cyrillic characters to Latin equivalents
+            col = col.replace("\u0445", "x");  // Cyrillic '\u0445' to Latin 'x'
+
+            // Map recognized column names to their positions
+            if (col.equals("x") || col.equals("lx") || col.equals("dx") ||
+                col.equals("qx") || col.equals("px") || col.equals("ex") ||
+                col.equals("Lx") || col.equals("Tx") || col.equals("Vx"))
+            {
+                columnMap.put(col, i);
+            }
+        }
+
+        // Validate that required fields are present
+        String[] required = {"x", "lx", "dx", "qx", "px", "ex"};
+        for (String field : required)
+        {
+            if (!columnMap.containsKey(field))
+                throw new Exception("Column layout missing required field: " + field);
+        }
+
+        // Validate that first 5 columns are in the required order
+        if (columnMap.get("x") != 0 || columnMap.get("lx") != 1 ||
+            columnMap.get("dx") != 2 || columnMap.get("qx") != 3 ||
+            columnMap.get("px") != 4)
+        {
+            throw new Exception("First five columns must be: x, lx, dx, qx, px (in this order)");
+        }
+
+        return columnMap;
+    }
+
+    private Map<String, Integer> getDefaultColumnLayout()
+    {
+        Map<String, Integer> columnMap = new HashMap<>();
+        columnMap.put("x", 0);
+        columnMap.put("lx", 1);
+        columnMap.put("dx", 2);
+        columnMap.put("qx", 3);
+        columnMap.put("px", 4);
+        columnMap.put("Lx", 5);
+        columnMap.put("Tx", 6);
+        columnMap.put("ex", 7);
+        return columnMap;
+    }
+
     public void validate() throws Exception
     {
         /*
@@ -101,7 +196,7 @@ public class SingleMortalityTable
         for (int age = 0; age <= MAX_AGE; age++)
         {
             MortalityInfo mi = get(age);
-            
+
             if (mi.qx > 1.0)
                 throw new Exception("qx > 1");
 
@@ -110,8 +205,12 @@ public class SingleMortalityTable
             Util.checkValidNonNegative(mi.dx);
             Util.checkValidNonNegative(mi.ex);
             Util.checkValidNonNegative(mi.lx);
-            Util.checkValidNonNegative(mi.Lx);
-            Util.checkValidNonNegative(mi.Tx);
+
+            // Only validate optional fields if they are present
+            if (mi.Lx != null)
+                Util.checkValidNonNegative(mi.Lx);
+            if (mi.Tx != null)
+                Util.checkValidNonNegative(mi.Tx);
 
             check_eq(String.format("px+qx for age %d px = %f, qx = %f", age, mi.px, mi.qx),
                      mi.px + mi.qx, 1.0, 0.011);
@@ -186,8 +285,18 @@ public class SingleMortalityTable
             mi.qx = 1.0 - mi.px;
             mi.lx = w1 * mi1.lx + w2 * mi2.lx;
             mi.dx = w1 * mi1.dx + w2 * mi2.dx;
-            mi.Lx = w1 * mi1.Lx + w2 * mi2.Lx;
-            mi.Tx = w1 * mi1.Tx + w2 * mi2.Tx;
+
+            // Interpolate optional fields only if present in both tables
+            if (mi1.Lx != null && mi2.Lx != null)
+                mi.Lx = w1 * mi1.Lx + w2 * mi2.Lx;
+            else
+                mi.Lx = null;
+
+            if (mi1.Tx != null && mi2.Tx != null)
+                mi.Tx = w1 * mi1.Tx + w2 * mi2.Tx;
+            else
+                mi.Tx = null;
+
             mi.ex = w1 * mi1.ex + w2 * mi2.ex;
 
             m.put(age, mi);
@@ -322,7 +431,7 @@ public class SingleMortalityTable
             }
 
             if (mi.Lx < 0)
-                mi.Lx = 0;
+                mi.Lx = 0.0;
         }
 
         // calculate Tx and ex
@@ -410,8 +519,17 @@ public class SingleMortalityTable
             sb.append(String.format("%-8d", Math.round(mi.dx)));
             sb.append(String.format("%-8.5f", mi.qx));
             sb.append(String.format("%-8.5f", mi.px));
-            sb.append(String.format("%-8d", Math.round(mi.Lx)));
-            sb.append(String.format("%-8d", Math.round(mi.Tx)));
+
+            if (mi.Lx != null)
+                sb.append(String.format("%-8d", Math.round(mi.Lx)));
+            else
+                sb.append(String.format("%-8s", "ND"));
+
+            if (mi.Tx != null)
+                sb.append(String.format("%-8d", Math.round(mi.Tx)));
+            else
+                sb.append(String.format("%-8s", "ND"));
+
             sb.append(String.format("%.2f", mi.ex));
             sb.append(nl);
         }
@@ -442,8 +560,17 @@ public class SingleMortalityTable
                 sb.append(String.format("%-8d", Math.round(mi.dx)));
                 sb.append(String.format("%-8.5f", mi.qx));
                 sb.append(String.format("%-8.5f", mi.px));
-                sb.append(String.format("%-8d", Math.round(mi.Lx)));
-                sb.append(String.format("%-8d", Math.round(mi.Tx)));
+
+                if (mi.Lx != null)
+                    sb.append(String.format("%-8d", Math.round(mi.Lx)));
+                else
+                    sb.append(String.format("%-8s", "ND"));
+
+                if (mi.Tx != null)
+                    sb.append(String.format("%-8d", Math.round(mi.Tx)));
+                else
+                    sb.append(String.format("%-8s", "ND"));
+
                 sb.append(String.format("%.2f", mi.ex));
                 sb.append(nl);
             }

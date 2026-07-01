@@ -94,12 +94,12 @@ public class CombinedMortalityTable
         return new CombinedMortalityTable(path);
     }
 
-    static public CombinedMortalityTable loadMF(String path) throws Exception
+    static public CombinedMortalityTable loadMFT(String path) throws Exception
     {
         CombinedMortalityTable cmt = new CombinedMortalityTable();
         cmt.source = path;
-        cmt.loadTables(path, Gender.MALE);
-        cmt.loadTables(path, Gender.FEMALE);
+        cmt.loadTables(path, Gender.MALE, Locality.TOTAL);
+        cmt.loadTables(path, Gender.FEMALE, Locality.TOTAL);
         return cmt;
     }
     

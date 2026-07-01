@@ -18,19 +18,22 @@ public class MortalityInfo
     public double px;
 
     // Числа живущих в возрасте х лет (int)
-    public double Lx;
+    public Double Lx;
 
     // Числа прожитых человеколет (int)
-    public double Tx;
+    public Double Tx;
 
     // Средняя продолжительность предстоящей жизни
     public double ex;
     
+    // вероятная продолжительность предстоящей жизни (до которой доживает половина группы)
+    public Double Vx;
+
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("x=%d lx=%f dx=%f qx=%f px=%f ", x, lx, dx, qx, px));
-        sb.append(String.format("Lx=%f Tx=%f ex=%f", Lx, Tx, ex));
+        sb.append(String.format("Lx=%s Tx=%s ex=%f", Lx, Tx, ex));
         return sb.toString();
     }
 }
