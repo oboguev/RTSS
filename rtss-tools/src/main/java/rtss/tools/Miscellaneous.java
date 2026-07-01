@@ -10,10 +10,10 @@ public class Miscellaneous
         try
         {
             double qx = 0.216;
-            double mx = MortalityUtil.qx2mx(qx);
+            double mx = MortalityUtil.do_not_use__qx2mx(qx);
             
             mx = 0.243;
-            qx = MortalityUtil.mx2qx(mx);
+            qx = MortalityUtil.do_not_use__mx2qx(mx);
             
             Util.noop();
         }

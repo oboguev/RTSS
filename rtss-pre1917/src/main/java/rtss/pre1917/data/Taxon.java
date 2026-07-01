@@ -73,6 +73,7 @@ public class Taxon
         return set(name, TaxonTerritoryFraction.percent(pecrentage));
     }
 
+    @SuppressWarnings("unused")
     private Taxon setPercentIfContains(String name, double pecrentage) throws Exception
     {
         return setIfContains(name, TaxonTerritoryFraction.percent(pecrentage));

@@ -125,7 +125,7 @@ public class ExporAllMortalityCurves
                     sb.append(",");
                 SingleMortalityTable smt = year2smt.get(year);
                 double qx = smt.qx()[age];
-                double mx = MortalityUtil.qx2mx(qx);
+                double mx = MortalityUtil.qx2mx(qx, gender, age);
                 sb.append("" + String.format("%.5f", (age == 0 ? qx : mx) * PROMILLE));
             }
 
@@ -184,7 +184,7 @@ public class ExporAllMortalityCurves
                     for (int age = bin.age_x1; age <= bin.age_x2; age++)
                     {
                         double qx = smt.qx()[age];
-                        double mx = MortalityUtil.qx2mx(qx);
+                        double mx = MortalityUtil.qx2mx(qx, gender, age);
                         mx_avg += mx;
                         
                     }

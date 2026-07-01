@@ -32,11 +32,11 @@ public class TestMortalityUtil
             double qxe = qx;
             if (qxe >= 0.999999999999)
                 qxe = 0.999;
-            double mx = MortalityUtil.qx2mx(qxe);
+            double mx = MortalityUtil.do_not_use__qx2mx(qxe);
             double mx_old = MortalityUtil.qx2mx_old(qxe);
             if (mx <= MortalityUtil.MAX_MX)
             {
-                double qx2 = MortalityUtil.mx2qx(mx);
+                double qx2 = MortalityUtil.do_not_use__mx2qx(mx);
                 Util.out(String.format("%.4f => %.4f %.4f => %.4f", qxe, mx, mx_old, qx2));
             }
             else
@@ -66,7 +66,7 @@ public class TestMortalityUtil
                 qxe = 0.999;
 
             double mx= MortalityUtil.qx2mx(qxe, gender, 0);
-            double mx_const = MortalityUtil.qx2mx(qxe);
+            double mx_const = MortalityUtil.do_not_use__qx2mx(qxe);
 
             if (mx <= MortalityUtil.MAX_MX)
             {

@@ -123,7 +123,7 @@ public class MortalityUtil
      * 
      * Употребима в возрастах >= 1
      */
-    public static double qx2mx(double qx) throws Exception
+    private static double qx2mx(double qx) throws Exception
     {
         qx = validate_qx(qx);
         double mx = -Math.log1p(-qx);
@@ -137,7 +137,7 @@ public class MortalityUtil
      * 
      * Употребима в возрастах >= 1
      */
-    public static double mx2qx(double mx) throws Exception
+    private static double mx2qx(double mx) throws Exception
     {
         if (!(mx >= 0 && mx <= MAX_MX))
             throw new Exception("mx value is out of valid range: " + mx);
@@ -145,6 +145,17 @@ public class MortalityUtil
         double qx = -Math.expm1(-mx);
         return qx;
     }
+
+    public static double do_not_use__mx2qx(double mx) throws Exception
+    {
+        return mx2qx(mx);
+    }
+
+    public static double do_not_use__qx2mx(double qx) throws Exception
+    {
+        return qx2mx(qx);
+    }
+
 
     /* ============================================================================== */
 
