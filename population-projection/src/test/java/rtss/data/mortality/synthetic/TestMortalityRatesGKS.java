@@ -35,6 +35,7 @@ public class TestMortalityRatesGKS
             PopulationByLocality p = PopulationByLocality.census(Area.RSFSR, 1979);
             p = null;
             CombinedMortalityTable cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1978-1979", p);
+            Util.unused(cmt);
         }
 
         /* 
@@ -47,6 +48,7 @@ public class TestMortalityRatesGKS
             PopulationByLocality p = PopulationByLocality.census(Area.RSFSR, 1989);
             p = null;
             CombinedMortalityTable cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987", p);
+            Util.unused(cmt);
         }
     }
 }
