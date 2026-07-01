@@ -49,6 +49,9 @@ public class ExporAllMortalityCurves
             year2smt.put(year, cmt.getSingleTable(Locality.TOTAL, gender));
         }
 
+        cmt = CombinedMortalityTable.load("mortality_tables/RSFSR/1958-1959");
+        year2smt.put(1959, cmt.getSingleTable(Locality.TOTAL, gender));
+        
         PopulationByLocality p1989 = PopulationByLocality.census(Area.RSFSR, 1989);
         cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987", p1989);
         year2smt.put(1987, cmt.getSingleTable(Locality.TOTAL, gender));
