@@ -25,7 +25,7 @@ import rtss.util.Util;
 
 public class EvalCountryTaxon extends EvalCountryBase
 {
-    private final static boolean DoCountMilitaryDeaths = Util.True;
+    private final static boolean DoCountMilitaryDeaths = Util.False;
 
     public static void main(String[] args)
     {
