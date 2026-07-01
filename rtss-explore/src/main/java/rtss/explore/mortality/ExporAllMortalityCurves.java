@@ -1,4 +1,5 @@
-package rtss.data.mortality;
+package rtss.explore.mortality;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import rtss.data.bin.Bin;
+import rtss.data.mortality.CombinedMortalityTable;
+import rtss.data.mortality.MortalityUtil;
+import rtss.data.mortality.SingleMortalityTable;
 import rtss.data.mortality.synthetic.MortalityTableADH;
 import rtss.data.mortality.synthetic.MortalityTableGKS;
 import rtss.data.population.struct.Population;
