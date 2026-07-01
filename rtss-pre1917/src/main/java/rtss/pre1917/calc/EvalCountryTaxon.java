@@ -44,6 +44,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                     .exportData("c:\\@\\Final.csv", "c:\\@\\Final.txt");
             new EvalCountryTaxon("РСФСР-1991", 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("СССР-1991", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1926", 1913, Options.VERBOSE).calc().print();
 
             new EvalCountryTaxon("Европейская часть РСФСР-1991", 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Сибирь", 1914, Options.VERBOSE).calc().print();

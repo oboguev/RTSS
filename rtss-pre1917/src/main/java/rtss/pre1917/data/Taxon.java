@@ -60,9 +60,22 @@ public class Taxon
         return this;
     }
 
-    private Taxon set(String name, double pecrentage) throws Exception
+    private Taxon removeIfContains(String name) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(name);
+        if (territories.containsKey(name))
+            territories.remove(name);
+        return this;
+    }
+
+    private Taxon setPercent(String name, double pecrentage) throws Exception
     {
         return set(name, TaxonTerritoryFraction.percent(pecrentage));
+    }
+
+    private Taxon setPercentIfContains(String name, double pecrentage) throws Exception
+    {
+        return setIfContains(name, TaxonTerritoryFraction.percent(pecrentage));
     }
 
     private Taxon set(String name, TaxonTerritoryFraction fraction) throws Exception
@@ -71,6 +84,14 @@ public class Taxon
         if (!territories.containsKey(name))
             throw new Exception("Таксон не содержит территории " + name);
         territories.put(name, fraction);
+        return this;
+    }
+
+    private Taxon setIfContains(String name, TaxonTerritoryFraction fraction) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(name);
+        if (territories.containsKey(name))
+            territories.put(name, fraction);
         return this;
     }
 
@@ -95,13 +116,13 @@ public class Taxon
         case "51 губерния Европейской России":
             if (year >= 1913)
             {
-                t.add50(year);
+                t.add50_european(year);
                 t.add("Холмская");
             }
             break;
 
         case "50 губерний Европейской России":
-            t.add50(year);
+            t.add50_european(year);
             break;
 
         case "Остзейские губернии":
@@ -190,7 +211,7 @@ public class Taxon
             break;
 
         case "Азиатская Россия":
-            t.add("Кавказ").add("Сибирь").add("Средняя Азия");
+            t.add("Кавказ").addSiberia().addCentralAsia();
             break;
 
         case "Кавказ":
@@ -214,18 +235,7 @@ public class Taxon
             break;
 
         case "Сибирь":
-            t.add("Амурская обл.")
-                    .add("Енисейская")
-                    .add("Забайкальская обл.")
-                    .add("Иркутская")
-                    .add("Камчатская обл.")
-                    .add("Иркутская")
-                    .add("Приморская обл.")
-                    .add("Приморская обл. с Камчатской обл.")
-                    .add("Сахалин")
-                    .add("Тобольская")
-                    .add("Томская")
-                    .add("Якутская обл.");
+            t.addSiberia();
             break;
 
         case "Финляндия":
@@ -240,20 +250,11 @@ public class Taxon
             break;
 
         case "Империя с Финляндией":
-            t.add("Империя")
-                    .add("Финляндия");
+            t.add("Империя").add("Финляндия");
             break;
 
         case "Средняя Азия":
-            t.add("Акмолинская обл.")
-                    .add("Закаспийская обл.")
-                    .add("Самаркандская обл.")
-                    .add("Семипалатинская обл.")
-                    .add("Семиреченская обл.")
-                    .add("Сыр-Дарьинская обл.")
-                    .add("Тургайская обл.")
-                    .add("Уральская обл.")
-                    .add("Ферганская обл.");
+            t.addCentralAsia();
             break;
 
         case "Белоруссия":
@@ -336,7 +337,7 @@ public class Taxon
                     .add("Уфимская")
                     .add("Ярославская")
                     .add("Выборгская", TaxonTerritoryFraction.percent(70))
-                    .add("Сибирь")
+                    .addSiberia()
                     .add("Акмолинская обл.", TaxonTerritoryFraction.percent(1897, 11.5, 1913, 17))
                     .add("Тургайская обл.", TaxonTerritoryFraction.percent(1897, 0.5, 1913, 3.5))
                     .add("Ставропольская")
@@ -405,25 +406,23 @@ public class Taxon
             break;
 
         case "СССР-1926":
-            // ### в СССР 1991 -- set("Батумская обл.", 0.5) ### кутаисская с батумской
             t.add_ussr_1991(year);
-            // ### flatten
             t.remove("Курляндская")
                     .remove("Лифляндская")
                     .remove("Эстляндская")
-                    .remove("Холмская") // ### if contains
+                    .removeIfContains("Холмская")
                     .remove("Виленская")
                     .remove("Ковенская")
                     .remove("Гродненская")
                     .remove("Бессарабская")
-                    .remove("Карсская обл.") // ### if contains
+                    .removeIfContains("Карсская обл.")
                     .remove("Выборгская")
-                    .set("Волынская", 49.3)
-                    .set("Минская", 66.6)
-                    .set("Витебская", 66.9)
-                    .set("Псковская", 81.5)
-                    // ### кутаисская с батумской
-                    .set("Батумская обл.", 0.5);
+                    .setPercent("Волынская", 49.3)
+                    .setPercent("Минская", 66.6)
+                    .setPercent("Витебская", 66.9)
+                    .setPercent("Псковская", 81.5)
+                    .setPercent("Батумская", 50)
+                    .setPercent("Кутаисская с Батумской", 92.8);
             break;
         }
 
@@ -433,7 +432,7 @@ public class Taxon
         return t;
     }
 
-    private void add50(int year) throws Exception
+    private void add50_european(int year) throws Exception
     {
         add("Архангельская");
         add("Астраханская");
@@ -570,11 +569,11 @@ public class Taxon
 
     private void add_ussr_1991(int year) throws Exception
     {
-        add("50 губерний Европейской России");
+        add50_european(year);
         addPercent("Выборгская", 70);
 
-        add("Сибирь");
-        add("Средняя Азия");
+        addSiberia();
+        addCentralAsia();
 
         // Кавказ кроме Карсской области
         add("г. Баку");
@@ -595,6 +594,39 @@ public class Taxon
         add("Эриванская");
         add("Закатальский окр.");
         add("Сухумский окр.");
+    }
+
+    /* =================================================================================================== */
+
+    private Taxon addSiberia() throws Exception
+    {
+        add("Амурская обл.");
+        add("Енисейская");
+        add("Забайкальская обл.");
+        add("Иркутская");
+        add("Камчатская обл.");
+        add("Иркутская");
+        add("Приморская обл.");
+        add("Приморская обл. с Камчатской обл.");
+        add("Сахалин");
+        add("Тобольская");
+        add("Томская");
+        add("Якутская обл.");
+        return this;
+    }
+
+    private Taxon addCentralAsia() throws Exception
+    {
+        add("Акмолинская обл.");
+        add("Закаспийская обл.");
+        add("Самаркандская обл.");
+        add("Семипалатинская обл.");
+        add("Семиреченская обл.");
+        add("Сыр-Дарьинская обл.");
+        add("Тургайская обл.");
+        add("Уральская обл.");
+        add("Ферганская обл.");
+        return this;
     }
 
     /* =================================================================================================== */
