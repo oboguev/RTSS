@@ -30,7 +30,7 @@ public class TestMortalityRatesGKS
          * таблицы смертности 1978-1979 года. Для этого важны не абсолютные значения
          * численности в возрастах, а их относительное соотношение.
          */
-        if (Util.False)
+        if (Util.True)
         {
             PopulationByLocality p = PopulationByLocality.census(Area.RSFSR, 1979);
             p = null;

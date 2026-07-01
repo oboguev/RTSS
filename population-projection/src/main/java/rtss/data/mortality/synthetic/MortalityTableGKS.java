@@ -82,7 +82,7 @@ public class MortalityTableGKS
             if (Util.False)
             {
                 String comment = "# Таблица построена модулем " + MortalityTableGKS.class.getCanonicalName() + " по данным в " + context.filepath;
-                cmt.saveTable("P:\\@\\zzzz", comment);
+                cmt.saveTable("C:\\@\\zzzz", comment);
             }
         }
 
