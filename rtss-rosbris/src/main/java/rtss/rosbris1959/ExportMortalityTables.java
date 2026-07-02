@@ -11,6 +11,8 @@ import rtss.data.mortality.synthetic.BuildSingleTable.BuildMortalityCurveOptions
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.rosbris.RosBrisDeathRates;
+import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
 
 public class ExportMortalityTables
@@ -45,12 +47,24 @@ public class ExportMortalityTables
             cmt.setTable(Locality.TOTAL, Gender.MALE, m_smt);
             cmt.setTable(Locality.TOTAL, Gender.FEMALE, f_smt);
 
-            String comment = "# Таблица построена модулем " + ExportMortalityTables.class.getCanonicalName() + " по данным в РосБРИС для РСФСР " + year;
-            String dir = "C:\\@\\zzzz\\RosBRIS\\" + year;
-            new File(dir).mkdirs();
-            cmt.saveTable(dir, comment);
-            Util.out("Exported table for " + year);
+            saveToFile(cmt, year);
         }
+
+        for (int year = 1989; year <= 2022; year++)
+        {
+            RosBrisDeathRates rates = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
+            CombinedMortalityTable cmt = rates.toCombinedMortalityTable();
+            saveToFile(cmt, year);
+        }
+    }
+    
+    private void saveToFile(CombinedMortalityTable cmt, int year) throws Exception
+    {
+        String comment = "# Таблица построена модулем " + ExportMortalityTables.class.getCanonicalName() + " по данным в РосБРИС для РСФСР " + year;
+        String dir = "C:\\@\\zzzz\\RosBRIS\\" + year;
+        new File(dir).mkdirs();
+        cmt.saveTable(dir, comment);
+        Util.out("Exported table for " + year);
     }
     
     private SingleMortalityTable build(RosBris1959DeathRates dr, int year, Gender gender) throws Exception
