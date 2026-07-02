@@ -19,6 +19,7 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.RosBrisDeathRates;
 import rtss.rosbris.RosBrisTerritory;
+import rtss.rosbris1959.RosBris1959DeathRates;
 import rtss.util.Util;
 
 public class ExporAllMortalityCurves
@@ -47,7 +48,7 @@ public class ExporAllMortalityCurves
         CombinedMortalityTable cmt;
 
         /* ============================================================================================================ */
-        
+
         /*
          * АДХ-РСФСР 1927-1958
          */
@@ -95,7 +96,7 @@ public class ExporAllMortalityCurves
         year2smt.put(1908.0, cmt.getSingleTable(Locality.TOTAL, gender));
 
         /* ============================================================================================================ */
-        
+
         /*
          * РосБРИС 1989-2002
          */
@@ -105,6 +106,10 @@ public class ExporAllMortalityCurves
             cmt = dr.toCombinedMortalityTable();
             year2smt.put(year + 0.0, cmt.getSingleTable(Locality.TOTAL, gender));
         }
+
+        /* ============================================================================================================ */
+
+        RosBris1959DeathRates.load();
 
         /* ============================================================================================================ */
 
@@ -221,21 +226,29 @@ public class ExporAllMortalityCurves
                 }
                 else
                 {
-                    double mx_avg = 0;
-                    for (int age = bin.age_x1; age <= bin.age_x2; age++)
-                    {
-                        double qx = smt.qx()[age];
-                        double mx = MortalityUtil.qx2mx(qx, gender, age);
-                        mx_avg += mx;
-
-                    }
-                    mx_avg /= bin.widths_in_years;
+                    double mx_avg = average_mx(smt, gender, bin.age_x1, bin.age_x2);
                     sb.append("" + String.format("%.5f", mx_avg * PROMILLE));
                 }
             }
 
             Util.out(sb.toString());
         }
+    }
+
+    private double average_mx(SingleMortalityTable smt, Gender gender, int age1, int age2) throws Exception
+    {
+        double mx_avg = 0;
+
+        for (int age = age1; age <= age2; age++)
+        {
+            double qx = smt.qx()[age];
+            double mx = MortalityUtil.qx2mx(qx, gender, age);
+            mx_avg += mx;
+        }
+        
+        mx_avg /= age2 - age1 + 1;
+        
+        return mx_avg;
     }
 
     private String formatYear(double year)
