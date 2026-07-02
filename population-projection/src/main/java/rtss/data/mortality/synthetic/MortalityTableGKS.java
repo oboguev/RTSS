@@ -119,6 +119,22 @@ public class MortalityTableGKS
     {
         Bin[] mortality_bins = MortalityRatesFromExcel.loadAgeQx(context.filepath, locality, gender);
         mortality_bins = Bins.multiply(mortality_bins, 1000.0);
+        
+        // открытая последяя корзина?
+        Bin last = Bins.lastBin(mortality_bins);
+        boolean open = last.avg >= 1000.0;
+
+        // значения в файле относятся к корзине в целом, и не представляют среднее за год
+        mortality_bins = Bins.sum2avg(mortality_bins);
+        
+        if (open)
+        {
+            last = Bins.lastBin(mortality_bins);
+            Bin p = last.prev;
+            Bin pp = last.prev.prev;
+            last.avg = p.avg + (p.avg - pp.avg) * 1.5;
+        }
+        
         String title = String.format("ГКС-%s-%s %s %s", context.area.name(), context.year, locality.name(), gender.name());
 
         double[] exposure = null;
