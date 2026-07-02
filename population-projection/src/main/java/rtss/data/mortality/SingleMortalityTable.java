@@ -33,7 +33,7 @@ public class SingleMortalityTable
     }
 
     /*****************************************************************************************************/
-
+    
     public SingleMortalityTable(String path) throws Exception
     {
         load(path);

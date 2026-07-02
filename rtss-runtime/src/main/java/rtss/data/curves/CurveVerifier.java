@@ -52,12 +52,23 @@ public class CurveVerifier
         }
     }
 
+    public static class CurveVerifierOptions
+    {
+        public Double maxAbsDifference;
+
+        public CurveVerifierOptions maxAbsDifference(double maxAbsDifference)
+        {
+            this.maxAbsDifference = maxAbsDifference;
+            return this;
+        }
+    }
+
     /*
      * Validate curve mean values against the bins,
      * but allow average curve values in the last bin years be less than bin average
      * (if mortality curve is clipped at 1000 promille).
      */
-    public static void validate_means_allow_last_beless(double[] yy, Bin[] bins, double[] exposure) throws Exception
+    public static void validate_means_allow_last_beless(double[] yy, Bin[] bins, double[] exposure, CurveVerifierOptions options) throws Exception
     {
         int ppy = CurveUtil.ppy(yy, bins);
 
@@ -70,6 +81,10 @@ public class CurveVerifier
 
             if (exposure == null)
             {
+
+                if (options != null && options.maxAbsDifference != null && Math.abs(Util.average(y) - bin.avg) <= options.maxAbsDifference)
+                    continue;
+
                 if (Util.differ(Util.average(y), bin.avg, 0.001))
                     throw new Exception("Curve does not preserve mean values of the bins");
             }

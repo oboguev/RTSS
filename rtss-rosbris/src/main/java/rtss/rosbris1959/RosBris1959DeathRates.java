@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import rtss.csv.CSVSmartReader;
+import rtss.data.bin.Bin;
+import rtss.data.bin.Bins;
 import rtss.data.selectors.Gender;
 
 public class RosBris1959DeathRates
@@ -33,7 +35,7 @@ public class RosBris1959DeathRates
     public static RosBris1959DeathRates load() throws Exception
     {
         RosBris1959DeathRates dr = new RosBris1959DeathRates();
-        
+
         CSVSmartReader csv = CSVSmartReader.fromResource("RosBRIS.1959/DRc5a1959-1988.txt");
 
         Map<RosBris1959AgeGroup, Integer> age2col = new HashMap<>();
@@ -58,10 +60,10 @@ public class RosBris1959DeathRates
             case "F":
                 gender = Gender.FEMALE;
                 break;
-            
+
             default:
                 throw new Exception("Malformatted file");
-                
+
             }
 
             for (RosBris1959AgeGroup ag : RosBris1959AgeGroup.AllAgeGroups)
@@ -75,59 +77,59 @@ public class RosBris1959DeathRates
 
         return dr;
     }
-    
+
     public RosBris1959DeathRates forYear(int year)
     {
         RosBris1959DeathRates dr = new RosBris1959DeathRates();
-    
+
         for (Value value : values)
         {
             if (value.year == year)
                 dr.values.add(value);
         }
-        
+
         return dr;
     }
 
     public RosBris1959DeathRates forGender(Gender gender)
     {
         RosBris1959DeathRates dr = new RosBris1959DeathRates();
-    
+
         for (Value value : values)
         {
             if (value.gender == gender)
                 dr.values.add(value);
         }
-        
+
         return dr;
     }
 
     public RosBris1959DeathRates forCause(int cause)
     {
         RosBris1959DeathRates dr = new RosBris1959DeathRates();
-    
+
         for (Value value : values)
         {
             if (value.cause == cause)
                 dr.values.add(value);
         }
-        
+
         return dr;
     }
 
     public RosBris1959DeathRates forAge(RosBris1959AgeGroup ag)
     {
         RosBris1959DeathRates dr = new RosBris1959DeathRates();
-    
+
         for (Value value : values)
         {
             if (value.age.equals(ag))
                 dr.values.add(value);
         }
-        
+
         return dr;
     }
-    
+
     public double value()
     {
         if (values.size() == 0)
@@ -135,7 +137,36 @@ public class RosBris1959DeathRates
 
         if (values.size() > 1)
             throw new IllegalArgumentException("More than one element");
-        
+
         return values.get(0).value;
     }
+
+    public Bin[] asBins() throws Exception
+    {
+        Value v0 = null;
+
+        for (Value value : values)
+        {
+            if (v0 == null)
+            {
+                v0 = value;
+            }
+            else
+            {
+                if (v0.year != value.year || v0.gender != value.gender || v0.cause != value.cause)
+                    throw new IllegalArgumentException("Mixed values");
+            }
+        }
+        
+        List<Bin> list = new ArrayList<>();
+        
+        for (RosBris1959AgeGroup ag : RosBris1959AgeGroup.AllAgeGroups)
+        {
+            Bin bin = new Bin(ag.from, ag.to, this.forAge(ag).value());
+            list.add(bin);
+        }
+
+        return Bins.bins(list);
+    }
+
 }

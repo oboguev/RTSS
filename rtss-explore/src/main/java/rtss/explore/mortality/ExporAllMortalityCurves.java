@@ -42,6 +42,7 @@ public class ExporAllMortalityCurves
 
     private Map<Double, SingleMortalityTable> year2smt = new HashMap<>();
     private final double PROMILLE = 1000.0;
+    private RosBris1959DeathRates rbdr;
 
     private void do_main(Gender gender) throws Exception
     {
@@ -109,7 +110,14 @@ public class ExporAllMortalityCurves
 
         /* ============================================================================================================ */
 
-        RosBris1959DeathRates.load();
+        /*
+         * РосБРИС 1959-1988
+         */
+        for (int year = 1959; year <= 1988; year++)
+        {
+            cmt = CombinedMortalityTable.loadMFT("mortality_tables/RSFSR/RosBRIS/" + year);
+            year2smt.put(year + 0.0, cmt.getSingleTable(Locality.TOTAL, gender));
+        }
 
         /* ============================================================================================================ */
 

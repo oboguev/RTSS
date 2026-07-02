@@ -6,6 +6,7 @@ import java.util.List;
 import rtss.data.bin.Bin;
 import rtss.data.bin.Bins;
 import rtss.data.curves.CurveVerifier;
+import rtss.data.curves.CurveVerifier.CurveVerifierOptions;
 import rtss.data.curves.InterpolateAsMeanPreservingCurve;
 import rtss.data.curves.InterpolateUShapeAsMeanPreservingCurve;
 import rtss.data.curves.OsierTask;
@@ -31,15 +32,34 @@ public class BuildSingleTable
     private static final int IMAGE_CX = 3435;
     private static final int IMAGE_CY = 1341;
     
-    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt)
+    public static class BuildMortalityCurveOptions
+    {
+        private CurveVerifierOptions curveVerifierOptions = new CurveVerifierOptions();
+        
+        public CurveVerifierOptions curveVerifierOptions()
+        {
+            return curveVerifierOptions; 
+        }
+    
+        public BuildMortalityCurveOptions curveVerifierOptions(CurveVerifierOptions curveVerifierOptions)
+        {
+            this.curveVerifierOptions = curveVerifierOptions;
+            return this;
+        }
+    }
+    
+    public static SingleMortalityTable makeSingleTable(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt, BuildMortalityCurveOptions options)
             throws Exception
     {
         // exposure = null;
-        double[] qx = curve(bins, exposure, debug_title, modelMt);
+        if (options == null)
+            options = new BuildMortalityCurveOptions(); 
+        
+        double[] qx = curve(bins, exposure, debug_title, modelMt, options);
         return SingleMortalityTable.from_qx("computed", Util.divide(qx, 1000));
     }
 
-    private static double[] curve(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt) throws Exception
+    private static double[] curve(Bin[] bins, double[] exposure, String debug_title, SingleMortalityTable modelMt, BuildMortalityCurveOptions options) throws Exception
     {
         /*
          * Tried to use Osier library (see Sigurd Dyrting, "Osier : A Library for Demographic Calculations"
@@ -138,7 +158,7 @@ public class BuildSingleTable
         boolean useTailModelTable = Bins.lastBin(bins).widths_in_years >= 10 && modelMt != null && Util.True;
 
         boolean allowFakeBin = (!useTailModel && !useTailModelTable) || Util.True;
-        double[] curve = curve_pclm(bins, exposure, debug_title, allowFakeBin);
+        double[] curve = curve_pclm(bins, exposure, debug_title, allowFakeBin, options);
 
         if (useTailModel)
         {
@@ -155,7 +175,7 @@ public class BuildSingleTable
                                                     tailBinIndex,
                                                     OldAgeTailModel.GOMPERTZ);
 
-            CurveVerifier.validate_means_allow_last_beless(curve, bins, exposure);
+            CurveVerifier.validate_means_allow_last_beless(curve, bins, exposure, null);
 
             if (Util.True)
             {
@@ -173,7 +193,7 @@ public class BuildSingleTable
             {
                 double[] curve2 = OldAgeTailViaModelTable.apply(curve, bins, exposure, modelMt.qx(), 70, Population.MAX_AGE, beta);
                         
-                CurveVerifier.validate_means_allow_last_beless(curve2, bins, exposure);
+                CurveVerifier.validate_means_allow_last_beless(curve2, bins, exposure, null);
 
                 if (Util.True)
                 {
@@ -190,7 +210,7 @@ public class BuildSingleTable
         return curve;
     }
 
-    private static double[] curve_pclm(Bin[] bins, double[] exposure, String debug_title, boolean allowFakeBin) throws Exception
+    private static double[] curve_pclm(Bin[] bins, double[] exposure, String debug_title, boolean allowFakeBin, BuildMortalityCurveOptions options) throws Exception
     {
         final int ppy = 1;
         final double[] exposure_original = exposure;
@@ -250,7 +270,7 @@ public class BuildSingleTable
 
         CurveVerifier.positive(yy, bins, debug_title, true);
         CurveVerifier.verifyUShape(yy, bins, false, debug_title, false);
-        CurveVerifier.validate_means_allow_last_beless(yy, bins, exposure_original);
+        CurveVerifier.validate_means_allow_last_beless(yy, bins, exposure_original, options.curveVerifierOptions());
 
         if (Util.False && bins[0].widths_in_years == 1)
         {
