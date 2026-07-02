@@ -1,6 +1,5 @@
 package rtss.explore.mortality;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +17,8 @@ import rtss.data.population.struct.PopulationByLocality;
 import rtss.data.selectors.Area;
 import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
+import rtss.rosbris.RosBrisDeathRates;
+import rtss.rosbris.RosBrisTerritory;
 import rtss.util.Util;
 
 public class ExporAllMortalityCurves
@@ -45,6 +46,11 @@ public class ExporAllMortalityCurves
     {
         CombinedMortalityTable cmt;
 
+        /* ============================================================================================================ */
+        
+        /*
+         * АДХ-РСФСР 1927-1958
+         */
         for (int year = 1927; year <= 1958; year++)
         {
             if (year >= 1941 && year <= 1945)
@@ -53,19 +59,29 @@ public class ExporAllMortalityCurves
             year2smt.put(year + 0.0, cmt.getSingleTable(Locality.TOTAL, gender));
         }
 
+        /* ============================================================================================================ */
+
+        /*
+         * Таблицы Госкомстата 1958.5 1978.5 1986.5
+         */
         cmt = CombinedMortalityTable.load("mortality_tables/RSFSR/1958-1959");
-        year2smt.put(1959.0, cmt.getSingleTable(Locality.TOTAL, gender));
-        
+        year2smt.put(1958.5, cmt.getSingleTable(Locality.TOTAL, gender));
+
         PopulationByLocality p1979 = PopulationByLocality.census(Area.RSFSR, 1979);
         p1979 = null;
         cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1978-1979", p1979);
-        year2smt.put(1979.0, cmt.getSingleTable(Locality.TOTAL, gender));
-        
+        year2smt.put(1978.5, cmt.getSingleTable(Locality.TOTAL, gender));
+
         PopulationByLocality p1989 = PopulationByLocality.census(Area.RSFSR, 1989);
         p1989 = null;
         cmt = MortalityTableGKS.getMortalityTable(Area.RSFSR, "1986-1987", p1989);
-        year2smt.put(1987.0, cmt.getSingleTable(Locality.TOTAL, gender));
+        year2smt.put(1986.5, cmt.getSingleTable(Locality.TOTAL, gender));
 
+        /* ============================================================================================================ */
+
+        /*
+         * Исторические таблицы 1879 1897 1908
+         */
         cmt = CombinedMortalityTable.loadMFT("mortality_tables/Russian-Empire/no63-50governorships-orthodox-1874-1883");
         year2smt.put(1879.0, cmt.getSingleTable(Locality.TOTAL, gender));
 
@@ -77,6 +93,18 @@ public class ExporAllMortalityCurves
 
         cmt = CombinedMortalityTable.loadMFT("mortality_tables/Russian-Empire/no67-50governorships-orthodox-1907-1910-variant-2");
         year2smt.put(1908.0, cmt.getSingleTable(Locality.TOTAL, gender));
+
+        /* ============================================================================================================ */
+        
+        /*
+         * РосБРИС 1989-2002
+         */
+        for (int year = 1989; year <= 2022; year++)
+        {
+            RosBrisDeathRates dr = RosBrisDeathRates.loadMX(RosBrisTerritory.RF_BEFORE_2014, year);
+            cmt = dr.toCombinedMortalityTable();
+            year2smt.put(year + 0.0, cmt.getSingleTable(Locality.TOTAL, gender));
+        }
 
         /* ============================================================================================================ */
 
@@ -163,7 +191,7 @@ public class ExporAllMortalityCurves
         years = new ArrayList<>(year2smt.keySet());
         Collections.sort(years);
 
-        sb = new StringBuilder("возраст,средний возраст");
+        sb = new StringBuilder("средний возраст,возраст");
         for (double year : years)
         {
             if (sb.length() != 0)
@@ -176,15 +204,15 @@ public class ExporAllMortalityCurves
         {
             sb = new StringBuilder();
             if (bin.age_x2 == 0)
-                sb.append(String.format("%d,%.1f", bin.age_x1, bin.mid_x));
+                sb.append(String.format("%.1f,%d", bin.mid_x, bin.age_x1));
             else
-                sb.append(String.format("%d-%d,%.1f", bin.age_x1, bin.age_x2, bin.mid_x));
+                sb.append(String.format("%.1f,\"%d-%d\"", bin.mid_x, bin.age_x1, bin.age_x2));
 
             for (double year : years)
             {
                 if (sb.length() != 0)
                     sb.append(",");
-                
+
                 SingleMortalityTable smt = year2smt.get(year);
                 if (bin.age_x2 == 0)
                 {
@@ -199,23 +227,23 @@ public class ExporAllMortalityCurves
                         double qx = smt.qx()[age];
                         double mx = MortalityUtil.qx2mx(qx, gender, age);
                         mx_avg += mx;
-                        
+
                     }
                     mx_avg /= bin.widths_in_years;
-                    sb.append("" + String.format("%.5f", mx_avg  * PROMILLE));
+                    sb.append("" + String.format("%.5f", mx_avg * PROMILLE));
                 }
             }
 
             Util.out(sb.toString());
         }
     }
-    
+
     private String formatYear(double year)
     {
         long iy = Math.round(year);
         if (iy == year)
             return "" + iy;
-        else 
+        else
             return String.format("%.1f", year);
     }
 }
