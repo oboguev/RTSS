@@ -132,7 +132,7 @@ public class MortalityTableGKS
             last = Bins.lastBin(mortality_bins);
             Bin p = last.prev;
             Bin pp = last.prev.prev;
-            last.avg = p.avg + (p.avg - pp.avg) * 1.5;
+            last.avg = p.avg + (p.avg - pp.avg) * 6.0;
         }
         
         String title = String.format("ГКС-%s-%s %s %s", context.area.name(), context.year, locality.name(), gender.name());
