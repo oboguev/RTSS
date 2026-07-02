@@ -1,9 +1,7 @@
 package rtss.rosbris1959;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import rtss.csv.CSVSmartReader;
 import rtss.data.bin.Bin;
@@ -37,8 +35,6 @@ public class RosBris1959DeathRates
         RosBris1959DeathRates dr = new RosBris1959DeathRates();
 
         CSVSmartReader csv = CSVSmartReader.fromResource("RosBRIS.1959/DRc5a1959-1988.txt");
-
-        Map<RosBris1959AgeGroup, Integer> age2col = new HashMap<>();
 
         int colYear = csv.column("Year");
         int colSex = csv.column("Sex");

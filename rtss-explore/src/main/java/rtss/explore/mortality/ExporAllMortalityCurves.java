@@ -19,7 +19,6 @@ import rtss.data.selectors.Gender;
 import rtss.data.selectors.Locality;
 import rtss.rosbris.RosBrisDeathRates;
 import rtss.rosbris.RosBrisTerritory;
-import rtss.rosbris1959.RosBris1959DeathRates;
 import rtss.util.Util;
 
 public class ExporAllMortalityCurves
@@ -42,7 +41,6 @@ public class ExporAllMortalityCurves
 
     private Map<Double, SingleMortalityTable> year2smt = new HashMap<>();
     private final double PROMILLE = 1000.0;
-    private RosBris1959DeathRates rbdr;
 
     private void do_main(Gender gender) throws Exception
     {
