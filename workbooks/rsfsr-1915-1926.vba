@@ -48,6 +48,51 @@ BadValue:
 End Function
 
 
+'
+' Calculate logarithmic average between two values.
+'
+' This is the time-average value over one interval if the value changes
+' at a constant proportional rate from vstart to vend.
+'
+Public Function LogAverage( _
+    ByVal vstart As Variant, _
+    ByVal vend As Variant) As Variant
+
+    On Error GoTo BadValue
+
+    Dim x0 As Double
+    Dim x1 As Double
+    Dim lr As Double
+    Dim scaleValue As Double
+
+    If Not ToDouble(vstart, x0) Then GoTo BadValue
+    If Not ToDouble(vend, x1) Then GoTo BadValue
+
+    If x0 <= 0# Or x1 <= 0# Then GoTo BadValue
+
+    scaleValue = Abs(x0)
+    If Abs(x1) > scaleValue Then scaleValue = Abs(x1)
+    If scaleValue < 1# Then scaleValue = 1#
+
+    If Abs(x1 - x0) < 0.000000000001 * scaleValue Then
+        LogAverage = (x0 + x1) / 2#
+    Else
+        lr = Log(x1 / x0)
+        If Abs(lr) < 0.000000000001 Then
+            LogAverage = (x0 + x1) / 2#
+        Else
+            LogAverage = (x1 - x0) / lr
+        End If
+    End If
+
+    Exit Function
+
+BadValue:
+    LogAverage = CVErr(xlErrValue)
+
+End Function
+
+
 Private Function ToDouble(ByVal v As Variant, ByRef out As Double) As Boolean
 
     On Error GoTo BadValue
@@ -109,5 +154,3 @@ BadValue:
     ToDouble = False
 
 End Function
-
-
