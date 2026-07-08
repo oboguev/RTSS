@@ -160,4 +160,11 @@ public class URValue
     {
         return urban.get(gender) == null && rural.get(gender) == null && total.get(gender) != null;
     }
+    
+    public void boost(double multiplier)
+    {
+        urban.boost(multiplier);
+        rural.boost(multiplier);
+        total.boost(multiplier);
+    }
 }

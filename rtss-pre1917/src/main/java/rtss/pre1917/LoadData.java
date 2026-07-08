@@ -131,6 +131,9 @@ public class LoadData
     private String currentFile = null;
     private Integer currentWCOL = null;
     private Integer currentNR = null;
+    
+    private Double boostBirths = null;
+    private Double boostDeaths = null;
 
     /* ================================================================================================= */
 
@@ -385,6 +388,8 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
             territories.mergePost1897Regions();
+        
+        territories.boostBirthsDeaths(boostBirths, boostDeaths);
 
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
             new EvalProgressive(territories).evalProgressive();
@@ -408,6 +413,13 @@ public class LoadData
             new CrossVerify().verify(territories);
 
         return territories;
+    }
+    
+    public LoadData boostBirthsDeaths(Double boostBirths, Double boostDeaths)
+    {
+        this.boostBirths = boostBirths;
+        this.boostDeaths = boostDeaths;
+        return this;
     }
 
     private void loadUGVI(String fn) throws Exception

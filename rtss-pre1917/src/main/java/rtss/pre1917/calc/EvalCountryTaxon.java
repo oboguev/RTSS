@@ -25,7 +25,17 @@ import rtss.util.Util;
 
 public class EvalCountryTaxon extends EvalCountryBase
 {
+    /*
+     * Если False, военные смерти не учитываются
+     */
     private final static boolean DoCountMilitaryDeaths = Util.True;
+
+    /*
+     * Корректировка на недоучёт рождений и смертей.
+     * Например 1.04 увелививает на 4%.
+     */
+    private final static Double BoostBirths = 1.0;
+    private final static Double BoostDeaths = 1.0;
 
     public static void main(String[] args)
     {
@@ -37,6 +47,12 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
             Util.out("В этом варианте расчёта не учитываются военные смерти в 1904-1905 и 1914 годах");
         }
+        
+        if (BoostBirths != null && BoostBirths != 1.0)
+            Util.out(String.format("Увеличение числа рождений (для корректировки недоучёта) в %.3f раз", BoostBirths));
+
+        if (BoostDeaths != null && BoostDeaths != 1.0)
+            Util.out(String.format("Увеличение числа смертей (для корректировки недоучёта) в %.3f раз", BoostDeaths));
 
         try
         {
@@ -159,12 +175,12 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         return eval.tdsExportPopulation;
     }
-    
+
     public static void warmup() throws Exception
     {
         new EvalCountryTaxon("Империя", 1913, Options.SILENT).calc();
     }
-    
+
     public static TaxonYearlyPopulationData calc(String taxonName, int toYear, Options options) throws Exception
     {
         return new EvalCountryTaxon(taxonName, toYear, options).calc();
@@ -210,14 +226,17 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         /* ===================== Загрузить данные о численности и естественном движении населения ===================== */
 
-        tdsPopulation = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
-                                                LoadOptions.ADJUST_FEMALE_BIRTHS,
-                                                LoadOptions.FILL_MISSING_BD,
-                                                LoadOptions.MERGE_CITIES,
-                                                LoadOptions.MERGE_POST1897_REGIONS,
-                                                options.splitAstrakhan() ? LoadOptions.EVAL_SPLIT_ASTRAKHAN
-                                                                         : LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
-                                                LoadOptions.EVAL_PROGRESSIVE);
+        tdsPopulation = new LoadData()
+                .boostBirthsDeaths(BoostBirths, BoostDeaths)
+                .loadUGVI(LoadOptions.DONT_VERIFY,
+                          LoadOptions.ADJUST_FEMALE_BIRTHS,
+                          LoadOptions.FILL_MISSING_BD,
+                          LoadOptions.MERGE_CITIES,
+                          LoadOptions.MERGE_POST1897_REGIONS,
+                          options.splitAstrakhan() ? LoadOptions.EVAL_SPLIT_ASTRAKHAN
+                                                   : LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
+                          LoadOptions.EVAL_PROGRESSIVE);
+
         tdsPopulation.leaveOnlyTotalBoth();
 
         if (options.verbose())

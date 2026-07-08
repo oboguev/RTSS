@@ -210,6 +210,12 @@ public class TerritoryDataSet extends HashMap<String, Territory>
             t.adjustFemaleBirths();
     }
 
+    public void boostBirthsDeaths(Double boostBirths, Double boostDeaths)
+    {
+        for (Territory t : values())
+            t.boostBirthsDeaths(boostBirths, boostDeaths);
+    }
+
     /*
      * Оставить в полях численности населения и числа рождений и смертей
      * только величины total.both, поставив другие в null.

@@ -129,6 +129,12 @@ public class Territory
             ty.adjustFemaleBirths();
     }
 
+    public void boostBirthsDeaths(Double boostBirths, Double boostDeaths)
+    {
+        for (TerritoryYear ty : year2value.values())
+            ty.boostBirthsDeaths(boostBirths, boostDeaths);
+    }
+    
     public void leaveOnlyTotalBoth()
     {
         for (TerritoryYear ty : year2value.values())

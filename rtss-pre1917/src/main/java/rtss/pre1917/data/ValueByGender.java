@@ -219,4 +219,16 @@ public class ValueByGender
         else
             return String.format("%,d", v);
     }
+
+    public void boost(double multiplier)
+    {
+        if (male != null)
+            male = Math.round(multiplier * male);
+
+        if (female != null)
+            female = Math.round(multiplier * female);
+        
+        if (both != null)
+            both = Math.round(multiplier * both);
+    }
 }

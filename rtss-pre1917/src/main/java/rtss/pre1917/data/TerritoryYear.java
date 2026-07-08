@@ -106,9 +106,9 @@ public class TerritoryYear
                 duplicateValue(what);
             births.total.both = v;
             break;
-            
+
         case "чр-м":
-            if (births.total.male!= null)
+            if (births.total.male != null)
                 duplicateValue(what);
             births.total.male = v;
             break;
@@ -127,7 +127,7 @@ public class TerritoryYear
             break;
 
         case "чс-м":
-            if (deaths.total.male!= null)
+            if (deaths.total.male != null)
                 duplicateValue(what);
             deaths.total.male = v;
             break;
@@ -290,10 +290,10 @@ public class TerritoryYear
         ty.progressive_population = this.progressive_population.dup(ty);
         ty.births = this.births.dup(ty);
         ty.deaths = this.deaths.dup(ty);
-        ty.migration= this.migration.dup(ty);
+        ty.migration = this.migration.dup(ty);
         return ty;
     }
-    
+
     public void merge(TerritoryYear ty) throws Exception
     {
         Long p1 = population.total.both;
@@ -307,7 +307,7 @@ public class TerritoryYear
             p2 = ty.midyear_population.total.both;
         if (p2 != null && p2 == 0)
             p2 = null;
-        
+
         if (p1 == null && p2 == null)
         {
             // do nothing
@@ -326,7 +326,7 @@ public class TerritoryYear
         {
             // do nothing
         }
-        
+
         if (ngr != null)
         {
             if (cbr != null && cdr != null)
@@ -334,7 +334,7 @@ public class TerritoryYear
             else
                 ngr = null;
         }
-        
+
         /* --------------------------------------------- */
 
         population.merge(ty.population);
@@ -344,7 +344,7 @@ public class TerritoryYear
         deaths.merge(ty.deaths);
         migration.merge(ty.migration);
     }
-    
+
     private Double rate(long p1, Double r1, long p2, Double r2) throws Exception
     {
         if (r1 == null && r2 == null)
@@ -370,6 +370,15 @@ public class TerritoryYear
     public void adjustFemaleBirths()
     {
         births.adjustFemaleBirths();
+    }
+
+    public void boostBirthsDeaths(Double boostBirths, Double boostDeaths)
+    {
+        if (boostBirths != null && boostBirths != 1.0)
+            births.boost(boostBirths);
+
+        if (boostDeaths != null && boostDeaths != 1.0)
+            deaths.boost(boostDeaths);
     }
 
     public void leaveOnlyTotalBoth()
