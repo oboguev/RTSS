@@ -367,7 +367,7 @@ public class LoadData
     // ### соотношение см. в 1887-detailed.xlsx и в 1888
     // ### если Черноморская указана явно, то не делить Кубанскую
     
-    // ### искать чр чс р с (NYY YY) с английскими c р
+    // ### искать чр р с (NYY YY) с английскими р c
 
     public TerritoryDataSet loadUGVI(Set<LoadOptions> options) throws Exception
     {
