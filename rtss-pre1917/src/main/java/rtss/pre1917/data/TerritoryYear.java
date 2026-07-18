@@ -36,6 +36,11 @@ public class TerritoryYear
     public URValue deaths = new URValue(this);
     public URValue migration = new URValue(this);
 
+    public void setValueForce(String what, Double v) throws Exception
+    {
+        setValue(what, v);
+    }
+
     public void setValue(String what, Double v) throws Exception
     {
         interceptSetValue(what);
@@ -65,15 +70,25 @@ public class TerritoryYear
             throw new Exception("Invalid selector");
         }
     }
-
+    
     public void setValue(String what, Long v) throws Exception
+    {
+        setValueForce(what, v, false);
+    }
+
+    public void setValueForce(String what, Long v) throws Exception
+    {
+        setValueForce(what, v, true);
+    }
+
+    private void setValueForce(String what, Long v, boolean force) throws Exception
     {
         interceptSetValue(what);
 
         switch (what.trim())
         {
         case "MYY-чж":
-            if (midyear_population.total.both != null)
+            if (midyear_population.total.both != null && !force)
                 duplicateValue(what);
             midyear_population.total.both = v;
             break;
@@ -81,59 +96,59 @@ public class TerritoryYear
         case "чж":
         case "чж-о":
         case "чж-всего-о":
-            if (population.total.both != null)
+            if (population.total.both != null && !force)
                 duplicateValue(what);
             population.total.both = v;
             break;
 
         case "чж-м":
         case "чж-всего-м":
-            if (population.total.male != null)
+            if (population.total.male != null && !force)
                 duplicateValue(what);
             population.total.male = v;
             break;
 
         case "чж-ж":
         case "чж-всего-ж":
-            if (population.total.female != null)
+            if (population.total.female != null && !force)
                 duplicateValue(what);
             population.total.female = v;
             break;
 
         case "чр":
         case "чр-о":
-            if (births.total.both != null)
+            if (births.total.both != null && !force)
                 duplicateValue(what);
             births.total.both = v;
             break;
 
         case "чр-м":
-            if (births.total.male != null)
+            if (births.total.male != null && !force)
                 duplicateValue(what);
             births.total.male = v;
             break;
 
         case "чр-ж":
-            if (births.total.female != null)
+            if (births.total.female != null && !force)
                 duplicateValue(what);
             births.total.female = v;
             break;
 
         case "чу":
         case "чс-о":
-            if (deaths.total.both != null)
+            if (deaths.total.both != null && !force)
                 duplicateValue(what);
             deaths.total.both = v;
             break;
 
         case "чс-м":
-            if (deaths.total.male != null)
+            if (deaths.total.male != null && !force)
                 duplicateValue(what);
             deaths.total.male = v;
             break;
 
         case "чс-ж":
-            if (deaths.total.female != null)
+            if (deaths.total.female != null && !force)
                 duplicateValue(what);
             deaths.total.female = v;
             break;
@@ -141,19 +156,19 @@ public class TerritoryYear
         // -----------------
 
         case "чж-гор-м":
-            if (population.urban.male != null)
+            if (population.urban.male != null && !force)
                 duplicateValue(what);
             population.urban.male = v;
             break;
 
         case "чж-гор-ж":
-            if (population.urban.female != null)
+            if (population.urban.female != null && !force)
                 duplicateValue(what);
             population.urban.female = v;
             break;
 
         case "чж-гор-о":
-            if (population.urban.both != null)
+            if (population.urban.both != null && !force)
                 duplicateValue(what);
             population.urban.both = v;
             break;
@@ -161,19 +176,19 @@ public class TerritoryYear
         // -----------------
 
         case "чж-уез-м":
-            if (population.rural.male != null)
+            if (population.rural.male != null && !force)
                 duplicateValue(what);
             population.rural.male = v;
             break;
 
         case "чж-уез-ж":
-            if (population.rural.female != null)
+            if (population.rural.female != null && !force)
                 duplicateValue(what);
             population.rural.female = v;
             break;
 
         case "чж-уез-о":
-            if (population.rural.both != null)
+            if (population.rural.both != null && !force)
                 duplicateValue(what);
             population.rural.both = v;
             break;
@@ -181,19 +196,19 @@ public class TerritoryYear
         // -----------------
 
         case "чр-гор-м":
-            if (births.urban.male != null)
+            if (births.urban.male != null && !force)
                 duplicateValue(what);
             births.urban.male = v;
             break;
 
         case "чр-гор-ж":
-            if (births.urban.female != null)
+            if (births.urban.female != null && !force)
                 duplicateValue(what);
             births.urban.female = v;
             break;
 
         case "чр-гор-о":
-            if (births.urban.both != null)
+            if (births.urban.both != null && !force)
                 duplicateValue(what);
             births.urban.both = v;
             break;
@@ -201,19 +216,19 @@ public class TerritoryYear
         // -----------------
 
         case "чр-уез-м":
-            if (births.rural.male != null)
+            if (births.rural.male != null && !force)
                 duplicateValue(what);
             births.rural.male = v;
             break;
 
         case "чр-уез-ж":
-            if (births.rural.female != null)
+            if (births.rural.female != null && !force)
                 duplicateValue(what);
             births.rural.female = v;
             break;
 
         case "чр-уез-о":
-            if (births.rural.both != null)
+            if (births.rural.both != null && !force)
                 duplicateValue(what);
             births.rural.both = v;
             break;
@@ -221,19 +236,19 @@ public class TerritoryYear
         // -----------------
 
         case "чс-гор-м":
-            if (deaths.urban.male != null)
+            if (deaths.urban.male != null && !force)
                 duplicateValue(what);
             deaths.urban.male = v;
             break;
 
         case "чс-гор-ж":
-            if (deaths.urban.female != null)
+            if (deaths.urban.female != null && !force)
                 duplicateValue(what);
             deaths.urban.female = v;
             break;
 
         case "чс-гор-о":
-            if (deaths.urban.both != null)
+            if (deaths.urban.both != null && !force)
                 duplicateValue(what);
             deaths.urban.both = v;
             break;
@@ -241,19 +256,19 @@ public class TerritoryYear
         // -----------------
 
         case "чс-уез-м":
-            if (deaths.rural.male != null)
+            if (deaths.rural.male != null && !force)
                 duplicateValue(what);
             deaths.rural.male = v;
             break;
 
         case "чс-уез-ж":
-            if (deaths.rural.female != null)
+            if (deaths.rural.female != null && !force)
                 duplicateValue(what);
             deaths.rural.female = v;
             break;
 
         case "чс-уез-о":
-            if (deaths.rural.both != null)
+            if (deaths.rural.both != null && !force)
                 duplicateValue(what);
             deaths.rural.both = v;
             break;

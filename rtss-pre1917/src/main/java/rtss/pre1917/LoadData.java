@@ -381,7 +381,7 @@ public class LoadData
         loadUGVI("1883");
         loadUGVI("1884");
         loadUGVI("1885");
-        loadUGVI("1886");
+        // ### loadUGVI("1886");
         loadUGVI("1887");
         loadUGVI("1888");
         loadUGVI("1889");
@@ -784,7 +784,7 @@ public class LoadData
                 if (gub.startsWith("[правка=]"))
                 {
                     o = rc.get(nr, wcol);
-                    setValue(targetGub, year, what, o);
+                    setValueForce(targetGub, year, what, o);
                 }
                 else if (gub.startsWith("[правка+]"))
                 {
@@ -1018,7 +1018,7 @@ public class LoadData
         }
     }
 
-    private void addValue(String gub, int year, String what, Object o) throws Exception
+    private void setValueForce(String gub, int year, String what, Object o) throws Exception
     {
         if (o == null)
             return;
@@ -1036,19 +1036,60 @@ public class LoadData
                 String msg = String.format("Значение не округлено до 0.1 тысячи: %d %s %s", year, gub, what);
                 Util.err(msg);
             }
-            territoryYear(gub, year).addValue(what, v);
+            territoryYear(gub, year).setValueForce(what, v);
         }
         else if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж") && year == 1917)
         {
-            territoryYear(gub, year).addValue(what, asLong(o));
+            territoryYear(gub, year).setValueForce(what, asLong(o));
         }
         else if (typeof(what) == Double.class)
         {
-            territoryYear(gub, year).addValue(what, asDouble(o));
+            territoryYear(gub, year).setValueForce(what, asDouble(o));
         }
         else if (typeof(what) == Long.class)
         {
-            territoryYear(gub, year).addValue(what, asLong(o));
+            territoryYear(gub, year).setValueForce(what, asLong(o));
+        }
+    }
+
+    private void addValue(String gub, int year, String what, Object o) throws Exception
+    {
+        try
+        {
+            if (o == null)
+                return;
+
+            String so = o.toString();
+            so = Util.despace(so).trim();
+            if (so.length() == 0 || so.equals("-") || so.equals("—"))
+                return;
+
+            if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж") && year != 1917)
+            {
+                Long v = asLongThousands(o);
+                if (v != null && (v % 100) != 0)
+                {
+                    String msg = String.format("Значение не округлено до 0.1 тысячи: %d %s %s", year, gub, what);
+                    Util.err(msg);
+                }
+                territoryYear(gub, year).addValue(what, v);
+            }
+            else if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж") && year == 1917)
+            {
+                territoryYear(gub, year).addValue(what, asLong(o));
+            }
+            else if (typeof(what) == Double.class)
+            {
+                territoryYear(gub, year).addValue(what, asDouble(o));
+            }
+            else if (typeof(what) == Long.class)
+            {
+                territoryYear(gub, year).addValue(what, asLong(o));
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(String.format("%s %d %s", gub, year, what), ex);
         }
     }
 
