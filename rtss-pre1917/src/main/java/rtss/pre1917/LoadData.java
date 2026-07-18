@@ -131,7 +131,7 @@ public class LoadData
     private String currentFile = null;
     private Integer currentWCOL = null;
     private Integer currentNR = null;
-    
+
     private Double boostBirths = null;
     private Double boostDeaths = null;
 
@@ -347,9 +347,9 @@ public class LoadData
     }
 
     /* ================================================================================================= */
-    
+
     // ### при сканировании колонок collapse white space + trim
-    
+
     // ### если колонка "добавить к" непуста, то "губ" игнорировать, новую строку не создавать, а
     // ### если губ начинается с [правка=] установить величины в target 
     // ### если губ начинается с [правка+] а добавить величины к target 
@@ -362,12 +362,12 @@ public class LoadData
     // ### em-dash — means null
     // ### 1883 игнорировать строки [уже]
     // ### 1883 сделать прибавления [правка+] через колоку "добавить к"
-    
+
     // ### Черноморская губерния (с центром в Новороссийске) была образована в мае 1896 года выделением из Кубанской области
     // ### для предшествующих лет 1881-1895 разрезать Кубанскую и переименость в Кубанская без Черноморской
     // ### соотношение см. в 1887-detailed.xlsx и в 1888
     // ### если Черноморская указана явно, то не делить Кубанскую
-    
+
     // ### искать чр р с (NYY YY) с английскими р c
 
     public TerritoryDataSet loadUGVI(Set<LoadOptions> options) throws Exception
@@ -415,7 +415,7 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
             territories.mergePost1897Regions();
-        
+
         territories.boostBirthsDeaths(boostBirths, boostDeaths);
 
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
@@ -428,20 +428,20 @@ public class LoadData
 
             Territory tOriginal = territories.get("Астраханская");
             territories.remove("Астраханская");
-            
+
             Territory t = Astrakhan.calcSettled(tOriginal);
             territories.put(t.name, t);
-            
+
             t = Astrakhan.calcNomadic(tOriginal, 1896, 1915);
             territories.put(t.name, t);
         }
-            
+
         if (hasOption(LoadOptions.VERIFY, options))
             new CrossVerify().verify(territories);
 
         return territories;
     }
-    
+
     public LoadData boostBirthsDeaths(Double boostBirths, Double boostDeaths)
     {
         this.boostBirths = boostBirths;
@@ -595,13 +595,13 @@ public class LoadData
                 h.startsWith("чр ") ||
                 h.startsWith("чу ") ||
                 // --------------------------
-                h.startsWith("уезды") || 
-                h.startsWith("ср-чж ") || 
-                h.startsWith("ср-чр ") || 
-                h.startsWith("ср-чу ") || 
-                h.startsWith("чж-гор ") || 
-                h.startsWith("чр-гор ") || 
-                h.startsWith("чу-гор ") || 
+                h.startsWith("уезды") ||
+                h.startsWith("ср-чж ") ||
+                h.startsWith("ср-чр ") ||
+                h.startsWith("ср-чу ") ||
+                h.startsWith("чж-гор ") ||
+                h.startsWith("чр-гор ") ||
+                h.startsWith("чу-гор ") ||
                 // --------------------------
                 h.startsWith("чж-гор-м ") ||
                 h.startsWith("чж-гор-ж ") ||
@@ -642,9 +642,9 @@ public class LoadData
             if (o == null)
                 o = "";
             String gub = o.toString();
-            
+
             gub = Util.despace(gub).trim();
-            
+
             if (gub.startsWith("[") && gub.endsWith("]"))
                 continue;
 
@@ -719,9 +719,9 @@ public class LoadData
                 o = "";
             String gub = o.toString();
             gub = Util.despace(gub).trim();
-            
+
             String targetGub = targetGub(rc, nr, headers);
-            
+
             if (gub.startsWith("[") && gub.endsWith("]"))
             {
                 if (targetGub != null)
@@ -745,18 +745,47 @@ public class LoadData
                     break;
                 }
             }
-            
+
             if (targetGub != null)
             {
-                // ###
-                continue;
+                targetGub = TerritoryNames.canonic(targetGub);
+                
+                switch (what)
+                {
+                case "р":
+                case "с":
+                case "п":
+                    continue;
+                }
+
+                if (gub.startsWith("[правка=]"))
+                {
+                    o = rc.get(nr, wcol);
+                    setValue(targetGub, year, what, o);
+                }
+                else if (gub.startsWith("[правка+]"))
+                {
+                    o = rc.get(nr, wcol);
+                    addValue(targetGub, year, what, o);
+                }
+                else if (gub.startsWith("["))
+                {
+                    throw new Exception("Check file data -- suspect cell format");
+                }
+                else
+                {
+                    o = rc.get(nr, wcol);
+                    addValue(targetGub, year, what, o);
+                }
             }
-            
-            gub = TerritoryNames.canonic(gub);
-            if (gub.length() != 0)
+            else
             {
-                o = rc.get(nr, wcol);
-                setValue(gub, year, what, o);
+                gub = TerritoryNames.canonic(gub);
+                if (gub.length() != 0)
+                {
+                    o = rc.get(nr, wcol);
+                    setValue(gub, year, what, o);
+                }
             }
         }
 
@@ -873,7 +902,7 @@ public class LoadData
         xgub = Util.despace(xgub).trim();
         if (xgub.length() == 0)
             return null;
-        
+
         return TerritoryNames.canonic(xgub);
     }
 
@@ -965,7 +994,7 @@ public class LoadData
             territoryYear(gub, year).setValue(what, asLong(o));
         }
     }
-    
+
     private void addValue(String gub, int year, String what, Object o) throws Exception
     {
         if (o == null)
