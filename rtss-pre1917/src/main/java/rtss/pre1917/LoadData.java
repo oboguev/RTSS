@@ -355,6 +355,7 @@ public class LoadData
     // ### если губ начинается с [правка+] а добавить величины к target 
     // ### иначе добавить величины к target 
     // ### пустые значения или em-dash — means null игнорировать
+    // ### только для колонок чу чр чж, но не для р с
 
     // ### игнорировать строки "в т.ч." "в т.ч" и [xxx] (строго начало и конец кв. скобки, не по первой скобке)
     // ### Прим. Вост. Сибири = Приморская обл. = Прим Вост Сиб
@@ -556,6 +557,7 @@ public class LoadData
             switch (h)
             {
             case "губ":
+            case "добавить к":
             case "чж-о":
             case "чж-м":
             case "чж-ж":
@@ -687,7 +689,7 @@ public class LoadData
 
                 if (year > 0)
                 {
-                    scanYearColumn(rc, gcol, what, year, headers.get(h));
+                    scanYearColumn(rc, gcol, what, year, headers.get(h), headers);
                 }
             }
         }
@@ -699,12 +701,12 @@ public class LoadData
         {
             if (h.equals(what))
             {
-                scanYearColumn(rc, gcol, what, currentFileYear.intValue(), headers.get(h));
+                scanYearColumn(rc, gcol, what, currentFileYear.intValue(), headers.get(h), headers);
             }
         }
     }
 
-    private void scanYearColumn(ExcelRC rc, int gcol, String what, int year, int wcol) throws Exception
+    private void scanYearColumn(ExcelRC rc, int gcol, String what, int year, int wcol, Map<String, Integer> headers) throws Exception
     {
         currentWCOL = wcol;
 
@@ -718,8 +720,14 @@ public class LoadData
             String gub = o.toString();
             gub = Util.despace(gub).trim();
             
+            String targetGub = targetGub(rc, nr, headers);
+            
             if (gub.startsWith("[") && gub.endsWith("]"))
+            {
+                if (targetGub != null)
+                    throw new Exception("[добавить к] и [...]");
                 continue;
+            }
 
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
@@ -736,6 +744,12 @@ public class LoadData
                     gub = "Таврическая с Севастополем";
                     break;
                 }
+            }
+            
+            if (targetGub != null)
+            {
+                // ###
+                continue;
             }
             
             gub = TerritoryNames.canonic(gub);
@@ -846,6 +860,23 @@ public class LoadData
         }
     }
 
+    private String targetGub(ExcelRC rc, int nr, Map<String, Integer> headers) throws Exception
+    {
+        Integer targetCol = headers.get("добавить к");
+        if (targetCol == null)
+            return null;
+
+        Object o = rc.get(nr, targetCol);
+        if (o == null)
+            o = "";
+        String xgub = o.toString();
+        xgub = Util.despace(xgub).trim();
+        if (xgub.length() == 0)
+            return null;
+        
+        return TerritoryNames.canonic(xgub);
+    }
+
     private Class<?> typeof(String what) throws Exception
     {
         switch (what)
@@ -932,6 +963,40 @@ public class LoadData
         else if (typeof(what) == Long.class)
         {
             territoryYear(gub, year).setValue(what, asLong(o));
+        }
+    }
+    
+    private void addValue(String gub, int year, String what, Object o) throws Exception
+    {
+        if (o == null)
+            return;
+
+        String so = o.toString();
+        so = Util.despace(so).trim();
+        if (so.length() == 0 || so.equals("-") || so.equals("—"))
+            return;
+
+        if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж") && year != 1917)
+        {
+            Long v = asLongThousands(o);
+            if (v != null && (v % 100) != 0)
+            {
+                String msg = String.format("Значение не округлено до 0.1 тысячи: %d %s %s", year, gub, what);
+                Util.err(msg);
+            }
+            territoryYear(gub, year).addValue(what, v);
+        }
+        else if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII && what.startsWith("чж") && year == 1917)
+        {
+            territoryYear(gub, year).addValue(what, asLong(o));
+        }
+        else if (typeof(what) == Double.class)
+        {
+            territoryYear(gub, year).addValue(what, asDouble(o));
+        }
+        else if (typeof(what) == Long.class)
+        {
+            territoryYear(gub, year).addValue(what, asLong(o));
         }
     }
 
