@@ -185,7 +185,7 @@ public class LoadData
                 if (!headers.containsKey("губ"))
                     throw new Exception("Нет колонки для губернии");
                 int gcol = headers.get("губ");
-                scanGubColumn(rc, gcol);
+                scanGubColumn(rc, gcol, headers);
 
                 scanThisYearColumn(rc, gcol, headers, "чж-уез-м");
                 scanThisYearColumn(rc, gcol, headers, "чж-уез-ж");
@@ -262,7 +262,7 @@ public class LoadData
                 if (!headers.containsKey("губ"))
                     throw new Exception("Нет колонки для губернии");
                 int gcol = headers.get("губ");
-                scanGubColumn(rc, gcol);
+                scanGubColumn(rc, gcol, headers);
 
                 if (year != 1903)
                     scanYearColumn(rc, gcol, headers, "чж");
@@ -317,7 +317,7 @@ public class LoadData
                 if (!headers.containsKey("губ"))
                     throw new Exception("Нет колонки для губернии");
                 int gcol = headers.get("губ");
-                scanGubColumn(rc, gcol);
+                scanGubColumn(rc, gcol, headers);
 
                 // scan column "key yyyy" 
                 scanThisYearColumn(rc, gcol, headers, "чж-м");
@@ -356,19 +356,16 @@ public class LoadData
     // ### иначе добавить величины к target 
     // ### пустые значения или em-dash — means null игнорировать
     // ### только для колонок чу чр чж, но не для р с
-
-    // ### игнорировать строки "в т.ч." "в т.ч" и [xxx] (строго начало и конец кв. скобки, не по первой скобке)
-    // ### Прим. Вост. Сибири = Приморская обл. = Прим Вост Сиб
-    // ### em-dash — means null
-    // ### 1883 игнорировать строки [уже]
     // ### 1883 сделать прибавления [правка+] через колоку "добавить к"
+
+    
+    // ### игнорировать строки "в т.ч." "в т.ч" и [xxx] (строго начало и конец кв. скобки, не по первой скобке)
+    // ### 1883 игнорировать строки [уже]
 
     // ### Черноморская губерния (с центром в Новороссийске) была образована в мае 1896 года выделением из Кубанской области
     // ### для предшествующих лет 1881-1895 разрезать Кубанскую и переименость в Кубанская без Черноморской
     // ### соотношение см. в 1887-detailed.xlsx и в 1888
     // ### если Черноморская указана явно, то не делить Кубанскую
-
-    // ### искать чр р с (NYY YY) с английскими р c
 
     public TerritoryDataSet loadUGVI(Set<LoadOptions> options) throws Exception
     {
@@ -379,6 +376,14 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.UGVI, Set.of(options));
 
+        loadUGVI("1881");
+        loadUGVI("1882");
+        loadUGVI("1883");
+        loadUGVI("1884");
+        loadUGVI("1885");
+        loadUGVI("1886");
+        loadUGVI("1887");
+        loadUGVI("1888");
         loadUGVI("1889");
         loadUGVI("1890");
         loadUGVI("1891");
@@ -472,7 +477,7 @@ public class LoadData
                 if (!headers.containsKey("губ"))
                     throw new Exception("Нет колонки для губернии");
                 int gcol = headers.get("губ");
-                scanGubColumn(rc, gcol);
+                scanGubColumn(rc, gcol, headers);
 
                 // scan column "key yyyy" 
                 scanYearColumn(rc, gcol, headers, "р");
@@ -536,7 +541,7 @@ public class LoadData
 
                 int gcol = headers.get("губ");
                 int ycol = headers.get("год");
-                scanGubColumn(rc, gcol);
+                scanGubColumn(rc, gcol, headers);
                 scanMultiYearColumn(rc, gcol, ycol, headers, "р");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "с");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чж в сл. году");
@@ -634,7 +639,7 @@ public class LoadData
         }
     }
 
-    private void scanGubColumn(ExcelRC rc, int gcol) throws Exception
+    private void scanGubColumn(ExcelRC rc, int gcol, Map<String, Integer> headers) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -646,6 +651,21 @@ public class LoadData
             gub = Util.despace(gub).trim();
 
             if (gub.startsWith("[") && gub.endsWith("]"))
+                continue;
+            
+            Integer targetCol = headers.get("добавить к");
+            if (targetCol != null)
+            {
+                o = rc.get(nr, targetCol);
+                if (o == null)
+                    o = "";
+                String xgub = o.toString();
+                xgub = Util.despace(xgub).trim();
+                if (xgub.length() != 0)
+                    continue;
+            }
+
+            if (gub.startsWith("[уже] "))
                 continue;
 
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
@@ -722,13 +742,16 @@ public class LoadData
 
             String targetGub = targetGub(rc, nr, headers);
 
-            if (gub.startsWith("[") && gub.endsWith("]"))
+            if (gub.startsWith("[") && gub.endsWith("]") || gub.startsWith("[уже] ") || gub.startsWith("в т.ч. ") || gub.startsWith("в т.ч "))
             {
                 if (targetGub != null)
                     throw new Exception("[добавить к] и [...]");
                 continue;
             }
 
+            if (gub.startsWith("в т.ч.") || gub.startsWith("в т.ч"))
+                throw new Exception("Сомнительная запись");
+            
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
 
@@ -1993,7 +2016,7 @@ public class LoadData
                 int gcol = headers.get("губ");
                 int ycol = headers.get("год");
 
-                scanGubColumn(rc, gcol);
+                scanGubColumn(rc, gcol, headers);
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чж-о");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чр");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чу");
