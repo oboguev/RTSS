@@ -378,9 +378,14 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.UGVI, Set.of(options));
 
+        loadUGVI("1889");
+        loadUGVI("1890");
         loadUGVI("1891");
         loadUGVI("1892");
-        loadUGVI("1893-1895", 1893, 1895);
+        loadUGVI("1893");
+        loadUGVI("1894");
+        loadUGVI("1895");
+        // loadUGVI("1893-1895-old", 1893, 1895);
         loadUGVI("1896-1901", 1896, 1901);
         loadUGVI("1902");
         loadUGVI("1903");
@@ -588,6 +593,14 @@ public class LoadData
                 h.startsWith("чр ") ||
                 h.startsWith("чу ") ||
                 // --------------------------
+                h.startsWith("уезды") || 
+                h.startsWith("ср-чж ") || 
+                h.startsWith("ср-чр ") || 
+                h.startsWith("ср-чу ") || 
+                h.startsWith("чж-гор ") || 
+                h.startsWith("чр-гор ") || 
+                h.startsWith("чу-гор ") || 
+                // --------------------------
                 h.startsWith("чж-гор-м ") ||
                 h.startsWith("чж-гор-ж ") ||
                 h.startsWith("чж-гор-о ") ||
@@ -615,7 +628,7 @@ public class LoadData
                 continue;
             }
 
-            throw new Exception("Incorrect header in Excel file");
+            throw new Exception("Incorrect header in Excel file: " + h);
         }
     }
 
@@ -627,6 +640,11 @@ public class LoadData
             if (o == null)
                 o = "";
             String gub = o.toString();
+            
+            gub = Util.despace(gub).trim();
+            
+            if (gub.startsWith("[") && gub.endsWith("]"))
+                continue;
 
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
@@ -698,6 +716,10 @@ public class LoadData
             if (o == null)
                 o = "";
             String gub = o.toString();
+            gub = Util.despace(gub).trim();
+            
+            if (gub.startsWith("[") && gub.endsWith("]"))
+                continue;
 
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
@@ -715,7 +737,7 @@ public class LoadData
                     break;
                 }
             }
-
+            
             gub = TerritoryNames.canonic(gub);
             if (gub.length() != 0)
             {
