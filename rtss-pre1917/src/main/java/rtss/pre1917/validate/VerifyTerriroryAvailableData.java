@@ -10,6 +10,7 @@ import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
 /*
@@ -40,6 +41,8 @@ public class VerifyTerriroryAvailableData
         taxon = taxon.flatten(tds, 1913);
         List<String> tnames = new ArrayList<String>(taxon.territories.keySet());
         Collections.sort(tnames);
+        
+        tds.leaveOnlyTotalBoth();
 
         for (String tname : tnames)
             explore(tds, tname);
@@ -58,17 +61,27 @@ public class VerifyTerriroryAvailableData
         List<Integer> years = t.years();
         int y0 = years.get(0);
         String gaps = gaps(years);
-        if (y0 == 1881 && gaps.equals("none"))
+        String nodata = nodata(t);
+        
+        if (y0 == 1881 && gaps.equals("none") && nodata.equals(""))
         {
-            Util.out(String.format("%s full", tname));
+            // Util.out(String.format("%s full", tname));
         }
-        else if (gaps.equals("none"))
+        else if (gaps.equals("none") && nodata.equals(""))
         {
             Util.out(String.format("%s from %d", tname, years.get(0)));
         }
-        else 
+        else if (nodata.equals(""))
         {
             Util.out(String.format("%s from %d gaps: %s", tname, years.get(0), gaps));
+        }
+        else if (gaps.equals("none"))
+        {
+            Util.out(String.format("%s from %d nodata: %s", tname, years.get(0), nodata));
+        }
+        else 
+        {
+            Util.out(String.format("%s from %d gaps: %s nodata: %s", tname, years.get(0), gaps, nodata));
         }
     }
 
@@ -108,7 +121,29 @@ public class VerifyTerriroryAvailableData
 
         return gaps.isEmpty() ? "none" : gaps.toString();
     }
+    
+    private String nodata(Territory t)
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        for (int year : t.years())
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            if (ty == null || year >= 1914)
+                continue;
+            
+            if (ty.births.total.both == null || ty.deaths.total.both == null)
+            {
+                if (sb.length() != 0)
+                    sb.append(" ");
+                sb.append("" + year);
+            }
+        }
+        
+        return sb.toString();
+    }
 }
+
 
 /****************************************************************
 
@@ -125,7 +160,7 @@ public class VerifyTerriroryAvailableData
 - Седлецкая full
 - Холмская from 1913
 
-Область войска Донского from 1882 => clone to 1881
+Область войска Донского from 1882 => за 1881 взято по Временнику на 1881 год
 
 Средняя Азия (с 1888)
 - Закаспийская обл. from 1888
@@ -148,14 +183,43 @@ public class VerifyTerriroryAvailableData
 - Кубанская обл. from 1886
 - Кутаисская from 1886
 - Ставропольская from 1886
-- Черноморская from 1888 gaps: 1890 1891 1892 1893 1894 1895 1896 => выделить из Кубанской
+- Черноморская from 1888 gaps: 1890 1891 1892 1893 1894 1895 1896 => ###выделить из Кубанской
 
-- Амурская обл. from 1881 gaps: 1887 => интерполировать 1887 из соседних годов
-- Сахалин from 1887 => скопировать в 1886 из 1887
+- Амурская обл. from 1881 gaps: 1887 => ####интерполировать 1887 из соседних годов
+- Сахалин from 1887 => ###скопировать в 1886 из 1887
 
-- Астраханская from 1881 gaps: 1887 1888 1889 1890 1891 1892 1893 1894 1895
+- ####Астраханская from 1881 gaps: 1887 1888 1889 1890 1891 1892 1893 1894 1895
 - Астраханская (кочевники) from 1886 gaps: 1887
 - Астраханская (оседлое население) from 1885
+
+..............
+
+
+Амурская обл. from 1881 gaps: 1887 nodata: 1883 1884 1886 1888 1889 1890 1891 1892
+Астраханская from 1881 gaps: 1887 1888 1889 1890 1891 1892 1893 1894 1895 nodata: 1885
+Астраханская (кочевники) from 1886 gaps: 1887 nodata: 1886 1888 1889 1890 1891 1894 1896
+Астраханская (оседлое население) from 1885 nodata: 1886 1896
+Забайкальская обл. from 1881 nodata: 1882 1884 1886 1888
+Закаспийская обл. from 1888 nodata: 1888 1889 1891 1893
+Калишская from 1881 nodata: 1913
+Карсская обл. from 1888 nodata: 1888 1889 1913
+Келецкая from 1881 nodata: 1913
+Кутаисская from 1886 nodata: 1904 1905
+Ломжинская from 1881 nodata: 1913
+Область войска Донского from 1881 nodata: 1885
+Петроковская from 1881 nodata: 1913
+Приморская обл. from 1881 nodata: 1882 1883 1884 1888
+Самаркандская обл. from 1888 nodata: 1888 1889 1892 1893 1894 1902 1903 1904 1905 1906 1907 1908 1909 1910 1911 1912 1913
+Сахалин from 1887 nodata: 1903 1904 1905 1906 1907
+Седлецкая from 1881 nodata: 1913
+Семипалатинская обл. from 1881 nodata: 1884 1885 1889 1913
+Сыр-Дарьинская обл. from 1882 gaps: 1887 nodata: 1882 1883 1884 1885 1886 1888 1889 1892 1902 1903 1904 1905
+Тургайская обл. from 1882 nodata: 1882 1883 1884
+Ферганская обл. from 1882 gaps: 1886 1887 nodata: 1883 1885
+Черноморская from 1888 gaps: 1890 1891 1892 1893 1894 1895 1896 nodata: 1889
+Эриванская from 1886 nodata: 1888
+Якутская обл. from 1881 nodata: 1882
+
 
 ..............
 
