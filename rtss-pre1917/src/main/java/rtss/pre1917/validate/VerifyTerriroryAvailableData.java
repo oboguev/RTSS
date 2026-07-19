@@ -33,8 +33,9 @@ public class VerifyTerriroryAvailableData
     private void do_main() throws Exception
     {
         TerritoryDataSet tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
-                                                       LoadOptions.MERGE_CITIES,
-                                                       LoadOptions.MERGE_POST1897_REGIONS);
+                                                       LoadOptions.MERGE_CITIES
+                                                       // , LoadOptions.MERGE_POST1897_REGIONS
+                                                       );
         Taxon taxon = Taxon.of("Империя", 1913, tds);
         taxon = taxon.flatten(tds, 1913);
         List<String> tnames = new ArrayList<String>(taxon.territories.keySet());
@@ -59,7 +60,7 @@ public class VerifyTerriroryAvailableData
         String gaps = gaps(years);
         if (y0 == 1881 && gaps.equals("none"))
         {
-            // Util.out(String.format("%s full", tname));
+            Util.out(String.format("%s full", tname));
         }
         else if (gaps.equals("none"))
         {
@@ -108,3 +109,71 @@ public class VerifyTerriroryAvailableData
         return gaps.isEmpty() ? "none" : gaps.toString();
     }
 }
+
+/****************************************************************
+
+Кутаисская с Батумской:
+- Кутаисская from 1886
+- Батумская from 1903
+
+Приморская обл. с Камчатской обл.:
+- Приморская обл. full
+- Камчатская обл. from 1909
+
+Люблинская с Седлецкой и Холмской:
+- Люблинская full
+- Седлецкая full
+- Холмская from 1913
+
+Область войска Донского from 1882 => clone to 1881
+
+Средняя Азия (с 1888)
+- Закаспийская обл. from 1888
+- Самаркандская обл. from 1888
+- Тургайская обл. from 1882
+- Ферганская обл. from 1882 gaps: 1886 1887 
+- Сыр-Дарьинская обл. from 1882 gaps: 1887
+- Семиреченская обл. from 1882
+
+Кавказ-СССР (с 1886)
+- Бакинская с Баку from 1886
+- Елисаветпольская from 1886
+- Карсская обл. from 1888
+- Тифлисская from 1886
+- Эриванская from 1886
+
+Кавказ-РСФСР (с 1886)
+- Дагестанская обл. from 1886
+- Терская обл. from 1886
+- Кубанская обл. from 1886
+- Кутаисская from 1886
+- Ставропольская from 1886
+- Черноморская from 1888 gaps: 1890 1891 1892 1893 1894 1895 1896 => выделить из Кубанской
+
+- Амурская обл. from 1881 gaps: 1887 => интерполировать 1887 из соседних годов
+- Сахалин from 1887 => скопировать в 1886 из 1887
+
+- Астраханская from 1881 gaps: 1887 1888 1889 1890 1891 1892 1893 1894 1895
+- Астраханская (кочевники) from 1886 gaps: 1887
+- Астраханская (оседлое население) from 1885
+
+..............
+
+Империя с 1888
+РСФСР-1991 с 1886
+СССР-1991 с 1888
+СССР-1926 с 1888
+Европейская часть РСФСР-1991 c 1886
+Сибирь c 1881
+Новороссия с 1881
+Малороссия с 1881
+Белоруссия с 1881
+Белоруссия без Смоленской с 1881
+Литва с 1881
+Кавказ 1886
+Средняя Азия с 1888
+привислинские губернии с 1881
+Остзейские губернии с 1881
+50 губерний Европейской России 1881
+
+*/
