@@ -13,6 +13,9 @@ import rtss.util.Util;
 
 public abstract class ByRateBase
 {
+    // private static final int fromYear = 1896; 
+    private static final int fromYear = 1881; 
+
     private static class TerritoryResult implements Comparable<TerritoryResult>
     {
         public final String tname;
@@ -37,7 +40,7 @@ public abstract class ByRateBase
 
     protected void eval() throws Exception
     {
-        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(new EvalCountryTaxon.Options().countMilitaryDeaths(false));
+        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(fromYear, new EvalCountryTaxon.Options().countMilitaryDeaths(false));
 
         for (String tname : tdsEmpire.keySet())
         {

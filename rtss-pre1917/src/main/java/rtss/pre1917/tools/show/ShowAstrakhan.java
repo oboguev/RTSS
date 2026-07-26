@@ -13,12 +13,15 @@ import rtss.util.Util;
 public class ShowAstrakhan
 {
     private static TerritoryDataSet tdsEmpire;
+    
+    // private static final int fromYear = 1896; 
+    private static final int fromYear = 1881; 
 
     public static void main(String[] args)
     {
         try
         {
-            tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(new EvalCountryTaxon.Options()
+            tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(fromYear, new EvalCountryTaxon.Options()
                     .splitAstrakhan(false)
                     .verbose(false));
             new ShowAstrakhan().do_show_1();

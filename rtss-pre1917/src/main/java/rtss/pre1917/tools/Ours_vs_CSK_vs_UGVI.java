@@ -21,7 +21,7 @@ public class Ours_vs_CSK_vs_UGVI
             TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES,
                                                                           LoadOptions.MERGE_POST1897_REGIONS);
             TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.MERGE_POST1897_REGIONS);
-            TerritoryDataSet tdsOurs = EvalCountryTaxon.getFinalEmpirePopulationSet();
+            TerritoryDataSet tdsOurs = EvalCountryTaxon.getFinalEmpirePopulationSet(1881);
 
             new Ours_vs_CSK_vs_UGVI().printDifference("ЦСК минус наша", tdsCSK, tdsOurs);
             new Ours_vs_CSK_vs_UGVI().printDifference("УГВИ минус наша", tdsUGVI, tdsOurs);

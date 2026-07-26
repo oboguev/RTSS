@@ -36,6 +36,8 @@ public class EvalCountryTaxon extends EvalCountryBase
      */
     private final static Double BoostBirths = 1.0;
     private final static Double BoostDeaths = 1.0;
+    
+    private final static boolean LimitToPost1896 = Util.True; 
 
     public static void main(String[] args)
     {
@@ -70,7 +72,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             new EvalCountryTaxon("Белоруссия без Смоленской", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Литва", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Кавказ", 1886, 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Средняя Азия", 1914, Options.VERBOSE).calc().print(); // ###
+            new EvalCountryTaxon("Средняя Азия", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("привислинские губернии", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Остзейские губернии", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("50 губерний Европейской России", 1881, 1913, Options.VERBOSE).calc().print();
@@ -147,14 +149,14 @@ public class EvalCountryTaxon extends EvalCountryBase
      *     hasValidVitalRate
      * CBR и СDR должны вычисляться отдельно, в зависимости от нужной нормировки   
      */
-    public static TerritoryDataSet getFinalEmpirePopulationSet() throws Exception
+    public static TerritoryDataSet getFinalEmpirePopulationSet(int fromYear) throws Exception
     {
-        return getFinalEmpirePopulationSet(new Options());
+        return getFinalEmpirePopulationSet(fromYear, new Options());
     }
 
-    public static TerritoryDataSet getFinalEmpirePopulationSet(Options options) throws Exception
+    public static TerritoryDataSet getFinalEmpirePopulationSet(int fromYear, Options options) throws Exception
     {
-        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", 1913, options.clone().verbose(false));
+        EvalCountryTaxon eval = new EvalCountryTaxon("Империя", fromYear, 1913, options.clone().verbose(false));
         eval.calc();
         eval.tdsExportPopulation.leaveOnlyTotalBoth();
 
@@ -178,12 +180,12 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     public static void warmup() throws Exception
     {
-        new EvalCountryTaxon("Империя", 1913, Options.SILENT).calc();
+        new EvalCountryTaxon("Империя", 1881, 1913, Options.SILENT).calc();
     }
 
-    public static TaxonYearlyPopulationData calc(String taxonName, int toYear, Options options) throws Exception
+    public static TaxonYearlyPopulationData calc(String taxonName, int fromYear, int toYear, Options options) throws Exception
     {
-        return new EvalCountryTaxon(taxonName, toYear, options).calc();
+        return new EvalCountryTaxon(taxonName, fromYear, toYear, options).calc();
     }
 
     private Territory tmPopulation;
@@ -195,24 +197,19 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
-    private EvalCountryTaxon(String taxonName, int toYear) throws Exception
+    private EvalCountryTaxon(String taxonName, int fromYear, int toYear) throws Exception
     {
-        this(taxonName, toYear, new Options().countMilitaryDeaths(DoCountMilitaryDeaths));
-    }
-
-    private EvalCountryTaxon(String taxonName, int toYear, Options options) throws Exception
-    {
-        this(taxonName, 1896, toYear, options);
+        this(taxonName, fromYear, toYear, new Options().countMilitaryDeaths(DoCountMilitaryDeaths));
     }
 
     private EvalCountryTaxon(String taxonName, int fromYear, int toYear, Options options) throws Exception
     {
-        super(taxonName, fromYear, toYear);
+        super(taxonName, LimitToPost1896 ? 1896 : fromYear, toYear);
 
         this.options = options;
 
         if (Util.False && typdRusEvro == null && !taxonName.equals(RusEvro))
-            typdRusEvro = new EvalCountryTaxon(RusEvro, 1914, options.clone().verbose(false)).calc();
+            typdRusEvro = new EvalCountryTaxon(RusEvro, LimitToPost1896 ? 1896 : fromYear, 1914, options.clone().verbose(false)).calc();
     }
 
     private static Long EmpirePopulation1904 = null;

@@ -12,6 +12,9 @@ import rtss.util.Util;
 
 public class ByIncreaseOfGrowthRate
 {
+    // private static final int fromYear = 1896; 
+    private static final int fromYear = 1881; 
+    
     public static void main(String[] args)
     {
         try
@@ -53,7 +56,7 @@ public class ByIncreaseOfGrowthRate
 
     protected void eval() throws Exception
     {
-        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(new EvalCountryTaxon.Options().countMilitaryDeaths(false));
+        TerritoryDataSet tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(fromYear, new EvalCountryTaxon.Options().countMilitaryDeaths(false));
 
         for (String tname : tdsEmpire.keySet())
         {

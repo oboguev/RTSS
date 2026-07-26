@@ -62,7 +62,7 @@ public class DemTransitionStart
         List<Double> ax = new ArrayList<Double>();
         List<Double> ay = new ArrayList<Double>();
 
-        TaxonYearlyPopulationData yds = EvalCountryTaxon.calc(txname, toYear, Options.SILENT);
+        TaxonYearlyPopulationData yds = EvalCountryTaxon.calc(txname, 1881, toYear, Options.SILENT);
         for (int year : yds.years())
         {
             TaxonYearData yd = yds.get(year);
