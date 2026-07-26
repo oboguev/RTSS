@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import rtss.data.selectors.BirthDeath;
+import rtss.data.selectors.BirthDeathPopulation;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
@@ -36,7 +37,7 @@ public class FillMissingBD
     {
         if (tds.filledMissingBD)
             return;
-            
+
         // Нет сведений за 1913 и 1914 гг. по Карсской области и за 1913 г. для Семипалатинской обл.
         // Изменение их населения за 1913 г. приближено повтором величины за 1912 год.
         repeat("Карсская обл.", 1913, 1912);
@@ -64,14 +65,14 @@ public class FillMissingBD
             t3.births.total.both = t2.births.total.both = (t1.births.total.both + t4.births.total.both) / 2;
             t3.deaths.total.both = t2.deaths.total.both = (t1.deaths.total.both + t4.deaths.total.both) / 2;
         }
-        
+
         // Черноморская губерния (с центром в Новороссийске) была образована в мае 1896 года выделением из Кубанской области, 
         // поэтому сведения о числе рождений и смертей в ней собираются с 1897 года. Установить для 1896 года в Черноморской губ.
         // число рождений и смертей как среднее за 1897-1900. 
         average("Черноморская", 1896, 1897, 1900);
-        
+
         applyPatches();
-        
+
         fill_pre1896_blanks();
 
         // исправить число рождений и смертей для губерний с иудеями
@@ -113,7 +114,7 @@ public class FillMissingBD
         TerritoryYear ty2 = t.territoryYear(yto);
         if (ty2.births.total.both != null || ty2.deaths.total.both != null)
             throw new Exception("Already have BD data");
-        
+
         ty2.births.total.both = null;
         ty2.deaths.total.both = null;
 
@@ -126,7 +127,7 @@ public class FillMissingBD
         for (int y = y1; y <= y2; y++)
         {
             TerritoryYear ty1 = t.territoryYear(y);
-            
+
             ty2.births.total.both = sum(ty2.births.total.both, ty1.births.total.both);
             ty2.deaths.total.both = sum(ty2.deaths.total.both, ty1.deaths.total.both);
             ty2.births.urban.both = sum(ty2.births.urban.both, ty1.births.urban.both);
@@ -134,19 +135,19 @@ public class FillMissingBD
             ty2.births.rural.both = sum(ty2.births.rural.both, ty1.births.rural.both);
             ty2.deaths.rural.both = sum(ty2.deaths.rural.both, ty1.deaths.rural.both);
         }
-        
+
         int nyears = y2 - y1 + 1;
-        
+
         ty2.births.total.both = div(ty2.births.total.both, nyears);
         ty2.deaths.total.both = div(ty2.deaths.total.both, nyears);
 
         ty2.births.urban.both = div(ty2.births.urban.both, nyears);
         ty2.deaths.urban.both = div(ty2.deaths.urban.both, nyears);
-        
+
         ty2.births.rural.both = div(ty2.births.rural.both, nyears);
         ty2.deaths.rural.both = div(ty2.deaths.rural.both, nyears);
     }
-    
+
     private Long sum(Long v1, Long v2)
     {
         if (v1 == null && v2 == null)
@@ -158,7 +159,7 @@ public class FillMissingBD
         else
             return v1 + v2;
     }
-    
+
     private Long div(Long v, int ny)
     {
         if (v == null)
@@ -205,7 +206,7 @@ public class FillMissingBD
     {
         if (ur == null)
             return;
-        
+
         if (ur.urban.both != null || ur.rural.both != null)
         {
             fixJews(ur.urban, pct);
@@ -231,7 +232,7 @@ public class FillMissingBD
             v.both = scaleJews(v.both, pct);
         }
     }
-    
+
     private final double JudaicBirthDeathUnderaccouningRate = 0.15;
 
     private Long scaleJews(Long v, double pct) throws Exception
@@ -243,20 +244,21 @@ public class FillMissingBD
     }
 
     /* =============================================================================================== */
-    
+
     private void applyPatches() throws Exception
     {
         ExcelWorkbook wb = ExcelWorkbook.load("ugvi/PatchYearData.xlsx");
         ExcelSheet sheet = wb.getTheOnlySheet();
-        
+
         for (ExcelRow row : sheet.getRows())
         {
-            applyPatch(row, "чр", BirthDeath.BIRTH);
-            applyPatch(row, "чу", BirthDeath.DEATH);
+            applyPatch(row, "чр", BirthDeathPopulation.BIRTH);
+            applyPatch(row, "чу", BirthDeathPopulation.DEATH);
+            applyPatch(row, "чж", BirthDeathPopulation.POPULATION);
         }
     }
 
-    private void applyPatch(ExcelRow row, String col, BirthDeath bd) throws Exception
+    private void applyPatch(ExcelRow row, String col, BirthDeathPopulation bd) throws Exception
     {
         String tname = row.asDespacedString("губ");
         if (tname == null || tname.length() == 0)
@@ -264,11 +266,11 @@ public class FillMissingBD
         TerritoryNames.checkValidTerritoryName(tname);
 
         int year = row.asInteger("год");
-        
+
         String sv = row.asDespacedString(col);
         if (sv == null || sv.length() == 0)
             return;
-        
+
         if (sv.startsWith("A"))
         {
             applyPatch(tname, year, sv, bd);
@@ -279,8 +281,8 @@ public class FillMissingBD
             applyPatch(tname, year, value, bd);
         }
     }
-    
-    private void applyPatch(String tname, int year, String formula, BirthDeath bd) throws Exception
+
+    private void applyPatch(String tname, int year, String formula, BirthDeathPopulation bd) throws Exception
     {
         if (formula.equals("A"))
         {
@@ -301,35 +303,39 @@ public class FillMissingBD
         }
     }
 
-    private void applyPatch(String tname, int year, BirthDeath bd, Integer... avyears) throws Exception
+    private void applyPatch(String tname, int year, BirthDeathPopulation bd, Integer... avyears) throws Exception
     {
         Territory t = tds.get(tname);
         long sum = 0;
         int count = 0;
-        
+
         for (int ay : avyears)
         {
             TerritoryYear ty = t.territoryYear(ay);
             count++;
-            
+
             switch (bd)
             {
             case BIRTH:
                 sum += ty.births.total.both;
                 break;
-            
+
             case DEATH:
                 sum += ty.deaths.total.both;
                 break;
+
+            case POPULATION:
+                sum += ty.population.total.both;
+                break;
             }
         }
-        
-        long value  = Math.round((1.0 * sum) / count);
-        
+
+        long value = Math.round((1.0 * sum) / count);
+
         applyPatch(tname, year, value, bd);
     }
 
-    private void applyPatch(String tname, int year, long value, BirthDeath bd) throws Exception
+    private void applyPatch(String tname, int year, long value, BirthDeathPopulation bd) throws Exception
     {
         Territory t = tds.get(tname);
         TerritoryYear ty = t.territoryYear(year);
@@ -340,10 +346,15 @@ public class FillMissingBD
             ty.births.leaveOnlyTotalBoth();
             ty.births.total.both = value;
             break;
-        
+
         case DEATH:
             ty.deaths.leaveOnlyTotalBoth();
             ty.deaths.total.both = value;
+            break;
+
+        case POPULATION:
+            ty.population.leaveOnlyTotalBoth();
+            ty.population.total.both = value;
             break;
         }
     }
@@ -356,13 +367,14 @@ public class FillMissingBD
     private void fill_pre1896_blanks() throws Exception
     {
         TerritoryDataSet tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY /*, LoadOptions.MERGE_CITIES */);
-        
+
         // Сибирь
         fill_pre1896_blanks(1881, 1895, tdsCensus, "Амурская обл.");
         fill_pre1896_blanks(1881, 1895, tdsCensus, "Забайкальская обл.");
         fill_pre1896_blanks(1881, 1895, tdsCensus, "Приморская обл.");
         fill_pre1896_blanks(1881, 1895, tdsCensus, "Якутская обл.");
-        
+        fill_pre1896_blanks(1881, 1886, tdsCensus, "Сахалин");
+
         // Кавказ
         fill_pre1896_blanks(1881, 1885, tdsCensus, "Бакинская");
         fill_pre1896_blanks(1881, 1885, tdsCensus, "Дагестанская обл.");
@@ -381,7 +393,7 @@ public class FillMissingBD
         fill_pre1896_blanks(1881, 1881, tdsCensus, "Семиреченская обл.");
         fill_pre1896_blanks(1881, 1905, tdsCensus, "Сыр-Дарьинская обл.");
         fill_pre1896_blanks(1881, 1887, tdsCensus, "Тургайская обл.");
-        fill_pre1896_blanks(1881, 1885, tdsCensus, "Ферганская обл.", false);
+        fill_pre1896_blanks(1881, 1887, tdsCensus, "Ферганская обл.", false);
 
         Util.noop();
 

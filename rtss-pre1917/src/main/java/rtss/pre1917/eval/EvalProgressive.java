@@ -46,7 +46,7 @@ public class EvalProgressive
     {
         for (String tname : tds.keySet())
         {
-            if (Taxon.isComposite(tname) || Taxon.isFinland(tname))
+            if (Taxon.isComposite(tname) || Taxon.isFinland(tname) || tname.equals(Taxon.Астраханская_кочевники) || tname.equals("Самаркандская обл."))
                 continue;
 
             Territory tCensus = census.get(censusTerritoryName(tname));
@@ -103,6 +103,10 @@ public class EvalProgressive
 
     static private void evalProgressive(Territory t, Territory xt, long censusPopulation) throws Exception
     {
+        int startYear = 1881;
+        if (t.name.equals("Черноморская"))
+            startYear = 1896;
+        
         final TotalMigration totalMigration = TotalMigration.getTotalMigration();
         String tname = t.name;
 
@@ -153,6 +157,9 @@ public class EvalProgressive
 
         for (int year = 1895; year >= 1881; year--)
         {
+            if (year < startYear)
+                continue;
+            
             TerritoryYear ty = t.territoryYearOrNull(year);
             TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
 
