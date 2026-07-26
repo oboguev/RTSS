@@ -31,11 +31,13 @@ public class EvalCountryBase
     protected final double PROMILLE = 1000.0;
 
     protected final String taxonName;
+    protected final int fromYear;
     protected final int toYear;
 
-    protected EvalCountryBase(String taxonName, int toYear) throws Exception
+    protected EvalCountryBase(String taxonName, int fromYear, int toYear) throws Exception
     {
         this.taxonName = taxonName;
+        this.fromYear = fromYear;
         this.toYear = toYear;
     }
 

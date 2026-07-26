@@ -56,24 +56,24 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         try
         {
-            new EvalCountryTaxon("Империя", 1913, Options.VERBOSE).calc().print().printDifferenceWithCSK().printDifferenceWithUGVI()
+            new EvalCountryTaxon("Империя", 1886, 1913, Options.VERBOSE).calc().print().printDifferenceWithCSK().printDifferenceWithUGVI()
                     .exportData("c:\\@\\Final.csv", "c:\\@\\Final.txt");
-            new EvalCountryTaxon("РСФСР-1991", 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("СССР-1991", 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("СССР-1926", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("РСФСР-1991", 1886, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1991", 1886, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1926", 1886, 1913, Options.VERBOSE).calc().print();
 
-            new EvalCountryTaxon("Европейская часть РСФСР-1991", 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Сибирь", 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Новороссия", 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Малороссия", 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Белоруссия", 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Белоруссия без Смоленской", 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Литва", 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Кавказ", 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Средняя Азия", 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("привислинские губернии", 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Остзейские губернии", 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("50 губерний Европейской России", 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Европейская часть РСФСР-1991", 1886, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Сибирь", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Новороссия", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Малороссия", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Белоруссия", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Белоруссия без Смоленской", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Литва", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Кавказ", 1886, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Средняя Азия", 1914, Options.VERBOSE).calc().print(); // ###
+            new EvalCountryTaxon("привислинские губернии", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Остзейские губернии", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("50 губерний Европейской России", 1881, 1913, Options.VERBOSE).calc().print();
         }
         catch (Throwable ex)
         {
@@ -202,7 +202,12 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private EvalCountryTaxon(String taxonName, int toYear, Options options) throws Exception
     {
-        super(taxonName, toYear);
+        this(taxonName, 1896, toYear, options);
+    }
+
+    private EvalCountryTaxon(String taxonName, int fromYear, int toYear, Options options) throws Exception
+    {
+        super(taxonName, fromYear, toYear);
 
         this.options = options;
 
@@ -220,7 +225,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             Util.out("");
             Util.out("====================================================================================================================");
             Util.out("");
-            Util.out("Расчёт для " + taxonName);
+            Util.out(String.format("Расчёт для %s за %d-%d", taxonName, fromYear, toYear));
             Util.out("");
         }
 
