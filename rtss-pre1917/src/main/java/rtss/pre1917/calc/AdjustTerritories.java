@@ -47,7 +47,7 @@ public class AdjustTerritories
 
     /*
      * Исправление для Самаркандской области.
-     * Использовать расчёт УГВИ (1896-1901), затем ЦСК (1904-1915).
+     * Использовать расчёт УГВИ (1896-1901 экстраполированный на 1881-1901), затем ЦСК (1904-1915).
      * Численность в 1902 и 1903 г. интерполировать между 1901 и 1904. 
      */
     public void fixSamarkand() throws Exception
@@ -61,7 +61,7 @@ public class AdjustTerritories
         
         Territory tCSK = tdsCSK.get(tname);
 
-        for (int year = 1896; year <= 1901; year++)
+        for (int year = 1881; year <= 1901; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             ty.progressive_population.total.both = ty.population.total.both;
