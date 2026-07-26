@@ -30,6 +30,20 @@ public class TotalMigration
 
     public long saldo(String tname, int year) throws Exception
     {
+        Long v = saldo_nullable(tname, year);
+        if (v == null)
+            v = 0L;
+        return v;
+    }
+    
+    public Long saldo_nullable(String tname, int year) throws Exception
+    {
+        if (year < 1896)
+        {
+            // ###
+            return null;
+        }
+        
         return innerMigration.saldo(tname, year)
                + immigration.immigrants(tname, year)
                - emigration.emigrants(tname, year);

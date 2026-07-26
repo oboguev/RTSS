@@ -402,7 +402,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 
                 try
                 {
-                    saldo = totalMigration.saldo(t.name, year);
+                    saldo = totalMigration.saldo_nullable(t.name, year);
                 }
                 catch (MissingMigrationDataException ex)
                 {
@@ -520,7 +520,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 
         try
         {
-            saldo = totalMigration.saldo(t.name, year);
+            saldo = totalMigration.saldo_nullable(t.name, year);
         }
         catch (MissingMigrationDataException ex)
         {

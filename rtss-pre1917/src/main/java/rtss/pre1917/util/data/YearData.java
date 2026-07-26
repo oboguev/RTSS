@@ -38,7 +38,7 @@ public class YearData
         if (migration == null)
         {
             final TotalMigration totalMigration = TotalMigration.getTotalMigration();
-            migration = totalMigration.saldo(ty.territory.name, ty.year);
+            migration = totalMigration.saldo_nullable(ty.territory.name, ty.year);
         }
 
         Long next_pop = nextYearPopulation();

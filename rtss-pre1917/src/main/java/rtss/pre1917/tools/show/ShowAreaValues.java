@@ -273,13 +273,19 @@ public class ShowAreaValues
             Util.out("==== =========== ========================================== =======  ========================  ========================================= =======");
         }
 
+        int minyear = t.minYear(1881);
+        if (tCSK != null)
+            minyear = Math.min(minyear, tCSK.minYear(1881));
+        if (tEval != null)
+            minyear = Math.min(minyear, tEval.minYear(1881));
+
         int maxyear = t.maxYear(1917);
         if (tCSK != null)
             maxyear = Math.max(maxyear, tCSK.maxYear(1917));
         if (tEval != null)
             maxyear = Math.max(maxyear, tEval.maxYear(1917));
 
-        for (int year = 1896; year <= maxyear; year++)
+        for (int year = minyear; year <= maxyear; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
 
@@ -360,7 +366,7 @@ public class ShowAreaValues
             Long saldo = null;
             try
             {
-                saldo = totalMigration.saldo(t.name, year);
+                saldo = totalMigration.saldo_nullable(t.name, year);
             }
             catch (MissingMigrationDataException ex)
             {
