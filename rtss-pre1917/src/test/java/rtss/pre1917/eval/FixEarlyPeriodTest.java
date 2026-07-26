@@ -12,6 +12,9 @@ import rtss.util.Util;
 
 public class FixEarlyPeriodTest
 {
+    // private final static int fromYear = 1896;
+    private final static int fromYear = 1881;
+
     public static void main(String[] args)
     {
         try
@@ -60,7 +63,7 @@ public class FixEarlyPeriodTest
         
         new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
-        Territory xt = new FixEarlyPeriod().fix(t, tCensus, by, dy);        
+        Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, by, dy);        
 
         new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
@@ -73,7 +76,7 @@ public class FixEarlyPeriodTest
         
         new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
-        Territory xt = new FixEarlyPeriod().fix(t, tCensus, yl1, yl2, yr1, yr2);        
+        Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, yl1, yl2, yr1, yr2);        
 
         new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
@@ -86,7 +89,7 @@ public class FixEarlyPeriodTest
         
         new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
-        Territory xt = new FixEarlyPeriod().fix(t, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);        
+        Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, byl1, byl2, byr1, byr2, dyl1, dyl2, dyr1, dyr2);        
 
         new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }

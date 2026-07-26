@@ -15,6 +15,9 @@ public class PrintProgressive
     private final static char NBSP = 0xA0;
     private final static String NBSP_S = "" + NBSP;
     
+    // private final static int fromYear = 1896;
+    private final static int fromYear = 1881;
+    
     public static void print(Territory t) throws Exception
     {
         final TotalMigration totalMigration = TotalMigration.getTotalMigration();
@@ -28,7 +31,7 @@ public class PrintProgressive
 
         for (int year : t.years())
         {
-            if (year >= 1896)
+            if (year >= fromYear)
             {
                 TerritoryYear ty = t.territoryYear(year);
 

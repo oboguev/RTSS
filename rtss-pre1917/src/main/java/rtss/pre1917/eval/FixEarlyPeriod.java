@@ -30,9 +30,12 @@ import rtss.pre1917.data.URValue;
 public class FixEarlyPeriod
 {
     private final double PROMILLE = 1000.0;
+    
+    private final int fromYear;
 
-    public FixEarlyPeriod() throws Exception
+    public FixEarlyPeriod(int fromYear) throws Exception
     {
+        this.fromYear = fromYear;
     }
 
     /*
@@ -41,13 +44,13 @@ public class FixEarlyPeriod
      */
     public Territory fix(Territory t, Territory tCensus, int by, int dy) throws Exception
     {
-        int byl1 = 1896;
+        int byl1 = fromYear;
         int byl2 = by - 1;
 
         int byr1 = by;
         int byr2 = 1916;
 
-        int dyl1 = 1896;
+        int dyl1 = fromYear;
         int dyl2 = dy - 1;
 
         int dyr1 = dy;
@@ -114,7 +117,7 @@ public class FixEarlyPeriod
         right_cdr = averageRate(t, dyr1, dyr2, BirthDeath.DEATH);
 
         // adjust births and deaths in left window from exising progressive
-        for (int year = 1896; year <= 1916; year++)
+        for (int year = fromYear; year <= 1916; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             if (ty != null)

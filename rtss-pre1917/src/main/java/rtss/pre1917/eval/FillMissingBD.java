@@ -6,6 +6,7 @@ import java.util.Map;
 
 import rtss.data.selectors.BirthDeath;
 import rtss.pre1917.LoadData;
+import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -70,6 +71,8 @@ public class FillMissingBD
         average("Черноморская", 1896, 1897, 1900);
         
         applyPatches();
+        
+        fill_pre1896_blanks();
 
         // исправить число рождений и смертей для губерний с иудеями
         fixJews();
@@ -343,5 +346,54 @@ public class FillMissingBD
             ty.deaths.total.both = value;
             break;
         }
+    }
+
+    /* =============================================================================================== */
+
+    /*
+     * Заполнить пропуски в данных до 1896 года
+     */
+    private void fill_pre1896_blanks() throws Exception
+    {
+        TerritoryDataSet tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY /*, LoadOptions.MERGE_CITIES */);
+        
+        // Сибирь
+        fill_pre1896_blanks(1881, 1895, tdsCensus, "Амурская обл.");
+        fill_pre1896_blanks(1881, 1895, tdsCensus, "Забайкальская обл.");
+        fill_pre1896_blanks(1881, 1895, tdsCensus, "Приморская обл.");
+        fill_pre1896_blanks(1881, 1895, tdsCensus, "Якутская обл.");
+        
+        // Кавказ
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Бакинская");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Дагестанская обл.");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Елисаветпольская");
+        fill_pre1896_blanks(1881, 1889, tdsCensus, "Карсская обл.");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Кубанская обл.");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Кутаисская");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Ставропольская");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Терская обл.");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Тифлисская");
+        fill_pre1896_blanks(1881, 1888, tdsCensus, "Эриванская");
+
+        // Средняя Азия
+        fill_pre1896_blanks(1881, 1894, tdsCensus, "Закаспийская обл.");
+        fill_pre1896_blanks(1881, 1892, tdsCensus, "Семипалатинская обл.");
+        fill_pre1896_blanks(1881, 1881, tdsCensus, "Семиреченская обл.");
+        fill_pre1896_blanks(1881, 1905, tdsCensus, "Сыр-Дарьинская обл.");
+        fill_pre1896_blanks(1881, 1887, tdsCensus, "Тургайская обл.");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Ферганская обл.");
+
+        Util.noop();
+
+        // ####
+    }
+
+    private void fill_pre1896_blanks(int fromYear, int toYear, TerritoryDataSet tdsCensus, String tname) throws Exception
+    {
+        tname = TerritoryNames.canonic(tname);
+        Territory t = tds.get(tname);
+
+        FillBlanks fb = new FillBlanks(t, tdsCensus);
+        fb.fillAllBlanks(fromYear, toYear);
     }
 }

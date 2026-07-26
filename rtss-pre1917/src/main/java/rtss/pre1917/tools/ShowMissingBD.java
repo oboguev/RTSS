@@ -10,6 +10,9 @@ import rtss.util.Util;
 
 public class ShowMissingBD
 {
+    // private final static int fromYear = 1896;
+    private final static int fromYear = 1881;
+
     public static void main(String[] args)
     {
         try
@@ -21,7 +24,7 @@ public class ShowMissingBD
                 if (Taxon.isComposite(tname))
                     continue;
 
-                for (int year = 1896; year <= 1914; year++)
+                for (int year = fromYear; year <= 1914; year++)
                 {
                     String v = hasBD(tds, tname, year);
                     if (v != null)

@@ -288,7 +288,7 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         filterPopulationSetsByTaxon();
         Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
-        checkProgressiveAvailable();
+        checkProgressiveAvailable(fromYear);
         mergeTaxonPopulation();
 
         /* Часть иммиграции не разбиваемая по губерниям */
@@ -353,7 +353,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
 
         Set<String> territoriesExcludedFromVitalRates = refreshVitalSetData();
-        checkProgressiveAvailable();
+        checkProgressiveAvailable(fromYear);
         mergeTaxonPopulation();
         mergeTaxonVitalRates(territoriesExcludedFromVitalRates);
 
@@ -419,12 +419,12 @@ public class EvalCountryTaxon extends EvalCountryBase
         return territoriesExcludedFromVitalRates;
     }
 
-    private void checkProgressiveAvailable() throws Exception
+    private void checkProgressiveAvailable(int fromYear) throws Exception
     {
-        new CheckProgressiveAvailable(tdsPopulation).check(toYear + 1);
-        new CheckProgressiveAvailable(tdsVitalRates).check(toYear + 1);
+        new CheckProgressiveAvailable(tdsPopulation).check(fromYear, toYear + 1);
+        new CheckProgressiveAvailable(tdsVitalRates).check(fromYear, toYear + 1);
         if (tdsExportPopulation != null)
-            new CheckProgressiveAvailable(tdsExportPopulation).check(toYear + 1);
+            new CheckProgressiveAvailable(tdsExportPopulation).check(fromYear, toYear + 1);
     }
 
     private void mergeTaxonPopulation() throws Exception

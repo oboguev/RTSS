@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import rtss.util.Util;
+
 /**
  * Fills missing annual numbers of births and deaths by interpolating annual
  * demographic rates and reconciling them iteratively with the population
@@ -28,6 +30,33 @@ import java.util.Set;
  *
  * <p>The deliberately misspelled method names {@code birhts} and
  * {@code setBirhts} are preserved to match the requested integration API.
+ * 
+ * *************************************************************************
+ * 
+ * Реализованная логика:
+ * 
+ *   - население на начало 1896 года используется как жёсткая опорная точка;
+ *   - население восстанавливается в обе стороны по балансу:
+ *     P(y + 1) = P(y) + births(y) - deaths(y) + migration(y)
+ *   - коэффициенты рассчитываются относительно среднегодового населения;
+ *   - внутренние пробелы заполняются логарифмической интерполяцией коэффициентов;
+ *   - краевые пробелы заполняются постоянным коэффициентом, равным медиане до пяти ближайших известных коэффициентов;
+ *   - рождения и смерти интерполируются независимо;
+ *   - известные исходные значения никогда не изменяются;
+ *   - расчёт выполняется итерационно до согласования коэффициентов, чисел событий и населения;
+ *   - округление до long производится только после сходимости;
+ *   - предусмотрены проверки отрицательных значений, неположительного населения, расходимости и необычных коэффициентов.
+ * 
+ * Методы вызова:
+ * 
+ *     fillBlanks(1883);
+ *     fillBlanks(1886, 1892);
+ *     fillAllBlanks(1881, 1917);
+ * 
+ *     fillAllBlanks находит все пропущенные значения в заданном промежутке и решает их совместно. 
+ *     Класс также помнит, какие значения были ранее заполнены им самим: при последующих вызовах они не превращаются в «исходные наблюдения», 
+ *     а могут быть пересчитаны для сохранения общей согласованности.
+ * 
  */
 public abstract class FillBlanksMethod
 {
@@ -761,6 +790,8 @@ public abstract class FillBlanksMethod
             this.observedBirth = observedBirth;
             this.observedDeath = observedDeath;
             this.iterationsUsed = iterationsUsed;
+            
+            Util.unused(this.population, this.exposure, this.iterationsUsed);
         }
     }
 }

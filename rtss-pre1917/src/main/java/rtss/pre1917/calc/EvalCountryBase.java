@@ -179,7 +179,7 @@ public class EvalCountryBase
 
         Territory tCensus = tdsCensus1897.get(tname);
         
-        Territory xt = new FixEarlyPeriod().fix(t, tCensus, yl1, yl2, yr1, yr2);        
+        Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, yl1, yl2, yr1, yr2);        
         tdsPopulation.put(tname, xt);
         tdsVitalRates.put(tname, xt.dup());
     }

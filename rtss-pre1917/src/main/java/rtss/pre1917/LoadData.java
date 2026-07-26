@@ -358,7 +358,6 @@ public class LoadData
     // ### только для колонок чу чр чж, но не для р с
     // ### 1883 сделать прибавления [правка+] через колоку "добавить к"
 
-    
     // ### игнорировать строки "в т.ч." "в т.ч" и [xxx] (строго начало и конец кв. скобки, не по первой скобке)
     // ### 1883 игнорировать строки [уже]
 
@@ -652,7 +651,7 @@ public class LoadData
 
             if (gub.startsWith("[") && gub.endsWith("]"))
                 continue;
-            
+
             Integer targetCol = headers.get("добавить к");
             if (targetCol != null)
             {
@@ -751,7 +750,7 @@ public class LoadData
 
             if (gub.startsWith("в т.ч.") || gub.startsWith("в т.ч"))
                 throw new Exception("Сомнительная запись");
-            
+
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
 
@@ -772,7 +771,7 @@ public class LoadData
             if (targetGub != null)
             {
                 targetGub = TerritoryNames.canonic(targetGub);
-                
+
                 switch (what)
                 {
                 case "р":

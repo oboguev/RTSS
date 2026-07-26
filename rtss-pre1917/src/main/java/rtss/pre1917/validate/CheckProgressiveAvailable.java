@@ -18,19 +18,19 @@ public class CheckProgressiveAvailable
         this.tds = tds;
     }
     
-    public void check() throws Exception
+    public void check(int fromYear) throws Exception
     {
-        check(-1);
+        check(fromYear, -1);
     }
     
-    public void check(int toYear) throws Exception
+    public void check(int fromYear, int toYear) throws Exception
     {
         for (String tname : Util.sort(tds.keySet()))
         {
             if (Taxon.isComposite(tname))
                 continue; 
             
-            for (int year = 1896; year <= 1915; year++)
+            for (int year = fromYear; year <= 1915; year++)
             {
                 if (toYear > 0 && year > toYear)
                     break;

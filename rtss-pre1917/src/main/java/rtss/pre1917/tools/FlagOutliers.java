@@ -15,6 +15,9 @@ import rtss.util.Util;
  */
 public class FlagOutliers
 {
+    // private final static int fromYear = 1896;
+    private final static int fromYear = 1881;
+
     public static void main(String[] args)
     {
         try
@@ -58,7 +61,7 @@ public class FlagOutliers
     private boolean flagOutliers(String tname) throws Exception
     {
         boolean res = false;
-        for (int year = 1896; year <= 1916; year++)
+        for (int year = fromYear; year <= 1916; year++)
         {
             boolean x = flagOutliers(tname, year);
             res = res || x;

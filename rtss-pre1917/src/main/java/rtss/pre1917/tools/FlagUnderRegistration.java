@@ -19,6 +19,9 @@ import rtss.util.Util;
  */
 public class FlagUnderRegistration
 {
+    // private final static int fromYear = 1896;
+    private final static int fromYear = 1881;
+
     public static void main(String[] args)
     {
         try
@@ -107,7 +110,7 @@ public class FlagUnderRegistration
 
         boolean printed = false;
 
-        for (int year = 1896; year <= 1904; year++)
+        for (int year = fromYear; year <= 1904; year++)
         {
             double cbr = cbr(t, year);
             double cdr = cdr(t, year);
