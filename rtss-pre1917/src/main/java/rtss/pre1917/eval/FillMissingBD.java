@@ -381,7 +381,7 @@ public class FillMissingBD
         fill_pre1896_blanks(1881, 1881, tdsCensus, "Семиреченская обл.");
         fill_pre1896_blanks(1881, 1905, tdsCensus, "Сыр-Дарьинская обл.");
         fill_pre1896_blanks(1881, 1887, tdsCensus, "Тургайская обл.");
-        fill_pre1896_blanks(1881, 1885, tdsCensus, "Ферганская обл.");
+        fill_pre1896_blanks(1881, 1885, tdsCensus, "Ферганская обл.", false);
 
         Util.noop();
 
@@ -390,10 +390,15 @@ public class FillMissingBD
 
     private void fill_pre1896_blanks(int fromYear, int toYear, TerritoryDataSet tdsCensus, String tname) throws Exception
     {
+        fill_pre1896_blanks(fromYear, toYear, tdsCensus, tname, true);
+    }
+
+    private void fill_pre1896_blanks(int fromYear, int toYear, TerritoryDataSet tdsCensus, String tname, boolean warn) throws Exception
+    {
         tname = TerritoryNames.canonic(tname);
         Territory t = tds.get(tname);
 
-        FillBlanks fb = new FillBlanks(t, tdsCensus);
+        FillBlanks fb = new FillBlanks(t, tdsCensus).displayWarnings(warn);
         fb.fillAllBlanks(fromYear, toYear);
     }
 }

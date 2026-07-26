@@ -4,12 +4,15 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.TotalMigration;
+import rtss.util.Util;
 
 public class FillBlanks extends FillBlanksMethod
 {
     private final TerritoryDataSet tdsCensus;
     private final Territory t;
     private final TotalMigration totalMigration = TotalMigration.getTotalMigration();
+
+    private boolean displayWarnings = true;
 
     public FillBlanks(Territory t, TerritoryDataSet tdsCensus) throws Exception
     {
@@ -90,5 +93,18 @@ public class FillBlanks extends FillBlanksMethod
     private String censusTerritoryName(String tname)
     {
         return tname;
+    }
+
+    @Override
+    protected void warning(String message)
+    {
+        if (displayWarnings)
+            Util.err("FillBlanks: " + message + " for " + t.name);
+    }
+
+    public FillBlanks displayWarnings(boolean displayWarnings)
+    {
+        this.displayWarnings = displayWarnings;
+        return this;
     }
 }

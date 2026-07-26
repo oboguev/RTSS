@@ -422,10 +422,20 @@ public class LoadData
 
         territories.boostBirthsDeaths(boostBirths, boostDeaths);
 
+        if (hasOption(LoadOptions.EVAL_SPLIT_ASTRAKHAN, options))
+        {
+            if (!hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
+                throw new Exception("Несовместимые опции");
+            
+            Astrakhan.split(territories);
+            
+            // ####
+        }
+
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
             new EvalProgressive(territories).evalProgressive();
 
-        if (hasOption(LoadOptions.EVAL_SPLIT_ASTRAKHAN, options))
+        if (Util.False && hasOption(LoadOptions.EVAL_SPLIT_ASTRAKHAN, options))
         {
             if (!hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
                 throw new Exception("Несовместимые опции");

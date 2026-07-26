@@ -150,10 +150,7 @@ public abstract class FillBlanksMethod
     }
 
     /** Hook for non-fatal diagnostics. */
-    protected void warning(String message)
-    {
-        System.err.println("FillBlanks: " + message);
-    }
+    protected abstract void warning(String message);
 
     private void fillRequestedInterval(int fromYear, int toYear)
     {
@@ -654,19 +651,11 @@ public abstract class FillBlanksMethod
             double birthRatePerThousand = 1000.0 * solution.birthRates[i];
             double deathRatePerThousand = 1000.0 * solution.deathRates[i];
 
-            if (!solution.observedBirth[i]
-                && (birthRatePerThousand < 1.0 || birthRatePerThousand > 100.0))
-            {
-                warning("unusual imputed birth rate in " + year + ": "
-                        + birthRatePerThousand + " per 1,000");
-            }
+            if (!solution.observedBirth[i] && (birthRatePerThousand < 1.0 || birthRatePerThousand > 100.0))
+                warning("unusual imputed birth rate in " + year + ": " + birthRatePerThousand + " per 1,000");
 
-            if (!solution.observedDeath[i]
-                && (deathRatePerThousand < 1.0 || deathRatePerThousand > 150.0))
-            {
-                warning("unusual imputed death rate in " + year + ": "
-                        + deathRatePerThousand + " per 1,000");
-            }
+            if (!solution.observedDeath[i] && (deathRatePerThousand < 1.0 || deathRatePerThousand > 150.0))
+                warning("unusual imputed death rate in " + year + ": " + deathRatePerThousand + " per 1,000");
         }
     }
 
@@ -790,7 +779,7 @@ public abstract class FillBlanksMethod
             this.observedBirth = observedBirth;
             this.observedDeath = observedDeath;
             this.iterationsUsed = iterationsUsed;
-            
+
             Util.unused(this.population, this.exposure, this.iterationsUsed);
         }
     }

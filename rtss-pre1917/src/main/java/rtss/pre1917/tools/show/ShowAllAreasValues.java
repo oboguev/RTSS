@@ -14,7 +14,7 @@ public class ShowAllAreasValues extends ShowAreaValues
         try
         {
             // new ShowAllAreasValues().show_values_all();
-            new ShowAllAreasValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_all();
+            new ShowAllAreasValues(LoadOptions.MERGE_POST1897_REGIONS, LoadOptions.EVAL_SPLIT_ASTRAKHAN).show_values_all();
             // rawShowAllAreasValues().show_values_all();
         }
         catch (Throwable ex)

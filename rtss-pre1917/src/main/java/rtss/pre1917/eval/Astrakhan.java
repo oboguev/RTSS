@@ -52,8 +52,11 @@ public class Astrakhan
             ty.progressive_population.total.both = ty1.progressive_population.total.both +
                                                    ty2.progressive_population.total.both;
 
-            ty.population.total.both = ty1.population.total.both +
-                                       ty2.population.total.both;
+            if (ty1.population.total.both != null && ty2.population.total.both != null)
+            {
+                ty.population.total.both = ty1.population.total.both +
+                                           ty2.population.total.both;
+            }
         }
 
         return t;
@@ -185,7 +188,7 @@ public class Astrakhan
             switch (tdsCode)
             {
             case "A":
-                return tname.equals("Астраханская"); 
+                return tname.equals("Астраханская");
 
             case "OK":
                 return tname.equals(Taxon.Астраханская_оседлое) || tname.equals(Taxon.Астраханская_кочевники);
@@ -197,7 +200,7 @@ public class Astrakhan
                 return tname.equals(Taxon.Астраханская_кочевники);
 
             case "AOK":
-                return tname.equals("Астраханская"); 
+                return tname.equals("Астраханская");
 
             default:
                 Util.err("Inconsistent state for Астраханская");
@@ -234,5 +237,88 @@ public class Astrakhan
     private static void log(String tname, String decision)
     {
         // Util.err("Merging taxon: территория " + tname + " " + decision);
+    }
+
+    /* ======================================================================================= */
+
+    public static void split(TerritoryDataSet territories) throws Exception
+    {
+        Territory tCombined = territories.get("Астраханская");
+        if (tCombined == null)
+            return;
+
+        Territory tSettled = territories.get(Taxon.Астраханская_оседлое);
+        if (tSettled == null)
+        {
+            tSettled = new Territory(Taxon.Астраханская_оседлое);
+            territories.put(tSettled.name, tSettled);
+        }
+
+        Territory tNomadic = territories.get(Taxon.Астраханская_кочевники);
+
+        if (tSettled != null && tNomadic != null)
+        {
+            for (int year = 1881; year <= 1916; year++)
+            {
+                TerritoryYear tyNomadic = tNomadic.territoryYearOrNull(year);
+                TerritoryYear tySettled = tSettled.territoryYearOrNull(year);
+                TerritoryYear tyCombined = tCombined.territoryYearOrNull(year);
+
+                if (tyNomadic != null && tySettled != null && tyCombined != null &&
+                    tyCombined.population.total.both == null &&
+                    tySettled.population.total.both != null &&
+                    tyNomadic.population.total.both != null)
+                {
+                    tyCombined.population.total.both = tySettled.population.total.both + tyNomadic.population.total.both;
+                }
+            }
+        }
+
+        for (int year : tCombined.years())
+        {
+            TerritoryYear tyCombined = tCombined.territoryYearOrNull(year);
+            if (tyCombined == null)
+                continue;
+            if (tyCombined.births.total.both == null && tyCombined.deaths.total.both == null)
+                continue;
+
+            TerritoryYear tySettled = tSettled.territoryYear(year);
+
+            if (tyCombined.births.total.both != null)
+            {
+                if (tySettled.births.total.both == null || tySettled.births.total.both == tyCombined.births.total.both)
+                {
+                    tySettled.births.total.both = tyCombined.births.total.both;
+                }
+                else
+                {
+                    throw new Exception("Ошибка деления Астраханской  (births collision)");
+                }
+            }
+
+            if (tyCombined.deaths.total.both != null)
+            {
+                if (tySettled.deaths.total.both == null || tySettled.deaths.total.both == tyCombined.deaths.total.both)
+                {
+                    tySettled.deaths.total.both = tyCombined.deaths.total.both;
+                }
+                else
+                {
+                    throw new Exception("Ошибка деления Астраханской (deaths collision)");
+                }
+            }
+        }
+
+        tSettled.leaveOnlyTotalBoth();
+        EvalProgressive.evalProgressive(tSettled, DemographicConstants.перепись1897_Астраханская_губ_оседлое_население);
+
+        evalUgviPopulation(tSettled, tCombined,
+                           DemographicConstants.перепись1897_Астраханская_губ_оседлое_население,
+                           DemographicConstants.перепись1897_Астраханская_губ_всё_население);
+
+        tNomadic = Astrakhan.calcNomadic(tCombined, 1881, 1915);
+        territories.put(tNomadic.name, tNomadic);
+
+        territories.remove("Астраханская");
     }
 }

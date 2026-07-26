@@ -100,7 +100,7 @@ public class EvalProgressive
         TerritoryYear tyCensus = tCensus.territoryYearOrNull(1897);
         evalProgressive(t, xt, tyCensus.population.total.both);
     }
-    
+
     static private void evalProgressive(Territory t, Territory xt, long censusPopulation) throws Exception
     {
         final TotalMigration totalMigration = TotalMigration.getTotalMigration();
@@ -148,6 +148,24 @@ public class EvalProgressive
 
                     ty_next.progressive_population.total.both = ty.progressive_population.total.both + in;
                 }
+            }
+        }
+
+        for (int year = 1895; year >= 1881; year--)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
+
+            if (ty != null && ty_next != null && ty_next.progressive_population.total.both != null)
+            {
+                ty.migration.total.both = totalMigration.saldo_nullable(tname, year);
+                in = null2zero(ty.births.total.both) - null2zero(ty.deaths.total.both);
+                in += null2zero(ty.migration.total.both);
+                ty.progressive_population.total.both = ty_next.progressive_population.total.both - in;  
+            }
+            else
+            {
+                Util.err("Нельзя вычислить прогрессивный расчёт для " + tname + " " + year);
             }
         }
     }
