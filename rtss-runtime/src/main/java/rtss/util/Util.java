@@ -1,6 +1,7 @@
 package rtss.util;
 
 import java.io.File;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import rtss.config.Config;
 
@@ -191,6 +193,15 @@ public class Util
     public static String loadResource(String path) throws Exception
     {
         return new String(loadResourceAsBytes(path), StandardCharsets.UTF_8);
+    }
+    
+    public static Properties loadProperties(String path) throws Exception
+    {
+        String s = loadResource(path); 
+        s = stripMultiLineComment(s);
+        Properties p = new Properties ();
+        p.load(new StringReader(s));
+        return p;
     }
 
     public static String f2s(double f) throws Exception
