@@ -58,20 +58,20 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         try
         {
-            new EvalCountryTaxon("Империя", 1886, 1913, Options.VERBOSE).calc().print().printDifferenceWithCSK().printDifferenceWithUGVI()
-                    .exportData("c:\\@\\Final.csv", "c:\\@\\Final.txt");
-            new EvalCountryTaxon("РСФСР-1991", 1886, 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("СССР-1991", 1886, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("СССР-1926", 1886, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Империя", 1881, 1913, Options.VERBOSE).calc().print().printDifferenceWithCSK().printDifferenceWithUGVI()
+                    .exportData("c:\\@\\pre1917\\Final.csv", "c:\\@\\pre1917\\Final.txt");
+            new EvalCountryTaxon("РСФСР-1991", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1991", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1926", 1881, 1913, Options.VERBOSE).calc().print();
 
-            new EvalCountryTaxon("Европейская часть РСФСР-1991", 1886, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Европейская часть РСФСР-1991", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Сибирь", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Новороссия", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Малороссия", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Белоруссия", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Белоруссия без Смоленской", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Литва", 1881, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Кавказ", 1886, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Кавказ", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Средняя Азия", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("привислинские губернии", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Остзейские губернии", 1881, 1913, Options.VERBOSE).calc().print();

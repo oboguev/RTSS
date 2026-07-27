@@ -428,8 +428,6 @@ public class LoadData
                 throw new Exception("Несовместимые опции");
             
             Astrakhan.split(territories);
-            
-            // ####
         }
 
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))

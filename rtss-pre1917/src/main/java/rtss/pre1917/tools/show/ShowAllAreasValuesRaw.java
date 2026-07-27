@@ -40,7 +40,7 @@ public class ShowAllAreasValuesRaw extends ShowAllAreasValues
             // new ShowAllAreasValues().show_values_all();
             // new ShowAllAreasValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_all();
             rawShowAllAreasValues(exportData).show_values_all();
-            exportData.export("c:\\@\\CSK-UGVI-raw.csv");
+            exportData.export("c:\\@\\pre1917\\CSK-UGVI-raw.csv");
         }
         catch (Throwable ex)
         {
