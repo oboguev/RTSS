@@ -7,6 +7,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.TotalMigration;
+import rtss.util.Util;
 
 /*
  * Пересчитать население за 1896-1915 гг. на основе сведений о естественом движении за промежуток, 
@@ -130,6 +131,20 @@ public class EvalGrowthRate
             }
         }
         
+        for (int year = 1895; year >= 1881; year--)
+        {
+            TerritoryYear ty = xt.territoryYearOrNull(year);
+            TerritoryYear ty_next = xt.territoryYearOrNull(year + 1);
+            
+            if (ty == null)
+            {
+                Util.err("Yearly data gap in " + xt.name);
+                break;
+            }
+            
+            ty.population.total.both = Math.round(ty_next.population.total.both / ymult);
+        }
+        
         xt.removeYear(1916);
         xt.removeYear(1917);
 
@@ -146,7 +161,7 @@ public class EvalGrowthRate
         cdr /= nyears;
 
         // пересчитать число рождений и смертей вне стабилизированого участка
-        for (int year = 1896; year <= 1917; year++)
+        for (int year = 1881; year <= 1917; year++)
         {
             if (!(year >= y1 && year <= y2))
             {
