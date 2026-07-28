@@ -9,6 +9,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.diag.DiagMigrationMerge;
 import rtss.pre1917.eval.Astrakhan;
 import rtss.util.FieldValue;
 import rtss.util.Util;
@@ -293,6 +294,8 @@ public class MergeTaxon
             double weight = tx.territories.get(tname).fraction(ty.year);
             res += lv * weight;
             count++;
+            
+            DiagMigrationMerge.merged(selector, ty.territory.name, ty.year, tname, res);
         }
 
         if (count != 0)

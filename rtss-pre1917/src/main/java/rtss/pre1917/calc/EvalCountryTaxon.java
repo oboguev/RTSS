@@ -15,6 +15,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
+import rtss.pre1917.diag.DiagMigrationMerge;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.MergeTaxonOptions;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
@@ -426,24 +427,32 @@ public class EvalCountryTaxon extends EvalCountryBase
 
     private void mergeTaxonPopulation() throws Exception
     {
+        DiagMigrationMerge.which(DiagMigrationMerge.Population);
+
         tmPopulation = MergeTaxon.mergeTaxon(tdsPopulation, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
-                .flagMissing("progressive_population.total.both", 1896, toYear + 1)
+                .flagMissing("progressive_population.total.both", fromYear, toYear + 1)
                 .allowMissingTeritory("Закатальский окр.")
                 .allowMissingTeritory("Сухумский окр."));
+        
+        DiagMigrationMerge.which(null);
     }
 
     private void mergeTaxonVitalRates(Set<String> territoriesExcludedFromVitalRates) throws Exception
     {
+        DiagMigrationMerge.which(DiagMigrationMerge.VitalRates);
+        
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
-                .flagMissing("progressive_population.total.both", 1896, toYear + 1)
-                .flagMissing("births.total.both", 1896, toYear)
-                .flagMissing("deaths.total.both", 1896, toYear)
+                .flagMissing("progressive_population.total.both", fromYear, toYear + 1)
+                .flagMissing("births.total.both", fromYear, toYear)
+                .flagMissing("deaths.total.both", fromYear, toYear)
                 .allowMissingTeritories(territoriesExcludedFromVitalRates)
                 .allowMissingSelectorsTeritoriesYears(Set.of("births.total.both", "deaths.total.both"),
                                                       Set.of("Сахалин"),
                                                       Set.of(1903, 1904, 1905, 1906, 1907))
                 .allowMissingTeritory("Закатальский окр.")
                 .allowMissingTeritory("Сухумский окр."));
+        
+        DiagMigrationMerge.which(null);
     }
 
     private TaxonYearlyPopulationData buildTaxonYearlyPopulationData()
@@ -456,7 +465,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                                      toYear);
         TaxonYearData yd;
 
-        for (int year = 1896; year <= toYear; year++)
+        for (int year = fromYear; year <= toYear; year++)
         {
             yd = new TaxonYearData();
 
@@ -504,7 +513,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         long lumpTotal = 0;
 
-        for (int year = 1896; year <= toYear; year++)
+        for (int year = fromYear; year <= toYear; year++)
         {
             LumpImmigration lump = immigration.lumpImmigrationForYear(year);
             final double TurkeyFactor = 2.33;
@@ -546,6 +555,8 @@ public class EvalCountryTaxon extends EvalCountryBase
             case "Средняя Азия":
                 break;
             }
+            
+            DiagMigrationMerge.lump(taxonName, year, lumpYearSum, lump);
 
             lumpTotal += lumpYearSum;
 
@@ -560,7 +571,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
 
         if (print && options.verbose())
-            Util.out(String.format("Величина части иммиграции не разбиваемой по губерниям, с 1896 по конец периода: %,d", lumpTotal));
+            Util.out(String.format("Величина части иммиграции не разбиваемой по губерниям, с %d по конец периода: %,d", fromYear, lumpTotal));
     }
 
     private long immigration(Territory t, int year, long amount)
@@ -574,8 +585,8 @@ public class EvalCountryTaxon extends EvalCountryBase
         if (options.verbose())
         {
             Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
-            Util.out(String.format("    в %d-%d годах %.1f%% населения", 1896, toYear, populationPercentageVitalRatesVsPopulation(1896, toYear)));
-            Util.out(String.format("    в %d году %.1f%% населения", 1896, populationPercentageVitalRatesVsPopulation(1896, 1896)));
+            Util.out(String.format("    в %d-%d годах %.1f%% населения", fromYear, toYear, populationPercentageVitalRatesVsPopulation(fromYear, toYear)));
+            Util.out(String.format("    в %d году %.1f%% населения", fromYear, populationPercentageVitalRatesVsPopulation(fromYear, fromYear)));
             Util.out(String.format("    в %d году %.1f%% населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
         }
     }
