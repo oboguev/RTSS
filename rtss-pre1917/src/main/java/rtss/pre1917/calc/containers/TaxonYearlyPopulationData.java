@@ -45,7 +45,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         public double ngr;
         public long population_increase;
         public long migration;
-        
+
         public double vitalShare;
 
         public void add(int year, double cbr, double cdr, double ngr, long population_increase, long migration, double vitalShare)
@@ -98,7 +98,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
         }
     }
-    
+
     public List<Integer> years()
     {
         return Util.sort(keySet());
@@ -258,13 +258,13 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         @Override
         public int compareTo(PopulationDifference o)
         {
-            long d = o.diff - this.diff;
-            if (d > 0)
-                return 1;
-            else if (d < 0)
-                return -1;
+
+            int cmp = Long.compare(o.diff, this.diff); // descending by diff
+
+            if (cmp != 0)
+                return cmp;
             else
-                return 0;
+                return this.tname.compareTo(o.tname); // ascending alphabetically
         }
     }
 

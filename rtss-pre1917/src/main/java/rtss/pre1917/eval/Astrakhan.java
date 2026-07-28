@@ -308,6 +308,9 @@ public class Astrakhan
                 }
             }
         }
+        
+        /* create empty year end cell to fill by evalProgressive */
+        tSettled.territoryYear(1915);
 
         tSettled.leaveOnlyTotalBoth();
         EvalProgressive.evalProgressive(tSettled, DemographicConstants.перепись1897_Астраханская_губ_оседлое_население);
