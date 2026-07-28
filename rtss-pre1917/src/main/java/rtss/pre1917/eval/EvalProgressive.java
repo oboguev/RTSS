@@ -2,6 +2,7 @@ package rtss.pre1917.eval;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.calc.AdjustTerritories;
 import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -46,8 +47,17 @@ public class EvalProgressive
     {
         for (String tname : tds.keySet())
         {
-            if (Taxon.isComposite(tname) || Taxon.isFinland(tname) || tname.equals(Taxon.Астраханская_кочевники) || tname.equals("Самаркандская обл."))
+            if (Taxon.isComposite(tname) || Taxon.isFinland(tname) || tname.equals(Taxon.Астраханская_кочевники))
                 continue;
+
+            if (tname.equals("Самаркандская обл."))
+            {
+                // fill population special way
+                // fill migration
+                TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(tds.loadOptions.toArray(new LoadOptions[0]));
+                new AdjustTerritories(tds).setCSK(tdsCSK).fixSamarkand();
+                continue;
+            }
 
             Territory tCensus = census.get(censusTerritoryName(tname));
             if (tCensus == null)
@@ -106,7 +116,7 @@ public class EvalProgressive
         int startYear = 1881;
         if (t.name.equals("Черноморская"))
             startYear = 1896;
-        
+
         final TotalMigration totalMigration = TotalMigration.getTotalMigration();
         String tname = t.name;
 
@@ -159,7 +169,7 @@ public class EvalProgressive
         {
             if (year < startYear)
                 continue;
-            
+
             TerritoryYear ty = t.territoryYearOrNull(year);
             TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
 
@@ -168,7 +178,7 @@ public class EvalProgressive
                 ty.migration.total.both = totalMigration.saldo_nullable(tname, year);
                 in = null2zero(ty.births.total.both) - null2zero(ty.deaths.total.both);
                 in += null2zero(ty.migration.total.both);
-                ty.progressive_population.total.both = ty_next.progressive_population.total.both - in;  
+                ty.progressive_population.total.both = ty_next.progressive_population.total.both - in;
             }
             else
             {

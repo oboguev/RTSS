@@ -1,7 +1,7 @@
 package rtss.pre1917.data.migration;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.merge.MergeCities;
@@ -20,11 +20,11 @@ public class InnerMigration
 
         @SuppressWarnings("unused")
         private final String tname;
-        Map<Integer, Long> year2inflow = new HashMap<>();
-        Map<Integer, Long> year2outflow = new HashMap<>();;
+        Map<Integer, Long> year2inflow = new TreeMap<>();
+        Map<Integer, Long> year2outflow = new TreeMap<>();;
     }
 
-    private Map<String, InnerMigrationAmount> tname2ima = new HashMap<>();
+    private Map<String, InnerMigrationAmount> tname2ima = new TreeMap<>();
     private boolean readonly = false;
 
     public void setInFlow(String tname, int year, long amount) throws Exception
@@ -110,7 +110,7 @@ public class InnerMigration
         }
     }
 
-    private class CoarseDataHolder extends HashMap<String, CoarseData>
+    private class CoarseDataHolder extends TreeMap<String, CoarseData>
     {
         private static final long serialVersionUID = 1L;
 

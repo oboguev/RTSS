@@ -237,6 +237,9 @@ public class MergeTaxon
 
         for (String tname : Util.sort(tx.territories.keySet()))
         {
+            if (Util.False && ty.year == 1906 && tname.startsWith("Самарк") && selector.equals("migration.total.both"))
+                Util.noop();
+            
             if (!Astrakhan.shouldMergeTaxon(tname, tx.territories.keySet(), territories))
                 continue;
 
@@ -295,7 +298,7 @@ public class MergeTaxon
             res += lv * weight;
             count++;
             
-            DiagMigrationMerge.merged(selector, ty.territory.name, ty.year, tname, res);
+            DiagMigrationMerge.merged(selector, ty.territory.name, ty.year, tname, lv * weight);
         }
 
         if (count != 0)

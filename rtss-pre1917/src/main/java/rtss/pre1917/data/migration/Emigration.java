@@ -1,8 +1,8 @@
 package rtss.pre1917.data.migration;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
@@ -89,13 +89,13 @@ public class Emigration
     /* ================================== INNER DATA ================================== */
 
     /* количество эмигрантов для губернии и года */
-    private Map<String, Double> tname2amount = new HashMap<>();
+    private Map<String, Double> tname2amount = new TreeMap<>();
 
     private boolean sealed = false;
 
     private String key(String tname, int year)
     {
-        return year + " @ " + tname;
+        return tname + " @ " + year;
     }
 
     private void addAmount(String tname, int year, double value)
@@ -115,7 +115,7 @@ public class Emigration
 
     /* ================================== CONSTRUCTION ================================== */
 
-    private Map<Integer, EmigrationYear> y2yd = new HashMap<>();
+    private Map<Integer, EmigrationYear> y2yd = new TreeMap<>();
 
     public void setYearData(EmigrationYear yd) throws Exception
     {
@@ -294,7 +294,7 @@ public class Emigration
 
         for (String key : tname2amount.keySet())
         {
-            if (key.startsWith("" + yd.year + " @ "))
+            if (key.endsWith(" @ " + yd.year))
                 v += tname2amount.get(key);
         }
 

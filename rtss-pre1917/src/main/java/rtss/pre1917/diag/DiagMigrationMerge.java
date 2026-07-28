@@ -5,7 +5,7 @@ import rtss.util.Util;
 
 public class DiagMigrationMerge
 {
-    private static boolean active = Util.True;
+    private static boolean active = Util.False;
     
     public static final String Population = "Population";
     public static final String VitalRates = "VitalRates";
@@ -31,6 +31,9 @@ public class DiagMigrationMerge
 
         if (!selector.equals("migration.total.both") || which == null || !Population.equals(which))
             return;
+        
+        if (year == 1906 && tnameSource.equals("Самарская"))
+            Util.noop();
 
         long rounded = Math.round(amount);
 

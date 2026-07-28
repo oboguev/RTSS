@@ -4,6 +4,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.migration.TotalMigration;
 
 public class AdjustTerritories
 {
@@ -34,7 +35,7 @@ public class AdjustTerritories
         Territory t = tds.get(tname);
         if (t == null)
             return;
-        
+
         TerritoryYear ty1897 = t.territoryYearOrNull(1897);
         long delta = ty1897.progressive_population.total.both - ty1897.population.total.both;
 
@@ -58,7 +59,7 @@ public class AdjustTerritories
         Territory t = tds.get(tname);
         if (t == null)
             return;
-        
+
         Territory tCSK = tdsCSK.get(tname);
 
         for (int year = 1881; year <= 1901; year++)
@@ -75,6 +76,12 @@ public class AdjustTerritories
         }
 
         interpolate_progressive_population(t, 1901, 1904);
+
+        for (int year = 1881; year <= 1915; year++)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            ty.migration.total.both = TotalMigration.getTotalMigration().saldo_nullable(tname, year);
+        }
     }
 
     /*
@@ -106,7 +113,7 @@ public class AdjustTerritories
             }
         }
     }
-    
+
     /*
      * Исправление для Бакинской губернии с Баку.
      * 
@@ -123,9 +130,9 @@ public class AdjustTerritories
         Territory t = tds.get(tname);
         if (t == null)
             return;
-        
+
         interpolate_population(t, 1903, 1914);
-        
+
         for (int year = 1896; year <= 1914; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
