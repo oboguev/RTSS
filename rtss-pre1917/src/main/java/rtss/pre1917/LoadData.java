@@ -747,17 +747,22 @@ public class LoadData
             String gub = o.toString();
             gub = Util.despace(gub).trim();
 
-            String targetGub = targetGub(rc, nr, headers);
-
-            if (gub.startsWith("[") && gub.endsWith("]") || gub.startsWith("[уже] ") || gub.startsWith("в т.ч. ") || gub.startsWith("в т.ч "))
+            String targetGub = null;
+            
+            if (territories.dataSetType == DataSetType.UGVI)
             {
-                if (targetGub != null)
-                    throw new Exception("[добавить к] и [...]");
-                continue;
-            }
+                targetGub = targetGub(rc, nr, headers);
 
-            if (gub.startsWith("в т.ч.") || gub.startsWith("в т.ч"))
-                throw new Exception("Сомнительная запись");
+                if (gub.startsWith("[") && gub.endsWith("]") || gub.startsWith("[уже] ") || gub.startsWith("в т.ч. ") || gub.startsWith("в т.ч "))
+                {
+                    if (targetGub != null)
+                        throw new Exception("[добавить к] и [...]");
+                    continue;
+                }
+
+                if (gub.startsWith("в т.ч.") || gub.startsWith("в т.ч"))
+                    throw new Exception("Сомнительная запись");
+            }
 
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";

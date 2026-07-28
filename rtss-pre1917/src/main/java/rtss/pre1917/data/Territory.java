@@ -118,11 +118,6 @@ public class Territory
         return res;
     }
 
-    public String toString()
-    {
-        return name;
-    }
-
     public void adjustFemaleBirths()
     {
         for (TerritoryYear ty : year2value.values())
@@ -134,7 +129,7 @@ public class Territory
         for (TerritoryYear ty : year2value.values())
             ty.boostBirthsDeaths(boostBirths, boostDeaths);
     }
-    
+
     public void leaveOnlyTotalBoth()
     {
         for (TerritoryYear ty : year2value.values())
@@ -183,7 +178,7 @@ public class Territory
     {
         return calc_mid_CBR_total_both(year, false);
     }
-    
+
     public Double calc_mid_CBR_total_both(int year, boolean allowNull) throws Exception
     {
         try
@@ -204,7 +199,7 @@ public class Territory
     {
         return calc_mid_CDR_total_both(year, false);
     }
-    
+
     public Double calc_mid_CDR_total_both(int year, boolean allowNull) throws Exception
     {
         try
@@ -267,5 +262,42 @@ public class Territory
                 throw new Exception(String.format("Ошибка вычисления среднегодового населения %s в %d году", name, year), ex);
             }
         }
+    }
+
+    private static final String nl = "\n";
+
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name + nl);
+
+        sb.append("год    чж-угви     чж-прогр      чр        чс" + nl);
+        sb.append("==== =========== =========== ========= =========" + nl);
+
+        for (int year : years())
+        {
+            TerritoryYear ty = this.territoryYearOrNull(year);
+            if (ty == null)
+                continue;
+
+            sb.append(String.format("%4d %s %s %s %s" + nl,
+                                    year,
+                                    f2s(ty.population.total.both, 11),
+                                    f2s(ty.progressive_population.total.both, 11),
+                                    f2s(ty.births.total.both, 9),
+                                    f2s(ty.deaths.total.both, 9)));
+        }
+
+        return sb.toString();
+    }
+
+    private String f2s(Long v, int w)
+    {
+        String s = "";
+        if (v != null)
+            s = String.format("%,d", v);
+        while (s.length() < w)
+            s = " " + s;
+        return s;
     }
 }

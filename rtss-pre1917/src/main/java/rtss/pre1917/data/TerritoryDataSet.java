@@ -1,8 +1,8 @@
 package rtss.pre1917.data;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeMap;
 
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.merge.MergeCities;
@@ -10,7 +10,10 @@ import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
 
-public class TerritoryDataSet extends HashMap<String, Territory>
+/*
+ * TreeMap, а не HashMap для удобства отладки
+ */
+public class TerritoryDataSet extends TreeMap<String, Territory>
 {
     private static final long serialVersionUID = 1L;
 
