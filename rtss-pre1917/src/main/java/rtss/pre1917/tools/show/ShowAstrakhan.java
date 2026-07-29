@@ -23,6 +23,7 @@ public class ShowAstrakhan
         {
             tdsEmpire = EvalCountryTaxon.getFinalEmpirePopulationSet(fromYear, new EvalCountryTaxon.Options()
                     .splitAstrakhan(false)
+                    .mergeAstrakhan(true)
                     .verbose(false));
             new ShowAstrakhan().do_show_1();
             new ShowAstrakhan().do_show_2();

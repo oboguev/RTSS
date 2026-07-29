@@ -35,6 +35,10 @@ public class CheckProgressiveAvailable
                 if (toYear > 0 && year > toYear)
                     break;
                 
+                // Черноморская губерния была создана в 1896
+                if (tname.equals("Черноморская") && year < 1896)
+                    continue;
+                
                 if (!available(tname, year))
                     Util.err(String.format("Прогрессивный расчёт отсутствет для %s %d", tname, year));
             }

@@ -128,6 +128,10 @@ public class MergeTaxon
 
         public boolean isFlagMissing(String selector, String tname, int year)
         {
+            // Черноморская губерния была создана в 1896
+            if (tname.equals("Черноморская") && year < 1896)
+                return false;
+            
             for (MissingDataAllowance mda : missingDataAllowances)
             {
                 if (mda.allowMissing(selector, tname, year))
@@ -139,7 +143,7 @@ public class MergeTaxon
                 if (mdc.isFlagMissing(selector, year))
                     return true;
             }
-
+            
             return false;
         }
 

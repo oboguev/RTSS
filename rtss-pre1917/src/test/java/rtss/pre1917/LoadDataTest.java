@@ -29,7 +29,6 @@ public class LoadDataTest
         TerritoryDataSet census = new LoadData().loadCensus1897(options);        
         
         Territory t = census.get("Московская с Москвой");
-        
-        Util.noop();
+        Util.unused(t);
     }
 }

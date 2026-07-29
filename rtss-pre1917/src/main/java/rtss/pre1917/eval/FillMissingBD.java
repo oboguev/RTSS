@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import rtss.data.selectors.BirthDeath;
 import rtss.data.selectors.BirthDeathPopulation;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;

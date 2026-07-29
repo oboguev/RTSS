@@ -54,7 +54,7 @@ public abstract class ByRateBase
             double rate = 0;
             int nyears = 0;
 
-            for (int year = 1896; year <= 1913; year++)
+            for (int year = fromYear; year <= 1913; year++)
             {
                 if (year == 1898 || year == 1905 || year == 1910)
                     continue;

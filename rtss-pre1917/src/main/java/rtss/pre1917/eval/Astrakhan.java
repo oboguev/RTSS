@@ -8,6 +8,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.util.FieldValue;
 import rtss.util.Util;
 
 /*
@@ -241,6 +242,9 @@ public class Astrakhan
 
     /* ======================================================================================= */
 
+    /*
+     * Разбить Астраханскую губернию на оседлую и кочевые части
+     */
     public static void split(TerritoryDataSet territories) throws Exception
     {
         Territory tCombined = territories.get("Астраханская");
@@ -308,7 +312,7 @@ public class Astrakhan
                 }
             }
         }
-        
+
         /* create empty year end cell to fill by evalProgressive */
         tSettled.territoryYear(1915);
 
@@ -323,5 +327,72 @@ public class Astrakhan
         territories.put(tNomadic.name, tNomadic);
 
         territories.remove("Астраханская");
+    }
+
+    /* ======================================================================================= */
+
+    /*
+     * Слить оседлую и кочевые части Астраханской губернии в одну запись 
+     */
+    public static void combine(TerritoryDataSet territories) throws Exception
+    {
+        Territory tSettled = territories.get(Taxon.Астраханская_оседлое);
+        Territory tNomadic = territories.get(Taxon.Астраханская_кочевники);
+
+        Territory tCombined = territories.get("Астраханская");
+
+        if (tSettled == null && tNomadic == null)
+            return;
+
+        if (tSettled == null && tNomadic != null)
+            throw new Exception("Нельзя слить части Астраханской губернии");
+
+        if (tNomadic == null)
+            tNomadic = Astrakhan.calcNomadic(tCombined, 1881, 1915);
+
+        if (tCombined == null)
+        {
+            tCombined = new Territory("Астраханская");
+            territories.put(tCombined.name, tCombined);
+        }
+
+        tCombined.leaveOnlyTotalBoth();
+        tNomadic.leaveOnlyTotalBoth();
+        tSettled.leaveOnlyTotalBoth();
+
+        for (int year = 1881; year <= 1915; year++)
+        {
+            TerritoryYear tyCombined = tCombined.territoryYear(year);
+            TerritoryYear tyNomadic = tNomadic.territoryYearOrNull(year);
+            TerritoryYear tySettled = tSettled.territoryYearOrNull(year);
+
+            if (tyCombined.population.total.both == null)
+                tyCombined.population.total.both = denull(tySettled, "population.total.both") + denull(tyNomadic, "population.total.both");
+
+            if (tyCombined.progressive_population.total.both == null)
+                tyCombined.progressive_population.total.both = denull(tySettled, "progressive_population.total.both") + denull(tyNomadic, "progressive_population.total.both");
+
+            if (tyCombined.births.total.both == null)
+                tyCombined.births.total.both = denull(tySettled, "births.total.both") + denull(tyNomadic, "births.total.both");
+
+            if (tyCombined.deaths.total.both == null)
+                tyCombined.deaths.total.both = denull(tySettled, "deaths.total.both") + denull(tyNomadic, "deaths.total.both");
+        }
+
+        territories.remove(Taxon.Астраханская_оседлое);
+        territories.remove(Taxon.Астраханская_кочевники);
+    }
+
+    private static long denull(Long v)
+    {
+        return v == null ? 0 : v;
+    }
+
+    private static long denull(TerritoryYear ty, String selector) throws Exception
+    {
+        if (ty == null)
+            return 0;
+        Long v = FieldValue.getLong(ty, selector);
+        return denull(v);
     }
 }

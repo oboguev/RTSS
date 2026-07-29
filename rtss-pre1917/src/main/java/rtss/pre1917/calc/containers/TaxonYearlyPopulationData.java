@@ -27,6 +27,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public final TerritoryDataSet tdsVitalRates;
     public final TerritoryDataSet tdsCSK;
     public final TerritoryDataSet tdsExportPopulation;
+    public final int fromYear;
     public final int toYear;
 
     private final static double PROMILLE = 1000.0;
@@ -109,6 +110,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             TerritoryDataSet tdsVitalRates,
             TerritoryDataSet tdsCSK,
             TerritoryDataSet tdsExportPopulation,
+            int fromYear,
             int toYear)
     {
         this.taxonName = taxonName;
@@ -116,6 +118,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         this.tdsVitalRates = tdsVitalRates;
         this.tdsCSK = tdsCSK;
         this.tdsExportPopulation = tdsExportPopulation;
+        this.fromYear = fromYear;
         this.toYear = toYear;
     }
 
@@ -373,7 +376,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
 
         for (int year : t.years())
         {
-            if (year >= 1896)
+            if (year >= fromYear)
             {
                 TerritoryYear ty = t.territoryYear(year);
 

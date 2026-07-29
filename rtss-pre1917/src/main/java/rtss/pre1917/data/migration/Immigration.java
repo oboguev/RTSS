@@ -75,6 +75,21 @@ public class Immigration
     
     public LumpImmigration lumpImmigrationForYear(int year)
     {
+        if (year < 1896)
+        {
+            LumpImmigration lump = new LumpImmigration();
+            
+            // ###
+            
+            lump.european = 0L;
+            lump.persia = 0L;
+            lump.turkey = 0L;
+            lump.china = 0L;
+            lump.japan = 0L;
+
+            return lump;
+        }
+        
         return y2yd.get(year).lump;
     }
 

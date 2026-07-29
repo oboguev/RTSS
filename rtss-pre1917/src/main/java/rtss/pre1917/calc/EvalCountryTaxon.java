@@ -37,8 +37,8 @@ public class EvalCountryTaxon extends EvalCountryBase
      */
     private final static Double BoostBirths = 1.0;
     private final static Double BoostDeaths = 1.0;
-    
-    private final static boolean LimitToPost1896 = Util.True; 
+
+    private final static boolean LimitToPost1896 = Util.False;
 
     public static void main(String[] args)
     {
@@ -50,7 +50,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         {
             Util.out("В этом варианте расчёта не учитываются военные смерти в 1904-1905 и 1914 годах");
         }
-        
+
         if (BoostBirths != null && BoostBirths != 1.0)
             Util.out(String.format("Увеличение числа рождений (для корректировки недоучёта) в %.3f раз", BoostBirths));
 
@@ -89,6 +89,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         private boolean countMilitaryDeaths = DoCountMilitaryDeaths;
         private boolean splitAstrakhan = true;
+        private boolean mergeAstrakhan = false;
         private boolean verbose = true;
 
         public Options countMilitaryDeaths(boolean b)
@@ -100,6 +101,12 @@ public class EvalCountryTaxon extends EvalCountryBase
         public Options splitAstrakhan(boolean b)
         {
             splitAstrakhan = b;
+            return this;
+        }
+
+        public Options mergeAstrakhan(boolean b)
+        {
+            mergeAstrakhan = b;
             return this;
         }
 
@@ -117,6 +124,11 @@ public class EvalCountryTaxon extends EvalCountryBase
         public boolean splitAstrakhan()
         {
             return splitAstrakhan;
+        }
+
+        public boolean mergeAstrakhan()
+        {
+            return mergeAstrakhan;
         }
 
         public boolean verbose()
@@ -238,6 +250,8 @@ public class EvalCountryTaxon extends EvalCountryBase
                           LoadOptions.MERGE_POST1897_REGIONS,
                           options.splitAstrakhan() ? LoadOptions.EVAL_SPLIT_ASTRAKHAN
                                                    : LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
+                          options.mergeAstrakhan() ? LoadOptions.EVAL_MERGE_ASTRAKHAN
+                                                   : LoadOptions.DONT_EVAL_MERGE_ASTRAKHAN,
                           LoadOptions.EVAL_PROGRESSIVE);
 
         tdsPopulation.leaveOnlyTotalBoth();
@@ -433,14 +447,14 @@ public class EvalCountryTaxon extends EvalCountryBase
                 .flagMissing("progressive_population.total.both", fromYear, toYear + 1)
                 .allowMissingTeritory("Закатальский окр.")
                 .allowMissingTeritory("Сухумский окр."));
-        
+
         DiagMigrationMerge.which(null);
     }
 
     private void mergeTaxonVitalRates(Set<String> territoriesExcludedFromVitalRates) throws Exception
     {
         DiagMigrationMerge.which(DiagMigrationMerge.VitalRates);
-        
+
         tmVitalRates = MergeTaxon.mergeTaxon(tdsVitalRates, taxonName, WhichYears.AllSetYears, new MergeTaxonOptions()
                 .flagMissing("progressive_population.total.both", fromYear, toYear + 1)
                 .flagMissing("births.total.both", fromYear, toYear)
@@ -451,7 +465,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                       Set.of(1903, 1904, 1905, 1906, 1907))
                 .allowMissingTeritory("Закатальский окр.")
                 .allowMissingTeritory("Сухумский окр."));
-        
+
         DiagMigrationMerge.which(null);
     }
 
@@ -462,6 +476,7 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                                      tdsVitalRates,
                                                                      tdsCSK,
                                                                      tdsExportPopulation,
+                                                                     fromYear,
                                                                      toYear);
         TaxonYearData yd;
 
@@ -555,7 +570,7 @@ public class EvalCountryTaxon extends EvalCountryBase
             case "Средняя Азия":
                 break;
             }
-            
+
             DiagMigrationMerge.lump(taxonName, year, lumpYearSum, lump);
 
             lumpTotal += lumpYearSum;
@@ -585,7 +600,8 @@ public class EvalCountryTaxon extends EvalCountryBase
         if (options.verbose())
         {
             Util.out(String.format("Для расчёта естественого движения в таксоне %s использованы территории включающие", taxonName));
-            Util.out(String.format("    в %d-%d годах %.1f%% населения", fromYear, toYear, populationPercentageVitalRatesVsPopulation(fromYear, toYear)));
+            Util.out(String.format("    в %d-%d годах %.1f%% населения", fromYear, toYear,
+                                   populationPercentageVitalRatesVsPopulation(fromYear, toYear)));
             Util.out(String.format("    в %d году %.1f%% населения", fromYear, populationPercentageVitalRatesVsPopulation(fromYear, fromYear)));
             Util.out(String.format("    в %d году %.1f%% населения", toYear, populationPercentageVitalRatesVsPopulation(toYear, toYear)));
         }
