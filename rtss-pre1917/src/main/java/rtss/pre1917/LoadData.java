@@ -1481,7 +1481,7 @@ public class LoadData
 
     private void loadInnerMigrationYearly(InnerMigration im) throws Exception
     {
-        currentFile = "inner-migration/inner-migration-yearly.xlsx";
+        currentFile = "inner-migration/1896-1916/inner-migration-yearly.xlsx";
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
@@ -1899,7 +1899,7 @@ public class LoadData
 
     private void loadInnerMigrationCorarse(InnerMigration im) throws Exception
     {
-        currentFile = "inner-migration/inner-migration-coarse-loadable.xlsx";
+        currentFile = "inner-migration/1896-1916/inner-migration-coarse-loadable.xlsx";
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
