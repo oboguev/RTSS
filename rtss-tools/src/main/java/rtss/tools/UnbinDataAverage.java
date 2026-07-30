@@ -85,7 +85,7 @@ public class UnbinDataAverage
 
         if (binlist.size() == 1)
         {
-            do_main_single(kind, binlist.get(0));
+            text = do_main_single(kind, binlist.get(0));
         }
         else
         {
