@@ -41,6 +41,11 @@ public class InnerMigrationPre1896
         for (int year = 1893; year <= 1904; year++)
             in_values.put("" + year, rc.columnValues("" + year));
 
+        StringBuilder sb = new StringBuilder("губерния");
+        for (int year = 1885; year <= 1904; year++)
+            sb.append(String.format(",%d", year));
+        Util.out(sb.toString());
+
         for (int nr = 0; nr < tnames.size(); nr++)
         {
             String tname = ExcelRC.asString(tnames.get(nr));
@@ -52,8 +57,6 @@ public class InnerMigrationPre1896
 
             process(tname, nr, in_values);
         }
-
-        Util.noop();
     }
 
     private void process(String tname, int nr, Map<String, List<Object>> in_values) throws Exception
@@ -67,9 +70,10 @@ public class InnerMigrationPre1896
         for (Bin bin : bins)
             bin.avg /= bin.widths_in_years;
 
-        double[] yvs = unbin_csasra(bins);
+        double[] yvs = unbin(tname, bins);
 
-        StringBuilder sb = new StringBuilder(tname);
+        char quote = '"';
+        StringBuilder sb = new StringBuilder(quote + tname + quote);
         for (int year = 1885; year <= 1904; year++)
             sb.append(String.format(",%d", Math.round(yvs[year - 1885])));
         Util.out(sb.toString());
@@ -89,14 +93,49 @@ public class InnerMigrationPre1896
         else
         {
             v = ExcelRC.asDouble(values.get(nr));
-            ;
-
         }
 
         binlist.add(new Bin(y1, y2, v));
     }
 
     /* ============================================================================================================= */
+
+    private double[] unbin(String tname, Bin[] bins)
+    {
+        Bin first = Bins.firstBin(bins);
+
+        if (first.avg == 0)
+        {
+            List<Double> res = new ArrayList<>();
+            for (int year = first.age_x1; year <= first.age_x2; year++)
+                res.add(0.0);
+
+            for (Bin bin = first.next; bin != null; bin = bin.next)
+            {
+                if (bin.age_x1 != bin.age_x2)
+                    throw new IllegalArgumentException();
+                res.add(bin.avg);
+            }
+
+            double[] v = res.stream()
+                    .mapToDouble(Double::doubleValue)
+                    .toArray();
+            return v;
+        }
+
+        double[] v = unbin_csasra(bins);
+
+        switch (tname)
+        {
+        case "Курская":
+        case "Нижегородская":
+            for (int year = first.age_x1; year <= first.age_x2; year++)
+                v[year - first.age_x1] = first.avg;
+            break;
+        }
+
+        return v;
+    }
 
     private double[] unbin_csasra(Bin[] bins)
     {
