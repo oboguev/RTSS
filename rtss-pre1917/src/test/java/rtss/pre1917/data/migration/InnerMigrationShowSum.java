@@ -7,13 +7,13 @@ import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Taxon;
 import rtss.util.Util;
 
-public class ShowMigrationSum
+public class InnerMigrationShowSum
 {
     public static void main(String[] args)
     {
         try
         {
-            new ShowMigrationSum().do_main();
+            new InnerMigrationShowSum().do_main();
         }
         catch (Exception ex)
         {
@@ -22,7 +22,7 @@ public class ShowMigrationSum
         }
     }
     
-    private ShowMigrationSum() throws Exception
+    private InnerMigrationShowSum() throws Exception
     {
     }
 
