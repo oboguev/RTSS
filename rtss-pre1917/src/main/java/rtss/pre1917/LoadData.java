@@ -1224,7 +1224,7 @@ public class LoadData
     {
         Emigration em = new Emigration();
 
-        currentFile = "emigration.xlsx";
+        currentFile = "emigration-1896-1916.xlsx";
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
