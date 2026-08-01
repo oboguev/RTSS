@@ -1,13 +1,17 @@
 package rtss.pre1917.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
+import rtss.util.Util;
 
 /*
  * Таксон (или составной таксон) -- это территория состоящая из других областей,
@@ -713,6 +717,8 @@ public class Taxon
         }
         return xs;
     }
+    
+    /* ========================================================================================================= */
 
     /*
      * Редуцировать таксон до базовых областей
@@ -782,6 +788,36 @@ public class Taxon
                 territories.remove(city);
         }
     }
+    
+    /* ========================================================================================================= */
+    
+    public List<String> flattenUsedEementaryTerritories(int year) throws Exception
+    {
+        Set<String> tnames = new HashSet<String>();
+        
+        for (String tname : territories.keySet())
+        {
+            if (!isComposite(tname))
+            {
+                tnames.add(tname);
+            }
+            else
+            {
+                Taxon tx = Taxon.of(tname, year, null);
+                if (tx == null)
+                {
+                    Util.noop();
+                }
+                tnames.addAll(tx.flattenUsedEementaryTerritories(year));
+            }
+        }
+        
+        List<String> list = new ArrayList<>(tnames);
+        Collections.sort(list);
+        return list;
+    }
+    
+    /* ========================================================================================================= */    
 
     private static Taxon TaxonFinland = null;
 

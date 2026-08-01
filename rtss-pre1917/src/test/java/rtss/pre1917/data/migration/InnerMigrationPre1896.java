@@ -32,7 +32,7 @@ public class InnerMigrationPre1896
 
     private void do_main() throws Exception
     {
-        ExcelRC rc = Excel.readSheet("inner-migration/1881-1895/inner-migration-1881-1895.xlsx", true, "data-outbound");
+        ExcelRC rc = Excel.readSheet("inner-migration/1881-1895/inner-migration-1881-1895.xlsx", true, "1885-1904 выход доноры");
 
         List<Object> tnames = rc.columnValues("губерния");
 
@@ -129,6 +129,11 @@ public class InnerMigrationPre1896
         {
         case "Курская":
         case "Нижегородская":
+        case "Пермская":
+        case "Витебская":
+        case "Могилевская":
+        case "Гродненская":
+        case "Казанская":
             for (int year = first.age_x1; year <= first.age_x2; year++)
                 v[year - first.age_x1] = first.avg;
             break;

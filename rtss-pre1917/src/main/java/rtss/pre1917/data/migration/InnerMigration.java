@@ -1,9 +1,12 @@
 package rtss.pre1917.data.migration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import rtss.pre1917.data.Taxon;
+import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
@@ -66,7 +69,7 @@ public class InnerMigration
             year2flow.put(year, amount);
         }
     }
-
+    
     /* ==================================================================== */
 
     /*
@@ -155,10 +158,10 @@ public class InnerMigration
 
     private final boolean domsg = Util.False;
 
-    public void build() throws Exception
+    public void build_1896_1916() throws Exception
     {
         checkWritable();
-        
+
         if (domsg)
             Util.err("=== Building InnerMigration ===");
 
@@ -239,7 +242,10 @@ public class InnerMigration
                 Util.out(String.format("%d %,d %,d", year, inflow, outflow));
             }
         }
-        
+    }
+
+    public void seal()
+    {
         readonly = true;
     }
 
@@ -292,7 +298,7 @@ public class InnerMigration
     {
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
-            
+
         if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
@@ -325,7 +331,7 @@ public class InnerMigration
     {
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
-            
+
         if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
@@ -372,10 +378,80 @@ public class InnerMigration
 
         return tname;
     }
-    
+
     private void checkWritable() throws Exception
     {
         if (readonly)
             throw new Exception("Trying to modify sealed read-only instance of InnerMigration");
+    }
+
+    /* ====================================================================== */
+
+    public void process_1881_1895(String tname, int year, double amount) throws Exception
+    {
+        checkWritable();
+        tname = TerritoryNames.canonic(tname);
+        if (!(year >= 1881 && year <= 1895) || amount < 0)
+            throw new IllegalArgumentException();
+        if (amount == 0)
+            return;
+        makeScatterDescriptors();
+        
+        long distributed = 0;  
+        
+        for (ScatterDescriptor sd : scatterDescriptors)
+        {
+            long v = Math.round(sd.fraction * amount);
+            if (v == 0)
+                continue;
+            setInFlow(sd.tname, year, v);
+            distributed += v;
+        }
+
+        setOutFlow(tname, year, distributed);
+    }
+
+    private List<ScatterDescriptor> scatterDescriptors;
+
+    private void makeScatterDescriptors() throws Exception
+    {
+        if (scatterDescriptors == null)
+        {
+            List<ScatterDescriptor> list = new ArrayList<>();
+            list.add(new ScatterDescriptor("Акмолинская обл.", 20.2));
+            list.add(new ScatterDescriptor("Амурская обл.", 1.7));
+            list.add(new ScatterDescriptor("Енисейская", 5.8));
+            list.add(new ScatterDescriptor("Приморская обл.", 0.1));
+            list.add(new ScatterDescriptor("Семипалатинская обл.", 1.7));
+            list.add(new ScatterDescriptor("Тобольская", 19.6));
+            list.add(new ScatterDescriptor("Томская", 29.3));
+            scatterDescriptors = list;
+        }
+    }
+
+    public class ScatterDescriptor
+    {
+        public final String tname;
+        public final double fraction;
+
+        public ScatterDescriptor(String tname, double pct) throws Exception
+        {
+            this.tname = TerritoryNames.canonic(tname);
+            this.fraction = pct / 100.0;
+        }
+    }
+    
+    public void validate_1881_1895()
+    {
+        if (domsg)
+        {
+            Util.out("Migration inflow-outflow balance per year");
+            for (int year = 1881; year <= 1895; year++)
+            {
+                long inflow = sumInFlow(year);
+                long outflow = sumOutFlow(year);
+                Util.out(String.format("%d %,d %,d", year, inflow, outflow));
+            }
+        }
     }
 }

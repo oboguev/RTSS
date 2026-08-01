@@ -1472,7 +1472,9 @@ public class LoadData
             InnerMigration im = new InnerMigration();
             loadInnerMigrationYearly(im);
             loadInnerMigrationCorarse(im);
-            im.build();
+            im.build_1896_1916();
+            loadInnerMigration_1881_1895(im);
+            im.seal();
             cachedInnerMigration = im;
         }
 
@@ -2046,6 +2048,44 @@ public class LoadData
             int nyears = y2 - y1 + 1;
             return Math.round((1.0 * amount) / nyears);
         }
+    }
+    
+    private void loadInnerMigration_1881_1895(InnerMigration im) throws Exception
+    {
+        ExcelRC rc = Excel.readSheet("inner-migration/1881-1895/inner-migration-1881-1895.xlsx", false, "1881-1904 выход доноры");
+
+        List<Object> tnames = rc.columnValues("губерния");
+        
+        for (int nr = 0; nr < tnames.size(); nr++)
+        {
+            String tname = ExcelRC.asString(tnames.get(nr));
+            if (tname == null || tname.length() == 0)
+                continue;
+            if (tname.toLowerCase().startsWith("всего "))
+                continue;
+            tname = TerritoryNames.canonic(tname);
+
+            for (int year = 1881; year <= 1895; year++)
+            {
+                List<Object> values = rc.columnValues("" + year + ".0");
+
+                String s = ExcelRC.asString(values.get(nr));
+                double v;
+
+                if (s == null || s.equals("") || s.equals("—"))
+                {
+                    v = 0;
+                }
+                else
+                {
+                    v = ExcelRC.asDouble(values.get(nr));
+                }
+                
+                im.process_1881_1895(tname, year, v);
+            }
+        }
+        
+        im.validate_1881_1895();
     }
 
     /* ================================================================================================= */
