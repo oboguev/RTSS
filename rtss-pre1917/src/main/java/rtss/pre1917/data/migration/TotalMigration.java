@@ -37,6 +37,24 @@ public class TotalMigration
         Long v = saldo_nullable(tname, year);
         if (v == null)
             v = 0L;
+        return v;
+    }
+    
+    public Long saldo_nullable(String tname, int year) throws Exception
+    {
+        Long v = null;
+        
+        if (year < 1896)
+        {
+            // ###@@@
+            v = innerMigration.saldo(tname, year);
+        }
+        else
+        {
+            v = innerMigration.saldo(tname, year)
+                    + immigration.immigrants(tname, year)
+                    - emigration.emigrants(tname, year);
+        }
         
         /*
          * Черноморская губерния образована начиная с 1896 года из Черноморской области входившей в состав Кубанской области.
@@ -50,20 +68,9 @@ public class TotalMigration
             v -= split;
         }
         
-        return v;
-    }
-    
-    public Long saldo_nullable(String tname, int year) throws Exception
-    {
-        if (year < 1896)
-        {
-            // ###
-            return null;
-        }
+        if (v == 0)
+            v = null;
         
-        return innerMigration.saldo(tname, year)
-               + immigration.immigrants(tname, year)
-               - emigration.emigrants(tname, year);
-
+        return v;
     }
 }
