@@ -86,6 +86,19 @@ public class Emigration
         return Math.round(v);
     }
 
+    public long emigrants(int year) throws Exception
+    {
+        Double v = 0.0;
+        
+        for (String key : tname2amount.keySet())
+        {
+            if (isYearKey(key, year))
+                v += tname2amount.get(key);
+        }
+        
+        return Math.round(v);
+    }
+
     /* ================================== INNER DATA ================================== */
 
     /* количество эмигрантов для губернии и года */
@@ -96,6 +109,11 @@ public class Emigration
     private String key(String tname, int year)
     {
         return tname + " @ " + year;
+    }
+    
+    private boolean isYearKey(String key, int year)
+    {
+        return key.endsWith(" @ " + year);
     }
 
     private void addAmount(String tname, int year, double value)
