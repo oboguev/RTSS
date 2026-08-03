@@ -1224,21 +1224,14 @@ public class LoadData
     {
         Emigration em = new Emigration();
 
-        currentFile = "emigration-1896-1916.xlsx";
+        currentFile = "emigration.xlsx";
 
         try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
         {
-            for (int k = 0; k < wb.getNumberOfSheets(); k++)
-            {
-                XSSFSheet sheet = wb.getSheetAt(k);
-                String sname = sheet.getSheetName();
-                if (sname != null && sname.trim().toLowerCase().contains("note"))
-                    continue;
-
-                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
-                loadEmigration(em, rc, headers.get("год"), headers);
-            }
+            XSSFSheet sheet = wb.getSheet("data-1896-1916");
+            ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+            Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+            loadEmigration_1896_1916(em, rc, headers.get("год"), headers);
         }
         finally
         {
@@ -1250,7 +1243,7 @@ public class LoadData
         return em;
     }
 
-    private void loadEmigration(Emigration em, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception
+    private void loadEmigration_1896_1916(Emigration em, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -2049,13 +2042,13 @@ public class LoadData
             return Math.round((1.0 * amount) / nyears);
         }
     }
-    
+
     private void loadInnerMigration_1881_1895(InnerMigration im) throws Exception
     {
         ExcelRC rc = Excel.readSheet("inner-migration/1881-1895/inner-migration-1881-1895.xlsx", false, "1881-1904 выход доноры");
 
         List<Object> tnames = rc.columnValues("губерния");
-        
+
         for (int nr = 0; nr < tnames.size(); nr++)
         {
             String tname = ExcelRC.asString(tnames.get(nr));
@@ -2080,11 +2073,11 @@ public class LoadData
                 {
                     v = ExcelRC.asDouble(values.get(nr));
                 }
-                
+
                 im.process_1881_1895(tname, year, v);
             }
         }
-        
+
         im.validate_1881_1895();
     }
 
