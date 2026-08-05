@@ -1231,7 +1231,12 @@ public class LoadData
             XSSFSheet sheet = wb.getSheet("data-1896-1916");
             ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
             Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
-            loadEmigration_1896_1916(em, rc, headers.get("год"), headers);
+            loadEmigration(em, rc, headers.get("год"), headers);
+
+            sheet = wb.getSheet("data-1881-1895");
+            rc = Excel.readSheet(wb, sheet, currentFile);
+            headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+            loadEmigration(em, rc, headers.get("год"), headers);
         }
         finally
         {
@@ -1243,7 +1248,7 @@ public class LoadData
         return em;
     }
 
-    private void loadEmigration_1896_1916(Emigration em, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception
+    private void loadEmigration(Emigration em, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
