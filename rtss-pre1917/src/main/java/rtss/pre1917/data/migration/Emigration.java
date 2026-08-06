@@ -60,6 +60,16 @@ public class Emigration
 
         if (v == null)
         {
+            String pname = MergeCities.combined2parent(tname);
+            if (pname != null)
+            {
+                key = key(pname, year);
+                v = tname2amount.get(key);
+            }
+        }
+
+        if (v == null)
+        {
             v = 0.0;
 
             MergeDescriptor md = MergePost1897Regions.find(tname);

@@ -130,21 +130,21 @@ public class EvalGrowthRate
                 xt.territoryYear(year + 1).population.total.both = Math.round(ymult * xt.territoryYear(year).population.total.both);
             }
         }
-        
+
         for (int year = 1895; year >= 1881; year--)
         {
             TerritoryYear ty = xt.territoryYearOrNull(year);
             TerritoryYear ty_next = xt.territoryYearOrNull(year + 1);
-            
+
             if (ty == null)
             {
                 Util.err("Yearly data gap in " + xt.name);
                 break;
             }
-            
+
             ty.population.total.both = Math.round(ty_next.population.total.both / ymult);
         }
-        
+
         xt.removeYear(1916);
         xt.removeYear(1917);
 
@@ -163,9 +163,10 @@ public class EvalGrowthRate
         // пересчитать число рождений и смертей вне стабилизированого участка
         for (int year = 1881; year <= 1917; year++)
         {
+            TerritoryYear ty = xt.territoryYearOrNull(year);
+
             if (!(year >= y1 && year <= y2))
             {
-                TerritoryYear ty = xt.territoryYearOrNull(year);
                 if (ty != null)
                 {
                     if (year <= 1914)
@@ -180,6 +181,9 @@ public class EvalGrowthRate
                     }
                 }
             }
+
+            if (ty != null)
+                ty.migration.total.both = totalMigration.saldo_nullable(t.name, year);
         }
 
         return xt;

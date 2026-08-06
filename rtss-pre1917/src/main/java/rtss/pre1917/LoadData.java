@@ -445,7 +445,11 @@ public class LoadData
 
             Astrakhan.combine(territories);
         }
-
+        
+        /*
+         * Важно!!! Слияния должны произойти до EVAL_PROGRESSIVE
+         * для более точного учёта миграции по слитым территориям.
+         */
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
             new EvalProgressive(territories).evalProgressive();
 

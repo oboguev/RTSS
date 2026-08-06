@@ -30,19 +30,32 @@ public class Immigration
     {
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
-            
+
         if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
         String key = key(tname, year);
 
         Double v = tname2amount.get(key);
-        
+
         if (v == null)
         {
             String ptname = MergeCities.combined2parent(tname);
-            key = key(ptname, year);
-            v = tname2amount.get(key);
+            if (ptname != null)
+            {
+                key = key(ptname, year);
+                v = tname2amount.get(key);
+            }
+        }
+
+        if (v == null)
+        {
+            String ptname = MergeCities.parent2combined(tname);
+            if (ptname != null)
+            {
+                key = key(ptname, year);
+                v = tname2amount.get(key);
+            }
         }
 
         if (v == null)
@@ -72,15 +85,15 @@ public class Immigration
 
         return Math.round(v);
     }
-    
+
     public LumpImmigration lumpImmigrationForYear(int year)
     {
         if (year < 1896)
         {
             LumpImmigration lump = new LumpImmigration();
-            
+
             // ###
-            
+
             lump.european = 0L;
             lump.persia = 0L;
             lump.turkey = 0L;
@@ -89,7 +102,7 @@ public class Immigration
 
             return lump;
         }
-        
+
         return y2yd.get(year).lump;
     }
 
@@ -168,12 +181,12 @@ public class Immigration
         scatter(yd, "Румыния");
         scatter(yd, "Франция");
         scatter(yd, "Швейцария");
-        
+
         addAmount("Сыр-Дарьинская обл.", yd.year, yd.get("Хива"));
 
         yd.lump.persia = yd.get("Персия");
         yd.lump.turkey = yd.get("Турция");
-        
+
         yd.lump.china = yd.get("Китай");
         yd.lump.japan = yd.get("Япония");
 
@@ -194,14 +207,14 @@ public class Immigration
         long v1 = 0;
         for (String country : yd.contries())
             v1 += yd.get(country);
-        
+
         double v2 = yd.lump.sum();
         for (String key : tname2amount.keySet())
         {
             if (key.endsWith(" @ " + yd.year))
                 v2 += tname2amount.get(key);
         }
-        
+
         if (Math.abs(v1 - v2) > 3)
             throw new Exception("Immigration build self-check failed");
     }
@@ -210,16 +223,16 @@ public class Immigration
     {
         scatter(yd, country, country);
     }
-    
+
     private void scatter(ImmigrationYear yd, String immigrationCountry, String foreignersCountry) throws Exception
     {
         double imm = yd.get(immigrationCountry);
         double foreigners_total = foreigners.totalForForeignContry(foreignersCountry);
-        
+
         for (String tname : foreigners.territoriesForForeignContry(foreignersCountry))
         {
             double foreigners_territory = foreigners.forForeignContryAndTerritory(foreignersCountry, tname);
-            double imm_territory = imm  * (foreigners_territory / foreigners_total); 
+            double imm_territory = imm * (foreigners_territory / foreigners_total);
             addAmount(tname, yd.year, imm_territory);
         }
     }
