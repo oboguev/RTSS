@@ -20,6 +20,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
+import rtss.pre1917.data.TerritoryToDoubleValue;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.Foreigners.ByTerritory;
 import rtss.pre1917.data.migration.Emigration;
@@ -33,6 +34,7 @@ import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FillMissingBD;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
+import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.pre1917.war.WarLossShare;
 import rtss.util.Util;
@@ -1298,8 +1300,13 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    public Map<String, Double> loadJews() throws Exception
+    private static TerritoryToDoubleValue cached_loadedJews = null;
+
+    public TerritoryToDoubleValue loadJews() throws Exception
     {
+        if (cached_loadedJews != null)
+            return cached_loadedJews;
+
         Map<String, Double> m = new HashMap<>();
 
         currentFile = "census-1897/juifs.xlsx";
@@ -1317,8 +1324,17 @@ public class LoadData
                 Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
                 loadJews(m, rc, headers.get("губ"), headers.get("% иудеев"));
 
-                for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
-                    replicateJews(m, md);
+                if (Util.False)
+                {
+                    for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
+                        replicateJews(m, md);
+                }
+
+                if (Util.False)
+                {
+                    for (MergeDescriptor md : MergePost1897Regions.MergePost1897Descriptors)
+                        replicateJews(m, md);
+                }
             }
         }
         finally
@@ -1326,7 +1342,9 @@ public class LoadData
             currentFile = null;
         }
 
-        return m;
+        cached_loadedJews = new TerritoryToDoubleValue("Jews", m);
+
+        return cached_loadedJews;
     }
 
     private void loadJews(Map<String, Double> m, ExcelRC rc, int colGub, int colAmount) throws Exception
@@ -1371,6 +1389,70 @@ public class LoadData
             m.put(g2, m.get(g1));
         else if (m.containsKey(g2))
             m.put(g1, m.get(g2));
+    }
+
+    /* ================================================================================================= */
+
+    private static TerritoryToDoubleValue cached_loadedPoles = null;
+
+    public TerritoryToDoubleValue loadPoles() throws Exception
+    {
+        if (cached_loadedPoles != null)
+            return cached_loadedPoles;
+
+        Map<String, Double> m = new HashMap<>();
+
+        currentFile = "census-1897/poles.xlsx";
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+                loadPoles(m, rc, headers.get("Террритория"), headers.get("% поляков"));
+            }
+        }
+        finally
+        {
+            currentFile = null;
+        }
+
+        cached_loadedPoles = new TerritoryToDoubleValue("Poles", m);
+
+        return cached_loadedPoles;
+    }
+
+    private void loadPoles(Map<String, Double> m, ExcelRC rc, int colGub, int colAmount) throws Exception
+    {
+        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
+        {
+            currentNR = nr;
+
+            Object o = rc.get(nr, colGub);
+            if (o == null || o.toString().trim().length() == 0)
+                continue;
+            String gub = o.toString();
+            gub = TerritoryNames.canonic(gub);
+            TerritoryNames.checkValidTerritoryName(gub);
+
+            double amount = asDouble(rc.get(nr, colAmount));
+
+            if (m.containsKey(gub))
+                throw new Exception("Duplicate territory " + gub);
+
+            if (amount < 0 || amount > 100)
+                throw new Exception("Incorrect value " + amount);
+
+            m.put(gub, amount);
+        }
+
+        currentNR = null;
     }
 
     /* ================================================================================================= */

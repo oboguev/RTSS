@@ -11,6 +11,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
+import rtss.pre1917.data.TerritoryToDoubleValue;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.ValueByGender;
@@ -171,12 +172,12 @@ public class FillMissingBD
 
     private void fixJews() throws Exception
     {
-        Map<String, Double> mj = new LoadData().loadJews();
+        TerritoryToDoubleValue mj = new LoadData().loadJews();
 
-        for (String tname : mj.keySet())
+        for (String tname : tds.keySet())
         {
-            double pct = mj.get(tname);
-            if (pct >= 0.1)
+            Double pct = mj.getValue(tname);
+            if (pct != null && pct >= 0.1)
                 fixJews(tname, pct);
         }
     }
