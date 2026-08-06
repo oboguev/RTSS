@@ -37,9 +37,14 @@ public class EvalProgressive
         if (tds.dataSetType != DataSetType.UGVI)
             throw new Exception("Прогрессивная численность населения может быть расчитана только для набора УГВИ");
         this.tds = tds;
+        
+        /*
+         * xtds -- копия с корректированными числами рождений и смертей
+         */
         this.xtds = tds.dup();
         xtds.adjustFemaleBirths();
         new FillMissingBD(xtds).fillMissingBD();
+
         census = new LoadData().loadCensus1897(tds.loadOptions.toArray(new LoadOptions[0]));
     }
 
@@ -131,18 +136,24 @@ public class EvalProgressive
         in += totalMigration.saldo(tname, 1897);
         long in1 = Math.round(in * 27.0 / 365.0);
         long in2 = in - in1;
+        
+        /*
+         * Важно: не использовать кэшированного значения в ty.migration, но пересчитывать и перезаписывать его. 
+         * Это делает учёт миграции более точным после слияния (merge) территорий, т.к миграция не суммируется,
+         * а вычисляется заново для совокупной территтории. 
+         */
 
         ty1897.progressive_population.total.both = censusPopulation - in1;
         ty1898.progressive_population.total.both = censusPopulation + in2;
 
-        ty1897.migration.total.both = totalMigration.saldo(tname, 1897);
+        ty1897.migration.total.both = totalMigration.saldo_nullable(tname, 1897);
 
         if (xty1896 != null)
         {
             in = xty1896.births.total.both - xty1896.deaths.total.both;
             in += totalMigration.saldo(tname, 1896);
             ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
-            ty1896.migration.total.both = totalMigration.saldo(tname, 1896);
+            ty1896.migration.total.both = totalMigration.saldo_nullable(tname, 1896);
         }
 
         for (int year = 1898; year <= 1916; year++)
@@ -153,7 +164,7 @@ public class EvalProgressive
 
             if (ty != null)
             {
-                ty.migration.total.both = totalMigration.saldo(tname, year);
+                ty.migration.total.both = totalMigration.saldo_nullable(tname, year);
 
                 if (ty_next != null && xty != null)
                 {
@@ -171,12 +182,13 @@ public class EvalProgressive
                 continue;
 
             TerritoryYear ty = t.territoryYearOrNull(year);
+            TerritoryYear xty = xt.territoryYearOrNull(year);
             TerritoryYear ty_next = t.territoryYearOrNull(year + 1);
 
             if (ty != null && ty_next != null && ty_next.progressive_population.total.both != null)
             {
                 ty.migration.total.both = totalMigration.saldo_nullable(tname, year);
-                in = null2zero(ty.births.total.both) - null2zero(ty.deaths.total.both);
+                in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
                 in += null2zero(ty.migration.total.both);
                 ty.progressive_population.total.both = ty_next.progressive_population.total.both - in;
             }
