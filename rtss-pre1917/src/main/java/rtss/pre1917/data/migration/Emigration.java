@@ -1,5 +1,6 @@
 package rtss.pre1917.data.migration;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -162,7 +163,8 @@ public class Emigration
     {
         checkWritable();
 
-        tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        // tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY);
         censusCategories = new LoadData().loadCensusCategories();
 
         for (int year : Util.sort(y2yd.keySet()))
@@ -185,9 +187,9 @@ public class Emigration
                 s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"),
                 PopulationSelector.NON_HEBREW, yd.year);
 
-        Set<String> xs = censusCategories.keySet();
-        xs = Taxon.eliminateComposite(xs);
-        xs = MergeCities.leaveOnlyCombined(xs);
+        Set<String> xs = new HashSet<>(censusCategories.keySet());
+        xs = leaveOnlyElementary(xs);
+        // ###@@@@ check xs --- compare against .... --- add poles to categories
         scatter(yd.hebrews, s2d(xs), PopulationSelector.HEBREW, yd.year);
 
         scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.ALL, yd.year);
@@ -196,7 +198,8 @@ public class Emigration
 
         // --------------------------------------------------------------------------------------------
 
-        S2D sd = s2d("Варшавская с Варшавой", 6.4,
+        S2D sd = s2d("Варшавская", 6.4,
+                     "г. Варшава", 6.4,
                      "Калишская", 11.5,
                      "Келецкая", 0.6,
                      "Ломжинская", 27.4,
@@ -231,6 +234,18 @@ public class Emigration
                 s2d(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
                 PopulationSelector.NON_HEBREW, yd.year);
     }
+    
+    private Set<String> leaveOnlyElementary(Set<String> xs)
+    {
+        xs = Taxon.eliminateComposite(xs);
+        
+        for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
+            xs.remove(md.combined);
+        for (MergeDescriptor md : MergePost1897Regions.MergePost1897Descriptors)
+            xs.remove(md.combined);
+        
+        return xs;
+    }
 
     private void scatter(double amount, S2D tnames, PopulationSelector selector, int year) throws Exception
     {
@@ -259,14 +274,24 @@ public class Emigration
             return 386_440;
 
         Territory t = tdsCensus.get(tname);
-        if (t == null)
+        if (t == null && Util.False)
         {
             MergeDescriptor md = MergeCities.findContaining(tname);
             if (md != null)
                 t = tdsCensus.get(md.combined);
         }
+        
+        if (t == null && Util.False)
+        {
+            MergeDescriptor md = MergePost1897Regions.findContaining(tname);
+            if (md != null)
+                t = tdsCensus.get(md.combined);
+        }
 
         if (t == null && tname.equals("Батумская"))
+            return 0;
+
+        if (t == null && tname.equals("Камчатская обл."))
             return 0;
 
         if (t == null)

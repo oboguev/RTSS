@@ -241,5 +241,7 @@ public class InnerMigrationShowSum
             // double pct = inFlow / sum * 100;
             Util.out(String.format("%c%s%c %,d", quote, tname, quote, inFlow));
         }
+        
+        Util.unused(sum);
     }
 }

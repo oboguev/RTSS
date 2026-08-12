@@ -1,8 +1,11 @@
 package rtss.pre1917.data;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import rtss.util.Util;
 
 public class CensusCategories  
 {
@@ -17,14 +20,17 @@ public class CensusCategories
         tname2value.put(tname, value);
     }
     
-    public boolean containsKey(String tname)
-    {
-        return tname2value.containsKey(tname);
-    }
-    
     public CensusCategoryValues get(String tname)
     {
-        return tname2value.get(tname);
+        return get(tname, true);
+    }
+    
+    public CensusCategoryValues get(String tname, boolean verbose)
+    {
+        CensusCategoryValues  cv = tname2value.get(tname);
+        if (cv == null && verbose)
+            Util.err("CensusCategories: no value for " + tname);
+        return cv;
     }
     
     public void seal()
@@ -40,6 +46,6 @@ public class CensusCategories
     
     public Set<String> keySet()
     {
-        return tname2value.keySet(); 
+        return Collections.unmodifiableSet(tname2value.keySet()); 
     }
 }

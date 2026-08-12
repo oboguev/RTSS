@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import rtss.pre1917.data.TerritoryNames;
+
 public class Scatter
 {
     public static enum PopulationSelector
@@ -23,6 +25,7 @@ public class Scatter
 
         public void add(String s, Double d) throws Exception
         {
+            s = TerritoryNames.canonic(s);
             if (containsKey(s))
                 throw new Exception("already contains " + s);
             put(s, d);
@@ -30,6 +33,7 @@ public class Scatter
 
         public double weight(String s) throws Exception
         {
+            s = TerritoryNames.canonic(s);
             if (!containsKey(s))
                 throw new Exception("no value for " + s);
             return get(s);
@@ -154,7 +158,8 @@ public class Scatter
                       "Курская",
                       "Минская",
                       "Могилевская",
-                      "Московская с Москвой",
+                      "Московская",
+                      "г. Москва",
                       "Нижегородская",
                       "Новгородская",
                       "Область войска Донского",
@@ -166,17 +171,20 @@ public class Scatter
                       "Псковская",
                       "Рязанская",
                       "Самарская",
-                      "Санкт-Петербургская с Санкт-Петербургом",
+                      "Санкт-Петербургская",
+                      "г. Санкт-Петербург",
                       "Саратовская",
                       "Симбирская",
                       "Смоленская",
-                      "Таврическая с Севастополем",
+                      "Таврическая",
+                      // "г. Севастополь",
                       "Тамбовская",
                       "Тверская",
                       "Тульская",
                       "Уфимская",
                       "Харьковская",
-                      "Херсонская с Одессой",
+                      "Херсонская",
+                      "г. Одесса",
                       "Черниговская",
                       "Ярославская");
     }

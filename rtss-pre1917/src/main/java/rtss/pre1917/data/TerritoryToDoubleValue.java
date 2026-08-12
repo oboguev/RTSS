@@ -5,6 +5,7 @@ import java.util.Map;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
 import rtss.pre1917.merge.MergePost1897Regions;
+import rtss.util.Util;
 
 public class TerritoryToDoubleValue
 {
@@ -15,6 +16,7 @@ public class TerritoryToDoubleValue
     {
         this.what = what;
         this.values = values;
+        Util.unused(this.what);
     }
     
     public Double getValue(String tname)

@@ -2,16 +2,15 @@ package rtss.pre1917.eval;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import rtss.data.selectors.BirthDeathPopulation;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.Jews;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
-import rtss.pre1917.data.TerritoryToDoubleValue;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 import rtss.pre1917.data.ValueByGender;
@@ -172,11 +171,14 @@ public class FillMissingBD
 
     private void fixJews() throws Exception
     {
-        TerritoryToDoubleValue mj = new LoadData().loadJews();
+        Jews jews = new LoadData().loadJews();
 
         for (String tname : tds.keySet())
         {
-            Double pct = mj.getValue(tname);
+            if (Taxon.isComposite(tname))
+                continue;
+            
+            Double pct = jews.get(tname);
             if (pct != null && pct >= 0.1)
                 fixJews(tname, pct);
         }
@@ -187,7 +189,7 @@ public class FillMissingBD
         Territory t = tds.get(tname);
         if (t == null)
         {
-            // Util.err("Нет территории " + tname);
+            Util.err("fixJews: нет территории " + tname);
             return;
         }
 

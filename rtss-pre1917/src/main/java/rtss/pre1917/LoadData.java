@@ -23,6 +23,7 @@ import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryToDoubleValue;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.Foreigners.ByTerritory;
+import rtss.pre1917.data.Jews;
 import rtss.pre1917.data.migration.Emigration;
 import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.data.migration.Immigration;
@@ -32,9 +33,6 @@ import rtss.pre1917.eval.Astrakhan;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FillMissingBD;
-import rtss.pre1917.merge.MergeCities;
-import rtss.pre1917.merge.MergeDescriptor;
-import rtss.pre1917.merge.MergePost1897Regions;
 import rtss.pre1917.validate.CrossVerify;
 import rtss.pre1917.war.WarLossShare;
 import rtss.util.Util;
@@ -1304,95 +1302,14 @@ public class LoadData
 
     /* ================================================================================================= */
 
-    private static TerritoryToDoubleValue cached_loadedJews = null;
+    private static Jews cached_loadedJews = null;
 
-    public TerritoryToDoubleValue loadJews() throws Exception
+    public Jews loadJews() throws Exception
     {
-        if (cached_loadedJews != null)
-            return cached_loadedJews;
-
-        Map<String, Double> m = new HashMap<>();
-
-        currentFile = "census-1897/juifs.xlsx";
-
-        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
-        {
-            for (int k = 0; k < wb.getNumberOfSheets(); k++)
-            {
-                XSSFSheet sheet = wb.getSheetAt(k);
-                String sname = sheet.getSheetName();
-                if (sname != null && sname.trim().toLowerCase().contains("note"))
-                    continue;
-
-                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
-                loadJews(m, rc, headers.get("губ"), headers.get("% иудеев"));
-
-                if (Util.False)
-                {
-                    for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
-                        replicateJews(m, md);
-                }
-
-                if (Util.False)
-                {
-                    for (MergeDescriptor md : MergePost1897Regions.MergePost1897Descriptors)
-                        replicateJews(m, md);
-                }
-            }
-        }
-        finally
-        {
-            currentFile = null;
-        }
-
-        cached_loadedJews = new TerritoryToDoubleValue("Jews", m);
+        if (cached_loadedJews == null)
+            cached_loadedJews = new Jews(this.loadCensusCategories());
 
         return cached_loadedJews;
-    }
-
-    private void loadJews(Map<String, Double> m, ExcelRC rc, int colGub, int colAmount) throws Exception
-    {
-        for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
-        {
-            currentNR = nr;
-
-            Object o = rc.get(nr, colGub);
-            if (o == null || o.toString().trim().length() == 0)
-                continue;
-            String gub = o.toString();
-            gub = TerritoryNames.canonic(gub);
-            TerritoryNames.checkValidTerritoryName(gub);
-
-            double amount = asDouble(rc.get(nr, colAmount));
-
-            if (m.containsKey(gub))
-                throw new Exception("Duplicate territory " + gub);
-
-            if (amount < 0 || amount > 100)
-                throw new Exception("Incorrect value " + amount);
-
-            m.put(gub, amount);
-        }
-
-        currentNR = null;
-    }
-
-    private void replicateJews(Map<String, Double> m, MergeDescriptor md)
-    {
-        if (md.parent != null)
-            replicateJews(m, md.combined, md.parent);
-
-        for (String child : md.children)
-            replicateJews(m, md.combined, child);
-    }
-
-    private void replicateJews(Map<String, Double> m, String g1, String g2)
-    {
-        if (m.containsKey(g1))
-            m.put(g2, m.get(g1));
-        else if (m.containsKey(g2))
-            m.put(g1, m.get(g2));
     }
 
     /* ================================================================================================= */
@@ -1488,9 +1405,6 @@ public class LoadData
                                      headers.get("% католиков"),
                                      headers.get("% протестантов"),
                                      headers.get("% иудеев"));
-
-                for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
-                    replicateCensusCategories(cats, md);
             }
         }
         finally
@@ -1529,20 +1443,6 @@ public class LoadData
         }
 
         currentNR = null;
-    }
-
-    private void replicateCensusCategories(CensusCategories cats, MergeDescriptor md) throws Exception
-    {
-        if (md.parent != null)
-            replicateCensusCategories(cats, md.combined, md.parent);
-    }
-
-    private void replicateCensusCategories(CensusCategories cats, String g1, String g2) throws Exception
-    {
-        if (cats.containsKey(g1))
-            cats.add(g2, cats.get(g1));
-        else if (cats.containsKey(g2))
-            cats.add(g1, cats.get(g2));
     }
 
     /* ================================================================================================= */

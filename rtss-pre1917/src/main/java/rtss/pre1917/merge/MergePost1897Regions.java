@@ -36,6 +36,12 @@ public class MergePost1897Regions
         
         return null;
     }
+    
+    public static MergeDescriptor findContaining(String what)
+    {
+        return MergeDescriptor.findContaining(MergePost1897Descriptors, what);
+    }
+    
 
     /* ================================================================== */
     
