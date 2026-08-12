@@ -58,6 +58,11 @@ public class MergeCities
 
         return xs;
     }
+    
+    public static MergeDescriptor find(String combined)
+    {
+        return MergeDescriptor.find(MergeCitiesDescriptors, combined);
+    }
 
     public static MergeDescriptor findContaining(String what)
     {

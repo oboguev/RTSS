@@ -41,7 +41,7 @@ public class Emigration
     {
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
-            
+
         if (tname.equals(Taxon.Астраханская_оседлое))
             tname = "Астраханская";
 
@@ -49,64 +49,46 @@ public class Emigration
 
         Double v = tname2amount.get(key);
 
-        if (v == null)
-        {
-            String pname = MergeCities.parent2combined(tname);
-            if (pname != null)
-            {
-                key = key(pname, year);
-                v = tname2amount.get(key);
-            }
-        }
+        if (v != null)
+            return Math.round(v);
 
-        if (v == null)
-        {
-            String pname = MergeCities.combined2parent(tname);
-            if (pname != null)
-            {
-                key = key(pname, year);
-                v = tname2amount.get(key);
-            }
-        }
-
-        if (v == null)
+        MergeDescriptor md = MergePost1897Regions.find(tname);
+        if (md != null)
         {
             v = 0.0;
-
-            MergeDescriptor md = MergePost1897Regions.find(tname);
-
-            if (md != null)
-            {
-                for (String xtn : md.parentWithChildren())
-                    v += emigrants(xtn, year);
-            }
-            else if (MergeCities.isMergedCity(tname))
-            {
-                // leave zero
-            }
-            else if (union("Холмская", "Сахалин", "Камчатская обл.", "Батумская").contains(tname))
-            {
-                // leave zero
-            }
-            else
-            {
-                throw new MissingMigrationDataException(String.format("Нет данных об эмиграции из %s в %d году", tname, year));
-            }
+            for (String xtn : md.parentWithChildren())
+                v += emigrants(xtn, year);
+            return Math.round(v);
         }
 
-        return Math.round(v);
+        md = MergeCities.find(tname);
+        if (md != null)
+        {
+            v = 0.0;
+            for (String xtn : md.parentWithChildren())
+                v += emigrants(xtn, year);
+            return Math.round(v);
+        }
+
+        if (union("Холмская", "Сахалин", "Камчатская обл.", "Батумская").contains(tname))
+            return 0;
+
+        if (union("г. Баку", "г. Севастополь", "г. Николаев").contains(tname))
+            return 0;
+
+        throw new MissingMigrationDataException(String.format("Нет данных об эмиграции из %s в %d году", tname, year));
     }
 
     public long emigrants(int year) throws Exception
     {
         Double v = 0.0;
-        
+
         for (String key : tname2amount.keySet())
         {
             if (isYearKey(key, year))
                 v += tname2amount.get(key);
         }
-        
+
         return Math.round(v);
     }
 
@@ -121,7 +103,7 @@ public class Emigration
     {
         return tname + " @ " + year;
     }
-    
+
     private boolean isYearKey(String key, int year)
     {
         return key.endsWith(" @ " + year);
@@ -234,11 +216,11 @@ public class Emigration
                 s2d(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
                 PopulationSelector.NON_HEBREW, yd.year);
     }
-    
+
     private Set<String> leaveOnlyElementary(Set<String> xs)
     {
         xs = Taxon.eliminateComposite(xs);
-        
+
         for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
         {
             for (String s : md.parentWithChildren())
@@ -254,11 +236,11 @@ public class Emigration
                 case "Ростовское и./Д град.":
                     continue;
                 }
-                
+
                 if (!xs.contains(s))
                     Util.err("leaveOnlyElementary: missing " + s);
             }
-            
+
             xs.remove(md.combined);
         }
 
@@ -275,16 +257,16 @@ public class Emigration
                 if (!xs.contains(s))
                     Util.err("leaveOnlyElementary: missing " + s);
             }
-            
+
             xs.remove(md.combined);
         }
-        
+
         for (String tname : xs)
         {
             if (censusCategories.get(tname) == null)
                 Util.err("leaveOnlyElementary: census missing " + tname);
         }
-        
+
         return xs;
     }
 
@@ -321,7 +303,7 @@ public class Emigration
             if (md != null)
                 t = tdsCensus.get(md.combined);
         }
-        
+
         if (t == null && Util.False)
         {
             MergeDescriptor md = MergePost1897Regions.findContaining(tname);
