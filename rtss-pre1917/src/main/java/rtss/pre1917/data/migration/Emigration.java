@@ -240,9 +240,50 @@ public class Emigration
         xs = Taxon.eliminateComposite(xs);
         
         for (MergeDescriptor md : MergeCities.MergeCitiesDescriptors)
+        {
+            for (String s : md.parentWithChildren())
+            {
+                if (s == null)
+                    continue;
+
+                switch (s)
+                {
+                case "г. Баку":
+                case "г. Николаев":
+                case "г. Севастополь":
+                case "Ростовское и./Д град.":
+                    continue;
+                }
+                
+                if (!xs.contains(s))
+                    Util.err("leaveOnlyElementary: missing " + s);
+            }
+            
             xs.remove(md.combined);
+        }
+
         for (MergeDescriptor md : MergePost1897Regions.MergePost1897Descriptors)
+        {
+            for (String s : md.parentWithChildren())
+            {
+                switch (s)
+                {
+                case "Холмская":
+                    continue;
+                }
+
+                if (!xs.contains(s))
+                    Util.err("leaveOnlyElementary: missing " + s);
+            }
+            
             xs.remove(md.combined);
+        }
+        
+        for (String tname : xs)
+        {
+            if (censusCategories.get(tname) == null)
+                Util.err("leaveOnlyElementary: census missing " + tname);
+        }
         
         return xs;
     }
