@@ -6,4 +6,5 @@ public class CensusCategoryValues
     public double pct_catholic;
     public double pct_protestants;
     public double pct_juifs;
+    public double pct_poles;
 }

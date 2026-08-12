@@ -1404,7 +1404,8 @@ public class LoadData
                                      headers.get("% русских"),
                                      headers.get("% католиков"),
                                      headers.get("% протестантов"),
-                                     headers.get("% иудеев"));
+                                     headers.get("% иудеев"),
+                                     headers.get("% поляков"));
             }
         }
         finally
@@ -1419,7 +1420,7 @@ public class LoadData
     }
 
     private void loadCensusCategories(CensusCategories cats, ExcelRC rc, int colGub,
-            int colRussian, int colCatholic, int colProtestant, int colJuifs) throws Exception
+            int colRussian, int colCatholic, int colProtestant, int colJuifs, int colPoles) throws Exception
     {
         for (int nr = 1; nr < rc.size() && !rc.isEndRow(nr); nr++)
         {
@@ -1438,6 +1439,7 @@ public class LoadData
             v.pct_catholic = asPercent(rc.get(nr, colCatholic));
             v.pct_protestants = asPercent(rc.get(nr, colProtestant));
             v.pct_juifs = asPercent(rc.get(nr, colJuifs));
+            v.pct_poles = asPercent(rc.get(nr, colPoles));
 
             cats.add(gub, v);
         }
