@@ -161,18 +161,20 @@ public class Emigration
 
     private void build(EmigrationYear yd) throws Exception
     {
+        Set<String> xs = new HashSet<>(censusCategories.keySet());
+        xs = leaveOnlyElementary(xs);
+
         scatter(yd.armenians, s2d("Эриванская", "Карсская обл."), PopulationSelector.ALL, yd.year);
         scatter(yd.finns * yd.vyborg / 100, s2d("Выборгская"), PopulationSelector.ALL, yd.year);
 
         // следует ли взвешивать губернии по численности населения или просто использовать соотношение 3-2-1-1-1-1 ?
         scatter(yd.germans,
                 s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"),
-                PopulationSelector.NON_HEBREW, yd.year);
+                PopulationSelector.NON_HEBREW_NON_POLISH, yd.year);
 
-        Set<String> xs = new HashSet<>(censusCategories.keySet());
-        xs = leaveOnlyElementary(xs);
-        // ###@@@@ check xs --- compare against .... --- add poles to categories
         scatter(yd.hebrews, s2d(xs), PopulationSelector.HEBREW, yd.year);
+
+        // --------------------------------------------------------------------------------------------
 
         scatter(yd.lithuanians * 0.4, s2d("Сувалкская"), PopulationSelector.ALL, yd.year);
         scatter(yd.lithuanians * 0.55, s2d("Виленская", "Ковенская"), PopulationSelector.CATHOLIC, yd.year);
@@ -189,12 +191,27 @@ public class Emigration
                      "Петроковская", 3.0,
                      "Плоцкая", 42.5,
                      "Радомская", 1.9,
-                     "Сувалкская", 0.6 * 57.9);
+                     "Сувалкская", 57.9);
 
         if (yd.year <= 1913)
             sd.add("Седлецкая", 2.1);
 
-        scatter(yd.poles, sd, PopulationSelector.CATHOLIC, yd.year);
+        double poles_non_kingdom_emigration_intensity = 2.1;
+
+        sd.add("Гродненская", poles_non_kingdom_emigration_intensity);
+        sd.add("Ковенская", poles_non_kingdom_emigration_intensity);
+        sd.add("Виленская", poles_non_kingdom_emigration_intensity);
+        sd.add("Волынская", poles_non_kingdom_emigration_intensity);
+        sd.add("г. Одесса", poles_non_kingdom_emigration_intensity);
+        sd.add("Витебская", poles_non_kingdom_emigration_intensity);
+        sd.add("Минская", poles_non_kingdom_emigration_intensity);
+        sd.add("Курляндская", poles_non_kingdom_emigration_intensity);
+        sd.add("Подольская", poles_non_kingdom_emigration_intensity);
+        sd.add("Киевская", poles_non_kingdom_emigration_intensity);
+        sd.add("Лифляндская", poles_non_kingdom_emigration_intensity);
+        sd.add("Могилевская", poles_non_kingdom_emigration_intensity);
+
+        scatter(yd.poles, sd, PopulationSelector.POLES, yd.year);
 
         // --------------------------------------------------------------------------------------------
 
@@ -210,11 +227,11 @@ public class Emigration
                     PopulationSelector.RUSSIAN, yd.year);
         }
 
-        scatter(yd.ruthenians, s2d("Волынская", "Подольская"), PopulationSelector.NON_HEBREW, yd.year);
+        scatter(yd.ruthenians, s2d("Волынская", "Подольская"), PopulationSelector.NON_HEBREW_NON_POLISH, yd.year);
 
         scatter(yd.others + yd.greeks + yd.scandinavians,
                 s2d(tsEuropeanRussian(), "Виленская", "Ковенская", tsBaltic(), tsPolish(yd.year)),
-                PopulationSelector.NON_HEBREW, yd.year);
+                PopulationSelector.NON_HEBREW_NON_POLISH, yd.year);
     }
 
     private Set<String> leaveOnlyElementary(Set<String> xs)
@@ -341,8 +358,16 @@ public class Emigration
             pop *= ccv.pct_juifs / 100;
             break;
 
+        case POLES:
+            pop *= ccv.pct_poles / 100;
+            break;
+
         case NON_HEBREW:
             pop *= 1 - ccv.pct_juifs / 100;
+            break;
+
+        case NON_HEBREW_NON_POLISH:
+            pop *= 1 - (ccv.pct_juifs + ccv.pct_poles) / 100;
             break;
 
         case CATHOLIC:
@@ -359,7 +384,13 @@ public class Emigration
 
         case ALL:
             break;
+
+        default:
+            throw new IllegalArgumentException("selector = " + selector);
         }
+
+        if (pop <= 0)
+            throw new Exception("population is non-positive: " + pop);
 
         return pop;
     }
