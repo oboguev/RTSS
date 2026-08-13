@@ -170,7 +170,7 @@ public class Emigration
         // следует ли взвешивать губернии по численности населения или просто использовать соотношение 3-2-1-1-1-1 ?
         scatter(yd.germans,
                 s2d("Волынская", 3, "Херсонская", 2, "Бессарабская", "Таврическая", "Саратовская", "Самарская"),
-                PopulationSelector.NON_HEBREW_NON_POLISH, yd.year);
+                PopulationSelector.UNITARY, yd.year);
 
         scatter(yd.hebrews, s2d(xs), PopulationSelector.HEBREW, yd.year);
 
@@ -309,46 +309,59 @@ public class Emigration
     private double pop_1897(String tname, PopulationSelector selector) throws Exception
     {
         TerritoryNames.checkValidTerritoryName(tname);
+        
+        CensusCategoryValues ccv;
+        double pop;
 
         if (tname.equals("Выборгская"))
-            return 386_440;
-
-        Territory t = tdsCensus.get(tname);
-        if (t == null && Util.False)
         {
-            MergeDescriptor md = MergeCities.findContaining(tname);
-            if (md != null)
-                t = tdsCensus.get(md.combined);
+            pop = 386_440;
+            ccv = new CensusCategoryValues();
+            ccv.pct_protestants = 100;
+            ccv.pct_catholic = 0;
+            ccv.pct_poles = 0;
+            ccv.pct_juifs = 0;
+            ccv.pct_russian = 0;
         }
-
-        if (t == null && Util.False)
+        else
         {
-            MergeDescriptor md = MergePost1897Regions.findContaining(tname);
-            if (md != null)
-                t = tdsCensus.get(md.combined);
+            Territory t = tdsCensus.get(tname);
+            if (t == null && Util.False)
+            {
+                MergeDescriptor md = MergeCities.findContaining(tname);
+                if (md != null)
+                    t = tdsCensus.get(md.combined);
+            }
+
+            if (t == null && Util.False)
+            {
+                MergeDescriptor md = MergePost1897Regions.findContaining(tname);
+                if (md != null)
+                    t = tdsCensus.get(md.combined);
+            }
+
+            if (t == null && tname.equals("Батумская"))
+                return 0;
+
+            if (t == null && tname.equals("Камчатская обл."))
+                return 0;
+
+            if (t == null)
+                throw new Exception("no pop_1897 data for " + tname);
+
+            TerritoryYear ty = t.territoryYearOrNull(1897);
+
+            pop = ty.population.total.both;
+
+            ccv = censusCategories.get(tname);
+            if (ccv == null)
+            {
+                MergeDescriptor md = MergeCities.findContaining(tname);
+                if (md != null)
+                    ccv = censusCategories.get(md.combined);
+            }
         }
-
-        if (t == null && tname.equals("Батумская"))
-            return 0;
-
-        if (t == null && tname.equals("Камчатская обл."))
-            return 0;
-
-        if (t == null)
-            throw new Exception("no pop_1897 data for " + tname);
-
-        TerritoryYear ty = t.territoryYearOrNull(1897);
-
-        double pop = ty.population.total.both;
-
-        CensusCategoryValues ccv = censusCategories.get(tname);
-        if (ccv == null)
-        {
-            MergeDescriptor md = MergeCities.findContaining(tname);
-            if (md != null)
-                ccv = censusCategories.get(md.combined);
-        }
-
+        
         if (ccv == null)
             throw new Exception("No 1897 census category data for " + tname);
 
@@ -383,6 +396,10 @@ public class Emigration
             break;
 
         case ALL:
+            break;
+
+        case UNITARY:
+            pop = 1.0;
             break;
 
         default:

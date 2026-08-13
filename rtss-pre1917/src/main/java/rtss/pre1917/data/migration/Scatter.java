@@ -11,7 +11,7 @@ public class Scatter
 {
     public static enum PopulationSelector
     {
-        HEBREW, POLES, NON_HEBREW, NON_HEBREW_NON_POLISH, CATHOLIC, PROTESTANT, RUSSIAN, ALL
+        HEBREW, POLES, NON_HEBREW, NON_HEBREW_NON_POLISH, CATHOLIC, PROTESTANT, RUSSIAN, ALL, UNITARY
     }
 
     public static S2D s2d(Object... objects) throws Exception
