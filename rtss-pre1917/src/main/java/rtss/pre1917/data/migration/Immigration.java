@@ -182,7 +182,7 @@ public class Immigration
         scatter(yd, "Франция");
         scatter(yd, "Швейцария");
 
-        addAmount("Сыр-Дарьинская обл.", yd.year, yd.get("Хива"));
+        addAmount("Сыр-Дарьинская обл.", yd.year, yd.get("Хива и Бухара"));
 
         yd.lump.persia = yd.get("Персия");
         yd.lump.turkey = yd.get("Турция");

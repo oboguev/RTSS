@@ -443,7 +443,7 @@ public class LoadData
 
             Astrakhan.combine(territories);
         }
-        
+
         /*
          * Важно!!! Слияния должны произойти до EVAL_PROGRESSIVE
          * для более точного учёта миграции по слитым территориям.
@@ -1146,6 +1146,20 @@ public class LoadData
         else
         {
             throw new Exception("Invalid cell data type (for expected Double)");
+        }
+    }
+
+    private String asString(Object o)
+    {
+        if (o == null)
+        {
+            return null;
+        }
+        else
+        {
+            String s = o.toString();
+            s = Util.despace(s).trim();
+            return s;
         }
     }
 
@@ -2289,7 +2303,12 @@ public class LoadData
                 int col = headers.get(h);
                 currentWCOL = col;
                 o = rc.get(nr, col);
-                long amount = asLong(o);
+
+                long amount;
+                if (o == null || asString(o).trim().equals(""))
+                    amount = 0;
+                else
+                    amount = asLong(o);
 
                 yd.add(country, amount);
             }
