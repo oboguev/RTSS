@@ -86,6 +86,19 @@ public class Immigration
         return Math.round(v);
     }
 
+    public long legalImmigrationForYear(int year)
+    {
+        long v = 0;
+        
+        ImmigrationYear yd = y2yd.get(year);
+        for (String country : yd.contries())
+        {
+            v += yd.get(country);
+        }
+        
+        return v;
+    }
+    
     public LumpImmigration lumpImmigrationForYear(int year)
     {
         return y2yd.get(year).lump;
