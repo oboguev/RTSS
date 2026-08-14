@@ -38,7 +38,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     private final static Double BoostBirths = 1.0;
     private final static Double BoostDeaths = 1.0;
 
-    private final static boolean LimitToPost1896 = Util.True;
+    private final static boolean LimitToPost1896 = Util.False;
 
     public static void main(String[] args)
     {
@@ -531,7 +531,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         for (int year = fromYear; year <= toYear; year++)
         {
             LumpImmigration lump = immigration.lumpImmigrationForYear(year);
-            final double TurkeyFactor = 2.33;
+            final double TurkeyFactor = (year >= 1896) ? 2.33 : 1.0;
             long lumpYearSum = 0;
 
             switch (taxonName)
