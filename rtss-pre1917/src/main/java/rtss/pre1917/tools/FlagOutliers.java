@@ -43,7 +43,9 @@ public class FlagOutliers
     {
         this.what = what;
         this.threshold = threshold;
-        this.tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY);
+        this.tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, 
+                                           LoadOptions.EVAL_SPLIT_ASTRAKHAN, 
+                                           LoadOptions.EVAL_PROGRESSIVE_ASTRAKHAN_ONLY);
     }
 
     private void flagOutliers() throws Exception

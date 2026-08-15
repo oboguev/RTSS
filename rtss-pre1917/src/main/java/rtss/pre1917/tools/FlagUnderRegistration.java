@@ -58,7 +58,8 @@ public class FlagUnderRegistration
                                           LoadOptions.MERGE_CITIES,
                                           LoadOptions.EVAL_PROGRESSIVE,
                                           LoadOptions.ADJUST_FEMALE_BIRTHS,
-                                          LoadOptions.FILL_MISSING_BD);
+                                          LoadOptions.FILL_MISSING_BD,
+                                          LoadOptions.EVAL_SPLIT_ASTRAKHAN);
     }
 
     private void flagUnderRegistration() throws Exception

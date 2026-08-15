@@ -74,6 +74,24 @@ public class EvalProgressive
             evalProgressive(tname, tCensus);
         }
     }
+    
+    public void evalProgressiveAstrakhanOnly() throws Exception
+    {
+        for (String tname : tds.keySet())
+        {
+            if (!tname.equals(Taxon.Астраханская_оседлое))
+                continue;
+
+            Territory tCensus = census.get(censusTerritoryName(tname));
+            if (tCensus == null)
+            {
+                Util.err("Нельзя сделать прогрессивный расчёт для " + tname);
+                continue;
+            }
+
+            evalProgressive(tname, tCensus);
+        }
+    }
 
     private String censusTerritoryName(String tname)
     {
@@ -131,6 +149,9 @@ public class EvalProgressive
 
         TerritoryYear xty1896 = xt.territoryYearOrNull(1896);
         TerritoryYear xty1897 = xt.territoryYearOrNull(1897);
+        
+        if (xty1896 == null || xty1897 == null)
+            Util.noop();
 
         long in = xty1897.births.total.both - xty1897.deaths.total.both;
         in += totalMigration.saldo(tname, 1897);

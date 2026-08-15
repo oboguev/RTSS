@@ -73,7 +73,13 @@ public class LoadData
 
         // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
         // и сохранить её в поле progressive_population, параллельно собственным данным УГВИ
-        EVAL_PROGRESSIVE, DONT_EVAL_PROGRESSIVE
+        EVAL_PROGRESSIVE, DONT_EVAL_PROGRESSIVE,
+
+        // вычислить прогрессивную оценку населения отсчётом от переписи 1897 года (только для УГВИ)
+        // только для Астраханской губернии 
+        // и сохранить её в поле progressive_population, параллельно собственным данным УГВИ
+        // может быть употреблена в комбинации DONT_EVAL_PROGRESSIVE + EVAL_PROGRESSIVE_ASTRAKHAN_ONLY 
+        EVAL_PROGRESSIVE_ASTRAKHAN_ONLY, DONT_EVAL_PROGRESSIVE_ASTRAKHAN_ONLY
     }
 
     public static void main(String[] args)
@@ -430,8 +436,11 @@ public class LoadData
             if (hasOption(LoadOptions.EVAL_MERGE_ASTRAKHAN, options))
                 throw new Exception("Несовместимые опции");
 
-            if (!hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
+            if (!hasOption(LoadOptions.EVAL_PROGRESSIVE, options) &&
+                !hasOption(LoadOptions.EVAL_PROGRESSIVE_ASTRAKHAN_ONLY, options))
+            {
                 throw new Exception("Несовместимые опции");
+            }
 
             Astrakhan.split(territories);
         }
@@ -450,6 +459,12 @@ public class LoadData
          */
         if (hasOption(LoadOptions.EVAL_PROGRESSIVE, options))
             new EvalProgressive(territories).evalProgressive();
+
+        if (!hasOption(LoadOptions.EVAL_PROGRESSIVE, options) &&
+            hasOption(LoadOptions.EVAL_PROGRESSIVE_ASTRAKHAN_ONLY, options))
+        {
+            new EvalProgressive(territories).evalProgressiveAstrakhanOnly();
+        }
 
         if (Util.False && hasOption(LoadOptions.EVAL_SPLIT_ASTRAKHAN, options))
         {
