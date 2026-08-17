@@ -1,7 +1,6 @@
 package rtss.pre1917.data.migration;
 
 import rtss.pre1917.LoadData;
-import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.util.Util;
 
 public class ImmigrationShowSum
