@@ -73,7 +73,7 @@ public class Emigration
         if (union("Холмская", "Сахалин", "Камчатская обл.", "Батумская").contains(tname))
             return 0;
 
-        if (union("г. Баку", "г. Севастополь", "г. Николаев").contains(tname))
+        if (union("г. Баку", "г. Севастополь", "г. Николаев", "Ростовское и./Д град.").contains(tname))
             return 0;
 
         throw new MissingMigrationDataException(String.format("Нет данных об эмиграции из %s в %d году", tname, year));

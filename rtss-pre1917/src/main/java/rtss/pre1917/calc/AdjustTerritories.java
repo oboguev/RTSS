@@ -133,7 +133,7 @@ public class AdjustTerritories
 
         interpolate_population(t, 1903, 1914);
 
-        for (int year = 1896; year <= 1914; year++) // ###@@@
+        for (int year = 1881; year <= 1914; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             ty.progressive_population.total.both = (ty.population.total.both + ty.progressive_population.total.both) / 2;
