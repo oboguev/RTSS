@@ -711,6 +711,9 @@ public class LoadData
             if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
                 gub = "50 губерний Европейской России";
 
+            if (territories.dataSetType == DataSetType.POLAND && gub.equals("Итого 10 губерний Царства Польского"))
+                continue;
+            
             gub = TerritoryNames.canonic(gub);
         }
     }
@@ -879,6 +882,10 @@ public class LoadData
             if (o == null)
                 o = "";
             String xgub = o.toString();
+            
+            if (territories.dataSetType == DataSetType.POLAND && xgub.equals("Итого 10 губерний Царства Польского"))
+                continue;
+            
             xgub = TerritoryNames.canonic(xgub);
             if (xgub.length() != 0)
                 gub = xgub;
@@ -909,6 +916,7 @@ public class LoadData
             {
             case "":
             case "-":
+            case "—":
                 continue;
             default:
                 break;
@@ -1249,6 +1257,88 @@ public class LoadData
         }
 
         return false;
+    }
+
+    /* ================================================================================================= */
+
+    public TerritoryDataSet loadPoland(Set<LoadOptions> options) throws Exception
+    {
+        return loadPoland(options.toArray(new LoadOptions[0]));
+    }
+
+    public TerritoryDataSet loadPoland(LoadOptions... options) throws Exception
+    {
+        for (LoadOptions option : options)
+        {
+            switch (option)
+            {
+            case NONE:
+            case DONT_VERIFY:
+            case DONT_MERGE_CITIES:
+            case DONT_MERGE_POST1897_REGIONS:
+            case DONT_ADJUST_FEMALE_BIRTHS:
+            case DONT_FILL_MISSING_BD:
+            case DONT_EVAL_SPLIT_ASTRAKHAN:
+            case DONT_EVAL_MERGE_ASTRAKHAN:
+            case DONT_EVAL_PROGRESSIVE:
+            case DONT_EVAL_PROGRESSIVE_ASTRAKHAN_ONLY:
+                break;
+
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+
+        territories = new TerritoryDataSet(DataSetType.POLAND, Set.of(options));
+
+        loadPoland("Poland-1881-1893.xlsx");
+        return territories;
+    }
+
+    private void loadPoland(String fn) throws Exception
+    {
+        String fpath = String.format("%s", fn);
+        currentFile = fpath;
+
+        try (XSSFWorkbook wb = Excel.loadWorkbook(fpath);)
+        {
+            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            {
+                XSSFSheet sheet = wb.getSheetAt(k);
+                String sname = sheet.getSheetName();
+                if (sname != null && sname.trim().toLowerCase().contains("note"))
+                    continue;
+
+                ExcelRC rc = Excel.readSheet(wb, sheet, fpath);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+
+                if (!headers.containsKey("губерния"))
+                    throw new Exception("Нет колонки для губернии");
+                if (!headers.containsKey("год"))
+                    throw new Exception("Нет колонки для год");
+
+                int gcol = headers.get("губерния");
+                int ycol = headers.get("год");
+                scanGubColumn(rc, gcol, headers);
+
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чж-м");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чж-ж");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чж-о");
+                
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чр-м");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чр-ж");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чр-о");
+                
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чс-м");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чс-ж");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "чс-о");
+                
+                scanMultiYearColumn(rc, gcol, ycol, headers, "р");
+                scanMultiYearColumn(rc, gcol, ycol, headers, "с");
+            }
+        }
+
+        currentFile = null;
     }
 
     /* ================================================================================================= */
