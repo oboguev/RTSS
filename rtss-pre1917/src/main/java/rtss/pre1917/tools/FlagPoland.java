@@ -18,7 +18,7 @@ public class FlagPoland
     {
         try
         {
-            Util.out("Сравненение числа рождений и смертей в губерниях Царства Польского");
+            Util.out("Сравнение числа рождений и смертей в губерниях Царства Польского");
             Util.out("по Варш. Стат. Комитету и по УГВИ");
             Util.out("");
             new FlagPoland().flagPoland(BirthDeath.BIRTH);
