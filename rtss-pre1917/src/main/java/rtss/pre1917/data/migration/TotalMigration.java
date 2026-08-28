@@ -3,6 +3,7 @@ package rtss.pre1917.data.migration;
 import java.util.Properties;
 
 import rtss.pre1917.LoadData;
+import rtss.pre1917.data.DemographicConstants;
 import rtss.util.Util;
 
 /*
@@ -56,6 +57,27 @@ public class TotalMigration
             s = Util.despace(s).replace(",", "");
             long split = Long.parseLong(s);
             v -= split;
+        }
+
+        /* 
+         * В 1894 году территория Варшавской губернии существенно увеличилась. К ней были присоединены два уезда: 
+         * Плонский уезд (переданный из соседней Плоцкой губернии) 
+         * и Пултусский уезд (переданный из Ломжинской губернии). 
+         */
+        if (year == 1894)
+        {
+            if (tname.equals("Ломжинская"))
+            {
+                v -= DemographicConstants.population_Ломжинская_Пултусский_уезд_1894;
+            }
+            else if (tname.equals("Плоцкая"))
+            {
+                v -= DemographicConstants.population_Плоцкая_Плонский_уезд_1894;
+            }
+            else if (tname.equals("Варшавская") || tname.equals("Варшавская с Варшавой"))
+            {
+                v += DemographicConstants.population_Ломжинская_Пултусский_уезд_1894 + DemographicConstants.population_Плоцкая_Плонский_уезд_1894;
+            }
         }
 
         if (v == 0)
