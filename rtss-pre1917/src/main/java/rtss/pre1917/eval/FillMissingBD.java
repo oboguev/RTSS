@@ -198,51 +198,57 @@ public class FillMissingBD
             TerritoryYear ty = t.territoryYearOrNull(year);
             if (ty != null)
             {
-                fixJews(ty.births, pct);
-                fixJews(ty.deaths, pct);
+                fixJews(tname, year, ty.births, pct);
+                fixJews(tname, year, ty.deaths, pct);
             }
         }
     }
 
-    private void fixJews(URValue ur, double pct) throws Exception
+    private void fixJews(String tname, int year, URValue ur, double pct) throws Exception
     {
         if (ur == null)
             return;
 
         if (ur.urban.both != null || ur.rural.both != null)
         {
-            fixJews(ur.urban, pct);
-            fixJews(ur.rural, pct);
+            fixJews(tname, year, ur.urban, pct);
+            fixJews(tname, year, ur.rural, pct);
             ur.total.recalcAsSum(ur.rural, ur.urban);
         }
         else
         {
-            fixJews(ur.total, pct);
+            fixJews(tname, year, ur.total, pct);
         }
     }
 
-    private void fixJews(ValueByGender v, double pct) throws Exception
+    private void fixJews(String tname, int year, ValueByGender v, double pct) throws Exception
     {
         if (v.male != null && v.female != null)
         {
-            v.male = scaleJews(v.male, pct);
-            v.female = scaleJews(v.female, pct);
+            v.male = scaleJews(tname, year, v.male, pct);
+            v.female = scaleJews(tname, year, v.female, pct);
             v.both = v.male + v.female;
         }
         else if (v.both != null)
         {
-            v.both = scaleJews(v.both, pct);
+            v.both = scaleJews(tname, year, v.both, pct);
         }
     }
 
-    private final double JudaicBirthDeathUnderaccouningRate = 0.15;
-
-    private Long scaleJews(Long v, double pct) throws Exception
+    private Long scaleJews(String tname, int year, Long v, double pct) throws Exception
     {
         if (v != null)
-            return v + Math.round(v * JudaicBirthDeathUnderaccouningRate * pct / 100.0);
+            return v + Math.round(v * judaicBirthDeathUnderaccouningRate(tname, year) * pct / 100.0);
         else
             return null;
+    }
+    
+    private double judaicBirthDeathUnderaccouningRate(String tname, int year) throws Exception
+    {
+        if (Taxon.isPoland(tname) && year <= 1895)
+            return 0.40;
+        else
+            return 0.15;
     }
 
     /* =============================================================================================== */

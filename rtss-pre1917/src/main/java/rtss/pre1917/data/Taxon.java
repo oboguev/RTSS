@@ -717,7 +717,7 @@ public class Taxon
         }
         return xs;
     }
-    
+
     /* ========================================================================================================= */
 
     /*
@@ -788,13 +788,13 @@ public class Taxon
                 territories.remove(city);
         }
     }
-    
+
     /* ========================================================================================================= */
-    
+
     public List<String> flattenUsedEementaryTerritories(int year) throws Exception
     {
         Set<String> tnames = new HashSet<String>();
-        
+
         for (String tname : territories.keySet())
         {
             if (!isComposite(tname))
@@ -811,13 +811,13 @@ public class Taxon
                 tnames.addAll(tx.flattenUsedEementaryTerritories(year));
             }
         }
-        
+
         List<String> list = new ArrayList<>(tnames);
         Collections.sort(list);
         return list;
     }
-    
-    /* ========================================================================================================= */    
+
+    /* ========================================================================================================= */
 
     private static Taxon TaxonFinland = null;
 
@@ -831,5 +831,32 @@ public class Taxon
     public static boolean isFinland(String tname) throws Exception
     {
         return taxonFinland().territories.containsKey(tname);
+    }
+
+    /* ========================================================================================================= */
+
+    public static boolean isPoland(String tname) throws Exception
+    {
+        switch (tname)
+        {
+        case "Варшавская":
+        case "Калишская":
+        case "Келецкая":
+        case "Ломжинская":
+        case "Люблинская":
+        case "Петроковская":
+        case "Плоцкая":
+        case "Радомская":
+        case "Сувалкская":
+        case "Седлецкая":
+        case "Холмская":
+        case "г. Варшава":
+        case "Варшавская с Варшавой":
+        case "Люблинская с Седлецкой и Холмской":
+            return true;
+        default:
+            return false;
+
+        }
     }
 }
