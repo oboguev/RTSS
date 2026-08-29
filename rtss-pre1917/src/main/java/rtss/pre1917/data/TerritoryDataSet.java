@@ -21,6 +21,7 @@ public class TerritoryDataSet extends TreeMap<String, Territory>
     public final Set<LoadOptions> loadOptions;
 
     public boolean filledMissingBD = false;
+    public boolean appliedPatches = false;
 
     public TerritoryDataSet(DataSetType dataSetType, Set<LoadOptions> loadOptions)
     {

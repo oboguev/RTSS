@@ -9,7 +9,7 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
 /*
- * Сравнить числа рождений и смертей по УГВИ и по ЦСК для начального периода 1881-1889
+ * Сравнить числа рождений и смертей по УГВИ и по ЦСК
  */
 public class FlagUGVIvsCSK
 {
@@ -17,7 +17,7 @@ public class FlagUGVIvsCSK
     {
         try
         {
-            Util.out("Сравнение числа рождений и смертей по УГВИ и по ЦСК для начального периода 1881-1889");
+            Util.out("Сравнение числа рождений и смертей по УГВИ и по ЦСК");
             Util.out("");
             new FlagUGVIvsCSK().flagUnder(BirthDeath.BIRTH);
             Util.out("");
@@ -46,6 +46,7 @@ public class FlagUGVIvsCSK
         tdsUGVI = new LoadData().loadUGVI(LoadOptions.MERGE_CITIES,
                                           LoadOptions.MERGE_POST1897_REGIONS,
                                           LoadOptions.DONT_VERIFY,
+                                          LoadOptions.APPLY_PATCHES,
                                           LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
                                           LoadOptions.DONT_FILL_MISSING_BD,
                                           LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
@@ -57,7 +58,7 @@ public class FlagUGVIvsCSK
             if (Taxon.isComposite(tname))
                 continue;
 
-            flagUnder(tname, bd, 1881, 1889);
+            flagUnder(tname, bd, 1881, 1914);
         }
     }
 
@@ -83,6 +84,9 @@ public class FlagUGVIvsCSK
                 vUGVI = tyUGVI.deaths.total.both;
                 break;
             }
+            
+            if (vUGVI == null && year == 1914)
+                continue;
 
             if (vCSK == null || vUGVI == null)
                 throw new Exception("Null data for " + tname + " " + year + " " + bd.toString());

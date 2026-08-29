@@ -6,6 +6,7 @@ import java.util.List;
 import rtss.data.selectors.BirthDeathPopulation;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Jews;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
@@ -34,6 +35,9 @@ public class FillMissingBD
 
     public void fillMissingBD() throws Exception
     {
+        if (tds.dataSetType != DataSetType.UGVI)
+            throw new IllegalArgumentException();
+
         if (tds.filledMissingBD)
             return;
 
@@ -253,8 +257,14 @@ public class FillMissingBD
 
     /* =============================================================================================== */
 
-    private void applyPatches() throws Exception
+    public void applyPatches() throws Exception
     {
+        if (tds.dataSetType != DataSetType.UGVI)
+            throw new IllegalArgumentException();
+        
+        if (tds.appliedPatches)
+            return;
+
         ExcelWorkbook wb = ExcelWorkbook.load("ugvi/PatchYearData.xlsx");
         ExcelSheet sheet = wb.getTheOnlySheet();
 
@@ -264,6 +274,8 @@ public class FillMissingBD
             applyPatch(row, "чу", BirthDeathPopulation.DEATH);
             applyPatch(row, "чж", BirthDeathPopulation.POPULATION);
         }
+
+        tds.appliedPatches = true;
     }
 
     private void applyPatch(ExcelRow row, String col, BirthDeathPopulation bd) throws Exception

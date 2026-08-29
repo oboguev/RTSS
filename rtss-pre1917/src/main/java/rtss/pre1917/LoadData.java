@@ -60,6 +60,10 @@ public class LoadData
         // исправить число рождений для женщин сделав его >= числу мужских рождений / 1.06
         ADJUST_FEMALE_BIRTHS, DONT_ADJUST_FEMALE_BIRTHS,
 
+        // приложить коррекции из ugvi/PatchYearData (только для УГВИ)
+        // автоматически включается в FILL_MISSING_BD 
+        APPLY_PATCHES, DONT_APPLY_PATCHES,
+
         // - заполнить пробелы в сведениях о числе рождений и смертей (только для УГВИ)
         // - приложить коррекции из ugvi/PatchYearData (только для УГВИ)
         // - скорректировать на недоучёт регистрации рождений и смертей иудеев (только для УГВИ)
@@ -432,6 +436,9 @@ public class LoadData
         if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
             territories.adjustFemaleBirths();
 
+        if (hasOption(LoadOptions.APPLY_PATCHES, options) && !hasOption(LoadOptions.FILL_MISSING_BD, options))
+            new FillMissingBD(territories).applyPatches();
+            
         if (hasOption(LoadOptions.FILL_MISSING_BD, options))
             new FillMissingBD(territories).fillMissingBD();
 
