@@ -230,10 +230,7 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII, Set.of(options));
 
-        for (int year = 1881; year <= 1889; year++)
-            loadEvroChast(year);
-
-        for (int year = 1897; year <= 1914; year++)
+        for (int year = 1881; year <= 1914; year++)
             loadEvroChast(year);
 
         if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
@@ -276,7 +273,7 @@ public class LoadData
                 int gcol = headers.get("губ");
                 scanGubColumn(rc, gcol, headers);
                 
-                if (year >= 1881 && year <= 1889)
+                if (year >= 1881 && year <= 1896)
                 {
                     scanThisYearColumn(rc, gcol, headers, "чр-м");
                     scanThisYearColumn(rc, gcol, headers, "чр-ж");
