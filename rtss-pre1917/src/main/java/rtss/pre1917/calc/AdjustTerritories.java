@@ -5,6 +5,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.TotalMigration;
+import rtss.util.Util;
 
 public class AdjustTerritories
 {
@@ -133,10 +134,31 @@ public class AdjustTerritories
 
         interpolate_population(t, 1903, 1914);
 
-        for (int year = 1881; year <= 1914; year++)
+        for (int year = 1881; year <= 1887; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
+            if (ty.population.total.both != null)
+                throw new Exception("Unexpected: data for Бакинская с Баку");
+        }
+
+        long offset;
+        {
+            TerritoryYear ty = t.territoryYearOrNull(1888);
+            offset = (ty.population.total.both + ty.progressive_population.total.both) / 2 - ty.progressive_population.total.both;
+        }
+
+        for (int year = 1888; year <= 1914; year++)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            if (ty.population.total.both == null || ty.progressive_population.total.both == null)
+                Util.noop();
             ty.progressive_population.total.both = (ty.population.total.both + ty.progressive_population.total.both) / 2;
+        }
+
+        for (int year = 1881; year <= 1887; year++)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            ty.progressive_population.total.both += offset;
         }
     }
 

@@ -230,6 +230,9 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII, Set.of(options));
 
+        for (int year = 1881; year <= 1889; year++)
+            loadEvroChast(year);
+
         for (int year = 1897; year <= 1914; year++)
             loadEvroChast(year);
 
@@ -272,18 +275,30 @@ public class LoadData
                     throw new Exception("Нет колонки для губернии");
                 int gcol = headers.get("губ");
                 scanGubColumn(rc, gcol, headers);
-
-                if (year != 1903)
-                    scanYearColumn(rc, gcol, headers, "чж");
-                scanThisYearColumn(rc, gcol, headers, "р");
-                scanThisYearColumn(rc, gcol, headers, "с");
-                scanThisYearColumn(rc, gcol, headers, "еп");
-                scanThisYearColumn(rc, gcol, headers, "чр-м");
-                scanThisYearColumn(rc, gcol, headers, "чр-ж");
-                scanThisYearColumn(rc, gcol, headers, "чр-о");
-                scanThisYearColumn(rc, gcol, headers, "чс-м");
-                scanThisYearColumn(rc, gcol, headers, "чс-ж");
-                scanThisYearColumn(rc, gcol, headers, "чс-о");
+                
+                if (year >= 1881 && year <= 1889)
+                {
+                    scanThisYearColumn(rc, gcol, headers, "чр-м");
+                    scanThisYearColumn(rc, gcol, headers, "чр-ж");
+                    scanThisYearColumn(rc, gcol, headers, "чр-о");
+                    scanThisYearColumn(rc, gcol, headers, "чс-м");
+                    scanThisYearColumn(rc, gcol, headers, "чс-ж");
+                    scanThisYearColumn(rc, gcol, headers, "чс-о");
+                }
+                else
+                {
+                    if (year != 1903)
+                        scanYearColumn(rc, gcol, headers, "чж");
+                    scanThisYearColumn(rc, gcol, headers, "р");
+                    scanThisYearColumn(rc, gcol, headers, "с");
+                    scanThisYearColumn(rc, gcol, headers, "еп");
+                    scanThisYearColumn(rc, gcol, headers, "чр-м");
+                    scanThisYearColumn(rc, gcol, headers, "чр-ж");
+                    scanThisYearColumn(rc, gcol, headers, "чр-о");
+                    scanThisYearColumn(rc, gcol, headers, "чс-м");
+                    scanThisYearColumn(rc, gcol, headers, "чс-ж");
+                    scanThisYearColumn(rc, gcol, headers, "чс-о");
+                }
             }
         }
         finally
