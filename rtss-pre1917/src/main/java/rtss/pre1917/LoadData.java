@@ -723,7 +723,7 @@ public class LoadData
             if (gub.startsWith("[уже] "))
                 continue;
 
-            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
+            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equalsIgnoreCase("всего"))
                 gub = "50 губерний Европейской России";
 
             if (territories.dataSetType == DataSetType.POLAND && gub.equals("Итого 10 губерний Царства Польского"))
@@ -815,7 +815,7 @@ public class LoadData
                     throw new Exception("Сомнительная запись");
             }
 
-            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equals("всего"))
+            if (territories.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII && gub.equalsIgnoreCase("всего"))
                 gub = "50 губерний Европейской России";
 
             if (territories.dataSetType == DataSetType.CSK_EZHEGODNIK_ROSSII)
