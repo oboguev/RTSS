@@ -25,7 +25,6 @@ public class ExportData
 
     private ExportData()
     {
-        
     }
 
     public static ExportData forRaw()
