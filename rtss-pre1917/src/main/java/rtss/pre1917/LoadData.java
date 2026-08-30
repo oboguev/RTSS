@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.CensusCategoryValues;
 import rtss.pre1917.data.DataSetType;
@@ -93,7 +94,7 @@ public class LoadData
         try
         {
             // self.loadCensus1897(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
-            // self.loadEvroChast(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
+            // self.loadEvroChast(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.APPLY_PATCHES);
             // self.loadEzhegodnikRossii(LoadOptions.VERIFY, LoadOptions.MERGE_CITIES);
             // self.loadUGVI(LoadOptions.VERIFY, LoadOptions.DONT_MERGE_CITIES);
             // TerritoryNames.printSeen();
@@ -236,6 +237,9 @@ public class LoadData
 
         for (int year = 1881; year <= 1914; year++)
             loadEvroChast(year);
+        
+        if (hasOption(LoadOptions.APPLY_PATCHES, options))
+            new FillMissingBD(territories).applyPatches();
 
         if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
             territories.adjustFemaleBirths();

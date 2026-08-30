@@ -29,7 +29,7 @@ public class ShowData
 
     private void show_1() throws Exception
     {
-        // tds = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        // tds = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.APPLY_PATCHES);
         // show(tds, "50 губерний Европейской России", "population.total.both", 1897, 1914);
         // show(tds, "Архангельская", "births.total.both", 1897, 1914);
         // show(tds, "Ярославская", "deaths.total.both", 1897, 1914);

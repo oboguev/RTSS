@@ -15,7 +15,7 @@ public class Show1898
         try
         {
             TerritoryDataSet tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.DONT_MERGE_CITIES);
-            // TerritoryDataSet tds = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.DONT_MERGE_CITIES);
+            // TerritoryDataSet tds = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.DONT_MERGE_CITIES, LoadOptions.APPLY_PATCHES);
             
             for (String tname : Util.sort(tds.keySet()))
             {

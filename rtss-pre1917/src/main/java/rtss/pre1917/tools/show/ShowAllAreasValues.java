@@ -35,6 +35,17 @@ public class ShowAllAreasValues extends ShowAreaValues
         return raw;
     }
 
+    protected static ShowAllAreasValues rawShowAllAreasValuesPatched(ExportData exportData) throws Exception
+    {
+        TerritoryDataSet rawUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.APPLY_PATCHES);
+        TerritoryDataSet rawCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
+        TerritoryDataSet rawCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY);
+        ShowAllAreasValues raw = new ShowAllAreasValues(rawUGVI, rawCSK, rawCensus1897);
+        raw.setOnlyRaw();
+        raw.setExportData(exportData);
+        return raw;
+    }
+
     @SuppressWarnings("unused")
     protected ShowAllAreasValues(TerritoryDataSet tdsUGVI,
             TerritoryDataSet tdsCSK,

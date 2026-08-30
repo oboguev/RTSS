@@ -181,7 +181,7 @@ public class FillMissingBD
         {
             if (Taxon.isComposite(tname))
                 continue;
-            
+
             Double pct = jews.get(tname);
             if (pct != null && pct >= 0.1)
                 fixJews(tname, pct);
@@ -246,7 +246,7 @@ public class FillMissingBD
         else
             return null;
     }
-    
+
     private double judaicBirthDeathUnderaccouningRate(String tname, int year) throws Exception
     {
         if (Taxon.isPoland(tname) && year <= 1895)
@@ -259,13 +259,24 @@ public class FillMissingBD
 
     public void applyPatches() throws Exception
     {
-        if (tds.dataSetType != DataSetType.UGVI)
-            throw new IllegalArgumentException();
-        
         if (tds.appliedPatches)
             return;
 
-        ExcelWorkbook wb = ExcelWorkbook.load("ugvi/PatchYearData.xlsx");
+        ExcelWorkbook wb = null;
+
+        if (tds.dataSetType == DataSetType.UGVI)
+        {
+            wb = ExcelWorkbook.load("ugvi/PatchYearData.xlsx");
+        }
+        else if (tds.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII)
+        {
+            wb = ExcelWorkbook.load("csk-dvizhenie-evropriskoi-chasti-rossii/PatchYearData.xlsx");
+        }
+        else
+        {
+            throw new IllegalArgumentException();
+        }
+
         ExcelSheet sheet = wb.getTheOnlySheet();
 
         for (ExcelRow row : sheet.getRows())

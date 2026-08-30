@@ -39,7 +39,7 @@ public class EvalDivergence_CSK_50
         Util.out("  годовой прирост населения Империи = по Ежегодникам России ЦСК");
         Util.out("");
 
-        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.APPLY_PATCHES);
         TerritoryDataSet tdsPOP = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
         
         Territory tmEP50 = MergeTaxon.mergeTaxon(tdsEP, "50 губерний Европейской России", WhichYears.AllSetYears);
@@ -70,7 +70,7 @@ public class EvalDivergence_CSK_50
     private void calc_2() throws Exception
     {
         TerritoryDataSet tdsPOP = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
-        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.APPLY_PATCHES);
         
         Territory tmPOP50 = MergeTaxon.mergeTaxon(tdsPOP, "50 губерний Европейской России", WhichYears.AllSetYears);
         Territory tmPOP_EMPIRE = MergeTaxon.mergeTaxon(tdsPOP, "Империя", WhichYears.AllSetYears);

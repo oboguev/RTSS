@@ -11,7 +11,7 @@ import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.util.Util;
 
 /*
- * Пометить сильные уклонения в числе рождений или смертей в губернии от соседних лет
+ * Пометить сильные уклонения в числе рождений или смертей в губернии от соседних лет (УГВИ)
  */
 public class FlagOutliers
 {
@@ -22,8 +22,11 @@ public class FlagOutliers
     {
         try
         {
-            new FlagOutliers("births", 0.28).flagOutliers();
-            new FlagOutliers("deaths", 0.28).flagOutliers();
+            TerritoryDataSet tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
+                                                           LoadOptions.EVAL_SPLIT_ASTRAKHAN,
+                                                           LoadOptions.EVAL_PROGRESSIVE_ASTRAKHAN_ONLY);
+            new FlagOutliers(tds, "births", 0.28).flagOutliers();
+            new FlagOutliers(tds, "deaths", 0.28).flagOutliers();
 
             Util.out("** Done");
         }
@@ -39,16 +42,14 @@ public class FlagOutliers
     private final double threshold;
     private final boolean ShowCompositeDivergences = Util.False;
 
-    private FlagOutliers(String what, double threshold) throws Exception
+    FlagOutliers(TerritoryDataSet tds, String what, double threshold) throws Exception
     {
+        this.tds = tds;
         this.what = what;
         this.threshold = threshold;
-        this.tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, 
-                                           LoadOptions.EVAL_SPLIT_ASTRAKHAN, 
-                                           LoadOptions.EVAL_PROGRESSIVE_ASTRAKHAN_ONLY);
     }
 
-    private void flagOutliers() throws Exception
+    void flagOutliers() throws Exception
     {
         for (String tname : Util.sort(tds.keySet()))
         {
@@ -162,14 +163,14 @@ public class FlagOutliers
             String sv3 = "unknown";
             if (v3 != null)
                 sv3 = String.format("%,d", v3);
-            
+
             Util.out(String.format("Расхождение %s для %d -> %d %s: %,d -> %,d -> %s, delta = %,d (%.1f%%), suggested: %,d %,d",
                                    what, y1, y2, tname, v1, v2, sv3, Math.abs(v1 - v2), delta * 100,
                                    Math.round(suggested1), Math.round(suggested2)));
-            
+
             if (ShowCompositeDivergences)
                 showCompositeDivergences(tname, year);
-            
+
             return true;
         }
         else

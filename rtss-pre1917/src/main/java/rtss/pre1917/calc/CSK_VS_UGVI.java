@@ -39,7 +39,7 @@ public class CSK_VS_UGVI
         Util.out("");
 
         TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
-        TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.APPLY_PATCHES);
 
         Territory tmCSK = MergeTaxon.mergeTaxon(tdsCSK, txname, WhichYears.AllSetYears, new MergeTaxonOptions().setLog(false));
         Territory tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, txname, WhichYears.AllSetYears);
@@ -72,10 +72,10 @@ public class CSK_VS_UGVI
         Util.out(String.format("Движение населения по ЦСК и по УГВИ для территории: %s, поле %s ", txname, field));
         Util.out("");
 
-        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        TerritoryDataSet tdsEP = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.APPLY_PATCHES);
         Territory tmEP50 = MergeTaxon.mergeTaxon(tdsEP, txname, WhichYears.AllSetYears);
 
-        TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES);
+        TerritoryDataSet tdsUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.MERGE_CITIES, LoadOptions.APPLY_PATCHES);
         Territory tmUGVI = MergeTaxon.mergeTaxon(tdsUGVI, txname, WhichYears.AllSetYears);
 
         // final int fromYear = 1897;

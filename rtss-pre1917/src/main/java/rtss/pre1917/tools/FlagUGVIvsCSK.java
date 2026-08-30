@@ -40,6 +40,7 @@ public class FlagUGVIvsCSK
     {
         tdsCSK = new LoadData().loadEvroChast(LoadOptions.MERGE_CITIES,
                                               LoadOptions.MERGE_POST1897_REGIONS,
+                                              LoadOptions.APPLY_PATCHES,
                                               LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
                                               LoadOptions.DONT_VERIFY);
 

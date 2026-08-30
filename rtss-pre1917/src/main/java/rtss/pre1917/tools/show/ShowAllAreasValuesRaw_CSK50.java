@@ -34,42 +34,43 @@ public class ShowAllAreasValuesRaw_CSK50
             ex.printStackTrace();
         }
     }
-    
+
     private TerritoryDataSet tdsCSK;
     private static final char nbsp = '\u00A0';
 
     private void do_main() throws Exception
     {
-        tdsCSK = new LoadData().loadEvroChast(LoadOptions.DONT_MERGE_CITIES,
+        tdsCSK = new LoadData().loadEvroChast(LoadOptions.APPLY_PATCHES,
+                                              LoadOptions.DONT_MERGE_CITIES,
                                               LoadOptions.DONT_MERGE_POST1897_REGIONS,
                                               LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
                                               LoadOptions.DONT_VERIFY);
-        
-        for (String tname: Util.sort(tdsCSK.keySet()))
+
+        for (String tname : Util.sort(tdsCSK.keySet()))
         {
             if (Taxon.isComposite(tname))
                 continue;
             Territory t = tdsCSK.get(tname);
-            
+
             Util.out("");
             Util.out(tname);
             Util.out("");
             Util.out("год   чж-нач    чж-сер     чр      чс");
-            Util.out("==== ========= ========= ======= =======");            
-            
+            Util.out("==== ========= ========= ======= =======");
+
             for (int year : t.years())
             {
                 TerritoryYear ty = t.territoryYearOrNull(year);
-                Util.out(String.format("%4d %s %s %s %s", 
-                                       year, 
-                                       i2s(ty.population.total.both, 9), 
+                Util.out(String.format("%4d %s %s %s %s",
+                                       year,
+                                       i2s(ty.population.total.both, 9),
                                        i2s(ty.midyear_population.total.both, 9),
                                        i2s(ty.births.total.both, 7),
                                        i2s(ty.deaths.total.both, 7)));
             }
         }
     }
-    
+
     private String i2s(Long v, int width)
     {
         String s = "";
