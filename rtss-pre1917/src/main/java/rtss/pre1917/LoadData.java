@@ -242,7 +242,7 @@ public class LoadData
 
         if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
             territories.adjustFemaleBirths();
-        
+
         if (hasOption(LoadOptions.APPLY_PATCHES, options) && !hasOption(LoadOptions.FILL_MISSING_BD, options))
             new FillMissingBD(territories).applyPatches();
 
@@ -471,12 +471,12 @@ public class LoadData
                 throw new IllegalArgumentException("Несовместимые опции");
             }
 
-            TerritoryDataSet tdsEvro = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, 
+            TerritoryDataSet tdsEvro = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY,
                                                                     LoadOptions.ADJUST_FEMALE_BIRTHS,
                                                                     LoadOptions.FILL_MISSING_BD,
                                                                     LoadOptions.MERGE_CITIES,
                                                                     LoadOptions.MERGE_POST1897_REGIONS);
-            // ###@@@ заместить
+            overrideUgviWithCSK50(tdsEvro);
         }
 
         territories.boostBirthsDeaths(boostBirths, boostDeaths);
@@ -1307,6 +1307,33 @@ public class LoadData
         }
 
         return false;
+    }
+
+    /* ================================================================================================= */
+
+    private void overrideUgviWithCSK50(TerritoryDataSet tdsEvro) throws Exception
+    {
+        for (String tname : Util.sort(tdsEvro.keySet()))
+        {
+            if (Taxon.isComposite(tname))
+                continue;
+
+            if (tname.equals("Астраханская"))
+            {
+                this.territories.remove(tdsEvro, tname);
+                this.territories.remove(tdsEvro, Taxon.Астраханская_оседлое);
+                this.territories.remove(tdsEvro, Taxon.Астраханская_кочевники);
+                this.territories.put(tname, tdsEvro.get(tname).dup());
+            }
+            else if (this.territories.containsKey(tname))
+            {
+                this.territories.put(tname, tdsEvro.get(tname).dup());
+            }
+            else
+            {
+                throw new Exception("Ошибка замещения данных УГВИ данными ЦСК о Движениии Европейской России");
+            }
+        }
     }
 
     /* ================================================================================================= */
