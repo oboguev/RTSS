@@ -12,7 +12,6 @@ import java.util.Set;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.CensusCategories;
 import rtss.pre1917.data.CensusCategoryValues;
 import rtss.pre1917.data.DataSetType;
@@ -84,7 +83,10 @@ public class LoadData
         // только для Астраханской губернии 
         // и сохранить её в поле progressive_population, параллельно собственным данным УГВИ
         // может быть употреблена в комбинации DONT_EVAL_PROGRESSIVE + EVAL_PROGRESSIVE_ASTRAKHAN_ONLY 
-        EVAL_PROGRESSIVE_ASTRAKHAN_ONLY, DONT_EVAL_PROGRESSIVE_ASTRAKHAN_ONLY
+        EVAL_PROGRESSIVE_ASTRAKHAN_ONLY, DONT_EVAL_PROGRESSIVE_ASTRAKHAN_ONLY,
+
+        // для 50 губерний использовать данные ЦСК (только для УГВИ)
+        USE_CSK50, DONT_USE_CSK50,
     }
 
     public static void main(String[] args)
@@ -237,12 +239,15 @@ public class LoadData
 
         for (int year = 1880; year <= 1914; year++)
             loadEvroChast(year);
-        
-        if (hasOption(LoadOptions.APPLY_PATCHES, options))
-            new FillMissingBD(territories).applyPatches();
 
         if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options))
             territories.adjustFemaleBirths();
+        
+        if (hasOption(LoadOptions.APPLY_PATCHES, options) && !hasOption(LoadOptions.FILL_MISSING_BD, options))
+            new FillMissingBD(territories).applyPatches();
+
+        if (hasOption(LoadOptions.FILL_MISSING_BD, options))
+            new FillMissingBD(territories).fillMissingBD();
 
         new EvalEvroChastPopulation().eval(territories);
 
@@ -280,7 +285,7 @@ public class LoadData
                     throw new Exception("Нет колонки для губернии");
                 int gcol = headers.get("губ");
                 scanGubColumn(rc, gcol, headers);
-                
+
                 if (year >= 1881 && year <= 1896)
                 {
                     scanThisYearColumn(rc, gcol, headers, "чр-м");
@@ -442,7 +447,7 @@ public class LoadData
 
         if (hasOption(LoadOptions.APPLY_PATCHES, options) && !hasOption(LoadOptions.FILL_MISSING_BD, options))
             new FillMissingBD(territories).applyPatches();
-            
+
         if (hasOption(LoadOptions.FILL_MISSING_BD, options))
             new FillMissingBD(territories).fillMissingBD();
 
@@ -451,6 +456,28 @@ public class LoadData
 
         if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
             territories.mergePost1897Regions();
+
+        if (hasOption(LoadOptions.USE_CSK50, options))
+        {
+            if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options) &&
+                hasOption(LoadOptions.FILL_MISSING_BD, options) &&
+                hasOption(LoadOptions.MERGE_CITIES, options) &&
+                hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
+            {
+                // OK 
+            }
+            else
+            {
+                throw new IllegalArgumentException("Несовместимые опции");
+            }
+
+            TerritoryDataSet tdsEvro = new LoadData().loadEvroChast(LoadOptions.DONT_VERIFY, 
+                                                                    LoadOptions.ADJUST_FEMALE_BIRTHS,
+                                                                    LoadOptions.FILL_MISSING_BD,
+                                                                    LoadOptions.MERGE_CITIES,
+                                                                    LoadOptions.MERGE_POST1897_REGIONS);
+            // ###@@@ заместить
+        }
 
         territories.boostBirthsDeaths(boostBirths, boostDeaths);
 
@@ -736,7 +763,7 @@ public class LoadData
 
             if (territories.dataSetType == DataSetType.POLAND && gub.equals("Итого 10 губерний Царства Польского"))
                 continue;
-            
+
             gub = TerritoryNames.canonic(gub);
         }
     }
@@ -905,10 +932,10 @@ public class LoadData
             if (o == null)
                 o = "";
             String xgub = o.toString();
-            
+
             if (territories.dataSetType == DataSetType.POLAND && xgub.equals("Итого 10 губерний Царства Польского"))
                 continue;
-            
+
             xgub = TerritoryNames.canonic(xgub);
             if (xgub.length() != 0)
                 gub = xgub;
@@ -1347,15 +1374,15 @@ public class LoadData
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чж-м");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чж-ж");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чж-о");
-                
+
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чр-м");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чр-ж");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чр-о");
-                
+
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чс-м");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чс-ж");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "чс-о");
-                
+
                 scanMultiYearColumn(rc, gcol, ycol, headers, "р");
                 scanMultiYearColumn(rc, gcol, ycol, headers, "с");
             }

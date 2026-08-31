@@ -35,51 +35,61 @@ public class FillMissingBD
 
     public void fillMissingBD() throws Exception
     {
-        if (tds.dataSetType != DataSetType.UGVI)
-            throw new IllegalArgumentException();
-
         if (tds.filledMissingBD)
             return;
 
-        // Нет сведений за 1913 и 1914 гг. по Карсской области и за 1913 г. для Семипалатинской обл.
-        // Изменение их населения за 1913 г. приближено повтором величины за 1912 год.
-        repeat("Карсская обл.", 1913, 1912);
-        repeat("Семипалатинская обл.", 1913, 1912);
-
-        // Для 1913 гг. сведения есть только по части привислинских губерний и по Варшаве.
-        // Для губерний с отсутствующими сведениями повторить значения их роста за 1912 год.
-        for (String tname : Taxon.of("привислинские губернии", 1913, tds).territories.keySet())
+        if (tds.dataSetType == DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII)
         {
-            if (tds.get(tname) != null && !hasBD(tname, 1913))
-                repeat(tname, 1913, 1912);
+            applyPatches();
+            // исправить число рождений и смертей для губерний с иудеями
+            fixJews();
         }
-
-        // Сведения о числе рождений и смертей отсутствуют для Кутаисской губернии (1904-1905).
-        // Исчислить приближение усреднением сведений за 1903 и 1906 гг.
-        if (Util.True)
+        else if (tds.dataSetType == DataSetType.UGVI)
         {
-            if (hasBD("Кутаисская", 1904) || hasBD("Кутаисская", 1905))
-                throw new Exception("Already have BD data");
-            Territory t = tds.get("Кутаисская");
-            TerritoryYear t1 = t.territoryYear(1903);
-            TerritoryYear t2 = t.territoryYear(1904);
-            TerritoryYear t3 = t.territoryYear(1905);
-            TerritoryYear t4 = t.territoryYear(1906);
-            t3.births.total.both = t2.births.total.both = (t1.births.total.both + t4.births.total.both) / 2;
-            t3.deaths.total.both = t2.deaths.total.both = (t1.deaths.total.both + t4.deaths.total.both) / 2;
+            // Нет сведений за 1913 и 1914 гг. по Карсской области и за 1913 г. для Семипалатинской обл.
+            // Изменение их населения за 1913 г. приближено повтором величины за 1912 год.
+            repeat("Карсская обл.", 1913, 1912);
+            repeat("Семипалатинская обл.", 1913, 1912);
+
+            // Для 1913 гг. сведения есть только по части привислинских губерний и по Варшаве.
+            // Для губерний с отсутствующими сведениями повторить значения их роста за 1912 год.
+            for (String tname : Taxon.of("привислинские губернии", 1913, tds).territories.keySet())
+            {
+                if (tds.get(tname) != null && !hasBD(tname, 1913))
+                    repeat(tname, 1913, 1912);
+            }
+
+            // Сведения о числе рождений и смертей отсутствуют для Кутаисской губернии (1904-1905).
+            // Исчислить приближение усреднением сведений за 1903 и 1906 гг.
+            if (Util.True)
+            {
+                if (hasBD("Кутаисская", 1904) || hasBD("Кутаисская", 1905))
+                    throw new Exception("Already have BD data");
+                Territory t = tds.get("Кутаисская");
+                TerritoryYear t1 = t.territoryYear(1903);
+                TerritoryYear t2 = t.territoryYear(1904);
+                TerritoryYear t3 = t.territoryYear(1905);
+                TerritoryYear t4 = t.territoryYear(1906);
+                t3.births.total.both = t2.births.total.both = (t1.births.total.both + t4.births.total.both) / 2;
+                t3.deaths.total.both = t2.deaths.total.both = (t1.deaths.total.both + t4.deaths.total.both) / 2;
+            }
+
+            // Черноморская губерния (с центром в Новороссийске) была образована в мае 1896 года выделением из Кубанской области, 
+            // поэтому сведения о числе рождений и смертей в ней собираются с 1897 года. Установить для 1896 года в Черноморской губ.
+            // число рождений и смертей как среднее за 1897-1900. 
+            average("Черноморская", 1896, 1897, 1900);
+
+            applyPatches();
+
+            fill_pre1896_blanks();
+
+            // исправить число рождений и смертей для губерний с иудеями
+            fixJews();
         }
-
-        // Черноморская губерния (с центром в Новороссийске) была образована в мае 1896 года выделением из Кубанской области, 
-        // поэтому сведения о числе рождений и смертей в ней собираются с 1897 года. Установить для 1896 года в Черноморской губ.
-        // число рождений и смертей как среднее за 1897-1900. 
-        average("Черноморская", 1896, 1897, 1900);
-
-        applyPatches();
-
-        fill_pre1896_blanks();
-
-        // исправить число рождений и смертей для губерний с иудеями
-        fixJews();
+        else
+        {
+            throw new IllegalArgumentException();
+        }
 
         tds.filledMissingBD = true;
     }
@@ -427,8 +437,6 @@ public class FillMissingBD
         fill_pre1896_blanks(1881, 1887, tdsCensus, "Ферганская обл.", false);
 
         Util.noop();
-
-        // ####
     }
 
     private void fill_pre1896_blanks(int fromYear, int toYear, TerritoryDataSet tdsCensus, String tname) throws Exception
