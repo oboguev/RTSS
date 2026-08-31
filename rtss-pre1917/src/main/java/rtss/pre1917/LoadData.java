@@ -235,7 +235,7 @@ public class LoadData
     {
         territories = new TerritoryDataSet(DataSetType.CSK_DVIZHENIE_EVROPEISKOI_CHASTI_ROSSII, Set.of(options));
 
-        for (int year = 1881; year <= 1914; year++)
+        for (int year = 1880; year <= 1914; year++)
             loadEvroChast(year);
         
         if (hasOption(LoadOptions.APPLY_PATCHES, options))

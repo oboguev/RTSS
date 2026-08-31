@@ -16,7 +16,7 @@ import rtss.util.Util;
 public class FlagOutliers
 {
     // private final static int fromYear = 1896;
-    private final static int fromYear = 1881;
+    private int fromYear = 1881;
 
     public static void main(String[] args)
     {
@@ -25,8 +25,8 @@ public class FlagOutliers
             TerritoryDataSet tds = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY,
                                                            LoadOptions.EVAL_SPLIT_ASTRAKHAN,
                                                            LoadOptions.EVAL_PROGRESSIVE_ASTRAKHAN_ONLY);
-            new FlagOutliers(tds, "births", 0.28).flagOutliers();
-            new FlagOutliers(tds, "deaths", 0.28).flagOutliers();
+            new FlagOutliers(tds, "births", 0.28, 1881).flagOutliers();
+            new FlagOutliers(tds, "deaths", 0.28, 1881).flagOutliers();
 
             Util.out("** Done");
         }
@@ -42,8 +42,9 @@ public class FlagOutliers
     private final double threshold;
     private final boolean ShowCompositeDivergences = Util.False;
 
-    FlagOutliers(TerritoryDataSet tds, String what, double threshold) throws Exception
+    FlagOutliers(TerritoryDataSet tds, String what, double threshold, int fromYear) throws Exception
     {
+        this.fromYear = fromYear;
         this.tds = tds;
         this.what = what;
         this.threshold = threshold;

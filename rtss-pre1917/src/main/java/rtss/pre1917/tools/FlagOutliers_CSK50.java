@@ -19,8 +19,8 @@ public class FlagOutliers_CSK50
                                                                 LoadOptions.DONT_MERGE_POST1897_REGIONS,
                                                                 LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
                                                                 LoadOptions.DONT_VERIFY);
-            new FlagOutliers(tds, "births", 0.28).flagOutliers();
-            new FlagOutliers(tds, "deaths", 0.28).flagOutliers();
+            new FlagOutliers(tds, "births", 0.28, 1880).flagOutliers();
+            new FlagOutliers(tds, "deaths", 0.28, 1880).flagOutliers();
 
             Util.out("** Done");
         }
