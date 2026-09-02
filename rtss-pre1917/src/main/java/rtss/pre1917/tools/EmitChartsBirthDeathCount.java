@@ -99,7 +99,7 @@ public class EmitChartsBirthDeathCount
             if ((tCSKPatched == null) != (tCSKUnpatched == null))
                 throw new Exception("Нет территоррии");
 
-            boolean hasCSK = tCSKPatched != null;
+            boolean hasCSK = (tCSKPatched != null);
 
             XSSFWorkbook wb = Excel
                     .loadWorkbook(hasCSK ? "excel-templates/birth-death-counts-ugvi-csk.xlsx" : "excel-templates/birth-death-counts-ugvi.xlsx");
@@ -182,12 +182,11 @@ public class EmitChartsBirthDeathCount
 
     private void setUnpatched(XSSFSheet sheet, int nr, int nc, Long vPatched, Long vUnpatched)
     {
-        setNumber(sheet, nr, nc, null);
-
-        if (vPatched != null && vUnpatched != null && vPatched == vUnpatched)
-            return;
-        
-        if (vUnpatched != null)
+        if (vPatched != null && vUnpatched != null && (long) vPatched == (long) vUnpatched)
+        {
+            setNumber(sheet, nr, nc, null);
+        }
+        else if (vUnpatched != null)
         {
             setNumber(sheet, nr, nc, vUnpatched);
         }
