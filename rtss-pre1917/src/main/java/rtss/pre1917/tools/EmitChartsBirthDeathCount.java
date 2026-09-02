@@ -104,7 +104,7 @@ public class EmitChartsBirthDeathCount
             XSSFWorkbook wb = Excel
                     .loadWorkbook(hasCSK ? "excel-templates/birth-death-counts-ugvi-csk.xlsx" : "excel-templates/birth-death-counts-ugvi.xlsx");
             XSSFSheet sheet = wb.getSheet("data");
-            sheet.getRow(0).getCell(0).setCellValue(tname);
+            sheet.getRow(0).getCell(5).setCellValue(tname);
 
             for (int year = 1880; year <= 1914; year++)
             {
