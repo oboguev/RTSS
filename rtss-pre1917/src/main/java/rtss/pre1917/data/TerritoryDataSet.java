@@ -47,6 +47,16 @@ public class TerritoryDataSet extends TreeMap<String, Territory>
         for (String name : keySet())
             tds.put(name, get(name).dup());
         tds.filledMissingBD = this.filledMissingBD;
+        tds.appliedPatches = appliedPatches;
+        return tds;
+    }
+
+    public TerritoryDataSet dupSingleTerritory(String tname)
+    {
+        TerritoryDataSet tds = new TerritoryDataSet(dataSetType, new HashSet<>(loadOptions));
+        tds.put(tname, get(tname).dup());
+        tds.filledMissingBD = this.filledMissingBD;
+        tds.appliedPatches = appliedPatches;
         return tds;
     }
 

@@ -5,6 +5,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.TotalMigration;
+import rtss.pre1917.eval.EvalProgressive;
 import rtss.util.Util;
 
 public class AdjustTerritories
@@ -272,7 +273,12 @@ public class AdjustTerritories
             ty.deaths.total.both = deaths;
         }
         
-        // ###@@@ recalc progressive
+        /*
+         * Пересчитать прогрессивный расчёт 
+         */
+        TerritoryDataSet tds2 = tds.dupSingleTerritory(SUVALKI);
+        new EvalProgressive(tds2).evalProgressive();
+        tds.put(SUVALKI, tds2.get(SUVALKI));
     }
 
     /*
