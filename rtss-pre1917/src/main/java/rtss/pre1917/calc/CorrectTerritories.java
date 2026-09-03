@@ -1,0 +1,192 @@
+package rtss.pre1917.calc;
+
+import rtss.pre1917.LoadData;
+import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.Taxon;
+import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
+import rtss.pre1917.data.TerritoryNames;
+import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.eval.EvalGrowthRate;
+import rtss.pre1917.eval.FixEarlyPeriod;
+
+public class CorrectTerritories
+{
+    private final String taxonName;
+    private final TerritoryDataSet tdsPopulation;
+    private final TerritoryDataSet tdsVitalRates;
+    private final int fromYear;
+    private final int toYear;
+
+    private final TerritoryDataSet tdsCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY,
+                                                                                 LoadOptions.MERGE_CITIES,
+                                                                                 LoadOptions.MERGE_POST1897_REGIONS);
+
+    private final TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY,
+                                                                                LoadOptions.ADJUST_FEMALE_BIRTHS,
+                                                                                LoadOptions.MERGE_CITIES,
+                                                                                LoadOptions.MERGE_POST1897_REGIONS);
+
+    private final EvalGrowthRate evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
+
+    public CorrectTerritories(String taxonName, int fromYear, int toYear,
+            TerritoryDataSet tdsPopulation,
+            TerritoryDataSet tdsVitalRates)
+            throws Exception
+    {
+        this.taxonName = taxonName;
+        this.fromYear = fromYear;
+        this.toYear = toYear;
+        this.tdsPopulation = tdsPopulation;
+        this.tdsVitalRates = tdsVitalRates;
+    }
+
+    /* ================================================================================================ */
+
+    protected void corrections() throws Exception
+    {
+        if (taxonName.equals("русские губернии Европейской России и Кавказа, кроме Черноморской"))
+            return;
+
+        /* не включать кочевников астраханских степей в подсчёт естественого движения */
+        excludeFromVitalRates(Taxon.Астраханская_кочевники);
+
+        corrections_Poland();
+        corrections_Kavkaz();
+        corrections_CentralAsia();
+        corrections_Siberia();
+
+        /*
+         * Черноморская губерния: внутрироссийская миграция извне РСФСР (1,600) и иммиграция извне России (1,300).
+         */
+        Long nAddChernomorskaya = null;
+        final long nAddChernomorskayaInner = 1_600;
+        final long nAddChernomorskayaForeign = 1_300;
+
+        switch (taxonName)
+        {
+        case "Империя":
+        case "СССР-1991":
+        case "СССР-1926":
+            // уже содержится в учёте турецкой иммиграции 
+            // nAddChernomorskaya = nAddChernomorskayaForeign;
+            break;
+
+        case "РСФСР-1991":
+            nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner;
+            break;
+
+        default:
+            break;
+        }
+
+        if (nAddChernomorskaya != null)
+        {
+            for (int year = 1896; year <= toYear; year++)
+            {
+                tdsPopulation.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
+                tdsVitalRates.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
+            }
+        }
+    }
+
+    private void corrections_Poland() throws Exception
+    {
+        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSuvalkskaia();
+    }
+
+    private void corrections_Kavkaz() throws Exception
+    {
+        /* пересчёт численности населения для Дагестана */
+        new AdjustTerritories(tdsPopulation).fixDagestan();
+
+        /* не включать Дагестан в подсчёт рождаемости и смертности */
+        excludeFromVitalRates("Дагестанская обл.");
+
+        useStabilized("Карсская обл.", 1907, 1913);
+        useStabilized("Терская обл.", 1910, 1914);
+        useStabilized("Тифлисская", 1903, 1914);
+
+        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
+
+        excludeFromVitalRates("Елисаветпольская");
+        excludeFromVitalRates("Бакинская с Баку");
+        excludeFromVitalRates("Кутаисская с Батумской");
+    }
+
+    private void corrections_CentralAsia() throws Exception
+    {
+        useStabilized("Закаспийская обл.", 1911, 1913);
+        useStabilized("Семиреченская обл.", 1912, 1914);
+        useStabilized("Сыр-Дарьинская обл.", 1908);
+        useStabilized("Ферганская обл.", 1912);
+
+        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
+        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
+
+        excludeFromVitalRates("Акмолинская обл.");
+        excludeFromVitalRates("Тургайская обл.");
+        excludeFromVitalRates("Самаркандская обл.");
+        excludeFromVitalRates("Семипалатинская обл.");
+        excludeFromVitalRates("Уральская обл.");
+    }
+
+    private void corrections_Siberia() throws Exception
+    {
+        useStabilized("Забайкальская обл.", 1908, 1913);
+        fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1896, 1898, 1899, 1903);
+        excludeFromVitalRates("Приморская обл. с Камчатской обл.");
+    }
+
+    /* ================================================================================================ */
+
+    private void excludeFromVitalRates(String tname) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+        Territory t = tdsVitalRates.get(tname);
+        if (t != null)
+            tdsVitalRates.remove(t.name);
+    }
+
+    private void useStabilized(String tname, int year) throws Exception
+    {
+        useStabilized(tname, year, year);
+    }
+
+    /*
+     * Пересчитать территорию по стабилизированному участку
+     */
+    private void useStabilized(String tname, int y1, int y2) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+
+        Territory tEval = evalGrowthRate.evalTerritory(t, y1, y2);
+
+        for (int year : tEval.years())
+        {
+            TerritoryYear ty = tEval.territoryYearOrNull(year);
+            ty.progressive_population = ty.population.dup(ty);
+        }
+
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
+    }
+
+    private void fixEarlyPeriod(String tname, int yl1, int yl2, int yr1, int yr2) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+
+        Territory tCensus = tdsCensus1897.get(tname);
+
+        Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, yl1, yl2, yr1, yr2);
+        tdsPopulation.put(tname, xt);
+        tdsVitalRates.put(tname, xt.dup());
+    }
+}
