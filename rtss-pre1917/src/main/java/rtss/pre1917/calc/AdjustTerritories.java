@@ -205,4 +205,183 @@ public class AdjustTerritories
             ty.population.total.both = Math.round(pop);
         }
     }
+
+    /* ===================================================================================== */
+
+    /*
+     * Корректровка числа рождений и смертей в Сувалкской губернии в 1906-1913 годах
+     */
+    public void fixSuvalkskaia() throws Exception
+    {
+        final String SUVALKI = "Сувалкская";
+
+        final String[] controls = { "Ковенская",
+                                    "Виленская",
+                                    "Ломжинская" };
+
+        final int BASE_YEAR = 1904;
+        final int FIRST_FIX_YEAR = 1906;
+        final int LAST_FIX_YEAR = 1913;
+
+        Territory suvalki = tds.get(SUVALKI);
+
+        TerritoryYear base = suvalki.territoryYearOrNull(BASE_YEAR);
+        if (base == null)
+            throw new Exception("No data for Сувалкская, " + BASE_YEAR);
+
+        if (base.births.total.both == null || base.deaths.total.both == null)
+            throw new Exception("No births/deaths for Сувалкская, " + BASE_YEAR);
+
+        long baseBirths = base.births.total.both;
+        long baseDeaths = base.deaths.total.both;
+        long basePopulation = cskPopulation(SUVALKI, BASE_YEAR);
+
+        /*
+         * Estimate log-linear trends of birth and death rates in the control provinces.
+         * 1905 is deliberately excluded because it is a revolutionary / Russo-Japanese-war year.
+         * 1904 is included as the base observation.
+         */
+        double birthSlope = controlRateLogSlope(controls, BASE_YEAR, LAST_FIX_YEAR, true);
+        double deathSlope = controlRateLogSlope(controls, BASE_YEAR, LAST_FIX_YEAR, false);
+
+        /*
+         * Anchor the fitted trends exactly at Suwalki 1904.
+         * We use only the regression slope here, not its intercept:
+         *
+         *   rate(t) = rate(1904) * exp(slope * (t - 1904))
+         *
+         * Therefore the correction preserves the observed 1904 level.
+         */
+        for (int year = FIRST_FIX_YEAR; year <= LAST_FIX_YEAR; year++)
+        {
+            TerritoryYear ty = suvalki.territoryYearOrNull(year);
+            if (ty == null)
+                throw new Exception("No data for Сувалкская " + year);
+
+            long population = cskPopulation(SUVALKI, year);
+
+            double populationRatio = (double) population / (double) basePopulation;
+
+            double birthRateRatio = Math.exp(birthSlope * (year - BASE_YEAR));
+            double deathRateRatio = Math.exp(deathSlope * (year - BASE_YEAR));
+
+            long births = Math.round(baseBirths * populationRatio * birthRateRatio);
+            long deaths = Math.round(baseDeaths * populationRatio * deathRateRatio);
+
+            ty.births.total.both = births;
+            ty.deaths.total.both = deaths;
+        }
+        
+        // ###@@@ recalc progressive
+    }
+
+    /*
+     * Fit
+     *
+     *     log(controlRate(year) / controlRate(1904))
+     *         = intercept + slope * (year - 1904)
+     *
+     * by ordinary least squares.
+     *
+     * Years used:
+     *
+     *     1904, 1906, 1907, ..., 1913
+     *
+     * 1905 is excluded.
+     */
+    private double controlRateLogSlope(
+            String[] controls,
+            int baseYear,
+            int lastYear,
+            boolean births) throws Exception
+    {
+        double baseRate = pooledControlRate(controls, baseYear, births);
+
+        double sumX = 0;
+        double sumY = 0;
+        double sumXX = 0;
+        double sumXY = 0;
+        int n = 0;
+
+        for (int year = baseYear; year <= lastYear; year++)
+        {
+            if (year == 1905)
+                continue;
+
+            double rate = pooledControlRate(controls, year, births);
+
+            double x = year - baseYear;
+            double y = Math.log(rate / baseRate);
+
+            sumX += x;
+            sumY += y;
+            sumXX += x * x;
+            sumXY += x * y;
+            n++;
+        }
+
+        double denominator = n * sumXX - sumX * sumX;
+
+        if (denominator == 0)
+            throw new Exception("Cannot estimate control trend");
+
+        return (n * sumXY - sumX * sumY) / denominator;
+    }
+
+    /*
+     * Pooled rate for the control provinces:
+     *
+     *     sum(events) / sum(CSK population)
+     *
+     * A province is omitted for a year if the corresponding event count
+     * is absent.  This matters in particular for Ломжинская in 1913.
+     */
+    private double pooledControlRate(
+            String[] controls,
+            int year,
+            boolean births) throws Exception
+    {
+        long events = 0;
+        long population = 0;
+        int used = 0;
+
+        for (String name : controls)
+        {
+            Territory t = tds.get(name);
+            TerritoryYear ty = t.territoryYearOrNull(year);
+
+            if (ty == null)
+                continue;
+
+            Long value = births ? ty.births.total.both
+                                : ty.deaths.total.both;
+
+            if (value == null)
+                continue;
+
+            events += value;
+            population += cskPopulation(name, year);
+            used++;
+        }
+
+        if (used == 0 || population == 0)
+        {
+            throw new Exception("No control data for " + year +
+                                (births ? " births" : " deaths"));
+        }
+
+        return (double) events / (double) population;
+    }
+
+    /*
+     * Population at the beginning of the year according to CSK.
+     * These are used instead of the UGVI population figures because the
+     * latter contain conspicuous year-to-year jumps in some provinces.
+     */
+    private long cskPopulation(String territory, int year) throws Exception
+    {
+        Territory t = tdsCSK.get(territory);
+        TerritoryYear ty = t.territoryYearOrNull(year);
+        return ty.population.total.both;
+    }
 }

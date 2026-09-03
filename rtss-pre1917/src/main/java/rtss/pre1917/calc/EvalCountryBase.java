@@ -11,6 +11,7 @@ import rtss.pre1917.data.migration.Immigration;
 import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.FixEarlyPeriod;
+import rtss.util.Util;
 
 public class EvalCountryBase
 {
@@ -51,6 +52,7 @@ public class EvalCountryBase
         /* не включать кочевников астраханских степей в подсчёт естественого движения */
         excludeFromVitalRates(Taxon.Астраханская_кочевники);
 
+        corrections_Poland();
         corrections_Kavkaz();
         corrections_CentralAsia();
         corrections_Siberia();
@@ -87,6 +89,11 @@ public class EvalCountryBase
                 tdsVitalRates.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
             }
         }
+    }
+
+    private void corrections_Poland() throws Exception
+    {
+        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSuvalkskaia();
     }
 
     private void corrections_Kavkaz() throws Exception
