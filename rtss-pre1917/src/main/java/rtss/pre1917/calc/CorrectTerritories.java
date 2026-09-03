@@ -43,7 +43,7 @@ public class CorrectTerritories
 
     /* ================================================================================================ */
 
-    protected void corrections() throws Exception
+    public void corrections() throws Exception
     {
         if (taxonName.equals("русские губернии Европейской России и Кавказа, кроме Черноморской"))
             return;

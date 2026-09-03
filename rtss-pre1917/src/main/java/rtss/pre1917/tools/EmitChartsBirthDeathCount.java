@@ -12,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.calc.CorrectTerritories;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -24,7 +25,39 @@ public class EmitChartsBirthDeathCount
 
     public static enum ChartType
     {
-        RawSources, Adjusted
+        RawSources, AdjustedIntermediate, AdjustedFinal;
+
+        public boolean isAdjusted()
+        {
+            switch (this)
+            {
+            case RawSources:
+                return false;
+
+            case AdjustedIntermediate:
+            case AdjustedFinal:
+                return true;
+
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+
+        public boolean isAdjustedFinal()
+        {
+            switch (this)
+            {
+            case RawSources:
+            case AdjustedIntermediate:
+                return false;
+
+            case AdjustedFinal:
+                return true;
+
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
     }
 
     public static void main(String[] args)
@@ -36,9 +69,14 @@ public class EmitChartsBirthDeathCount
             new EmitChartsBirthDeathCount().do_main(ChartType.RawSources);
 
             Util.out("");
-            Util.out("=== Emitting Adjusted charts");
+            Util.out("=== Emitting AdjustedIntermediate charts");
             Util.out("");
-            new EmitChartsBirthDeathCount().do_main(ChartType.Adjusted);
+            new EmitChartsBirthDeathCount().do_main(ChartType.AdjustedIntermediate);
+
+            Util.out("");
+            Util.out("=== Emitting AdjustedFinal charts");
+            Util.out("");
+            new EmitChartsBirthDeathCount().do_main(ChartType.AdjustedFinal);
 
             Util.out("");
             Util.out("** Done");
@@ -61,22 +99,23 @@ public class EmitChartsBirthDeathCount
                                                      LoadOptions.MERGE_POST1897_REGIONS,
                                                      LoadOptions.DONT_VERIFY,
                                                      LoadOptions.APPLY_PATCHES,
-                                                     (chartType == ChartType.Adjusted) ? LoadOptions.ADJUST_FEMALE_BIRTHS
-                                                                                       : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
-                                                     (chartType == ChartType.Adjusted) ? LoadOptions.FILL_MISSING_BD
-                                                                                       : LoadOptions.DONT_FILL_MISSING_BD);
+                                                     chartType.isAdjusted() ? LoadOptions.ADJUST_FEMALE_BIRTHS
+                                                                            : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
+                                                     chartType.isAdjusted() ? LoadOptions.FILL_MISSING_BD
+                                                                            : LoadOptions.DONT_FILL_MISSING_BD);
 
         tdsUGVIPatched = new LoadData().loadUGVI(LoadOptions.MERGE_CITIES,
                                                  LoadOptions.MERGE_POST1897_REGIONS,
                                                  LoadOptions.DONT_VERIFY,
                                                  LoadOptions.APPLY_PATCHES,
-                                                 (chartType == ChartType.Adjusted) ? LoadOptions.ADJUST_FEMALE_BIRTHS
-                                                                                   : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
-                                                 (chartType == ChartType.Adjusted) ? LoadOptions.FILL_MISSING_BD
-                                                                                   : LoadOptions.DONT_FILL_MISSING_BD,
+                                                 chartType.isAdjusted() ? LoadOptions.ADJUST_FEMALE_BIRTHS
+                                                                        : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
+                                                 chartType.isAdjusted() ? LoadOptions.FILL_MISSING_BD
+                                                                        : LoadOptions.DONT_FILL_MISSING_BD,
                                                  LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
                                                  LoadOptions.EVAL_MERGE_ASTRAKHAN,
-                                                 LoadOptions.DONT_EVAL_PROGRESSIVE);
+                                                 chartType.isAdjustedFinal() ? LoadOptions.EVAL_PROGRESSIVE
+                                                                             : LoadOptions.DONT_EVAL_PROGRESSIVE);
 
         if (chartType == ChartType.RawSources)
         {
@@ -84,22 +123,30 @@ public class EmitChartsBirthDeathCount
                                                            LoadOptions.MERGE_POST1897_REGIONS,
                                                            LoadOptions.DONT_VERIFY,
                                                            LoadOptions.DONT_APPLY_PATCHES,
-                                                           (chartType == ChartType.Adjusted) ? LoadOptions.ADJUST_FEMALE_BIRTHS
-                                                                                             : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
-                                                           (chartType == ChartType.Adjusted) ? LoadOptions.FILL_MISSING_BD
-                                                                                             : LoadOptions.DONT_FILL_MISSING_BD);
+                                                           chartType.isAdjusted() ? LoadOptions.ADJUST_FEMALE_BIRTHS
+                                                                                  : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
+                                                           chartType.isAdjusted() ? LoadOptions.FILL_MISSING_BD
+                                                                                  : LoadOptions.DONT_FILL_MISSING_BD);
 
             tdsUGVIUnpatched = new LoadData().loadUGVI(LoadOptions.MERGE_CITIES,
                                                        LoadOptions.MERGE_POST1897_REGIONS,
                                                        LoadOptions.DONT_VERIFY,
                                                        LoadOptions.DONT_APPLY_PATCHES,
-                                                       (chartType == ChartType.Adjusted) ? LoadOptions.ADJUST_FEMALE_BIRTHS
-                                                                                         : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
-                                                       (chartType == ChartType.Adjusted) ? LoadOptions.FILL_MISSING_BD
-                                                                                         : LoadOptions.DONT_FILL_MISSING_BD,
+                                                       chartType.isAdjusted() ? LoadOptions.ADJUST_FEMALE_BIRTHS
+                                                                              : LoadOptions.DONT_ADJUST_FEMALE_BIRTHS,
+                                                       chartType.isAdjusted() ? LoadOptions.FILL_MISSING_BD
+                                                                              : LoadOptions.DONT_FILL_MISSING_BD,
                                                        LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
                                                        LoadOptions.EVAL_MERGE_ASTRAKHAN,
                                                        LoadOptions.DONT_EVAL_PROGRESSIVE);
+        }
+
+        if (chartType == ChartType.AdjustedFinal)
+        {
+            TerritoryDataSet tdsPopulation = tdsUGVIPatched;
+            TerritoryDataSet tdsVitalRates = tdsPopulation.dup();
+            CorrectTerritories ct = new CorrectTerritories("Империя", 1881, 1914, tdsPopulation, tdsVitalRates);
+            ct.corrections();
         }
     }
 
@@ -138,7 +185,9 @@ public class EmitChartsBirthDeathCount
                 wb = Excel.loadWorkbook(hasCSK ? "excel-templates/birth-death-counts-ugvi-csk-raw-sources.xlsx"
                                                : "excel-templates/birth-death-counts-ugvi-raw-sources.xlsx");
                 break;
-            case Adjusted:
+
+            case AdjustedIntermediate:
+            case AdjustedFinal:
                 wb = Excel.loadWorkbook(hasCSK ? "excel-templates/birth-death-counts-ugvi-csk-adjusted.xlsx"
                                                : "excel-templates/birth-death-counts-ugvi-adjusted.xlsx");
                 break;
@@ -224,8 +273,13 @@ public class EmitChartsBirthDeathCount
             case RawSources:
                 dir = new File(dir, "raw-sources");
                 break;
-            case Adjusted:
-                dir = new File(dir, "adjusted");
+
+            case AdjustedIntermediate:
+                dir = new File(dir, "adjusted-stage1-intermediate");
+                break;
+
+            case AdjustedFinal:
+                dir = new File(dir, "adjusted-stage2-final");
                 break;
             }
             dir.mkdirs();
