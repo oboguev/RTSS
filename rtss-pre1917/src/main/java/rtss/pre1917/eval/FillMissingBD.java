@@ -346,34 +346,41 @@ public class FillMissingBD
 
     private void applyPatch(String tname, int year, BirthDeathPopulation bd, Integer... avyears) throws Exception
     {
-        Territory t = tds.get(tname);
-        long sum = 0;
-        int count = 0;
-
-        for (int ay : avyears)
+        try
         {
-            TerritoryYear ty = t.territoryYear(ay);
-            count++;
+            Territory t = tds.get(tname);
+            long sum = 0;
+            int count = 0;
 
-            switch (bd)
+            for (int ay : avyears)
             {
-            case BIRTH:
-                sum += ty.births.total.both;
-                break;
+                TerritoryYear ty = t.territoryYear(ay);
+                count++;
 
-            case DEATH:
-                sum += ty.deaths.total.both;
-                break;
+                switch (bd)
+                {
+                case BIRTH:
+                    sum += ty.births.total.both;
+                    break;
 
-            case POPULATION:
-                sum += ty.population.total.both;
-                break;
+                case DEATH:
+                    sum += ty.deaths.total.both;
+                    break;
+
+                case POPULATION:
+                    sum += ty.population.total.both;
+                    break;
+                }
             }
+
+            long value = Math.round((1.0 * sum) / count);
+
+            applyPatch(tname, year, value, bd);
         }
-
-        long value = Math.round((1.0 * sum) / count);
-
-        applyPatch(tname, year, value, bd);
+        catch (Exception ex)
+        {
+            throw new Exception(String.format("Прилагая %s %d %s", tname, year, bd.name()), ex); 
+        }
     }
 
     private void applyPatch(String tname, int year, long value, BirthDeathPopulation bd) throws Exception

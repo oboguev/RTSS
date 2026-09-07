@@ -88,10 +88,14 @@ public class EmitChartsBirthDeathCount
         }
     }
 
+    /* =========================================================================================================== */
+
     private TerritoryDataSet tdsCSKPatched;
+    private TerritoryDataSet tdsCSKPatchedBeforeCorrections;
     private TerritoryDataSet tdsUGVIPatched;
     private TerritoryDataSet tdsCSKUnpatched;
     private TerritoryDataSet tdsUGVIUnpatched;
+    private CorrectTerritories correctTerritories;
 
     private void init(ChartType chartType) throws Exception
     {
@@ -145,10 +149,14 @@ public class EmitChartsBirthDeathCount
         {
             TerritoryDataSet tdsPopulation = tdsUGVIPatched;
             TerritoryDataSet tdsVitalRates = tdsPopulation.dup();
-            CorrectTerritories ct = new CorrectTerritories("Империя", 1881, 1914, tdsPopulation, tdsVitalRates);
-            ct.corrections();
+            tdsCSKPatchedBeforeCorrections = tdsPopulation.dup();
+
+            correctTerritories = new CorrectTerritories("Империя", 1881, 1914, tdsPopulation, tdsVitalRates);
+            correctTerritories.corrections();
         }
     }
+
+    /* =========================================================================================================== */
 
     private void do_main(ChartType chartType) throws Exception
     {
@@ -187,108 +195,169 @@ public class EmitChartsBirthDeathCount
                 break;
 
             case AdjustedIntermediate:
-            case AdjustedFinal:
                 wb = Excel.loadWorkbook(hasCSK ? "excel-templates/birth-death-counts-ugvi-csk-adjusted.xlsx"
                                                : "excel-templates/birth-death-counts-ugvi-adjusted.xlsx");
+                break;
+
+            case AdjustedFinal:
+                if (correctTerritories.isCorrected(tname))
+                {
+                    wb = Excel.loadWorkbook(hasCSK ? "excel-templates/birth-death-counts-ugvi-csk-adjusted-with-before-after.xlsx"
+                                                   : "excel-templates/birth-death-counts-ugvi-adjusted-with-before-after.xlsx");
+                }
+                else
+                {
+                    wb = Excel.loadWorkbook(hasCSK ? "excel-templates/birth-death-counts-ugvi-csk-adjusted.xlsx"
+                                                   : "excel-templates/birth-death-counts-ugvi-adjusted.xlsx");
+                }
                 break;
             }
 
             XSSFSheet sheet = wb.getSheet("data");
             sheet.getRow(0).getCell(5).setCellValue(tname);
+            fillPageMain(tname, sheet, chartType, tUGVIPatched, tUGVIUnpatched, tCSKPatched, tCSKUnpatched);
 
-            for (int year = 1880; year <= 1914; year++)
+            if (chartType == ChartType.AdjustedFinal && correctTerritories.isCorrected(tname))
             {
-                Long birthsUGVIPatched = null;
-                Long deathsUGVIPatched = null;
-
-                Long birthsUGVIUnpatched = null;
-                Long deathsUGVIUnpatched = null;
-
-                Long birthsCSKPatched = null;
-                Long deathsCSKPatched = null;
-
-                Long birthsCSKUnpatched = null;
-                Long deathsCSKUnpatched = null;
-
-                if (tUGVIPatched != null && tUGVIPatched.territoryYearOrNull(year) != null)
-                {
-                    birthsUGVIPatched = tUGVIPatched.territoryYearOrNull(year).births.total.both;
-                    deathsUGVIPatched = tUGVIPatched.territoryYearOrNull(year).deaths.total.both;
-                }
-
-                if (tUGVIUnpatched != null && tUGVIUnpatched.territoryYearOrNull(year) != null)
-                {
-                    birthsUGVIUnpatched = tUGVIUnpatched.territoryYearOrNull(year).births.total.both;
-                    deathsUGVIUnpatched = tUGVIUnpatched.territoryYearOrNull(year).deaths.total.both;
-                }
-
-                if (tCSKPatched != null && tCSKPatched.territoryYearOrNull(year) != null)
-                {
-                    birthsCSKPatched = tCSKPatched.territoryYearOrNull(year).births.total.both;
-                    deathsCSKPatched = tCSKPatched.territoryYearOrNull(year).deaths.total.both;
-                }
-
-                if (tCSKUnpatched != null && tCSKUnpatched.territoryYearOrNull(year) != null)
-                {
-                    birthsCSKUnpatched = tCSKUnpatched.territoryYearOrNull(year).births.total.both;
-                    deathsCSKUnpatched = tCSKUnpatched.territoryYearOrNull(year).deaths.total.both;
-                }
-
-                int nr = (year - 1880) + (6 - 1);
-
-                if (hasCSK)
-                {
-                    setNumber(sheet, nr, 1, birthsUGVIPatched);
-                    setNumber(sheet, nr, 2, deathsUGVIPatched);
-                    setNumber(sheet, nr, 3, birthsCSKPatched);
-                    setNumber(sheet, nr, 4, deathsCSKPatched);
-
-                    if (chartType == ChartType.RawSources)
-                    {
-                        setUnpatched(sheet, nr, 6, birthsUGVIPatched, birthsUGVIUnpatched);
-                        setUnpatched(sheet, nr, 7, deathsUGVIPatched, deathsUGVIUnpatched);
-                        setUnpatched(sheet, nr, 8, birthsCSKPatched, birthsCSKUnpatched);
-                        setUnpatched(sheet, nr, 9, deathsCSKPatched, deathsCSKUnpatched);
-                    }
-                }
-                else
-                {
-                    setNumber(sheet, nr, 1, birthsUGVIPatched);
-                    setNumber(sheet, nr, 2, deathsUGVIPatched);
-
-                    if (chartType == ChartType.RawSources)
-                    {
-                        setUnpatched(sheet, nr, 4, birthsUGVIPatched, birthsUGVIUnpatched);
-                        setUnpatched(sheet, nr, 5, deathsUGVIPatched, deathsUGVIUnpatched);
-                    }
-                }
+                sheet = wb.getSheet("УГВИ до и после");
+                sheet.getRow(0).getCell(5).setCellValue(tname);
+                fillPageUgviBeforeAfter(tname, sheet, tUGVIPatched, tdsCSKPatchedBeforeCorrections.get(tname));
             }
 
-            while (tname.endsWith("."))
-                tname = Util.stripTail(tname, ".");
+            saveFile(tname, wb, chartType);
+        }
+    }
 
-            File dir = new File(OUT_PATH);
-            switch (chartType)
+    /* =========================================================================================================== */
+
+    private void fillPageMain(String tname, XSSFSheet sheet, ChartType chartType, Territory tUGVIPatched, Territory tUGVIUnpatched,
+            Territory tCSKPatched, Territory tCSKUnpatched) throws Exception
+    {
+        boolean hasCSK = (tCSKPatched != null);
+
+        sheet.getRow(0).getCell(5).setCellValue(tname);
+
+        for (int year = 1880; year <= 1914; year++)
+        {
+            Long birthsUGVIPatched = null;
+            Long deathsUGVIPatched = null;
+
+            Long birthsUGVIUnpatched = null;
+            Long deathsUGVIUnpatched = null;
+
+            Long birthsCSKPatched = null;
+            Long deathsCSKPatched = null;
+
+            Long birthsCSKUnpatched = null;
+            Long deathsCSKUnpatched = null;
+
+            if (tUGVIPatched != null && tUGVIPatched.territoryYearOrNull(year) != null)
             {
-            case RawSources:
-                dir = new File(dir, "raw-sources");
-                break;
-
-            case AdjustedIntermediate:
-                dir = new File(dir, "adjusted-stage1-intermediate");
-                break;
-
-            case AdjustedFinal:
-                dir = new File(dir, "adjusted-stage2-final");
-                break;
+                birthsUGVIPatched = tUGVIPatched.territoryYearOrNull(year).births.total.both;
+                deathsUGVIPatched = tUGVIPatched.territoryYearOrNull(year).deaths.total.both;
             }
-            dir.mkdirs();
 
-            File fp = new File(dir, tname + ".xlsx");
-            try (OutputStream out = Files.newOutputStream(fp.toPath()))
+            if (tUGVIUnpatched != null && tUGVIUnpatched.territoryYearOrNull(year) != null)
             {
-                wb.write(out);
+                birthsUGVIUnpatched = tUGVIUnpatched.territoryYearOrNull(year).births.total.both;
+                deathsUGVIUnpatched = tUGVIUnpatched.territoryYearOrNull(year).deaths.total.both;
             }
+
+            if (tCSKPatched != null && tCSKPatched.territoryYearOrNull(year) != null)
+            {
+                birthsCSKPatched = tCSKPatched.territoryYearOrNull(year).births.total.both;
+                deathsCSKPatched = tCSKPatched.territoryYearOrNull(year).deaths.total.both;
+            }
+
+            if (tCSKUnpatched != null && tCSKUnpatched.territoryYearOrNull(year) != null)
+            {
+                birthsCSKUnpatched = tCSKUnpatched.territoryYearOrNull(year).births.total.both;
+                deathsCSKUnpatched = tCSKUnpatched.territoryYearOrNull(year).deaths.total.both;
+            }
+
+            int nr = (year - 1880) + (6 - 1);
+
+            if (hasCSK)
+            {
+                setNumber(sheet, nr, 1, birthsUGVIPatched);
+                setNumber(sheet, nr, 2, deathsUGVIPatched);
+                setNumber(sheet, nr, 3, birthsCSKPatched);
+                setNumber(sheet, nr, 4, deathsCSKPatched);
+
+                if (chartType == ChartType.RawSources)
+                {
+                    setUnpatched(sheet, nr, 6, birthsUGVIPatched, birthsUGVIUnpatched);
+                    setUnpatched(sheet, nr, 7, deathsUGVIPatched, deathsUGVIUnpatched);
+                    setUnpatched(sheet, nr, 8, birthsCSKPatched, birthsCSKUnpatched);
+                    setUnpatched(sheet, nr, 9, deathsCSKPatched, deathsCSKUnpatched);
+                }
+            }
+            else
+            {
+                setNumber(sheet, nr, 1, birthsUGVIPatched);
+                setNumber(sheet, nr, 2, deathsUGVIPatched);
+
+                if (chartType == ChartType.RawSources)
+                {
+                    setUnpatched(sheet, nr, 4, birthsUGVIPatched, birthsUGVIUnpatched);
+                    setUnpatched(sheet, nr, 5, deathsUGVIPatched, deathsUGVIUnpatched);
+                }
+            }
+        }
+    }
+    
+    /* =========================================================================================================== */
+
+    private void fillPageUgviBeforeAfter(String tname, XSSFSheet sheet, Territory tAfter, Territory tBefore) throws Exception
+    {
+        sheet.getRow(0).getCell(5).setCellValue(tname);
+        
+        for (int year = 1880; year <= 1914; year++)
+        {
+            Long birthsBefore = tBefore.territoryYearOrNull(year) == null ? null : tBefore.territoryYearOrNull(year).births.total.both;
+            Long deathsBefore = tBefore.territoryYearOrNull(year) == null ? null : tBefore.territoryYearOrNull(year).deaths.total.both;
+
+            Long birthsAfter = tAfter.territoryYearOrNull(year) == null ? null : tAfter.territoryYearOrNull(year).births.total.both;
+            Long deathsAfter = tAfter.territoryYearOrNull(year) == null ? null : tAfter.territoryYearOrNull(year).deaths.total.both;;
+
+            int nr = (year - 1880) + (6 - 1);
+
+            setNumber(sheet, nr, 1, birthsAfter);
+            setNumber(sheet, nr, 2, deathsAfter);
+
+            setNumber(sheet, nr, 3, birthsBefore);
+            setNumber(sheet, nr, 4, deathsBefore);
+        }
+    }
+
+    /* =========================================================================================================== */
+
+    private void saveFile(String tname, XSSFWorkbook wb, ChartType chartType) throws Exception
+    {
+        while (tname.endsWith("."))
+            tname = Util.stripTail(tname, ".");
+
+        File dir = new File(OUT_PATH);
+        switch (chartType)
+        {
+        case RawSources:
+            dir = new File(dir, "raw-sources");
+            break;
+
+        case AdjustedIntermediate:
+            dir = new File(dir, "adjusted-stage1-intermediate");
+            break;
+
+        case AdjustedFinal:
+            dir = new File(dir, "adjusted-stage2-final");
+            break;
+        }
+        dir.mkdirs();
+
+        File fp = new File(dir, tname + ".xlsx");
+        try (OutputStream out = Files.newOutputStream(fp.toPath()))
+        {
+            wb.write(out);
         }
     }
 
