@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import rtss.math.algorithms.MathUtil;
 import rtss.pre1917.LoadData;
@@ -16,6 +17,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.pre1917.diag.DiagMigrationMerge;
+import rtss.pre1917.export.ExportCharts;
 import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.MergeTaxonOptions;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
@@ -39,6 +41,9 @@ public class EvalCountryTaxon extends EvalCountryBase
     private final static Double BoostDeaths = 1.0;
 
     private final static boolean LimitToPost1896 = Util.False;
+    
+    private final static TerritoryDataSet tdsCompositeTaxonsPopulation = new TerritoryDataSet(null, null); 
+    private final static TerritoryDataSet tdsCompositeTaxonsVitalRates = new TerritoryDataSet(null, null); 
 
     public static void main(String[] args)
     {
@@ -56,10 +61,14 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         if (BoostDeaths != null && BoostDeaths != 1.0)
             Util.out(String.format("Увеличение числа смертей (для корректировки недоучёта) в %.3f раз", BoostDeaths));
-
+        
         try
         {
-            new EvalCountryTaxon("Империя", 1881, 1913, Options.VERBOSE).calc().print().printDifferenceWithCSK().printDifferenceWithUGVI()
+            AtomicReference<TerritoryDataSet> tdsElementaryPopulation = new AtomicReference<>();
+            tdsCompositeTaxonsPopulation.clear();
+            tdsCompositeTaxonsVitalRates.clear();
+
+            new EvalCountryTaxon("Империя", 1881, 1913, Options.VERBOSE).calc(tdsElementaryPopulation).print().printDifferenceWithCSK().printDifferenceWithUGVI()
                     .exportData("c:\\@\\pre1917\\Final.csv", "c:\\@\\pre1917\\Final.txt");
             new EvalCountryTaxon("РСФСР-1991", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("СССР-1991", 1881, 1914, Options.VERBOSE).calc().print();
@@ -77,10 +86,9 @@ public class EvalCountryTaxon extends EvalCountryBase
             new EvalCountryTaxon("привислинские губернии", 1881, 1913, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Остзейские губернии", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("50 губерний Европейской России", 1881, 1914, Options.VERBOSE).calc().print();
-
-            // ### экспортировать числа и rates для элементарных территорий
-            // ### брать их из Империя, но Черноморскую -- из РСФСР-1991
-            // ### экспортировать числа и rates для таксонов (для них два вида населения: всё и vital)
+            
+            ExportCharts ec = new ExportCharts(tdsElementaryPopulation.get(), tdsCompositeTaxonsPopulation, tdsCompositeTaxonsVitalRates);
+            ec.export();
         }
         catch (Throwable ex)
         {
@@ -175,23 +183,6 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         EvalCountryTaxon eval = new EvalCountryTaxon("Империя", fromYear, 1913, options.clone().verbose(false));
         eval.calc();
-        eval.tdsExportPopulation.leaveOnlyTotalBoth();
-
-        for (Territory t : eval.tdsExportPopulation.values())
-        {
-            for (int year : t.years())
-            {
-                TerritoryYear ty = t.territoryYear(year);
-                ty.cbr = null;
-                ty.cdr = null;
-                ty.ngr = null;
-                ty.population = null;
-                ty.midyear_population = null;
-            }
-
-            t.hasValidVitalRate = eval.tdsVitalRates.containsKey(t.name);
-        }
-
         return eval.tdsExportPopulation;
     }
 
@@ -233,6 +224,11 @@ public class EvalCountryTaxon extends EvalCountryBase
     private static Long EmpirePopulation1914 = null;
 
     private TaxonYearlyPopulationData calc() throws Exception
+    {
+        return calc(null);
+    }
+    
+    private TaxonYearlyPopulationData calc(AtomicReference<TerritoryDataSet> tdsElementaryPopulation) throws Exception
     {
         if (options.verbose())
         {
@@ -281,6 +277,13 @@ public class EvalCountryTaxon extends EvalCountryBase
             calc_empire();
         else
             calc_non_empire();
+        
+        /* ====================== Сохранить результаты для экспорта ==================== */
+
+        if (tdsElementaryPopulation != null)
+            tdsElementaryPopulation.set(tdsExportPopulation);
+        tdsCompositeTaxonsPopulation.put(taxonName, tmPopulation);
+        tdsCompositeTaxonsVitalRates.put(taxonName, tmVitalRates);
 
         /* ===================== Построить структуру с результатом ===================== */
 
@@ -342,6 +345,26 @@ public class EvalCountryTaxon extends EvalCountryBase
          * Не учитывается при вычислении естественного движения, причины объяснены в DOCX/PDF.
          */
         // DO NOT applyLumpImmigration(tmVitalRates, false);
+        
+        /* ===================== Finalize data export ===================== */
+        
+        finalizeEmpireExport(tdsExportPopulation, tdsVitalRates);
+        tdsExportPopulation.leaveOnlyTotalBoth();
+
+        for (Territory t : tdsExportPopulation.values())
+        {
+            for (int year : t.years())
+            {
+                TerritoryYear ty = t.territoryYearOrNull(year);
+                ty.cbr = null;
+                ty.cdr = null;
+                ty.ngr = null;
+                ty.population = null;
+                ty.midyear_population = null;
+            }
+
+            t.hasValidVitalRate = tdsVitalRates.containsKey(t.name);
+        }
     }
 
     private void calc_non_empire() throws Exception

@@ -236,4 +236,22 @@ public class CorrectTerritories
         tdsPopulation.put(tname, xt);
         tdsVitalRates.put(tname, xt.dup());
     }
+
+    /* ================================================================================================ */
+
+    public void finalizeEmpireExport(TerritoryDataSet tds) throws Exception
+    {
+        if (!taxonName.equals("Империя"))
+            throw new IllegalArgumentException();
+
+        /*
+         * Черноморская губерния: внутрироссийская миграция извне РСФСР (1,600) и иммиграция извне России (1,300).
+         */
+        final long nAddChernomorskayaInner = 1_600;
+        final long nAddChernomorskayaForeign = 1_300;
+        final Long nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner;
+
+        for (int year = 1896; year <= 1914; year++)
+            tds.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
+    }
 }

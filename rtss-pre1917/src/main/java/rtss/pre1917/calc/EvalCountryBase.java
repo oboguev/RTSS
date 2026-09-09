@@ -36,4 +36,11 @@ public class EvalCountryBase
         CorrectTerritories ct = new CorrectTerritories(taxonName, fromYear, toYear, tdsPopulation, tdsVitalRates);
         ct.corrections();
     }
+
+    public void finalizeEmpireExport(TerritoryDataSet tdsExportPopulation, TerritoryDataSet tdsVitalRates) throws Exception
+    {
+        CorrectTerritories ct = new CorrectTerritories(taxonName, fromYear, toYear, tdsPopulation, tdsVitalRates);
+        ct.finalizeEmpireExport(tdsExportPopulation);
+        ct.finalizeEmpireExport(tdsVitalRates);
+    }
 }
