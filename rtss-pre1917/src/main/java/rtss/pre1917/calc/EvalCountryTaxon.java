@@ -62,21 +62,25 @@ public class EvalCountryTaxon extends EvalCountryBase
             new EvalCountryTaxon("Империя", 1881, 1913, Options.VERBOSE).calc().print().printDifferenceWithCSK().printDifferenceWithUGVI()
                     .exportData("c:\\@\\pre1917\\Final.csv", "c:\\@\\pre1917\\Final.txt");
             new EvalCountryTaxon("РСФСР-1991", 1881, 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("СССР-1991", 1881, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("СССР-1926", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1991", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("СССР-1926", 1881, 1914, Options.VERBOSE).calc().print();
 
             new EvalCountryTaxon("Европейская часть РСФСР-1991", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Сибирь", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Новороссия", 1881, 1914, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Малороссия", 1881, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Белоруссия", 1881, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Белоруссия без Смоленской", 1881, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Литва", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Малороссия", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Белоруссия", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Белоруссия без Смоленской", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Литва", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Кавказ", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("Средняя Азия", 1881, 1914, Options.VERBOSE).calc().print();
             new EvalCountryTaxon("привислинские губернии", 1881, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("Остзейские губернии", 1881, 1913, Options.VERBOSE).calc().print();
-            new EvalCountryTaxon("50 губерний Европейской России", 1881, 1913, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("Остзейские губернии", 1881, 1914, Options.VERBOSE).calc().print();
+            new EvalCountryTaxon("50 губерний Европейской России", 1881, 1914, Options.VERBOSE).calc().print();
+
+            // ### экспортировать числа и rates для элементарных территорий
+            // ### брать их из Империя, но Черноморскую -- из РСФСР-1991
+            // ### экспортировать числа и rates для таксонов (для них два вида населения: всё и vital)
         }
         catch (Throwable ex)
         {
@@ -383,6 +387,9 @@ public class EvalCountryTaxon extends EvalCountryBase
     {
         tdsPopulation = FilterByTaxon.filterByTaxon(taxonName, tdsPopulation);
         tdsVitalRates = FilterByTaxon.filterByTaxon(taxonName, tdsVitalRates);
+
+        /* Проверить, какие данные отсутствуют */
+        show_missing_data(tdsPopulation, fromYear, toYear);
     }
 
     private Set<String> refreshVitalSetData() throws Exception
@@ -622,5 +629,47 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
 
         return (100.0 * p1) / p2;
+    }
+
+    private void show_missing_data(TerritoryDataSet tds, int y1, int y2)
+    {
+        for (String tname : Util.sort(tds.keySet()))
+        {
+            if (Taxon.isComposite(tname))
+                continue;
+
+            for (int year = y1; year <= y2; year++)
+            {
+                TerritoryYear ty = tds.get(tname).territoryYearOrNull(year);
+                if (isMissing(ty, tname, year))
+                    Util.err("!!! Missing data for " + tname + " " + year);
+            }
+        }
+    }
+
+    private boolean isMissing(TerritoryYear ty, String tname, int year)
+    {
+        if (tname.equals("Черноморская") && year < 1896)
+            return false;
+
+        if (ty == null || ty.progressive_population.total.both == null)
+            return true;
+
+        if (tname.equals("Сахалин") && year >= 1903 && year <= 1907)
+            return false;
+
+        switch (tname)
+        {
+        case Taxon.Астраханская_кочевники:
+        case "Самаркандская обл.":
+            break;
+
+        default:
+            if (ty.births.total.both == null || ty.deaths.total.both == null)
+                return true;
+            break;
+        }
+
+        return false;
     }
 }
