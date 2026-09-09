@@ -3,7 +3,7 @@ package rtss.pre1917.tools.show;
 import rtss.pre1917.ExportData;
 import rtss.util.Util;
 
-public class ShowAllAreasValuesRaw_UGVU extends ShowAllAreasValues 
+public class ShowAllAreasValuesRaw_UGVI extends ShowAllAreasValues 
 {
     public static void main(String[] args)
     {
@@ -49,7 +49,7 @@ public class ShowAllAreasValuesRaw_UGVU extends ShowAllAreasValues
         }
     }
     
-    private ShowAllAreasValuesRaw_UGVU() throws Exception
+    private ShowAllAreasValuesRaw_UGVI() throws Exception
     {
     }
 }

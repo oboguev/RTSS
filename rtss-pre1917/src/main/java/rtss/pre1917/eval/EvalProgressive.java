@@ -51,28 +51,31 @@ public class EvalProgressive
     public void evalProgressive() throws Exception
     {
         for (String tname : tds.keySet())
+            evalProgressive(tname);
+    }
+    
+    public void evalProgressive(String tname) throws Exception
+    {
+        if (Taxon.isComposite(tname) || Taxon.isFinland(tname) || tname.equals(Taxon.Астраханская_кочевники))
+            return;
+        
+        if (tname.equals("Самаркандская обл."))
         {
-            if (Taxon.isComposite(tname) || Taxon.isFinland(tname) || tname.equals(Taxon.Астраханская_кочевники))
-                continue;
-
-            if (tname.equals("Самаркандская обл."))
-            {
-                // fill population special way
-                // fill migration
-                TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(tds.loadOptions.toArray(new LoadOptions[0]));
-                new AdjustTerritories(tds).setCSK(tdsCSK).fixSamarkand();
-                continue;
-            }
-
-            Territory tCensus = census.get(censusTerritoryName(tname));
-            if (tCensus == null)
-            {
-                Util.err("Нельзя сделать прогрессивный расчёт для " + tname);
-                continue;
-            }
-
-            evalProgressive(tname, tCensus);
+            // fill population special way
+            // fill migration
+            TerritoryDataSet tdsCSK = new LoadData().loadEzhegodnikRossii(tds.loadOptions.toArray(new LoadOptions[0]));
+            new AdjustTerritories(tds).setCSK(tdsCSK).fixSamarkand();
+            return;
         }
+
+        Territory tCensus = census.get(censusTerritoryName(tname));
+        if (tCensus == null)
+        {
+            Util.err("Нельзя сделать прогрессивный расчёт для " + tname);
+            return;
+        }
+
+        evalProgressive(tname, tCensus);
     }
     
     public void evalProgressiveAstrakhanOnly() throws Exception

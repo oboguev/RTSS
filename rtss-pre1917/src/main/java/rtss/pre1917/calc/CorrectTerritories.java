@@ -8,6 +8,7 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalGrowthRate;
+import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FixEarlyPeriod;
 
 public class CorrectTerritories
@@ -49,6 +50,7 @@ public class CorrectTerritories
         {
         // Польша
         case "Сувалкская":
+        case "Люблинская с Седлецкой и Холмской":
             
         // Кавказ
         case "Дагестанская обл.":
@@ -127,6 +129,17 @@ public class CorrectTerritories
     private void corrections_Poland() throws Exception
     {
         new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSuvalkskaia();
+        
+        final String LubSedHolm = "Люблинская с Седлецкой и Холмской";
+        Territory t = tdsPopulation.get(LubSedHolm);
+        TerritoryYear ty1910 = t.territoryYearOrNull(1910);
+        for (int year = 1911; year <= 1913; year++)
+        {
+            TerritoryYear ty = t.territoryYearOrNull(year);
+            ty.births.total.both = ty1910.births.total.both;
+            ty.deaths.total.both = ty1910.deaths.total.both;
+        }
+        new EvalProgressive(tdsPopulation).evalProgressive(LubSedHolm);
     }
 
     private void corrections_Kavkaz() throws Exception
