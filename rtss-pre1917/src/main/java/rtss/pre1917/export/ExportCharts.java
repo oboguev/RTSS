@@ -104,6 +104,27 @@ public class ExportCharts
             long popm;
             final Double nullDouble = null;
             final Long nullLong = null;
+            
+            if (t.territoryYearOrNull(year) == null)
+            {
+                if (tname.equals("Черноморская") && year < 1896)
+                {
+                    // allow missing year
+                }
+                else
+                {
+                    throw new IllegalArgumentException();
+                }
+                
+                setNumber(sheet, nr, 1, nullLong);
+                setNumber(sheet, nr, 2, nullLong);
+                setNumber(sheet, nr, 3, nullLong);
+                setNumber(sheet, nr, 4, nullLong);
+                setNumber(sheet, nr, 5, nullLong);
+                setNumber(sheet, nr, 6, nullDouble);
+                setNumber(sheet, nr, 7, nullDouble);
+                continue;
+            }
 
             Long pop = t.territoryYearOrNull(year).progressive_population.total.both;
             setNumber(sheet, nr, 1, pop);
