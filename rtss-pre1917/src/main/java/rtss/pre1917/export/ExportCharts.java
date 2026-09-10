@@ -40,8 +40,11 @@ public class ExportCharts
 
     public void export() throws Exception
     {
-        // ### экспортировать числа и rates для элементарных территорий (tdsElementaryPopulation)
-        // ### экспортировать числа и rates для таксонов (для них два вида населения: tdsCompositeTaxonsPopulation tdsCompositeTaxonsVitalRates)
+        for (String tname : Util.sort(tdsElementaryPopulation.keySet()))
+        {
+            Territory t = tdsElementaryPopulation.get(tname);
+            exportElementary(tname, t);
+        }
 
         if (tdsCompositeTaxonsPopulation.keySet().size() != tdsCompositeTaxonsVitalRates.keySet().size())
             throw new IllegalArgumentException();
@@ -53,6 +56,16 @@ public class ExportCharts
             exportTaxon(tname, tPopulation, tVitalRates);
         }
     }
+
+    /* =========================================================================================== */
+
+    private void exportElementary(String tname, Territory t) throws Exception
+    {
+        currentTname = tname; 
+        // ### экспортировать числа и rates для элементарных территорий (tdsElementaryPopulation)
+    }
+
+    /* =========================================================================================== */
 
     private void exportTaxon(String tname, Territory tPopulation, Territory tVitalRates) throws Exception
     {
@@ -207,6 +220,8 @@ public class ExportCharts
         else
             cell.setCellValue(value);
     }
+
+    /* =========================================================================================== */
 
     private Double round(Double v, int places)
     {
