@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import rtss.math.algorithms.MathUtil;
+import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.util.Util;
@@ -27,7 +28,7 @@ public class ExportCharts
     private final TerritoryDataSet tdsCompositeTaxonsVitalRates;
 
     private final int startYear = 1881;
-    
+
     private String currentTname;
 
     public ExportCharts(TerritoryDataSet tdsElementaryPopulation, TerritoryDataSet tdsCompositeTaxonsPopulation,
@@ -61,16 +62,94 @@ public class ExportCharts
 
     private void exportElementary(String tname, Territory t) throws Exception
     {
-        currentTname = tname; 
-        // ### экспортировать числа и rates для элементарных территорий (tdsElementaryPopulation)
+        currentTname = tname;
+        int maxYear = t.maxYear(-1);
+        // Util.out(String.format("exportElementary: %s %d", tname, maxYear));
+
+        if (tname.equals("Выборгская"))
+        {
+            if (maxYear < 1915)
+                throw new IllegalArgumentException();
+            // последний год со сведениями о движении
+            maxYear = 1914;
+        }
+        else if (Taxon.isPoland(tname))
+        {
+            if (maxYear < 1914)
+                throw new IllegalArgumentException();
+            // последний год со сведениями о движении
+            maxYear = 1913;
+        }
+        else
+        {
+            if (maxYear < 1915)
+                throw new IllegalArgumentException();
+            // последний год со сведениями о движении
+            maxYear = 1914;
+        }
+
+        String template = "excel-templates/elementary-territory-1881-" + maxYear + ".xlsx";
+        XSSFWorkbook wb = Excel.loadWorkbook(template);
+        XSSFSheet sheet = wb.getSheet("data");
+        setText(sheet, 0, 0, tname);
+
+        if (t.hasValidVitalRate)
+            setText(sheet, 1, 0, "Территория включена в учёт естественного движения");
+        else
+            setText(sheet, 1, 0, "Территория НЕ включена в учёт естественного движения");
+
+        for (int year = startYear; year <= maxYear + 1; year++)
+        {
+            int nr = (year - 1881) + (6 - 1);
+            long popm;
+            final Double nullDouble = null;
+            final Long nullLong = null;
+
+            Long pop = t.territoryYearOrNull(year).progressive_population.total.both;
+            setNumber(sheet, nr, 1, pop);
+            if (year <= maxYear)
+            {
+                /* next year start */
+                Long pop2 = t.territoryYearOrNull(year + 1).progressive_population.total.both;
+                /* mid-year */
+                popm = MathUtil.log_average(pop, pop2);
+                setNumber(sheet, nr, 2, popm);
+
+                Long births = t.territoryYearOrNull(year).births.total.both;
+                Long deaths = t.territoryYearOrNull(year).deaths.total.both;
+                Long migr = t.territoryYearOrNull(year).migration.total.both;
+                
+                setNumber(sheet, nr, 3, births);
+                setNumber(sheet, nr, 4, deaths);
+                setNumber(sheet, nr, 5, migr);
+
+                Double cbr = births == null ? null : (1000.0 * births) / popm;
+                Double cdr = deaths == null ? null : (1000.0 * deaths) / popm;
+
+                setNumber(sheet, nr, 6, round(cbr, 3));
+                setNumber(sheet, nr, 7, round(cdr, 3));
+            }
+            else
+            {
+                setNumber(sheet, nr, 2, nullLong);
+                setNumber(sheet, nr, 3, nullLong);
+                setNumber(sheet, nr, 4, nullLong);
+                setNumber(sheet, nr, 5, nullLong);
+                setNumber(sheet, nr, 6, nullDouble);
+                setNumber(sheet, nr, 7, nullDouble);
+            }
+        }
+
+        saveFile("final-elementary-territories", tname, wb);
     }
 
     /* =========================================================================================== */
 
     private void exportTaxon(String tname, Territory tPopulation, Territory tVitalRates) throws Exception
     {
-        currentTname = tname; 
-        
+        currentTname = tname;
+
+        // последний год со сведениями о движении
         int maxYear = 1914;
         switch (tname)
         {
@@ -197,7 +276,7 @@ public class ExportCharts
             cell.setBlank();
             cell.setCellValue(value);
         }
-        
+
         if (Util.False && currentTname.equals("Империя"))
             Util.out(String.format("Filling cell %d %d => %s", row.getRowNum(), nc, value));
     }
@@ -244,7 +323,7 @@ public class ExportCharts
 
         while (tname.endsWith("."))
             tname = Util.stripTail(tname, ".");
-        tname = tname.replace(" ", "-");
+        // tname = tname.replace(" ", "-");
 
         File dir = new File(OUT_PATH);
         dir = new File(dir, subdir);
