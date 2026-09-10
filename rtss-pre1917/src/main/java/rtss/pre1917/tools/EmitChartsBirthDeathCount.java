@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -334,6 +335,10 @@ public class EmitChartsBirthDeathCount
 
     private void saveFile(String tname, XSSFWorkbook wb, ChartType chartType) throws Exception
     {
+        XSSFFormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
+        evaluator.evaluateAll();
+        wb.setForceFormulaRecalculation(true);
+
         while (tname.endsWith("."))
             tname = Util.stripTail(tname, ".");
 
@@ -391,9 +396,14 @@ public class EmitChartsBirthDeathCount
             cell = row.createCell(nc);
 
         if (value == null)
+        {
             cell.setBlank();
+        }
         else
+        {
+            cell.setBlank();
             cell.setCellValue(value);
+        }
     }
 
     private static void setText(XSSFSheet sheet, int nr, int nc, String value)
@@ -410,8 +420,13 @@ public class EmitChartsBirthDeathCount
             cell = row.createCell(nc);
 
         if (value == null)
+        {
             cell.setBlank();
+        }
         else
+        {
+            cell.setBlank();
             cell.setCellValue(value);
+        }
     }
 }
