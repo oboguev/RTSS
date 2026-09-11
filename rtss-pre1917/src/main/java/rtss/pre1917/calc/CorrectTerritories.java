@@ -51,15 +51,15 @@ public class CorrectTerritories
         // Польша
         case "Сувалкская":
         case "Люблинская с Седлецкой и Холмской":
-            
-        // Кавказ
+
+            // Кавказ
         case "Дагестанская обл.":
         case "Карсская обл.":
         case "Терская обл.":
         case "Тифлисская":
         case "Бакинская с Баку":
 
-        // Средняя Азия
+            // Средняя Азия
         case "Закаспийская обл.":
         case "Семиреченская обл.":
         case "Сыр-Дарьинская обл.":
@@ -67,7 +67,7 @@ public class CorrectTerritories
         case "Самаркандская обл.":
         case "Уральская обл.":
 
-        // Сибирь
+            // Сибирь
         case "Забайкальская обл.":
         case "Приморская обл. с Камчатской обл.":
             return true;
@@ -128,33 +128,44 @@ public class CorrectTerritories
 
     private void corrections_Poland() throws Exception
     {
-        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSuvalkskaia();
-        
-        final String LubSedHolm = "Люблинская с Седлецкой и Холмской";
-        Territory t = tdsPopulation.get(LubSedHolm);
-        TerritoryYear ty1910 = t.territoryYearOrNull(1910);
-        for (int year = 1911; year <= 1913; year++)
+        if (isCorrected("Сувалкская"))
+            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSuvalkskaia();
+
+        if (isCorrected("Люблинская с Седлецкой и Холмской"))
         {
-            TerritoryYear ty = t.territoryYearOrNull(year);
-            ty.births.total.both = ty1910.births.total.both;
-            ty.deaths.total.both = ty1910.deaths.total.both;
+            final String LubSedHolm = "Люблинская с Седлецкой и Холмской";
+            Territory t = tdsPopulation.get(LubSedHolm);
+            TerritoryYear ty1910 = t.territoryYearOrNull(1910);
+            for (int year = 1911; year <= 1913; year++)
+            {
+                TerritoryYear ty = t.territoryYearOrNull(year);
+                ty.births.total.both = ty1910.births.total.both;
+                ty.deaths.total.both = ty1910.deaths.total.both;
+            }
+            new EvalProgressive(tdsPopulation).evalProgressive(LubSedHolm);
         }
-        new EvalProgressive(tdsPopulation).evalProgressive(LubSedHolm);
     }
 
     private void corrections_Kavkaz() throws Exception
     {
         /* пересчёт численности населения для Дагестана */
-        new AdjustTerritories(tdsPopulation).fixDagestan();
+        if (isCorrected("Дагестанская обл."))
+            new AdjustTerritories(tdsPopulation).fixDagestan();
 
         /* не включать Дагестан в подсчёт рождаемости и смертности */
         excludeFromVitalRates("Дагестанская обл.");
 
-        useStabilized("Карсская обл.", 1907, 1913);
-        useStabilized("Терская обл.", 1910, 1914);
-        useStabilized("Тифлисская", 1903, 1914);
+        if (isCorrected("Карсская обл."))
+            useStabilized("Карсская обл.", 1907, 1913);
 
-        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
+        if (isCorrected("Терская обл."))
+            useStabilized("Терская обл.", 1910, 1914);
+
+        if (isCorrected("Тифлисская"))
+            useStabilized("Тифлисская", 1903, 1914);
+
+        if (isCorrected("Бакинская с Баку"))
+            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
 
         excludeFromVitalRates("Елисаветпольская");
         excludeFromVitalRates("Бакинская с Баку");
@@ -163,13 +174,23 @@ public class CorrectTerritories
 
     private void corrections_CentralAsia() throws Exception
     {
-        useStabilized("Закаспийская обл.", 1911, 1913);
-        useStabilized("Семиреченская обл.", 1912, 1914);
-        useStabilized("Сыр-Дарьинская обл.", 1908);
-        useStabilized("Ферганская обл.", 1912);
+        if (isCorrected("Закаспийская обл."))
+            useStabilized("Закаспийская обл.", 1911, 1913);
 
-        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
-        new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
+        if (isCorrected("Семиреченская обл."))
+            useStabilized("Семиреченская обл.", 1912, 1914);
+
+        if (isCorrected("Сыр-Дарьинская обл."))
+            useStabilized("Сыр-Дарьинская обл.", 1908);
+
+        if (isCorrected("Ферганская обл."))
+            useStabilized("Ферганская обл.", 1912);
+
+        if (isCorrected("Самаркандская обл."))
+            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
+
+        if (isCorrected("Уральская обл."))
+            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
 
         excludeFromVitalRates("Акмолинская обл.");
         excludeFromVitalRates("Тургайская обл.");
@@ -180,8 +201,12 @@ public class CorrectTerritories
 
     private void corrections_Siberia() throws Exception
     {
-        useStabilized("Забайкальская обл.", 1908, 1913);
-        fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1896, 1898, 1899, 1903);
+        if (isCorrected("Забайкальская обл."))
+            useStabilized("Забайкальская обл.", 1908, 1913);
+
+        if (isCorrected("Приморская обл. с Камчатской обл."))
+            fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1896, 1898, 1899, 1903);
+
         excludeFromVitalRates("Приморская обл. с Камчатской обл.");
     }
 
@@ -252,6 +277,9 @@ public class CorrectTerritories
         final Long nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner;
 
         for (int year = 1896; year <= 1914; year++)
+        {
             tds.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
+            tds.get("Черноморская").territoryYearOrNull(year).migration.total.both += nAddChernomorskaya;
+        }
     }
 }
