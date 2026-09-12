@@ -241,7 +241,7 @@ public class CorrectTerritories
         for (int year : tEval.years())
         {
             TerritoryYear ty = tEval.territoryYearOrNull(year);
-            ty.progressive_population = ty.population.dup(ty);
+            ty.progressive_population = ty.population.dup(ty);  // ###@@@@@
         }
 
         tdsPopulation.put(tname, tEval);

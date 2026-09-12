@@ -22,7 +22,8 @@ public class EvalGrowthRate
     private final TerritoryDataSet tdsCensus1897;
     TotalMigration totalMigration = TotalMigration.getTotalMigration();
 
-    private final double PROMILLE = 1000.0;
+    private static final double PROMILLE = 1000.0;
+    private static final int DEATH_SPIKE_YEAR = 1892;
 
     public EvalGrowthRate(TerritoryDataSet tdsCensus1897) throws Exception
     {
@@ -93,6 +94,8 @@ public class EvalGrowthRate
         Territory tCensus1897 = tdsCensus1897.get(t.name);
         if (tCensus1897 == null)
             throw new Exception("Missing 1897 census territory data for " + t.name);
+
+        Double deathBoost1892 = calcDeathBoost(t, DEATH_SPIKE_YEAR);
 
         int nyears = y2 - y1 + 1;
 
@@ -172,7 +175,11 @@ public class EvalGrowthRate
                     if (year <= 1914)
                     {
                         ty.births.total.both = Math.round(ty.population.total.both * cbr / PROMILLE);
-                        ty.deaths.total.both = Math.round(ty.population.total.both * cdr / PROMILLE);
+
+                        if (year == DEATH_SPIKE_YEAR && deathBoost1892 != null)
+                            ty.deaths.total.both = Math.round(ty.population.total.both * cdr * deathBoost1892/ PROMILLE);
+                        else
+                            ty.deaths.total.both = Math.round(ty.population.total.both * cdr / PROMILLE);
                     }
                     else
                     {
@@ -185,7 +192,54 @@ public class EvalGrowthRate
             if (ty != null)
                 ty.migration.total.both = totalMigration.saldo_nullable(t.name, year);
         }
+        
+        EvalProgressive.evalProgressive(xt, tdsCensus1897.get(t.name));
+        
+        if (Util.False)
+        {
+            for (int year : t.years())
+            {
+                TerritoryYear ty = xt.territoryYearOrNull(year);
+                ty.population.total.both = ty.progressive_population.total.both;
+            }
+        }
 
         return xt;
+    }
+
+    /* =============================================================== */
+
+    /*
+     * Вычислить относительный всплеск смертности в указанном году
+     * по исходным, ещё не исправленным данным:
+     *
+     *                 deaths(year)
+     * boost = -----------------------------
+     *         avg(deaths(year-1), deaths(year+1))
+     *
+     * Возвращает null, если хотя бы одного исходного значения нет
+     * или значение не является положительным.
+     */
+    private Double calcDeathBoost(Territory t, int year)
+    {
+        TerritoryYear tyPrev = t.territoryYearOrNull(year - 1);
+        TerritoryYear ty = t.territoryYearOrNull(year);
+        TerritoryYear tyNext = t.territoryYearOrNull(year + 1);
+
+        if (tyPrev == null || ty == null || tyNext == null)
+            return null;
+
+        Long dPrev = tyPrev.deaths.total.both;
+        Long d = ty.deaths.total.both;
+        Long dNext = tyNext.deaths.total.both;
+
+        if (dPrev == null || d == null || dNext == null)
+            return null;
+
+        if (dPrev <= 0 || d <= 0 || dNext <= 0)
+            return null;
+
+        double neighboringAverage = (dPrev + dNext) / 2.0;
+        return Math.max(1.0, d / neighboringAverage);
     }
 }

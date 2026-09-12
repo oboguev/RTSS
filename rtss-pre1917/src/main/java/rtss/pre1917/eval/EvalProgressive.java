@@ -96,7 +96,7 @@ public class EvalProgressive
         }
     }
 
-    private String censusTerritoryName(String tname)
+    private static String censusTerritoryName(String tname)
     {
         return tname;
     }
