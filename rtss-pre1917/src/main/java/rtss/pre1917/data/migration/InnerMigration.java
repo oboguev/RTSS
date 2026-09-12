@@ -69,7 +69,7 @@ public class InnerMigration
             year2flow.put(year, amount);
         }
     }
-    
+
     /* ==================================================================== */
 
     /*
@@ -270,7 +270,7 @@ public class InnerMigration
         return v == null ? 0 : v;
     }
 
-    private long sumInFlow(int year)
+    public long sumInFlow(int year)
     {
         long v = 0;
         for (String tname : tname2ima.keySet())
@@ -281,7 +281,7 @@ public class InnerMigration
         return v;
     }
 
-    private long sumOutFlow(int year)
+    public long sumOutFlow(int year)
     {
         long v = 0;
         for (String tname : tname2ima.keySet())
@@ -396,9 +396,9 @@ public class InnerMigration
         if (amount == 0)
             return;
         makeScatterDescriptors();
-        
-        long distributed = 0;  
-        
+
+        long distributed = 0;
+
         for (ScatterDescriptor sd : scatterDescriptors)
         {
             long v = Math.round(sd.fraction * amount);
@@ -440,7 +440,7 @@ public class InnerMigration
             this.fraction = pct / 100.0;
         }
     }
-    
+
     public void validate_1881_1895()
     {
         if (domsg)
@@ -452,6 +452,70 @@ public class InnerMigration
                 long outflow = sumOutFlow(year);
                 Util.out(String.format("%d %,d %,d", year, inflow, outflow));
             }
+        }
+    }
+
+    /* ==================================================================== */
+
+    private boolean balanced = false;
+
+    public void balance()
+    {
+        if (balanced)
+            return;
+
+        boolean sv_readonly = readonly;
+
+        for (int year = 1881; year <= 1916; year++)
+            balance(year);
+
+        readonly = sv_readonly;
+        balanced = true;
+    }
+
+    private void balance(int year)
+    {
+        long inFlow = sumInFlow(year);
+        long outFlow = sumOutFlow(year);
+        if (inFlow == outFlow)
+        {
+            // do nothing
+        }
+        else if (inFlow > outFlow)
+        {
+            boostOutFlow(year, (1.0 * inFlow) / outFlow);
+        }
+        else if (inFlow < outFlow)
+        {
+            boostInFlow(year, (1.0 * outFlow) / inFlow);
+        }
+    }
+    
+    private void boostOutFlow(int year, double byScale)
+    {
+        for (String tname : tname2ima.keySet())
+        {
+            InnerMigrationAmount ima = tname2ima.get(tname);
+            boost(ima.year2outflow, year, byScale);
+        }
+    }
+
+    private void boostInFlow(int year, double byScale)
+    {
+        for (String tname : tname2ima.keySet())
+        {
+            InnerMigrationAmount ima = tname2ima.get(tname);
+            boost(ima.year2inflow, year, byScale);
+        }
+    }
+    
+    private void boost(Map<Integer, Long> flow, int year, double byScale)
+    {
+        Long v = flow.get(year);
+        if (v != null)
+        {
+            v = Math.round(byScale * v);
+            flow.put(year, v);
         }
     }
 }

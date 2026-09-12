@@ -64,6 +64,12 @@ public class EvalCountryTaxon extends EvalCountryBase
         
         try
         {
+            /*
+             * Балансировать годовые значения внутренней миграции (число уехавших vs. число приехавших по сумме территорий),
+             * с тем чтобы дисбаланс не приводил к фиктивному появлению или исчезновению людей.
+             */
+            new LoadData().loadInnerMigration().balance();
+            
             AtomicReference<TerritoryDataSet> tdsElementaryPopulation = new AtomicReference<>();
             tdsCompositeTaxonsPopulation.clear();
             tdsCompositeTaxonsVitalRates.clear();

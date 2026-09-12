@@ -15,8 +15,29 @@ public class InnerMigrationShowSum
         try
         {
             new InnerMigrationShowSum().do_main_e50();
+
+            Util.out("");
+            Util.out("====================================================================================================");
+            Util.out("");
             new InnerMigrationShowSum().do_main_rcpt();
+
+            Util.out("");
+            Util.out("====================================================================================================");
+            Util.out("");
             new InnerMigrationShowSum().do_main_breakdown();
+
+            Util.out("");
+            Util.out("====================================================================================================");
+            Util.out("Годовой приток и отток переселенцев, сумма по губерниям, до балансирования");
+            Util.out("");
+            new InnerMigrationShowSum().do_by_year();
+
+            Util.out("");
+            Util.out("====================================================================================================");
+            Util.out("Годовой приток и отток переселенцев, сумма по губерниям, после балансирования");
+            Util.out("");
+            new LoadData().loadInnerMigration().balance();
+            new InnerMigrationShowSum().do_by_year();
         }
         catch (Exception ex)
         {
@@ -243,5 +264,17 @@ public class InnerMigrationShowSum
         }
         
         Util.unused(sum);
+    }
+
+    /* ==================================================================================================================== */
+
+    private void do_by_year() throws Exception
+    {
+        for (int year = 1881; year <= 1916; year++)
+        {
+            long inFlow = innerMigration.sumInFlow(year);
+            long outFlow = innerMigration.sumOutFlow(year);
+            Util.out(String.format("%d %,d %,d", year, inFlow, outFlow));
+        }
     }
 }
