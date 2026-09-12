@@ -177,7 +177,7 @@ public class EvalGrowthRate
                         ty.births.total.both = Math.round(ty.population.total.both * cbr / PROMILLE);
 
                         if (year == DEATH_SPIKE_YEAR && deathBoost1892 != null)
-                            ty.deaths.total.both = Math.round(ty.population.total.both * cdr * deathBoost1892/ PROMILLE);
+                            ty.deaths.total.both = Math.round(ty.population.total.both * cdr * deathBoost1892 / PROMILLE);
                         else
                             ty.deaths.total.both = Math.round(ty.population.total.both * cdr / PROMILLE);
                     }
@@ -192,16 +192,16 @@ public class EvalGrowthRate
             if (ty != null)
                 ty.migration.total.both = totalMigration.saldo_nullable(t.name, year);
         }
-        
+
         EvalProgressive.evalProgressive(xt, tdsCensus1897.get(t.name));
-        
-        if (Util.False)
+
+        for (int year : t.years())
         {
-            for (int year : t.years())
-            {
-                TerritoryYear ty = xt.territoryYearOrNull(year);
-                ty.population.total.both = ty.progressive_population.total.both;
-            }
+            TerritoryYear xty = xt.territoryYearOrNull(year);
+            if (t.territoryYearOrNull(year).population == null)
+                xty.population = null;
+            else
+                xty.population = t.territoryYearOrNull(year).population.dup(xty);
         }
 
         return xt;

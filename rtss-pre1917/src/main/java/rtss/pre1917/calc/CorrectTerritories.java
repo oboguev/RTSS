@@ -237,13 +237,6 @@ public class CorrectTerritories
             return;
 
         Territory tEval = evalGrowthRate.evalTerritory(t, y1, y2);
-
-        for (int year : tEval.years())
-        {
-            TerritoryYear ty = tEval.territoryYearOrNull(year);
-            ty.progressive_population = ty.population.dup(ty);  // ###@@@@@
-        }
-
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
     }

@@ -41,10 +41,11 @@ public class AdjustTerritories
         TerritoryYear ty1897 = t.territoryYearOrNull(1897);
         long delta = ty1897.progressive_population.total.both - ty1897.population.total.both;
 
-        for (int year = 1896; year <= 1914; year++) // ###@@@
+        for (int year = 1881; year <= 1914; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
-            ty.population.total.both += delta;
+            if (ty != null && ty.population.total.both != null)
+                ty.population.total.both += delta;
         }
     }
 
@@ -272,7 +273,7 @@ public class AdjustTerritories
             ty.births.total.both = births;
             ty.deaths.total.both = deaths;
         }
-        
+
         /*
          * Пересчитать прогрессивный расчёт 
          */
