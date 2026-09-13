@@ -1,6 +1,7 @@
 package rtss.pre1917.tools.show;
 
 import rtss.pre1917.ExportData;
+import rtss.pre1917.LoadData;
 import rtss.util.Util;
 
 public class ShowAllAreasValuesRaw_UGVI extends ShowAllAreasValues 
@@ -36,6 +37,12 @@ public class ShowAllAreasValuesRaw_UGVI extends ShowAllAreasValues
 
         try
         {
+            /*
+             * Балансировать годовые значения внутренней миграции (число уехавших vs. число приехавших по сумме территорий),
+             * с тем чтобы дисбаланс не приводил к фиктивному появлению или исчезновению людей.
+             */
+            new LoadData().loadInnerMigration().balance();
+
             ExportData exportData = ExportData.forRaw();
             // new ShowAllAreasValues().show_values_all();
             // new ShowAllAreasValues(LoadOptions.MERGE_POST1897_REGIONS).show_values_all();

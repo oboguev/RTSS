@@ -65,6 +65,12 @@ public class EmitChartsBirthDeathCount
     {
         try
         {
+            /*
+             * Балансировать годовые значения внутренней миграции (число уехавших vs. число приехавших по сумме территорий),
+             * с тем чтобы дисбаланс не приводил к фиктивному появлению или исчезновению людей.
+             */
+            new LoadData().loadInnerMigration().balance();
+
             Util.out("=== Emitting RawSources charts");
             Util.out("");
             new EmitChartsBirthDeathCount().do_main(ChartType.RawSources);

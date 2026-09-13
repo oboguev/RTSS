@@ -40,6 +40,12 @@ public class ShowAllAreasValuesRaw_CSK50
 
     private void do_main() throws Exception
     {
+        /*
+         * Балансировать годовые значения внутренней миграции (число уехавших vs. число приехавших по сумме территорий),
+         * с тем чтобы дисбаланс не приводил к фиктивному появлению или исчезновению людей.
+         */
+        new LoadData().loadInnerMigration().balance();
+
         tdsCSK = new LoadData().loadEvroChast(LoadOptions.APPLY_PATCHES,
                                               LoadOptions.DONT_MERGE_CITIES,
                                               LoadOptions.DONT_MERGE_POST1897_REGIONS,
