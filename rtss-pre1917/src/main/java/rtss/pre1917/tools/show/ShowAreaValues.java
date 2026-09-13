@@ -98,7 +98,8 @@ public class ShowAreaValues
                                                 LoadOptions.MERGE_CITIES,
                                                 LoadOptions.EVAL_PROGRESSIVE,
                                                 LoadOptions.ADJUST_FEMALE_BIRTHS,
-                                                LoadOptions.FILL_MISSING_BD));
+                                                LoadOptions.FILL_MISSING_BD,
+                                                LoadOptions.EVAL_SPLIT_ASTRAKHAN));
         tdsCSK = new LoadData().loadEzhegodnikRossii(unite(xo, LoadOptions.DONT_VERIFY));
         tdsCensus1897 = new LoadData().loadCensus1897(unite(xo,
                                                             LoadOptions.DONT_VERIFY,

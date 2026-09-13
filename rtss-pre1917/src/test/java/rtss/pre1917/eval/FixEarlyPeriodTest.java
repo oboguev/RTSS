@@ -19,8 +19,9 @@ public class FixEarlyPeriodTest
     {
         try
         {
-            new FixEarlyPeriodTest().test("Приморская обл.", 1896, 1898, 1899, 1903);
-            new FixEarlyPeriodTest(LoadOptions.MERGE_POST1897_REGIONS).test("Приморская обл. с Камчатской обл.", 1896, 1898, 1899, 1903);
+            // new FixEarlyPeriodTest().test("Приморская обл.", 1896, 1898, 1899, 1903);
+            
+            new FixEarlyPeriodTest(LoadOptions.MERGE_POST1897_REGIONS).test("Приморская обл. с Камчатской обл.", 1881, 1898, 1899, 1903);
         }
         catch (Throwable ex)
         {
@@ -41,7 +42,8 @@ public class FixEarlyPeriodTest
                                                 LoadOptions.MERGE_CITIES,
                                                 LoadOptions.EVAL_PROGRESSIVE,
                                                 LoadOptions.ADJUST_FEMALE_BIRTHS,
-                                                LoadOptions.FILL_MISSING_BD));
+                                                LoadOptions.FILL_MISSING_BD,
+                                                LoadOptions.EVAL_SPLIT_ASTRAKHAN));
         tdsCensus1897 = new LoadData().loadCensus1897(unite(xo,
                                                             LoadOptions.DONT_VERIFY,
                                                             LoadOptions.MERGE_CITIES));
@@ -58,26 +60,24 @@ public class FixEarlyPeriodTest
     @SuppressWarnings("unused")
     private void test(String tname, int by, int dy) throws Exception
     {
-        Territory t = tdsUGVI.get(tname);
         Territory tCensus = tdsCensus1897.get(tname);
         
+        Territory t = tdsUGVI.get(tname);
         new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
         Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, by, dy);        
-
         new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
 
     @SuppressWarnings("unused")
     private void test(String tname, int yl1, int yl2, int yr1, int yr2) throws Exception
     {
-        Territory t = tdsUGVI.get(tname);
         Territory tCensus = tdsCensus1897.get(tname);
         
+        Territory t = tdsUGVI.get(tname);
         new ShowAreaValues().show(t, "BEFORE FixEarlyPeriod: ");
         
         Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, yl1, yl2, yr1, yr2);        
-
         new ShowAreaValues().show(xt, "AFTER FixEarlyPeriod: ");
     }
 

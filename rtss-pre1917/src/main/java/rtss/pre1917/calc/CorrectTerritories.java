@@ -205,7 +205,7 @@ public class CorrectTerritories
             useStabilized("Забайкальская обл.", 1908, 1913);
 
         if (isCorrected("Приморская обл. с Камчатской обл."))
-            fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1896, 1898, 1899, 1903);
+            fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1881, 1898, 1899, 1903);
 
         excludeFromVitalRates("Приморская обл. с Камчатской обл.");
     }
