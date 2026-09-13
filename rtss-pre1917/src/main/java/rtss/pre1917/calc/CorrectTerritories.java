@@ -11,7 +11,6 @@ import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.EvalStabilizedV2;
 import rtss.pre1917.eval.FixEarlyPeriod;
-import rtss.util.Util;
 
 public class CorrectTerritories
 {
@@ -164,7 +163,10 @@ public class CorrectTerritories
             useStabilizedV2("Терская обл.", 1910, 1914, true);
 
         if (isCorrected("Тифлисская"))
-            useStabilized("Тифлисская", 1903, 1914);
+        {
+            // useStabilized("Тифлисская", 1903, 1914);
+            useStabilizedV2("Тифлисская", 1905, 1914, 1909, 1914, true);
+        }
 
         if (isCorrected("Бакинская с Баку"))
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();

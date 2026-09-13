@@ -104,8 +104,10 @@ public class EvalStabilizedV2
         Map<Integer, Long> sourceBirths = sourceCounts(t, years, Series.BIRTHS);
         Map<Integer, Long> sourceDeaths = sourceCounts(t, years, Series.DEATHS);
 
-        Special1892 births1892 = Special1892.forBirths(sourceBirths);
-        Special1892 deaths1892 = Special1892.forDeaths(sourceDeaths);
+        Special1892 births1892 = adjust1892 ? Special1892.forBirths(sourceBirths)
+                                              : Special1892.inactive();
+        Special1892 deaths1892 = adjust1892 ? Special1892.forDeaths(sourceDeaths)
+                                              : Special1892.inactive();
 
         // Establish a population series consistent with the unmodified clone.
         EvalProgressive.evalProgressive(result, censusTerritory);
