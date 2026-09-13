@@ -11,6 +11,7 @@ import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.EvalStabilizedV2;
 import rtss.pre1917.eval.FixEarlyPeriod;
+import rtss.util.Util;
 
 public class CorrectTerritories
 {
@@ -157,10 +158,10 @@ public class CorrectTerritories
         excludeFromVitalRates("Дагестанская обл.");
 
         if (isCorrected("Карсская обл."))
-            useStabilized("Карсская обл.", 1907, 1913);
+            useStabilizedV2("Карсская обл.", 1907, 1913, false);
 
         if (isCorrected("Терская обл."))
-            useStabilized("Терская обл.", 1910, 1914);
+            useStabilizedV2("Терская обл.", 1910, 1914, true);
 
         if (isCorrected("Тифлисская"))
             useStabilized("Тифлисская", 1903, 1914);
@@ -203,7 +204,7 @@ public class CorrectTerritories
     private void corrections_Siberia() throws Exception
     {
         if (isCorrected("Забайкальская обл."))
-            useStabilized("Забайкальская обл.", 1908, 1913);
+            useStabilizedV2("Забайкальская обл.", 1908, 1913, true);
 
         if (isCorrected("Приморская обл. с Камчатской обл."))
             fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1881, 1898, 1899, 1903);
@@ -246,7 +247,7 @@ public class CorrectTerritories
      * Пересчитать территорию по стабилизированному участку (метод версии V2)
      */
     @SuppressWarnings("unused")
-    private void useStabilizedV2(String tname, int y1, int y2) throws Exception
+    private void useStabilizedV2(String tname, int y1, int y2, boolean adjust1892) throws Exception
     {
         TerritoryNames.checkValidTerritoryName(tname);
 
@@ -254,9 +255,16 @@ public class CorrectTerritories
         if (t == null)
             return;
         
+        TerritoryYear ty1913 = t.territoryYearOrNull(1913);
+        TerritoryYear ty1914 = t.territoryYearOrNull(1914);
+        if (ty1914.births.total.both == null)
+            ty1914.births.total.both = ty1913.births.total.both;  
+        if (ty1914.deaths.total.both == null)
+            ty1914.deaths.total.both = ty1913.deaths.total.both;  
+        
         final int window = 7;
         final double lambda = 0.5;
-        EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda);
+        EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda, adjust1892);
 
         Territory tEval = es.evalTerritory(t, y1, y2, y1, y2); 
 
@@ -268,7 +276,7 @@ public class CorrectTerritories
      * Пересчитать территорию по стабилизированному участку (метод версии V2)
      */
     @SuppressWarnings("unused")
-    private void useStabilizedV2(String tname, int by1, int by2, int dy1, int dy2) throws Exception
+    private void useStabilizedV2(String tname, int by1, int by2, int dy1, int dy2, boolean adjust1892) throws Exception
     {
         TerritoryNames.checkValidTerritoryName(tname);
 
@@ -278,7 +286,7 @@ public class CorrectTerritories
         
         final int window = 7;
         final double lambda = 0.5;
-        EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda);
+        EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda, adjust1892);
 
         Territory tEval = es.evalTerritory(t, by1, by2, dy1, dy2);
 

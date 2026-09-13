@@ -23,18 +23,26 @@ import rtss.util.Util;
  * <p>Known gaps, administrative breaks, and other defective source intervals
  * must be repaired before this class is used. The method never modifies its
  * input territory.</p>
+ * 
+ * λ = 0 — плоская реконструкция;
+ * λ = 0.5 — частичное сохранение формы;
+ * λ = 1 — полное сохранение остаточных колебаний;
  */
 public class EvalStabilizedV2
 {
     private static final int MAX_ITERATIONS = 200;
+    private static final int fromYear = 1881;
+    private static final int toYear = 1914;
 
     private final TerritoryDataSet tdsCensus1897;
     private final int windowWidth;
     private final double lambda;
+    private final boolean adjust1892;
 
     public EvalStabilizedV2(TerritoryDataSet tdsCensus1897,
             int windowWidth,
-            double lambda)
+            double lambda,
+            boolean adjust1892)
     {
         if (tdsCensus1897 == null)
             throw constructorError("EvalStabilizedV2: tdsCensus1897 is null");
@@ -48,6 +56,7 @@ public class EvalStabilizedV2
         this.tdsCensus1897 = tdsCensus1897;
         this.windowWidth = windowWidth;
         this.lambda = lambda;
+        this.adjust1892 = adjust1892;
     }
 
     /**
@@ -77,11 +86,16 @@ public class EvalStabilizedV2
             throw evaluationError("EvalStabilizedV2: no 1897 census territory for " + t.name);
 
         Territory result = t.dup();
-        List<Integer> years = new ArrayList<Integer>(result.years());
+        List<Integer> years = new ArrayList<Integer>();
+        for (int year : result.years())
+        {
+            if (year >= fromYear && year <= toYear)
+                years.add(year);
+        }
         Collections.sort(years);
 
         if (years.isEmpty())
-            throw evaluationError("EvalStabilizedV2: no years for " + t.name);
+            throw evaluationError("EvalStabilizedV2: no data in " + fromYear + "-" + toYear + " for " + t.name);
 
         validateStableInterval(years, by1, by2, "births", t.name);
         validateStableInterval(years, dy1, dy2, "deaths", t.name);
@@ -96,6 +110,8 @@ public class EvalStabilizedV2
         // Establish a population series consistent with the unmodified clone.
         EvalProgressive.evalProgressive(result, censusTerritory);
 
+        long[][] twoIterationsAgo = null;
+
         for (int iteration = 1; iteration <= MAX_ITERATIONS; iteration++)
         {
             long[][] before = snapshot(result, years);
@@ -109,8 +125,26 @@ public class EvalStabilizedV2
 
             EvalProgressive.evalProgressive(result, censusTerritory);
 
-            if (sameState(before, result, years))
+            long[][] after = snapshot(result, years);
+
+            if (sameState(before, after))
                 return result;
+
+            /*
+             * With integer births/deaths an exact fixed point need not exist:
+             * rounding can produce A -> B -> A, with A and B differing by one
+             * event in a few years. Both states represent the same continuous
+             * solution to the available integer precision.
+             */
+            if (twoIterationsAgo != null && sameState(twoIterationsAgo, after))
+            {
+                if (differsOnlyByRounding(before, after))
+                    return result;
+
+                throw evaluationError("EvalStabilizedV2: entered a non-trivial two-state cycle for " + t.name);
+            }
+
+            twoIterationsAgo = before;
         }
 
         throw evaluationError("EvalStabilizedV2: failed to converge after " + MAX_ITERATIONS + " iterations for " + t.name);
@@ -312,17 +346,30 @@ public class EvalStabilizedV2
         return state;
     }
 
-    private static boolean sameState(long[][] before,
-            Territory territory,
-            List<Integer> years) throws Exception
+    private static boolean sameState(long[][] a, long[][] b)
     {
-        for (int k = 0; k < years.size(); k++)
-        {
-            int year = years.get(k);
-            TerritoryYear ty = territory.territoryYearOrNull(year);
+        if (a.length != b.length)
+            return false;
 
-            if (before[k][0] != ty.births.total.both || before[k][1] != ty.deaths.total.both ||
-                before[k][2] != requirePopulation(ty, year, territory.name))
+        for (int k = 0; k < a.length; k++)
+        {
+            if (!Arrays.equals(a[k], b[k]))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static boolean differsOnlyByRounding(long[][] a, long[][] b)
+    {
+        if (a.length != b.length)
+            return false;
+
+        for (int k = 0; k < a.length; k++)
+        {
+            // Population differences accumulate from the +/-1 event choices.
+            if (Math.abs(a[k][0] - b[k][0]) > 1 ||
+                Math.abs(a[k][1] - b[k][1]) > 1)
             {
                 return false;
             }
