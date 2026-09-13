@@ -9,6 +9,7 @@ import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.EvalProgressive;
+import rtss.pre1917.eval.EvalStabilizedV2;
 import rtss.pre1917.eval.FixEarlyPeriod;
 
 public class CorrectTerritories
@@ -237,6 +238,50 @@ public class CorrectTerritories
             return;
 
         Territory tEval = evalGrowthRate.evalTerritory(t, y1, y2);
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
+    }
+
+    /*
+     * Пересчитать территорию по стабилизированному участку (метод версии V2)
+     */
+    @SuppressWarnings("unused")
+    private void useStabilizedV2(String tname, int y1, int y2) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+        
+        final int window = 7;
+        final double lambda = 0.5;
+        EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda);
+
+        Territory tEval = es.evalTerritory(t, y1, y2, y1, y2); 
+
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
+    }
+
+    /*
+     * Пересчитать территорию по стабилизированному участку (метод версии V2)
+     */
+    @SuppressWarnings("unused")
+    private void useStabilizedV2(String tname, int by1, int by2, int dy1, int dy2) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+        
+        final int window = 7;
+        final double lambda = 0.5;
+        EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda);
+
+        Territory tEval = es.evalTerritory(t, by1, by2, dy1, dy2);
+
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
     }
