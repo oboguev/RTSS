@@ -9,6 +9,7 @@ import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.EvalProgressive;
+import rtss.pre1917.eval.EvalStabilizedFergana;
 import rtss.pre1917.eval.EvalStabilizedV2;
 import rtss.pre1917.eval.FixEarlyPeriod;
 
@@ -188,7 +189,10 @@ public class CorrectTerritories
             useStabilized("Сыр-Дарьинская обл.", 1908);
 
         if (isCorrected("Ферганская обл."))
-            useStabilized("Ферганская обл.", 1912);
+        {
+            // useStabilized("Ферганская обл.", 1912);
+            fixFergana("Ферганская обл.");
+        }
 
         if (isCorrected("Самаркандская обл."))
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
@@ -315,6 +319,23 @@ public class CorrectTerritories
         Territory xt = new FixEarlyPeriod(fromYear).fix(t, tCensus, yl1, yl2, yr1, yr2);
         tdsPopulation.put(tname, xt);
         tdsVitalRates.put(tname, xt.dup());
+    }
+
+    @SuppressWarnings("unused")
+    private void fixFergana(String tname) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+        
+        final int window = 7;
+        final double lambda = 0.5;
+        
+        Territory tEval = new EvalStabilizedFergana(tdsCensus1897, window, lambda).evalTerritory(t);
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
     }
 
     /* ================================================================================================ */
