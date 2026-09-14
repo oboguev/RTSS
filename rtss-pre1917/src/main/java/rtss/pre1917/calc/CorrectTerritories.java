@@ -251,6 +251,12 @@ public class CorrectTerritories
     @SuppressWarnings("unused")
     private void useStabilizedV2(String tname, int y1, int y2, boolean adjust1892) throws Exception
     {
+        useStabilizedV2(tname, y1, y2, adjust1892, null);
+    }
+
+    @SuppressWarnings("unused")
+    private void useStabilizedV2(String tname, int y1, int y2, boolean adjust1892, Double lambda) throws Exception
+    {
         TerritoryNames.checkValidTerritoryName(tname);
 
         Territory t = tdsPopulation.get(tname);
@@ -265,7 +271,8 @@ public class CorrectTerritories
             ty1914.deaths.total.both = ty1913.deaths.total.both;  
         
         final int window = 7;
-        final double lambda = 0.5;
+        if (lambda == null)
+            lambda = 0.5;
         EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda, adjust1892);
 
         Territory tEval = es.evalTerritory(t, y1, y2, y1, y2); 
