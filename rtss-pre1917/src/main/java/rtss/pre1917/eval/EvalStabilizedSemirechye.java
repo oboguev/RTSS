@@ -47,7 +47,7 @@ public class EvalStabilizedSemirechye
     private static final int stableYear2 = 1914;
     private static final int toYear = 1914;
 
-    private static final InterpolationBlock[] interpolationBlocks = { new InterpolationBlock(1885, 1886, 1887, 1888),
+    private static final InterpolationBlock[] interpolationBlocks = { /*new InterpolationBlock(1885, 1886, 1887, 1888), */
                                                                       new InterpolationBlock(1894, 1895, 1896, 1897),
                                                                       new InterpolationBlock(1898, 1899, 1900, 1901),
                                                                       new InterpolationBlock(1901, 1902, 1902, 1903),
