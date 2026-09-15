@@ -10,6 +10,7 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.EvalStabilizedFergana;
+import rtss.pre1917.eval.EvalStabilizedSemirechye;
 import rtss.pre1917.eval.EvalStabilizedV2;
 import rtss.pre1917.eval.FixEarlyPeriod;
 
@@ -183,7 +184,10 @@ public class CorrectTerritories
             useStabilized("Закаспийская обл.", 1911, 1913);
 
         if (isCorrected("Семиреченская обл."))
-            useStabilized("Семиреченская обл.", 1912, 1914);
+        {
+            // useStabilized("Семиреченская обл.", 1912, 1914);
+            fixSemirechye("Семиреченская обл.");
+        }
 
         if (isCorrected("Сыр-Дарьинская обл."))
             useStabilized("Сыр-Дарьинская обл.", 1908);
@@ -266,20 +270,20 @@ public class CorrectTerritories
         Territory t = tdsPopulation.get(tname);
         if (t == null)
             return;
-        
+
         TerritoryYear ty1913 = t.territoryYearOrNull(1913);
         TerritoryYear ty1914 = t.territoryYearOrNull(1914);
         if (ty1914.births.total.both == null)
-            ty1914.births.total.both = ty1913.births.total.both;  
+            ty1914.births.total.both = ty1913.births.total.both;
         if (ty1914.deaths.total.both == null)
-            ty1914.deaths.total.both = ty1913.deaths.total.both;  
-        
+            ty1914.deaths.total.both = ty1913.deaths.total.both;
+
         final int window = 7;
         if (lambda == null)
             lambda = 0.5;
         EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda, adjust1892);
 
-        Territory tEval = es.evalTerritory(t, y1, y2, y1, y2); 
+        Territory tEval = es.evalTerritory(t, y1, y2, y1, y2);
 
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
@@ -296,7 +300,7 @@ public class CorrectTerritories
         Territory t = tdsPopulation.get(tname);
         if (t == null)
             return;
-        
+
         final int window = 7;
         final double lambda = 0.5;
         EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda, adjust1892);
@@ -329,11 +333,28 @@ public class CorrectTerritories
         Territory t = tdsPopulation.get(tname);
         if (t == null)
             return;
-        
+
         final int window = 7;
         final double lambda = 0.5;
-        
+
         Territory tEval = new EvalStabilizedFergana(tdsCensus1897, window, lambda).evalTerritory(t);
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
+    }
+
+    @SuppressWarnings("unused")
+    private void fixSemirechye(String tname) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+
+        final int window = 7;
+        final double lambda = 0.5;
+
+        Territory tEval = new EvalStabilizedSemirechye(tdsCensus1897, window, lambda).evalTerritory(t);
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
     }
