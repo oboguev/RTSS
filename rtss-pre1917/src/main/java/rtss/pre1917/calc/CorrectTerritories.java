@@ -377,6 +377,8 @@ public class CorrectTerritories
         {
             tds.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
             tds.get("Черноморская").territoryYearOrNull(year).migration.total.both += nAddChernomorskaya;
+            tds.get("Черноморская").territoryYearOrNull(year).immigration.total.both += nAddChernomorskayaForeign;
+            tds.get("Черноморская").territoryYearOrNull(year).inner_migration.total.both += nAddChernomorskayaInner;
         }
     }
 }

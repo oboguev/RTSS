@@ -92,9 +92,52 @@ public class TotalMigration
     
     public void fillMigration(TerritoryYear ty) throws Exception
     {
-        if (!(ty.year >= 1881 && ty.year <= 1916))
+        final String tname = ty.territory.name;
+        final int year = ty.year;
+        
+        if (!(year >= 1881 && year <= 1916))
             throw new IllegalArgumentException();
-        ty.migration.total.both = saldo_nullable(ty.territory.name, ty.year);
-        // ###
+        
+        ty.migration.total.both = saldo_nullable(tname, year);
+        ty.emigration.total.both = emigration.emigrants(tname, year);
+        ty.immigration.total.both = immigration.immigrants(tname, year);
+        ty.inner_migration.total.both = innerMigration.saldo(tname, year);
+        
+        /*
+         * Черноморская губерния образована начиная с 1896 года из Черноморской области входившей в состав Кубанской области.
+         * Этот административный откол расчётно равносилен миграции части населения из Кубанской области.
+         * Записи населения Черноморской губ. возникают в 1896 году, поэтому out-миграция из Кубанской области 
+         * должна быть отнесена на 1895, так чтобы в начале 1895 в ней имелся полынй объём населения,
+         * а в начале 1896 уже умееньшенный.   
+         */
+        if (tname.equals("Кубанская обл.") && year == 1895)
+        {
+            String s = p.getProperty("Черноморская.1896");
+            s = Util.despace(s).replace(",", "");
+            long split = Long.parseLong(s);
+            ty.inner_migration.total.both -= split;
+        }
+
+        
+        /* 
+         * В 1894 году территория Варшавской губернии существенно увеличилась. К ней были присоединены два уезда: 
+         * Плонский уезд (переданный из соседней Плоцкой губернии) 
+         * и Пултусский уезд (переданный из Ломжинской губернии). 
+         */
+        if (year == 1894)
+        {
+            if (tname.equals("Ломжинская"))
+            {
+                ty.inner_migration.total.both -= DemographicConstants.population_Ломжинская_Пултусский_уезд_1894;
+            }
+            else if (tname.equals("Плоцкая"))
+            {
+                ty.inner_migration.total.both -= DemographicConstants.population_Плоцкая_Плонский_уезд_1894;
+            }
+            else if (tname.equals("Варшавская") || tname.equals("Варшавская с Варшавой"))
+            {
+                ty.inner_migration.total.both += DemographicConstants.population_Ломжинская_Пултусский_уезд_1894 + DemographicConstants.population_Плоцкая_Плонский_уезд_1894;
+            }
+        }
     }
 }

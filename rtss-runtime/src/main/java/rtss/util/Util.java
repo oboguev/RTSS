@@ -920,6 +920,21 @@ public class Util
         return a;
     }
 
+    public static Long add_nullable(Long v1, Long v2)
+    {
+        if (v1 == null && v2 == null)
+            return null;
+
+        long sum = 0;
+        
+        if (v1 != null)
+            sum += v1;
+        if (v2 != null)
+            sum += v2;
+        
+        return sum;
+    }
+
     /*
      * Return stack frame string.
      * depth = 0 => for the place of the call

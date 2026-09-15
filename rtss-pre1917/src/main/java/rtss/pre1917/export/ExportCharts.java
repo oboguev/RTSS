@@ -44,7 +44,7 @@ public class ExportCharts
         for (String tname : Util.sort(tdsElementaryPopulation.keySet()))
         {
             Territory t = tdsElementaryPopulation.get(tname);
-            exportElementary(tname, t);
+            exportElementaryTerritory(tname, t);
         }
 
         if (tdsCompositeTaxonsPopulation.keySet().size() != tdsCompositeTaxonsVitalRates.keySet().size())
@@ -60,7 +60,7 @@ public class ExportCharts
 
     /* =========================================================================================== */
 
-    private void exportElementary(String tname, Territory t) throws Exception
+    private void exportElementaryTerritory(String tname, Territory t) throws Exception
     {
         currentTname = tname;
         int maxYear = t.maxYear(-1);
@@ -104,7 +104,7 @@ public class ExportCharts
             long popm;
             final Double nullDouble = null;
             final Long nullLong = null;
-            
+
             if (t.territoryYearOrNull(year) == null)
             {
                 if (tname.equals("Черноморская") && year < 1896)
@@ -115,7 +115,7 @@ public class ExportCharts
                 {
                     throw new IllegalArgumentException();
                 }
-                
+
                 setNumber(sheet, nr, 1, nullLong);
                 setNumber(sheet, nr, 2, nullLong);
                 setNumber(sheet, nr, 3, nullLong);
@@ -139,7 +139,10 @@ public class ExportCharts
                 Long births = t.territoryYearOrNull(year).births.total.both;
                 Long deaths = t.territoryYearOrNull(year).deaths.total.both;
                 Long migr = t.territoryYearOrNull(year).migration.total.both;
-                
+                Long emigr = t.territoryYearOrNull(year).emigration.total.both;
+                Long immigr = t.territoryYearOrNull(year).immigration.total.both;
+                Long inner_migr = t.territoryYearOrNull(year).inner_migration.total.both;
+
                 setNumber(sheet, nr, 3, births);
                 setNumber(sheet, nr, 4, deaths);
                 setNumber(sheet, nr, 5, migr);
@@ -149,6 +152,10 @@ public class ExportCharts
 
                 setNumber(sheet, nr, 6, round(cbr, 3));
                 setNumber(sheet, nr, 7, round(cdr, 3));
+
+                setNumber(sheet, nr, 9, emigr);
+                setNumber(sheet, nr, 10, immigr);
+                setNumber(sheet, nr, 11, inner_migr);
             }
             else
             {
@@ -158,6 +165,10 @@ public class ExportCharts
                 setNumber(sheet, nr, 5, nullLong);
                 setNumber(sheet, nr, 6, nullDouble);
                 setNumber(sheet, nr, 7, nullDouble);
+
+                setNumber(sheet, nr, 9, nullLong);
+                setNumber(sheet, nr, 10, nullLong);
+                setNumber(sheet, nr, 11, nullLong);
             }
         }
 
@@ -200,10 +211,24 @@ public class ExportCharts
                 /* mid-year */
                 popm = MathUtil.log_average(pop, pop2);
                 setNumber(sheet, nr, 2, popm);
+
+                Long migr = tPopulation.territoryYearOrNull(year).migration.total.both;
+                Long emigr = tPopulation.territoryYearOrNull(year).emigration.total.both;
+                Long immigr = tPopulation.territoryYearOrNull(year).immigration.total.both;
+                Long inner_migr = tPopulation.territoryYearOrNull(year).inner_migration.total.both;
+
+                setNumber(sheet, nr, 3, migr);
+                setNumber(sheet, nr, 4, emigr);
+                setNumber(sheet, nr, 5, immigr);
+                setNumber(sheet, nr, 6, inner_migr);
             }
             else
             {
                 setNumber(sheet, nr, 2, nullLong);
+                setNumber(sheet, nr, 3, nullLong);
+                setNumber(sheet, nr, 4, nullLong);
+                setNumber(sheet, nr, 5, nullLong);
+                setNumber(sheet, nr, 6, nullLong);
             }
 
             pop = tVitalRates.territoryYearOrNull(year).progressive_population.total.both;
@@ -214,32 +239,44 @@ public class ExportCharts
                 Long pop2 = tVitalRates.territoryYearOrNull(year + 1).progressive_population.total.both;
                 /* mid-year */
                 popm = MathUtil.log_average(pop, pop2);
-                setNumber(sheet, nr, 4, popm);
+                setNumber(sheet, nr, 8, popm);
 
                 Long births = tVitalRates.territoryYearOrNull(year).births.total.both;
                 Long deaths = tVitalRates.territoryYearOrNull(year).deaths.total.both;
                 Long migr = tVitalRates.territoryYearOrNull(year).migration.total.both;
+                Long emigr = tVitalRates.territoryYearOrNull(year).emigration.total.both;
+                Long immigr = tVitalRates.territoryYearOrNull(year).immigration.total.both;
+                Long inner_migr = tVitalRates.territoryYearOrNull(year).inner_migration.total.both;
 
-                setNumber(sheet, nr, 5, births);
-                setNumber(sheet, nr, 6, deaths);
-                setNumber(sheet, nr, 7, migr);
+                setNumber(sheet, nr, 9, births);
+                setNumber(sheet, nr, 10, deaths);
+                setNumber(sheet, nr, 11, migr);
 
                 Double cbr = (1000.0 * births) / popm;
                 Double cdr = (1000.0 * deaths) / popm;
 
-                setNumber(sheet, nr, 8, round(cbr, 3));
-                setNumber(sheet, nr, 9, round(cdr, 3));
+                setNumber(sheet, nr, 12, round(cbr, 3));
+                setNumber(sheet, nr, 13, round(cdr, 3));
+                // 14 = естественный прирост
+
+                setNumber(sheet, nr, 15, emigr);
+                setNumber(sheet, nr, 16, immigr);
+                setNumber(sheet, nr, 17, inner_migr);
             }
             else
             {
-                setNumber(sheet, nr, 4, nullLong);
-                setNumber(sheet, nr, 5, nullLong);
-                setNumber(sheet, nr, 6, nullLong);
-                setNumber(sheet, nr, 7, nullLong);
+                setNumber(sheet, nr, 8, nullLong);
+                setNumber(sheet, nr, 9, nullLong);
+                setNumber(sheet, nr, 10, nullLong);
+                setNumber(sheet, nr, 11, nullLong);
 
-                setNumber(sheet, nr, 8, nullDouble);
-                setNumber(sheet, nr, 9, nullDouble);
-                setNumber(sheet, nr, 10, nullDouble);
+                setNumber(sheet, nr, 12, nullDouble);
+                setNumber(sheet, nr, 13, nullDouble);
+                setNumber(sheet, nr, 14, nullDouble);
+
+                setNumber(sheet, nr, 15, nullLong);
+                setNumber(sheet, nr, 16, nullLong);
+                setNumber(sheet, nr, 17, nullLong);
             }
         }
 

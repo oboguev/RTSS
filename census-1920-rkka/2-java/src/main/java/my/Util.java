@@ -128,24 +128,24 @@ public class Util
             text = "";
         return text;
     }
-    
+
     public static String loadResource(String path) throws Exception
     {
         byte[] bytes = Files.readAllBytes(Paths.get(Util.class.getClassLoader().getResource(path).toURI()));
         return new String(bytes, StandardCharsets.UTF_8);
     }
-    
+
     public static String f2s(double f) throws Exception
     {
         String s = String.format("%f", f);
         if (!s.contains("."))
             return s;
         while (s.endsWith("0") && !s.endsWith(".0"))
-             s = Util.stripTail(s, "0");
+            s = Util.stripTail(s, "0");
         if (s.endsWith(".0"))
             s = Util.stripTail(s, ".0");
         return s;
-    }    
+    }
 
     public static double min(double[] y)
     {
@@ -176,7 +176,7 @@ public class Util
             sum += y[k];
         return sum;
     }
-    
+
     public static double[] splice(double[] y, int yx1, int yx2)
     {
         double[] yy = new double[yx2 - yx1 + 1];
@@ -186,7 +186,7 @@ public class Util
         }
         return yy;
     }
-    
+
     public static void noop()
     {
         // for debugging

@@ -13,6 +13,9 @@ public class TaxonYearData
     public Double cdr_middle;
     
     public Long migration;
+    public Long emigration;
+    public Long immigration;
+    public Long inner_migration;
     
     public Double vitalShare;
 }

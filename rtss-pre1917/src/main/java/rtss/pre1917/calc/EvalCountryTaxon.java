@@ -177,6 +177,9 @@ public class EvalCountryTaxon extends EvalCountryBase
      *     births.total.both
      *     deaths.total.both
      *     migration.total.both
+     *     immigration.total.both
+     *     emigration.total.both
+     *     inner_migration.total.both
      *     hasValidVitalRate
      * CBR и СDR должны вычисляться отдельно, в зависимости от нужной нормировки   
      */
@@ -545,6 +548,9 @@ public class EvalCountryTaxon extends EvalCountryBase
             yd.cdr_middle = cdr_middle;
             yd.population_increase = pop_total_next - pop_total;
             yd.migration = tmPopulation.territoryYear(year).migration.total.both;
+            yd.emigration = tmPopulation.territoryYear(year).emigration.total.both;
+            yd.immigration = tmPopulation.territoryYear(year).immigration.total.both;
+            yd.inner_migration = tmPopulation.territoryYear(year).inner_migration.total.both;
             yd.vitalShare = (100.0 * pop_vital_middle) / pop_total_middle;
 
             cd.put(year, yd);
@@ -610,15 +616,9 @@ public class EvalCountryTaxon extends EvalCountryBase
             DiagMigrationMerge.lump(taxonName, year, lumpYearSum, lump);
 
             lumpTotal += lumpYearSum;
-
-            if (tm.territoryYearOrNull(year).migration.total.both == null)
-            {
-                tm.territoryYearOrNull(year).migration.total.both = lumpYearSum;
-            }
-            else
-            {
-                tm.territoryYearOrNull(year).migration.total.both += lumpYearSum;
-            }
+            
+            tm.territoryYearOrNull(year).migration.total.both = Util.add_nullable(tm.territoryYearOrNull(year).migration.total.both, lumpYearSum);
+            tm.territoryYearOrNull(year).immigration.total.both = Util.add_nullable(tm.territoryYearOrNull(year).immigration.total.both, lumpYearSum);
         }
 
         if (print && options.verbose())
