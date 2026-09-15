@@ -83,7 +83,7 @@ public class AdjustTerritories
         for (int year = 1881; year <= 1915; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
-            ty.migration.total.both = TotalMigration.getTotalMigration().saldo_nullable(tname, year);
+            TotalMigration.getTotalMigration().fillMigration(ty);
         }
     }
 

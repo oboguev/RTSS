@@ -35,6 +35,12 @@ public class TerritoryYear
     public URValue births = new URValue(this);
     public URValue deaths = new URValue(this);
     public URValue migration = new URValue(this);
+    /*
+     * Категории миграционного баланса
+     */
+    public URValue emigration = new URValue(this);
+    public URValue immigration = new URValue(this);
+    public URValue inner_migration = new URValue(this);
 
     public void setValueForce(String what, Double v) throws Exception
     {
@@ -70,7 +76,7 @@ public class TerritoryYear
             throw new Exception("Invalid selector");
         }
     }
-    
+
     public void setValue(String what, Long v) throws Exception
     {
         setValueForce(what, v, false);
@@ -481,6 +487,10 @@ public class TerritoryYear
         ty.births = this.births.dup(ty);
         ty.deaths = this.deaths.dup(ty);
         ty.migration = this.migration.dup(ty);
+        ty.emigration = this.emigration.dup(ty);
+        ty.immigration = this.immigration.dup(ty);
+        ty.inner_migration = this.inner_migration.dup(ty);
+
         return ty;
     }
 
@@ -533,6 +543,9 @@ public class TerritoryYear
         births.merge(ty.births);
         deaths.merge(ty.deaths);
         migration.merge(ty.migration);
+        emigration.merge(ty.emigration);
+        immigration.merge(ty.immigration);
+        inner_migration.merge(ty.inner_migration);
     }
 
     private Double rate(long p1, Double r1, long p2, Double r2) throws Exception
@@ -579,5 +592,8 @@ public class TerritoryYear
         births.leaveOnlyTotalBoth();
         deaths.leaveOnlyTotalBoth();
         migration.leaveOnlyTotalBoth();
+        emigration.leaveOnlyTotalBoth();
+        immigration.leaveOnlyTotalBoth();
+        inner_migration.leaveOnlyTotalBoth();
     }
 }

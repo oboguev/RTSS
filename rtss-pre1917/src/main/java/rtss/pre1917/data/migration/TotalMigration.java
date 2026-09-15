@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.DemographicConstants;
+import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
 /*
@@ -87,5 +88,13 @@ public class TotalMigration
             v = null;
 
         return v;
+    }
+    
+    public void fillMigration(TerritoryYear ty) throws Exception
+    {
+        if (!(ty.year >= 1881 && ty.year <= 1916))
+            throw new IllegalArgumentException();
+        ty.migration.total.both = saldo_nullable(ty.territory.name, ty.year);
+        // ###
     }
 }

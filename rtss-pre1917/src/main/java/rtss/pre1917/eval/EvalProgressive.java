@@ -170,14 +170,14 @@ public class EvalProgressive
         ty1897.progressive_population.total.both = censusPopulation - in1;
         ty1898.progressive_population.total.both = censusPopulation + in2;
 
-        ty1897.migration.total.both = totalMigration.saldo_nullable(tname, 1897);
+        totalMigration.fillMigration(ty1897);
 
         if (xty1896 != null)
         {
             in = xty1896.births.total.both - xty1896.deaths.total.both;
             in += totalMigration.saldo(tname, 1896);
             ty1896.progressive_population.total.both = ty1897.progressive_population.total.both - in;
-            ty1896.migration.total.both = totalMigration.saldo_nullable(tname, 1896);
+            totalMigration.fillMigration(ty1896);
         }
 
         for (int year = 1898; year <= 1916; year++)
@@ -188,7 +188,7 @@ public class EvalProgressive
 
             if (ty != null)
             {
-                ty.migration.total.both = totalMigration.saldo_nullable(tname, year);
+                totalMigration.fillMigration(ty);
 
                 if (ty_next != null && xty != null)
                 {
@@ -211,7 +211,7 @@ public class EvalProgressive
 
             if (ty != null && ty_next != null && ty_next.progressive_population.total.both != null)
             {
-                ty.migration.total.both = totalMigration.saldo_nullable(tname, year);
+                totalMigration.fillMigration(ty);
                 in = null2zero(xty.births.total.both) - null2zero(xty.deaths.total.both);
                 in += null2zero(ty.migration.total.both);
                 ty.progressive_population.total.both = ty_next.progressive_population.total.both - in;

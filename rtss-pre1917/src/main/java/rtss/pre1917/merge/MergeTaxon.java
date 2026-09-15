@@ -203,6 +203,9 @@ public class MergeTaxon
             sum_ur(ty, "births", tx, options);
             sum_ur(ty, "deaths", tx, options);
             sum_ur(ty, "migration", tx, options);
+            sum_ur(ty, "emigration", tx, options);
+            sum_ur(ty, "immigration", tx, options);
+            sum_ur(ty, "inner_migration", tx, options);
 
             rate(ty, "cbr", tx, options);
             rate(ty, "cdr", tx, options);
@@ -241,7 +244,8 @@ public class MergeTaxon
 
         for (String tname : Util.sort(tx.territories.keySet()))
         {
-            if (Util.False && ty.year == 1906 && tname.startsWith("Самарк") && selector.equals("migration.total.both"))
+            /* для отладки */
+            if (Util.False && ty.year == 1906 && tname.startsWith("Самаркандская") && selector.equals("migration.total.both"))
                 Util.noop();
             
             if (!Astrakhan.shouldMergeTaxon(tname, tx.territories.keySet(), territories))

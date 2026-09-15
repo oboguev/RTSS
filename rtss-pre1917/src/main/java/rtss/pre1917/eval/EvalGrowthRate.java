@@ -190,7 +190,7 @@ public class EvalGrowthRate
             }
 
             if (ty != null)
-                ty.migration.total.both = totalMigration.saldo_nullable(t.name, year);
+                totalMigration.fillMigration(ty);
         }
 
         EvalProgressive.evalProgressive(xt, tdsCensus1897.get(t.name));
