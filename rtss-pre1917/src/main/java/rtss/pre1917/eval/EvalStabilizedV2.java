@@ -44,9 +44,6 @@ public class EvalStabilizedV2
             double lambda,
             boolean adjust1892)
     {
-        if (tdsCensus1897 == null)
-            throw constructorError("EvalStabilizedV2: tdsCensus1897 is null");
-
         if (windowWidth < 3 || windowWidth % 2 == 0)
             throw constructorError("EvalStabilizedV2: windowWidth must be an odd integer >= 3");
 
@@ -72,6 +69,22 @@ public class EvalStabilizedV2
             int dy1,
             int dy2) throws Exception
     {
+        if (tdsCensus1897 == null)
+            throw constructorError("EvalStabilizedV2: tdsCensus1897 is null");
+
+        Territory censusTerritory = tdsCensus1897.get(t.name);
+        if (censusTerritory == null)
+            throw evaluationError("EvalStabilizedV2: no 1897 census territory for " + t.name);
+
+        return evalTerritory(t, censusTerritory, by1, by2, dy1, dy2);
+    }
+
+    public Territory evalTerritory(Territory t, Territory censusTerritory,
+            int by1,
+            int by2,
+            int dy1,
+            int dy2) throws Exception
+    {
         if (t == null)
             throw evaluationError("EvalStabilizedV2: territory is null");
 
@@ -80,10 +93,6 @@ public class EvalStabilizedV2
 
         if (dy1 > dy2)
             throw evaluationError("EvalStabilizedV2: invalid deaths interval " + dy1 + "-" + dy2);
-
-        Territory censusTerritory = tdsCensus1897.get(t.name);
-        if (censusTerritory == null)
-            throw evaluationError("EvalStabilizedV2: no 1897 census territory for " + t.name);
 
         Territory result = t.dup();
         List<Integer> years = new ArrayList<Integer>();

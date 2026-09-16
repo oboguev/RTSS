@@ -10,6 +10,7 @@ import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.EvalStabilizedFergana;
+import rtss.pre1917.eval.EvalStabilizedPrimKamchatka;
 import rtss.pre1917.eval.EvalStabilizedSemirechye;
 import rtss.pre1917.eval.EvalStabilizedV2;
 import rtss.pre1917.eval.FixEarlyPeriod;
@@ -217,7 +218,10 @@ public class CorrectTerritories
             useStabilizedV2("Забайкальская обл.", 1908, 1913, true);
 
         if (isCorrected("Приморская обл. с Камчатской обл."))
-            fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1881, 1898, 1899, 1903);
+        {
+            // fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1881, 1898, 1899, 1903);
+            fixPrimKamchatka("Приморская обл. с Камчатской обл.");
+        }
 
         excludeFromVitalRates("Приморская обл. с Камчатской обл.");
     }
@@ -355,6 +359,24 @@ public class CorrectTerritories
         final double lambda = 0.5;
 
         Territory tEval = new EvalStabilizedSemirechye(tdsCensus1897, window, lambda).evalTerritory(t);
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
+    }
+
+
+    @SuppressWarnings("unused")
+    private void fixPrimKamchatka(String tname) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+
+        final int window = 7;
+        final double lambda = 0.5;
+
+        Territory tEval = new EvalStabilizedPrimKamchatka(tdsCensus1897, window, lambda).evalTerritory(t);
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
     }

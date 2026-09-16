@@ -5,6 +5,7 @@ import java.util.List;
 
 import rtss.data.selectors.BirthDeath;
 import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 
@@ -32,6 +33,8 @@ public class FixEarlyPeriod
     private final double PROMILLE = 1000.0;
     
     private final int fromYear;
+    
+    private static boolean useEvalStabilizedV2 = true; 
 
     public FixEarlyPeriod(int fromYear) throws Exception
     {
@@ -74,6 +77,15 @@ public class FixEarlyPeriod
     public Territory fix(Territory t, Territory tCensus, int byl1, int byl2, int byr1, int byr2,
             int dyl1, int dyl2, int dyr1, int dyr2) throws Exception
     {
+        
+        if (useEvalStabilizedV2)
+        {
+            final int window = 7;
+            final double lambda = 0.5;
+            EvalStabilizedV2 es = new EvalStabilizedV2(null, window, lambda, false);
+            return es.evalTerritory(t, tCensus, byr1, byr2, dyr1, dyr2);
+        }
+        
         final double rate_difference_threshold = 0.01;
         double prev_right_cbr = 0;
         double prev_right_cdr = 0;
