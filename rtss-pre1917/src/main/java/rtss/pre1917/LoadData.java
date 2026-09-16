@@ -29,6 +29,7 @@ import rtss.pre1917.data.migration.EmigrationYear;
 import rtss.pre1917.data.migration.Immigration;
 import rtss.pre1917.data.migration.ImmigrationYear;
 import rtss.pre1917.data.migration.InnerMigration;
+import rtss.pre1917.data.migration.RebalanceEmigrationWithImmigration;
 import rtss.pre1917.eval.Astrakhan;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.eval.EvalProgressive;
@@ -1420,32 +1421,41 @@ public class LoadData
 
     /* ================================================================================================= */
 
+    private static Emigration cachedEmigration = null;
+
     public Emigration loadEmigration() throws Exception
     {
-        Emigration em = new Emigration();
-
-        currentFile = "emigration.xlsx";
-
-        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        if (cachedEmigration == null)
         {
-            XSSFSheet sheet = wb.getSheet("data-1896-1916");
-            ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-            Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
-            loadEmigration(em, rc, headers.get("год"), headers);
+            Emigration em = new Emigration();
 
-            sheet = wb.getSheet("data-1881-1895");
-            rc = Excel.readSheet(wb, sheet, currentFile);
-            headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
-            loadEmigration(em, rc, headers.get("год"), headers);
+            currentFile = "emigration.xlsx";
+
+            try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+            {
+                XSSFSheet sheet = wb.getSheet("data-1896-1916");
+                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+                loadEmigration(em, rc, headers.get("год"), headers);
+
+                sheet = wb.getSheet("data-1881-1895");
+                rc = Excel.readSheet(wb, sheet, currentFile);
+                headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+                loadEmigration(em, rc, headers.get("год"), headers);
+            }
+            finally
+            {
+                currentFile = null;
+            }
+
+            em.build();
+
+            cachedEmigration = em;
         }
-        finally
-        {
-            currentFile = null;
-        }
 
-        em.build();
+        RebalanceEmigrationWithImmigration.rebalance(cachedEmigration, cachedImmigration);
 
-        return em;
+        return cachedEmigration;
     }
 
     private void loadEmigration(Emigration em, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception
@@ -2427,37 +2437,39 @@ public class LoadData
 
     public Immigration loadImmigration() throws Exception
     {
-        if (cachedImmigration != null)
-            return cachedImmigration;
-
-        Immigration immigration = new Immigration();
-
-        currentFile = "immigration.xlsx";
-
-        try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
+        if (cachedImmigration == null)
         {
-            for (int k = 0; k < wb.getNumberOfSheets(); k++)
+            Immigration immigration = new Immigration();
+
+            currentFile = "immigration.xlsx";
+
+            try (XSSFWorkbook wb = Excel.loadWorkbook(currentFile))
             {
-                XSSFSheet sheet = wb.getSheetAt(k);
-                String sname = sheet.getSheetName();
-                if (sname != null && sname.trim().toLowerCase().contains("note"))
-                    continue;
+                for (int k = 0; k < wb.getNumberOfSheets(); k++)
+                {
+                    XSSFSheet sheet = wb.getSheetAt(k);
+                    String sname = sheet.getSheetName();
+                    if (sname != null && sname.trim().toLowerCase().contains("note"))
+                        continue;
 
-                ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
-                Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
+                    ExcelRC rc = Excel.readSheet(wb, sheet, currentFile);
+                    Map<String, Integer> headers = ExcelColumnHeader.getTopHeaders(sheet, rc);
 
-                loadImmigration(immigration, rc, headers.get("год"), headers);
+                    loadImmigration(immigration, rc, headers.get("год"), headers);
+                }
             }
-        }
-        finally
-        {
-            currentFile = null;
+            finally
+            {
+                currentFile = null;
+            }
+
+            immigration.build();
+            cachedImmigration = immigration;
         }
 
-        immigration.build();
-        cachedImmigration = immigration;
+        RebalanceEmigrationWithImmigration.rebalance(cachedEmigration, cachedImmigration);
 
-        return immigration;
+        return cachedImmigration;
     }
 
     private void loadImmigration(Immigration immigration, ExcelRC rc, int colYear, Map<String, Integer> headers) throws Exception

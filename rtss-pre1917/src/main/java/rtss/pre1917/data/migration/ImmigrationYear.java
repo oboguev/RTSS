@@ -39,6 +39,14 @@ public class ImmigrationYear
         return v;
     }
     
+    public long get_nonneg(String country) throws Exception
+    {
+        long v = get(country);
+        if (v < 0)
+            throw new Exception("Отрицательнная иммиграция для " + country + " в " + year);
+        return v;
+    }
+    
     public Set<String> contries()
     {
         return country2amount.keySet();
