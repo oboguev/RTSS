@@ -315,6 +315,7 @@ public class CorrectTerritories
         tdsVitalRates.put(tname, tEval.dup());
     }
 
+    @SuppressWarnings("unused")
     private void fixEarlyPeriod(String tname, int yl1, int yl2, int yr1, int yr2) throws Exception
     {
         TerritoryNames.checkValidTerritoryName(tname);

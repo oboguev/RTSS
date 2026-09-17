@@ -5,7 +5,6 @@ import java.util.List;
 
 import rtss.data.selectors.BirthDeath;
 import rtss.pre1917.data.Territory;
-import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.URValue;
 

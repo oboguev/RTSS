@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import rtss.util.Util;
-
 /*
  * Годовые данные иммиграции в Россию: число иммигрантов по странам
  */
@@ -38,14 +36,6 @@ public class ImmigrationYear
         if (v == null)
             v = 0L;
         
-        return v;
-    }
-    
-    public long get_nonneg(String country) throws Exception
-    {
-        long v = get(country);
-        if (v < 0 && Util.False) // ###@@@
-            throw new Exception("Отрицательнная иммиграция для " + country + " в " + year);
         return v;
     }
     

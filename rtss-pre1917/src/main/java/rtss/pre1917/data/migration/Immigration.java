@@ -122,9 +122,6 @@ public class Immigration
         Double v = tname2amount.get(key);
         if (v == null)
             v = 0.0;
-        // ###@@@
-        // if (v < 0 || value < 0)
-        //            throw new IllegalArgumentException("Отрицательная иммиграция");
         tname2amount.put(key, v + value);
     }
 
@@ -185,22 +182,22 @@ public class Immigration
 
         addAmount("Сыр-Дарьинская обл.", yd.year, yd.get("Хива и Бухара"));
 
-        yd.lump.persia = yd.get_nonneg("Персия");
-        yd.lump.turkey = yd.get_nonneg("Турция");
+        yd.lump.persia = yd.get("Персия");
+        yd.lump.turkey = yd.get("Турция");
 
-        yd.lump.china = yd.get_nonneg("Китай");
-        yd.lump.japan = yd.get_nonneg("Япония");
+        yd.lump.china = yd.get("Китай");
+        yd.lump.japan = yd.get("Япония");
 
         yd.lump.european = 0L;
-        yd.lump.european += yd.get_nonneg("Голландия");
-        yd.lump.european += yd.get_nonneg("Дания");
-        yd.lump.european += yd.get_nonneg("Испания");
-        yd.lump.european += yd.get_nonneg("Португалия");
-        yd.lump.european += yd.get_nonneg("Сербия");
-        yd.lump.european += yd.get_nonneg("США");
-        yd.lump.european += yd.get_nonneg("Черногория");
-        yd.lump.european += yd.get_nonneg("Швеция и Норвегия");
-        yd.lump.european += yd.get_nonneg("др страны");
+        yd.lump.european += yd.get("Голландия");
+        yd.lump.european += yd.get("Дания");
+        yd.lump.european += yd.get("Испания");
+        yd.lump.european += yd.get("Португалия");
+        yd.lump.european += yd.get("Сербия");
+        yd.lump.european += yd.get("США");
+        yd.lump.european += yd.get("Черногория");
+        yd.lump.european += yd.get("Швеция и Норвегия");
+        yd.lump.european += yd.get("др страны");
     }
     
     private void validate(ImmigrationYear yd) throws Exception
