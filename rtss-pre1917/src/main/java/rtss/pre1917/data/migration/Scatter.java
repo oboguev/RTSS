@@ -116,7 +116,8 @@ public class Scatter
 
     public static Collection<String> tsPolish(int year) throws Exception
     {
-        Set<String> v = Set.of("Варшавская с Варшавой",
+        Set<String> v = Set.of("Варшавская",
+                               "г. Варшава",
                                "Калишская",
                                "Келецкая",
                                "Ломжинская",
