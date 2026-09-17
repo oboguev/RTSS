@@ -198,19 +198,19 @@ public class ExportCharts
         for (int year = startYear; year <= maxYear + 1; year++)
         {
             int nr = (year - 1881) + (5 - 1);
-            long popm;
             final Double nullDouble = null;
             final Long nullLong = null;
 
             Long pop = tPopulation.territoryYearOrNull(year).progressive_population.total.both;
+            Long popmOverall = null;
             setNumber(sheet, nr, 1, pop);
             if (year <= maxYear)
             {
                 /* next year start */
                 Long pop2 = tPopulation.territoryYearOrNull(year + 1).progressive_population.total.both;
                 /* mid-year */
-                popm = MathUtil.log_average(pop, pop2);
-                setNumber(sheet, nr, 2, popm);
+                popmOverall = MathUtil.log_average(pop, pop2);
+                setNumber(sheet, nr, 2, popmOverall);
 
                 Long migr = tPopulation.territoryYearOrNull(year).migration.total.both;
                 Long emigr = tPopulation.territoryYearOrNull(year).emigration.total.both;
@@ -238,8 +238,8 @@ public class ExportCharts
                 /* next year start */
                 Long pop2 = tVitalRates.territoryYearOrNull(year + 1).progressive_population.total.both;
                 /* mid-year */
-                popm = MathUtil.log_average(pop, pop2);
-                setNumber(sheet, nr, 8, popm);
+                double popmVital = MathUtil.log_average(pop, pop2);
+                setNumber(sheet, nr, 8, popmVital);
 
                 Long births = tVitalRates.territoryYearOrNull(year).births.total.both;
                 Long deaths = tVitalRates.territoryYearOrNull(year).deaths.total.both;
@@ -252,16 +252,19 @@ public class ExportCharts
                 setNumber(sheet, nr, 10, deaths);
                 setNumber(sheet, nr, 11, migr);
 
-                Double cbr = (1000.0 * births) / popm;
-                Double cdr = (1000.0 * deaths) / popm;
+                Double cbr = (1000.0 * births) / popmVital;
+                Double cdr = (1000.0 * deaths) / popmVital;
 
                 setNumber(sheet, nr, 12, round(cbr, 3));
                 setNumber(sheet, nr, 13, round(cdr, 3));
                 // 14 = естественный прирост
+                
+                Double pctVital = (100.0 * popmVital) / popmOverall; 
+                setNumber(sheet, nr, 15, round(pctVital , 2));
 
-                setNumber(sheet, nr, 15, emigr);
-                setNumber(sheet, nr, 16, immigr);
-                setNumber(sheet, nr, 17, inner_migr);
+                setNumber(sheet, nr, 16, emigr);
+                setNumber(sheet, nr, 17, immigr);
+                setNumber(sheet, nr, 18, inner_migr);
             }
             else
             {
@@ -273,10 +276,11 @@ public class ExportCharts
                 setNumber(sheet, nr, 12, nullDouble);
                 setNumber(sheet, nr, 13, nullDouble);
                 setNumber(sheet, nr, 14, nullDouble);
+                setNumber(sheet, nr, 15, nullDouble);
 
-                setNumber(sheet, nr, 15, nullLong);
                 setNumber(sheet, nr, 16, nullLong);
                 setNumber(sheet, nr, 17, nullLong);
+                setNumber(sheet, nr, 18, nullLong);
             }
         }
 
