@@ -9,6 +9,7 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.TotalMigration;
+import rtss.pre1917.validate.ValidateProgressive;
 import rtss.util.Util;
 
 /*
@@ -221,6 +222,8 @@ public class EvalProgressive
                 Util.err("Нельзя вычислить прогрессивный расчёт для " + tname + " " + year);
             }
         }
+        
+        ValidateProgressive.validate(t);
     }
 
     static private long null2zero(Long v)

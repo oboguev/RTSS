@@ -22,6 +22,7 @@ import rtss.pre1917.merge.MergeTaxon;
 import rtss.pre1917.merge.MergeTaxon.MergeTaxonOptions;
 import rtss.pre1917.merge.MergeTaxon.WhichYears;
 import rtss.pre1917.validate.CheckProgressiveAvailable;
+import rtss.pre1917.validate.ValidateProgressive;
 import rtss.pre1917.war.ApplyWarDeaths;
 import rtss.pre1917.war.ApplyWarDeaths.WarDeathsSummary;
 import rtss.util.Util;
@@ -263,13 +264,19 @@ public class EvalCountryTaxon extends EvalCountryBase
                                                    : LoadOptions.DONT_EVAL_MERGE_ASTRAKHAN,
                           LoadOptions.EVAL_PROGRESSIVE);
 
+        ValidateProgressive.validate(tdsPopulation);
+
         tdsPopulation.leaveOnlyTotalBoth();
+
+        ValidateProgressive.validate(tdsPopulation);
 
         if (options.verbose())
         {
             FilterByTaxon.filteredOutByTaxon(taxonName, tdsPopulation).showTerritoryNames("Не используемые территории, в т.ч. составные");
             FilterByTaxon.filterByTaxon(taxonName, tdsPopulation).showTerritoryNames("Территории для численности населения", taxonName, 1914);
         }
+
+        ValidateProgressive.validate(tdsPopulation);
 
         /* ================================= Правки ================================ */
 
@@ -281,6 +288,8 @@ public class EvalCountryTaxon extends EvalCountryBase
         tdsVitalRates = tdsPopulation.dup();
 
         corrections();
+        ValidateProgressive.validate(tdsPopulation);
+        ValidateProgressive.validate(tdsVitalRates);
 
         if (taxonName.equals("Империя"))
             calc_empire();
