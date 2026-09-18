@@ -124,7 +124,8 @@ public class URValue
 
     public void adjustFemaleBirths()
     {
-        if (rural.adjustFemaleBirths() || urban.adjustFemaleBirths())
+        /* note it should be | rather than || so both are executed */
+        if (rural.adjustFemaleBirths() | urban.adjustFemaleBirths())
         {
             total.recalcAsSum(rural, urban);
         }

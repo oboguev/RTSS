@@ -41,7 +41,9 @@ public class TerritoryYear
     public URValue emigration = new URValue(this);
     public URValue immigration = new URValue(this);
     public URValue inner_migration = new URValue(this);
-
+    
+    private boolean femaleBirthsAdjusted = false;
+    
     public void setValueForce(String what, Double v) throws Exception
     {
         setValue(what, v);
@@ -490,6 +492,7 @@ public class TerritoryYear
         ty.emigration = this.emigration.dup(ty);
         ty.immigration = this.immigration.dup(ty);
         ty.inner_migration = this.inner_migration.dup(ty);
+        ty.femaleBirthsAdjusted = this.femaleBirthsAdjusted;
 
         return ty;
     }
@@ -572,7 +575,12 @@ public class TerritoryYear
 
     public void adjustFemaleBirths()
     {
-        births.adjustFemaleBirths();
+        if (!femaleBirthsAdjusted)
+        {
+            /* execute it once to avoid rounding errors */
+            births.adjustFemaleBirths();
+            femaleBirthsAdjusted = true;
+        }
     }
 
     public void boostBirthsDeaths(Double boostBirths, Double boostDeaths)
