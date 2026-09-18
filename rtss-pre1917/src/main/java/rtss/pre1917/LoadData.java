@@ -30,12 +30,12 @@ import rtss.pre1917.data.migration.Immigration;
 import rtss.pre1917.data.migration.ImmigrationYear;
 import rtss.pre1917.data.migration.InnerMigration;
 import rtss.pre1917.data.migration.RebalanceEmigrationWithImmigration;
+import rtss.pre1917.data.migration.TotalMigration;
 import rtss.pre1917.eval.Astrakhan;
 import rtss.pre1917.eval.EvalEvroChastPopulation;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.FillMissingBD;
 import rtss.pre1917.validate.CrossVerify;
-import rtss.pre1917.validate.ValidateProgressive;
 import rtss.pre1917.war.WarLossShare;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
@@ -2339,11 +2339,10 @@ public class LoadData
         {
             addFinlandProgressive(tdsFinland.get(name));
             tds.put(name, tdsFinland.get(name));
-
         }
     }
 
-    private void addFinlandProgressive(Territory t)
+    private void addFinlandProgressive(Territory t) throws Exception
     {
         /*
          * Население по финской статистике уже учитывает миграцию
@@ -2352,6 +2351,7 @@ public class LoadData
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             ty.progressive_population.total.both = ty.population.total.both;
+            TotalMigration.getTotalMigration().fillMigration(ty);
         }
     }
 

@@ -113,6 +113,9 @@ public class TotalMigration
         final String tname = ty.territory.name;
         final int year = ty.year;
         
+        if (Taxon.isFinland(tname) && year == 1917)
+            return;
+        
         if (!(year >= 1881 && year <= 1916))
             throw new IllegalArgumentException();
         
