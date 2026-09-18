@@ -12,9 +12,12 @@ public class ValidateProgressive
     {
         switch (t.name)
         {
-        case "Волынская":
-            break;
-            
+        case "Бакинская с Баку":
+        case "Уральская обл.":
+        case "Самаркандская обл.":
+        case "Черноморская":
+            return;
+
         default:
             break;
         }

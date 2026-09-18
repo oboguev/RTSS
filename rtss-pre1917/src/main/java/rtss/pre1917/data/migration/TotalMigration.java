@@ -4,6 +4,9 @@ import java.util.Properties;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.DemographicConstants;
+import rtss.pre1917.data.Taxon;
+import rtss.pre1917.data.Territory;
+import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.util.Util;
 
@@ -20,6 +23,7 @@ public class TotalMigration
     private InnerMigration innerMigration = new LoadData().loadInnerMigration();
     private Emigration emigration = new LoadData().loadEmigration();
     private Immigration immigration = new LoadData().loadImmigration();
+    private TerritoryDataSet tdsFinland = new LoadData().loadFinland();
     private Properties p = Util.loadProperties("pre1917.props");
 
     private TotalMigration() throws Exception
@@ -44,6 +48,20 @@ public class TotalMigration
 
     public Long saldo_nullable(String tname, int year) throws Exception
     {
+        if (Taxon.isFinland(tname))
+        {
+            if (year >= 1917)
+                return null;
+            
+            Territory t = tdsFinland.get(tname);
+            TerritoryYear ty = t.territoryYearOrNull(year); 
+            TerritoryYear ty2 = t.territoryYearOrNull(year + 1); 
+            long pop_delta = ty2.population.total.both - ty.population.total.both;
+            long ngrowth = ty.births.total.both - ty.deaths.total.both;
+            long migr = pop_delta - ngrowth;
+            return migr;
+        }
+        
         Long v = null;
 
         v = innerMigration.saldo(tname, year) + immigration.immigrants(tname, year) - emigration.emigrants(tname, year);
