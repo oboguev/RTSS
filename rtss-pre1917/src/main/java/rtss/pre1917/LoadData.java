@@ -1662,10 +1662,12 @@ public class LoadData
         if (cachedInnerMigration == null)
         {
             InnerMigration im = new InnerMigration();
+            im.building();
             loadInnerMigrationYearly(im);
             loadInnerMigrationCorarse(im);
             im.build_1896_1916();
             loadInnerMigration_1881_1895(im);
+            im.built();
             im.seal();
             cachedInnerMigration = im;
         }

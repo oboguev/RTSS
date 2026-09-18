@@ -14,6 +14,9 @@ import rtss.util.Util;
 
 public class InnerMigration
 {
+    private boolean built = false;
+    private boolean building = false;
+
     public static class InnerMigrationAmount
     {
         public InnerMigrationAmount(String tname)
@@ -249,6 +252,16 @@ public class InnerMigration
         readonly = true;
     }
 
+    public void building()
+    {
+        building = true;
+    }
+
+    public void built()
+    {
+        built = true;
+    }
+
     private long sumInFlow(String tname, int y1, int y2)
     {
         long v = 0;
@@ -272,6 +285,9 @@ public class InnerMigration
 
     public long sumInFlow(int year)
     {
+        if (!built && !building)
+            throw new IllegalArgumentException();
+
         long v = 0;
         for (String tname : tname2ima.keySet())
         {
@@ -283,6 +299,9 @@ public class InnerMigration
 
     public long sumOutFlow(int year)
     {
+        if (!built && !building)
+            throw new IllegalArgumentException();
+
         long v = 0;
         for (String tname : tname2ima.keySet())
         {
@@ -296,6 +315,9 @@ public class InnerMigration
 
     public long inFlow(String tname, int year)
     {
+        if (!built && !building)
+            throw new IllegalArgumentException();
+
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
 
@@ -329,6 +351,9 @@ public class InnerMigration
 
     public long outFlow(String tname, int year)
     {
+        if (!built && !building)
+            throw new IllegalArgumentException();
+
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
 

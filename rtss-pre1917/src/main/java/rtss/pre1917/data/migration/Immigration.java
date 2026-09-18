@@ -19,6 +19,8 @@ import static rtss.pre1917.data.migration.Scatter.union;
  */
 public class Immigration
 {
+    private boolean built = false;
+
     /* ================================== FETCH DATA ================================== */
 
     /*
@@ -28,6 +30,9 @@ public class Immigration
      */
     public long immigrants(String tname, int year) throws Exception
     {
+        if (!built)
+            throw new IllegalArgumentException();
+
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
 
@@ -88,6 +93,9 @@ public class Immigration
 
     public long legalImmigrationForYear(int year)
     {
+        if (!built)
+            throw new IllegalArgumentException();
+
         long v = 0;
 
         ImmigrationYear yd = y2yd.get(year);
@@ -101,6 +109,9 @@ public class Immigration
 
     public LumpImmigration lumpImmigrationForYear(int year)
     {
+        if (!built)
+            throw new IllegalArgumentException();
+
         return y2yd.get(year).lump;
     }
 
@@ -165,6 +176,7 @@ public class Immigration
         }
 
         sealed = true;
+        built = true;
     }
 
     private void build(ImmigrationYear yd) throws Exception
@@ -199,7 +211,7 @@ public class Immigration
         yd.lump.european += yd.get("Швеция и Норвегия");
         yd.lump.european += yd.get("др страны");
     }
-    
+
     private void validate(ImmigrationYear yd) throws Exception
     {
         long v1 = 0;

@@ -32,6 +32,8 @@ import static rtss.pre1917.data.migration.Scatter.tsPolish;
  */
 public class Emigration
 {
+    private boolean built = false;
+    
     /* ================================== FETCH DATA ================================== */
 
     /*
@@ -39,6 +41,9 @@ public class Emigration
      */
     public long emigrants(String tname, int year) throws Exception
     {
+        if (!built)
+            throw new IllegalArgumentException();
+
         if (tname.equals(Taxon.Астраханская_кочевники))
             return 0;
 
@@ -81,6 +86,9 @@ public class Emigration
 
     public long emigrants(int year) throws Exception
     {
+        if (!built)
+            throw new IllegalArgumentException();
+
         Double v = 0.0;
 
         for (String key : tname2amount.keySet())
@@ -157,6 +165,7 @@ public class Emigration
         }
 
         sealed = true;
+        built = true;
     }
 
     private void build(EmigrationYear yd) throws Exception
