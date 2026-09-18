@@ -16,7 +16,7 @@ public class ValidateProgressive
             break;
             
         default:
-            return;
+            break;
         }
         
         for (int year : t.years())

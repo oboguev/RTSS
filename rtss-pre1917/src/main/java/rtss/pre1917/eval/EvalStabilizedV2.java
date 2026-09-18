@@ -114,16 +114,16 @@ public class EvalStabilizedV2
         Map<Integer, Long> sourceDeaths = sourceCounts(t, years, Series.DEATHS);
 
         Special1892 births1892 = adjust1892 ? Special1892.forBirths(sourceBirths)
-                                              : Special1892.inactive();
+                                            : Special1892.inactive();
         Special1892 deaths1892 = adjust1892 ? Special1892.forDeaths(sourceDeaths)
-                                              : Special1892.inactive();
+                                            : Special1892.inactive();
 
         // Establish a population series consistent with the unmodified clone.
         EvalProgressive.evalProgressive(result, censusTerritory);
 
         long[][] twoIterationsAgo = null;
 
-        for (int iteration = 1; iteration <= MAX_ITERATIONS; iteration++)
+        for (int iteration = 1; ; iteration++)
         {
             long[][] before = snapshot(result, years);
 
@@ -142,23 +142,35 @@ public class EvalStabilizedV2
                 return result;
 
             /*
-             * With integer births/deaths an exact fixed point need not exist:
-             * rounding can produce A -> B -> A, with A and B differing by one
-             * event in a few years. Both states represent the same continuous
-             * solution to the available integer precision.
+             * With integer births/deaths an exact fixed point need not exist.
+             * The iteration may wander among several adjacent integer states
+             * rather than form a strict A -> B -> A cycle.
+             *
+             * Treat two consecutive transitions whose births and deaths differ
+             * by no more than one event per year as convergence at the available
+             * integer precision. Population differences may be slightly larger
+             * because +/-1 event differences accumulate through the progressive
+             * population series.
              */
-            if (twoIterationsAgo != null && sameState(twoIterationsAgo, after))
+            if (twoIterationsAgo != null &&
+                differsOnlyByRounding(twoIterationsAgo, before) &&
+                differsOnlyByRounding(before, after))
             {
-                if (differsOnlyByRounding(before, after))
-                    return result;
-
-                throw evaluationError("EvalStabilizedV2: entered a non-trivial two-state cycle for " + t.name);
+                return result;
             }
 
-            twoIterationsAgo = before;
-        }
+            /*
+             * A two-state cycle with differences larger than rounding precision
+             * is a genuine failure to converge.
+             */
+            if (twoIterationsAgo != null && sameState(twoIterationsAgo, after))
+                throw evaluationError("EvalStabilizedV2: entered a non-trivial two-state cycle for " + t.name);
 
-        throw evaluationError("EvalStabilizedV2: failed to converge after " + MAX_ITERATIONS + " iterations for " + t.name);
+            twoIterationsAgo = before;
+            
+            if (iteration == MAX_ITERATIONS)
+                throw evaluationError("EvalStabilizedV2: failed to converge after " + MAX_ITERATIONS + " iterations for " + t.name);
+        }
     }
 
     private long[] reconstruct(Territory current,
