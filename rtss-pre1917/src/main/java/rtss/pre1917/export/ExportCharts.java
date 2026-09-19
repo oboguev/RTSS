@@ -88,6 +88,16 @@ public class ExportCharts
             maxYear = 1914;
         }
 
+        boolean calcGrowth = false;
+        switch (tname)
+        {
+        case Taxon.Астраханская_кочевники:
+        case "Самаркандская обл.":
+            // calc прирост (2 колонки) и еп
+            calcGrowth = true;
+            break;
+        }
+
         String template = "excel-templates/elementary-territory-1881-" + maxYear + ".xlsx";
         XSSFWorkbook wb = Excel.loadWorkbook(template);
         XSSFSheet sheet = wb.getSheet("data");
@@ -156,6 +166,20 @@ public class ExportCharts
                 setNumber(sheet, nr, 9, emigr);
                 setNumber(sheet, nr, 10, immigr);
                 setNumber(sheet, nr, 11, inner_migr);
+
+                if (calcGrowth)
+                {
+                    Long pop_total_incr = pop2 - pop;
+                    Long pop_natural_incr = pop_total_incr;
+                    if (migr != null)
+                        pop_natural_incr -= migr;
+
+                    setNumber(sheet, nr, 13, pop_natural_incr);
+                    setNumber(sheet, nr, 14, pop_total_incr);
+                    
+                    Double ngr = (1000.0 * pop_natural_incr) / popm;
+                    setNumber(sheet, nr, 8, round(ngr, 3));
+                }
             }
             else
             {
@@ -170,6 +194,28 @@ public class ExportCharts
                 setNumber(sheet, nr, 10, nullLong);
                 setNumber(sheet, nr, 11, nullLong);
             }
+        }
+
+        if (tname.equals(Taxon.Астраханская_кочевники))
+        {
+            // blank verify
+            blank_elementary(sheet, 16, 1881, 1914);
+        }
+
+        if (tname.equals("Выборгская"))
+        {
+            // blank иммиграция внутр. миграция
+            blank_elementary(sheet, 10, 1881, 1914);
+            blank_elementary(sheet, 11, 1881, 1914);
+        }
+
+        if (tname.equals("Черноморская"))
+        {
+            // blank еп прирост (2 колонки) verify 
+            blank_elementary(sheet, 8, 1881, 1895);
+            blank_elementary(sheet, 13, 1881, 1895);
+            blank_elementary(sheet, 14, 1881, 1895);
+            blank_elementary(sheet, 16, 1881, 1895);
         }
 
         saveFile("final-elementary-territories", tname, wb);
@@ -258,9 +304,9 @@ public class ExportCharts
                 setNumber(sheet, nr, 12, round(cbr, 3));
                 setNumber(sheet, nr, 13, round(cdr, 3));
                 // 14 = естественный прирост
-                
-                Double pctVital = (100.0 * popmVital) / popmOverall; 
-                setNumber(sheet, nr, 15, round(pctVital , 2));
+
+                Double pctVital = (100.0 * popmVital) / popmOverall;
+                setNumber(sheet, nr, 15, round(pctVital, 2));
 
                 setNumber(sheet, nr, 16, emigr);
                 setNumber(sheet, nr, 17, immigr);
@@ -360,6 +406,19 @@ public class ExportCharts
             cell.setBlank();
         else
             cell.setCellValue(value);
+    }
+
+    private void blank_elementary(XSSFSheet sheet, int nc, int y1, int y2)
+    {
+        for (int year = y1; year <= y2; year++)
+        {
+            int nr = (year - 1881) + (6 - 1);
+            Row row = sheet.getRow(nr);
+            Cell cell = row.getCell(nc);
+            if (cell == null)
+                cell = row.createCell(nc);
+            cell.setBlank();
+        }
     }
 
     /* =========================================================================================== */

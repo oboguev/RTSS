@@ -74,6 +74,7 @@ public class CorrectTerritories
             // Сибирь
         case "Забайкальская обл.":
         case "Приморская обл. с Камчатской обл.":
+        case "Томская":
             return true;
 
         default:
@@ -223,6 +224,9 @@ public class CorrectTerritories
             fixPrimKamchatka("Приморская обл. с Камчатской обл.");
         }
 
+        if (isCorrected("Томская"))
+            useStabilizedV2("Томская", 1893, 1914, true, 0.8);
+
         excludeFromVitalRates("Приморская обл. с Камчатской обл.");
     }
 
@@ -363,7 +367,6 @@ public class CorrectTerritories
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
     }
-
 
     @SuppressWarnings("unused")
     private void fixPrimKamchatka(String tname) throws Exception
