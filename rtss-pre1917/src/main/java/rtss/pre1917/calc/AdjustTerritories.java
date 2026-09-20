@@ -149,7 +149,7 @@ public class AdjustTerritories
             offset = (ty.population.total.both + ty.progressive_population.total.both) / 2 - ty.progressive_population.total.both;
         }
 
-        for (int year = 1888; year <= 1914; year++)
+        for (int year = 1888; year <= 1915; year++)
         {
             TerritoryYear ty = t.territoryYearOrNull(year);
             if (ty.population.total.both == null || ty.progressive_population.total.both == null)
@@ -162,6 +162,8 @@ public class AdjustTerritories
             TerritoryYear ty = t.territoryYearOrNull(year);
             ty.progressive_population.total.both += offset;
         }
+        
+        Util.noop();
     }
 
     /* ===================================================================================== */
