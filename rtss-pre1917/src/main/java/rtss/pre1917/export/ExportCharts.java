@@ -103,10 +103,18 @@ public class ExportCharts
         XSSFSheet sheet = wb.getSheet("data");
         setText(sheet, 0, 0, tname);
 
-        if (t.hasValidVitalRate)
+        if (t.hasValidVitalRate && t.name.equals("Сахалин"))
+        {
+            setText(sheet, 1, 0, "Территория включена в учёт естественного движения, но после 1902 верны только числа рождений и смертей, а не данные о численности населения, рождаемости и смертности");
+        }
+        else if (t.hasValidVitalRate)
+        {
             setText(sheet, 1, 0, "Территория включена в учёт естественного движения");
+        }
         else
+        {
             setText(sheet, 1, 0, "Территория НЕ включена в учёт естественного движения");
+        }
 
         for (int year = startYear; year <= maxYear + 1; year++)
         {
