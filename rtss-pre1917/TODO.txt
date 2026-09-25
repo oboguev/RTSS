@@ -34,3 +34,9 @@ ShowAreaValues -> add InnerMigration.balance
 - РСФСР-1991
 - европейские 50
 - европейская часть ...
+
+======================
+
+###@@@
+
+use CSK50
