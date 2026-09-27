@@ -40,3 +40,7 @@ ShowAreaValues -> add InnerMigration.balance
 ###@@@
 
 use CSK50
+
+======================
+
+check-in charts
