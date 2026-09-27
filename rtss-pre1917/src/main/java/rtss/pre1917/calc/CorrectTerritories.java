@@ -53,23 +53,24 @@ public class CorrectTerritories
         switch (tname)
         {
         // Польша
-        case "Сувалкская":
         case "Люблинская с Седлецкой и Холмской":
+        case "Сувалкская":
 
             // Кавказ
+        case "Бакинская с Баку":
         case "Дагестанская обл.":
         case "Карсская обл.":
         case "Терская обл.":
         case "Тифлисская":
-        case "Бакинская с Баку":
+        case "Эриванская":
 
             // Средняя Азия
         case "Закаспийская обл.":
+        case "Самаркандская обл.":
         case "Семиреченская обл.":
         case "Сыр-Дарьинская обл.":
-        case "Ферганская обл.":
-        case "Самаркандская обл.":
         case "Уральская обл.":
+        case "Ферганская обл.":
 
             // Сибирь
         case "Забайкальская обл.":
@@ -171,6 +172,9 @@ public class CorrectTerritories
             // useStabilized("Тифлисская", 1903, 1914);
             useStabilizedV2("Тифлисская", 1905, 1914, 1909, 1914, true);
         }
+
+        if (isCorrected("Эриванская"))
+            useStabilizedV2("Эриванская", 1893, 1914, true);
 
         if (isCorrected("Бакинская с Баку"))
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
