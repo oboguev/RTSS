@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>1886-note</title>
+  </head>
+  <body>
+    <span>1. Расхождение </span><code dir="ltr">1,000,000</code><span>
+      жителей — Олонецкая губерния</span>
+    <p><span>В строке </span><strong><span>Олонецкой губернии</span></strong><span>
+        напечатано:</span></p>
+    <div>
+      <pre dir="ltr"><code>1,336,204 жителей
+16,492 родившихся
+11,962 умерших</code></pre>
+    </div>
+    <p><span>Но проценты в той же строке — </span><code dir="ltr">49,1‰</code><span>
+        родившихся и </span><code dir="ltr">35,6‰</code><span> умерших
+        — считаются не от </span><code dir="ltr">1,336,204</code><span>,
+        а от:</span></p>
+    <div>
+      <pre dir="ltr"><code>336,204</code></pre>
+    </div>
+    <p><span>Проверка:</span></p>
+    <div>
+      <pre dir="ltr"><code>16,492 / 336,204 * 1000 = 49.05‰
+11,962 / 336,204 * 1000 = 35.57‰</code></pre>
+    </div>
+    <p><span>То есть в строке Олонецкой губернии лишняя начальная </span><code
+        dir="ltr">1</code><span>. Должно быть:</span></p>
+    <div>
+      <pre dir="ltr"><code>Олонецкая: 336,204 / 16,492 / 11,962</code></pre>
+    </div>
+    <p><span>После этой поправки сумма земских губерний по населению
+        уменьшается ровно на </span><code dir="ltr">1,000,000</code><span>
+        и совпадает с печатным итогом </span><code dir="ltr">60,895,206</code><span>.
+        Сводка отчёта также даёт земские губернии как </span><code
+        dir="ltr">60,895,206</code><span> жителей. </span><br>
+    </p>
+    <hr width="100%" size="2">
+    <p><br>
+    </p>
+    <h3><span>2. Расхождение </span><code dir="ltr">5,000</code><span>
+        умерших — город Москва</span></h3>
+    <p><span>В Excel, видимо, внесено:</span></p>
+    <div>
+      <pre dir="ltr"><code>Г. Москва: 23,643 умерших</code></pre>
+    </div>
+    <p><span>Но на изображении таблицы это читается как:</span></p>
+    <div>
+      <pre dir="ltr"><code>28,643</code></pre>
+    </div>
+    <p><span>И именно </span><code dir="ltr">28,643</code><span>
+        согласуется с напечатанным коэффициентом смертности </span><code
+        dir="ltr">38,0‰</code><span>:</span></p>
+    <div>
+      <pre dir="ltr"><code>28,643 / 753,469 * 1000 = 38.0‰</code></pre>
+    </div>
+    <p><span>Если оставить </span><code dir="ltr">23,643</code><span>,
+        получается только:</span></p>
+    <div>
+      <pre dir="ltr"><code>23,643 / 753,469 * 1000 = 31.4‰</code></pre>
+    </div>
+    <p><span>Кроме того, замена </span><code dir="ltr">23,643 → 28,643</code><span>
+        добавляет ровно недостающие </span><code dir="ltr">5,000</code><span>
+        смертей:</span></p>
+    <div>
+      <pre dir="ltr"><code>2,032,966 + 5,000 = 2,037,966</code></pre>
+    </div>
+    <p><span>а </span><code dir="ltr">2,037,966</code><span> — это
+        печатный итог умерших по земским губерниям в таблице и в сводке.
+      </span><span><span><span> 1886 - Отчет медицинского депар…</span></span></span></p>
+    <h3><span>Итого</span></h3>
+    <p><span>Нужно внести две поправки:</span></p>
+    <div>
+      <pre dir="ltr"><code>Олонецкая, жители:
+1,336,204 → 336,204
+
+Г. Москва, умерло:
+23,643 → 28,643</code></pre>
+    </div>
+    <p><span>После этого земские губернии сходятся:</span></p>
+    <div>
+      <pre dir="ltr"><code>Жители:    61,895,206 - 1,000,000 = 60,895,206
+Родилось:  2,945,052               = 2,945,052
+Умерло:    2,032,966 + 5,000       = 2,037,966</code></pre>
+    </div>
+    <p><span>Так что </span><code dir="ltr">5,000</code><span>
+        действительно вызвано чтением </span><code dir="ltr">8</code><span>
+        как </span><code dir="ltr">3</code><span>, а </span><code
+        dir="ltr">1,000,000</code><span> — печатной ошибкой в Олонецкой
+        строке.</span></p>
+  </body>
+</html>
