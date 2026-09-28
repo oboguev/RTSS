@@ -582,7 +582,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         for (int year = fromYear; year <= toYear; year++)
         {
             LumpImmigration lump = immigration.lumpImmigrationForYear(year);
-            final double TurkeyFactor = (year >= 1896) ? 2.33 : 1.0;
+            final double TurkeyFactor = (year >= 1897 && year <= 1913) ? 2.35 : 1.0;
             long lumpYearSum = 0;
 
             switch (taxonName)

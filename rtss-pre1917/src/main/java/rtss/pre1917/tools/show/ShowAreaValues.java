@@ -93,6 +93,13 @@ public class ShowAreaValues
     {
         Set<LoadOptions> xo = Set.of(options);
 
+        /*
+         * Балансировать годовые значения внутренней миграции (число уехавших vs. число приехавших по сумме территорий),
+         * с тем чтобы дисбаланс не приводил к фиктивному появлению или исчезновению людей.
+         */
+        new LoadData().loadInnerMigration().balance();
+        totalMigration = TotalMigration.getTotalMigration();
+
         tdsUGVI = new LoadData().loadUGVI(unite(xo,
                                                 LoadOptions.DONT_VERIFY,
                                                 LoadOptions.MERGE_CITIES,
@@ -104,7 +111,6 @@ public class ShowAreaValues
         tdsCensus1897 = new LoadData().loadCensus1897(unite(xo,
                                                             LoadOptions.DONT_VERIFY,
                                                             LoadOptions.MERGE_CITIES));
-        totalMigration = TotalMigration.getTotalMigration();
         evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
     }
 
@@ -241,6 +247,7 @@ public class ShowAreaValues
     public void show(Territory t, String prefix) throws Exception
     {
         Territory tCSK = tdsCSK.get(t.name);
+        // ###@@@ replace by CorrectTerritories
         Territory tEval = onlyRaw ? null : evalGrowthRate.evalTerritory(t);
 
         if (prefix == null)

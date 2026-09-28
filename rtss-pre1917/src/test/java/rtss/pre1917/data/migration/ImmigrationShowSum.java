@@ -30,7 +30,7 @@ public class ImmigrationShowSum
         {
             long immmigrants = immigration.legalImmigrationForYear(year);
             LumpImmigration lump = immigration.lumpImmigrationForYear(year);
-            final double TurkeyFactor = (year >= 1896) ? 2.33 : 1.0;
+            final double TurkeyFactor = (year >= 1897 && year <= 1913) ? 2.35 : 1.0;
             long lumpSum = lump.european + lump.persia + Math.round(lump.turkey * TurkeyFactor) + lump.china + lump.japan;
             Util.out(String.format("%d %,d %,d", year, immmigrants, lumpSum));
         }

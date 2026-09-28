@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.Foreigners;
 import rtss.pre1917.data.Taxon;
+import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.migration.ImmigrationYear.LumpImmigration;
 import rtss.pre1917.merge.MergeCities;
 import rtss.pre1917.merge.MergeDescriptor;
@@ -127,8 +128,9 @@ public class Immigration
         return tname + " @ " + year;
     }
 
-    private void addAmount(String tname, int year, double value)
+    private void addAmount(String tname, int year, double value) throws Exception
     {
+        TerritoryNames.checkValidTerritoryName(tname);
         String key = key(tname, year);
         Double v = tname2amount.get(key);
         if (v == null)
@@ -174,6 +176,8 @@ public class Immigration
             build(yd);
             validate(yd);
         }
+        
+        addKnownArmenianRefugees();
 
         sealed = true;
         built = true;
@@ -245,5 +249,20 @@ public class Immigration
             double imm_territory = imm * (foreigners_territory / foreigners_total);
             addAmount(tname, yd.year, imm_territory);
         }
+    }
+
+    private void addKnownArmenianRefugees() throws Exception
+    {
+        addAmount(TerritoryNames.canonic("Карсская обл."), 1894, 3_000);
+        addAmount(TerritoryNames.canonic("Карсская обл."), 1895, 6_000);
+        addAmount(TerritoryNames.canonic("Карсская обл."), 1896, 6_000);
+        addAmount(TerritoryNames.canonic("Карсская обл."), 1914, 19_779);
+
+        addAmount(TerritoryNames.canonic("Эриванская"), 1894, 3_000);
+        addAmount(TerritoryNames.canonic("Эриванская"), 1895, 6_000);
+        addAmount(TerritoryNames.canonic("Эриванская"), 1896, 6_000);
+        addAmount(TerritoryNames.canonic("Эриванская"), 1914, 31_685);
+
+        addAmount(TerritoryNames.canonic("Тифлисская"), 1914, 2_987);
     }
 }
