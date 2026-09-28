@@ -204,16 +204,17 @@ public class Immigration
         yd.lump.china = yd.get("Китай");
         yd.lump.japan = yd.get("Япония");
 
-        yd.lump.european = 0L;
-        yd.lump.european += yd.get("Голландия");
-        yd.lump.european += yd.get("Дания");
-        yd.lump.european += yd.get("Испания");
-        yd.lump.european += yd.get("Португалия");
-        yd.lump.european += yd.get("Сербия");
-        yd.lump.european += yd.get("США");
-        yd.lump.european += yd.get("Черногория");
-        yd.lump.european += yd.get("Швеция и Норвегия");
-        yd.lump.european += yd.get("др страны");
+        long european = 0L;
+        european += yd.get("Голландия");
+        european += yd.get("Дания");
+        european += yd.get("Испания");
+        european += yd.get("Португалия");
+        european += yd.get("Сербия");
+        european += yd.get("США");
+        european += yd.get("Черногория");
+        european += yd.get("Швеция и Норвегия");
+        european += yd.get("др страны");
+        scatterEuropean(yd.year, european);
     }
 
     private void validate(ImmigrationYear yd) throws Exception
@@ -241,13 +242,25 @@ public class Immigration
     private void scatter(ImmigrationYear yd, String immigrationCountry, String foreignersCountry) throws Exception
     {
         double imm = yd.get(immigrationCountry);
-        double foreigners_total = foreigners.totalForForeignContry(foreignersCountry);
+        double foreigners_total = foreigners.totalForForeignCountry(foreignersCountry);
 
-        for (String tname : foreigners.territoriesForForeignContry(foreignersCountry))
+        for (String tname : foreigners.territoriesForForeignCountry(foreignersCountry))
         {
             double foreigners_territory = foreigners.forForeignContryAndTerritory(foreignersCountry, tname);
             double imm_territory = imm * (foreigners_territory / foreigners_total);
             addAmount(tname, yd.year, imm_territory);
+        }
+    }
+
+    private void scatterEuropean(int year, long imm) throws Exception
+    {
+        final String[] clist = {"Бельгия", "Британия", "Франция", "Швейцария"};
+        double foreigners_total = foreigners.totalForForeignCountries(clist);
+        for (String tname : foreigners.territoriesForForeignCountries(clist))
+        {
+            double foreigners_territory = foreigners.forForeignContriesAndTerritory(clist, tname);
+            double imm_territory = imm * (foreigners_territory / foreigners_total);
+            addAmount(tname, year, imm_territory);
         }
     }
 

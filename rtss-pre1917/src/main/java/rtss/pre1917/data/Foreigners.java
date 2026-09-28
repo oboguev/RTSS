@@ -1,6 +1,7 @@
 package rtss.pre1917.data;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -88,16 +89,32 @@ public class Foreigners
     /*
      * Общее число иностранцев подданства @countryName в России
      */
-    public long totalForForeignContry(String countryName)
+    public long totalForForeignCountry(String countryName)
     {
         return forCountry(countryName).total();
     }
 
-    public Set<String> territoriesForForeignContry(String countryName)
+    public Set<String> territoriesForForeignCountry(String countryName)
     {
         return forCountry(countryName).keySet();
     }
     
+    public long totalForForeignCountries(String... cnames)
+    {
+        long v = 0;
+        for (String cname : cnames)
+            v += totalForForeignCountry(cname);
+        return v;
+    }
+
+    public Set<String> territoriesForForeignCountries(String... cnames)
+    {
+        Set<String> xs = new HashSet<>();
+        for (String cname : cnames)
+            xs.addAll(territoriesForForeignCountry(cname));
+        return xs;
+    }
+
     /*
      * Число иностранцев подданства @countryName в губернии или области @tname
      */
@@ -117,6 +134,14 @@ public class Foreigners
         return v;
     }
     
+    public long forForeignContriesAndTerritory(String[] cnames, String tname) throws Exception
+    {
+        long v = 0;
+        for (String cname : cnames)
+            v += forForeignContryAndTerritory(cname, tname);
+        return v;
+    }
+
     public void build()
     {
         // убрать города
