@@ -92,7 +92,7 @@ public class Immigration
         return Math.round(v);
     }
 
-    public long legalImmigrationForYear(int year)
+    public long allImmigrationForYear(int year)
     {
         if (!built)
             throw new IllegalArgumentException();
@@ -176,7 +176,7 @@ public class Immigration
             build(yd);
             validate(yd);
         }
-        
+
         addKnownArmenianRefugees();
 
         sealed = true;
@@ -254,7 +254,7 @@ public class Immigration
 
     private void scatterEuropean(int year, long imm) throws Exception
     {
-        final String[] clist = {"Бельгия", "Британия", "Франция", "Швейцария"};
+        final String[] clist = { "Бельгия", "Британия", "Франция", "Швейцария" };
         double foreigners_total = foreigners.totalForForeignCountries(clist);
         for (String tname : foreigners.territoriesForForeignCountries(clist))
         {
@@ -277,5 +277,27 @@ public class Immigration
         addAmount(TerritoryNames.canonic("Эриванская"), 1914, 31_685);
 
         addAmount(TerritoryNames.canonic("Тифлисская"), 1914, 2_987);
+    }
+
+    public long getKnownArmenianRefugees(int year)
+    {
+        switch (year)
+        {
+        case 1894:
+            return 3_000 + 3_000;
+            
+        case 1895:
+        case 1896:
+            return 6_000 + 6_000;
+            
+        case 1914:
+            return 19_779 + 31_685 + 2_987;
+
+        case 1915:
+            return 98_000;
+
+        default:
+            return 0;
+        }
     }
 }

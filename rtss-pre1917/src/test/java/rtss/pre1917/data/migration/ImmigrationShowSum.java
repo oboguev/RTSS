@@ -21,7 +21,7 @@ public class ImmigrationShowSum
 
     private void do_main() throws Exception
     {
-        Util.out("Иммиграция в Империю по годам: легальная, ясное размещение -- легальная, неясное размещение -- нелегальная");
+        Util.out("Иммиграция в Империю по годам: легальная, ясное размещение (scattered) --- легальная, неясное размещение (lump) --- нелегальная");
         Util.out("Легальная (документированная) иммиграция в Империю по годам");
         Util.out("");
 
@@ -29,12 +29,13 @@ public class ImmigrationShowSum
 
         for (int year = 1881; year <= 1915; year++)
         {
-            long immmigrants = immigration.legalImmigrationForYear(year);
+            long allLegalImmmigrants = immigration.allImmigrationForYear(year);
             LumpImmigration lump = immigration.lumpImmigrationForYear(year);
             final double TurkeyFactor = (year >= 1897 && year <= 1913) ? 2.35 : 1.0;
             long legaLumpSum = lump.persia + lump.turkey + lump.china + lump.japan;
-            long illegaLumpSum = Math.round(lump.turkey * (TurkeyFactor - 1));
-            Util.out(String.format("%d %,d %,d %,d", year, immmigrants, legaLumpSum, illegaLumpSum));
+            long scattered = allLegalImmmigrants - legaLumpSum;
+            long illegaLumpSum = Math.round(lump.turkey * (TurkeyFactor - 1)) + immigration.getKnownArmenianRefugees(year);
+            Util.out(String.format("%d %,d %,d %,d", year, scattered, legaLumpSum, illegaLumpSum));
         }
     }
 }
