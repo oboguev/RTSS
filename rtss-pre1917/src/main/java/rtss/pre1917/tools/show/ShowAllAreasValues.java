@@ -26,6 +26,7 @@ public class ShowAllAreasValues extends ShowAreaValues
 
     protected static ShowAllAreasValues rawShowAllAreasValues(ExportData exportData) throws Exception
     {
+        balanceImmigration();
         TerritoryDataSet rawUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY);
         TerritoryDataSet rawCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
         TerritoryDataSet rawCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY);
@@ -37,6 +38,7 @@ public class ShowAllAreasValues extends ShowAreaValues
 
     protected static ShowAllAreasValues rawShowAllAreasValuesPatched(ExportData exportData) throws Exception
     {
+        balanceImmigration();
         TerritoryDataSet rawUGVI = new LoadData().loadUGVI(LoadOptions.DONT_VERIFY, LoadOptions.APPLY_PATCHES);
         TerritoryDataSet rawCSK = new LoadData().loadEzhegodnikRossii(LoadOptions.DONT_VERIFY);
         TerritoryDataSet rawCensus1897 = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY);

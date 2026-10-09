@@ -93,11 +93,7 @@ public class ShowAreaValues
     {
         Set<LoadOptions> xo = Set.of(options);
 
-        /*
-         * Балансировать годовые значения внутренней миграции (число уехавших vs. число приехавших по сумме территорий),
-         * с тем чтобы дисбаланс не приводил к фиктивному появлению или исчезновению людей.
-         */
-        new LoadData().loadInnerMigration().balance();
+        balanceImmigration();
         totalMigration = TotalMigration.getTotalMigration();
 
         tdsUGVI = new LoadData().loadUGVI(unite(xo,
@@ -112,6 +108,15 @@ public class ShowAreaValues
                                                             LoadOptions.DONT_VERIFY,
                                                             LoadOptions.MERGE_CITIES));
         evalGrowthRate = new EvalGrowthRate(tdsCensus1897);
+    }
+    
+    protected static void balanceImmigration() throws Exception
+    {
+        /*
+         * Балансировать годовые значения внутренней миграции (число уехавших vs. число приехавших по сумме территорий),
+         * с тем чтобы дисбаланс не приводил к фиктивному появлению или исчезновению людей.
+         */
+        new LoadData().loadInnerMigration().balance();
     }
 
     public ShowAreaValues() throws Exception
