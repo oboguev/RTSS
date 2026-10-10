@@ -2,6 +2,7 @@ package rtss.pre1917.calc;
 
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
+import rtss.pre1917.data.DataSetType;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -126,6 +127,8 @@ public class CorrectTerritories
         {
             for (int year = 1896; year <= toYear; year++)
             {
+                assertUgvi(tdsPopulation, "Черноморская");
+                assertUgvi(tdsVitalRates, "Черноморская");
                 tdsPopulation.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
                 tdsVitalRates.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
             }
@@ -135,11 +138,15 @@ public class CorrectTerritories
     private void corrections_Poland() throws Exception
     {
         if (isCorrected("Сувалкская"))
+        {
+            assertUgvi(tdsPopulation, "Сувалкская");
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSuvalkskaia();
+        }
 
         if (isCorrected("Люблинская с Седлецкой и Холмской"))
         {
             final String LubSedHolm = "Люблинская с Седлецкой и Холмской";
+            assertUgvi(tdsPopulation, LubSedHolm);
             Territory t = tdsPopulation.get(LubSedHolm);
             TerritoryYear ty1910 = t.territoryYearOrNull(1910);
             for (int year = 1911; year <= 1913; year++)
@@ -156,28 +163,44 @@ public class CorrectTerritories
     {
         /* пересчёт численности населения для Дагестана */
         if (isCorrected("Дагестанская обл."))
+        {
+            assertUgvi(tdsPopulation, "Дагестанская обл.");
             new AdjustTerritories(tdsPopulation).fixDagestan();
+        }
 
         /* не включать Дагестан в подсчёт рождаемости и смертности */
         excludeFromVitalRates("Дагестанская обл.");
 
         if (isCorrected("Карсская обл."))
+        {
+            assertUgvi(tdsPopulation, "Карсская обл.");
             useStabilizedV2("Карсская обл.", 1907, 1913, false);
+        }
 
         if (isCorrected("Терская обл."))
+        {
+            assertUgvi(tdsPopulation, "Терская обл.");
             useStabilizedV2("Терская обл.", 1910, 1914, true);
+        }
 
         if (isCorrected("Тифлисская"))
         {
+            assertUgvi(tdsPopulation, "Тифлисская");
             // useStabilized("Тифлисская", 1903, 1914);
             useStabilizedV2("Тифлисская", 1905, 1914, 1909, 1914, true);
         }
 
         if (isCorrected("Эриванская"))
+        {
+            assertUgvi(tdsPopulation, "Эриванская");
             useStabilizedV2("Эриванская", 1893, 1914, true);
+        }
 
         if (isCorrected("Бакинская с Баку"))
+        {
+            assertUgvi(tdsPopulation, "Бакинская с Баку");
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixBakinskaiaWithBaku();
+        }
 
         excludeFromVitalRates("Елисаветпольская");
         excludeFromVitalRates("Бакинская с Баку");
@@ -187,28 +210,42 @@ public class CorrectTerritories
     private void corrections_CentralAsia() throws Exception
     {
         if (isCorrected("Закаспийская обл."))
+        {
+            assertUgvi(tdsPopulation, "Закаспийская обл.");
             useStabilized("Закаспийская обл.", 1911, 1913);
+        }
 
         if (isCorrected("Семиреченская обл."))
         {
+            assertUgvi(tdsPopulation, "Семиреченская обл.");
             // useStabilized("Семиреченская обл.", 1912, 1914);
             fixSemirechye("Семиреченская обл.");
         }
 
         if (isCorrected("Сыр-Дарьинская обл."))
+        {
+            assertUgvi(tdsPopulation, "Сыр-Дарьинская обл.");
             useStabilized("Сыр-Дарьинская обл.", 1908);
+        }
 
         if (isCorrected("Ферганская обл."))
         {
+            assertUgvi(tdsPopulation, "Ферганская обл.");
             // useStabilized("Ферганская обл.", 1912);
             fixFergana("Ферганская обл.");
         }
 
         if (isCorrected("Самаркандская обл."))
+        {
+            assertUgvi(tdsPopulation, "Самаркандская обл.");
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
+        }
 
         if (isCorrected("Уральская обл."))
+        {
+            assertUgvi(tdsPopulation, "Уральская обл.");
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
+        }
 
         excludeFromVitalRates("Акмолинская обл.");
         excludeFromVitalRates("Тургайская обл.");
@@ -220,16 +257,23 @@ public class CorrectTerritories
     private void corrections_Siberia() throws Exception
     {
         if (isCorrected("Забайкальская обл."))
+        {
+            assertUgvi(tdsPopulation, "Забайкальская обл.");
             useStabilizedV2("Забайкальская обл.", 1908, 1913, true);
+        }
 
         if (isCorrected("Приморская обл. с Камчатской обл."))
         {
+            assertUgvi(tdsPopulation, "Приморская обл. с Камчатской обл.");
             // fixEarlyPeriod("Приморская обл. с Камчатской обл.", 1881, 1898, 1899, 1903);
             fixPrimKamchatka("Приморская обл. с Камчатской обл.");
         }
 
         if (isCorrected("Томская"))
+        {
+            assertUgvi(tdsPopulation, "Томская");
             useStabilizedV2("Томская", 1893, 1914, true, 0.8);
+        }
 
         excludeFromVitalRates("Приморская обл. с Камчатской обл.");
     }
@@ -410,5 +454,12 @@ public class CorrectTerritories
             tds.get("Черноморская").territoryYearOrNull(year).immigration.total.both += nAddChernomorskayaForeign;
             tds.get("Черноморская").territoryYearOrNull(year).inner_migration.total.both += nAddChernomorskayaInner;
         }
+    }
+
+    private void assertUgvi(TerritoryDataSet tds, String tname) throws Exception
+    {
+        Territory t = tds.get(tname);
+        if (t.dataSetType != DataSetType.UGVI)
+            throw new Exception("Источник территории не УГВИ: " + tname);
     }
 }

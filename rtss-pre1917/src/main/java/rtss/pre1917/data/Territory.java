@@ -13,12 +13,14 @@ import rtss.util.Util;
 public class Territory
 {
     public final String name;
+    public DataSetType dataSetType;
     public Boolean hasValidVitalRate;
     private Map<Integer, TerritoryYear> year2value = new HashMap<>();
 
-    public Territory(String name)
+    public Territory(String name, DataSetType dataSetType)
     {
         this.name = name;
+        this.dataSetType = dataSetType;
     }
 
     public TerritoryYear territoryYear(int year)
@@ -62,7 +64,7 @@ public class Territory
 
     public Territory dup(String name)
     {
-        Territory t = new Territory(name);
+        Territory t = new Territory(name, dataSetType);
         t.hasValidVitalRate = hasValidVitalRate;
 
         for (int year : year2value.keySet())

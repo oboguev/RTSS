@@ -34,7 +34,7 @@ public class MergeTerritories
         {
             Territory dst = territories.get(dstname);
             if (dst == null)
-                territories.put(dstname, dst = new Territory(dstname));
+                territories.put(dstname, dst = new Territory(dstname, territories.dataSetType));
 
             merge(dst, cities);
         }

@@ -42,7 +42,7 @@ public class Astrakhan
                             DemographicConstants.рост_Астраханская_губ_кочевое_киргиз_кайсацкое_население,
                             y1, y2);
 
-        Territory t = new Territory(Taxon.Астраханская_кочевники);
+        Territory t = new Territory(Taxon.Астраханская_кочевники, null);
 
         for (int year = y1; year <= y2; year++)
         {
@@ -65,7 +65,7 @@ public class Astrakhan
 
     private static Territory calc(String tname, Territory tFullAstrakan, long censusPopulation, double ngr, int y1, int y2)
     {
-        Territory t = new Territory(tname);
+        Territory t = new Territory(tname, null);
 
         TerritoryYear ty1897 = t.territoryYear(1897);
         ty1897.progressive_population.total.both = MathUtil.yearStartPopulation(27, censusPopulation, ngr);
@@ -254,7 +254,7 @@ public class Astrakhan
         Territory tSettled = territories.get(Taxon.Астраханская_оседлое);
         if (tSettled == null)
         {
-            tSettled = new Territory(Taxon.Астраханская_оседлое);
+            tSettled = new Territory(Taxon.Астраханская_оседлое, null);
             territories.put(tSettled.name, tSettled);
         }
 
@@ -352,7 +352,7 @@ public class Astrakhan
 
         if (tCombined == null)
         {
-            tCombined = new Territory("Астраханская");
+            tCombined = new Territory("Астраханская", null);
             territories.put(tCombined.name, tCombined);
         }
 

@@ -176,7 +176,7 @@ public class MergeTaxon
         VerifyNoTerritoryDuplication.verify(territories);
 
         Territory src = territories.get(txname);
-        Territory res = new Territory(txname);
+        Territory res = new Territory(txname, null);
 
         List<Integer> years;
         if (whichYears == WhichYears.TaxonExistingYears)

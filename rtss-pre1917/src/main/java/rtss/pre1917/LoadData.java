@@ -1293,7 +1293,7 @@ public class LoadData
 
         if (t == null)
         {
-            t = new Territory(gub);
+            t = new Territory(gub, territories.dataSetType);
             territories.put(gub, t);
         }
 
