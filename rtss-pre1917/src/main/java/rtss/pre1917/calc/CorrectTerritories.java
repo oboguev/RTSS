@@ -14,6 +14,7 @@ import rtss.pre1917.eval.EvalStabilizedFergana;
 import rtss.pre1917.eval.EvalStabilizedPrimKamchatka;
 import rtss.pre1917.eval.EvalStabilizedSemirechye;
 import rtss.pre1917.eval.EvalStabilizedV2;
+import rtss.pre1917.eval.EvalStabilizedYakutia;
 import rtss.pre1917.eval.FixEarlyPeriod;
 
 public class CorrectTerritories
@@ -77,6 +78,7 @@ public class CorrectTerritories
         case "Забайкальская обл.":
         case "Приморская обл. с Камчатской обл.":
         case "Томская":
+        case "Якутская обл.":
             return true;
 
         default:
@@ -275,6 +277,12 @@ public class CorrectTerritories
             useStabilizedV2("Томская", 1893, 1914, true, 0.8);
         }
 
+        if (isCorrected("Якутская обл."))
+        {
+            assertUgvi(tdsPopulation, "Якутская обл.");
+            fixYakutia("Якутская обл.");
+        }
+
         excludeFromVitalRates("Приморская обл. с Камчатской обл.");
     }
 
@@ -429,6 +437,23 @@ public class CorrectTerritories
         final double lambda = 0.5;
 
         Territory tEval = new EvalStabilizedPrimKamchatka(tdsCensus1897, window, lambda).evalTerritory(t);
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
+    }
+
+    @SuppressWarnings("unused")
+    private void fixYakutia(String tname) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+
+        final int window = 7;
+        final double lambda = 0.5;
+
+        Territory tEval = new EvalStabilizedYakutia(tdsCensus1897, window, lambda).evalTerritory(t);
         tdsPopulation.put(tname, tEval);
         tdsVitalRates.put(tname, tEval.dup());
     }
