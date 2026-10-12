@@ -75,6 +75,7 @@ public class CorrectTerritories
         case "Ферганская обл.":
 
             // Сибирь
+        case "Амурская обл.":
         case "Забайкальская обл.":
         case "Приморская обл. с Камчатской обл.":
         case "Томская":
@@ -258,6 +259,12 @@ public class CorrectTerritories
 
     private void corrections_Siberia() throws Exception
     {
+        if (isCorrected("Амурская обл."))
+        {
+            assertUgvi(tdsPopulation, "Амурская обл.");
+            useStabilizedV2("Амурская обл.", 1893, 1914, false);
+        }
+
         if (isCorrected("Забайкальская обл."))
         {
             assertUgvi(tdsPopulation, "Забайкальская обл.");

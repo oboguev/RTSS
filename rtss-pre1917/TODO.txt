@@ -15,7 +15,6 @@ ShowAreaValues -- разобраться с CorrectTerritories
 
 review графики УГВИ
 
-- Амурская (см. книгу ЦСК)
 - Тургайская
 - Уральская
 

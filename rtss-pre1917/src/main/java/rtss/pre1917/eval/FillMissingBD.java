@@ -417,7 +417,7 @@ public class FillMissingBD
         TerritoryDataSet tdsCensus = new LoadData().loadCensus1897(LoadOptions.DONT_VERIFY /*, LoadOptions.MERGE_CITIES */);
 
         // Сибирь
-        fill_pre1896_blanks(1881, 1895, tdsCensus, "Амурская обл.");
+        // fill_pre1896_blanks(1881, 1895, tdsCensus, "Амурская обл.");
         fill_pre1896_blanks(1881, 1895, tdsCensus, "Забайкальская обл.");
         fill_pre1896_blanks(1881, 1895, tdsCensus, "Приморская обл.");
         fill_pre1896_blanks(1881, 1895, tdsCensus, "Якутская обл.");
