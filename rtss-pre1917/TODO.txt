@@ -13,11 +13,6 @@ ShowAreaValues -- разобраться с CorrectTerritories
 УГВИ fix Таврическая
 см. файлы todo/tavr.*
 
-review графики УГВИ
-
-- Тургайская
-- Уральская
-
 ======================
 
 review графики ЦСК
