@@ -8,6 +8,8 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryNames;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.data.WhichPopulation;
+import rtss.pre1917.data.load.LoadRegionalPopulation;
 import rtss.pre1917.eval.EvalGrowthRate;
 import rtss.pre1917.eval.EvalProgressive;
 import rtss.pre1917.eval.EvalStabilizedFergana;
@@ -71,6 +73,7 @@ public class CorrectTerritories
         case "Самаркандская обл.":
         case "Семиреченская обл.":
         case "Сыр-Дарьинская обл.":
+        case "Тургайская обл.":
         case "Уральская обл.":
         case "Ферганская обл.":
 
@@ -244,16 +247,24 @@ public class CorrectTerritories
             new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixSamarkand();
         }
 
+        if (isCorrected("Тургайская обл."))
+        {
+            assertUgvi(tdsPopulation, "Тургайская обл.");
+            LoadRegionalPopulation.load(tdsPopulation.get("Тургайская обл."), WhichPopulation.PROGRESSIVE_POPULATION);
+        }
+        
         if (isCorrected("Уральская обл."))
         {
             assertUgvi(tdsPopulation, "Уральская обл.");
-            new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
+            LoadRegionalPopulation.load(tdsPopulation.get("Уральская обл."), WhichPopulation.PROGRESSIVE_POPULATION);
+            // obsolete approach:
+            // new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
         }
 
         excludeFromVitalRates("Акмолинская обл.");
-        excludeFromVitalRates("Тургайская обл.");
         excludeFromVitalRates("Самаркандская обл.");
         excludeFromVitalRates("Семипалатинская обл.");
+        excludeFromVitalRates("Тургайская обл.");
         excludeFromVitalRates("Уральская обл.");
     }
 
