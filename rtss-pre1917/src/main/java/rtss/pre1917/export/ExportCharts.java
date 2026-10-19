@@ -286,7 +286,7 @@ public class ExportCharts
             }
 
             pop = tVitalRates.territoryYearOrNull(year).progressive_population.total.both;
-            setNumber(sheet, nr, 3, pop);
+            setNumber(sheet, nr, 7, pop);
             if (year <= maxYear)
             {
                 /* next year start */
