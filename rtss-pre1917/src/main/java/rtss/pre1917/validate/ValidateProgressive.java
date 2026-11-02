@@ -13,6 +13,7 @@ public class ValidateProgressive
         switch (t.name)
         {
         case "Бакинская с Баку":
+        case "Дагестанская обл.":
         case "Самаркандская обл.":
         case "Семипалатинская обл.":
         case "Тургайская обл.":

@@ -173,6 +173,7 @@ public class CorrectTerritories
         {
             assertUgvi(tdsPopulation, "Дагестанская обл.");
             new AdjustTerritories(tdsPopulation).fixDagestan();
+            LoadRegionalPopulation.load(tdsPopulation.get("Дагестанская обл."), WhichPopulation.PROGRESSIVE_POPULATION);
         }
 
         /* не включать Дагестан в подсчёт рождаемости и смертности */
