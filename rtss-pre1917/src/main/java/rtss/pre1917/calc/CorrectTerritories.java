@@ -71,6 +71,7 @@ public class CorrectTerritories
             // Средняя Азия
         case "Закаспийская обл.":
         case "Самаркандская обл.":
+        case "Семипалатинская обл.":
         case "Семиреченская обл.":
         case "Сыр-Дарьинская обл.":
         case "Тургайская обл.":
@@ -252,7 +253,7 @@ public class CorrectTerritories
             assertUgvi(tdsPopulation, "Тургайская обл.");
             LoadRegionalPopulation.load(tdsPopulation.get("Тургайская обл."), WhichPopulation.PROGRESSIVE_POPULATION);
         }
-        
+
         if (isCorrected("Уральская обл."))
         {
             assertUgvi(tdsPopulation, "Уральская обл.");
@@ -261,6 +262,12 @@ public class CorrectTerritories
             // new AdjustTerritories(tdsPopulation).setCSK(tdsCSK).fixUralskaia();
         }
 
+        if (isCorrected("Семипалатинская обл."))
+        {
+            assertUgvi(tdsPopulation, "Семипалатинская обл.");
+            LoadRegionalPopulation.load(tdsPopulation.get("Семипалатинская обл."), WhichPopulation.PROGRESSIVE_POPULATION);
+        }
+        
         excludeFromVitalRates("Акмолинская обл.");
         excludeFromVitalRates("Самаркандская обл.");
         excludeFromVitalRates("Семипалатинская обл.");

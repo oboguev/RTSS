@@ -14,6 +14,7 @@ public class ValidateProgressive
         {
         case "Бакинская с Баку":
         case "Самаркандская обл.":
+        case "Семипалатинская обл.":
         case "Тургайская обл.":
         case "Уральская обл.":
         case "Черноморская":
