@@ -41,9 +41,9 @@ public class TerritoryYear
     public URValue emigration = new URValue(this);
     public URValue immigration = new URValue(this);
     public URValue inner_migration = new URValue(this);
-    
+
     private boolean femaleBirthsAdjusted = false;
-    
+
     public void setValueForce(String what, Double v) throws Exception
     {
         setValue(what, v);

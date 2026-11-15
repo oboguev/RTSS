@@ -290,7 +290,7 @@ public class Astrakhan
 
             if (tyCombined.births.total.both != null)
             {
-                if (tySettled.births.total.both == null || tySettled.births.total.both == tyCombined.births.total.both)
+                if (tySettled.births.total.both == null || eq(tySettled.births.total.both, tyCombined.births.total.both))
                 {
                     tySettled.births.total.both = tyCombined.births.total.both;
                 }
@@ -302,7 +302,7 @@ public class Astrakhan
 
             if (tyCombined.deaths.total.both != null)
             {
-                if (tySettled.deaths.total.both == null || tySettled.deaths.total.both == tyCombined.deaths.total.both)
+                if (tySettled.deaths.total.both == null || eq(tySettled.deaths.total.both, tyCombined.deaths.total.both))
                 {
                     tySettled.deaths.total.both = tyCombined.deaths.total.both;
                 }
@@ -327,6 +327,11 @@ public class Astrakhan
         territories.put(tNomadic.name, tNomadic);
 
         territories.remove("Астраханская");
+    }
+    
+    private static boolean eq(Long v1, Long v2)
+    {
+        return (long) v1 == (long) v2;
     }
 
     /* ======================================================================================= */
