@@ -60,10 +60,13 @@ check-in charts to git
 
 tdsExport -> включает военные смерти?
 
-
 ======================
 
 while evaluating taxons:
 compensateFictiousMigration
 внутр. мигр +56,573 в 1895
 если содержит Черноморскую
+
+======================
+
+Варианты charts UseCSK50 false/true

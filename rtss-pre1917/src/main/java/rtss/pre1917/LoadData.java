@@ -459,6 +459,10 @@ public class LoadData
         if (hasOption(LoadOptions.MERGE_POST1897_REGIONS, options))
             territories.mergePost1897Regions();
 
+        /*
+         * Замена ЦСК -> УГВИ должна осуществиться до обработки 
+         * boostBirthsDeaths, EVAL_SPLIT_ASTRAKHAN, EVAL_MERGE_ASTRAKHAN, EVAL_PROGRESSIVE
+         */
         if (hasOption(LoadOptions.USE_CSK50, options))
         {
             if (hasOption(LoadOptions.ADJUST_FEMALE_BIRTHS, options) &&
@@ -1320,7 +1324,18 @@ public class LoadData
             if (Taxon.isComposite(tname))
                 continue;
 
-            if (tname.equals("Астраханская"))
+            if (tname.equals("Астраханская") || tname.equals("Таврическая"))
+            {
+                /*
+                 * Для Астраханской и Таврической губерний использовать данные УГВИ, а не ЦСК
+                 */
+                continue;
+            }
+            else if (tname.equals(Taxon.Астраханская_оседлое) || tname.equals(Taxon.Астраханская_кочевники))
+            {
+                throw new Exception("Ошибка замещения данных УГВИ данными ЦСК о Движениии Европейской России");
+            }
+            else if (Util.False && tname.equals("Астраханская"))
             {
                 this.territories.remove(tdsEvro, tname);
                 this.territories.remove(tdsEvro, Taxon.Астраханская_оседлое);

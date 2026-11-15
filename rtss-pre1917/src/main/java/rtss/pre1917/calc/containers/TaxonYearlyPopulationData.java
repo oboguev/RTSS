@@ -298,6 +298,8 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             {
                 Territory t = tdsPopulation.get(tname);
                 TerritoryYear ty = t.territoryYearOrNull(toYear);
+                if (ty.population.total.both == null) // ####@@@
+                    Util.noop();
                 list.add(new PopulationDifference(tname, ty.population.total.both, ty.progressive_population.total.both));
             }
         }
