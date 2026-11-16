@@ -227,8 +227,10 @@ public class EvalCountryTaxon extends EvalCountryBase
     private TerritoryDataSet tdsExportPopulation;
     private final Options options;
 
-    private static TaxonYearlyPopulationData typdRusEvro;
+    private static Long EmpirePopulation1904 = null;
+    private static Long EmpirePopulation1914 = null;
 
+    private static TaxonYearlyPopulationData typdRusEvro;
     private final String RusEvro = "русские губернии Европейской России и Кавказа, кроме Черноморской";
 
     private EvalCountryTaxon(String taxonName, int fromYear, int toYear) throws Exception
@@ -245,9 +247,26 @@ public class EvalCountryTaxon extends EvalCountryBase
         if (Util.False && typdRusEvro == null && !taxonName.equals(RusEvro))
             typdRusEvro = new EvalCountryTaxon(RusEvro, LimitToPost1896 ? 1896 : fromYear, 1914, options.clone().verbose(false)).calc();
     }
-
-    private static Long EmpirePopulation1904 = null;
-    private static Long EmpirePopulation1914 = null;
+    
+    private TerritoryDataSet loadUgvi(Options options, boolean useCSK50) throws Exception
+    {
+        TerritoryDataSet tds = new LoadData()
+                .boostBirthsDeaths(BoostBirths, BoostDeaths)
+                .loadUGVI(LoadOptions.DONT_VERIFY,
+                          LoadOptions.ADJUST_FEMALE_BIRTHS,
+                          LoadOptions.FILL_MISSING_BD,
+                          LoadOptions.MERGE_CITIES,
+                          LoadOptions.MERGE_POST1897_REGIONS,
+                          options.splitAstrakhan() ? LoadOptions.EVAL_SPLIT_ASTRAKHAN
+                                                   : LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
+                          options.mergeAstrakhan() ? LoadOptions.EVAL_MERGE_ASTRAKHAN
+                                                   : LoadOptions.DONT_EVAL_MERGE_ASTRAKHAN,
+                          useCSK50 ? LoadOptions.USE_CSK50
+                                   : LoadOptions.NONE,
+                          LoadOptions.EVAL_PROGRESSIVE);
+        
+        return tds;
+    }
 
     private TaxonYearlyPopulationData calc() throws Exception
     {
@@ -267,25 +286,9 @@ public class EvalCountryTaxon extends EvalCountryBase
 
         /* ===================== Загрузить данные о численности и естественном движении населения ===================== */
 
-        tdsPopulation = new LoadData()
-                .boostBirthsDeaths(BoostBirths, BoostDeaths)
-                .loadUGVI(LoadOptions.DONT_VERIFY,
-                          LoadOptions.ADJUST_FEMALE_BIRTHS,
-                          LoadOptions.FILL_MISSING_BD,
-                          LoadOptions.MERGE_CITIES,
-                          LoadOptions.MERGE_POST1897_REGIONS,
-                          options.splitAstrakhan() ? LoadOptions.EVAL_SPLIT_ASTRAKHAN
-                                                   : LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
-                          options.mergeAstrakhan() ? LoadOptions.EVAL_MERGE_ASTRAKHAN
-                                                   : LoadOptions.DONT_EVAL_MERGE_ASTRAKHAN,
-                          UseCSK50 ? LoadOptions.USE_CSK50
-                                   : LoadOptions.NONE,
-                          LoadOptions.EVAL_PROGRESSIVE);
-
+        tdsPopulation = loadUgvi(options, UseCSK50);
         ValidateProgressive.validate(tdsPopulation);
-
         tdsPopulation.leaveOnlyTotalBoth();
-
         ValidateProgressive.validate(tdsPopulation);
 
         if (options.verbose())
