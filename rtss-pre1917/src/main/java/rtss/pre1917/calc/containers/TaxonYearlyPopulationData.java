@@ -26,6 +26,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
     public final TerritoryDataSet tdsPopulation;
     public final TerritoryDataSet tdsVitalRates;
     public final TerritoryDataSet tdsCSK;
+    public final TerritoryDataSet tdsPureUgvi;
     public final TerritoryDataSet tdsExportPopulation;
     public final int fromYear;
     public final int toYear;
@@ -119,6 +120,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             TerritoryDataSet tdsPopulation,
             TerritoryDataSet tdsVitalRates,
             TerritoryDataSet tdsCSK,
+            TerritoryDataSet tdsPureUgvi,
             TerritoryDataSet tdsExportPopulation,
             int fromYear,
             int toYear)
@@ -127,6 +129,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
         this.tdsPopulation = tdsPopulation;
         this.tdsVitalRates = tdsVitalRates;
         this.tdsCSK = tdsCSK;
+        this.tdsPureUgvi = tdsPureUgvi;
         this.tdsExportPopulation = tdsExportPopulation;
         this.fromYear = fromYear;
         this.toYear = toYear;
@@ -155,7 +158,7 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
                                        year, yd.population, yd.cbr, yd.cdr, ngr,
                                        yd.population_increase,
                                        yd.migration, yd.emigration, yd.immigration, yd.inner_migration));
-                summary.add(year, yd.cbr, yd.cdr, ngr, yd.population_increase, 
+                summary.add(year, yd.cbr, yd.cdr, ngr, yd.population_increase,
                             yd.migration, yd.emigration, yd.immigration, yd.inner_migration,
                             yd.vitalShare);
                 if (year == 1913)
@@ -296,11 +299,9 @@ public class TaxonYearlyPopulationData extends HashMap<Integer, TaxonYearData>
             }
             else if (!Taxon.isComposite(tname))
             {
-                Territory t = tdsPopulation.get(tname);
-                TerritoryYear ty = t.territoryYearOrNull(toYear);
-                if (ty.population.total.both == null) // ####@@@
-                    Util.noop();
-                list.add(new PopulationDifference(tname, ty.population.total.both, ty.progressive_population.total.both));
+                TerritoryYear ty = tdsPopulation.get(tname).territoryYearOrNull(toYear);
+                TerritoryYear tyUgvi = tdsPureUgvi.get(tname).territoryYearOrNull(toYear);
+                list.add(new PopulationDifference(tname, tyUgvi.population.total.both, ty.progressive_population.total.both));
             }
         }
 

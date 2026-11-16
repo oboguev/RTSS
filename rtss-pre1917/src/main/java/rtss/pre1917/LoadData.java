@@ -1345,6 +1345,10 @@ public class LoadData
             else if (this.territories.containsKey(tname))
             {
                 this.territories.put(tname, tdsEvro.get(tname).dup());
+                /*
+                 * Добавить пустую ячейку 1915 года для заполнения прогрессвным расчётом. 
+                 */
+                this.territories.get(tname).territoryYear(1915);
             }
             else
             {

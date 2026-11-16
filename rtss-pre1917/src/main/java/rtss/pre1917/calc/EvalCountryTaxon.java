@@ -47,7 +47,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     private final static Double BoostBirths = 1.0;
     private final static Double BoostDeaths = 1.0;
 
-    private final static boolean LimitToPost1896 = Util.False;
+    private final static boolean LimitToPost1896 = Util.True;
 
     private final static TerritoryDataSet tdsCompositeTaxonsPopulation = new TerritoryDataSet(null, null);
     private final static TerritoryDataSet tdsCompositeTaxonsVitalRates = new TerritoryDataSet(null, null);
@@ -298,7 +298,7 @@ public class EvalCountryTaxon extends EvalCountryBase
         }
 
         ValidateProgressive.validate(tdsPopulation);
-
+        
         /* ================================= Правки ================================ */
 
         /*
@@ -538,12 +538,23 @@ public class EvalCountryTaxon extends EvalCountryBase
         DiagMigrationMerge.which(null);
     }
 
-    private TaxonYearlyPopulationData buildTaxonYearlyPopulationData()
+    private TaxonYearlyPopulationData buildTaxonYearlyPopulationData() throws Exception
     {
+        TerritoryDataSet tdsPureUgvi;
+        if (UseCSK50)
+        {
+            tdsPureUgvi = loadUgvi(options, false);
+        }
+        else
+        {
+            tdsPureUgvi = tdsPopulation.dup();
+        }
+
         TaxonYearlyPopulationData cd = new TaxonYearlyPopulationData(taxonName,
                                                                      tdsPopulation,
                                                                      tdsVitalRates,
                                                                      tdsCSK,
+                                                                     tdsPureUgvi,
                                                                      tdsExportPopulation,
                                                                      fromYear,
                                                                      toYear);

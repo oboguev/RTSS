@@ -70,3 +70,7 @@ compensateFictiousMigration
 ======================
 
 Варианты charts UseCSK50 false/true
+
+======================
+
+Причины смертности в 1882
