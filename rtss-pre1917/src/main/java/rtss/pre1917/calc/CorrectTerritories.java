@@ -351,6 +351,8 @@ public class CorrectTerritories
     {
         useStabilizedV2(tname, y1, y2, adjust1892, null);
     }
+    
+    private final double DefaultLambda = 0.5;
 
     @SuppressWarnings("unused")
     private void useStabilizedV2(String tname, int y1, int y2, boolean adjust1892, Double lambda) throws Exception
@@ -370,7 +372,7 @@ public class CorrectTerritories
 
         final int window = 7;
         if (lambda == null)
-            lambda = 0.5;
+            lambda = DefaultLambda;
         EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda, adjust1892);
 
         Territory tEval = es.evalTerritory(t, y1, y2, y1, y2);
@@ -392,7 +394,7 @@ public class CorrectTerritories
             return;
 
         final int window = 7;
-        final double lambda = 0.5;
+        final double lambda = DefaultLambda;
         EvalStabilizedV2 es = new EvalStabilizedV2(tdsCensus1897, window, lambda, adjust1892);
 
         Territory tEval = es.evalTerritory(t, by1, by2, dy1, dy2);
@@ -426,7 +428,7 @@ public class CorrectTerritories
             return;
 
         final int window = 7;
-        final double lambda = 0.5;
+        final double lambda = DefaultLambda;
 
         Territory tEval = new EvalStabilizedFergana(tdsCensus1897, window, lambda).evalTerritory(t);
         tdsPopulation.put(tname, tEval);
@@ -443,7 +445,7 @@ public class CorrectTerritories
             return;
 
         final int window = 7;
-        final double lambda = 0.5;
+        final double lambda = DefaultLambda;
 
         Territory tEval = new EvalStabilizedSemirechye(tdsCensus1897, window, lambda).evalTerritory(t);
         tdsPopulation.put(tname, tEval);
@@ -460,7 +462,7 @@ public class CorrectTerritories
             return;
 
         final int window = 7;
-        final double lambda = 0.5;
+        final double lambda = DefaultLambda;
 
         Territory tEval = new EvalStabilizedPrimKamchatka(tdsCensus1897, window, lambda).evalTerritory(t);
         tdsPopulation.put(tname, tEval);
@@ -477,7 +479,7 @@ public class CorrectTerritories
             return;
 
         final int window = 7;
-        final double lambda = 0.5;
+        final double lambda = DefaultLambda;
 
         Territory tEval = new EvalStabilizedYakutia(tdsCensus1897, window, lambda).evalTerritory(t);
         tdsPopulation.put(tname, tEval);
