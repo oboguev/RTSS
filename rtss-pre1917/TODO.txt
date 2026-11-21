@@ -6,19 +6,13 @@
 +скорректировать TurkeyFactor на новый объём иммиграции армян 1897-1913 по приложению №6 (2.35)
 +ShowAreaValues -> add InnerMigration.balance 
 
-Кутаисская с Батумской: 1885-1890 fix недоучёт (до распространения налево)
-
-ImmigrationShowSum и изменить таблицу в docx
-
 ======================
 
-ShowAreaValues -- разобраться с CorrectTerritories
-
-======================
-
-добавить категории миграции в
-- console
-- csv
+Кутаисская с Батумской: 1886-1889 fix недоучёт (до распространения налево) -- может быть убрать данные 1886-1889
+http://elib.shpl.ru/ru/nodes/49728 = 1887 1888
+1887 = http://elib.shpl.ru/ru/nodes/49576-za-1887-god-1888
+1888 = http://elib.shpl.ru/ru/nodes/49577-za-1888-god-1889
+1892 = http://elib.shpl.ru/ru/nodes/49578-za-1891-god-1892
 
 ======================
 
@@ -35,6 +29,27 @@ ShowAreaValues -- разобраться с CorrectTerritories
 
 ======================
 
+while evaluating taxons:
+compensateFictiousMigration
+внутр. мигр +56,573 в 1895
+если содержит Черноморскую
+
+======================
+
+ImmigrationShowSum и изменить таблицу в docx
+
+======================
+
+ShowAreaValues -- разобраться с CorrectTerritories
+
+======================
+
+добавить категории миграции в
+- console
+- csv
+
+======================
+
 tags ### @@@ in code
 
 use CSK50
@@ -48,13 +63,6 @@ use CSK50
 check-in charts to git
 
 tdsExport -> включает военные смерти?
-
-======================
-
-while evaluating taxons:
-compensateFictiousMigration
-внутр. мигр +56,573 в 1895
-если содержит Черноморскую
 
 ======================
 
