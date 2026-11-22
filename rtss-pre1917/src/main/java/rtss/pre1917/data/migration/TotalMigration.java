@@ -75,9 +75,7 @@ public class TotalMigration
          */
         if (tname.equals("Кубанская обл.") && year == 1895)
         {
-            String s = p.getProperty("Черноморская.1896");
-            s = Util.despace(s).replace(",", "");
-            long split = Long.parseLong(s);
+            long split = get_Chernomorskaia_1896_population();
             v -= split;
         }
 
@@ -133,12 +131,9 @@ public class TotalMigration
          */
         if (tname.equals("Кубанская обл.") && year == 1895)
         {
-            String s = p.getProperty("Черноморская.1896");
-            s = Util.despace(s).replace(",", "");
-            long split = Long.parseLong(s);
+            long split = get_Chernomorskaia_1896_population();
             ty.inner_migration.total.both -= split;
         }
-
         
         /* 
          * В 1894 году территория Варшавской губернии существенно увеличилась. К ней были присоединены два уезда: 
@@ -160,5 +155,13 @@ public class TotalMigration
                 ty.inner_migration.total.both += DemographicConstants.population_Ломжинская_Пултусский_уезд_1894 + DemographicConstants.population_Плоцкая_Плонский_уезд_1894;
             }
         }
+    }
+    
+    private long get_Chernomorskaia_1896_population() throws Exception
+    {
+        String s = p.getProperty("Черноморская.1896");
+        s = Util.despace(s).replace(",", "");
+        long v = Long.parseLong(s);
+        return v;
     }
 }
