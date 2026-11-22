@@ -1,5 +1,6 @@
 package rtss.pre1917.calc;
 
+import rtss.data.selectors.BirthDeathBoth;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.data.DataSetType;
@@ -16,6 +17,7 @@ import rtss.pre1917.eval.EvalStabilizedFergana;
 import rtss.pre1917.eval.EvalStabilizedPrimKamchatka;
 import rtss.pre1917.eval.EvalStabilizedSemirechye;
 import rtss.pre1917.eval.EvalStabilizedV2;
+import rtss.pre1917.eval.EvalStabilizedV2Ex;
 import rtss.pre1917.eval.EvalStabilizedYakutia;
 import rtss.pre1917.eval.FixEarlyPeriod;
 
@@ -64,6 +66,7 @@ public class CorrectTerritories
         case "Бакинская с Баку":
         case "Дагестанская обл.":
         case "Карсская обл.":
+        case "Кутаисская с Батумской":
         case "Терская обл.":
         case "Тифлисская":
         case "Эриванская":
@@ -185,6 +188,12 @@ public class CorrectTerritories
             useStabilizedV2("Карсская обл.", 1907, 1913, false);
         }
 
+        if (isCorrected("Кутаисская с Батумской"))
+        {
+            assertUgvi(tdsPopulation, "Кутаисская с Батумской");
+            fixKutaisskaiaWithBatumskaia("Кутаисская с Батумской");
+        }
+        
         if (isCorrected("Терская обл."))
         {
             assertUgvi(tdsPopulation, "Терская обл.");
@@ -486,6 +495,25 @@ public class CorrectTerritories
         tdsVitalRates.put(tname, tEval.dup());
     }
 
+    @SuppressWarnings("unused")
+    private void fixKutaisskaiaWithBatumskaia(String tname) throws Exception
+    {
+        TerritoryNames.checkValidTerritoryName(tname);
+
+        Territory t = tdsPopulation.get(tname);
+        if (t == null)
+            return;
+
+        final int window = 7;
+        final double lambda = 0.0;
+        EvalStabilizedV2Ex es = new EvalStabilizedV2Ex(tdsCensus1897, window, lambda, false);
+
+        Territory tEval = es.evalTerritory(t, BirthDeathBoth.DEATH, 1891, 1897, 1881, 1889);
+
+        tdsPopulation.put(tname, tEval);
+        tdsVitalRates.put(tname, tEval.dup());
+    }
+    
     /* ================================================================================================ */
 
     public void finalizeEmpireExport(TerritoryDataSet tds) throws Exception
