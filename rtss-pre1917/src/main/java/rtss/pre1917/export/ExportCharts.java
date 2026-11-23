@@ -18,6 +18,9 @@ import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.util.Util;
 import rtss.util.excel.Excel;
+import rtss.util.excel.ExcelRC;
+import rtss.util.excel.FindCells;
+import rtss.util.excel.RowCol;
 
 public class ExportCharts
 {
@@ -247,6 +250,7 @@ public class ExportCharts
         String template = "excel-templates/composite-taxon-1881-" + maxYear + ".xlsx";
         XSSFWorkbook wb = Excel.loadWorkbook(template);
         XSSFSheet sheet = wb.getSheet("data");
+        
         setText(sheet, 0, 0, "Составная территория: " + tname);
 
         for (int year = startYear; year <= maxYear + 1; year++)
@@ -338,6 +342,10 @@ public class ExportCharts
             }
         }
 
+        ExcelRC rc = Excel.readSheet(wb, sheet, "res://" + template);
+        RowCol rowcol = FindCells.findRequiredVerticalCells(rc, "@примечание@");
+        setText(sheet, rowcol.row, rowcol.col, "нет примечаний");
+        
         saveFile("final-composite-taxons", tname, wb);
     }
 

@@ -316,6 +316,9 @@ public class EvalCountryTaxon extends EvalCountryBase
             calc_empire();
         else
             calc_non_empire();
+        
+        totalMigration.compensateFictiousMigration(tmPopulation, tdsPopulation);
+        totalMigration.compensateFictiousMigration(tmVitalRates, tdsVitalRates);
 
         /* ====================== Сохранить результаты для экспорта ==================== */
 

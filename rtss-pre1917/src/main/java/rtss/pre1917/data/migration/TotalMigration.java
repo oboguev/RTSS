@@ -164,4 +164,22 @@ public class TotalMigration
         long v = Long.parseLong(s);
         return v;
     }
+    
+    /*
+     * Компенсировать в результатах слияния tdsTaxon фиктивную миграцию
+     * из-за разделения территорий. 
+     */
+    public void compensateFictiousMigration(Territory tMergedTaxon, TerritoryDataSet tdsTaxon) throws Exception
+    {
+        if (tdsTaxon.containsKey("Кубанская обл."))
+        {
+            TerritoryYear ty = tMergedTaxon.territoryYearOrNull(1895);
+            if (ty != null)
+            {
+                long split = get_Chernomorskaia_1896_population();
+                ty.migration.total.both += split;
+                ty.inner_migration.total.both += split;
+            }
+        }
+    }
 }
