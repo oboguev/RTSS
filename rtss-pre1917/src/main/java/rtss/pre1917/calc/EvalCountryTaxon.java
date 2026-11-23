@@ -47,7 +47,7 @@ public class EvalCountryTaxon extends EvalCountryBase
     private final static Double BoostBirths = 1.0;
     private final static Double BoostDeaths = 1.0;
 
-    private final static boolean LimitToPost1896 = Util.True;
+    private final static boolean LimitToPost1896 = Util.False;
 
     private final static TerritoryDataSet tdsCompositeTaxonsPopulation = new TerritoryDataSet(null, null);
     private final static TerritoryDataSet tdsCompositeTaxonsVitalRates = new TerritoryDataSet(null, null);

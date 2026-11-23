@@ -1,11 +1,4 @@
-﻿while evaluating taxons:
-compensateFictiousMigration
-внутр. мигр +56,573 в 1895
-если содержит Черноморскую
-
-======================
-
-Черноморская -- html/xlsx
+﻿Черноморская -- html/xlsx
 
 Черноморская, migration:
 

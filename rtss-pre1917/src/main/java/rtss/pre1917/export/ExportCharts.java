@@ -344,7 +344,7 @@ public class ExportCharts
 
         ExcelRC rc = Excel.readSheet(wb, sheet, "res://" + template);
         RowCol rowcol = FindCells.findRequiredVerticalCells(rc, "@примечание@");
-        setText(sheet, rowcol.row, rowcol.col, "нет примечаний");
+        setText(sheet, rowcol.row, rowcol.col, ""); // нет примечаний
         
         saveFile("final-composite-taxons", tname, wb);
     }
