@@ -9,6 +9,10 @@
 - европейские 50
 - европейская часть ...
 
+finalizeEmpireExport
+
+nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner
+
 ======================
 
 ImmigrationShowSum и изменить таблицу в docx
