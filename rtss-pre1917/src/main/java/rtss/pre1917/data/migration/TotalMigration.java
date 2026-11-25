@@ -1,14 +1,12 @@
 package rtss.pre1917.data.migration;
 
-import java.util.Properties;
-
 import rtss.pre1917.LoadData;
 import rtss.pre1917.data.DemographicConstants;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
-import rtss.util.Util;
+import rtss.pre1917.eval.regions.Chernomor;
 
 /*
  * Сумимарное механическое движение (внутри страны + эмиграция + иммиграция)
@@ -24,7 +22,7 @@ public class TotalMigration
     private Emigration emigration = new LoadData().loadEmigration();
     private Immigration immigration = new LoadData().loadImmigration();
     private TerritoryDataSet tdsFinland = new LoadData().loadFinland();
-    private Properties p = Util.loadProperties("pre1917.props");
+    // private Properties p = Util.loadProperties("pre1917.props");
 
     private TotalMigration() throws Exception
     {
@@ -74,10 +72,7 @@ public class TotalMigration
          * а в начале 1896 уже умееньшенный.   
          */
         if (tname.equals("Кубанская обл.") && year == 1895)
-        {
-            long split = get_Chernomorskaia_1896_population();
-            v -= split;
-        }
+            v -= Chernomor.population_1896();
 
         /* 
          * В 1894 году территория Варшавской губернии существенно увеличилась. К ней были присоединены два уезда: 
@@ -130,10 +125,7 @@ public class TotalMigration
          * а в начале 1896 уже умееньшенный.   
          */
         if (tname.equals("Кубанская обл.") && year == 1895)
-        {
-            long split = get_Chernomorskaia_1896_population();
-            ty.inner_migration.total.both -= split;
-        }
+            ty.inner_migration.total.both -= Chernomor.population_1896();
         
         /* 
          * В 1894 году территория Варшавской губернии существенно увеличилась. К ней были присоединены два уезда: 
@@ -157,14 +149,6 @@ public class TotalMigration
         }
     }
     
-    private long get_Chernomorskaia_1896_population() throws Exception
-    {
-        String s = p.getProperty("Черноморская.1896");
-        s = Util.despace(s).replace(",", "");
-        long v = Long.parseLong(s);
-        return v;
-    }
-    
     /*
      * Компенсировать в результатах слияния tdsTaxon фиктивную миграцию
      * из-за разделения территорий. 
@@ -176,7 +160,7 @@ public class TotalMigration
             TerritoryYear ty = tMergedTaxon.territoryYearOrNull(1895);
             if (ty != null)
             {
-                long split = get_Chernomorskaia_1896_population();
+                long split = Chernomor.population_1896();
                 ty.migration.total.both += split;
                 ty.inner_migration.total.both += split;
             }

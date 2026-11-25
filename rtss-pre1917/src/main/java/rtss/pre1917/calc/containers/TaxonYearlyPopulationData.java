@@ -13,8 +13,8 @@ import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
 import rtss.pre1917.data.migration.MissingMigrationDataException;
 import rtss.pre1917.data.migration.TotalMigration;
-import rtss.pre1917.eval.Astrakhan;
 import rtss.pre1917.eval.EvalGrowthRate;
+import rtss.pre1917.eval.regions.Astrakhan;
 import rtss.pre1917.util.WeightedAverage;
 import rtss.util.Util;
 

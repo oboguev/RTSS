@@ -1,4 +1,4 @@
-package rtss.pre1917.eval;
+package rtss.pre1917.eval.regions;
 
 import java.util.Collection;
 
@@ -8,6 +8,7 @@ import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
 import rtss.pre1917.data.TerritoryYear;
+import rtss.pre1917.eval.EvalProgressive;
 import rtss.util.FieldValue;
 import rtss.util.Util;
 
