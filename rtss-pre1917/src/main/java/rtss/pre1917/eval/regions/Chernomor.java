@@ -23,4 +23,14 @@ public class Chernomor
 
         return population_1896;
     }
+    
+    public static long additionalInnerMigration(int year)
+    {
+        return 1_600;
+    }
+
+    public static long additionalForeignMigration(int year)
+    {
+        return 1_300;
+    }
 }
