@@ -80,7 +80,7 @@ public class ApplyTable
             Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
             Util.out("к численности по переписи января 1939 года для пола " + gender.name() + ":");
             Util.out("возраст --- для раздельной передвижки городского и сельского населения --- для передвижки без разбивки населения по типу местности");
-            
+
             Double final_multiplier_t = null;
 
             for (int cutoffAge = 3; cutoffAge <= 20; cutoffAge++)
@@ -114,13 +114,14 @@ public class ApplyTable
         }
 
         for_adh_population(mt);
-        
+
         Util.out("*** Complete");
 
         Util.noop();
     }
 
-    private void show_divergence(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, double multiplier, Gender gender) throws Exception
+    private void show_divergence(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, double multiplier, Gender gender)
+            throws Exception
     {
         PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier, false, gender);
         p = p.selectByAgeYears(3, Population.MAX_AGE);
@@ -139,7 +140,7 @@ public class ApplyTable
             int cutoffAge,
             Gender gender) throws Exception
     {
-        double mmax = 1.7;
+        double mmax = 1.9;
         int mmaxcount = 0;
 
         double m1 = 0.5;
@@ -199,7 +200,7 @@ public class ApplyTable
     {
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
-        PopulationContext p = forward_without_births(p1937, p1939, xmt, ur, gender);
+        PopulationContext p = forward_without_births(p1937, p1939, xmt, ur, null);
         return difference(p, p1939, cutoffAge, gender);
     }
 
@@ -289,33 +290,46 @@ public class ApplyTable
     {
         PopulationContext p = p1937.clone();
 
-        double deaths = 0;
+        double allDeaths = 0;
+        double genderDeaths = 0;
 
         /* 1937 -> 1938 */
         ForwardPopulationT fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         fw.forward(p, mt, 1.0);
-        deaths += fw.getObservedDeaths();
+        allDeaths += fw.getObservedDeaths();
+        if (printDeathsForGender != null)
+            genderDeaths += fw.deathsByGenderAge().sum(printDeathsForGender, 0, Population.MAX_AGE);
 
         /* 1938 -> 1939 */
         fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         fw.forward(p, mt, 1.0);
-        deaths += fw.getObservedDeaths();
+        allDeaths += fw.getObservedDeaths();
+        if (printDeathsForGender != null)
+            genderDeaths += fw.deathsByGenderAge().sum(printDeathsForGender, 0, Population.MAX_AGE);
 
         /* последний отрезок в 11 дней */
         fw = new ForwardPopulationT();
         fw.setBirthRateTotal(0);
         fw.forward(p, mt, 0.03);
-        deaths += fw.getObservedDeaths();
+        allDeaths += fw.getObservedDeaths();
+        if (printDeathsForGender != null)
+            genderDeaths += fw.deathsByGenderAge().sum(printDeathsForGender, 0, Population.MAX_AGE);
 
         if (printDeathsForGender != null)
         {
-            // ### для gender
             Util.out(String
-                     .format("Общее число смертей во всех возрастах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.",
-                             (int) Math.round(deaths / 1000)));
+                    .format("Общее число смертей во всех возрастах и обеих полах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.",
+                            (int) Math.round(allDeaths / 1000)));
+
+            Util.out(String
+                     .format("Общее число смертей пола %s во всех возрастах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.",
+                             printDeathsForGender.name(),
+                             (int) Math.round(genderDeaths / 1000)));
         }
+        
+        Util.unused(genderDeaths);
 
         return p;
     }
@@ -459,7 +473,7 @@ public class ApplyTable
     {
         Util.out("");
         Util.out("На сколько требуется увеличить коэффициенты смертности таблицы, чтобы сумма смертей совпала с реконструкцией АДХ?");
-        
+
         /* значения по АДХ-СССР стр. 120, 135 */
         for_adh_population(mt, 1934, 30.4, 21.7, 204);
         for_adh_population(mt, 1935, 33.0, 20.6, 198);
@@ -470,23 +484,23 @@ public class ApplyTable
         for_adh_population(mt, 1939, 40.0, 20.1, 168);
         for_adh_population(mt, 1940, 36.1, 21.7, 184);
     }
-    
+
     final private static double PROMILLE = 1000;
 
     private void for_adh_population(CombinedMortalityTable mt, int year, double cbr_middle, double cdr_middle, double imr) throws Exception
     {
         imr /= PROMILLE;
-        
+
         PopulationByLocality p = null;
         if (year == 1939)
             p = PopulationADH.getPopulationByLocality(Area.USSR, "1939-in-borders-of-1938");
         else
             p = PopulationADH.getPopulationByLocality(Area.USSR, year);
-        
+
         Rates r = Recalibrate.m2e(new Rates(cbr_middle, cdr_middle));
         double cbr = r.cbr;
         double cdr = r.cdr;
-        
+
         double[] qx = mt.getSingleTable(Locality.TOTAL, Gender.BOTH).qx();
 
         List<PatchInstruction> instructions = new ArrayList<>();
