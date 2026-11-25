@@ -38,7 +38,7 @@ public class EvalCountryTaxon extends EvalCountryBase
      * Если True, для 48 губерний европейской России (кроме Архангельской и Таврической) 
      * используются числа рождений и смертей ЦСК, а не УГВИ
      */
-    private final static boolean UseCSK50 = Util.True;
+    public final static boolean UseCSK50 = Util.True;
 
     /*
      * Корректировка на недоучёт рождений и смертей.

@@ -1319,27 +1319,37 @@ public class LoadData
 
     private void overrideUgviWithCSK50(TerritoryDataSet tdsEvro) throws Exception
     {
+        if (!tdsEvro.containsKey("Астраханская") || !tdsEvro.containsKey("Таврическая с Севастополем"))
+            throw new Exception("Ошибка замещения данных УГВИ данными ЦСК о Движениии Европейской России");
+        
         for (String tname : Util.sort(tdsEvro.keySet()))
         {
             if (Taxon.isComposite(tname))
                 continue;
 
-            if (tname.equals("Астраханская") || tname.equals("Таврическая"))
+            switch (tname)
+            {
+            case Taxon.Астраханская_кочевники:
+            case Taxon.Астраханская_оседлое:
+            case "Московская":
+            case "Санкт-Петербургская":
+            case "Таврическая":
+            case "Херсонская":
+                throw new Exception("Ошибка замещения данных УГВИ данными ЦСК о Движениии Европейской России");
+            }
+
+            if (tname.equals("Астраханская") || tname.equals("Таврическая с Севастополем"))
             {
                 /*
                  * Для Астраханской и Таврической губерний использовать данные УГВИ, а не ЦСК
                  */
                 continue;
             }
-            else if (tname.equals(Taxon.Астраханская_оседлое) || tname.equals(Taxon.Астраханская_кочевники))
-            {
-                throw new Exception("Ошибка замещения данных УГВИ данными ЦСК о Движениии Европейской России");
-            }
             else if (Util.False && tname.equals("Астраханская"))
             {
-                this.territories.remove(tdsEvro, tname);
-                this.territories.remove(tdsEvro, Taxon.Астраханская_оседлое);
-                this.territories.remove(tdsEvro, Taxon.Астраханская_кочевники);
+                this.territories.remove(tname);
+                this.territories.remove(Taxon.Астраханская_оседлое);
+                this.territories.remove(Taxon.Астраханская_кочевники);
                 this.territories.put(tname, tdsEvro.get(tname).dup());
             }
             else if (this.territories.containsKey(tname))

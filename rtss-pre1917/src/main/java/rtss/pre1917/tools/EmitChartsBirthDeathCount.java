@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import rtss.pre1917.LoadData;
 import rtss.pre1917.LoadData.LoadOptions;
 import rtss.pre1917.calc.CorrectTerritories;
+import rtss.pre1917.calc.EvalCountryTaxon;
 import rtss.pre1917.data.Taxon;
 import rtss.pre1917.data.Territory;
 import rtss.pre1917.data.TerritoryDataSet;
@@ -28,7 +29,7 @@ public class EmitChartsBirthDeathCount
      * Если True, для 48 губерний европейской России (кроме Архангельской и Таврической) 
      * используются числа рождений и смертей ЦСК, а не УГВИ
      */
-    private final static boolean UseCSK50 = Util.True;
+    private final static boolean UseCSK50 = EvalCountryTaxon.UseCSK50;
 
     public static enum ChartType
     {
