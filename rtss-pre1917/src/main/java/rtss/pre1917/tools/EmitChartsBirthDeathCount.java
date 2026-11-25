@@ -24,6 +24,12 @@ public class EmitChartsBirthDeathCount
 {
     private static final String OUT_PATH = "c:\\@\\rtss-pre1917\\charts\\birth-death-counts";
 
+    /*
+     * Если True, для 48 губерний европейской России (кроме Архангельской и Таврической) 
+     * используются числа рождений и смертей ЦСК, а не УГВИ
+     */
+    private final static boolean UseCSK50 = Util.True;
+
     public static enum ChartType
     {
         RawSources, AdjustedIntermediate, AdjustedFinal;
@@ -104,7 +110,7 @@ public class EmitChartsBirthDeathCount
     private TerritoryDataSet tdsUGVIUnpatched;
     private CorrectTerritories correctTerritories;
 
-    private void init(ChartType chartType) throws Exception
+    private void init(ChartType chartType, boolean useCSK50) throws Exception
     {
         tdsCSKPatched = new LoadData().loadEvroChast(LoadOptions.MERGE_CITIES,
                                                      LoadOptions.MERGE_POST1897_REGIONS,
@@ -125,6 +131,8 @@ public class EmitChartsBirthDeathCount
                                                                         : LoadOptions.DONT_FILL_MISSING_BD,
                                                  LoadOptions.DONT_EVAL_SPLIT_ASTRAKHAN,
                                                  LoadOptions.EVAL_MERGE_ASTRAKHAN,
+                                                 useCSK50 ? LoadOptions.USE_CSK50
+                                                          : LoadOptions.NONE,
                                                  chartType.isAdjustedFinal() ? LoadOptions.EVAL_PROGRESSIVE
                                                                              : LoadOptions.DONT_EVAL_PROGRESSIVE);
 
@@ -167,7 +175,7 @@ public class EmitChartsBirthDeathCount
 
     private void do_main(ChartType chartType) throws Exception
     {
-        init(chartType);
+        init(chartType, chartType == ChartType.RawSources ? false : UseCSK50);
 
         for (String tname : Util.sort(tdsUGVIPatched.keySet()))
         {

@@ -1,21 +1,4 @@
-﻿Черноморская -- html/xlsx
-
-Черноморская, migration:
-
-- Империя
-- СССР-1991
-- СССР-1926
-- РСФСР-1991
-- европейские 50
-- европейская часть ...
-
-finalizeEmpireExport
-
-nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner
-
-======================
-
-ImmigrationShowSum и изменить таблицу в docx
+﻿ImmigrationShowSum и изменить таблицу в docx
 
 ======================
 
