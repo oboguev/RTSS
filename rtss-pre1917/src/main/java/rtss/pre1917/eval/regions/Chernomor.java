@@ -24,13 +24,27 @@ public class Chernomor
         return population_1896;
     }
     
-    public static long additionalInnerMigration(int year)
+    /*
+     * Иммиграция в Черноморскую область извне России.
+     */
+    public static long additionalForeignMigration(int year)
+    {
+        return 1_300;
+    }
+
+    /*
+     * Внутрироссийская миграция в Черноморскую область извне РСФСР (1,600). 
+     */
+    public static long additionalInnerMigrationFromOutsideRSFSR(int year)
     {
         return 1_600;
     }
 
-    public static long additionalForeignMigration(int year)
+    /*
+     * Внутрироссийская миграция в Черноморскую область из РСФСР (1,600). 
+     */
+    public static long additionalInnerMigrationFromRSFSR(int year)
     {
-        return 1_300;
+        return 0;
     }
 }

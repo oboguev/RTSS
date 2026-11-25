@@ -115,8 +115,8 @@ public class CorrectTerritories
          */
         for (int year = 1896; year <= toYear; year++)
         {
-            final long nAddChernomorskayaInner = Chernomor.additionalInnerMigration(year);
-            final long nAddChernomorskayaForeign = Chernomor.additionalInnerMigration(year);
+            final long nAddChernomorskayaInnerFromOutsideRSFSR = Chernomor.additionalInnerMigrationFromOutsideRSFSR(year);
+            final long nAddChernomorskayaForeign = Chernomor.additionalForeignMigration(year);
             Long nAddChernomorskaya = null;
 
             switch (taxonName)
@@ -124,12 +124,13 @@ public class CorrectTerritories
             case "Империя":
             case "СССР-1991":
             case "СССР-1926":
-                // уже содержится в учёте турецкой иммиграции 
+                // Внутреннюю миграцию учитывать не нужно.
+                // Внешняя иммигнрация уже содержится в учёте турецкой иммиграции. 
                 // nAddChernomorskaya = nAddChernomorskayaForeign;
                 break;
 
             case "РСФСР-1991":
-                nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner;
+                nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInnerFromOutsideRSFSR;
                 break;
 
             default:
@@ -523,19 +524,22 @@ public class CorrectTerritories
             throw new IllegalArgumentException();
 
         /*
-         * Черноморская губерния: внутрироссийская миграция извне РСФСР (1,600) и иммиграция извне России (1,300).
+         * Черноморская губерния: иммиграция извне России + внутрироссийская миграция извне РСФСР + внутрироссийская миграция из РСФСР.
          */
         for (int year = 1896; year <= 1914; year++)
         {
-            final long nAddChernomorskayaInner = Chernomor.additionalInnerMigration(year);
-            final long nAddChernomorskayaForeign = Chernomor.additionalInnerMigration(year);
-            final Long nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInner;
+            final long nAddChernomorskayaForeign = Chernomor.additionalForeignMigration(year);
+            final long nAddChernomorskayaInnerFromOutsideRSFSR = Chernomor.additionalInnerMigrationFromOutsideRSFSR(year);
+            final long nAddChernomorskayaInnerFromRSFSR = Chernomor.additionalInnerMigrationFromRSFSR(year);
+            final Long nAddChernomorskaya = nAddChernomorskayaForeign + nAddChernomorskayaInnerFromOutsideRSFSR + nAddChernomorskayaInnerFromRSFSR;
 
             tds.get("Черноморская").cascadeAdjustProgressivePopulation(year, nAddChernomorskaya);
             tds.get("Черноморская").territoryYearOrNull(year).migration.total.both += nAddChernomorskaya;
             tds.get("Черноморская").territoryYearOrNull(year).immigration.total.both += nAddChernomorskayaForeign;
-            tds.get("Черноморская").territoryYearOrNull(year).inner_migration.total.both += nAddChernomorskayaInner;
+            tds.get("Черноморская").territoryYearOrNull(year).inner_migration.total.both += nAddChernomorskayaInnerFromOutsideRSFSR + nAddChernomorskayaInnerFromRSFSR;
         }
+        
+        // LoadRegionalPopulation.load(tds.get("Черноморская"), "Черноморская", WhichPopulation.PROGRESSIVE_POPULATION);
     }
 
     private void assertUgvi(TerritoryDataSet tds, String tname) throws Exception
