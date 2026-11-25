@@ -75,36 +75,43 @@ public class ApplyTable
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
 
-        Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
-        Util.out("к численности по переписи января 1939 года:");
-        Util.out("возраст --- для раздельной передвижки городского и сельского населения --- для передвижки без разбивки населения по типу местности");
-
-        Double final_multiplier_t = null;
-
-        for (int cutoffAge = 3; cutoffAge <= 20; cutoffAge++)
+        for (Gender gender : Gender.ThreeGenders)
         {
-            double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false, cutoffAge);
-            double multiplier_ur = find_multiplier(p1937, p1939, mt, true, cutoffAge);
-            Util.out(String.format("%-2d %.4f %.4f", cutoffAge, multiplier_ur, multiplier_t));
+            Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
+            Util.out("к численности по переписи января 1939 года для пола " + gender.name() + ":");
+            Util.out("возраст --- для раздельной передвижки городского и сельского населения --- для передвижки без разбивки населения по типу местности");
+            
+            Double final_multiplier_t = null;
 
-            if (Util.False)
+            for (int cutoffAge = 3; cutoffAge <= 20; cutoffAge++)
             {
-                double diff_t = difference(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false, 3);
-                double diff_ur = difference(p1937, p1939, mt, multiplier_ur, true, 3);
-                Util.unused(diff_t, diff_ur);
+                double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false, cutoffAge, gender);
+                double multiplier_ur = find_multiplier(p1937, p1939, mt, true, cutoffAge, gender);
+                Util.out(String.format("%-2d %.4f %.4f", cutoffAge, multiplier_ur, multiplier_t));
+
+                if (Util.False)
+                {
+                    double diff_t = difference(p1937.toTotal(), p1939.toTotal(), mt, multiplier_t, false, 3, gender);
+                    double diff_ur = difference(p1937, p1939, mt, multiplier_ur, true, 3, gender);
+                    Util.unused(diff_t, diff_ur);
+                }
+
+                if (final_multiplier_t == null)
+                    final_multiplier_t = multiplier_t;
             }
 
-            if (final_multiplier_t == null)
-                final_multiplier_t = multiplier_t;
+            Util.out("");
+            Util.out(String.format("При множителе %.4f", final_multiplier_t));
+            show_divergence(p1937, p1939, mt, final_multiplier_t, gender);
+
+            Util.out("");
+            Util.out(String.format("При множителе %.4f", 1.4));
+            show_divergence(p1937, p1939, mt, 1.4, gender);
+
+            Util.out("");
+            Util.out("=============================================================");
+            Util.out("");
         }
-
-        Util.out("");
-        Util.out(String.format("При множителе %.4f", final_multiplier_t));
-        show_divergence(p1937, p1939, mt, final_multiplier_t);
-
-        Util.out("");
-        Util.out(String.format("При множителе %.4f", 1.4));
-        show_divergence(p1937, p1939, mt, 1.4);
 
         for_adh_population(mt);
         
@@ -113,9 +120,9 @@ public class ApplyTable
         Util.noop();
     }
 
-    private void show_divergence(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, double multiplier) throws Exception
+    private void show_divergence(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, double multiplier, Gender gender) throws Exception
     {
-        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier, false, true);
+        PopulationContext p = forward_without_births(p1937.toTotal(), p1939.toTotal(), mt, multiplier, false, gender);
         p = p.selectByAgeYears(3, Population.MAX_AGE);
         p = p.sub(p1939.toTotal().selectByAgeYears(3, Population.MAX_AGE), ValueConstraint.NONE);
 
@@ -129,7 +136,8 @@ public class ApplyTable
             final PopulationContext p1939,
             CombinedMortalityTable mt,
             boolean ur,
-            int cutoffAge) throws Exception
+            int cutoffAge,
+            Gender gender) throws Exception
     {
         double mmax = 1.7;
         int mmaxcount = 0;
@@ -147,7 +155,7 @@ public class ApplyTable
             if (Util.False && Math.abs(m1 - m2) < 0.0005)
                 return m;
 
-            double d = difference(p1937, p1939, mt, m, ur, cutoffAge);
+            double d = difference(p1937, p1939, mt, m, ur, cutoffAge, gender);
             if (Math.abs(d) < 100)
                 return m;
 
@@ -186,18 +194,19 @@ public class ApplyTable
             CombinedMortalityTable mt,
             double multiplier,
             boolean ur,
-            int cutoffAge) throws Exception
+            int cutoffAge,
+            Gender gender) throws Exception
     {
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
-        PopulationContext p = forward_without_births(p1937, p1939, xmt, ur, false);
-        return difference(p, p1939, cutoffAge);
+        PopulationContext p = forward_without_births(p1937, p1939, xmt, ur, gender);
+        return difference(p, p1939, cutoffAge, gender);
     }
 
-    private double difference(final PopulationContext p, final PopulationContext p1939, int cutoffAge) throws Exception
+    private double difference(final PopulationContext p, final PopulationContext p1939, int cutoffAge, Gender gender) throws Exception
     {
-        double v_p = p.sumAges(Locality.TOTAL, Gender.BOTH, cutoffAge, Population.MAX_AGE);
-        double v_p1939 = p1939.sumAges(Locality.TOTAL, Gender.BOTH, cutoffAge, Population.MAX_AGE);
+        double v_p = p.sumAges(Locality.TOTAL, gender, cutoffAge, Population.MAX_AGE);
+        double v_p1939 = p1939.sumAges(Locality.TOTAL, gender, cutoffAge, Population.MAX_AGE);
         return v_p - v_p1939;
     }
 
@@ -209,11 +218,11 @@ public class ApplyTable
             final CombinedMortalityTable mt,
             double multiplier,
             final boolean ur,
-            boolean printDeaths) throws Exception
+            Gender printDeathsForGender) throws Exception
     {
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
-        return forward_without_births(p1937, p1939, xmt, ur, printDeaths);
+        return forward_without_births(p1937, p1939, xmt, ur, printDeathsForGender);
     }
 
     private PopulationContext forward_without_births(
@@ -221,19 +230,19 @@ public class ApplyTable
             final PopulationContext p1939,
             final CombinedMortalityTable mt,
             final boolean ur,
-            boolean printDeaths) throws Exception
+            Gender printDeathsForGender) throws Exception
     {
         if (ur)
-            return forward_without_births_ur(p1937, p1939, mt, printDeaths);
+            return forward_without_births_ur(p1937, p1939, mt, printDeathsForGender);
         else
-            return forward_without_births_t(p1937, p1939, mt, printDeaths);
+            return forward_without_births_t(p1937, p1939, mt, printDeathsForGender);
     }
 
     private PopulationContext forward_without_births_ur(
             final PopulationContext p1937,
             final PopulationContext p1939,
             final CombinedMortalityTable mt,
-            boolean printDeaths) throws Exception
+            Gender printDeathsForGender) throws Exception
     {
         double urban_male_fraction_1937 = urban_fraction(p1937, Gender.MALE);
         double urban_male_fraction_1939 = urban_fraction(p1939, Gender.MALE);
@@ -276,7 +285,7 @@ public class ApplyTable
             final PopulationContext p1937,
             final PopulationContext p1939,
             final CombinedMortalityTable mt,
-            boolean printDeaths) throws Exception
+            Gender printDeathsForGender) throws Exception
     {
         PopulationContext p = p1937.clone();
 
@@ -300,10 +309,13 @@ public class ApplyTable
         fw.forward(p, mt, 0.03);
         deaths += fw.getObservedDeaths();
 
-        if (printDeaths)
+        if (printDeathsForGender != null)
+        {
+            // ### для gender
             Util.out(String
-                    .format("Общее число смертей во всех возрастах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.",
-                            (int) Math.round(deaths / 1000)));
+                     .format("Общее число смертей во всех возрастах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.",
+                             (int) Math.round(deaths / 1000)));
+        }
 
         return p;
     }
