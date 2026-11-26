@@ -51,6 +51,10 @@ public class ApplyTable
     }
 
     final boolean DoSmoothPopulation = true;
+    
+    private static final int FloorAgeBase = 0; 
+    private static final int FloorAgeLow = 3; 
+    private static final int FloorAgeHigh = 20; 
 
     private void do_main(String tablePath) throws Exception
     {
@@ -104,11 +108,11 @@ public class ApplyTable
         {
             Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
             Util.out("к численности по переписи января 1939 года для пола " + gender.name() + ":");
-            Util.out("возраст --- для раздельной передвижки городского и сельского населения --- для передвижки без разбивки населения по типу местности");
+            Util.out("возраст в 1939 --- для раздельной передвижки городского и сельского населения --- для передвижки без разбивки населения по типу местности");
 
             Double final_multiplier_t = null;
 
-            for (int floorAge = 3; floorAge <= 20; floorAge++)
+            for (int floorAge = FloorAgeLow; floorAge <= FloorAgeHigh; floorAge++)
             {
                 double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false, floorAge, gender);
                 double multiplier_ur = find_multiplier(p1937, p1939, mt, true, floorAge, gender);
@@ -495,7 +499,7 @@ public class ApplyTable
     private void for_adh_population(CombinedMortalityTable mt) throws Exception
     {
         Util.out("");
-        Util.out("На сколько требуется увеличить коэффициенты смертности таблицы, чтобы сумма смертей совпала с реконструкцией АДХ?");
+        Util.out("На сколько требуется увеличить коэффициенты смертности таблицы в возрастах 5-100, чтобы сумма смертей совпала с реконструкцией АДХ?");
 
         /* значения по АДХ-СССР стр. 120, 135 */
         for_adh_population(mt, 1934, 30.4, 21.7, 204);
@@ -561,7 +565,7 @@ public class ApplyTable
         Util.out("===============================================================================");
         Util.out("");
         Util.out("Ожидаемое число смертей в наличном населении 1937-го года к переписи 1939 года");
-        Util.out("для каждого пола и возрастов от 3-100 до 20-100 (возраст в 1937)");
+        Util.out("для каждого пола и возрастов от 0-100 до 20-100 (возраст в 1937)");
         Util.out("");
 
         Util.out("Вариант передвижки Total (Urban + Rural вместе)");
@@ -578,7 +582,7 @@ public class ApplyTable
     {
         for (Gender gender : Gender.ThreeGenders)
         {
-            for (int floorAge = 3; floorAge <= 20; floorAge++)
+            for (int floorAge = FloorAgeBase; floorAge <= FloorAgeHigh; floorAge++)
             {
                 if (ur)
                     printExpectedDeathsUR(p1937, p1939, mt, gender, floorAge);
@@ -670,12 +674,12 @@ public class ApplyTable
         Util.out("===============================================================================");
         Util.out("");
         Util.out("Фактическое число смертей в наличном населении 1937-го года к переписи 1939 года");
-        Util.out("для каждого пола и возрастов от 3-100 до 20-100 (возраст в 1937)");
+        Util.out("для каждого пола и возрастов от 0-100 до 20-100 (возраст в 1937)");
         Util.out("");
 
         for (Gender gender : Gender.ThreeGenders)
         {
-            for (int floorAge = 3; floorAge <= 20; floorAge++)
+            for (int floorAge = FloorAgeBase; floorAge <= FloorAgeHigh; floorAge++)
                 printActualDeaths(p1937, p1939_down, gender, floorAge);
         }
     }
