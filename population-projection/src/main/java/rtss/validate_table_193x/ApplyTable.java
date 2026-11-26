@@ -608,6 +608,7 @@ public class ApplyTable
         fw.setBirthRateUrban(0);
         fw.setBirthRateRural(0);
         fw.forward(p, mt, 1.0);
+        fw.validateDeathsByGenderAge();
         deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge, Population.MAX_AGE);
 
         /*
@@ -621,6 +622,7 @@ public class ApplyTable
         fw.setBirthRateUrban(0);
         fw.setBirthRateRural(0);
         fw.forward(p, mt, 1.0);
+        fw.validateDeathsByGenderAge();
         deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge + 1, Population.MAX_AGE);
 
         /* последний отрезок в 11 дней */
@@ -628,6 +630,7 @@ public class ApplyTable
         fw.setBirthRateUrban(0);
         fw.setBirthRateRural(0);
         fw.forward(p, mt, 0.03);
+        fw.validateDeathsByGenderAge();
         deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge + 2, Population.MAX_AGE);
 
         Util.out(String.format("%s %d %.1f", gender.name(), floorAge, deaths / 1000));
