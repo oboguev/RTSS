@@ -50,10 +50,10 @@ public class ApplyTable
     {
     }
 
+    final boolean DoSmoothPopulation = true;
+
     private void do_main(String tablePath) throws Exception
     {
-        final boolean DoSmoothPopulation = true;
-
         final PopulationByLocality p1937_original = PopulationByLocality.census(Area.USSR, 1937).smooth(DoSmoothPopulation);
         // final PopulationContext p1937 = p1937_original.toPopulationContext();
         final PopulationContext p1937 = new Adjust_1937().adjust(p1937_original).toPopulationContext();
@@ -74,7 +74,28 @@ public class ApplyTable
         // print_difference(p1939_down, p1937.toTotal());
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
+        
+        printExpectedDeaths(p1937, mt);
+        
+        // ### вычислить фактическую убыль между 1937 и 1939 для каждого пола и возрастов от 3-100 до 20-100 (в 1937) 
 
+        evalRequiredAmplification(p1937, p1939, mt);
+
+        for_adh_population(mt);
+
+        Util.out("*** Complete");
+
+        Util.noop();
+    }
+    
+    /* ============================================================================================================================== */
+    
+    /*
+     * Определить требуемое увеличение коэффиентов смертности ЦУНХУ для совпадения наличного населения по переписи 1937 гола
+     * с его остатоком по переписи 1939 года. Определяется для трёх полов (муж, жен, оба) и возрастных групп от 3-100 до 20-100.
+     */
+    private void evalRequiredAmplification(final PopulationContext p1937, final PopulationContext p1939, final CombinedMortalityTable mt) throws Exception
+    {
         for (Gender gender : Gender.ThreeGenders)
         {
             Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
@@ -83,11 +104,11 @@ public class ApplyTable
 
             Double final_multiplier_t = null;
 
-            for (int cutoffAge = 3; cutoffAge <= 20; cutoffAge++)
+            for (int floorAge = 3; floorAge <= 20; floorAge++)
             {
-                double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false, cutoffAge, gender);
-                double multiplier_ur = find_multiplier(p1937, p1939, mt, true, cutoffAge, gender);
-                Util.out(String.format("%-2d %.4f %.4f", cutoffAge, multiplier_ur, multiplier_t));
+                double multiplier_t = find_multiplier(p1937.toTotal(), p1939.toTotal(), mt, false, floorAge, gender);
+                double multiplier_ur = find_multiplier(p1937, p1939, mt, true, floorAge, gender);
+                Util.out(String.format("%-2d %.4f %.4f", floorAge, multiplier_ur, multiplier_t));
 
                 if (Util.False)
                 {
@@ -112,12 +133,6 @@ public class ApplyTable
             Util.out("=============================================================");
             Util.out("");
         }
-
-        for_adh_population(mt);
-
-        Util.out("*** Complete");
-
-        Util.noop();
     }
 
     private void show_divergence(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, double multiplier, Gender gender)
@@ -137,7 +152,7 @@ public class ApplyTable
             final PopulationContext p1939,
             CombinedMortalityTable mt,
             boolean ur,
-            int cutoffAge,
+            int floorAge,
             Gender gender) throws Exception
     {
         double mmax = 1.9;
@@ -156,7 +171,7 @@ public class ApplyTable
             if (Util.False && Math.abs(m1 - m2) < 0.0005)
                 return m;
 
-            double d = difference(p1937, p1939, mt, m, ur, cutoffAge, gender);
+            double d = difference(p1937, p1939, mt, m, ur, floorAge, gender);
             if (Math.abs(d) < 100)
                 return m;
 
@@ -195,19 +210,19 @@ public class ApplyTable
             CombinedMortalityTable mt,
             double multiplier,
             boolean ur,
-            int cutoffAge,
+            int floorAge,
             Gender gender) throws Exception
     {
         PatchInstruction instruction = new PatchInstruction(PatchOpcode.Multiply, 0, Population.MAX_AGE, multiplier);
         CombinedMortalityTable xmt = PatchMortalityTable.patch(mt, instruction, "с множителем " + multiplier);
         PopulationContext p = forward_without_births(p1937, p1939, xmt, ur, null);
-        return difference(p, p1939, cutoffAge, gender);
+        return difference(p, p1939, floorAge, gender);
     }
 
-    private double difference(final PopulationContext p, final PopulationContext p1939, int cutoffAge, Gender gender) throws Exception
+    private double difference(final PopulationContext p, final PopulationContext p1939, int floorAge, Gender gender) throws Exception
     {
-        double v_p = p.sumAges(Locality.TOTAL, gender, cutoffAge, Population.MAX_AGE);
-        double v_p1939 = p1939.sumAges(Locality.TOTAL, gender, cutoffAge, Population.MAX_AGE);
+        double v_p = p.sumAges(Locality.TOTAL, gender, floorAge, Population.MAX_AGE);
+        double v_p1939 = p1939.sumAges(Locality.TOTAL, gender, floorAge, Population.MAX_AGE);
         return v_p - v_p1939;
     }
 
@@ -467,7 +482,11 @@ public class ApplyTable
         }
     }
 
-    /* ====================================================================================================== */
+    /* ============================================================================================================================== */
+    
+    /*
+     * На сколько требуется увеличить коэффициенты смертности таблицы ЦУНХУ, чтобы сумма смертей совпала с реконструкцией АДХ?
+     */
 
     private void for_adh_population(CombinedMortalityTable mt) throws Exception
     {
@@ -525,5 +544,29 @@ public class ApplyTable
 
         MatchMortalityTable.match(mt, p, instructions, cbr, cdr, "модиф");
         Util.out(String.format("Для %d года все коэффициенты в возрастах 5-100 увеличены на %.4f", year, instruction.scale));
+    }
+
+    /* ============================================================================================================================== */
+
+    /*
+     * Вычислить ожидаемое по таблице ЦУНХУ количество смертей в наличном населении 1937-го года к переписи 1939 года 
+     * для каждого пола и возрастов от 3-100 до 20-100 (возраст в 1937) 
+     */
+    private void printExpectedDeaths(PopulationContext p1937, CombinedMortalityTable mt)
+    {
+        for (Gender gender : Gender.TwoGenders)
+        {
+            for (int floorAge = 3; floorAge <= 20; floorAge++)
+            {
+                printExpectedDeaths(p1937, mt, gender, floorAge, false);
+                printExpectedDeaths(p1937, mt, gender, floorAge, true);
+                
+            }
+        }
+    }
+
+    private void printExpectedDeaths(PopulationContext p1937, CombinedMortalityTable mt, Gender gender, int floorAge, boolean ur)
+    {
+        // ###
     }
 }
