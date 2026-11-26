@@ -69,6 +69,60 @@ public class ForwardPopulationUR extends ForwardPopulation
     private double fctx_u_female_deaths = 0;
     private double fctx_r_female_deaths = 0;
 
+    /*
+     * Число смертей по типу местности, полу и возрасту в днях на начало передвижки.
+     * Смерти накапливаются при последовательных вызовах forward().
+     * Для рождённых во время передвижки см. newbornDeathRegistrationAge.
+     */
+    private final PopulationContext deathsByGenderAge = PopulationContext.newURPopulationContext();
+
+    /*
+     * Регистрация смертей в deathsByGenderAge индексируется по возрасту на момент НАЧАЛА передвижки,
+     * начиная с дня 0 для только что родившихся, т.е. характеризует население имевшееся на момент
+     * начала передвижки и даёт числа смертей для его возрастов.
+     *
+     * Но младенцы родившиеся и затем умершие уже в период передвижки имеют отрицательный возраст
+     * относительно начала передвижки.
+     *
+     * Наша структура не поддерживает индексацию по отрицательным возрастам.
+     *
+     * Мы поэтому можем либо отнести смерти новорожденных либо на возраст день 0,
+     * либо (чтобы избежать аккумуляции) на зеркально отражённый возраст.
+     *
+     * TODO:
+     * Требует исправления структуры или двойной структуры.
+     * Взамен можно пользоваться deathsByGenderAgeAtDeath.
+     */
+    public static enum NewbornDeathRegistrationAge
+    {
+        AT_AGE_DAY0, MIRROR_AGE
+    }
+
+    private NewbornDeathRegistrationAge newbornDeathRegistrationAge = NewbornDeathRegistrationAge.AT_AGE_DAY0;
+
+    public void setNewbornDeathRegistrationAge(NewbornDeathRegistrationAge newbornDeathRegistrationAge)
+    {
+        this.newbornDeathRegistrationAge = newbornDeathRegistrationAge;
+    }
+
+    private int newbornDeathDay(int nd)
+    {
+        switch (newbornDeathRegistrationAge)
+        {
+        case AT_AGE_DAY0:
+            return 0;
+        case MIRROR_AGE:
+            return nd;
+        default:
+            throw new IllegalArgumentException("неверная установка для newbornDeathRegistrationAge");
+        }
+    }
+
+    public PopulationContext deathsByGenderAge()
+    {
+        return deathsByGenderAge;
+    }
+
     /* Deaths by locality, sex and age in completed days at death, accumulated across forward() calls. */
     private final PopulationContext deathsByGenderAgeAtDeath = PopulationContext.newURPopulationContext();
 
@@ -505,6 +559,10 @@ public class ForwardPopulationUR extends ForwardPopulation
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
 
+        /* Register newborn deaths by their conventional age at the start of forwarding. */
+        recordNewbornDeathsByGenderAge(locality, gender, initial_day_births,
+                                       day_births, ndays, deaths_from_births);
+
         /* Use the existing aggregate as the authoritative newborn death count. */
         newbornDeathsByLocalityGender[locality.ordinal()][gender.ordinal()] += deaths_from_births;
         if (recordDeathsByGenderAgeAtDeath)
@@ -567,6 +625,8 @@ public class ForwardPopulationUR extends ForwardPopulation
 
             observed_deaths += deaths;
             sum_deaths += deaths;
+            /* Annual-age legacy population: use the first day of the initial year of age. */
+            deathsByGenderAge.addDay(locality, gender, age * DAYS_PER_YEAR, deaths);
             if (recorder != null)
                 recordYearlyDeathsAtDeathAge(recorder, age, deaths);
 
@@ -671,6 +731,8 @@ public class ForwardPopulationUR extends ForwardPopulation
                 // deathsByGenderAge.addDay(locality, gender, nd, deaths);
             }
 
+            /* All three branches above use nd as the actual initial age, even when lx is shifted. */
+            deathsByGenderAge.addDay(locality, gender, nd, v_initial - v);
             sum_deaths += v_initial - v;
         }
 
@@ -699,6 +761,87 @@ public class ForwardPopulationUR extends ForwardPopulation
         }
 
         observed_deaths += sum_deaths;
+    }
+
+    /*
+     * Register the newborn deaths using the same age convention as ForwardPopulationT.
+     * Both arrays are indexed by age at the END of forwarding. The mirrored age
+     * is therefore ndays - 1 - nd, not nd.
+     *
+     * UR computes the authoritative total as total births minus total survivors.
+     * In MIRROR_AGE mode normalize the individual cohort losses to this total,
+     * just as recordNewbornDeathsAtDeathAge() does. In AT_AGE_DAY0 mode there is
+     * no need to distribute the total over individual birth cohorts.
+     * This registration is independent of the optional age-at-death recorder.
+     */
+    private void recordNewbornDeathsByGenderAge(Locality locality, Gender gender,
+            double[] births, double[] survivors, int ndays, double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        if (newbornDeathRegistrationAge == NewbornDeathRegistrationAge.AT_AGE_DAY0)
+        {
+            deathsByGenderAge.addDay(locality, gender, 0, deaths);
+            return;
+        }
+
+        double cohortLossSum = 0;
+        for (int nd = 0; nd < ndays; nd++)
+            cohortLossSum += births[nd] - survivors[nd];
+
+        Util.assertion(cohortLossSum > 0);
+
+        for (int nd = 0; nd < ndays; nd++)
+        {
+            double cohortLoss = births[nd] - survivors[nd];
+            if (cohortLoss != 0)
+            {
+                int death_day = newbornDeathDay(ndays - 1 - nd);
+                deathsByGenderAge.addDay(locality, gender, death_day,
+                                         deaths * (cohortLoss / cohortLossSum));
+            }
+        }
+    }
+
+    /*
+     * Validate the always-enabled registration by initial age independently of
+     * the optional registration by age at death. Check all nine combinations
+     * of locality and gender against the existing cumulative death counters.
+     */
+    public void validateDeathsByGenderAge() throws Exception
+    {
+        double um = p_u_male_deaths + fctx_u_male_deaths
+                + newbornDeathsByLocalityGender[Locality.URBAN.ordinal()][Gender.MALE.ordinal()];
+        double uf = p_u_female_deaths + fctx_u_female_deaths
+                + newbornDeathsByLocalityGender[Locality.URBAN.ordinal()][Gender.FEMALE.ordinal()];
+        double rm = p_r_male_deaths + fctx_r_male_deaths
+                + newbornDeathsByLocalityGender[Locality.RURAL.ordinal()][Gender.MALE.ordinal()];
+        double rf = p_r_female_deaths + fctx_r_female_deaths
+                + newbornDeathsByLocalityGender[Locality.RURAL.ordinal()][Gender.FEMALE.ordinal()];
+
+        validateDeathsByGenderAge(Locality.TOTAL, Gender.BOTH, getObservedDeaths());
+        validateDeathsByGenderAge(Locality.TOTAL, Gender.MALE,
+                p_u_male_deaths + p_r_male_deaths + fctx_u_male_deaths + fctx_r_male_deaths
+                + ur_male_deaths_from_births);
+        validateDeathsByGenderAge(Locality.TOTAL, Gender.FEMALE,
+                p_u_female_deaths + p_r_female_deaths + fctx_u_female_deaths + fctx_r_female_deaths
+                + ur_female_deaths_from_births);
+        validateDeathsByGenderAge(Locality.URBAN, Gender.MALE, um);
+        validateDeathsByGenderAge(Locality.URBAN, Gender.FEMALE, uf);
+        validateDeathsByGenderAge(Locality.RURAL, Gender.MALE, rm);
+        validateDeathsByGenderAge(Locality.RURAL, Gender.FEMALE, rf);
+        validateDeathsByGenderAge(Locality.URBAN, Gender.BOTH, um + uf);
+        validateDeathsByGenderAge(Locality.RURAL, Gender.BOTH, rm + rf);
+    }
+
+    private void validateDeathsByGenderAge(Locality locality, Gender gender, double expected) throws Exception
+    {
+        double actual = deathsByGenderAge.sumAllAges(locality, gender);
+        if (!Util.same(expected, actual))
+            throw new Exception(String.format(
+                    "Deaths by initial age mismatch (%s, %s): expected = %.10f, actual = %.10f, difference = %.10f",
+                    locality, gender, expected, actual, actual - expected));
     }
 
     /*****************************************************************************************/

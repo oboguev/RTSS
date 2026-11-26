@@ -74,28 +74,32 @@ public class ApplyTable
         // print_difference(p1939_down, p1937.toTotal());
 
         CombinedMortalityTable mt = new CombinedMortalityTable(tablePath);
-        
-        printExpectedDeaths(p1937, mt);
-        
-        // ### вычислить фактическую убыль между 1937 и 1939 для каждого пола и возрастов от 3-100 до 20-100 (в 1937) 
 
+        printExpectedDeaths(p1937, p1939, mt);
+        printActualDeaths(p1937, p1939_down);
+        
         evalRequiredAmplification(p1937, p1939, mt);
-
+        
         for_adh_population(mt);
 
         Util.out("*** Complete");
 
         Util.noop();
     }
-    
+
     /* ============================================================================================================================== */
-    
+
     /*
      * Определить требуемое увеличение коэффиентов смертности ЦУНХУ для совпадения наличного населения по переписи 1937 гола
      * с его остатоком по переписи 1939 года. Определяется для трёх полов (муж, жен, оба) и возрастных групп от 3-100 до 20-100.
      */
-    private void evalRequiredAmplification(final PopulationContext p1937, final PopulationContext p1939, final CombinedMortalityTable mt) throws Exception
+    private void evalRequiredAmplification(final PopulationContext p1937, final PopulationContext p1939, final CombinedMortalityTable mt)
+            throws Exception
     {
+        Util.out("");
+        Util.out("===============================================================================");
+        Util.out("");
+
         for (Gender gender : Gender.ThreeGenders)
         {
             Util.out("Множитель коэффциентов смертности для схождения численности населения (в возрастах 3-100 лет) январь 1937 -> январь 1939 по передвижке");
@@ -339,11 +343,11 @@ public class ApplyTable
                             (int) Math.round(allDeaths / 1000)));
 
             Util.out(String
-                     .format("Общее число смертей пола %s во всех возрастах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.",
-                             printDeathsForGender.name(),
-                             (int) Math.round(genderDeaths / 1000)));
+                    .format("Общее число смертей пола %s во всех возрастах в наличном на момент переписи 1937 года населении (без новых рождений) к 1939 году: %,d тыс. чел.",
+                            printDeathsForGender.name(),
+                            (int) Math.round(genderDeaths / 1000)));
         }
-        
+
         Util.unused(genderDeaths);
 
         return p;
@@ -483,7 +487,7 @@ public class ApplyTable
     }
 
     /* ============================================================================================================================== */
-    
+
     /*
      * На сколько требуется увеличить коэффициенты смертности таблицы ЦУНХУ, чтобы сумма смертей совпала с реконструкцией АДХ?
      */
@@ -552,21 +556,133 @@ public class ApplyTable
      * Вычислить ожидаемое по таблице ЦУНХУ количество смертей в наличном населении 1937-го года к переписи 1939 года 
      * для каждого пола и возрастов от 3-100 до 20-100 (возраст в 1937) 
      */
-    private void printExpectedDeaths(PopulationContext p1937, CombinedMortalityTable mt)
+    private void printExpectedDeaths(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt) throws Exception
     {
-        for (Gender gender : Gender.TwoGenders)
+        Util.out("===============================================================================");
+        Util.out("");
+        Util.out("Ожидаемое число смертей в наличном населении 1937-го года к переписи 1939 года");
+        Util.out("для каждого пола и возрастов от 3-100 до 20-100 (возраст в 1937)");
+        Util.out("");
+
+        Util.out("Вариант передвижки Total (Urban + Rural вместе)");
+        Util.out("");
+        printExpectedDeaths(p1937, p1939, mt, false);
+
+        Util.out("");
+        Util.out("Вариант передвижки Urban/Rural по раздельности");
+        Util.out("");
+        printExpectedDeaths(p1937, p1939, mt, true);
+    }
+
+    private void printExpectedDeaths(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, boolean ur) throws Exception
+    {
+        for (Gender gender : Gender.ThreeGenders)
         {
             for (int floorAge = 3; floorAge <= 20; floorAge++)
             {
-                printExpectedDeaths(p1937, mt, gender, floorAge, false);
-                printExpectedDeaths(p1937, mt, gender, floorAge, true);
-                
+                if (ur)
+                    printExpectedDeathsUR(p1937, p1939, mt, gender, floorAge);
+                else
+                    printExpectedDeathsT(p1937, mt, gender, floorAge);
             }
         }
     }
 
-    private void printExpectedDeaths(PopulationContext p1937, CombinedMortalityTable mt, Gender gender, int floorAge, boolean ur)
+    private void printExpectedDeathsUR(PopulationContext p1937, PopulationContext p1939, CombinedMortalityTable mt, Gender gender, int floorAge)
+            throws Exception
     {
-        // ###
+        double deaths = 0;
+
+        double urban_male_fraction_1937 = urban_fraction(p1937, Gender.MALE);
+        double urban_male_fraction_1939 = urban_fraction(p1939, Gender.MALE);
+        double urban_male_fraction_1938 = (urban_male_fraction_1937 + urban_male_fraction_1939) / 2;
+
+        double urban_female_fraction_1937 = urban_fraction(p1937, Gender.FEMALE);
+        double urban_female_fraction_1939 = urban_fraction(p1939, Gender.FEMALE);
+        double urban_female_fraction_1938 = (urban_female_fraction_1937 + urban_female_fraction_1939) / 2;
+
+        PopulationContext p = p1937.clone();
+
+        /* 1937 -> 1938 */
+        ForwardPopulationUR fw = new ForwardPopulationUR();
+        fw.setBirthRateUrban(0);
+        fw.setBirthRateRural(0);
+        fw.forward(p, mt, 1.0);
+        deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge, Population.MAX_AGE);
+
+        /*
+         * Перераспределить население между городским и сельским, отражая урбанизацию 
+         */
+        urbanize(p, Gender.MALE, urban_male_fraction_1938);
+        urbanize(p, Gender.FEMALE, urban_female_fraction_1938);
+
+        /* 1938 -> 1939 */
+        fw = new ForwardPopulationUR();
+        fw.setBirthRateUrban(0);
+        fw.setBirthRateRural(0);
+        fw.forward(p, mt, 1.0);
+        deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge + 1, Population.MAX_AGE);
+
+        /* последний отрезок в 11 дней */
+        fw = new ForwardPopulationUR();
+        fw.setBirthRateUrban(0);
+        fw.setBirthRateRural(0);
+        fw.forward(p, mt, 0.03);
+        deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge + 2, Population.MAX_AGE);
+
+        Util.out(String.format("%s %d %.1f", gender.name(), floorAge, deaths / 1000));
+    }
+
+    private void printExpectedDeathsT(PopulationContext p1937, CombinedMortalityTable mt, Gender gender, int floorAge) throws Exception
+    {
+        PopulationContext p = p1937.toTotal();
+
+        double deaths = 0;
+
+        /* 1937 -> 1938 */
+        ForwardPopulationT fw = new ForwardPopulationT();
+        fw.setBirthRateTotal(0);
+        fw.forward(p, mt, 1.0);
+        deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge, Population.MAX_AGE);
+
+        /* 1938 -> 1939 */
+        fw = new ForwardPopulationT();
+        fw.setBirthRateTotal(0);
+        fw.forward(p, mt, 1.0);
+        deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge + 1, Population.MAX_AGE);
+
+        /* последний отрезок в 11 дней */
+        fw = new ForwardPopulationT();
+        fw.setBirthRateTotal(0);
+        fw.forward(p, mt, 0.03);
+        deaths += fw.deathsByGenderAge().sumAges(Locality.TOTAL, gender, floorAge + 2, Population.MAX_AGE);
+
+        Util.out(String.format("%s %d %.1f", gender.name(), floorAge, deaths / 1000));
+    }
+
+    /* ============================================================================================================================== */
+
+    private void printActualDeaths(PopulationContext p1937, PopulationContext p1939_down) throws Exception
+    {
+        Util.out("===============================================================================");
+        Util.out("");
+        Util.out("Фактическое число смертей в наличном населении 1937-го года к переписи 1939 года");
+        Util.out("для каждого пола и возрастов от 3-100 до 20-100 (возраст в 1937)");
+        Util.out("");
+
+        for (Gender gender : Gender.ThreeGenders)
+        {
+            for (int floorAge = 3; floorAge <= 20; floorAge++)
+                printActualDeaths(p1937, p1939_down, gender, floorAge);
+        }
+    }
+
+    private void printActualDeaths(PopulationContext p1937, PopulationContext p1939_down, Gender gender, int floorAge) throws Exception
+    {
+        double v1937 = p1937.sumAges(Locality.TOTAL, gender, floorAge, Population.MAX_AGE);
+        double v1939 = p1939_down.sumAges(Locality.TOTAL, gender, floorAge, Population.MAX_AGE);
+        double deaths = v1937 - v1939;
+        
+        Util.out(String.format("%s %d %.1f", gender.name(), floorAge, deaths / 1000));
     }
 }
