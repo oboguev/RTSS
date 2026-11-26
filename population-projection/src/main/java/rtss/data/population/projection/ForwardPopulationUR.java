@@ -69,6 +69,37 @@ public class ForwardPopulationUR extends ForwardPopulation
     private double fctx_u_female_deaths = 0;
     private double fctx_r_female_deaths = 0;
 
+    /* Deaths by locality, sex and age in completed days at death, accumulated across forward() calls. */
+    private final PopulationContext deathsByGenderAgeAtDeath = PopulationContext.newURPopulationContext();
+
+    /* Both flags default to false: preserve legacy execution unless explicitly enabled. */
+    private boolean recordDeathsByGenderAgeAtDeath = false;
+    private boolean bufferDeathsByGenderAgeAtDeath = false;
+
+    /* Enable before the first forward() call to obtain a complete cumulative distribution.
+     * Disabling recording does not clear deaths already recorded. */
+    public void setRecordDeathsByGenderAgeAtDeath(boolean enable)
+    {
+        this.recordDeathsByGenderAgeAtDeath = enable;
+    }
+
+    /* Select direct addDay() calls or a per-locality-and-sex temporary double[] buffer.
+     * This flag has no effect when recording is disabled. */
+    public void setBufferDeathsByGenderAgeAtDeath(boolean enable)
+    {
+        this.bufferDeathsByGenderAgeAtDeath = enable;
+    }
+
+    public PopulationContext deathsByGenderAgeAtDeath()
+    {
+        return deathsByGenderAgeAtDeath;
+    }
+
+    /* Independent cumulative newborn-death totals for validation. The legacy
+     * ur_*_deaths_from_births counters combine urban and rural deaths. */
+    private final double[][] newbornDeathsByLocalityGender =
+            new double[Locality.values().length][Gender.values().length];
+
     public ForwardPopulationUR setBirthRateRural(AgeSpecificFertilityRates ageSpecificFertilityRates)
     {
         this.ageSpecificFertilityRatesRural = ageSpecificFertilityRates;
@@ -458,6 +489,8 @@ public class ForwardPopulationUR extends ForwardPopulation
          * lx[nd] содержит число выживших на день жизни nd согласно таблице смертности,
          * таким образом day_lx[nd] / day_lx[0] представляет долю выживших к этому дню со дня рождения 
          */
+        /* Preserve the original birth cohorts for optional age-at-death registration. */
+        double[] initial_day_births = day_births;
         day_births = Util.dup(day_births);
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
         for (int nd = 0; nd < ndays; nd++)
@@ -471,6 +504,12 @@ public class ForwardPopulationUR extends ForwardPopulation
 
         double deaths_from_births = total_births - Util.sum(day_births);
         observed_deaths += deaths_from_births;
+
+        /* Use the existing aggregate as the authoritative newborn death count. */
+        newbornDeathsByLocalityGender[locality.ordinal()][gender.ordinal()] += deaths_from_births;
+        if (recordDeathsByGenderAgeAtDeath)
+            recordNewbornDeathsAtDeathAge(locality, gender, day_lx, initial_day_births,
+                                          day_births, ndays, deaths_from_births);
 
         switch (gender)
         {
@@ -508,6 +547,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         pto.set(locality, gender, 0, 0);
 
         double sum_deaths = 0;
+        DeathAgeRecorder recorder = newDeathAgeRecorder(locality, gender);
 
         /* Передвижка по таблице смертности.
          * 
@@ -527,10 +567,15 @@ public class ForwardPopulationUR extends ForwardPopulation
 
             observed_deaths += deaths;
             sum_deaths += deaths;
+            if (recorder != null)
+                recordYearlyDeathsAtDeathAge(recorder, age, deaths);
 
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
+
+        if (recorder != null)
+            recorder.flush();
 
         switch (locality.name() + "-" + gender.name())
         {
@@ -580,6 +625,7 @@ public class ForwardPopulationUR extends ForwardPopulation
         double[] p2 = new double[p.length];
 
         double sum_deaths = 0;
+        DeathAgeRecorder recorder = newDeathAgeRecorder(locality, gender);
 
         for (int nd = 0; nd < p.length; nd++)
         {
@@ -593,6 +639,8 @@ public class ForwardPopulationUR extends ForwardPopulation
             if (nd2 < p2.length)
             {
                 v *= survivalRate(fctx, day_lx, nd, nd2);
+                if (recorder != null)
+                    recordForwardDeathsAtDeathAge(recorder, fctx, day_lx, nd, nd2, nd, v_initial - v);
                 p2[nd2] = v;
 
                 // double deaths = v * deathRate(fctx, day_lx, nd, nd2);
@@ -603,6 +651,8 @@ public class ForwardPopulationUR extends ForwardPopulation
                 nd2 = age * fctx.DAYS_PER_YEAR;
 
                 v *= survivalRate(fctx, day_lx, nd, nd2);
+                if (recorder != null)
+                    recordForwardDeathsAtDeathAge(recorder, fctx, day_lx, nd, nd2, nd, v_initial - v);
                 pto.add(locality, gender, Math.min(age, MAX_AGE), v);
 
                 // double deaths = v * deathRate(fctx, day_lx, nd, nd2);
@@ -613,6 +663,8 @@ public class ForwardPopulationUR extends ForwardPopulation
                 int back = fctx.DAYS_PER_YEAR;
 
                 v *= survivalRate(fctx, day_lx, nd - back, nd2 - back);
+                if (recorder != null)
+                    recordForwardDeathsAtDeathAge(recorder, fctx, day_lx, nd - back, nd2 - back, nd, v_initial - v);
                 p2[p2.length - 1] += v;
 
                 // double deaths = v * deathRate(fctx, day_lx, nd - back, nd2 - back);
@@ -621,6 +673,9 @@ public class ForwardPopulationUR extends ForwardPopulation
 
             sum_deaths += v_initial - v;
         }
+
+        if (recorder != null)
+            recorder.flush();
 
         fctx.fromArray(locality, gender, p2);
 
@@ -644,6 +699,223 @@ public class ForwardPopulationUR extends ForwardPopulation
         }
 
         observed_deaths += sum_deaths;
+    }
+
+    /*****************************************************************************************/
+    /* Optional registration of deaths by age at death. */
+
+    private DeathAgeRecorder newDeathAgeRecorder(Locality locality, Gender gender)
+    {
+        return recordDeathsByGenderAgeAtDeath ? new DeathAgeRecorder(locality, gender) : null;
+    }
+
+    /*
+     * One recorder per invocation of the inner forwarding/births routine.
+     * Locality and sex remain fixed, so the buffer needs only one index (age in days).
+     * The same distribution algorithm is used in direct and buffered modes.
+     */
+    private class DeathAgeRecorder
+    {
+        private final Locality locality;
+        private final Gender gender;
+        private final double[] buffer;
+
+        DeathAgeRecorder(Locality locality, Gender gender)
+        {
+            this.locality = locality;
+            this.gender = gender;
+            buffer = bufferDeathsByGenderAgeAtDeath ? new double[deathsByGenderAgeAtDeath.NDAYS] : null;
+        }
+
+        void add(int day, double deaths) throws Exception
+        {
+            if (deaths == 0)
+                return;
+
+            /* Retain deaths beyond the representable age in the last daily age cell. */
+            day = Math.min(day, deathsByGenderAgeAtDeath.MAX_DAY);
+
+            if (buffer != null)
+                buffer[day] += deaths;
+            else
+                deathsByGenderAgeAtDeath.addDay(locality, gender, day, deaths);
+        }
+
+        /* Merge only once per nonzero daily age, then clear the local buffer. */
+        void flush() throws Exception
+        {
+            if (buffer == null)
+                return;
+
+            for (int day = 0; day < buffer.length; day++)
+            {
+                if (buffer[day] != 0)
+                {
+                    deathsByGenderAgeAtDeath.addDay(locality, gender, day, buffer[day]);
+                    buffer[day] = 0;
+                }
+            }
+        }
+    }
+
+    /*
+     * Distribute the number of deaths already calculated by the legacy algorithm.
+     * For a cohort exposed to mortality from lxFrom to lxTo, the fraction of its
+     * deaths in [d, d+1) is (lx[d] - lx[d+1]) / (lx[lxFrom] - lx[lxTo]).
+     * This telescoping sum preserves the old death count up to double rounding.
+     * Subtract lx values before dividing: avoid cancellation in 1 - lx[d+1]/lx[d].
+     *
+     * ageFrom is the actual starting age, which may differ from lxFrom when
+     * the legacy algorithm substitutes mortality rates of a younger age.
+     * For births, both lxFrom and ageFrom are zero.
+     */
+    private void recordDeathsAtDeathAge(DeathAgeRecorder recorder, double[] day_lx,
+            int lxFrom, int lxTo, int ageFrom, double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        /* Legacy survivalRate() defines 0/0 as zero survival. There is no
+         * daily distribution implied by lx in this case; assign to the first day. */
+        if (day_lx[lxFrom] == 0 && day_lx[lxTo] == 0)
+        {
+            recorder.add(ageFrom, deaths);
+            return;
+        }
+
+        double lxLoss = day_lx[lxFrom] - day_lx[lxTo];
+        Util.assertion(lxLoss > 0);
+
+        for (int d = lxFrom; d < lxTo; d++)
+        {
+            double dx = day_lx[d] - day_lx[d + 1];
+            Util.assertion(dx >= 0);
+
+            if (dx != 0)
+                recorder.add(ageFrom + (d - lxFrom), deaths * (dx / lxLoss));
+        }
+    }
+
+    /*
+     * Mirror the index correction in survivalRate() without changing that method.
+     * The caller has already applied any correction made by forward_context().
+     * Only the mortality-table indices are shifted, not the actual age at death.
+     * Keep this correction in sync with survivalRate() if it is ever changed.
+     */
+    private void recordForwardDeathsAtDeathAge(DeathAgeRecorder recorder, PopulationContext fctx,
+            double[] day_lx, int lxFrom, int lxTo, int ageFrom, double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        if (lxTo >= day_lx.length)
+        {
+            final int extra = 10;
+            final int shift = fctx.DAYS_PER_YEAR + extra;
+            lxFrom -= shift;
+            lxTo -= shift;
+        }
+
+        recordDeathsAtDeathAge(recorder, day_lx, lxFrom, lxTo, ageFrom, deaths);
+    }
+
+    /*
+     * Legacy yearly population has no daily age structure. Use a uniform
+     * distribution within the year of age whose mortality was applied.
+     * This is an approximation, not a reconstruction of exact ages at death.
+     */
+    private void recordYearlyDeathsAtDeathAge(DeathAgeRecorder recorder, int age, double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        int firstDay = age * DAYS_PER_YEAR;
+        double dailyDeaths = deaths / DAYS_PER_YEAR;
+
+        for (int d = 0; d < DAYS_PER_YEAR; d++)
+            recorder.add(firstDay + d, dailyDeaths);
+    }
+
+    /*
+     * UR uses the difference between total births and total survivors as its
+     * authoritative newborn death count. The sum of individual cohort losses
+     * may differ slightly because floating-point additions/subtractions are
+     * performed in a different order. Normalize those cohort losses to the
+     * existing aggregate before distributing each cohort over days of age.
+     * Both arrays are indexed by age at the end of the forwarding interval.
+     */
+    private void recordNewbornDeathsAtDeathAge(Locality locality, Gender gender,
+            double[] day_lx, double[] births, double[] survivors, int ndays,
+            double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        double cohortLossSum = 0;
+        for (int nd = 0; nd < ndays; nd++)
+            cohortLossSum += births[nd] - survivors[nd];
+
+        Util.assertion(cohortLossSum > 0);
+
+        DeathAgeRecorder recorder = newDeathAgeRecorder(locality, gender);
+        for (int nd = 0; nd < ndays; nd++)
+        {
+            double cohortLoss = births[nd] - survivors[nd];
+            if (cohortLoss != 0)
+                recordDeathsAtDeathAge(recorder, day_lx, 0, nd, 0,
+                                       deaths * (cohortLoss / cohortLossSum));
+        }
+        recorder.flush();
+    }
+
+    /*
+     * Compare the cumulative age-at-death distribution with the independent
+     * legacy death counts. Enable recording before the first forwarding call
+     * and leave it enabled throughout the sequence to be validated.
+     * PopulationContext derives TOTAL and BOTH by summing its stored cells;
+     * only URBAN/RURAL x MALE/FEMALE are written by the recorder.
+     */
+    public void validateDeathsByGenderAgeAtDeath() throws Exception
+    {
+        validateDeathsAtDeathAge(Locality.TOTAL, Gender.BOTH, getObservedDeaths());
+
+        validateDeathsAtDeathAge(Locality.TOTAL, Gender.MALE,
+                p_u_male_deaths + p_r_male_deaths + fctx_u_male_deaths + fctx_r_male_deaths
+                + ur_male_deaths_from_births);
+        validateDeathsAtDeathAge(Locality.TOTAL, Gender.FEMALE,
+                p_u_female_deaths + p_r_female_deaths + fctx_u_female_deaths + fctx_r_female_deaths
+                + ur_female_deaths_from_births);
+
+        double um = p_u_male_deaths + fctx_u_male_deaths
+                + newbornDeathsByLocalityGender[Locality.URBAN.ordinal()][Gender.MALE.ordinal()];
+        double uf = p_u_female_deaths + fctx_u_female_deaths
+                + newbornDeathsByLocalityGender[Locality.URBAN.ordinal()][Gender.FEMALE.ordinal()];
+        double rm = p_r_male_deaths + fctx_r_male_deaths
+                + newbornDeathsByLocalityGender[Locality.RURAL.ordinal()][Gender.MALE.ordinal()];
+        double rf = p_r_female_deaths + fctx_r_female_deaths
+                + newbornDeathsByLocalityGender[Locality.RURAL.ordinal()][Gender.FEMALE.ordinal()];
+
+        validateDeathsAtDeathAge(Locality.URBAN, Gender.MALE, um);
+        validateDeathsAtDeathAge(Locality.URBAN, Gender.FEMALE, uf);
+        validateDeathsAtDeathAge(Locality.RURAL, Gender.MALE, rm);
+        validateDeathsAtDeathAge(Locality.RURAL, Gender.FEMALE, rf);
+        validateDeathsAtDeathAge(Locality.URBAN, Gender.BOTH, um + uf);
+        validateDeathsAtDeathAge(Locality.RURAL, Gender.BOTH, rm + rf);
+    }
+
+    /* Compatibility with the spelling used in ForwardPopulationT. */
+    public void valdateDeathsByGenderAgeAtDeath() throws Exception
+    {
+        validateDeathsByGenderAgeAtDeath();
+    }
+
+    private void validateDeathsAtDeathAge(Locality locality, Gender gender, double expected) throws Exception
+    {
+        double actual = deathsByGenderAgeAtDeath.sumAllAges(locality, gender);
+        if (!Util.same(expected, actual))
+            throw new Exception(String.format(
+                    "Deaths mismatch (%s, %s): expected = %.10f, actual = %.10f, difference = %.10f",
+                    locality, gender, expected, actual, actual - expected));
     }
 
     @SuppressWarnings("unused")

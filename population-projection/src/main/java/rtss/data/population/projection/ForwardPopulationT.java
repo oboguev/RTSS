@@ -59,6 +59,55 @@ public class ForwardPopulationT extends ForwardPopulation
     private double[] daily_birth_count_m = null;
     private double[] daily_birth_count_f = null;
 
+    /* ----------------------------------------------------------------------------------------------------- */
+
+    /* Deaths by sex and age in completed days at death, accumulated across forward() calls. */
+    private final PopulationContext deathsByGenderAgeAtDeath = PopulationContext.newTotalPopulationContext();
+
+    /* Both flags default to false: preserve legacy execution unless explicitly enabled. */
+    private boolean recordDeathsByGenderAgeAtDeath = false;
+    private boolean bufferDeathsByGenderAgeAtDeath = false;
+
+    /* Enable before the first forward() call to obtain a complete cumulative distribution.
+     * Disabling recording does not clear deaths already recorded. */
+    public void setRecordDeathsByGenderAgeAtDeath(boolean enable)
+    {
+        this.recordDeathsByGenderAgeAtDeath = enable;
+    }
+
+    /* Select direct addDay() calls or a per-sex temporary double[] buffer.
+     * This flag has no effect when recording is disabled. */
+    public void setBufferDeathsByGenderAgeAtDeath(boolean enable)
+    {
+        this.bufferDeathsByGenderAgeAtDeath = enable;
+    }
+
+    public PopulationContext deathsByGenderAgeAtDeath()
+    {
+        return deathsByGenderAgeAtDeath;
+    }
+
+    /*
+     * Validate total deaths and deaths separately for each gender
+     */
+    public void valdateDeathsByGenderAgeAtDeath() throws Exception
+    {
+        for (Gender gender : Gender.ThreeGenders)
+        {
+            double v1 = deathsByGenderAge.sum(gender);
+            double v2 = deathsByGenderAgeAtDeath.sum(gender);
+
+            if (!Util.same(v1, v2))
+            {
+                throw new Exception(String.format("Deaths mismatch (%s): deathsByGenderAge = %.10f, " +
+                                                  "deathsByGenderAgeAtDeath = %.10f, difference = %.10f",
+                                                  gender, v1, v2, v2 - v1));
+            }
+        }
+    }
+    
+    /* ----------------------------------------------------------------------------------------------------- */
+
     /*
      * Число смертей по полу и по возрасту в днях на начало передвижки.
      * Для рождённых во время передвижки возраст = 0.
@@ -405,15 +454,21 @@ public class ForwardPopulationT extends ForwardPopulation
          * таким образом day_lx[nd] / day_lx[0] представляет долю выживших к этому дню со дня рождения 
          */
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
+        DeathAgeRecorder recorder = newDeathAgeRecorder(locality, gender);
         for (int nd = 0; nd < ndays; nd++)
         {
             int death_day = newbornDeathDay(ndays - 1 - nd);
 
             double deaths = day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
             deathsByGenderAge.addDay(locality, gender, death_day, deaths);
+            if (recorder != null)
+                recordDeathsAtDeathAge(recorder, day_lx, 0, nd, 0, deaths);
 
             day_births[nd] *= day_lx[nd] / day_lx[0];
         }
+
+        if (recorder != null)
+            recorder.flush();
 
         /*
          * добавить результат в контекст
@@ -467,15 +522,21 @@ public class ForwardPopulationT extends ForwardPopulation
          * таким образом day_lx[nd] / day_lx[0] представляет долю выживших к этому дню со дня рождения 
          */
         double[] day_lx = fctx.get_daily_lx(mt, locality, gender);
+        DeathAgeRecorder recorder = newDeathAgeRecorder(locality, gender);
         for (int nd = 0; nd < ndays; nd++)
         {
             int death_day = newbornDeathDay(ndays - 1 - nd);
 
             double deaths = day_births[nd] * (1 - day_lx[nd] / day_lx[0]);
             deathsByGenderAge.addDay(locality, gender, death_day, deaths);
+            if (recorder != null)
+                recordDeathsAtDeathAge(recorder, day_lx, 0, nd, 0, deaths);
 
             day_births[nd] *= day_lx[nd] / day_lx[0];
         }
+
+        if (recorder != null)
+            recorder.flush();
 
         /*
          * добавить результат в контекст
@@ -522,6 +583,7 @@ public class ForwardPopulationT extends ForwardPopulation
         pto.set(locality, gender, 0, 0);
 
         double sum_deaths = 0;
+        DeathAgeRecorder recorder = newDeathAgeRecorder(locality, gender);
 
         /* Передвижка по таблице смертности.
          * 
@@ -546,10 +608,15 @@ public class ForwardPopulationT extends ForwardPopulation
 
             // TODO: распределить по году
             deathsByGenderAge.addDay(locality, gender, age * DAYS_PER_YEAR, deaths);
+            if (recorder != null)
+                recordYearlyDeathsAtDeathAge(recorder, age, deaths);
 
             pto.add(locality, gender, age, staying);
             pto.add(locality, gender, Math.min(MAX_AGE, age + 1), moving - deaths);
         }
+
+        if (recorder != null)
+            recorder.flush();
 
         switch (gender.name())
         {
@@ -591,6 +658,7 @@ public class ForwardPopulationT extends ForwardPopulation
         double[] p2 = new double[p.length];
 
         double sum_deaths = 0;
+        DeathAgeRecorder recorder = newDeathAgeRecorder(locality, gender);
 
         for (int nd = 0; nd < p.length; nd++)
         {
@@ -605,6 +673,8 @@ public class ForwardPopulationT extends ForwardPopulation
             {
                 double deaths = v * deathRate(fctx, day_lx, nd, nd2);
                 deathsByGenderAge.addDay(locality, gender, nd, deaths);
+                if (recorder != null)
+                    recordForwardDeathsAtDeathAge(recorder, fctx, day_lx, nd, nd2, nd, deaths);
 
                 v *= survivalRate(fctx, day_lx, nd, nd2);
                 p2[nd2] = v;
@@ -616,6 +686,8 @@ public class ForwardPopulationT extends ForwardPopulation
 
                 double deaths = v * deathRate(fctx, day_lx, nd, nd2);
                 deathsByGenderAge.addDay(locality, gender, nd, deaths);
+                if (recorder != null)
+                    recordForwardDeathsAtDeathAge(recorder, fctx, day_lx, nd, nd2, nd, deaths);
 
                 v *= survivalRate(fctx, day_lx, nd, nd2);
                 pto.add(locality, gender, Math.min(age, MAX_AGE), v);
@@ -626,6 +698,8 @@ public class ForwardPopulationT extends ForwardPopulation
 
                 double deaths = v * deathRate(fctx, day_lx, nd - back, nd2 - back);
                 deathsByGenderAge.addDay(locality, gender, nd, deaths);
+                if (recorder != null)
+                    recordForwardDeathsAtDeathAge(recorder, fctx, day_lx, nd - back, nd2 - back, nd, deaths);
 
                 v *= survivalRate(fctx, day_lx, nd - back, nd2 - back);
                 p2[p2.length - 1] += v;
@@ -633,6 +707,9 @@ public class ForwardPopulationT extends ForwardPopulation
 
             sum_deaths += v_initial - v;
         }
+
+        if (recorder != null)
+            recorder.flush();
 
         fctx.fromArray(locality, gender, p2);
 
@@ -649,6 +726,147 @@ public class ForwardPopulationT extends ForwardPopulation
 
         observed_deaths += sum_deaths;
     }
+
+    /*****************************************************************************************/
+
+    /* 
+     * Optional registration of deaths by age at death. 
+     */
+
+    private DeathAgeRecorder newDeathAgeRecorder(Locality locality, Gender gender)
+    {
+        return recordDeathsByGenderAgeAtDeath ? new DeathAgeRecorder(locality, gender) : null;
+    }
+
+    /*
+     * One recorder per invocation of the inner forwarding/births routine.
+     * Locality and sex remain fixed, so the buffer needs only one index (age in days).
+     * The same distribution algorithm is used in direct and buffered modes.
+     */
+    private class DeathAgeRecorder
+    {
+        private final Locality locality;
+        private final Gender gender;
+        private final double[] buffer;
+
+        DeathAgeRecorder(Locality locality, Gender gender)
+        {
+            this.locality = locality;
+            this.gender = gender;
+            buffer = bufferDeathsByGenderAgeAtDeath ? new double[deathsByGenderAgeAtDeath.NDAYS] : null;
+        }
+
+        void add(int day, double deaths) throws Exception
+        {
+            if (deaths == 0)
+                return;
+
+            /* Retain deaths beyond the representable age in the last daily age cell. */
+            day = Math.min(day, deathsByGenderAgeAtDeath.MAX_DAY);
+
+            if (buffer != null)
+                buffer[day] += deaths;
+            else
+                deathsByGenderAgeAtDeath.addDay(locality, gender, day, deaths);
+        }
+
+        /* Merge only once per nonzero daily age, then clear the local buffer. */
+        void flush() throws Exception
+        {
+            if (buffer == null)
+                return;
+
+            for (int day = 0; day < buffer.length; day++)
+            {
+                if (buffer[day] != 0)
+                {
+                    deathsByGenderAgeAtDeath.addDay(locality, gender, day, buffer[day]);
+                    buffer[day] = 0;
+                }
+            }
+        }
+    }
+
+    /*
+     * Distribute the number of deaths already calculated by the legacy algorithm.
+     * For a cohort exposed to mortality from lxFrom to lxTo, the fraction of its
+     * deaths in [d, d+1) is (lx[d] - lx[d+1]) / (lx[lxFrom] - lx[lxTo]).
+     * This telescoping sum preserves the old death count up to double rounding.
+     * Subtract lx values before dividing: avoid cancellation in 1 - lx[d+1]/lx[d].
+     *
+     * ageFrom is the actual starting age, which may differ from lxFrom when
+     * the legacy algorithm substitutes mortality rates of a younger age.
+     * For births, both lxFrom and ageFrom are zero, regardless of the old
+     * NewbornDeathRegistrationAge setting.
+     */
+    private void recordDeathsAtDeathAge(DeathAgeRecorder recorder, double[] day_lx,
+            int lxFrom, int lxTo, int ageFrom, double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        /* Legacy survivalRate() defines 0/0 as zero survival. There is no
+         * daily distribution implied by lx in this case; assign to the first day. */
+        if (day_lx[lxFrom] == 0 && day_lx[lxTo] == 0)
+        {
+            recorder.add(ageFrom, deaths);
+            return;
+        }
+
+        double lxLoss = day_lx[lxFrom] - day_lx[lxTo];
+        Util.assertion(lxLoss > 0);
+
+        for (int d = lxFrom; d < lxTo; d++)
+        {
+            double dx = day_lx[d] - day_lx[d + 1];
+            Util.assertion(dx >= 0);
+
+            if (dx != 0)
+                recorder.add(ageFrom + (d - lxFrom), deaths * (dx / lxLoss));
+        }
+    }
+
+    /*
+     * Mirror the index correction in survivalRate() without changing that method.
+     * The caller has already applied any correction made by forward_context().
+     * Only the mortality-table indices are shifted, not the actual age at death.
+     * Keep this correction in sync with survivalRate() if it is ever changed.
+     */
+    private void recordForwardDeathsAtDeathAge(DeathAgeRecorder recorder, PopulationContext fctx,
+            double[] day_lx, int lxFrom, int lxTo, int ageFrom, double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        if (lxTo >= day_lx.length)
+        {
+            final int extra = 10;
+            final int shift = fctx.DAYS_PER_YEAR + extra;
+            lxFrom -= shift;
+            lxTo -= shift;
+        }
+
+        recordDeathsAtDeathAge(recorder, day_lx, lxFrom, lxTo, ageFrom, deaths);
+    }
+
+    /*
+     * Legacy yearly population has no daily age structure. Use a uniform
+     * distribution within the year of age whose mortality was applied.
+     * This is an approximation, not a reconstruction of exact ages at death.
+     */
+    private void recordYearlyDeathsAtDeathAge(DeathAgeRecorder recorder, int age, double deaths) throws Exception
+    {
+        if (deaths == 0)
+            return;
+
+        int firstDay = age * DAYS_PER_YEAR;
+        double dailyDeaths = deaths / DAYS_PER_YEAR;
+
+        for (int d = 0; d < DAYS_PER_YEAR; d++)
+            recorder.add(firstDay + d, dailyDeaths);
+    }
+
+    /*****************************************************************************************/
 
     private double deathRate(PopulationContext fctx, double[] day_lx, int nd, int nd2) throws Exception
     {

@@ -1285,6 +1285,20 @@ public class PopulationContext
         return p;
     }
 
+    public static PopulationContext newURPopulationContext()
+    {
+        return newURPopulationContext(null);
+    }
+
+    public static PopulationContext newURPopulationContext(ValueConstraint vc)
+    {
+        PopulationContext p = new PopulationContext(PopulationContext.ALL_AGES);
+        if (vc != null)
+            p.setValueConstraint(vc);
+        p.beginUrbanRural();
+        return p;
+    }
+
     /* ---------------------------------------------------------------------------- */
 
     public PopulationContext toTotal() throws Exception
