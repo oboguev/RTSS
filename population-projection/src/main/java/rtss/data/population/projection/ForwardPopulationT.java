@@ -127,7 +127,9 @@ public class ForwardPopulationT extends ForwardPopulation
      * Мы поэтому можем либо отнести смерти новорожденных либо на возраст день 0,
      * либо (чтобы избежать аккумуляции) на зеркально отражённый возраст.  
      * 
-     * TODO: требует исправления структуры или двойной структуры
+     * TODO: 
+     * Требует исправления структуры или двойной структуры.
+     * Взамен можно пользоваться deathsByGenderAgeAtDeath.
      */
     public static enum NewbornDeathRegistrationAge
     {
